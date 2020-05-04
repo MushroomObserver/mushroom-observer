@@ -44,7 +44,7 @@ class SearchController < ApplicationController
     if pattern.blank?
       redirect_to(
         controller: ctrlr,
-        action: "index"
+        action: :index
       )
     else
       redirect_to(

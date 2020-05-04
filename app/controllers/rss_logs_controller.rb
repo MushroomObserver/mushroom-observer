@@ -8,6 +8,9 @@ class RssLogsController < ApplicationController
     :next_rss_log,
     :prev_rss_log,
     :rss,
+    :show,
+    :show_next,
+    :show_prev,
     :show_rss_log,
     :show_selected_rss_logs
   ]
@@ -127,14 +130,18 @@ class RssLogsController < ApplicationController
     )
   end
 
+  alias_method :next_rss_log, :show_next
+
   # Go to previous RssLog: redirects to show_<object>.
-  def prev_rss_log # :norobots:
+  def show_prev # :norobots:
     redirect_to_next_object(
       :prev,
       RssLog,
       params[:id].to_s
     )
   end
+
+  alias_method :prev_rss_log, :show_prev
 
   # This is the site's rss feed.
   def rss
@@ -146,6 +153,7 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
+  # TODO: NIMMO This goes in ApplicationController
   # Update banner across all translations.
   def change_banner # :root: :norobots:
     if !in_admin_mode?

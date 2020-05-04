@@ -10,7 +10,7 @@
 #   P = prefetching allowed
 #
 #  index_name::                  List of results of index/search.
-#  list_names::                  Alphabetical list of all names, used or not.
+#  index::                       Alphabetical list of all names, used or not.
 #  observation_index::           Alphabetical list of names people have seen.
 #  names_by_user::               Alphabetical list of names created by
 #                                given user.
@@ -26,14 +26,14 @@
 #                                by given user.
 #  show::                        Show info about name.
 #  show_past_name::              Show past versions of name info.
-#  prev_name::                   Show previous name in index.
-#  next_name::                   Show next name in index.
+#  show_prev::                   Show previous name in index.
+#  show_next::                   Show next name in index.
 #  show_name_description::       Show info about name_description.
 #  show_past_name_description::  Show past versions of name_description info.
 #  prev_name_description::       Show previous name_description in index.
 #  next_name_description::       Show next name_description in index.
-#  create_name::                 Create new name.
-#  edit_name::                   Edit name.
+#  new::                         Create new name.
+#  edit::                        Edit name.
 #  create_name_description::     Create new name_description.
 #  edit_name_description::       Edit name_description.
 #  destroy_name_description::    Destroy name_description.
@@ -59,9 +59,6 @@
 class NamesController < ApplicationController
   require_dependency "names_controller/create_and_edit_name"
   require_dependency "names_controller/classification"
-  require_dependency "names_controller/show_name_description"
-
-  include DescriptionControllerHelpers
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
@@ -74,25 +71,20 @@ class NamesController < ApplicationController
     :eol_preview,
     :index,
     :index_name,
-    :index_name_description,
     :map,
-    :list_name_descriptions,
     :list_names,
     :name_search,
-    :name_descriptions_by_author,
-    :name_descriptions_by_editor,
     :names_by_user,
     :names_by_editor,
     :needed_descriptions,
     :next_name,
-    :next_name_description,
     :observation_index,
     :prev_name,
-    :prev_name_description,
+    :show,
+    :show_next,
+    :show_prev,
     :show_name,
-    :show_name_description,
     :show_past_name,
-    :show_past_name_description,
     :test_index
   ]
 
@@ -100,14 +92,10 @@ class NamesController < ApplicationController
     :approve_name,
     :bulk_name_edit,
     :change_synonyms,
-    :create_name_description,
     :deprecate_name,
-    :edit_name_description,
     :show,
     :show_name,
-    :show_name_description,
-    :show_past_name,
-    :show_past_name_description
+    :show_past_name
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -469,51 +457,19 @@ class NamesController < ApplicationController
     )
   end
 
-  # Show past version of NameDescription.  Accessible only from
-  # show_name_description page.
-  def show_past_name_description
-    pass_query_params
-    store_location
-    @description = find_or_goto_index(NameDescription, params[:id].to_s)
-    return unless @description
-
-    @name = @description.name
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = NameDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.name_description_id
-      subversion = params[:version]
-      if subversion.present? &&
-         (version.version != subversion.to_i)
-        version = NameDescription::Version.
-                  find_by_version_and_name_description_id(params[:version],
-                                                          @old_parent_id)
-      end
-      @description.clone_versioned_model(version, @description)
-    end
-  end
-
   # Go to next name: redirects to show_name.
-  def next_name
+  def show_next
     redirect_to_next_object(:next, Name, params[:id].to_s)
   end
 
+  alias_method :next_name, :show_next
+
   # Go to previous name: redirects to show_name.
-  def prev_name
+  def show_prev
     redirect_to_next_object(:prev, Name, params[:id].to_s)
   end
 
-  # Go to next name: redirects to show_name.
-  def next_name_description
-    redirect_to_next_object(:next, NameDescription, params[:id].to_s)
-  end
-
-  # Go to previous name_description: redirects to show_name_description.
-  def prev_name_description
-    redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
-  end
+  alias_method :prev_name, :show_prev
 
   # Callback to let reviewers change the review status of a Name from the
   # show_name page.
@@ -524,175 +480,6 @@ class NamesController < ApplicationController
     desc.update_review_status(params[:value]) if reviewer?
     redirect_with_query(action: :show_name, id: desc.name_id)
   end
-
-  ##############################################################################
-  #
-  #  :section: Create and Edit Name Descriptions
-  #
-  ##############################################################################
-
-  def create_name_description
-    store_location
-    pass_query_params
-    @name = Name.find(params[:id].to_s)
-    @licenses = License.current_names_and_ids
-    @description = NameDescription.new
-    @description.name = @name
-
-    # Render a blank form.
-    if request.method == "GET"
-      initialize_description_source(@description)
-
-    # Create new description.
-    else
-      @description.attributes = whitelisted_name_description_params
-      @description.source_type = @description.source_type.to_sym
-
-      if @description.valid?
-        initialize_description_permissions(@description)
-        @description.save
-
-        # Make this the "default" description if there isn't one and this is
-        # publicly readable and writable.
-        if !@name.description && @description.fully_public
-          @name.description = @description
-        end
-
-        # Keep the parent's classification cache up to date.
-        if (@name.description == @description) &&
-           (@name.classification != @description.classification)
-          @name.classification = @description.classification
-        end
-
-        # Log action in parent name.
-        @description.name.log(:log_description_created,
-                              user: @user.login,
-                              touch: true,
-                              name: @description.unique_partial_format_name)
-
-        # Save any changes to parent name.
-        @name.save if @name.changed?
-
-        flash_notice(:runtime_name_description_success.t(id: @description.id))
-        redirect_to(action: :show_name_description, id: @description.id)
-      else
-        flash_object_errors @description
-      end
-    end
-  end
-
-  # :prefetch: :norobots:
-  def edit_name_description
-    store_location
-    pass_query_params
-    @description = NameDescription.find(params[:id].to_s)
-    @licenses = License.current_names_and_ids
-
-    if !check_description_edit_permission(@description, params[:description])
-      # already redirected
-
-    elsif request.method == "POST"
-      @description.attributes = whitelisted_name_description_params
-      @description.source_type = @description.source_type.to_sym
-
-      # Modify permissions based on changes to the two "public" checkboxes.
-      modify_description_permissions(@description)
-
-      # If substantive changes are made by a reviewer, call this act a
-      # "review", even though they haven't actually changed the review
-      # status.  If it's a non-reviewer, this will revert it to "unreviewed".
-      if @description.save_version?
-        @description.update_review_status(@description.review_status)
-      end
-
-      # No changes made.
-      if !@description.changed?
-        flash_warning(:runtime_edit_name_description_no_change.t)
-        redirect_to(action: :show_name_description, id: @description.id)
-
-      # There were error(s).
-      elsif !@description.save
-        flash_object_errors(@description)
-
-      # Updated successfully.
-      else
-        flash_notice(
-          :runtime_edit_name_description_success.t(id: @description.id)
-        )
-
-        # Update name's classification cache.
-        name = @description.name
-        if (name.description == @description) &&
-           (name.classification != @description.classification)
-          name.classification = @description.classification
-          name.save
-        end
-
-        # Log action to parent name.
-        name.log(:log_description_updated,
-                 touch: true,
-                 user: @user.login,
-                 name: @description.unique_partial_format_name)
-
-        # Delete old description after resolving conflicts of merge.
-        if (params[:delete_after] == "true") &&
-           (old_desc = NameDescription.safe_find(params[:old_desc_id]))
-          v = @description.versions.latest
-          v.merge_source_id = old_desc.versions.latest.id
-          v.save
-          if !in_admin_mode? && !old_desc.is_admin?(@user)
-            flash_warning(:runtime_description_merge_delete_denied.t)
-          else
-            flash_notice(:runtime_description_merge_deleted.
-                           t(old: old_desc.partial_format_name))
-            name.log(:log_object_merged_by_user,
-                     user: @user.login, touch: true,
-                     from: old_desc.unique_partial_format_name,
-                     to: @description.unique_partial_format_name)
-            old_desc.destroy
-          end
-        end
-
-        redirect_to(action: :show_name_description, id: @description.id)
-      end
-    end
-  end
-
-  def destroy_name_description
-    pass_query_params
-    @description = NameDescription.find(params[:id].to_s)
-    if in_admin_mode? || @description.is_admin?(@user)
-      flash_notice(:runtime_destroy_description_success.t)
-      @description.name.log(:log_description_destroyed,
-                            user: @user.login,
-                            touch: true,
-                            name: @description.unique_partial_format_name)
-      @description.destroy
-      redirect_with_query(action: :show_name, id: @description.name_id)
-    else
-      flash_error(:runtime_destroy_description_not_admin.t)
-      if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(action: :show_name_description,
-                            id: @description.id)
-      else
-        redirect_with_query(action: :show_name, id: @description.name_id)
-      end
-    end
-  end
-
-  private
-
-  # TODO: should public, public_write and source_type be removed from this list?
-  # They should be individually checked and set, since we
-  # don't want them to have arbitrary values
-  def whitelisted_name_description_params
-    params.required(:description).
-      permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
-             :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
-             :source_type, :public, :public_write)
-  end
-
-  public
 
   ##############################################################################
   #

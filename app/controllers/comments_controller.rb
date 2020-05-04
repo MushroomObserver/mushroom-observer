@@ -32,6 +32,8 @@
 #
 ################################################################################
 
+# TODO: NIMMO check create/update actions below!
+
 class CommentsController < ApplicationController
   before_action :login_required, except: [
     :comment_search,
@@ -41,6 +43,8 @@ class CommentsController < ApplicationController
     :next_comment,
     :prev_comment,
     :show,
+    :show_next,
+    :show_prev,
     :show_comment,
     :show_comments_by_user,
     :show_comments_for_target,
@@ -211,14 +215,18 @@ class CommentsController < ApplicationController
   alias_method :show_comment, :show
 
   # Go to next comment: redirects to show_comment.
-  def next_comment # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, Comment, params[:id].to_s)
   end
 
+  alias_method :next_comment, :show_next
+
   # Go to previous comment: redirects to show_comment.
-  def prev_comment # :norobots:
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
+
+  alias_method :prev_comment, :show_prev
 
   # Form to create comment for an object.
   # Linked from: show_<object>
@@ -241,11 +249,12 @@ class CommentsController < ApplicationController
 
   alias_method :add_comment, :new
 
+  # TODO: NIMMO check if these instance variables are set in a create action
+  # @comment, @target
   def create
     pass_query_params
-    @comment = Comment.new
-    @comment.attributes = whitelisted_comment_params if params[:comment]
-    @comment.target = @target
+    @comment = Comment.new(whitelisted_comment_params)
+    @target = Comment.find_object(params[:type], params[:id].to_s)
     if !@comment.save
       flash_object_errors(@comment)
     else

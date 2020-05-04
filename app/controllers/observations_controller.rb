@@ -47,8 +47,10 @@ class ObservationsController < ApplicationController
     :prev_observation,
     :print_labels,
     :show,
+    :show_next,
     :show_obs,
     :show_observation,
+    :show_prev,
     :show_site_stats,
     :test,
     :throw_error,
@@ -61,7 +63,9 @@ class ObservationsController < ApplicationController
 
   before_action :disable_link_prefetching, except: [
     :create_observation,
+    :new,
     :edit_observation,
+    :edit,
     :show,
     :show_obs,
     :show_observation

@@ -81,15 +81,18 @@ module VersionHelper
       if ver.version != obj.version
         if @merge_source_id
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_past_#{type}", id: obj.id,
+                                       action: "show_past_#{type}",
+                                       id: obj.id,
                                        merge_source_id: @merge_source_id,
                                        version: version)
         elsif ver == obj.versions.last
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_#{type}", id: obj.id)
+                                       action: :show,
+                                       id: obj.id)
         else
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_past_#{type}", id: obj.id,
+                                       action: "show_past_#{type}",
+                                       id: obj.id,
                                        version: ver.version)
         end
       end

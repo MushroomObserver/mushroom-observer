@@ -46,6 +46,8 @@ class SpeciesListsController < ApplicationController
     :next_species_list,
     :prev_species_list,
     :show,
+    :show_next,
+    :show_prev,
     :show_species_list,
     :species_list_search,
     :species_lists_by_title,
@@ -234,13 +236,17 @@ class SpeciesListsController < ApplicationController
 
   alias_method :show_species_list, :show
 
-  def next_species_list # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
   end
 
-  def prev_species_list # :norobots:
+  alias_method :next_species_list, :show_next
+
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
+
+  alias_method :prev_species_list, :show_prev
 
   # For backwards compatibility.  Shouldn't be needed any more.
   def print_labels
@@ -612,9 +618,15 @@ class SpeciesListsController < ApplicationController
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(action: "manage_species_lists", id: observation.id)
+      redirect_to(
+        action: :manage_species_lists,
+        id: observation.id
+      )
     else
-      redirect_to(action: :show, id: species_list.id)
+      redirect_to(
+        action: :show,
+        id: species_list.id
+      )
     end
   end
 
@@ -731,7 +743,10 @@ class SpeciesListsController < ApplicationController
         flash_notice(:species_list_bulk_editor_success.t(n: updates))
       end
 
-      redirect_to(action: :show, id: @species_list.id)
+      redirect_to(
+        action: :show,
+        id: @species_list.id
+      )
     end
   end
 
@@ -743,7 +758,10 @@ class SpeciesListsController < ApplicationController
     return unless (@list = find_or_goto_index(SpeciesList, params[:id].to_s))
 
     if !check_permission!(@list)
-      redirect_to(action: :show, id: @list.id)
+      redirect_to(
+        action: :show,
+        id: @list.id
+      )
     else
       @projects = projects_to_manage
       @object_states = manage_object_states
@@ -751,13 +769,19 @@ class SpeciesListsController < ApplicationController
       if request.method == "POST"
         if params[:commit] == :ATTACH.l
           if attach_objects_to_projects
-            redirect_to(action: :show, id: @list.id)
+            redirect_to(
+              action: :show,
+              id: @list.id
+            )
           else
             flash_warning(:runtime_no_changes.t)
           end
         elsif params[:commit] == :REMOVE.l
           if remove_objects_from_projects
-            redirect_to(action: :show, id: @list.id)
+            redirect_to(
+              action: :show,
+              id: @list.id
+            )
           else
             flash_warning(:runtime_no_changes.t)
           end

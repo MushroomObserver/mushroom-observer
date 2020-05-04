@@ -3,14 +3,11 @@
 # see app/controllers/name_controller.rb
 class NamesController
   before_action :disable_link_prefetching, except: [
-    :create_name,
-    :edit_name
+    :new,
+    :edit
   ]
 
-  # TODO: NIMMO
-  # create_name would be normally called "new"
   # init_create_name_form prepares defaults
-  # create_new_name, would be normally called "create" and be private
   def new
     store_location
     pass_query_params

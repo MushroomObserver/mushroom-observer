@@ -25,7 +25,7 @@ class VotesController < ApplicationController
     observation.change_vote(naming, value)
     redirect_with_query(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: observation.id
     )
   end
@@ -50,7 +50,7 @@ class VotesController < ApplicationController
     end
     redirect_with_query(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: observation.id
     )
   end
@@ -65,7 +65,7 @@ class VotesController < ApplicationController
     flash_notice(:refresh_vote_cache.t)
     redirect_with_query(
       controller: :rss_logs,
-      action: :list_rss_logs,
+      action: :index,
       id: observation.id
     )
   end

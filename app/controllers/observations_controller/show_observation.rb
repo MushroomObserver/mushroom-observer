@@ -32,60 +32,16 @@ class ObservationsController
     @votes         = gather_users_votes(@observation, @user) if @user
   end
 
-  alias_method :show, :show_observation
-
-  # Make it really easy for users to elect to go public with their votes.
-  def check_if_user_wants_to_make_their_votes_public
-    if params[:go_public] == "1"
-      @user.votes_anonymous = :no
-      @user.save
-      flash_notice(:show_votes_gone_public.t)
-    elsif params[:go_private] == "1"
-      @user.votes_anonymous = :yes
-      @user.save
-      flash_notice(:show_votes_gone_private.t)
-    end
-  end
-
-  # Make it easy for users to change thumbnail size.
-  def check_if_user_wants_to_change_thumbnail_size
-    return if params[:set_thumbnail_size].blank?
-
-    default_thumbnail_size_set(params[:set_thumbnail_size])
-  end
+  alias_method :show_observation, :show
+  alias_method :show_obs, :show
 
   # Tell search engines what the "correct" URL is for this page.
   def canonical_url(obs)
     "#{MO.http_domain}/observations/#{obs.id}"
   end
 
-  # Decide if the current query can be used to create a map.
-  def check_if_query_is_mappable
-    query = find_query(:Observation)
-    query&.coercable?(:Location)
-  end
-
-  # Get a list of external_sites which the user has permission to add
-  # external_links to (and which no external_link to exists yet).
-  def external_sites_user_can_add_links_to(obs)
-    return [] unless @user
-
-    if @user == obs.user || in_admin_mode?
-      ExternalSite.all - obs.external_links.map(&:external_site)
-    else
-      @user.external_sites - obs.external_links.map(&:external_site)
-    end
-  end
-
-  def show_obs
-    redirect_to(
-      action: :show,
-      id: params[:id].to_s
-    )
-  end
-
   # Go to next observation: redirects to show_observation.
-  def next_observation # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(
       :next,
       Observation,
@@ -93,14 +49,18 @@ class ObservationsController
     )
   end
 
+  alias_method :next_observation, :show_next
+
   # Go to previous observation: redirects to show_observation.
-  def prev_observation # :norobots:
+  def show_prev # :norobots:
     redirect_to_next_object(
       :prev,
       Observation,
       params[:id].to_s
     )
   end
+
+  alias_method :prev_observation, :show_prev
 
   # Show map of observation.
   def map_observation # :norobots:
@@ -122,4 +82,47 @@ class ObservationsController
     ]
     render(action: :map_observations)
   end
+
+  ##########################################################################
+
+  private
+
+  # Make it really easy for users to elect to go public with their votes.
+  def check_if_user_wants_to_make_their_votes_public
+    if params[:go_public] == "1"
+      @user.votes_anonymous = :no
+      @user.save
+      flash_notice(:show_votes_gone_public.t)
+    elsif params[:go_private] == "1"
+      @user.votes_anonymous = :yes
+      @user.save
+      flash_notice(:show_votes_gone_private.t)
+    end
+  end
+
+  # Make it easy for users to change thumbnail size.
+  def check_if_user_wants_to_change_thumbnail_size
+    return if params[:set_thumbnail_size].blank?
+
+    default_thumbnail_size_set(params[:set_thumbnail_size])
+  end
+
+  # Decide if the current query can be used to create a map.
+  def check_if_query_is_mappable
+    query = find_query(:Observation)
+    query&.coercable?(:Location)
+  end
+
+  # Get a list of external_sites which the user has permission to add
+  # external_links to (and which no external_link to exists yet).
+  def external_sites_user_can_add_links_to(obs)
+    return [] unless @user
+
+    if @user == obs.user || in_admin_mode?
+      ExternalSite.all - obs.external_links.map(&:external_site)
+    else
+      @user.external_sites - obs.external_links.map(&:external_site)
+    end
+  end
+
 end

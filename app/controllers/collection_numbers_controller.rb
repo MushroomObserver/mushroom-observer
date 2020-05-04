@@ -7,6 +7,8 @@ class CollectionNumbersController < ApplicationController
     :collection_number_search,
     :observation_index,
     :show,
+    :show_next,
+    :show_prev,
     :show_collection_number,
     :next_collection_number,
     :prev_collection_number
@@ -62,13 +64,17 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :show_collection_number, :show
 
-  def next_collection_number # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
-  def prev_collection_number # :norobots:
+  alias_method :next_collection_number, :show_next
+
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
+
+  alias_method :prev_collection_number, :show_prev
 
   def new # :norobots:
     store_location
@@ -124,6 +130,9 @@ class CollectionNumbersController < ApplicationController
   alias_method :edit_collection_number, :edit
 
   def update
+    store_location
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters

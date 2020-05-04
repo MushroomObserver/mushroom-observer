@@ -128,6 +128,7 @@ module DescriptionControllerHelpers
       @merge = true
       @old_desc_id = src.id
       @delete_after = delete_after
+      #TODO: Check this action name on refactor!
       render(action: "edit_#{src.parent.type_tag}_description")
 
     # Merged successfully.

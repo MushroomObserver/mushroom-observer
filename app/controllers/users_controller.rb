@@ -6,6 +6,8 @@ class UsersController < ApplicationController
     :next_user,
     :prev_user,
     :show,
+    :show_next,
+    :show_prev,
     :show_user,
     :user_search,
     :users_by_contribution,
@@ -144,7 +146,7 @@ class UsersController < ApplicationController
   end
 
   # Go to next user: redirects to show_user.
-  def next_user # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(
       :next,
       User,
@@ -152,14 +154,18 @@ class UsersController < ApplicationController
     )
   end
 
+  alias_method :next_user, :show_next
+
   # Go to previous user: redirects to show_user.
-  def prev_user # :norobots:
+  def show_prev # :norobots:
     redirect_to_next_object(
       :prev,
       User,
       params[:id].to_s
     )
   end
+
+  alias_method :prev_user, :show_prev
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.

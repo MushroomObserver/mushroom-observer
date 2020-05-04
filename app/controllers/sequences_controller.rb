@@ -16,6 +16,8 @@ class SequencesController < ApplicationController
     :sequence_search,
     :observation_index,
     :show,
+    :show_next,
+    :show_prev,
     :show_sequence,
     :next_sequence,
     :prev_sequence
@@ -67,13 +69,17 @@ class SequencesController < ApplicationController
 
   alias_method :show_sequence, :show
 
-  def next_sequence # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  def prev_sequence # :norobots:
+  alias_method :next_sequence, :show_next
+
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
+
+  alias_method :prev_sequence, :show_prev
 
   def new
     store_location

@@ -22,22 +22,15 @@ class GlossaryController < ApplicationController
     @glossary_terms = GlossaryTerm.all.order(:name)
   end
 
-  def new # :norobots:
-    if request.method == "POST"
-      create
-    else
-      glossary_term_get
-    end
-  end
-
-  alias_method :show_glossary_term, :show
-
-  def glossary_term_get
+  def new
     @copyright_holder = @user.name
     @copyright_year = Time.now.utc.year
     @upload_license_id = @user.license_id
     @licenses = License.current_names_and_ids(@user.license)
   end
+
+  alias_method :create_glossary_term, :new
+  alias_method :glossary_term_get, :new
 
   def create
     glossary_term = \
@@ -45,10 +38,15 @@ class GlossaryController < ApplicationController
                        description: params[:glossary_term][:description])
     glossary_term.add_image(process_image(image_args))
     glossary_term.save
-    redirect_to(action: "show_glossary_term", id: glossary_term.id)
+    redirect_to(
+      action: :show,
+      id: glossary_term.id
+    )
   end
 
   alias_method :glossary_term_post, :create
+
+  private
 
   def image_args
     {
@@ -93,11 +91,7 @@ class GlossaryController < ApplicationController
   def edit # :norobots:
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
-    if request.method == "POST"
-      update
-    else
-      @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    end
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
   end
 
   alias_method :edit_glossary_term, :edit
@@ -109,10 +103,12 @@ class GlossaryController < ApplicationController
     glossary_term.user = @user
     glossary_term.save
     redirect_to(
-      action: :show_glossary_term,
+      action: :show,
       id: glossary_term.id
     )
   end
+
+  # no alias needed
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
@@ -124,7 +120,10 @@ class GlossaryController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(action: "show_glossary_term", id: @glossary_term.id)
+        redirect_to(
+          action: :show,
+          id: @glossary_term.id
+        )
       end
     end
   end

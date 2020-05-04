@@ -6,6 +6,8 @@ class HerbariaController < ApplicationController
     :list_herbaria,
     :herbarium_search,
     :show,
+    :show_next,
+    :show_prev,
     :show_herbarium
   ]
 
@@ -86,13 +88,17 @@ class HerbariaController < ApplicationController
 
   alias_method :show_herbarium, :show
 
-  def next_herbarium # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  def prev_herbarium # :norobots:
+  alias_method :next_herbarium, :show_next
+
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
+
+  alias_method :prev_herbarium, :show_prev
 
   def new # :norobots:
     store_location

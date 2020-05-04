@@ -38,6 +38,8 @@ class ProjectsController < ApplicationController
     :prev_project,
     :project_search,
     :show,
+    :show_next,
+    :show_prev,
     :show_project
   ]
 
@@ -148,14 +150,18 @@ class ProjectsController < ApplicationController
   alias_method :show_project, :show
 
   # Go to next project: redirects to show_project.
-  def next_project # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(:next, Project, params[:id].to_s)
   end
 
+  alias_method :next_project, :show_next
+
   # Go to previous project: redirects to show_project.
-  def prev_project # :norobots:
+  def show_prev # :norobots:
     redirect_to_next_object(:prev, Project, params[:id].to_s)
   end
+
+  alias_method :prev_project, :show_prev
 
   # Form to create a project.
   # Linked from: list_projects
@@ -216,7 +222,10 @@ class ProjectsController < ApplicationController
       else
         @project.log_create
         flash_notice(:add_project_success.t)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       end
     end
   end
@@ -238,7 +247,7 @@ class ProjectsController < ApplicationController
 
     if !check_permission!(@project)
       redirect_with_query(
-        action: :show_project,
+        action: :show,
         id: @project.id
       )
     end
@@ -275,14 +284,22 @@ class ProjectsController < ApplicationController
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_with_query(action: "show_project", id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
-        redirect_with_query(action: "show_project", id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       else
         @project.log_destroy
         flash_notice(:destroy_project_success.t)
-        redirect_with_query(action: :index_project)
+        redirect_with_query(
+          action: :index
+        )
       end
     end
   end
@@ -314,7 +331,10 @@ class ProjectsController < ApplicationController
                            subject, content).deliver_now
         end
         flash_notice(:admin_request_success.t(title: @project.title))
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       end
     end
   end
@@ -332,7 +352,10 @@ class ProjectsController < ApplicationController
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.where.not(verified: nil).order("login, name").to_a
       if !@project.is_admin?(@user)
-        redirect_with_query(action: "show_project", id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       elsif params[:candidate].present?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -354,7 +377,10 @@ class ProjectsController < ApplicationController
        @candidate = find_or_goto_index(User, params[:candidate])
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       elsif request.method == "POST"
         user_group = @project.user_group
         admin_group = @project.admin_group
@@ -367,7 +393,10 @@ class ProjectsController < ApplicationController
         end
         set_status(@project, :admin, @candidate, admin)
         set_status(@project, :member, @candidate, member)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(
+          action: :show,
+          id: @project.id
+        )
       end
     end
   end
