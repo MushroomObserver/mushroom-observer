@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
-# see app/controllers/name_controller.rb
+# see app/controllers/names_controller.rb
 class NamesController
-  before_action :disable_link_prefetching, except: [
-    :new,
-    :edit
-  ]
+
+  ##############################################################################
+  #
+  #  :section: New, Create, Edit, Update
+  #
+  ##############################################################################
 
   # init_create_name_form prepares defaults
   def new

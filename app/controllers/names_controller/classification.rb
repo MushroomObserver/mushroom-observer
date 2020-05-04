@@ -2,6 +2,14 @@
 
 # see app/controllers/name_controller.rb
 class NamesController
+
+  ##############################################################################
+  #
+  #  :section: Classification/Taxonomy
+  #  TODO: different controller? It's a different form
+  #
+  ##############################################################################
+
   def propagate_classification
     pass_query_params
     name = find_or_goto_index(Name, params[:id])
@@ -22,7 +30,9 @@ class NamesController
     name.update(classification: name.genus.classification)
     desc = name.description
     desc&.update(classification: name.genus.classification)
-    redirect_with_query(name.show_link_args)
+    redirect_with_query(
+      name.show_link_args
+    )
   end
 
   def inherit_classification
@@ -40,7 +50,9 @@ class NamesController
     return unless make_sure_parent_higher_rank!(parent)
 
     @name.inherit_classification(parent)
-    redirect_with_query(@name.show_link_args)
+    redirect_with_query(
+      @name.show_link_args
+    )
   end
 
   def edit_classification
@@ -54,7 +66,9 @@ class NamesController
     return unless validate_classification!
 
     @name.change_classification(@name.classification)
-    redirect_with_query(@name.show_link_args)
+    redirect_with_query(
+      @name.show_link_args
+    )
   end
 
   # ----------------------------------------------------------------------------
@@ -75,7 +89,9 @@ class NamesController
     return true unless name.below_genus?
 
     flash_error("only works at or above genera!")
-    redirect_with_query(name.show_link_args)
+    redirect_with_query(
+      name.show_link_args
+    )
     false
   end
 
@@ -83,7 +99,9 @@ class NamesController
     return true if name.rank == :Genus
 
     flash_error("only works on genera!")
-    redirect_with_query(name.show_link_args)
+    redirect_with_query(
+      name.show_link_args
+    )
     false
   end
 
@@ -91,7 +109,9 @@ class NamesController
     return true if name.below_genus?
 
     flash_error("only works on taxa below genus!")
-    redirect_with_query(name.show_link_args)
+    redirect_with_query(
+      name.show_link_args
+    )
     false
   end
 
@@ -99,7 +119,9 @@ class NamesController
     return true if name.genus&.classification.present?
 
     flash_error(:edit_name_fill_in_classification_for_genus_first.t)
-    redirect_with_query(name.show_link_args)
+    redirect_with_query(
+      name.show_link_args
+    )
     false
   end
 

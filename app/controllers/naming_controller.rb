@@ -4,8 +4,12 @@ class NamingController < ApplicationController
 
   before_action :disable_link_prefetching, except: [
     :create,
-    :edit
+    :new,
+    :edit,
+    :update
   ]
+
+  # TODO: NIMMO "new" was originally called "create", check forms and tests
 
   def new # :prefetch: :norobots:
     pass_query_params
@@ -51,7 +55,7 @@ class NamingController < ApplicationController
     end
   end
 
-  alias_method :edit_post, :udpate
+  alias_method :edit_post, :update
 
   def destroy # :norobots:
     pass_query_params
