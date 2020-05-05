@@ -6,14 +6,16 @@
 
   tabs = [
     link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
-            action: :show_glossary_term, id: @glossary_term.id)
+            action: :show,
+            id: @glossary_term.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-8">
-    <%= render(partial: "glossary_term", object: @glossary_term,
+    <%= render(partial: "glossary_term",
+               object: @glossary_term,
                locals: {synonyms: false}) %>
   </div>
   <div class="col-4">

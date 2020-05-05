@@ -5,21 +5,31 @@
   Textile.register_name(@name)
 
   tabs = [
-    link_with_query(:show_name_edit_name.t, action: :edit_name, id: @name.id),
-    link_with_query(:show_name_bulk_name_edit.t, action: :bulk_name_edit),
-    link_with_query(:show_name_add_name.t, action: :create_name)
+    link_with_query(:show_name_edit_name.t,
+                    action: :edit,
+                    id: @name.id),
+    link_with_query(:show_name_bulk_name_edit.t,
+                    action: :bulk_name_edit),
+    link_with_query(:show_name_add_name.t,
+                    action: :new)
   ]
   if in_admin_mode? || !@name.locked
     tabs << link_with_query(:show_name_change_synonyms.t,
-                      action: :change_synonyms, id: @name.id)
+                            action: :change_synonyms,
+                            id: @name.id)
     if @name.deprecated
-      tabs << link_with_query(:APPROVE.t, action: :approve_name, id: @name.id)
+      tabs << link_with_query(:APPROVE.t,
+                              action: :approve_name,
+                              id: @name.id)
     else
-      tabs << link_with_query(:DEPRECATE.t, action: :deprecate_name, id: @name.id)
+      tabs << link_with_query(:DEPRECATE.t,
+                              action: :deprecate_name,
+                              id: @name.id)
     end
   end
   tabs += [
-    link_with_query(:show_name_email_tracking.t, action: :email_tracking,
+    link_with_query(:show_name_email_tracking.t,
+                    action: :email_tracking,
                     id: @name.id),
     draw_interest_icons(@name)
   ]
@@ -114,7 +124,8 @@
       <div class="col-sm-6">
         <strong><%= :show_name_classification.t %>:</strong>
           <% if @user %>
-            [<%= link_with_query(:EDIT.t, controller: :names,
+            [<%= link_with_query(:EDIT.t,
+                                 controller: :names,
                                  action: :edit_classification,
                                  id: @name.id) %>]
           <% end %>
@@ -128,8 +139,10 @@
       <div class="col-sm-6">
         <strong><%= :show_name_lifeform.t %>:</strong>
           <% if @user %>
-            [<%= link_with_query(:EDIT.t, controller: :names,
-                                 action: :edit_lifeform, id: @name.id) %>]
+            [<%= link_with_query(:EDIT.t,
+                                 controller: :names,
+                                 action: :edit_lifeform,
+                                 id: @name.id) %>]
           <% end %>
         <div class="list-group">
           <div class="list-group-item name-section" id="lifeform_section">
@@ -150,7 +163,10 @@
 
     <% if @name.has_notes? %>
       <strong><%= :show_name_notes.t %>:</strong>
-        [<%= link_with_query(:EDIT.t, controller: :names, action: :edit_name, id: @name.id) %>]
+        [<%= link_with_query(:EDIT.t,
+                             controller: :names,
+                             action: :edit,
+                             id: @name.id) %>]
       <div class="list-group">
         <div class="list-group-item">
           <%= @name.notes.tpl %>
@@ -162,10 +178,12 @@
       <strong><%= :show_name_brief_description.t %>:</strong>
       <div>
         <span class="pull-right">
-          <%= link_with_query(:show_name_see_more.t, controller: :names,
+          <%= link_with_query(:show_name_see_more.t,
+                              controller: :names,
                               action: :show_name_description,
                               id: @name.description.id) %> |
-          <%= link_with_query(:EDIT.t, controller: :names,
+          <%= link_with_query(:EDIT.t,
+                              controller: :names,
                               action: :edit_name_description,
                               id: @name.description.id) %>
         </span>
@@ -177,8 +195,10 @@
       </div>
     <% end %>
     <strong><%= :show_name_descriptions.t %>:</strong>
-      [<%= link_with_query(:show_name_create_description.t, controller: :names,
-	                         action: :create_name_description, id: @name.id) %>]
+      [<%= link_with_query(:show_name_create_description.t,
+                           controller: :names,
+	                         action: :create_name_description,
+                           id: @name.id) %>]
     <div class="list-group">
       <div class="list-group-item">
         <% description_links.each do |desc| %>

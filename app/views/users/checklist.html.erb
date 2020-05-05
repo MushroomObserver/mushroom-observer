@@ -7,7 +7,7 @@
     tabs = [
       link_to(:show_object.t(type: :profile),
               controller: :users,
-              action: :show_user,
+              action: :show,
               id: @show_user.id),
       link_to(:show_objects.t(type: :observation),
               controller: :users,
@@ -26,11 +26,11 @@
     tabs = [
       link_to(:show_object.t(type: :project),
               controller: :projects,
-              action: :show_project,
+              action: :show,
               id: @project.id),
       link_to(:list_objects.t(type: :project),
               controller: :projects,
-              action: :list_projects)
+              action: :index)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
     name_link[:project_id] = @project.id
@@ -40,14 +40,14 @@
     tabs = [
       link_to(:show_object.t(type: :project),
               controller: :species_lists,
-              action: :show_species_list,
+              action: :show,
               id: @species_list.id)
     ]
     if check_permission(@species_list)
       tabs += [
         link_to(:edit_object.t(type: :species_list),
                 controller: :species_lists,
-                action: :edit_species_list,
+                action: :edit,
                 id: @species_list.id)
       ]
     end

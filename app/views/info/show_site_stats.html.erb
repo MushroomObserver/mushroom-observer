@@ -2,8 +2,12 @@
   @title = :show_site_stats_title.t
 
   tabs = [
-    link_to(:app_contributors.t, action: :users_by_contribution),
-    link_to(:site_stats_observed_taxa.t, action: :checklist)
+    link_to(:app_contributors.t,
+            controller: :users,
+            action: :users_by_contribution),
+    link_to(:site_stats_observed_taxa.t,
+            controller: :users,
+            action: :checklist)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -14,7 +18,10 @@
     if obs_length > 0 %>
       <% @observations[0,3].each do |obs| %>
         <div class="pb-3">
-          <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+          <%= thumbnail(obs.thumb_image,
+                        link: { controller: :observations,
+                                action: :show,
+                                id: obs.id },
                         votes: true) %><br/><br/>
 
         </div>
@@ -60,7 +67,10 @@
   <div class="d-none d-sm-block col-md-3">
     <% if obs_length > 3 %>
       <% @observations[3,3].each do |obs| %>
-        <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+        <%= thumbnail(obs.thumb_image,
+                      link: { controller: :observations,
+                              action: :show, 
+                              id: obs.id },
                       votes: true) %><br/><br/>
       <% end %>
     <% end %>

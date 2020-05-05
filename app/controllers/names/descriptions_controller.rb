@@ -27,8 +27,10 @@
 #  publish_description::         Publish a draft description.
 #  adjust_permissions::          Adjust permissions on a description.
 #
-#
-class NameDescriptionsController < ApplicationController
+#  for more on this pattern:
+#  http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
+
+class Names::DescriptionsController < ApplicationController
 
   include DescriptionControllerHelpers
 
@@ -39,25 +41,25 @@ class NameDescriptionsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_name_description,
-    :list_name_descriptions,
+    :list_name_descriptions, # aliased
     :name_descriptions_by_author,
     :name_descriptions_by_editor,
-    :next_name_description,
-    :prev_name_description,
+    :next_name_description, # aliased
+    :prev_name_description, # aliased
     :show,
     :show_next,
     :show_prev,
-    :show_name_description,
+    :show_name_description, # aliased
     :show_past_name_description
   ]
 
   before_action :disable_link_prefetching, except: [
     :create,
-    :create_name_description,
+    :create_name_description, # aliased
     :edit,
-    :edit_name_description,
+    :edit_name_description, # aliased
     :show,
-    :show_name_description,
+    :show_name_description, # aliased
     :show_past_name_description
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
@@ -265,7 +267,11 @@ class NameDescriptionsController < ApplicationController
     id = params[:id].to_s
     desc = NameDescription.find(id)
     desc.update_review_status(params[:value]) if reviewer?
-    redirect_with_query(action: :show_name, id: desc.name_id)
+    redirect_with_query(
+      controller: :names,
+      action: :show,
+      id: desc.name_id
+    )
   end
 
   ##############################################################################
@@ -318,7 +324,10 @@ class NameDescriptionsController < ApplicationController
       @name.save if @name.changed?
 
       flash_notice(:runtime_name_description_success.t(id: @description.id))
-      redirect_to(action: :show_name_description, id: @description.id)
+      redirect_to(
+        action: :show,
+        id: @description.id
+      )
     else
       flash_object_errors @description
     end

@@ -40,6 +40,9 @@
 ################################################################################
 
 module DescriptionControllerHelpers
+
+  extend ActiveSupport::Concern
+
   ##############################################################################
   #
   #  :section Actions
@@ -451,7 +454,7 @@ module DescriptionControllerHelpers
                       t(title: project.title))
         redirect_to(
           controller: :projects,
-          action: :show_project,
+          action: :show,
           id: project.id
         )
       end
@@ -469,7 +472,7 @@ module DescriptionControllerHelpers
       else
         flash_error(:runtime_description_private.t)
         redirect_to(
-          action: :show_name,
+          action: desc.parent.show_action,
           id: desc.parent_id
         )
       end

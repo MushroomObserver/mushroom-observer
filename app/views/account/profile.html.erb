@@ -2,10 +2,18 @@
   @title = :profile_title.t
 
   tabs = [
-    link_to(:bulk_license_link.t, controller: :images, action: :license_updater),
-    link_to(:show_user_your_notifications.t, controller: :interests, action: :list_interests),
-    link_to(:prefs_link.t, controller: :account, action: :prefs),
-    link_to(:account_api_keys_link.t, controller: :account, action: :api_keys)
+    link_to(:bulk_license_link.t,
+            controller: :images,
+            action: :license_updater),
+    link_to(:show_user_your_notifications.t,
+            controller: :interests,
+            action: :index),
+    link_to(:prefs_link.t,
+            controller: :account,
+            action: :prefs),
+    link_to(:account_api_keys_link.t,
+            controller: :account,
+            action: :api_keys)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

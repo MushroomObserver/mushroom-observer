@@ -2,10 +2,12 @@
   @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
   tabs = [
-    link_with_query(:show_object.t(type: :name), action: :show_name,
+    link_with_query(:show_object.t(type: :name),
+                    action: :show,
                     id: @description.parent_id),
     link_with_query(:show_object.t(type: :name_description),
-                    action: :show_name_description, id: @description.id)
+                    action: :show,
+                    id: @description.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

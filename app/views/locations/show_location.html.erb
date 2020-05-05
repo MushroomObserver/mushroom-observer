@@ -6,17 +6,18 @@
                     controller: :observations,
                     action: :observations_at_location,
                     id: @location.id),
-    link_to(:all_objects.t(type: :location), action: :list_locations),
+    link_to(:all_objects.t(type: :location),
+            action: :index),
     link_with_query(:show_location_create.t,
-                    action: :create_location),
+                    action: :new),
     link_with_query(:show_location_edit.t,
-                    action: :edit_location,
+                    action: :edit,
                     id: @location.id)
   ]
   if in_admin_mode?
     tabs += [
       link_with_query(:show_location_destroy.t,
-                      { action: :destroy_location,
+                      { action: :destroy,
                         id: @location.id },
                       data: { confirm: :are_you_sure.l }),
       link_with_query(:show_location_reverse.t,

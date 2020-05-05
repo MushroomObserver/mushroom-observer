@@ -3,16 +3,16 @@ class HerbariumRecordsController < ApplicationController
   before_action :login_required, except: [
     :index_herbarium_record,
     :index,
-    :list_herbarium_records,
+    :list_herbarium_records, # aliased
     :herbarium_record_search,
     :herbarium_index,
     :observation_index,
     :show,
-    :show_herbarium_record,
+    :show_herbarium_record, # aliased
     :show_next,
     :show_prev,
-    :next_herbarium_record,
-    :prev_herbarium_record
+    :next_herbarium_record, # aliased
+    :prev_herbarium_record # aliased
   ]
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
@@ -36,7 +36,10 @@ class HerbariumRecordsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium_record = HerbariumRecord.safe_find(pattern))
-      redirect_to(action: :show_herbarium_record, id: herbarium_record.id)
+      redirect_to(
+        action: :show_herbarium_record,
+        id: herbarium_record.id
+      )
     else
       query = create_query(:HerbariumRecord, :pattern_search, pattern: pattern)
       show_selected_herbarium_records(query)
@@ -58,7 +61,9 @@ class HerbariumRecordsController < ApplicationController
       [:show_object.l(type: :observation),
        Observation.show_link_args(params[:id])],
       [:create_herbarium_record.l,
-       { action: :create_herbarium_record, id: params[:id] }]
+       { action: :new,
+         id: params[:id] }
+      ]
     ]
     show_selected_herbarium_records(query, always_index: true)
   end
@@ -186,7 +191,9 @@ class HerbariumRecordsController < ApplicationController
 
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    redirect_with_query(action: :index_herbarium_record)
+    redirect_with_query(
+      action: :index_herbarium_record
+    )
   end
 
   alias_method :destroy_herbarium_record, :destroy
@@ -204,7 +211,9 @@ class HerbariumRecordsController < ApplicationController
 
     @links ||= []
     @links << [:create_herbarium.l,
-               { controller: :herbaria, action: :create_herbarium }]
+               { controller: :herbaria,
+                 action: :new }
+              ]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -326,8 +335,10 @@ class HerbariumRecordsController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(action: :index_herbarium_record,
-                          id: @herbarium_record.id)
+      redirect_with_query(
+        action: :index_herbarium_record,
+        id: @herbarium_record.id
+      )
     end
   end
 end

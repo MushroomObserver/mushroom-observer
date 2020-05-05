@@ -41,7 +41,10 @@ class SequencesController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
-      redirect_to(action: :show_sequence, id: sequence.id)
+      redirect_to(
+        action: :show,
+        id: sequence.id
+      )
     else
       query = create_query(:Sequence, :pattern_search, pattern: pattern)
       show_selected_sequences(query)
@@ -56,7 +59,9 @@ class SequencesController < ApplicationController
       [:show_object.l(type: :observation),
        Observation.show_link_args(params[:id])],
       [:show_observation_add_sequence.l,
-       { action: :create_sequence, id: params[:id] }]
+       { action: :new,
+         id: params[:id] }
+      ]
     ]
     show_selected_sequences(query, always_index: true)
   end
@@ -140,7 +145,9 @@ class SequencesController < ApplicationController
       flash_warning(:permission_denied.t)
     end
     if @back == "index"
-      redirect_with_query(action: :index_sequence)
+      redirect_with_query(
+        action: :index_sequence
+      )
     else
       redirect_with_query(@back_object.show_link_args)
     end
@@ -158,9 +165,11 @@ class SequencesController < ApplicationController
   end
 
   def show_selected_sequences(query, args = {})
-    args = { action: :list_sequences,
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
+    args = {
+      action: :index,
+      letters: "sequences.locus",
+      num_per_page: 50
+    }.merge(args)
     @links ||= []
     args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)

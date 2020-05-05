@@ -1,15 +1,17 @@
 <% @title = "MO Maintenance" %>
 
 <p>Sorry, this action no longer seems to exist...</p>
-  
+
 <% if false %>
   <% for (key, value) in @users %>
     <%= "#{key}: #{value}"%><br/>
   <% end %>
   <br/>
-  
+
   <% for datum in @data %>
-    <%= link_to(datum[:name].t, controller: :names, action: :show_name,
+    <%= link_to(datum[:name].t,
+                controller: :names,
+                action: :show,
                 id: datum[:id]) %>
     <%= datum[:login] %><br/>
   <% end %>

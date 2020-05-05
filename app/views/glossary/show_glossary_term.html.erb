@@ -2,9 +2,12 @@
   @title = :show_glossary_term_title.t(name: @glossary_term.name)
 
   tabs = [
-    link_to(:glossary_term_index.t, action: :index),
-    link_to(:create_glossary_term.t, action: :create_glossary_term),
-    link_to(:edit_glossary_term.t, action: :edit_glossary_term,
+    link_to(:glossary_term_index.t,
+            action: :index),
+    link_to(:create_glossary_term.t,
+            action: :new),
+    link_to(:edit_glossary_term.t,
+            action: :edit,
             id: @glossary_term.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }

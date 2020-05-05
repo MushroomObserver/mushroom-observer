@@ -34,6 +34,15 @@
 #  bulk_filename_purge::   Purge all original image filenames from the database.
 #  process_image::         (helper for create/update)
 #
+#  TODO: NIMMO This controller contains multiple REST controllers.
+#  The basic create/update is actually doing two things,
+#  creating the image AND the association to an object (observation).
+#  Anyway, others could be broken out namespaced like:
+#  Images::LicensesController
+#  Images::AnonymityController
+#  Images::ReuseController
+#  Votes might be another thing too.
+
 class ImagesController < ApplicationController
   before_action :login_required, except: [
     :advanced_search,
@@ -42,23 +51,23 @@ class ImagesController < ApplicationController
     :images_for_project,
     :index,
     :index_image,
-    :list_images,
-    :next_image,
-    :prev_image,
+    :list_images, # aliased
+    :next_image, # aliased
+    :prev_image, # aliased
     :show,
-    :show_image,
+    :show_image, # aliased
     :show_next,
     :show_prev,
     :show_original
   ]
 
   before_action :disable_link_prefetching, except: [
-    :add_image,
+    :add_image, # aliased
     :edit,
-    :edit_image,
+    :edit_image, # aliased
     :new,
     :show,
-    :show_image
+    :show_image # aliased
   ]
 
   ##############################################################################
@@ -117,7 +126,7 @@ class ImagesController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (image = Image.safe_find(pattern))
       redirect_to(
-        action: :show_image,
+        action: :show,
         id: image.id
       )
     else
@@ -149,7 +158,7 @@ class ImagesController < ApplicationController
     # about 90%, but for some reason misses 10%, and always the same 10%, but
     # apparently with no rhyme or reason. -JPH 20100204
     args = {
-      action: :list_images,
+      action: :index,
       matrix: true,
       include: [:user, { observations: :name }]
     }.merge(args)
@@ -834,7 +843,7 @@ class ImagesController < ApplicationController
       )
     else
       redirect_with_query(
-        action: :show_image,
+        action: :show,
         id: image,
         size: params[:size]
       )

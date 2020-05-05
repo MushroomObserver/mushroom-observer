@@ -13,7 +13,7 @@ if name.is_misspelling? %>
   if name.correct_spelling
     link_with_query(name.correct_spelling.display_name.t,
                     controller: :names,
-                    action: :show_name,
+                    action: :show,
                     id: name.correct_spelling_id)
   else
     # This can apparently happen for past_names.
@@ -32,7 +32,7 @@ if synonyms
     links = approved_synonyms.map do |n|
       link_with_query(n.display_name.t,
                       controller: :names,
-                      action: :show_name,
+                      action: :show,
                       id: n.id,)
     end %>
     <p><%=
@@ -46,7 +46,7 @@ if synonyms
     links = deprecated_synonyms.map do |n|
       link_with_query(n.display_name.t,
                       controller: :names,
-                      action: :show_name,
+                      action: :show,
                       id: n.id)
     end %>
     <p><%= :show_name_deprecated_synonyms.t %>:
@@ -57,7 +57,7 @@ if synonyms
     links = misspellings.map do |n|
       link_with_query(n.display_name.t,
                       controller: :names,
-                      action: :show_name,
+                      action: :show,
                       id: n.id)
     end %>
     <p><%= :show_name_misspelled_synonyms.t %>:

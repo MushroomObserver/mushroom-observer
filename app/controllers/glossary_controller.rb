@@ -4,7 +4,7 @@ class GlossaryController < ApplicationController
     :index,
     :show,
     :show_past_glossary_term,
-    :show_glossary_term
+    :show_glossary_term # aliased
   ]
 
   def show

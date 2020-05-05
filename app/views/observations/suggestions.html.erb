@@ -6,7 +6,7 @@
   tabs = [
     link_with_query(:show_object.t(type: :observation),
                     controller: :observations,
-                    action: :show_observation,
+                    action: :show,
                     id: @observation.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
@@ -36,7 +36,7 @@
         <td>
           <%= link_with_query(sugg.name.display_name_brief_authors.t,
                               controller: :names,
-                              action: :show_name,
+                              action: :show,
                               id: sugg.name.id) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
@@ -44,7 +44,7 @@
           <% else %>
             <%= link_with_query(:suggestions_propose_name.t,
                                 { controller: :naming,
-                                  action: :create,
+                                  action: :new,
                                   id: @observation.id,
                                   name: sugg.name.search_name,
                                   ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence" },

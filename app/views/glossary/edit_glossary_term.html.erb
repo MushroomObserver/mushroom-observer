@@ -3,14 +3,14 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :glossary_term),
-            action: :show_glossary_term, id: @glossary_term.id),
+            action: :show, id: @glossary_term.id),
     link_to(:glossary_term_index.t, action: :index)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text">
-  <%= form_for(:glossary_term, url: {action: :edit_glossary_term,
+  <%= form_for(:glossary_term, url: {action: :edit,
                id: @glossary_term.id}) do |form| %>
     <div class="form-group mt-3">
       <%= label_tag(:glossary_name, :glossary_term_name.t + ":") %>

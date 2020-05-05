@@ -48,14 +48,19 @@
 #  deprecate_synonym::           (used by change_synonyms)
 #  check_for_new_synonym::       (used by change_synonyms)
 #  dump_sorter::                 Error diagnostics for change_synonyms.
+#  post_comment::                Post a comment after approval or deprecation
+#                                if the user entered one.
 #
 class NamesController < ApplicationController
-  require_dependency "names_controller/indexes_and_searches"
-  require_dependency "names_controller/show"
-  require_dependency "names_controller/create_and_edit_name"
-  require_dependency "names_controller/classification"
-  require_dependency "names_controller/synonymy"
-  require_dependency "names_controller/eol"
+
+  require_dependency "names/indexes_and_searches"
+  require_dependency "names/show"
+  require_dependency "names/create_and_edit"
+  require_dependency "names/classification"
+  require_dependency "names/synonymy"
+  require_dependency "names/lifeforms"
+  require_dependency "names/email_tracking"
+  require_dependency "names/eol"
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
@@ -69,18 +74,18 @@ class NamesController < ApplicationController
     :index,
     :index_name,
     :map,
-    :list_names,
+    :list_names, # aliased
     :name_search,
     :names_by_user,
     :names_by_editor,
     :needed_descriptions,
-    :next_name,
+    :next_name, # aliased
     :observation_index,
-    :prev_name,
+    :prev_name, # aliased
     :show,
     :show_next,
     :show_prev,
-    :show_name,
+    :show_name, # aliased
     :show_past_name,
     :test_index
   ]
@@ -95,7 +100,7 @@ class NamesController < ApplicationController
     :new,
     :edit,
     :show,
-    :show_name,
+    :show_name, # aliased
     :show_past_name
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
@@ -158,90 +163,4 @@ class NamesController < ApplicationController
     @observations = @query.results.select { |o| o.lat || o.location }
   end
 
-  # Form accessible from show_name that lets a user setup tracker notifications
-  # for a name.
-  def email_tracking
-    pass_query_params
-    name_id = params[:id].to_s
-    @name = find_or_goto_index(Name, name_id)
-    return unless @name
-
-    flavor = Notification.flavors[:name]
-    @notification = Notification.
-                    find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
-                                                          @user.id)
-    if request.method != "POST"
-      initialize_tracking_form
-    else
-      submit_tracking_form(name_id)
-    end
-  end
-
-  def initialize_tracking_form
-    unless @name.at_or_below_genus?
-      flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name,
-                                                       rank: @name.rank))
-    end
-    if @notification
-      @note_template = @notification.note_template
-    else
-      @note_template = :email_tracking_note_template.l(
-        species_name: @name.real_text_name,
-        mailing_address: @user.mailing_address_for_tracking_template,
-        users_name: @user.legal_name
-      )
-    end
-  end
-
-  def submit_tracking_form(name_id)
-    case params[:commit]
-    when :ENABLE.l, :UPDATE.l
-      note_template = params[:notification][:note_template]
-      note_template = nil if note_template.blank?
-      if @notification.nil?
-        @notification = Notification.new(flavor: :name,
-                                         user: @user,
-                                         obj_id: name_id,
-                                         note_template: note_template)
-        flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
-      else
-        @notification.note_template = note_template
-        flash_notice(:email_tracking_updated_messages.t)
-      end
-      @notification.save
-    when :DISABLE.l
-      @notification.destroy
-      flash_notice(
-        :email_tracking_no_longer_tracking.t(name: @name.display_name)
-      )
-    end
-    redirect_with_query(action: :show_name, id: name_id)
-  end
-
-  def edit_lifeform
-    pass_query_params
-    @name = find_or_goto_index(Name, params[:id])
-    return unless request.method == "POST"
-
-    words = Name.all_lifeforms.select do |word|
-      params["lifeform_#{word}"] == "1"
-    end
-    @name.update(lifeform: " #{words.join(" ")} ")
-    redirect_with_query(@name.show_link_args)
-  end
-
-  def propagate_lifeform
-    pass_query_params
-    @name = find_or_goto_index(Name, params[:id])
-    return unless request.method == "POST"
-
-    Name.all_lifeforms.each do |word|
-      if params["add_#{word}"] == "1"
-        @name.propagate_add_lifeform(word)
-      elsif params["remove_#{word}"] == "1"
-        @name.propagate_remove_lifeform(word)
-      end
-    end
-    redirect_with_query(@name.show_link_args)
-  end
 end

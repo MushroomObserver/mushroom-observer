@@ -4,8 +4,8 @@
   if @observation
     tabs = [
       link_to(:show_object.t(type: :observation),
-              controller: :observations, 
-              action: :show_observation,
+              controller: :observations,
+              action: :show,
               id: @observation.id)
     ]
     @tabsets = { right: draw_tab_set(tabs) }

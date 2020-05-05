@@ -2,7 +2,9 @@
   @title = :email_tracking_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:cancel_and_show.t(type: :name), action: :show_name, id: @name.id)
+    link_to(:cancel_and_show.t(type: :name),
+            action: :show,
+            id: @name.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -20,6 +22,10 @@
 
   <label for="notification_note_template"><%= :email_tracking_note.t %></label>:<br/>
   <span class="help-note"><%= :email_tracking_note_help.t %></span><br/>
-  <%= text_area(:notification, :note_template, cols: 80, rows: 16,
-                value: @note_template, data: {autofocus: true}) %><br/>
+  <%= text_area(:notification,
+                :note_template,
+                cols: 80,
+                rows: 16,
+                value: @note_template,
+                data: {autofocus: true}) %><br/>
 <% end %>

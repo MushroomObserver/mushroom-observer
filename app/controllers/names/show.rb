@@ -103,7 +103,10 @@ class NamesController
     id = params[:id].to_s
     desc = NameDescription.find(id)
     desc.update_review_status(params[:value]) if reviewer?
-    redirect_with_query(action: :show_name, id: desc.name_id)
+    redirect_with_query(
+      action: :show,
+      id: desc.name_id
+    )
   end
 
 end

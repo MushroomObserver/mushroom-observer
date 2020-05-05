@@ -39,25 +39,25 @@ class CommentsController < ApplicationController
     :comment_search,
     :index,
     :index_comment,
-    :list_comments,
-    :next_comment,
-    :prev_comment,
+    :list_comments, # aliased
+    :next_comment, # aliased
+    :prev_comment, # aliased
     :show,
     :show_next,
     :show_prev,
-    :show_comment,
+    :show_comment, # aliased
     :show_comments_by_user,
     :show_comments_for_target,
     :show_comments_for_user
   ]
 
   before_action :disable_link_prefetching, except: [
-    :add_comment,
+    :add_comment, # aliased
     :edit,
-    :edit_comment,
+    :edit_comment, # aliased
     :new,
     :show,
-    :show_comment
+    :show_comment # aliased
   ]
 
   ##############################################################################
@@ -165,7 +165,7 @@ class CommentsController < ApplicationController
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
     args = {
-      action: :list_comments,
+      action: :index,
       num_per_page: 25,
       include: [:target, :user]
     }.merge(args)
@@ -338,8 +338,11 @@ class CommentsController < ApplicationController
         @comment.log_destroy
         flash_notice(:runtime_form_comments_destroy_success.t(id: id))
       end
-      redirect_with_query(controller: @target.show_controller,
-                          action: @target.show_action, id: @target.id)
+      redirect_with_query(
+        controller: @target.show_controller,
+        action: @target.show_action,
+        id: @target.id
+      )
     end
   end
 
@@ -356,8 +359,11 @@ class CommentsController < ApplicationController
        !in_admin_mode?
       flash_error(:runtime_show_description_denied.t)
       parent = object.parent
-      redirect_to(controller: parent.show_controller,
-                  action: parent.show_action, id: parent.id)
+      redirect_to(
+        controller: parent.show_controller,
+        action: parent.show_action,
+        id: parent.id
+      )
       false
     else
       true

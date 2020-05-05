@@ -8,11 +8,11 @@
     tabs += [
       link_with_query(:show_object.t(type: :observation),
                       controller: :observations,
-                      action: :show_observation,
+                      action: :show,
                       id: obs.id),
       link_with_query(:show_object.t(type: :name),
                       controller: :names,
-                      action: :show_name,
+                      action: :show,
                       id: obs.name.id),
       link_to(:google_images.t, "http://images.google.com/images?q=#{obs.name.search_name}")
     ]
@@ -23,11 +23,12 @@
   if check_permission(@image)
     tabs += [
       link_with_query(:edit_object.t(type: :image),
-                      action: :edit_image,
+                      action: :edit,
                       id: @image.id),
       link_with_query(:destroy_object.t(type: :image),
-                      {action: :destroy_image, id: @image.id},
-                      data: {confirm: :are_you_sure.l})
+                      { action: :destroy,
+                        id: @image.id },
+                      data: { confirm: :are_you_sure.l })
     ]
   end
   if @image.user.email_general_commercial

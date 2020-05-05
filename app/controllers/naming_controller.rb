@@ -9,7 +9,8 @@ class NamingController < ApplicationController
     :update
   ]
 
-  # TODO: NIMMO "new" was originally called "create", check forms and tests
+  # TODO: NIMMO "new" was originally called "create", therefore not aliasable.
+  # during this refactor. Check forms and tests
 
   def new # :prefetch: :norobots:
     pass_query_params
@@ -88,12 +89,12 @@ class NamingController < ApplicationController
   end
 
   def check_for_notifications
-    action = if unshown_notifications?(@user, :naming)
-               :show_notifications
+    controller = if unshown_notifications?(@user, :naming)
+                 :notifications
              else
-               :show_observation
+                 :observations
              end
-    default_redirect(@params.observation, action)
+    default_redirect(@params.observation, controller)
   end
 
   def can_save?
@@ -120,10 +121,12 @@ class NamingController < ApplicationController
     success
   end
 
-  def default_redirect(obs, action = :show_observation)
-    redirect_with_query(controller: :observations,
-                        action: action,
-                        id: obs.id)
+  def default_redirect(obs, controller = :observations)
+    redirect_with_query(
+      controller: controller,
+      action: :show,
+      id: obs.id
+    )
   end
 
   def create_new_naming

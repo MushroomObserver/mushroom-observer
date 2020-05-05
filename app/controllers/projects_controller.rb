@@ -33,22 +33,22 @@ class ProjectsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_project,
-    :list_projects,
-    :next_project,
-    :prev_project,
+    :list_projects, # aliased
+    :next_project, # aliased
+    :prev_project, # aliased
     :project_search,
     :show,
     :show_next,
     :show_prev,
-    :show_project
+    :show_project # aliased
   ]
 
   before_action :disable_link_prefetching, except: [
     :admin_request,
     :edit,
-    :edit_project,
+    :edit_project, # aliased
     :show,
-    :show_project
+    :show_project # aliased
   ]
 
   ##############################################################################

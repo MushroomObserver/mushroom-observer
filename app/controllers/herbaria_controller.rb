@@ -8,7 +8,7 @@ class HerbariaController < ApplicationController
     :show,
     :show_next,
     :show_prev,
-    :show_herbarium
+    :show_herbarium # aliased
   ]
 
   # Displays selected Herbarium's (based on current Query).
@@ -27,7 +27,8 @@ class HerbariaController < ApplicationController
   def index
     store_location
     query = create_query(
-      :Herbarium, :nonpersonal,
+      :Herbarium,
+      :nonpersonal,
       by: :code_then_name
     )
     show_selected_herbaria(
@@ -228,14 +229,20 @@ class HerbariaController < ApplicationController
     @links ||= []
     if query.flavor != :all
       @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbarium, action: :list_herbaria }]
+                 { controller: :herbarium,
+                   action: :list_herbaria }
+                ]
     end
     if query.flavor != :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbarium, action: :index }]
+                 { controller: :herbarium,
+                   action: :index }
+                ]
     end
     @links << [:create_herbarium.l,
-               { controller: :herbarium, action: :create_herbarium }]
+               { controller: :herbarium,
+                 action: :new }
+              ]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
@@ -381,8 +388,13 @@ class HerbariaController < ApplicationController
   end
 
   def request_merge(this, that)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
-                        type: :Herbarium, old_id: this.id, new_id: that.id)
+    redirect_with_query(
+      controller: :observer,
+      action: :email_merge_request,
+      type: :Herbarium,
+      old_id: this.id,
+      new_id: that.id
+    )
     false
   end
 
@@ -407,7 +419,10 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(action: :index_herbarium, id: herbarium.try(&:id))
+    redirect_with_query(
+      action: :index_herbarium,
+      id: herbarium.try(&:id)
+    )
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
@@ -418,8 +433,13 @@ class HerbariaController < ApplicationController
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    redirect_to(controller: :location, action: :create_location, back: @back,
-                where: @herbarium.place_name, set_herbarium: @herbarium.id)
+    redirect_to(
+      controller: :location,
+      action: :new,
+      back: @back,
+      where: @herbarium.place_name,
+      set_herbarium: @herbarium.id
+    )
     true
   end
 

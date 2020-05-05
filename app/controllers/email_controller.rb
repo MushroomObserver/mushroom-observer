@@ -24,7 +24,7 @@ class EmailController < ApplicationController
       flash_error(:permission_denied.t)
       redirect_to(
         controller: :rss_logs,
-        action: :list_rss_logs
+        action: :index
       )
     end
   end
@@ -48,7 +48,7 @@ class EmailController < ApplicationController
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to(
         controller: :rss_logs,
-        action: :list_rss_logs
+        action: :index
       )
     end
   end
@@ -64,7 +64,7 @@ class EmailController < ApplicationController
     flash_notice(:runtime_ask_user_question_success.t)
     redirect_to(
       controller: :users,
-      action: :show_user,
+      action: :show,
       id: @target.id
     )
   end
@@ -80,7 +80,7 @@ class EmailController < ApplicationController
     flash_notice(:runtime_ask_observation_question_success.t)
     redirect_with_query(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: @observation.id
     )
   end
@@ -95,7 +95,7 @@ class EmailController < ApplicationController
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(
       controller: :images,
-      action: :show_image,
+      action: :show,
       id: @image.id
     )
   end

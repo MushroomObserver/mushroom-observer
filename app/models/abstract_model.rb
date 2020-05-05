@@ -387,8 +387,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "show_<object>" action
   #
-  #   Name.show_url(12) => "http://mushroomobserver.org/names/show_name/12"
-  #   name.show_url     => "http://mushroomobserver.org/names/show_name/12"
+  #   Name.show_url(12) => "http://mushroomobserver.org/names/12"
+  #   name.show_url     => "http://mushroomobserver.org/names/12"
   #   Shortened from "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
   #
   def self.show_url(id)
@@ -401,8 +401,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
-  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
+  #   Name.show_link_args(12) => { controller: :names, action: :show, id: 12 }
+  #   name.show_link_args     => { controller: :names, action: :show, id: 12 }
   #
   def self.show_link_args(id)
     { controller: show_controller, action: show_action, id: id }

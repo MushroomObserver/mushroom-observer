@@ -9,7 +9,8 @@
   ]
   if @description.is_admin?(@user) || in_admin_mode?
     tabs << link_with_query(:show_description_adjust_permissions.t,
-                            action: :adjust_permissions, id: @description.id)
+                            action: :adjust_permissions,
+                            id: @description.id)
   end
   @tabsets = { right: draw_tab_set(tabs) }
 %>

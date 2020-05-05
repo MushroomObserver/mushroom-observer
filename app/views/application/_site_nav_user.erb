@@ -1,25 +1,78 @@
 <% if @user.nil? %>
   <div class="mo-toc-item">
     <i class="fa-user"> </i>
-    <%= link_to(:app_account.t, {controller: :account, action: :login}, {class: "mo-toc-link"}) %>
+    <%= link_to(:app_account.t,
+                { controller: :account,
+                  action: :login },
+                { class: "mo-toc-link" }) %>
     <ul class="nav mo-sidenav">
-      <li><%= link_to(:app_login.t, {controller: :account, action: :login}, {class: ""}) %>
-      <li><%= link_to(:app_create_account.t, {controller: :account, action: :signup}, {class: ""}) %>
+      <li><%= link_to(:app_login.t,
+                      { controller: :account,
+                        action: :login },
+                      { class: "" }) %>
+      <li><%= link_to(:app_create_account.t,
+                      { controller: :account,
+                        action: :signup },
+                      { class: "" }) %>
     </ul>
   </div>
 <% else %>
   <div class="mo-toc-item">
     <i class="fa-user"> </i>
-    <%= link_to(h(@user.login), {controller: :account, action: :login}, {class: "mo-toc-link"}) %>
+    <%= link_to(h(@user.login),
+                { controller: :account,
+                  action: :login },
+                { class: "mo-toc-link" }) %>
     <ul class="nav mo-sidenav">
-      <li><%= link_to(:app_comments_for_you.t, {controller: :comments, action: :show_comments_for_user, id: @user.id}, {class: ""}) %></li>
-      <li><%= link_to(:app_your_observations.t, {controller: :observations, action: :observations_by_user, id: @user.id}, {class: ""}) %></li>
-      <li><%= link_to(:app_your_interests.t, {controller: :interests, action: :list_interests}, {class: ""}) %></li>
-      <li><%= link_to(:app_your_summary.t, {controller: :users, action: :show_user, id: @user.id}, {class: ""}) %></li>
-      <li><%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: ""}) %></li>
-      <li><%= link_to(:app_join_mailing_list.t, "https://groups.google.com/forum/?fromgroups=#!forum/mo-general", class: "", target: "_blank") %></li>
-      <li><%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: ""}) if @user.admin && !in_admin_mode? %></li>
-      <li><%= link_to(:app_logout.t, {controller: :account, action: :logout_user}) %></li>
+      <li>
+        <%= link_to(:app_comments_for_you.t,
+                    { controller: :comments,
+                      action: :show_comments_for_user,
+                      id: @user.id },
+                    { class: "" }) %>
+      </li>
+      <li>
+        <%= link_to(:app_your_observations.t,
+                    { controller: :observations,
+                      action: :observations_by_user,
+                      id: @user.id },
+                    { class: "" }) %>
+      </li>
+      <li>
+        <%= link_to(:app_your_interests.t,
+                    { controller: :interests,
+                      action: :index },
+                    { class: "" }) %>
+      </li>
+      <li>
+        <%= link_to(:app_your_summary.t,
+                    { controller: :users,
+                      action: :show,
+                      id: @user.id },
+                    { class: "" }) %>
+      </li>
+      <li>
+        <%= link_to(:app_preferences.t,
+                    { controller: :account,
+                      action: :prefs },
+                    { class: "" }) %>
+      </li>
+      <li>
+        <%= link_to(:app_join_mailing_list.t,
+                    "https://groups.google.com/forum/?fromgroups=#!forum/mo-general",
+                    class: "",
+                    target: "_blank") %>
+      </li>
+      <li>
+        <%= link_to(:app_turn_admin_on.t,
+                    { controller: :account,
+                      action: :turn_admin_on },
+                    { class: "" }) if @user.admin && !in_admin_mode? %>
+      </li>
+      <li><%= link_to(:app_logout.t,
+                      { controller: :account,
+                        action: :logout_user }) %>
+      </li>
     </ul>
   </div>
 <% end %>

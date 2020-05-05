@@ -3,15 +3,15 @@ class CollectionNumbersController < ApplicationController
   before_action :login_required, except: [
     :index_collection_number,
     :index,
-    :list_collection_numbers,
+    :list_collection_numbers, # aliased
     :collection_number_search,
     :observation_index,
     :show,
     :show_next,
     :show_prev,
-    :show_collection_number,
-    :next_collection_number,
-    :prev_collection_number
+    :show_collection_number, # aliased
+    :next_collection_number, # aliased
+    :prev_collection_number # aliased
   ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).

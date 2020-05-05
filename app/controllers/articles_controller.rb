@@ -18,17 +18,17 @@ class ArticlesController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_article,
-    :list_articles,
+    :list_articles, # aliased
     :show,
-    :show_article
+    :show_article # aliased
   ]
   before_action :store_location
   before_action :ignore_request_unless_permitted, except: [
     :index,
     :index_article,
-    :list_articles,
+    :list_articles, # aliased
     :show,
-    :show_article
+    :show_article # aliased
   ]
   helper_method :permitted?
 
@@ -137,7 +137,7 @@ class ArticlesController < ApplicationController
     )
     @article.save
     redirect_to(
-      action: :show_article,
+      action: :show,
       id: @article.id
     )
   end

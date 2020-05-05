@@ -39,7 +39,7 @@
             <div class="col-5">
               <%= if user.image_id
                     thumbnail(user.image_id,
-                              link: { action: :show_user,
+                              link: { action: :show,
                                       id: user.id },
                               votes: false,
                               size: :thumbnail)

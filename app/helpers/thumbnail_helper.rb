@@ -115,7 +115,7 @@ module ThumbnailHelper
     # return a link if the user has NOT voted this way
     link = link_to(vote_text,
                    { controller: :images,
-                     action: :show_image,
+                     action: :show,
                      id: image.id,
                      vote: vote },
                    title: image_vote_as_help_string(vote),

@@ -10,7 +10,7 @@
           <% if n != @name %>
             <%= check_box(:existing_synonyms, n.id, {checked: "1"}, "1") %>
             <%= content_tag(:label, for: "existing_synonyms_#{n.id}") do
-              link_to(n.display_name.t, action: :show_name, id: n.id)
+              link_to(n.display_name.t, action: :show, id: n.id)
             end %><br/>
           <% end %>
         <% end %>
@@ -29,7 +29,7 @@
             <% unless names.member?(name) %>
               <%= check_box(:proposed_synonyms, name.id, {checked: "1"}, "1") %>
               <%= content_tag(:label, for: "proposed_synonyms_#{name.id}") do
-                link_to(name.display_name.t, action: :show_name, id: name.id)
+                link_to(name.display_name.t, action: :show, id: name.id)
               end %><br/>
             <% end %>
           <% end %>
@@ -60,7 +60,10 @@
     <div class="form-group">
       <label for="synonym_members"><%= :form_synonyms_names.t %>:</label>
       <p class="help-block"><%= :form_synonyms_names_help.t(name: @name.display_name) %></p>
-      <%= text_area(:synonym, :members, value: @list_members, class: "form-control",
+      <%= text_area(:synonym,
+                    :members, 
+                    value: @list_members,
+                    class: "form-control",
                     data: { autofocus: true }) %>
     </div>
   </div>

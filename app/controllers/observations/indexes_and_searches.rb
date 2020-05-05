@@ -7,6 +7,32 @@ class ObservationsController
     @observations = Observation.all
   end
 
+  # Displays matrix of advanced search results.
+  def advanced_search # :norobots:
+    if params[:name] || params[:location] || params[:user] || params[:content]
+      search = {}
+      search[:name] = params[:name] if params[:name].present?
+      search[:location] = params[:location] if params[:location].present?
+      search[:user] = params[:user] if params[:user].present?
+      search[:content] = params[:content] if params[:content].present?
+      search[:search_location_notes] = params[:search_location_notes].present?
+      query = create_query(
+        :Observation,
+        :advanced_search,
+        search
+      )
+    else
+      query = find_query(:Observation)
+    end
+    show_selected_observations(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(
+      controller: :search,
+      action: :advanced_search_form
+    )
+  end
+
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
@@ -71,14 +97,19 @@ class ObservationsController
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(action: :show_observation, id: observation.id)
+      redirect_to(
+        action: :show,
+        id: observation.id
+      )
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(action: :list_observations)
+        render(
+          action: :index
+        )
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
@@ -98,13 +129,16 @@ class ObservationsController
     # undefined location.
     if query.flavor == :at_where
       @links << [:list_observations_location_define.l,
-                 { controller: :locations, action: :create_location,
+                 { controller: :locations,
+                   action: :create,
                    where: query.params[:user_where] }]
       @links << [:list_observations_location_merge.l,
-                 { controller: :locations, action: :list_merge_options,
+                 { controller: :locations,
+                   action: :list_merge_options,
                    where: query.params[:user_where] }]
       @links << [:list_observations_location_all.l,
-                 { controller: :locations, action: :list_locations }]
+                 { controller: :locations,
+                   action: :index }]
     end
 
     # Add some alternate sorting criteria.
@@ -123,8 +157,10 @@ class ObservationsController
 
     link = [
       :show_object.t(type: :map),
-      add_query_param({ controller: :observations, action: :map_observations },
-                      query)
+      add_query_param(
+        { controller: :observations,
+          action: :map_observations },
+        query)
     ]
     @links << link
 
@@ -135,7 +171,8 @@ class ObservationsController
     @links << [
       :list_observations_add_to_list.t,
       add_query_param(
-        { controller: :species_lists, action: :add_remove_observations },
+        { controller: :species_lists,
+          action: :add_remove_observations },
         query
       )
     ]
@@ -143,7 +180,8 @@ class ObservationsController
     @links << [
       :list_observations_download_as_csv.t,
       add_query_param(
-        { controller: :observations, action: :download_observations },
+        { controller: :observations,
+          action: :download_observations },
         query
       )
     ]
@@ -233,7 +271,10 @@ class ObservationsController
 
   def download_observations_switch
     if params[:commit] == :CANCEL.l
-      redirect_with_query(action: :index_observation, always_index: true)
+      redirect_with_query(
+        action: :index_observation,
+        always_index: true
+      )
     elsif params[:commit] == :DOWNLOAD.l
       render_observation_report
     elsif params[:commit] == :download_observations_print_labels.l
@@ -250,7 +291,10 @@ class ObservationsController
 
   def render_labels
     @labels = make_labels(@query.results)
-    render(action: :print_labels, layout: :printable)
+    render(
+      action: :print_labels,
+      layout: :printable
+    )
   end
 
   def create_observation_report(args)

@@ -5,35 +5,48 @@
   if @user
     tabs += [
       link_with_query(:species_list_show_clone_list.t,
-                      {action: :create_species_list, clone: @species_list.id},
-                      {help: :species_list_show_clone_list_help.l}),
+                      { action: :new,
+                        clone: @species_list.id },
+                      { help: :species_list_show_clone_list_help.l }),
       link_with_query(:species_list_show_set_source.t,
-                      {action: :show_species_list, id: @species_list.id,
-                      set_source: 1},
-                      {help: :species_list_show_set_source_help.l}),
+                      { action: :show,
+                        id: @species_list.id,
+                        set_source: 1},
+                      { help: :species_list_show_set_source_help.l }),
       link_with_query(:species_list_show_bulk_edit.t,
-                      {action: :bulk_editor, id: @species_list.id},
-                      {help: :species_list_show_bulk_edit_help.l})
+                      { action: :bulk_editor,
+                        id: @species_list.id },
+                      { help: :species_list_show_bulk_edit_help.l })
     ]
   end
   if check_permission(@species_list)
     tabs += [
       link_with_query(:species_list_show_manage_projects.t,
-                      action: :manage_projects, id: @species_list.id),
+                      action: :manage_projects,
+                      id: @species_list.id),
       link_with_query(:species_list_show_edit.t,
-                      action: :edit_species_list, id: @species_list.id),
+                      action: :edit,
+                      id: @species_list.id),
       link_with_query(:DESTROY.t,
-                      {action: :destroy_species_list, id: @species_list.id},
-                      {class: "text-danger", data: {confirm: :are_you_sure.l}})
+                      { action: :destroy_species_list,
+                        id: @species_list.id },
+                      { class: "text-danger",
+                        data: { confirm: :are_you_sure.l } })
     ]
   end
   tabs += [
     link_with_query(:species_list_show_save_as_txt.t,
-                    action: :make_report, id: @species_list.id, type: "txt"),
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "txt"),
     link_with_query(:species_list_show_save_as_rtf.t,
-                    action: :make_report, id: @species_list.id, type: "rtf"),
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "rtf"),
     link_with_query(:species_list_show_save_as_csv.t,
-                    action: :make_report, id: @species_list.id, type: "csv")
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "csv")
   ]
   tabs << draw_interest_icons(@species_list) if @user
   @tabsets = {
@@ -78,7 +91,7 @@
             <%= link_to_coerced_query(@query, Image) %> |
             <%= link_to_coerced_query(@query, Name) %> |
             <%= link_to(:app_checklist.t,
-                        controller: :observations,
+                        controller: :users,
                         action: :checklist,
                         species_list_id: @species_list.id) %> |
             <%= link_with_query(:species_list_show_print_labels.t,

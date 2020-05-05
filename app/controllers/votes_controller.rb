@@ -1,15 +1,20 @@
 class VotesController < ApplicationController
-  before_action :login_required, except: [:show_votes]
+  before_action :login_required, except: [
+    :show,
+    :show_votes # aliased
+  ]
 
   # Show breakdown of votes for a given naming.
   # Linked from: show_observation
   # Inputs: params[:id] (naming)
   # Outputs: @naming
   # :prefetch:
-  def show_votes
+  def show
     pass_query_params
     @naming = find_or_goto_index(Naming, params[:id].to_s)
   end
+
+  alias_method :show_votes, :show
 
   # Create vote if none exists; change vote if exists; delete vote if setting
   # value to -1 (owner of naming is not allowed to do this).

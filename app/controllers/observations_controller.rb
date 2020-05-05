@@ -16,13 +16,11 @@ class ObservationsController < ApplicationController
   require "find"
   require "set"
 
-  require_dependency "observations_controller/show_observation"
-  require_dependency "observations_controller/create_and_edit_observation"
-  require_dependency "observations_controller/indexes"
-  # require_dependency "observations_controller/site_stats"
-  require_dependency "observations_controller/suggestions"
-  require_dependency "observations_controller/other"
-  require_dependency "observations_controller/search"
+  require_dependency "observations/show"
+  require_dependency "observations/indexes_and_searches"
+  require_dependency "observations/create_and_edit"
+  require_dependency "observations/suggestions"
+  require_dependency "observations/other"
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -33,10 +31,10 @@ class ObservationsController < ApplicationController
     :hide_thumbnail_map,
     :index,
     :index_observation,
-    :list_observations,
+    :list_observations, #aliased
     :map_observation,
     :map_observations,
-    :next_observation,
+    :next_observation, #aliased
     :observation_search,
     :observations_by_name,
     :observations_of_name,
@@ -44,12 +42,12 @@ class ObservationsController < ApplicationController
     :observations_for_project,
     :observations_at_where,
     :observations_at_location,
-    :prev_observation,
+    :prev_observation, #aliased
     :print_labels,
     :show,
     :show_next,
-    :show_obs,
-    :show_observation,
+    :show_obs, #aliased
+    :show_observation, #aliased
     :show_prev,
     :show_site_stats,
     :test,
@@ -62,13 +60,13 @@ class ObservationsController < ApplicationController
   ]
 
   before_action :disable_link_prefetching, except: [
-    :create_observation,
+    :create_observation, #aliased
     :new,
-    :edit_observation,
+    :edit_observation, #aliased
     :edit,
     :show,
-    :show_obs,
-    :show_observation
+    :show_obs, #aliased
+    :show_observation #aliased
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 end

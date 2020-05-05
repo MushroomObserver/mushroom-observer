@@ -12,8 +12,11 @@
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>
         <tr>
-          <td><%= link_with_query(desc.format_name.t,
-                    action: :show_name_description, id: desc.id) %><td>
+          <td><%= link_with_query(
+                    desc.format_name.t,
+                    action: :show,
+                    id: desc.id
+                  ) %><td>
         </tr>
       <% end %>
     </table>

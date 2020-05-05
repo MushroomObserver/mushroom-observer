@@ -1,6 +1,6 @@
 <%
   tabs = [
-    link_with_query(:show_location_create.t, action: :create_location),
+    link_with_query(:show_location_create.t, action: :new),
     link_with_query(:list_place_names_map.t, action: :map_locations),
     link_to(:list_countries.t, action: :list_countries)
   ]
@@ -56,7 +56,8 @@
             <div class="card-body">
               <%= location_link(location, nil, count) %>
               <%= link_to(:list_place_names_merge.t,
-                          action: :list_merge_options, where: location) %>
+                          action: :list_merge_options,
+                          where: location) %>
             </div>
           <% end %>
         </div>

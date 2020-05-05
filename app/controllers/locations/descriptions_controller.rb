@@ -1,38 +1,42 @@
 # frozen_string_literal: true
 
-require "geocoder"
+#  for more on this pattern:
+#  http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
 
 # Location controller.
-class LocationDescriptionsController < ApplicationController
+class Locations::DescriptionsController < ApplicationController
+
   include DescriptionControllerHelpers
 
   before_action :login_required, except: [
     :index,
     :index_location_description,
-    :list_location_descriptions,
+    :list_location_descriptions, # aliased
     :location_descriptions_by_author,
     :location_descriptions_by_editor,
-    :next_location_description,
-    :prev_location_description,
+    :next_location_description, # aliased
+    :prev_location_description, # aliased
     :show,
-    :show_location_description,
+    :show_location_description, # aliased
     :show_next,
     :show_prev,
     :show_past_location_description
   ]
 
   before_action :disable_link_prefetching, except: [
-    :create_location_description,
+    :create_location_description, # aliased
     :edit,
-    :edit_location_description,
+    :edit_location_description, # aliased
     :new,
     :show,
-    :show_location_description,
+    :show_location_description, # aliased
     :show_past_location_description
   ]
 
   before_action :require_successful_user, only: [
-    :create_location_description
+    :create,
+    :create_location_description, # aliased
+    :new
   ]
 
   ##############################################################################
@@ -136,7 +140,7 @@ class LocationDescriptionsController < ApplicationController
       else
         redirect_to(
           controller: :locations,
-          action: :show_location,
+          action: :show,
           id: @description.location_id
         )
       end
@@ -336,7 +340,7 @@ class LocationDescriptionsController < ApplicationController
       @description.destroy
       redirect_with_query(
         controller: :locations,
-        action: :show_location,
+        action: :show,
         id: @description.location_id
       )
     else
@@ -348,7 +352,7 @@ class LocationDescriptionsController < ApplicationController
         )
       else
         redirect_with_query(
-          action: :show_location,
+          action: :show,
           id: @description.location_id
         )
       end
