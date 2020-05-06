@@ -14,7 +14,7 @@
       <%= sequences.any? ? :Sequences.t + ":".html_safe :
                            :show_observation_no_sequences.t %> <%=
         link = link_with_query(:show_observation_add_sequence.t,
-                               controller: :sequence,
+                               controller: :sequences,
                                action: :new,
                                id: observation.id)
         "[#{link}]".html_safe if @user
@@ -43,12 +43,12 @@
             end
             if in_admin_mode? || sequence.can_edit?(@user)
               links << link_with_query(:EDIT.t,
-                                       controller: :sequence,
+                                       controller: :sequences,
                                        action: :edit,
                                        id: sequence.id,
                                        back: observation.id)
               links << link_with_query(:DESTROY.t,
-                                       { controller: :sequence,
+                                       { controller: :sequences,
                                          action: :destroy,
                                          id: sequence.id },
                                        { data: { confirm: :are_you_sure.t } })

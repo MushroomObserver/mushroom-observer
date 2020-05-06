@@ -12,7 +12,7 @@
             <td class="border-top">
               <%= link_to(list.format_name.t,
                           controller: :species_lists,
-                          action: :show_species_list,
+                          action: :show,
                           id: list.id) %>
               <%= if check_permission(list)
                 url = {

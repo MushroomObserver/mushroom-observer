@@ -72,14 +72,14 @@
         <%= if @user.votes_anonymous == :yes
           link_with_query(:show_votes_go_public.t,
                           { controller: :observations,
-                            action: :show_observation,
+                            action: :show,
                             id: @naming.observation.id,
                             go_public: "1" },
                           { data: { confirm: :show_votes_go_public_confirm.l } })
         else
           link_to(:show_votes_go_private.t,
                   { controller: :observations,
-                    action: :show_observation,
+                    action: :show,
                     id: @naming.observation.id, go_private: "1" },
                   { data: { confirm: :show_votes_go_private_confirm.l }})
         end %>

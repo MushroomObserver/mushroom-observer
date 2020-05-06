@@ -5,7 +5,7 @@
     link_with_query(:cancel_and_show.t(type: :species_list),
                     @species_list.show_link_args),
     link_with_query(:species_list_show_edit.t,
-                    action: :edit_species_list,
+                    action: :edit,
                     id: @species_list.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
@@ -130,7 +130,7 @@
     %> |
     <%=
       args = { controller: :observations,
-               action: :edit_observation,
+               action: :edit,
                id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:EDIT.l,
@@ -138,7 +138,7 @@
     %> |
     <%=
       args = { controller: :observations,
-               action: :destroy_observation,
+               action: :destroy,
                id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:DESTROY.l,
@@ -178,7 +178,7 @@
     %> |
     <%=
       args = { controller: :comments,
-               action: :add_comment,
+               action: :new,
                id: "XXX",
                type: "Observation" }
       url = url_for(add_query_param(args, @query))
@@ -190,7 +190,7 @@
     <%= :IMAGES.t %>: (<span id="number_of_images"></span>)
     <%=
       args = { controller: :images,
-               action: :add_image,
+               action: :new,
                id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:UPLOAD.l,

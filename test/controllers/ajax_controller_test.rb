@@ -308,7 +308,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     url = url_for(
       controller: :images,
-      action: :show_image,
+      action: :show,
       id: images(:in_situ_image).id
     )
 

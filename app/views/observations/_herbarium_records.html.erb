@@ -15,7 +15,7 @@
       <%= :Herbarium_records.t %>: [<%=
         link_with_query(:create_herbarium_record.t,
                         controller: :herbarium_records,
-                        action: :create_herbarium_record,
+                        action: :new,
                         id: observation.id)
       %>]
     </div>
@@ -27,7 +27,7 @@
           <% if in_admin_mode? || record.can_edit? %>
             [<%= link_with_query(:EDIT.t,
                                  controller: :herbarium_records,
-                                 action: :edit_herbarium_record,
+                                 action: :edit,
                                  id: record.id,
                                  back: observation.id) %> |
              <%= link_with_query(:REMOVE.t,
@@ -58,7 +58,7 @@
     <%= :show_observation_no_herbarium_records.t %> [<%=
       link_with_query(:create_herbarium_record.t,
                       controller: :herbarium_records,
-                      action: :create_herbarium_record,
+                      action: :new,
                       id: observation.id)
     %>]
   <% end %>

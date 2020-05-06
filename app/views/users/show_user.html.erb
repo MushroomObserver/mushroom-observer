@@ -24,7 +24,8 @@
   end
 
   tabs = [
-    link_to(:show_user_contributors.t, controller: :observations,
+    link_to(:show_user_contributors.t,
+            controller: :observations,
             action: :users_by_contribution)
   ]
   if @show_user == @user
@@ -35,7 +36,7 @@
               links[:comments_for]),
       link_to(:show_user_your_notifications.t,
               controller: :interests,
-              action: :list_interests),
+              action: :index),
       link_to(:show_user_edit_profile.t,
               controller: :account,
               action: :profile),

@@ -129,7 +129,7 @@ module ControllerExtensions
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   def requires_login(page, *args)
     either_requires_either(:get, page, nil, *args)
@@ -138,7 +138,7 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only logged-in users get to post this page.
-  #   post_requires_login(:edit_name, id: 1)
+  #   post_requires_login(:edit, id: 1)
   #
   def post_requires_login(page, *args)
     either_requires_either(:post, page, nil, *args)
@@ -147,9 +147,9 @@ module ControllerExtensions
   # Send GET request to a page that should require a specific user.
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location").
-  #   requires_user(:review_authors, :show_location, id: 1)
-  #   requires_user(:review_authors, [:location, :show_location], id: 1)
+  #   # redirected to "show location").
+  #   requires_user(:review_authors, :show, id: 1)
+  #   requires_user(:review_authors, [:location, :show], id: 1)
   #
   def requires_user(*args)
     either_requires_either(:get, *args)
@@ -158,9 +158,9 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation").
-  #   post_requires_user(:edit_obs, :show_obs, notes: 'new notes')
-  #   post_requires_user(:edit_obs, [:observation, :show_obs],
+  #   # redirected to "show observation").
+  #   post_requires_user(:edit, :show, notes: 'new notes')
+  #   post_requires_user(:edit, [:observations, :show],
   #                      notes: 'new notes')
   #
   def post_requires_user(*args)
@@ -181,22 +181,22 @@ module ControllerExtensions
   #
   #   # Make sure only logged-in users get to see this page, and that it
   #   # renders the template of the same name when it succeeds.
-  #   requires_login(:edit_name, id: 1)
+  #   requires_login(:edit, id: 1)
   #
   #   # Make sure only logged-in users get to post this page, but that it
   #   # renders the template of a different name (or redirects) on success.
-  #   post_requires_login(:edit_name, id: 1, false)
+  #   post_requires_login(:edit, id: 1, false)
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
-  #   # redirected to "show_location"), and that it renders
+  #   # redirected to "show location"), and that it renders
   #   # the template of the same name when it succeeds.
-  #   requires_user(:review_authors, {id: 1}, :show_location)
+  #   requires_user(:review_authors, {id: 1}, :show)
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation"), and that it redirects to
-  #   # "show_observation" when it succeeds (last argument).
-  #   post_requires_user(:edit_observation, {notes: 'new notes'},
-  #     :show_observation, [:show_observation])
+  #   # redirected to "show observation"), and that it redirects to
+  #   # "show observation" when it succeeds (last argument).
+  #   post_requires_user(:edit, {notes: 'new notes'},
+  #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
   #   post_requires_user(:action, params,
@@ -414,7 +414,7 @@ module ControllerExtensions
   # rendered template is correct.
   #
   # method::        HTTP request method.  Defaults to "GET".
-  # action::        Action/page requested, e.g., :show_observation.
+  # action::        Action/page requested, e.g., :show.
   # params::        Hash of parameters to pass in.  Defaults to {}.
   # user::          User name.  Defaults to "rolf" (user #1, a reviewer).
   # password::      Password.  Defaults to "testpassword".
@@ -480,18 +480,18 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response( {controller: :observations, action: :show_observation, id: 1 })
-  #   assert_response( {action: show_observation, id: 1 })
+  #   assert_response( {controller: :observations, action: :show, id: 1 })
+  #   assert_response( {action: :show, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: :rss_logs, action: :list_rss_logs)
+  #   assert_response(controller: :rss_logs, action: :index)
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
   #   assert_response(["observations", "index"])
   #
   #   # Short-hand for common redirects:
-  #   assert_response(:index)   => /rss_log/list_rss_logs
+  #   assert_response(:index)   => /rss_log/index
   #   assert_response(:login)   => /account/login
   #   assert_response(:welcome) => /account/welcome
   #
@@ -554,9 +554,9 @@ module ControllerExtensions
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <rss_log/list_rss_logs>" + got
+        msg += "Expected redirect to <rss_log/index>" + got
         assert_redirected_to({ controller: :rss_logs,
-                               action: :list_rss_logs }, msg)
+                               action: :index }, msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>" + got
         assert_redirected_to({ controller: :account, action: :login }, msg)

@@ -564,7 +564,7 @@ class AccountControllerTest < FunctionalTestCase
       login("rolf", "testpassword")
       post_with_dump(:profile, params)
     end
-    assert_redirected_to(controller: :users, action: :show_user, id: rolf.id)
+    assert_redirected_to(controller: :users, action: :show, id: rolf.id)
     assert_flash_success
 
     rolf.reload

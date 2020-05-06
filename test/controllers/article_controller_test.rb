@@ -58,7 +58,7 @@ class ArticleControllerTest < FunctionalTestCase
     article = Article.last
     assert_equal(body, article.body)
     assert_equal(title, article.title)
-    assert_redirected_to(action: :show_article, id: article.id)
+    assert_redirected_to(action: :show, id: article.id)
     assert_not_nil(article.rss_log, "Failed to create rss_log entry")
   end
 
@@ -101,7 +101,7 @@ class ArticleControllerTest < FunctionalTestCase
     article.reload
 
     assert_flash_success
-    assert_redirected_to(action: :show_article, id: article.id)
+    assert_redirected_to(action: :show, id: article.id)
     assert_equal(new_title, article.title)
     assert_equal(new_body, article.body)
 
@@ -110,7 +110,7 @@ class ArticleControllerTest < FunctionalTestCase
     post(:edit_article, params)
     article.reload
     assert_flash_warning
-    assert_redirected_to(action: :show_article, id: article.id)
+    assert_redirected_to(action: :show, id: article.id)
 
     # Prove removing title provokes warning
     params[:article][:title] = ""
@@ -137,6 +137,7 @@ class ArticleControllerTest < FunctionalTestCase
            "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
 
+  # possibly rename this method to test_index_article (index based on query)
   def test_index
     # Prove any user can see article index
     get(:index_article)
@@ -148,26 +149,27 @@ class ArticleControllerTest < FunctionalTestCase
     assert_select("a", text: :create_article_title.l)
   end
 
+  # Note that list_articles is now an alias for index, the unfiltered list
   def test_list_articles
-    get(:list_articles)
+    get(:index)
     assert(:success)
   end
 
   def test_show_article
     # Prove that an actual article gets shown
-    get(:show_article, id: articles(:premier_article).id)
+    get(:show, id: articles(:premier_article).id)
     assert_response(:success)
-    assert_template(:show_article)
+    assert_template(:show)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
-    get(:show_article, id: articles(:premier_article).id)
+    get(:show, id: articles(:premier_article).id)
     assert_select("a", text: :create_article_title.l)
     assert_select("a", text: :EDIT.l)
     assert_select("a", text: :DESTROY.l)
 
     # Prove that trying to show non-existent article provokes error & redirect
-    get(:show_article, id: -1)
+    get(:show, id: -1)
     assert_flash_error
     assert_response(:redirect)
   end

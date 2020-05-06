@@ -2,21 +2,27 @@
   @title ||= :show_project_title.t(title: @project.title)
 
   tabs = [
-    link_to(:app_list_projects.t, action: :list_projects),
-    link_with_query(:show_project_admin_request.t, action: :admin_request,
+    link_to(:app_list_projects.t,
+            action: :index),
+    link_with_query(:show_project_admin_request.t,
+                    action: :admin_request,
                     id: @project.id)
   ]
   if @project.is_admin?(@user)
     tabs += [
-      link_with_query(:show_project_add_members.t, action: :add_members,
+      link_with_query(:show_project_add_members.t,
+                      action: :add_members,
                       id: @project.id)
     ]
   end
   if check_permission(@project)
     tabs += [
-      link_with_query(:show_project_destroy.t, {action: :destroy_project,
-                      id: @project.id}, data: {confirm: :are_you_sure.l}),
-      link_with_query(:show_project_edit.t, action: :edit_project,
+      link_with_query(:show_project_destroy.t,
+                      { action: :destroy,
+                        id: @project.id },
+                      data: { confirm: :are_you_sure.l }),
+      link_with_query(:show_project_edit.t,
+                      action: :edit,
                       id: @project.id)
     ]
   end
@@ -110,7 +116,7 @@
   <div class="col-12">
     <%= render(partial: "comments/show_comments",
                locals: { object: @project,
-                         controls: true, 
+                         controls: true,
                          limit: nil }) %>
   </div>
 </div>

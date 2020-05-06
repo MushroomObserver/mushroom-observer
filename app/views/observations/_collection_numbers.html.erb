@@ -14,7 +14,7 @@
       <%= :Collection_numbers.t %>: [<%=
         link_with_query(:create_collection_number.t,
                         controller: :collection_numbers,
-                        action: :create_collection_number,
+                        action: :new,
                         id: observation.id)
       %>]
     </div>
@@ -25,7 +25,7 @@
                       add_query_param(number.show_link_args, query)) %>
           [<%= link_with_query(:EDIT.t,
                                controller: :collection_numbers,
-                               action: :edit_collection_number,
+                               action: :edit,
                                id: number.id,
                                back: observation.id) %> |
            <%= link_with_query(:REMOVE.t,
@@ -49,7 +49,7 @@
     <%= :show_observation_no_collection_numbers.t %> [<%=
       link_with_query(:create_collection_number.t,
                       controller: :collection_numbers,
-                      action: :create_collection_number,
+                      action: :new,
                       id: observation.id)
     %>]
   <% end %>
