@@ -1,0 +1,13 @@
+<%
+  @title = :species_list_edit_title.t(name: @species_list.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :species_list),
+                    @species_list.show_link_args),
+    link_with_query(:species_list_upload_title.t,
+                    action: :upload_species_list, id: @species_list.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "form", locals: { button_name: :UPDATE } %>

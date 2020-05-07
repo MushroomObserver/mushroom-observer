@@ -9,8 +9,5 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(@publication, action: :create) do |form| %>
-    <%= render(partial: "form", locals: {form: form}) %>
-    <%= form.submit(:CREATE.t, class: "btn mx-auto mt-3") %>
-  <% end %>
+  <%= render "form", locals: { button_name: :CREATE } %>
 </div>

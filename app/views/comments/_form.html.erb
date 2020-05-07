@@ -1,0 +1,28 @@
+<!--[form:comment]-->
+<%= # form_tag(add_query_param(action: :edit, id: @comment.id)) do %>
+<%= # form_tag(add_query_param(action: :new,
+    #                          id: @comment.target_id,
+    #                          type: @comment.target_type)) do %>
+<%= form_with model: :comment do |f| %>
+
+  <div class="form-group mt-3">
+    <%= label_tag(:comment_summary, :form_comments_summary.t + ":") %>
+    <%= text_field(:comment,
+                   :summary,
+                   size: 80,
+                   data: { autofocus: true },
+                   class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= label_tag(:comment_comment, :form_comments_comment.t + ":") %>
+    <%= text_area(:comment, :comment, rows: 10, class: "form-control") %>
+    <%= render(partial: "shared/textilize_help") %>
+  </div>
+
+  <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+
+  <hr align="center" width="90%" />
+
+<% end %>
+<!--[eoform:comment]-->

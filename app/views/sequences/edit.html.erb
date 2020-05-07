@@ -1,0 +1,21 @@
+<%
+  @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
+                    @back_object.show_link_args)
+  ]
+
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render(partial: "observation_title",
+           locals: { observation: @sequence.observation }) %>
+
+<%= render "form" %>
+
+<div class="small">
+  <span class="bold"><%= :CREATED_BY.t %>:</span>
+  <%= user_link(@sequence.user) %>
+</div>
+<%= show_object_footer(@sequence) %>

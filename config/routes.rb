@@ -608,7 +608,7 @@ ACTIONS = {
   themes: {
     color_themes: {}
   },
-  translation: {
+  translations: {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
@@ -736,12 +736,13 @@ MushroomObserver::Application.routes.draw do
   :herbarium_records, :observations, :projects,
   :publications, :sequences, :species_lists
 
+  # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
   resources :names do
-    resources :descriptions
+    resources :descriptions, module: :names
   end
 
   resources :locations do
-    resources :descriptions
+    resources :descriptions, module: :locations
   end
 
   resources :namings, only: [:show, :create, :edit, :update, :destroy]

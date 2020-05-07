@@ -1,0 +1,13 @@
+<%
+  @title = :create_glossary_term_title.l
+
+  tabs = [
+    link_to(:glossary_term_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= render "form" locals: { button_name: :edit_glossary_term_save,
+                              action: :new } %>
+</div>
