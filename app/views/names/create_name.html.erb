@@ -1,7 +1,7 @@
 <%
   @title ||= :create_name_title.t
   tabs = [
-      link_to(:all_objects.t(type: :name), action: :list_names)
+      link_to(:all_objects.t(type: :name), action: :index)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -9,7 +9,7 @@
 <div class="row">
   <div class="col-md-12">
 
-    <%= form_for(:name, url: add_query_param(action: :create_name)) do |form| %>
+    <%= form_for(:name, url: add_query_param(action: :new)) do |form| %>
         <%= render(partial: "form_name", locals: { form: form }) %>
         <div class="text-center">
           <%= submit_tag(:CREATE.l, class: "btn") %>

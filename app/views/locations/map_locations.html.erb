@@ -1,7 +1,7 @@
 <%
   tabs = [
     link_to(:all_objects.t(type: :location),
-            controller: :locations, action: :list_locations),
+            controller: :locations, action: :index),
     link_to_coerced_query(@query, Observation),
     link_to_coerced_query(@query, Location)
   ]
@@ -10,7 +10,7 @@
 
 <div class="max-width-text-plus-image">
   <center>
-    <%= 
+    <%=
       if @locations.any?
         gmap = make_map(@locations)
         finish_map(gmap)

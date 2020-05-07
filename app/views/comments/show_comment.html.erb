@@ -25,9 +25,9 @@
   if check_permission(@comment)
     tabs += [
       link_with_query(:comment_show_edit.t, controller: :comments,
-                            action: :edit_comment, id: @comment.id),
+                            action: :edit, id: @comment.id),
       link_with_query(:comment_show_destroy.t, {controller: :comments,
-                            action: :destroy_comment, id: @comment.id},
+                            action: :destroy, id: @comment.id},
                             data: {confirm: :are_you_sure.l})
     ]
   end

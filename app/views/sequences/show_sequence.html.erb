@@ -7,9 +7,9 @@
   ]
   if check_permission(@sequence)
     tabs << link_with_query(:edit_object.t(type: :sequence),
-                            action: :edit_sequence, id: @sequence.id, back: :show)
+                            action: :edit, id: @sequence.id, back: :show)
     tabs << link_with_query(:destroy_object.t(type: :sequence),
-                            {action: :destroy_sequence, id: @sequence.id, back: :index},
+                            {action: :destroy, id: @sequence.id, back: :index},
                             data: {confirm: :are_you_sure.t})
   end
 

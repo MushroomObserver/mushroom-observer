@@ -1,7 +1,7 @@
 require "test_helper"
 
-# Test theme controller
-class ThemeControllerTest < FunctionalTestCase
+# Test themes controller
+class ThemesControllerTest < FunctionalTestCase
   # Prove color_themes action succeeds.
   def test_color_themes
     get(:color_themes)

@@ -100,7 +100,7 @@ class ProjectsController < ApplicationController
   # Show selected list of projects.
   def show_selected_projects(query, args = {})
     args = {
-      action: :list_projects,
+      action: :index,
       letters: "projects.title",
       num_per_page: 50
     }.merge(args)

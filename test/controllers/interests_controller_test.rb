@@ -1,7 +1,7 @@
 require "test_helper"
 
 # users interests
-class InterestControllerTest < FunctionalTestCase
+class InterestsControllerTest < FunctionalTestCase
   # Test list feature from left-hand column.
   def test_list_interests
     login("rolf")
@@ -109,5 +109,5 @@ class InterestControllerTest < FunctionalTestCase
       Notification.find(id)
     end
   end
-  
+
 end

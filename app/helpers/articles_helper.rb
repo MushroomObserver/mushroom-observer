@@ -8,16 +8,16 @@ module ArticlesHelper
   def index_tabs
     return [] unless permitted?
 
-    [link_to(:create_article_title.t, action: :create_article)]
+    [link_to(:create_article_title.t, action: :new)]
   end
 
   def show_article_tabs
     tabs = [link_to(:index_article.t, action: :index_article)]
     return tabs unless permitted?
 
-    tabs.push(link_to(:create_article_title.t, action: :create_article),
-              link_to(:EDIT.t, action: :edit_article, id: @article.id),
-              link_to(:DESTROY.t, action: :destroy_article, id: @article.id))
+    tabs.push(link_to(:create_article_title.t, action: :new),
+              link_to(:EDIT.t, action: :edit, id: @article.id),
+              link_to(:DESTROY.t, action: :destroy, id: @article.id))
   end
 
   # "Title (#nnn)" textilized

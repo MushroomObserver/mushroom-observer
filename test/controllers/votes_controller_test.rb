@@ -1,7 +1,7 @@
 require "test_helper"
 
-# tests of Herbarium controller
-class VoteControllerTest < FunctionalTestCase
+# tests of Votes controller
+class VotesControllerTest < FunctionalTestCase
   # ----------------------------
   #  Test voting.
   # ----------------------------
@@ -140,8 +140,8 @@ class VoteControllerTest < FunctionalTestCase
 
   def test_show_votes
     # First just make sure the page displays.
-    get_with_dump(:show_votes, id: namings(:coprinus_comatus_naming).id)
-    assert_template(:show_votes, partial: "_show_votes")
+    get_with_dump(:show, id: namings(:coprinus_comatus_naming).id)
+    assert_template(:show, partial: "_show_votes")
 
     # Now try to make somewhat sure the content is right.
     table = namings(:coprinus_comatus_naming).calc_vote_table

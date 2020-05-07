@@ -121,7 +121,7 @@ class NamesController
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(action: :list_names)
+        render(action: :index)
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_names(search.query)
@@ -157,14 +157,14 @@ class NamesController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: :list_names,
+      action: :index,
       letters: "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
     # Tired of not having an easy link to list_names.
     if query.flavor == :with_observations
-      @links << [:all_objects.t(type: :name), { action: :list_names }]
+      @links << [:all_objects.t(type: :name), { action: :index }]
     end
 
     # Add some alternate sorting criteria.

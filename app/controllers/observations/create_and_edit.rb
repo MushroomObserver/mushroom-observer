@@ -786,7 +786,7 @@ class ObservationsController
     if @observation.location.nil?
       redirect_to(
         controller: :locations,
-        action: :create_location,
+        action: :new,
         where: @observation.place_name,
         set_observation: @observation.id
       )

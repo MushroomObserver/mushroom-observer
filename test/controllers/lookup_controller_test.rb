@@ -18,7 +18,11 @@ class MarkupControllerTest < FunctionalTestCase
   def test_lookup_comment
     c_id = comments(:minimal_unknown_obs_comment_1).id
     get(:lookup_comment, params: { id: c_id })
-    assert_redirected_to(controller: :comments, action: :show_comment, id: c_id)
+    assert_redirected_to(
+      controller: :comments,
+      action: :show,
+      id: c_id
+    )
     get(:lookup_comment, params: { id: 10_000 })
     assert_redirected_to(
       controller: :comments,
@@ -30,7 +34,10 @@ class MarkupControllerTest < FunctionalTestCase
   def test_lookup_image
     i_id = images(:in_situ_image).id
     get(:lookup_image, params: { id: i_id })
-    assert_redirected_to(controller: :images, action: :show_image, id: i_id)
+    assert_redirected_to(
+      controller: :images,
+      action: :show, id: i_id
+    )
     get(:lookup_image, params: { id: 10_000 })
     assert_redirected_to(
       controller: :images,
@@ -42,18 +49,20 @@ class MarkupControllerTest < FunctionalTestCase
   def test_lookup_location
     l_id = locations(:albion).id
     get(:lookup_location, params: { id: l_id })
-    assert_redirected_to(controller: :locations,
-                         action: :show_location, id: l_id)
+    assert_redirected_to(
+      controller: :locations,
+      action: :show, id: l_id
+    )
     get(:lookup_location, params: { id: "Burbank, California" })
     assert_redirected_to(
       controller: :locations,
-      action: :show_location,
+      action: :show,
       id: locations(:burbank).id
     )
     get(:lookup_location, params: { id: "California, Burbank" })
     assert_redirected_to(
       controller: :locations,
-      action: :show_location,
+      action: :show,
       id: locations(:burbank).id
     )
     get(:lookup_location, params: { id: "Zyzyx, Califonria" })
@@ -73,7 +82,7 @@ class MarkupControllerTest < FunctionalTestCase
         params: { id: names(:lactarius_subalpinus).text_name })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:lactarius_alpinus)
     )
   end
@@ -83,7 +92,7 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: n_id })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: n_id
     )
 
@@ -93,7 +102,7 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: "Agaricus campestris" })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:agaricus_campestris).id
     )
 
@@ -107,7 +116,7 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:amanita_baccata_borealis).id
     )
 
@@ -120,14 +129,14 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: "Agaricus campestris L." })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:agaricus_campestris).id
     )
 
     get(:lookup_name, params: { id: "Agaricus campestris Linn." })
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:agaricus_campestris).id
     )
 
@@ -138,7 +147,7 @@ class MarkupControllerTest < FunctionalTestCase
                                                        match: "Fungia"))
     assert_redirected_to(
       controller: :names,
-      action: :show_name,
+      action: :show,
       id: names(:fungi).id
     )
 
@@ -164,7 +173,7 @@ class MarkupControllerTest < FunctionalTestCase
         params: { id: observations(:minimal_unknown_obs).id })
     assert_redirected_to(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: observations(:minimal_unknown_obs).id
     )
   end
@@ -174,13 +183,13 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_project, params: { id: p_id })
     assert_redirected_to(
       controller: :projects,
-      action: :show_project,
+      action: :show,
       id: p_id
     )
     get(:lookup_project, params: { id: "Bolete" })
     assert_redirected_to(
       controller: :projects,
-      action: :show_project,
+      action: :show,
       id: projects(:bolete_project).id
     )
     get(:lookup_project, params: { id: "Bogus" })
@@ -201,13 +210,13 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_species_list, params: { id: sl_id })
     assert_redirected_to(
       controller: :species_lists,
-      action: :show_species_list,
+      action: :show,
       id: sl_id
     )
     get(:lookup_species_list, params: { id: "Mysteries" })
     assert_redirected_to(
       controller: :species_lists,
-      action: :show_species_list,
+      action: :show,
       id: species_lists(:unknown_species_list).id
     )
     get(:lookup_species_list, params: { id: "species list" })
@@ -227,13 +236,13 @@ class MarkupControllerTest < FunctionalTestCase
     get(:lookup_user, params: { id: rolf.id })
     assert_redirected_to(
       controller: :users,
-      action: :show_user,
+      action: :show,
       id: rolf.id
     )
     get(:lookup_user, params: { id: "mary" })
     assert_redirected_to(
       controller: :users,
-      action: :show_user,
+      action: :show,
       id: mary.id
     )
     get(:lookup_user, params: { id: "Einstein" })

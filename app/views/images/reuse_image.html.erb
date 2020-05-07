@@ -10,7 +10,7 @@
                       Observation.show_link_args(obs_id)),
       link_with_query(:image_reuse_edit.t,
                       controller: :observations,
-                      action: :edit_observation,
+                      action: :edit,
                       id: obs_id)
     ]
     @tabsets = { right: draw_tab_set(tabs) }

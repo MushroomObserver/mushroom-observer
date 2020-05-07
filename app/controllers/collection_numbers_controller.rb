@@ -194,7 +194,7 @@ class CollectionNumbersController < ApplicationController
 
   def show_selected_collection_numbers(query, args = {})
     args = {
-      action: :list_collection_numbers,
+      action: :index,
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)

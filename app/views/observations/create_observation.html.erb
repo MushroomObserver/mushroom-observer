@@ -4,19 +4,19 @@
   tabs = [
     link_with_query(:create_herbarium.t,
                     controller: :herbaria,
-                    action: :create_herbarium)
+                    action: :new)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag({ action: :create_observation,
+<%= form_tag({ action: :new,
                approved_name: @what,
                approved_where: @place_name },
              { multipart: true,
                name: "observation_form" }) do %>
   <%= render(partial: "form_observations",
              locals: {
-               action: :create_observation,
+               action: :new,
                logging_optional: false,
                include_naming: true,
                include_images: true,

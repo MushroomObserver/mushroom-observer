@@ -10,7 +10,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(action: :edit_species_list, id: @species_list.id,
+<%= form_tag(action: :edit, id: @species_list.id,
              approved_where: @place_name) do %>
   <%= render(partial: "form_species_lists", locals: {button: :UPDATE}) %>
 <% end %>

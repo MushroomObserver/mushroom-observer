@@ -35,7 +35,10 @@ class SearchController < ApplicationController
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(action: :list_rss_logs)
+      redirect_back_or_default(
+        controller: :observations,
+        action: :index
+      )
       return
     end
 
@@ -57,7 +60,10 @@ class SearchController < ApplicationController
 
   def site_google_search(pattern)
     if pattern.blank?
-      redirect_to(action: :list_rss_logs)
+      redirect_to(
+        controller: :observations,
+        action: :index
+      )
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")

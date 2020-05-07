@@ -8,7 +8,7 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(add_query_param(action: :create_herbarium, back: @back)) do %>
+  <%= form_tag(add_query_param(action: :new, back: @back)) do %>
     <%= render(partial: "form", locals: {button: :CREATE}) %>
   <% end %>
 </div>

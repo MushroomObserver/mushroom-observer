@@ -15,7 +15,7 @@
             <% if item.is_a?(Notification) %>
               <%= link_to(:show_object.t(type: obj.type_tag), obj.show_link_args) %> |
               <%= link_to(:EDIT.t, item.link_params) %> |
-              <%= link_to(:DESTROY.t, action: :destroy_notification, id: item.id) %>
+              <%= link_to(:DESTROY.t, action: :destroy, id: item.id) %>
             <% else %>
               <%= link_to(:show_object.t(type: obj.type_tag), obj.show_link_args) %> |
               <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,

@@ -9,7 +9,7 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(add_query_param(action: :edit_herbarium, id: @herbarium,
+  <%= form_tag(add_query_param(action: :edit, id: @herbarium,
                                back: @back)) do %>
     <%= render(partial: "form", locals: {button: :SAVE}) %>
   <% end %>

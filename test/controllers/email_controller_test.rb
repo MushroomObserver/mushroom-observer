@@ -26,7 +26,7 @@ class EmailControllerTest < FunctionalTestCase
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: { controller: :rss_logs,
-                                   action: :list_rss_logs })
+                                   action: :index })
   end
 
   def test_send_webmaster_question_need_address
@@ -75,7 +75,7 @@ class EmailControllerTest < FunctionalTestCase
 
     login("rolf")
     post(page, params: params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
@@ -92,7 +92,7 @@ class EmailControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(controller: :images, action: :show_image, id: image.id)
+    assert_redirected_to(controller: :images, action: :show, id: image.id)
   end
 
   def test_send_ask_observation_question
@@ -104,7 +104,7 @@ class EmailControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:ask_observation_question, params)
-    assert_redirected_to(action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
     assert_flash_text(:runtime_ask_observation_question_success.t)
   end
 
@@ -118,7 +118,7 @@ class EmailControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:ask_user_question, params)
-    assert_redirected_to(action: :show_user, id: user.id)
+    assert_redirected_to(controller: :users, action: :show, id: user.id)
     assert_flash_text(:runtime_ask_user_question_success.t)
   end
 

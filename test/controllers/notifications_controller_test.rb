@@ -1,6 +1,6 @@
 require "test_helper"
 
-class NotificationControllerTest < FunctionalTestCase
+class NotificationsControllerTest < FunctionalTestCase
 
   # ------------------------------------------------------------
   #
@@ -22,9 +22,9 @@ class NotificationControllerTest < FunctionalTestCase
 
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.
-    requires_login(:show_notifications,
+    requires_login(:show,
                    id: observations(:coprinus_comatus_obs).id)
-    assert_template(:show_notifications)
+    assert_template(:show)
     QueuedEmail.queue_emails(false)
   end
 

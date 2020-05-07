@@ -82,7 +82,7 @@ class ArticlesController < ApplicationController
   # Show selected list of articles.
   def show_selected_articles(query, args = {})
     args = {
-      action: :list_articles,
+      action: :index,
       letters: "articles.title",
       num_per_page: 50
     }.merge(args)

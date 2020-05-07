@@ -1,6 +1,6 @@
 require "test_helper"
 
-class UserControllerTest < FunctionalTestCase
+class UsersControllerTest < FunctionalTestCase
 
   # ------------------------------------------------------------
   #  User
@@ -8,7 +8,7 @@ class UserControllerTest < FunctionalTestCase
   # ------------------------------------------------------------
 
   def test_show_user_no_id
-    get_with_dump(:show_user)
+    get_with_dump(:show)
     assert_redirected_to(action: :index_user)
   end
 
@@ -23,7 +23,7 @@ class UserControllerTest < FunctionalTestCase
 
       login("rolf")
       get(page, params: params)
-      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :index)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
@@ -41,7 +41,7 @@ class UserControllerTest < FunctionalTestCase
   def test_user_search_id
     user = users(:rolf)
     get(:user_search, params: { pattern: user.id })
-    assert_redirected_to(action: :show_user, id: user.id)
+    assert_redirected_to(action: :show, id: user.id)
   end
 
   # When a non-id pattern matches only one user, show that user.
@@ -169,11 +169,11 @@ class UserControllerTest < FunctionalTestCase
     users_alpha = User.order(:name)
 
     get(:next_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show_user, id: users_alpha.fifth.id,
+    assert_redirected_to(action: :show, id: users_alpha.fifth.id,
                          params: @controller.query_params(QueryRecord.last))
 
     get(:prev_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show_user, id: users_alpha.third.id,
+    assert_redirected_to(action: :show, id: users_alpha.third.id,
                          params: @controller.query_params(QueryRecord.last))
   end
 
@@ -201,7 +201,7 @@ class UserControllerTest < FunctionalTestCase
     # redirects to target user's page
     login("rolf")
     get(:change_user_bonuses, params: { id: user.id })
-    assert_redirected_to(action: :show_user, id: user.id)
+    assert_redirected_to(action: :show, id: user.id)
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
     # leaving bonuses and contributions unchanged.

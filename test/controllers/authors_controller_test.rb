@@ -60,7 +60,7 @@ class AuthorControllerTest < FunctionalTestCase
     assert(rolf.in_group?("reviewers"))
     requires_user(:review_authors,
                   [controller: :locations,
-                   action: :show_location,
+                   action: :show,
                    id: desc.location_id],
                   params)
     assert_template(:review_authors)
@@ -73,7 +73,7 @@ class AuthorControllerTest < FunctionalTestCase
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
     assert_redirected_to(controller: :locations,
-                         action: :show_location,
+                         action: :show,
                          id: locations(:albion).id)
 
     # Make Rolf an author.
@@ -115,7 +115,9 @@ class AuthorControllerTest < FunctionalTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
-    assert_redirected_to(controller: :names, action: :show_name, id: name.id)
+    assert_redirected_to(controller: :names,
+                         action: :show,
+                         id: name.id)
 
     # Make Rolf an author.
     desc.add_author(rolf)

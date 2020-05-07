@@ -1,23 +1,23 @@
 require "test_helper"
 
 # Controller tests for news articles
-class ArticleControllerTest < FunctionalTestCase
+class ArticlesControllerTest < FunctionalTestCase
   def test_create_article_get
-    # Prove unathorized user cannot see create_article form
+    # Prove unathorized user cannot see new form
     login(users(:zero_user).login)
-    get(:create_article)
+    get(:new)
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
 
-    # Prove authorized user can go to create_article form
+    # Prove authorized user can go to new form
     login(users(:article_writer).login)
     make_admin
-    get(:create_article)
-    assert_form_action(action: :create_article)
+    get(:new)
+    assert_form_action(action: :new)
 
     # Prove that if News Articles project doesn't exist, there's no error.
     Project.destroy(Article.news_articles_project.id)
-    get(:create_article)
+    get(:new)
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
   end
@@ -33,7 +33,7 @@ class ArticleControllerTest < FunctionalTestCase
 
     # Prove unauthorized user cannot create Article
     login(users(:zero_user).login)
-    post(:create_article, params)
+    post(:new, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
     assert_redirected_to(action: :index_article)
@@ -44,16 +44,16 @@ class ArticleControllerTest < FunctionalTestCase
     params = {
       article: { title: "", body: body }
     }
-    post(:create_article, params)
+    post(:new, params)
     assert_equal(old_count, Article.count)
     assert_flash_text(:article_title_required.l)
-    assert_template(:create_article)
+    assert_template(:new)
 
     # Prove authorized user can create Article
     params = {
       article: { title: title, body: body }
     }
-    post(:create_article, params)
+    post(:new, params)
     assert_equal(old_count + 1, Article.count)
     article = Article.last
     assert_equal(body, article.body)
@@ -68,15 +68,15 @@ class ArticleControllerTest < FunctionalTestCase
     params = { id: article.id }
 
     login(users(:zero_user).login)
-    get(:edit_article, params)
+    get(:edit, params)
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
     login(users(:article_writer).login)
     make_admin
-    get(:edit_article, params)
-    assert_form_action(action: :edit_article)
+    get(:edit, params)
+    assert_form_action(action: :edit)
   end
 
   def test_edit_article_post
@@ -89,7 +89,7 @@ class ArticleControllerTest < FunctionalTestCase
       article: { title: new_title, body: new_body }
     }
     login(users(:zero_user).login)
-    post(:edit_article, params)
+    post(:edit, params)
 
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
@@ -97,7 +97,7 @@ class ArticleControllerTest < FunctionalTestCase
     # Prove authorized user can edit article
     login(users(:article_writer).login)
     make_admin
-    post(:edit_article, params)
+    post(:edit, params)
     article.reload
 
     assert_flash_success
@@ -107,16 +107,16 @@ class ArticleControllerTest < FunctionalTestCase
 
     # Prove that saving without changes provokes warning
     # save it again without changes
-    post(:edit_article, params)
+    post(:edit, params)
     article.reload
     assert_flash_warning
     assert_redirected_to(action: :show, id: article.id)
 
     # Prove removing title provokes warning
     params[:article][:title] = ""
-    post(:edit_article, params)
+    post(:edit, params)
     assert_flash_text(:article_title_required.l)
-    assert_template(:edit_article)
+    assert_template(:edit)
   end
 
   def test_destroy_article
@@ -125,14 +125,14 @@ class ArticleControllerTest < FunctionalTestCase
 
     # Prove unauthorized user cannot destroy article
     login(users(:zero_user).login)
-    get(:destroy_article, params)
+    get(:destroy, params)
     assert_flash_text(:permission_denied.l)
     assert(Article.exists?(article.id))
 
     # Prove authorized user can destroy article
     login(article.user.login)
     make_admin
-    get(:destroy_article, params)
+    get(:destroy, params)
     refute(Article.exists?(article.id),
            "Failed to destroy Article #{article.id}, '#{article.title}'")
   end

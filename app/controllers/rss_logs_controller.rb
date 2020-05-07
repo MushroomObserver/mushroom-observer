@@ -4,14 +4,14 @@ class RssLogsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_rss_log,
-    :list_rss_logs,
-    :next_rss_log,
-    :prev_rss_log,
+    :list_rss_logs, # aliased
+    :next_rss_log, # aliased
+    :prev_rss_log, # aliased
     :rss,
     :show,
     :show_next,
     :show_prev,
-    :show_rss_log,
+    :show_rss_log, # aliased
     :show_selected_rss_logs
   ]
 

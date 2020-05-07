@@ -204,7 +204,7 @@ class HerbariumRecordsController < ApplicationController
 
   def show_selected_herbarium_records(query, args = {})
     args = {
-      action: :list_herbarium_records,
+      action: :index,
       letters: "herbarium_records.initial_det",
       num_per_page: 100
     }.merge(args)

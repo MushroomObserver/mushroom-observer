@@ -2,7 +2,7 @@
   @title ||= :edit_location_title.t(name: @location.display_name)
 
   tabs = [
-    link_to(:all_objects.t(type: :location), action: :list_locations),
+    link_to(:all_objects.t(type: :location), action: :index),
     link_with_query(:cancel_and_show.t(type: :location),
                     @location.show_link_args)
   ]
@@ -14,7 +14,7 @@
 %>
 
 <%= form_for(:location, url: add_query_param(
-      action: :edit_location,
+      action: :edit,
       id: @location.id,
       approved_where: @display_name
     )) do |form| %>

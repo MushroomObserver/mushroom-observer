@@ -3,7 +3,7 @@ class HerbariaController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_herbarium,
-    :list_herbaria,
+    :list_herbaria, # aliased
     :herbarium_search,
     :show,
     :show_next,
@@ -220,7 +220,7 @@ class HerbariaController < ApplicationController
 
   def show_selected_herbaria(query, args = {})
     args = {
-      action: :list_herbaria,
+      action: :index,
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
@@ -230,7 +230,7 @@ class HerbariaController < ApplicationController
     if query.flavor != :all
       @links << [:herbarium_index_list_all_herbaria.l,
                  { controller: :herbarium,
-                   action: :list_herbaria }
+                   action: :index }
                 ]
     end
     if query.flavor != :nonpersonal

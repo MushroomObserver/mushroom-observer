@@ -41,7 +41,7 @@
       <%= select(:vote, :value,
                  options_for_select(Vote.confidence_menu, vote.value),
                  { include_blank: (action == :create ||
-                                   action == :create_observation) } ,
+                                   action == :new) } ,
                  class: "form-control",
                  data: { autofocus: focus_on_vote }) %>
     </div>

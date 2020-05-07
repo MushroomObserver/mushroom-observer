@@ -12,7 +12,7 @@
 <%= render(partial: "observation_title",
            locals: { observation: @sequence.observation }) %>
 
-<%= form_for(:sequence, url: add_query_param(action: :edit_sequence, back: @back)) do |form| %>
+<%= form_for(:sequence, url: add_query_param(action: :edit, back: @back)) do |form| %>
   <%= render(partial: "form_sequence", locals: {form: form}) %>
 <% end %>
 

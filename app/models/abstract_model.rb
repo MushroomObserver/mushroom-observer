@@ -373,8 +373,8 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "show_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   Name.show_action => "show_name"
-  #   name.show_action => "show_name"
+  #   Name.show_action => "show"
+  #   name.show_action => "show"
   #   Changed from    "show_" + name.underscore
   #
   def self.show_action
@@ -446,8 +446,8 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "edit_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   Name.edit_action => "edit_name"
-  #   name.edit_action => "edit_name"
+  #   Name.edit_action => "edit"
+  #   name.edit_action => "edit"
   #   Changed from    "edit_" + name.underscore
   #
   def self.edit_action
@@ -460,8 +460,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "edit_<object>" action
   #
-  #   Name.edit_url(12) => "http://mushroomobserver.org/names/edit_name/12"
-  #   name.edit_url     => "http://mushroomobserver.org/names/edit_name/12"
+  #   Name.edit_url(12) => "http://mushroomobserver.org/names/12/edit"
+  #   name.edit_url     => "http://mushroomobserver.org/names/12/edit"
   #   Changed from "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
   #
   def self.edit_url(id)
@@ -474,8 +474,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "edit_<object>" action
   #
-  #   Name.edit_link_args(12) => {controller: :name, action: :edit_name, id: 12}
-  #   name.edit_link_args     => {controller: :name, action: :edit_name, id: 12}
+  #   Name.edit_link_args(12) => {controller: :names, action: :edit, id: 12}
+  #   name.edit_link_args     => {controller: :names, action: :edit, id: 12}
   #
   def self.edit_link_args(id)
     { controller: edit_controller, action: edit_action, id: id }
@@ -502,8 +502,8 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "destroy_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   Name.destroy_action => "destroy_name"
-  #   name.destroy_action => "destroy_name"
+  #   Name.destroy_action => "destroy"
+  #   name.destroy_action => "destroy"
   #    Changed from   "destroy_" + name.underscore
   #
   def self.destroy_action
@@ -532,9 +532,9 @@ class AbstractModel < ApplicationRecord
   # Return the link_to args of the "destroy_<object>" action
   #
   #   Name.destroy_link_args(12) =>
-  #     {controller: :name, action: :destroy_name, id: 12}
+  #     {controller: :name, action: :destroy, id: 12}
   #   name.destroy_link_args     =>
-  #     {controller: :name, action: :destroy_name, id: 12}
+  #     {controller: :name, action: :destroy, id: 12}
   #
   def self.destroy_link_args(id)
     { controller: destroy_controller, action: destroy_action, id: id }

@@ -123,7 +123,7 @@ class Names::DescriptionsController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: :list_name_descriptions,
+      action: :index,
       num_per_page: 50
     }.merge(args)
 
@@ -207,7 +207,7 @@ class Names::DescriptionsController < ApplicationController
     end
   end
 
-  # TODO: NIMMO should this be /name/description/#{@description.id} ?
+  # TODO: NIMMO should this be /name/#{@name.id}/description/#{@description.id} ?
   def description_canonical_url
     "#{MO.http_domain}/name/show_name_description/#{@description.id}"
   end

@@ -6,7 +6,7 @@
                     @observation.show_link_args),
     link_with_query(:image_add_edit.t,
                     controller: :observations,
-                    action: :edit_observation,
+                    action: :edit,
                     id: @observation.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }

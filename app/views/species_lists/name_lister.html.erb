@@ -2,7 +2,7 @@
   @title = :name_lister_title.t
 
   tabs = [
-    link_to(:name_lister_classic.t, action: :create_species_list)
+    link_to(:name_lister_classic.t, controller: :species_lists, action: :new)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 

@@ -1,45 +1,45 @@
 require "test_helper"
 
-class CommentControllerTest < FunctionalTestCase
+class CommentsControllerTest < FunctionalTestCase
   def test_list_comments
-    get_with_dump(:list_comments)
-    assert_template("list_comments")
+    get_with_dump(:index)
+    assert_template("index")
   end
 
   def test_show_comment
-    get_with_dump(:show_comment,
+    get_with_dump(:show,
                   id: comments(:minimal_unknown_obs_comment_1).id)
-    assert_template("show_comment")
+    assert_template("show")
   end
 
   def test_show_comments_for_user
     get_with_dump(:show_comments_for_user, id: rolf.id)
-    assert_template("list_comments")
+    assert_template("index")
   end
 
   def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, id: rolf.id)
-    assert_redirected_to(action: :show_comment,
+    assert_redirected_to(action: :show,
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
   end
 
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
-    requires_login(:add_comment, id: obs_id, type: "Observation")
-    assert_form_action(action: :add_comment, id: obs_id, type: "Observation")
+    requires_login(:new, id: obs_id, type: "Observation")
+    assert_form_action(action: :new, id: obs_id, type: "Observation")
   end
 
   def test_add_comment_to_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
-    requires_login(:add_comment, id: name_id, type: "Name")
-    assert_form_action(action: :add_comment, id: name_id, type: "Name")
+    requires_login(:new, id: name_id, type: "Name")
+    assert_form_action(action: :new, id: name_id, type: "Name")
   end
 
   def test_add_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
     login :katrina
-    get(:add_comment, type: "NameDescription", id: katrina_is_not_reader.id)
+    get(:new, type: "NameDescription", id: katrina_is_not_reader.id)
 
     assert_flash_error("MO should flash if trying to comment on object"\
                        "for which user lacks read privileges")
@@ -51,11 +51,11 @@ class CommentControllerTest < FunctionalTestCase
     params = { id: comment.id.to_s }
     assert_equal("rolf", comment.user.login)
     requires_user(
-      :edit_comment,
-      { controller: :observations, action: :show_observation, id: obs.id },
+      :edit,
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
-    assert_form_action(action: :edit_comment, id: comment.id.to_s)
+    assert_form_action(action: :edit, id: comment.id.to_s)
   end
 
   def test_destroy_comment
@@ -65,8 +65,8 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     params = { id: comment.id.to_s }
     requires_user(
-      :destroy_comment,
-      { controller: :observations, action: :show_observation, id: obs.id },
+      :destroy,
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_equal(9, rolf.reload.contribution)
@@ -81,8 +81,8 @@ class CommentControllerTest < FunctionalTestCase
     params = { id: obs.id,
                type: "Observation",
                comment: { summary: "A Summary", comment: "Some text." } }
-    post_requires_login(:add_comment, params)
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    post_requires_login(:new, params)
+    assert_redirected_to(controller: :observations, action: :show)
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
@@ -98,8 +98,8 @@ class CommentControllerTest < FunctionalTestCase
                comment: { summary: "New Summary", comment: "New text." } }
     assert_equal("rolf", comment.user.login)
     post_requires_user(
-      :edit_comment,
-      { controller: :observations, action: :show_observation, id: obs.id },
+      :edit,
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_equal(10, rolf.reload.contribution)

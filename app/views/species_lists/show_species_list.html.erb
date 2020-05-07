@@ -28,7 +28,7 @@
                       action: :edit,
                       id: @species_list.id),
       link_with_query(:DESTROY.t,
-                      { action: :destroy_species_list,
+                      { action: :destroy,
                         id: @species_list.id },
                       { class: "text-danger",
                         data: { confirm: :are_you_sure.l } })

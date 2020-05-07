@@ -168,7 +168,7 @@ module ObjectLinkHelper
 
     link = link_with_query(:show_observation_add_sequence.t,
                            controller: :sequence,
-                           action: :create_sequence,
+                           action: :new,
                            id: obs.id)
     " | ".html_safe + link
   end

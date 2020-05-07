@@ -121,7 +121,7 @@ class ObservationsController
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
     @links ||= []
-    args = { action: :list_observations, matrix: true,
+    args = { action: :index, matrix: true,
             include: [:name, :location, :user, :rss_log,
                       { thumb_image: :image_votes }] }.merge(args)
 

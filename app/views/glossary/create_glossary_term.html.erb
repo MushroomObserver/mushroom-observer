@@ -8,7 +8,7 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:glossary_term, url: {action: :create_glossary_term},
+  <%= form_for(:glossary_term, url: {action: :new},
               html: {multipart: true}) do |form| %>
     <div class="form-group mt-3">
       <%= label_tag(:glossary_name, :glossary_term_name.t + ":") %>

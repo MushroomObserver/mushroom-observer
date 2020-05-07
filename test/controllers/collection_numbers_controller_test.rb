@@ -1,16 +1,16 @@
 require "test_helper"
 
-class CollectionNumberControllerTest < FunctionalTestCase
+class CollectionNumbersControllerTest < FunctionalTestCase
   def test_collection_index
-    get_with_dump(:list_collection_numbers)
-    assert_template(:list_collection_numbers)
+    get_with_dump(:index)
+    assert_template(:index)
   end
 
   def test_observation_index_with_one_collection_number
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
     get_with_dump(:observation_index, id: obs.id)
-    assert_template(:list_collection_numbers)
+    assert_template(:index)
     assert_no_flash
   end
 
@@ -18,7 +18,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
     get_with_dump(:observation_index, id: obs.id)
-    assert_template(:list_collection_numbers)
+    assert_template(:index)
     assert_no_flash
   end
 
@@ -26,7 +26,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
     get_with_dump(:observation_index, id: obs.id)
-    assert_template(:list_collection_numbers)
+    assert_template(:index)
     assert_flash_text(/no matching collection numbers found/i)
   end
 
@@ -35,7 +35,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_operator(numbers.count, :>, 1)
     get(:collection_number_search, pattern: "Singer")
     assert_response(:success)
-    assert_template("list_collection_numbers")
+    assert_template(:index)
     # In results, expect 1 row per collection_number.
     assert_select(".results tr", numbers.count)
   end
@@ -45,7 +45,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_equal(1, numbers.count)
     get_with_dump(:collection_number_search, pattern: "neighbor")
     query_record = QueryRecord.last
-    assert_redirected_to(action: :show_collection_number,
+    assert_redirected_to(action: :show,
                          id: numbers.first.id, q: query_record.id.alphabetize)
     assert_no_flash
   end
@@ -55,17 +55,18 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     get(:index_collection_number, q: query.record.id.alphabetize)
     assert_response(:success)
-    assert_template("list_collection_numbers")
+    assert_template(:index)
     # In results, expect 1 row per collection_number.
     assert_select(".results tr", query.num_results)
   end
 
+  # TODO: NIMMO rename to test_show
   def test_show_collection_number
-    get(:show_collection_number)
-    get(:show_collection_number, id: "bogus")
+    get(:show)
+    get(:show, id: "bogus")
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
-    get_with_dump(:show_collection_number, id: number.id)
+    get_with_dump(:show, id: number.id)
   end
 
   def test_next_and_prev_collection_number
@@ -76,32 +77,32 @@ class CollectionNumberControllerTest < FunctionalTestCase
     q = query.record.id.alphabetize
 
     get(:next_collection_number, id: number1.id, q: q)
-    assert_redirected_to(action: :show_collection_number, id: number2.id, q: q)
+    assert_redirected_to(action: :show, id: number2.id, q: q)
 
     get(:prev_collection_number, id: number2.id, q: q)
-    assert_redirected_to(action: :show_collection_number, id: number1.id, q: q)
+    assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
   def test_create_collection_number
-    get(:create_collection_number)
-    get(:create_collection_number, id: "bogus")
+    get(:new)
+    get(:new, id: "bogus")
 
     obs = observations(:coprinus_comatus_obs)
-    get(:create_collection_number, id: obs.id)
+    get(:new, id: obs.id)
     assert_response(:redirect)
 
     login("mary")
-    get(:create_collection_number, id: obs.id)
+    get(:new, id: obs.id)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:create_collection_number, id: obs.id)
+    get_with_dump(:new, id: obs.id)
     assert_response(:success)
-    assert_template("create_collection_number", partial: "shared/log_item")
+    assert_template("new", partial: "shared/log_item")
     assert(assigns(:collection_number))
 
     make_admin("mary")
-    get(:create_collection_number, id: obs.id)
+    get(:new, id: obs.id)
     assert_response(:success)
   end
 
@@ -115,25 +116,25 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: "  71-1234-c <spam>   "
     }
 
-    post(:create_collection_number, id: obs.id, collection_number: params)
+    post(:new, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:create_collection_number, id: obs.id, collection_number: params)
+    post(:new, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:create_collection_number, id: obs.id,
+    post(:new, id: obs.id,
                                     collection_number: params.except(:name))
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:create_collection_number, id: obs.id,
+    post(:new, id: obs.id,
                                     collection_number: params.except(:number))
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:create_collection_number, id: obs.id, collection_number: params)
+    post(:new, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
@@ -158,13 +159,13 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    post(:create_collection_number, id: obs.id, collection_number: params)
+    post(:new, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
     assert_obj_list_equal([number], obs.reload.collection_numbers)
 
-    post(:create_collection_number, id: obs.id, collection_number: params)
+    post(:new, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
@@ -184,7 +185,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
 
     login("mary")
-    post(:create_collection_number, id: obs2.id, collection_number: params)
+    post(:new, id: obs2.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
@@ -206,34 +207,34 @@ class CollectionNumberControllerTest < FunctionalTestCase
 
     # Prove that query params are added to form action.
     login(obs.user.login)
-    get(:create_collection_number, params)
+    get(:new, params)
     assert_select("form[action*='number/#{obs.id}?q=#{q}']")
 
     # Prove that post keeps query params intact.
-    post(:create_collection_number, params)
+    post(:new, params)
     assert_redirected_to(obs.show_link_args.merge(q: q))
   end
 
   def test_edit_collection_number
-    get(:edit_collection_number)
-    get(:edit_collection_number, id: "bogus")
+    get(:edit)
+    get(:edit, id: "bogus")
 
     number = collection_numbers(:coprinus_comatus_coll_num)
-    get(:edit_collection_number, id: number.id)
+    get(:edit, id: number.id)
     assert_response(:redirect)
 
     login("mary")
-    get(:edit_collection_number, id: number.id)
+    get(:edit, id: number.id)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit_collection_number, id: number.id)
+    get_with_dump(:edit, id: number.id)
     assert_response(:success)
-    assert_template("edit_collection_number", partial: "shared/log_item")
+    assert_template("edit", partial: "shared/log_item")
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")
-    get(:edit_collection_number, id: number.id)
+    get(:edit, id: number.id)
     assert_response(:success)
   end
 
@@ -259,25 +260,25 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: "  69-abc <spam>  "
     }
 
-    post(:edit_collection_number, id: number.id, collection_number: params)
+    post(:edit, id: number.id, collection_number: params)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:edit_collection_number, id: number.id, collection_number: params)
+    post(:edit, id: number.id, collection_number: params)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:edit_collection_number, id: number.id,
+    post(:edit, id: number.id,
                                   collection_number: params.merge(name: ""))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    post(:edit_collection_number, id: number.id,
+    post(:edit, id: number.id,
                                   collection_number: params.merge(number: ""))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    post(:edit_collection_number, id: number.id, collection_number: params)
+    post(:edit, id: number.id, collection_number: params)
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
@@ -288,7 +289,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
-    post(:edit_collection_number, id: number.id, collection_number: params)
+    post(:edit, id: number.id, collection_number: params)
     assert_no_flash
   end
 
@@ -308,7 +309,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: num1.number
     }
     login("rolf")
-    post(:edit_collection_number, id: num2.id, collection_number: params)
+    post(:edit, id: num2.id, collection_number: params)
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
@@ -336,19 +337,19 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
 
     # Prove that GET passes "back" and query param through to form.
-    get(:edit_collection_number, params.merge(back: "foo", q: q))
+    get(:edit, params.merge(back: "foo", q: q))
     assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
 
     # Prove that POST keeps query param when returning to observation.
-    post(:edit_collection_number, params.merge(back: obs.id, q: q))
+    post(:edit, params.merge(back: obs.id, q: q))
     assert_redirected_to(obs.show_link_args.merge(q: q))
 
-    # Prove that POST can return to show_collection_number with query intact.
-    post(:edit_collection_number, params.merge(back: "show", q: q))
+    # Prove that POST can return to show with query intact.
+    post(:edit, params.merge(back: "show", q: q))
     assert_redirected_to(num.show_link_args.merge(q: q))
 
     # Prove that POST can return to index_collection_number with query intact.
-    post(:edit_collection_number, params.merge(back: "index", q: q))
+    post(:edit, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_collection_number, id: num.id, q: q)
   end
 
@@ -423,29 +424,29 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_obj_list_equal([num1, num2], obs2.reload.collection_numbers, :sort)
 
     # Make sure user must be logged in.
-    get(:destroy_collection_number, id: num1.id)
+    get(:destroy, id: num1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure only owner obs can destroy num from it.
     login("mary")
-    get(:destroy_collection_number, id: num1.id)
+    get(:destroy, id: num1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
-    get(:destroy_collection_number)
-    get(:destroy_collection_number, id: "bogus")
+    get(:destroy)
+    get(:destroy, id: "bogus")
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Owner can destroy it.
-    get(:destroy_collection_number, id: num1.id)
+    get(:destroy, id: num1.id)
     assert_empty(obs1.reload.collection_numbers)
     assert_obj_list_equal([num2], obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
 
     # Admin can destroy it.
     make_admin("mary")
-    get(:destroy_collection_number, id: num2.id)
+    get(:destroy, id: num2.id)
     assert_empty(obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num2.id))
@@ -460,11 +461,11 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_operator(nums.length, :>, 1)
 
     # Prove by default it goes back to index.
-    post(:destroy_collection_number, id: nums[0].id)
+    post(:destroy, id: nums[0].id)
     assert_redirected_to(action: :index_collection_number)
 
     # Prove that it keeps query param intact when returning to index.
-    post(:destroy_collection_number, id: nums[1].id, q: q)
+    post(:destroy, id: nums[1].id, q: q)
     assert_redirected_to(action: :index_collection_number, q: q)
   end
 end

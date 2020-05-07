@@ -1,19 +1,19 @@
 require "test_helper"
 
-class ImageControllerTest < FunctionalTestCase
+class ImagesControllerTest < FunctionalTestCase
   def test_list_images
-    get_with_dump(:list_images)
-    assert_template("list_images", partial: "_image")
+    get_with_dump(:index)
+    assert_template("index", partial: "_image")
   end
 
   def test_images_by_user
     get_with_dump(:images_by_user, id: rolf.id)
-    assert_template("list_images", partial: "_image")
+    assert_template("index", partial: "_image")
   end
 
   def test_images_for_project
     get_with_dump(:images_for_project, id: projects(:bolete_project).id)
-    assert_template("list_images", partial: "_image")
+    assert_template("index", partial: "_image")
   end
 
   def test_next_image
@@ -81,8 +81,8 @@ class ImageControllerTest < FunctionalTestCase
       id: det_unknown.images.last.id,
       params: @controller.query_params(inner) # inner for first obs
     }.flatten
-    get(:next_image, params)
-    assert_redirected_to(action: :show_image,
+    get(:show_next, params)
+    assert_redirected_to(action: :show,
                          id: images(:agaricus_campestris_image).id,
                          params: @controller.query_params(save_query))
   end
@@ -112,8 +112,8 @@ class ImageControllerTest < FunctionalTestCase
       id: rolfs_favorite_image_id,
       params: @controller.query_params(query)
     }.flatten
-    get(:next_image, params)
-    assert_redirected_to(action: :show_image,
+    get(:show_next, params)
+    assert_redirected_to(action: :show,
                          id: expected_next,
                          params: @controller.query_params(query))
   end
@@ -175,7 +175,7 @@ class ImageControllerTest < FunctionalTestCase
     }.flatten
     get(:prev_image, params)
     assert_redirected_to(
-      action: :show_image,
+      action: :show,
       id: observations(:detailed_unknown_obs).images.second.id,
       params: @controller.query_params(QueryRecord.last)
     )
@@ -184,7 +184,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_original
     img_id = images(:in_situ_image).id
     get_with_dump(:show_original, id: img_id)
-    assert_redirected_to(action: :show_image,
+    assert_redirected_to(action: :show,
                          size: "full_size",
                          id: img_id)
   end
@@ -192,13 +192,13 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_image
     image = images(:in_situ_image)
     num_views = image.num_views
-    get_with_dump(:show_image, id: image.id)
-    assert_template("show_image", partial: "_form_ccbyncsa25")
+    get_with_dump(:show, id: image.id)
+    assert_template("show", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
     (Image.all_sizes + [:original]).each do |size|
-      get(:show_image, id: image.id, size: size)
-      assert_template("show_image", partial: "_form_ccbyncsa25")
+      get(:show, id: image.id, size: size)
+      assert_template("show", partial: "_form_ccbyncsa25")
     end
   end
 
@@ -211,28 +211,28 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal([dick.id], proj.user_group.users.map(&:id))
 
     login("rolf")
-    get(:show_image, id: img.id)
+    get(:show, id: img.id)
     assert_select("a[href*=edit_image]", count: 0)
     assert_select("a[href*=destroy_image]", count: 0)
-    get(:edit_image, id: img.id)
+    get(:edit, id: img.id)
     assert_response(:redirect)
-    get(:destroy_image, id: img.id)
+    get(:destroy, id: img.id)
     assert_flash_error
 
     login("mary")
-    get(:show_image, id: img.id)
+    get(:show, id: img.id)
     assert_select("a[href*=edit_image]", minimum: 1)
     assert_select("a[href*=destroy_image]", minimum: 1)
-    get(:edit_image, id: img.id)
+    get(:edit, id: img.id)
     assert_response(:success)
 
     login("dick")
-    get(:show_image, id: img.id)
+    get(:show, id: img.id)
     assert_select("a[href*=edit_image]", minimum: 1)
     assert_select("a[href*=destroy_image]", minimum: 1)
-    get(:edit_image, id: img.id)
+    get(:edit, id: img.id)
     assert_response(:success)
-    get(:destroy_image, id: img.id)
+    get(:destroy, id: img.id)
     assert_flash_success
   end
 
@@ -257,7 +257,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_image_search_by_number
     img_id = images(:commercial_inquiry_image).id
     get_with_dump(:image_search, pattern: img_id)
-    assert_redirected_to(action: :show_image, id: img_id)
+    assert_redirected_to(action: :show, id: img_id)
   end
 
   def test_advanced_search
@@ -271,14 +271,14 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_add_image
-    requires_login(:add_image,
+    requires_login(:new,
                    id: observations(:coprinus_comatus_obs).id)
-    assert_form_action(action: :add_image,
+    assert_form_action(action: :new,
                        id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
-    get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
+    get_with_dump(:new, id: observations(:minimal_unknown_obs).id)
     assert_redirected_to(controller: :observations,
-                         action: :show_observation)
+                         action: :show)
   end
 
   # Test reusing an image by id number.
@@ -292,7 +292,7 @@ class ImageControllerTest < FunctionalTestCase
                    obs_id: obs.id,
                    img_id: image.id)
     assert_redirected_to(controller: :observations,
-                         action: :show_observation,
+                         action: :show,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
@@ -397,7 +397,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post_requires_login(:remove_images, params, "mary")
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
     assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
     assert(!obs.images.member?(remove))
@@ -410,7 +410,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post(:remove_images, params)
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
@@ -424,8 +424,8 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.images.member?(image))
     params = { id: image.id.to_s }
     assert_equal("mary", image.user.login)
-    requires_user(:destroy_image, :show_image, params, "mary")
-    assert_redirected_to(action: :list_images)
+    requires_user(:destroy, :show, params, "mary")
+    assert_redirected_to(action: :index)
     assert_equal(0, mary.reload.contribution)
     assert(!obs.reload.images.member?(image))
   end
@@ -434,8 +434,8 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
     assert(image.user.login == "rolf")
-    requires_user(:edit_image, %w[image show_image], params)
-    assert_form_action(action: :edit_image, id: image.id.to_s)
+    requires_user(:edit, %w[image show_image], params)
+    assert_form_action(action: :edit, id: image.id.to_s)
   end
 
   def test_update_image
@@ -456,8 +456,8 @@ class ImageControllerTest < FunctionalTestCase
         "original_name" => new_name
       }
     }
-    post_requires_login(:edit_image, params)
-    assert_redirected_to(action: :show_image, id: image.id)
+    post_requires_login(:edit, params)
+    assert_redirected_to(action: :show, id: image.id)
     assert_equal(10, rolf.reload.contribution)
 
     assert(obs.reload.rss_log)
@@ -476,7 +476,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     requires_user(
       :remove_images,
-      { controller: :observations, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_form_action(action: :remove_images, id: obs.id)
@@ -502,7 +502,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary", "testpassword")
     send(:get, :reuse_image, params)
     # assert_redirected_to(%r{/#{obs.id}$})
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
 
     login("rolf", "testpassword")
@@ -533,15 +533,15 @@ class ImageControllerTest < FunctionalTestCase
     owner = obs.user.login
     assert_not_equal("mary", owner)
     requires_login(:reuse_image, params, "mary")
-    # assert_template(controller: :observations, action: :show_observation)
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    # assert_template(controller: :observations, action: :show)
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
     refute(obs.reload.images.member?(image))
 
     login(owner)
     get_with_dump(:reuse_image, params)
-    # assert_template(controller: :observations, action: :show_observation)
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    # assert_template(controller: :observations, action: :show)
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
@@ -557,7 +557,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     login("mary")
     get_with_dump(:reuse_image_for_glossary_term, params)
-    assert_redirected_to(controller: :glossary, action: :show_glossary_term,
+    assert_redirected_to(controller: :glossary, action: :show,
                          id: glossary_term.id)
     assert(glossary_term.reload.images.member?(image))
   end
@@ -664,7 +664,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :users, action: :show_user,
+    assert_redirected_to(controller: :users, action: :show,
                          id: rolf.id)
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
@@ -675,7 +675,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     post_requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :users, action: :show_user,
+    assert_redirected_to(controller: :users, action: :show,
                          id: rolf.id)
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
@@ -754,34 +754,34 @@ class ImageControllerTest < FunctionalTestCase
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     login("rolf")
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_image, id: img_id)
+    get(:show, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
   end
 
@@ -817,34 +817,34 @@ class ImageControllerTest < FunctionalTestCase
     # so there is no way to test init_project_vars_for_reload().
 
     login("rolf")
-    get(:add_image, id: obs1.id)
+    get(:new, id: obs1.id)
     assert_response(:redirect)
-    get(:add_image, id: obs2.id)
+    get(:new, id: obs2.id)
     assert_response(:redirect)
-    get(:edit_image, id: img1.id)
+    get(:edit, id: img1.id)
     assert_response(:redirect)
-    get(:edit_image, id: img2.id)
+    get(:edit, id: img2.id)
     assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
 
     login("mary")
-    get(:add_image, id: obs1.id)
+    get(:new, id: obs1.id)
     assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
-    get(:add_image, id: obs2.id)
+    get(:new, id: obs2.id)
     assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
-    get(:edit_image, id: img1.id)
+    get(:edit, id: img1.id)
     assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
-    get(:edit_image, id: img2.id)
+    get(:edit, id: img2.id)
     assert_response(:redirect)
 
     login("dick")
-    get(:add_image, id: obs2.id)
+    get(:new, id: obs2.id)
     assert_project_checks(proj1.id => :no_field, proj2.id => :checked)
-    get(:edit_image, id: img1.id)
+    get(:new, id: img1.id)
     assert_project_checks(proj1.id => :no_field, proj2.id => :checked)
-    get(:edit_image, id: img2.id)
+    get(:edit, id: img2.id)
     assert_response(:redirect)
     proj1.add_image(img1)
-    get(:edit_image, id: img1.id)
+    get(:edit, id: img1.id)
     assert_project_checks(proj1.id => :checked_but_disabled,
                           proj2.id => :checked)
   end
@@ -857,10 +857,10 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_show_user_profile_image
     assert(rolf.image_id)
-    get(:show_image, id: rolf.image_id)
+    get(:show, id: rolf.image_id)
 
     conic = glossary_terms(:conic_glossary_term)
     assert(conic.thumb_image_id)
-    get(:show_image, id: conic.thumb_image_id)
+    get(:show, id: conic.thumb_image_id)
   end
 end

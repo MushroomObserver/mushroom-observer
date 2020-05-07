@@ -7,6 +7,6 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(action: :create_species_list, approved_where: @place_name) do %>
+<%= form_tag(action: :new, approved_where: @place_name) do %>
   <%= render(partial: "form_species_lists", locals: {button: :CREATE}) %>
 <% end %>

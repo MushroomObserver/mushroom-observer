@@ -12,15 +12,15 @@ class SequencesController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_sequence,
-    :list_sequences,
+    :list_sequences, # aliased
     :sequence_search,
     :observation_index,
     :show,
     :show_next,
     :show_prev,
-    :show_sequence,
-    :next_sequence,
-    :prev_sequence
+    :show_sequence, # aliased
+    :next_sequence, # aliased
+    :prev_sequence # aliased
   ]
 
   def index_sequence # :norobots:

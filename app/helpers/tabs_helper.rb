@@ -54,8 +54,8 @@ module TabsHelper
     return unless user&.has_unshown_naming_notifications?(obs)
 
     link_with_query(:show_observation_view_notifications.t,
-                    controller: :observations,
-                    action: :show_notifications,
+                    controller: :notifications,
+                    action: :show,
                     id: obs.id)
   end
 
@@ -82,11 +82,11 @@ module TabsHelper
     [
       link_with_query(:show_observation_edit_observation.t,
                       controller: :observations,
-                      action: :edit_observation,
+                      action: :edit,
                       id: obs.id),
       link_with_query(:DESTROY.t,
                       { controller: :observations,
-                        action: :destroy_observation,
+                        action: :destroy,
                         id: obs.id },
                       class: "text-danger",
                       data: { confirm: :are_you_sure.l })

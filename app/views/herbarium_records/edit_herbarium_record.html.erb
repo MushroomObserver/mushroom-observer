@@ -9,7 +9,7 @@
     tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
                             @back_object.show_link_args)
   end
-  tabs << link_with_query(:create_herbarium.t, controller: :herbaria, action: :create_herbarium)
+  tabs << link_with_query(:create_herbarium.t, controller: :herbaria, action: :new)
   tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
 
   @tabsets = { right: draw_tab_set(tabs) }
@@ -17,7 +17,7 @@
 
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
-    <%= form_tag(add_query_param(action: :edit_herbarium_record, id: @herbarium_record.id, back: @back)) do %>
+    <%= form_tag(add_query_param(action: :edit, id: @herbarium_record.id, back: @back)) do %>
       <%= render(partial: "form", locals: {button: :SAVE}) %>
     <% end %>
   </div>

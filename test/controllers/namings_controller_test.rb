@@ -2,12 +2,16 @@
 
 require "test_helper"
 
-class NamingControllerTest < FunctionalTestCase
+class NamingsControllerTest < FunctionalTestCase
   def test_create_get
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id.to_s }
-    requires_login(:create, params)
-    assert_form_action(action: :create, approved_name: "", id: obs.id.to_s)
+    requires_login(:new, params)
+    assert_form_action(
+      action: :new,
+      approved_name: "",
+      id: obs.id.to_s
+    )
   end
 
   def test_edit_get
@@ -16,7 +20,7 @@ class NamingControllerTest < FunctionalTestCase
     requires_user(
       :edit,
       { controller: :observations,
-        action: :show_observation,
+        action: :show,
         id: nam.observation_id },
       params
     )
@@ -70,7 +74,7 @@ class NamingControllerTest < FunctionalTestCase
 
     assert_redirected_to(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: nam.observation_id
     )
     assert_equal(new_name, nam.text_name)
@@ -113,7 +117,7 @@ class NamingControllerTest < FunctionalTestCase
     post(:edit, params)
     assert_redirected_to(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: nmg.observation.id
     )
     # Must be cloning naming with no vote.
@@ -160,7 +164,7 @@ class NamingControllerTest < FunctionalTestCase
     post(:edit, params)
     assert_redirected_to(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: nmg.observation.id
     )
     # Must be cloning naming, with no vote.
@@ -186,7 +190,7 @@ class NamingControllerTest < FunctionalTestCase
     post(:edit, params)
     assert_redirected_to(
       controller: :observations,
-      action: :show_observation,
+      action: :show,
       id: nmg.observation.id
     )
     # Must be cloning the naming, but no votes?
@@ -346,7 +350,7 @@ class NamingControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:create, params)
+    post(:new, params)
     assert_response(:redirect)
 
     # Make sure the right number of objects were created.
@@ -412,7 +416,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: "-1" }
     }
     login("rolf")
-    post(:create, params)
+    post(:new, params)
     assert_response(:redirect)
     assert_equal(12, rolf.reload.contribution)
 
@@ -442,7 +446,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: "3" }
     }
     login("dick")
-    post(:create, params)
+    post(:new, params)
     assert_response(:redirect)
     assert_equal(12, dick.reload.contribution)
     naming = Naming.last
@@ -481,9 +485,12 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: "3" }
     }
     login("dick")
-    post(:create, params)
-    assert_redirected_to(controller: :observations, action: :show_observation,
-                         id: observations(:coprinus_comatus_obs).id)
+    post(:new, params)
+    assert_redirected_to(
+      controller: :observations,
+      action: :show,
+      id: observations(:coprinus_comatus_obs).id
+    )
     # Dick is getting points for the naming, vote, and name change.
     assert_equal(12 + 10, dick.reload.contribution)
     naming = Naming.last
@@ -501,7 +508,7 @@ class NamingControllerTest < FunctionalTestCase
       name: { name: "Agaricus campestris" }
     }
     login("dick")
-    post(:create, params)
+    post(:new, params)
     assert_response(:success) # really means failed
     params = @controller.instance_variable_get("@params")
     assert_equal("Agaricus campestris L.", params.what)
@@ -518,7 +525,7 @@ class NamingControllerTest < FunctionalTestCase
       approved_name: name
     }
     login("dick")
-    post(:create, params)
+    post(:new, params)
     assert_response(:success) # really means failed
     assert(name = Name.find_by(text_name: 'Foo "bar"'))
     assert_equal('Foo "bar" Author', name.search_name)
@@ -605,7 +612,7 @@ class NamingControllerTest < FunctionalTestCase
       name: { name: "Imageless" }
     }
     login("dick")
-    post(:create, params)
+    post(:new, params)
     assert_response(:success) # really means failed
   end
 

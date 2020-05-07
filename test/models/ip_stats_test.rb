@@ -121,32 +121,32 @@ class IpStatsTest < UnitTestCase
       ip: ip1,
       time: 15.seconds.ago,
       controller: :observations,
-      action: :show_observation
+      action: :show
     )
     IpStats.log_stats(
       ip: ip1,
       time: 12.seconds.ago,
       controller: :observations,
-      action: :show_observation
+      action: :show
     )
     IpStats.log_stats(
       ip: ip1,
       time: 9.seconds.ago,
       controller: :observations,
-      action: :show_observation
+      action: :show
     )
     IpStats.log_stats(
       ip: ip1,
       time: 6.seconds.ago,
       controller: :observations,
-      action: :show_observation
+      action: :show
     )
     User.current = rolf
     IpStats.log_stats(
       ip: ip2,
       time: 2.seconds.ago,
       controller: :observations,
-      action: :create_observation
+      action: :new
     )
 
     stats = IpStats.read_stats(:do_activity)
@@ -162,6 +162,6 @@ class IpStatsTest < UnitTestCase
     assert_operator(stats[ip2][:activity][0][0], :>=, 2.seconds.ago.to_s)
     assert_operator(stats[ip2][:activity][0][1], :>=, 2.seconds)
     assert_equal("observation", stats[ip2][:activity][0][2])
-    assert_equal("create_observation", stats[ip2][:activity][0][3])
+    assert_equal("new", stats[ip2][:activity][0][3])
   end
 end
