@@ -144,7 +144,7 @@ class NameDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "name"
+    "name_descriptions"
   end
 
   # Don't add any authors until someone has written something "useful".

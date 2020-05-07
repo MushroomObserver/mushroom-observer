@@ -41,11 +41,11 @@
                                     id: naming.name) %>
                 <% if check_permission(naming) %>
                   [<%= link_with_query(:EDIT.t,
-                                       { controller: :naming,
+                                       { controller: :namings,
                                          action: :edit,
                                          id: naming }) %> |
                   <%= link_with_query(:DESTROY.t,
-                                      { controller: :naming,
+                                      { controller: :namings,
                                         action: :destroy,
                                         id: naming.id },
                                       data: {confirm: :are_you_sure.l }) %>]
@@ -107,7 +107,7 @@
         <div class="col-12">
           <div class="float-sm-right mt-sm-3 mb-1 ml-2">
             <%= link_with_query(:show_namings_propose_new_name.t,
-                                { controller: :naming,
+                                { controller: :namings,
                                   action: :new,
                                   id: observation.id },
                                 class: "btn") %>
@@ -175,11 +175,11 @@
                     <% if check_permission(naming) %>
                       <div class="col-12">
                         [<%= link_with_query(:EDIT.t,
-                                             { controller: :naming,
+                                             { controller: :namings,
                                                action: :edit,
                                                id: naming }) %> |
                          <%= link_with_query(:DESTROY.t,
-                                             { controller: :naming,
+                                             { controller: :namings,
                                                action: :destroy,
                                                id: naming.id },
                                              data: { confirm: :are_you_sure.l }
@@ -240,7 +240,7 @@
         <div class="col-12">
           <div class="float-sm-right mt-sm-3">
             <%= link_with_query(:show_namings_propose_new_name.t,
-                                { controller: :naming,
+                                { controller: :namings,
                                   action: :new,
                                   id: observation.id },
                                 class: "btn") %>

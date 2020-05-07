@@ -744,7 +744,7 @@ MushroomObserver::Application.routes.draw do
     resources :descriptions
   end
 
-  resources :naming, only: [:show, :create, :edit, :update, :destroy]
+  resources :namings, only: [:show, :create, :edit, :update, :destroy]
 
   resources :notifications, only: [:show]
 
