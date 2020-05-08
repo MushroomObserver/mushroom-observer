@@ -65,7 +65,7 @@ class InfoController < ApplicationController
       @code = params[:code]
       @submit = params[:commit]
     end
-    render(action: :textile_sandbox)
+    render action: :textile_sandbox
   end
 
   # I keep forgetting the stupid "_sandbox" thing.

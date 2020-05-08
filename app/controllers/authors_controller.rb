@@ -16,8 +16,11 @@ class AuthorsController < ApplicationController
       AuthorEmail.build(@user, receiver, @object, subject, content).deliver_now
     end
     flash_notice(:request_success.t)
-    redirect_with_query(controller: @object.show_controller,
-                        action: @object.show_action, id: @object.id)
+    redirect_with_query(
+      controller: @object.show_controller,
+      action: @object.show_action,
+      id: @object.id
+    )
   end
 
   # Form to adjust permissions for a user with respect to a project.
@@ -53,8 +56,11 @@ class AuthorsController < ApplicationController
       end
     else
       flash_error(:review_authors_denied.t)
-      redirect_with_query(controller: parent.show_controller,
-                          action: parent.show_action, id: parent.id)
+      redirect_with_query(
+        controller: parent.show_controller,
+        action: parent.show_action,
+        id: parent.id
+      )
     end
   end
 end

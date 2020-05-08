@@ -27,10 +27,7 @@ class ObservationsController
     show_selected_observations(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(
-      controller: :search,
-      action: :advanced_search_form
-    )
+    redirect_to controller: :search, action: :advanced_search_form
   end
 
   # Displays matrix of selected Observation's (based on current Query).
@@ -96,20 +93,19 @@ class ObservationsController
   # Display matrix of Observation's whose notes, etc. match a string pattern.
   def observation_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: observation.id
-      )
+    if pattern.match(/^\d+$/) && (@observation = Observation.safe_find(pattern))
+      # redirect_to(
+      #   action: :show,
+      #   id: @observation.id
+      # )
+      redirect_to @observation
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(
-          action: :index
-        )
+        render action: :index
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
@@ -291,10 +287,7 @@ class ObservationsController
 
   def render_labels
     @labels = make_labels(@query.results)
-    render(
-      action: :print_labels,
-      layout: :printable
-    )
+    render action: :print_labels, layout: :printable
   end
 
   def create_observation_report(args)

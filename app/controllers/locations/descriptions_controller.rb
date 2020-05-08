@@ -131,25 +131,28 @@ class Locations::DescriptionsController < ApplicationController
     # User doesn't have permission to see this description.
     elsif @description.source_type == :project
       flash_error(:runtime_show_draft_denied.t)
-      if (project = @description.project)
-        redirect_to(
-          controller: :projects,
-          action: :show,
-          id: project.id
-        )
+      if (@project = @description.project)
+        # redirect_to(
+        #   controller: :projects,
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to @project
       else
-        redirect_to(
-          controller: :locations,
-          action: :show,
-          id: @description.location_id
-        )
+        # redirect_to(
+        #   controller: :locations,
+        #   action: :show,
+        #   id: @description.location_id
+        # )
+        redirect_back fallback_location: @location
       end
     else
       flash_error(:runtime_show_description_denied.t)
-      redirect_to(
-        action: :show,
-        id: @description.location_id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.location_id
+      # )
+      redirect_to @location
     end
   end
 
@@ -237,11 +240,11 @@ class Locations::DescriptionsController < ApplicationController
       flash_notice(
         :runtime_location_description_success.t(id: @description.id)
       )
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
-
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
     else
       flash_object_errors @description
     end
@@ -272,10 +275,11 @@ class Locations::DescriptionsController < ApplicationController
     # No changes made.
     if !@description.changed?
       flash_warning(:runtime_edit_location_description_no_change.t)
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
 
     # There were error(s).
     elsif !@description.save
@@ -316,10 +320,11 @@ class Locations::DescriptionsController < ApplicationController
         end
       end
 
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
     end
 
   end
@@ -331,6 +336,7 @@ class Locations::DescriptionsController < ApplicationController
     @description = LocationDescription.find(params[:id].to_s)
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
+      @location = @description.location
       @description.location.log(
         :log_description_destroyed,
         user: @user.login,
@@ -338,23 +344,27 @@ class Locations::DescriptionsController < ApplicationController
         name: @description.unique_partial_format_name
       )
       @description.destroy
-      redirect_with_query(
-        controller: :locations,
-        action: :show,
-        id: @description.location_id
-      )
+      # redirect_with_query(
+      #   controller: :locations,
+      #   action: :show,
+      #   id: @description.location_id
+      # )
+      redirect_to @location
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(
-          action: :show,
-          id: @description.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @description.id
+        # )
+        redirect_to @description
       else
-        redirect_with_query(
-          action: :show,
-          id: @description.location_id
-        )
+        # redirect_with_query(
+        #   controller: :locations,
+        #   action: :show,
+        #   id: @description.location_id
+        # )
+        redirect_to @location
       end
     end
   end

@@ -33,15 +33,16 @@ class GlossaryController < ApplicationController
   alias_method :glossary_term_get, :new
 
   def create
-    glossary_term = \
+    @glossary_term = \
       GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
                        description: params[:glossary_term][:description])
-    glossary_term.add_image(process_image(image_args))
-    glossary_term.save
-    redirect_to(
-      action: :show,
-      id: glossary_term.id
-    )
+    @glossary_term.add_image(process_image(image_args))
+    @glossary_term.save
+    # redirect_to(
+    #   action: :show,
+    #   id: glossary_term.id
+    # )
+    redirect_to @glossary_term
   end
 
   alias_method :glossary_term_post, :create
@@ -97,15 +98,16 @@ class GlossaryController < ApplicationController
   alias_method :edit_glossary_term, :edit
 
   def update
-    glossary_term = GlossaryTerm.find(params[:id].to_s)
-    glossary_term.attributes = params[:glossary_term].
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    @glossary_term.attributes = params[:glossary_term].
                                permit(:name, :description)
-    glossary_term.user = @user
-    glossary_term.save
-    redirect_to(
-      action: :show,
-      id: glossary_term.id
-    )
+    @glossary_term.user = @user
+    @glossary_term.save
+    # redirect_to(
+    #   action: :show,
+    #   id: glossary_term.id
+    # )
+    redirect_to @glossary_term
   end
 
   # no alias needed
@@ -120,10 +122,11 @@ class GlossaryController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(
-          action: :show,
-          id: @glossary_term.id
-        )
+        # redirect_to(
+        #   action: :show,
+        #   id: glossary_term.id
+        # )
+        redirect_to @glossary_term
       end
     end
   end

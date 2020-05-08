@@ -57,10 +57,11 @@ class LocationsController
       @location.revert_to(params[:version].to_i)
     else
       flash_error(:show_past_location_no_version.t)
-      redirect_to(
-        action: :show,
-        id: @location.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @location.id
+      # )
+      redirect_to @location
     end
   end
 

@@ -158,10 +158,7 @@ class RssLogsController < ApplicationController
   def change_banner # :root: :norobots:
     if !in_admin_mode?
       flash_error(:permission_denied.t)
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
@@ -183,10 +180,7 @@ class RssLogsController < ApplicationController
         str.language.update_localization_file
         str.language.update_export_file
       end
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     else
       @val = :app_banner_box.l.to_s
     end

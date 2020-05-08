@@ -86,11 +86,12 @@ class ProjectsController < ApplicationController
   def project_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (project = Project.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: project.id
-      )
+       (@project = Project.safe_find(pattern))
+      # redirect_to(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to @project
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
@@ -222,10 +223,11 @@ class ProjectsController < ApplicationController
       else
         @project.log_create
         flash_notice(:add_project_success.t)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       end
     end
   end
@@ -246,10 +248,11 @@ class ProjectsController < ApplicationController
     return unless @project = find_or_goto_index(Project, params[:id].to_s)
 
     if !check_permission!(@project)
-      redirect_with_query(
-        action: :show,
-        id: @project.id
-      )
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to_referrer || redirect_to_project_index
     end
   end
 
@@ -268,10 +271,11 @@ class ProjectsController < ApplicationController
     else
       @project.log_update
       flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      redirect_with_query(
-        action: :show,
-        id: @project.id
-      )
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to_referrer || redirect_to_project_index
     end
   end
 
@@ -284,22 +288,25 @@ class ProjectsController < ApplicationController
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       else
         @project.log_destroy
         flash_notice(:destroy_project_success.t)
-        redirect_with_query(
-          action: :index
-        )
+        # redirect_with_query(
+        #   action: :index
+        # )
+        redirect_to_project_index
       end
     end
   end
@@ -331,10 +338,11 @@ class ProjectsController < ApplicationController
                            subject, content).deliver_now
         end
         flash_notice(:admin_request_success.t(title: @project.title))
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       end
     end
   end
@@ -352,10 +360,11 @@ class ProjectsController < ApplicationController
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.where.not(verified: nil).order("login, name").to_a
       if !@project.is_admin?(@user)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       elsif params[:candidate].present?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -393,10 +402,11 @@ class ProjectsController < ApplicationController
         end
         set_status(@project, :admin, @candidate, admin)
         set_status(@project, :member, @candidate, member)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_referrer || redirect_to_project_index
       end
     end
   end
@@ -426,5 +436,18 @@ class ProjectsController < ApplicationController
     params.require(:project).permit(:title, :summary)
   end
 
+  def redirect_to_referrer
+    return false if @back.blank?
+
+    redirect_to(@back)
+    true
+  end
+
+  def redirect_to_project_index(project = @project)
+    redirect_with_query(
+      action: :index,
+      id: project.try(&:id)
+    )
+  end
 
 end

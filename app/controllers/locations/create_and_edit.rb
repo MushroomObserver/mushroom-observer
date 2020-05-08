@@ -112,49 +112,51 @@ class LocationsController
       end
       if @set_observation
         if unshown_notifications?(@user, :naming)
-          redirect_to(
-            controller: :notifications,
-            action: :show
-          )
+          redirect_to controller: :notifications, action: :show
         else
-          redirect_to(
-            controller: :observations,
-            action: :show,
-            id: @set_observation
-          )
+          # redirect_to(
+          #   controller: :observations,
+          #   action: :show,
+          #   id: @set_observation
+          # )
+          redirect_to @set_observation
         end
       elsif @set_species_list
-        redirect_to(
-          controller: :species_lists,
-          action: :show,
-          id: @set_species_list
-        )
+        # redirect_to(
+        #   controller: :species_lists,
+        #   action: :show,
+        #   id: @set_species_list
+        # )
+        redirect_to @set_species_list
       elsif @set_herbarium
         if (herbarium = Herbarium.safe_find(@set_herbarium))
           herbarium.location = @location
           herbarium.save
-          redirect_to(
-            controller: :herbaria,
-            action: :show,
-            id: @set_herbarium
-          )
+          # redirect_to(
+          #   controller: :herbaria,
+          #   action: :show,
+          #   id: @set_herbarium
+          # )
+          redirect_to @set_herbarium
         end
       elsif @set_user
         if (user = User.safe_find(@set_user))
           user.location = @location
           user.save
-          redirect_to(
-            controller: :users,
-            action: :show,
-            id: @set_user
-          )
+          # redirect_to(
+          #   controller: :users,
+          #   action: :show,
+          #   id: @set_user
+          # )
+          redirect_to @set_user
         end
       else
-        redirect_to(
-          controller: :locations,
-          action: :show,
-          id: @location.id
-        )
+        # redirect_to(
+        #   controller: :locations,
+        #   action: :show,
+        #   id: @location.id
+        # )
+        redirect_to @location
       end
     end
   end

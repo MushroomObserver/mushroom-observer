@@ -55,11 +55,12 @@ class HerbariaController < ApplicationController
   def herbarium_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: herbarium.id
-      )
+       (@herbarium = Herbarium.safe_find(pattern))
+      # redirect_to(
+      #   action: :show,
+      #   id: @herbarium.id
+      # )
+      redirect_to @herbarium
     else
       query = create_query(
         :Herbarium,

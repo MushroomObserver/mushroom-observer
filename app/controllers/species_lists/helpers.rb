@@ -136,15 +136,9 @@ class SpeciesListsController
             set_species_list: @species_list.id
           )
         elsif unshown_notifications?(@user, :naming)
-          redirect_to(
-            controller: :notifications,
-            action: :show
-          )
+          redirect_to controller: :notifications, action: :show
         else
-          redirect_to(
-            action: :show,
-            id: @species_list
-          )
+          redirect_to @species_list
         end
         redirected = true
       end

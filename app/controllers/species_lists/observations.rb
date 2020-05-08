@@ -11,7 +11,7 @@ class SpeciesListsController
 
   # TODO: NIMMO is this another REST controller here?
   # SpeciesList::ObservationsController
-  
+
   def add_remove_observations # :prefetch: :norobots:
     pass_query_params
     @id = params[:species_list].to_s
@@ -21,33 +21,25 @@ class SpeciesListsController
   def post_add_remove_observations # :prefetch: :norobots:
     pass_query_params
     id = params[:species_list].to_s
-    spl = find_list_or_reload_form(id)
-    return unless spl
+    @species_list = find_list_or_reload_form(id)
+    return unless @species_list
 
-    query = find_obs_query_or_redirect(spl)
+    query = find_obs_query_or_redirect(@species_list)
     return unless query
 
-    do_add_remove_observations(spl, query)
-    redirect_to(
-      action: :show,
-      id: spl.id
-    )
+    do_add_remove_observations(@species_list, query)
+    redirect_to @species_list
   end
 
-  def find_obs_query_or_redirect(spl = nil)
+  def find_obs_query_or_redirect(@species_list = nil)
     query = find_query(:Observation)
     return query if query
 
     flash_error(:species_list_add_remove_no_query.t)
-    if spl
-      redirect_to(
-        action: :show,
-        id: spl.id
-      )
+    if @species_list
+      redirect_to @species_list
     else
-      redirect_to(
-        action: :index
-      )
+      redirect_to action: :index
     end
     nil
   end
@@ -118,49 +110,37 @@ class SpeciesListsController
 
   # Used by manage_species_lists.
   def remove_observation_from_species_list # :norobots:
-    species_list = find_or_goto_index(SpeciesList, params[:species_list])
-    return unless species_list
+    @species_list = find_or_goto_index(SpeciesList, params[:species_list])
+    return unless @species_list
 
-    observation = find_or_goto_index(Observation, params[:observation])
-    return unless observation
+    @observation = find_or_goto_index(Observation, params[:observation])
+    return unless @observation
 
-    if check_permission!(species_list)
-      species_list.remove_observation(observation)
+    if check_permission!(@species_list)
+      @species_list.remove_observation(@observation)
       flash_notice(:runtime_species_list_remove_observation_success.
-        t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(
-        action: :manage_species_lists,
-        id: observation.id
-      )
+        t(name: @species_list.unique_format_name, id: @observation.id))
+      redirect_to action: :manage_species_lists, id: @observation.id
     else
-      redirect_to(
-        action: :show,
-        id: species_list.id
-      )
+      redirect_to @species_list.id
     end
   end
 
   # Used by manage_species_lists.
   def add_observation_to_species_list # :norobots:
-    species_list = find_or_goto_index(SpeciesList, params[:species_list])
-    return unless species_list
+    @species_list = find_or_goto_index(SpeciesList, params[:species_list])
+    return unless @species_list
 
-    observation = find_or_goto_index(Observation, params[:observation])
-    return unless observation
+    @observation = find_or_goto_index(Observation, params[:observation])
+    return unless @observation
 
-    if check_permission!(species_list)
-      species_list.add_observation(observation)
+    if check_permission!(@species_list)
+      @species_list.add_observation(@observation)
       flash_notice(:runtime_species_list_add_observation_success.
-        t(name: species_list.unique_format_name, id: observation.id))
-      redirect_to(
-        action: :manage_species_lists,
-        id: observation.id
-      )
+        t(name: @species_list.unique_format_name, id: @observation.id))
+      redirect_to action: :manage_species_lists, id: @observation.id
     else
-      redirect_to(
-        action: :show,
-        id: species_list.id
-      )
+      redirect_to @species_list
     end
   end
 
@@ -277,10 +257,7 @@ class SpeciesListsController
         flash_notice(:species_list_bulk_editor_success.t(n: updates))
       end
 
-      redirect_to(
-        action: :show,
-        id: @species_list.id
-      )
+      redirect_to @species_list
     end
   end
 

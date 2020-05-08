@@ -113,7 +113,6 @@ class SequencesController < ApplicationController
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
-    figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_with_query(@sequence.observation.show_link_args)
@@ -124,6 +123,7 @@ class SequencesController < ApplicationController
 
   def update
     @sequence.attributes = whitelisted_sequence_params
+    figure_out_where_to_go_back_to
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
       redirect_with_query(@back_object.show_link_args)

@@ -71,11 +71,7 @@ class SpeciesListsController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    if !check_permission!(@species_list)
-      redirect_to(
-        action: :show,
-        id: @species_list
-      )
+    if !check_permission!(@species_list) redirect_to @species_list
     init_name_vars_for_edit(@species_list)
     init_member_vars_for_edit(@species_list)
     init_project_vars_for_edit(@species_list)
@@ -94,10 +90,7 @@ class SpeciesListsController
     return unless @species_list
 
     if !check_permission!(@species_list)
-      redirect_to(
-        action: :show,
-        id: @species_list
-      )
+      redirect_to @species_list
     elsif request.method != "POST"
       query = create_query(
         :Observation,
@@ -114,9 +107,7 @@ class SpeciesListsController
       init_member_vars_for_edit(@species_list)
       init_project_vars_for_edit(@species_list)
       @checklist ||= calc_checklist
-      render(
-        action: :edit
-      )
+      render action: :edit
     end
   end
 
@@ -128,14 +119,9 @@ class SpeciesListsController
       @species_list.destroy
       id = params[:id].to_s
       flash_notice(:runtime_species_list_destroy_success.t(id: id))
-      redirect_to(
-        action: :index
-      )
+      redirect_to action: :index
     else
-      redirect_to(
-        action: :show,
-        id: @species_list
-      )
+      redirect_to @species_list
     end
   end
 

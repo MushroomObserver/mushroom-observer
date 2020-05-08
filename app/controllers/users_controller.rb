@@ -24,10 +24,7 @@ class UsersController < ApplicationController
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
       flash_error(:runtime_search_has_expired.t)
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     end
   end
 
@@ -46,10 +43,7 @@ class UsersController < ApplicationController
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     end
   end
 
@@ -57,11 +51,12 @@ class UsersController < ApplicationController
   def user_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (user = User.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: user.id
-      )
+       (@user = User.safe_find(pattern))
+      # redirect_to(
+      #   action: :show,
+      #   id: user.id
+      # )
+      redirect_to @user
     else
       query = create_query(
         :User,
@@ -236,17 +231,11 @@ class UsersController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          redirect_to(
-            action: :show,
-            id: @user2.id
-          )
+          redirect_to @user2
         end
       end
     else
-      redirect_to(
-        action: :show,
-        id: @user2.id
-      )
+      redirect_to @user2
     end
   end
 end

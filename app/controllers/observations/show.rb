@@ -80,7 +80,7 @@ class ObservationsController
         obs.location
       )
     ]
-    render(action: :map_observations)
+    render action: :map_observations
   end
 
   ##########################################################################

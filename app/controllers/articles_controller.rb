@@ -136,10 +136,11 @@ class ArticlesController < ApplicationController
       user_id: @user.id
     )
     @article.save
-    redirect_to(
-      action: :show,
-      id: @article.id
-    )
+    # redirect_to(
+    #   action: :show,
+    #   id: @article.id
+    # )
+    redirect_to @article
   end
 
   # add flash message if title missing
@@ -174,10 +175,11 @@ class ArticlesController < ApplicationController
     else
       flash_warning(:runtime_no_changes.t)
     end
-    redirect_to(
-      action: :show,
-      id: @article.id
-    )
+    # redirect_to(
+    #   action: :show,
+    #   id: @article.id
+    # )
+    redirect_to @article
   end
 
   alias_method :save_edits, :update
@@ -189,9 +191,7 @@ class ArticlesController < ApplicationController
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
     end
-    redirect_to(
-      action: :index_article
-    )
+    redirect_to action: :index_article
   end
 
   alias_method :destroy_article, :destroy

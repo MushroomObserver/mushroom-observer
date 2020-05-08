@@ -34,8 +34,9 @@ class CollectionNumbersController < ApplicationController
   def collection_number_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (collection_number = CollectionNumber.safe_find(pattern))
-      redirect_to(action: :show_collection_number, id: collection_number.id)
+       (@collection_number = CollectionNumber.safe_find(pattern))
+      # redirect_to(action: :show, id: @collection_number.id)
+      redirect_to @collection_number
     else
       query = create_query(:CollectionNumber, :pattern_search, pattern: pattern)
       show_selected_collection_numbers(query)

@@ -15,17 +15,11 @@ class EmailController < ApplicationController
                                             params[:feature_email][:content])
         end
         flash_notice(:send_feature_email_success.t)
-        redirect_to(
-          controller: :users,
-          action: :users_by_name
-        )
+        redirect_to controller: :users, action: :users_by_name
       end
     else
       flash_error(:permission_denied.t)
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     end
   end
 
@@ -46,10 +40,7 @@ class EmailController < ApplicationController
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(
-        controller: :rss_logs,
-        action: :index
-      )
+      redirect_to controller: :rss_logs, action: :index
     end
   end
 
@@ -78,11 +69,12 @@ class EmailController < ApplicationController
     question = params[:question][:content]
     ObservationEmail.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(
-      controller: :observations,
-      action: :show,
-      id: @observation.id
-    )
+    # redirect_with_query(
+    #   controller: :observations,
+    #   action: :show,
+    #   id: @observation.id
+    # )
+    redirect_with_query @observation
   end
 
   def commercial_inquiry # :norobots:
@@ -93,11 +85,12 @@ class EmailController < ApplicationController
     commercial_inquiry = params[:commercial_inquiry][:content]
     CommercialEmail.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
-    redirect_with_query(
-      controller: :images,
-      action: :show,
-      id: @image.id
-    )
+    # redirect_with_query(
+    #   controller: :images,
+    #   action: :show,
+    #   id: @image.id
+    # )
+    redirect_with_query @image
   end
 
   def email_question(target, method = :email_general_question)

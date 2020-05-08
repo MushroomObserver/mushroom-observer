@@ -173,10 +173,7 @@ class Names::DescriptionsController < ApplicationController
     return true if @name
 
     flash_error(:runtime_name_for_description_not_found.t)
-    redirect_to(
-      controller: :names,
-      action: :index
-    )
+    redirect_to controller: :names, action: :index
     false
   end
 
@@ -193,17 +190,19 @@ class Names::DescriptionsController < ApplicationController
 
   def redirect_to_name_or_project
     if @description.project
-      redirect_to(
-        controller: :projects,
-        action: :show,
-        id: @description.project_id
-      )
+      # redirect_to(
+      #   controller: :projects,
+      #   action: :show,
+      #   id: @description.project_id
+      # )
+      redirect_to @description.project
     else
-      redirect_to(
-        controller: :names,
-        action: :show,
-        id: @description.name_id
-      )
+      # redirect_to(
+      #   controller: :names,
+      #   action: :show,
+      #   id: @description.name_id
+      # )
+      redirect_to @description.name
     end
   end
 
@@ -324,10 +323,11 @@ class Names::DescriptionsController < ApplicationController
       @name.save if @name.changed?
 
       flash_notice(:runtime_name_description_success.t(id: @description.id))
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
     else
       flash_object_errors @description
     end
@@ -363,10 +363,11 @@ class Names::DescriptionsController < ApplicationController
     # No changes made.
     if !@description.changed?
       flash_warning(:runtime_edit_name_description_no_change.t)
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
 
     # There were error(s).
     elsif !@description.save
@@ -411,10 +412,11 @@ class Names::DescriptionsController < ApplicationController
         end
       end
 
-      redirect_to(
-        action: :show,
-        id: @description.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @description.id
+      # )
+      redirect_to @description
     end
   end
 

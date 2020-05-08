@@ -89,10 +89,11 @@ class NamesController
       end
 
       if success
-        redirect_with_query(
-          action: :show,
-          id: @name.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @name.id
+        # )
+        redirect_with_query(@name.show_link_args)
       else
         flash_object_errors(@name)
         flash_object_errors(@name.synonym)
@@ -177,10 +178,11 @@ class NamesController
                           other: target_name.real_search_name)
       post_comment(:deprecate, @name, @comment) if @comment.present?
 
-      redirect_with_query(
-        action: :show,
-        id: @name.id
-      )
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @name.id
+      # )
+      redirect_with_query(@name.show_link_args)
     end
   end
 

@@ -102,10 +102,11 @@ class ObservationsController
 
     # Make sure user owns this observation!
     if !check_permission!(@observation)
-      redirect_with_query(
-        action: :show,
-        id: @observation.id
-      )
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @observation.id
+      # )
+      redirect_with_query(@observation.show_link_args)
     end
 
     # Initialize form.
@@ -175,10 +176,11 @@ class ObservationsController
         set_observation: @observation.id
       )
     else
-      redirect_with_query(
-        action: :show,
-        id: @observation.id
-      )
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @observation.id
+      # )
+      redirect_with_query(@observation.show_link_args)
     end
   end
 
@@ -215,9 +217,7 @@ class ObservationsController
                                       id: next_state.current_id },
                                     next_state))
       else
-        redirect_to(
-          action: :index
-        )
+        redirect_to action: :index
       end
     end
   end
@@ -238,10 +238,11 @@ class ObservationsController
       flash_error(:observer_recalc_caught_error.t(error: e))
     end
     # render(plain: "", layout: true)
-    redirect_with_query(
-      action: :show,
-      id: id
-    )
+    # redirect_with_query(
+    #   action: :show,
+    #   id: @observation.id
+    # )
+    redirect_with_query(@observation.show_link_args)
   end
 
   # ----------------------------------------------------------------------------
@@ -797,10 +798,11 @@ class ObservationsController
         id: @observation.id
       )
     else
-      redirect_to(
-        action: :show,
-        id: @observation.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @observation.id
+      # )
+      redirect_to @observation
     end
   end
 

@@ -52,12 +52,9 @@ class SpeciesListsController
   # pattern.
   def species_list_search # :norobots:
     pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if spl
-      redirect_to(
-        action: :show,
-        id: spl.id
-      )
+    @species_list = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if @species_list
+      redirect_to @species_list
     else
       query = create_query(:SpeciesList, :pattern_search, pattern: pattern)
       show_selected_species_lists(query)

@@ -110,18 +110,19 @@ class NamesController
   def name_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
-       (name = Name.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: name.id
-      )
+       (@name = Name.safe_find(pattern))
+      # redirect_to(
+      #   action: :show,
+      #   id: @name.id
+      # )
+      redirect_to @name
     else
       search = PatternSearch::Name.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(action: :index)
+        render action: :index
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_names(search.query)
@@ -135,10 +136,7 @@ class NamesController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(
-      controller: :search,
-      action: :advanced_search_form
-    )
+    redirect_to controller: :search, action: :advanced_search_form
   end
 
   # Used to test pagination.

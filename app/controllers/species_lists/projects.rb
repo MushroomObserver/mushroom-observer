@@ -13,13 +13,11 @@ class SpeciesListsController
   # SpeciesList::ProjectsController
 
   def manage_projects # :norobots:
-    return unless (@list = find_or_goto_index(SpeciesList, params[:id].to_s))
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless (@species_list)
 
-    if !check_permission!(@list)
-      redirect_to(
-        action: :show,
-        id: @list.id
-      )
+    if !check_permission!(@species_list)
+      redirect_to @species_list
     else
       @projects = projects_to_manage
       @object_states = manage_object_states
@@ -27,19 +25,13 @@ class SpeciesListsController
       if request.method == "POST"
         if params[:commit] == :ATTACH.l
           if attach_objects_to_projects
-            redirect_to(
-              action: :show,
-              id: @list.id
-            )
+            redirect_to @species_list
           else
             flash_warning(:runtime_no_changes.t)
           end
         elsif params[:commit] == :REMOVE.l
           if remove_objects_from_projects
-            redirect_to(
-              action: :show,
-              id: @list.id
-            )
+            redirect_to @species_list
           else
             flash_warning(:runtime_no_changes.t)
           end
@@ -52,8 +44,8 @@ class SpeciesListsController
 
   def projects_to_manage
     projects = @user.projects_member
-    if @list.user == @user
-      projects += @list.projects
+    if @species_list.user == @user
+      projects += @species_list.projects
       projects.uniq!
     end
     projects
@@ -105,25 +97,25 @@ class SpeciesListsController
   end
 
   def attach_species_list_to_project(proj)
-    return if @list.projects.include?(proj)
+    return if @species_list.projects.include?(proj)
 
-    proj.add_species_list(@list)
+    proj.add_species_list(@species_list)
     flash_notice(:attached_to_project.
                     t(object: :species_list, project: proj.title))
     @any_changes = true
   end
 
   def remove_species_list_from_project(proj)
-    return unless @list.projects.include?(proj)
+    return unless @species_list.projects.include?(proj)
 
-    proj.remove_species_list(@list)
+    proj.remove_species_list(@species_list)
     flash_notice(:removed_from_project.
                     t(object: :species_list, project: proj.title))
     @any_changes = true
   end
 
   def attach_observations_to_project(proj)
-    obs = @list.observations.select { |o| check_permission(o) }
+    obs = @species_list.observations.select { |o| check_permission(o) }
     obs -= proj.observations
     return unless obs.any?
 
@@ -135,7 +127,7 @@ class SpeciesListsController
   end
 
   def remove_observations_from_project(proj)
-    obs = @list.observations.select { |o| check_permission(o) }
+    obs = @species_list.observations.select { |o| check_permission(o) }
     unless @user.projects_member.include?(proj)
       obs.select! { |o| o.user == @user }
     end
@@ -150,7 +142,7 @@ class SpeciesListsController
   end
 
   def attach_images_to_project(proj)
-    imgs = @list.observations.map(&:images).flatten.uniq.
+    imgs = @species_list.observations.map(&:images).flatten.uniq.
            select { |i| check_permission(i) }
     imgs -= proj.images
     return unless imgs.any?
@@ -163,7 +155,7 @@ class SpeciesListsController
   end
 
   def remove_images_from_project(proj)
-    imgs = @list.observations.map(&:images).flatten.uniq.
+    imgs = @species_list.observations.map(&:images).flatten.uniq.
            select { |i| check_permission(i) }
     unless @user.projects_member.include?(proj)
       imgs.select! { |i| i.user == @user }
