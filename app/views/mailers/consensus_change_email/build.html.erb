@@ -23,7 +23,7 @@
   links.push([:email_links_show_object.t(type: :observation),
     "#{MO.http_domain}/#{@observation.id}"])
   links.push([:email_links_post_comment.t,
-    "#{MO.http_domain}/comments/add_comment?id=#{@observation.id}&type=Observation"])
+    "#{MO.http_domain}/comments/new?id=#{@observation.id}&type=Observation"])
   links.push([:email_links_not_interested.t(type: :observation),
     "#{MO.http_domain}/interests/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,

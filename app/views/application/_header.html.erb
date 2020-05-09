@@ -4,7 +4,9 @@
 
       <div class="col-md-3 col-xl-2 left-nav-sidebar">
 
-        <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>" class="site-logo navbar-brand d-block mx-4">
+        <a id="logo"
+           href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>"
+           class="site-logo navbar-brand d-block mx-4">
           <div class="logo-wrap position-relative">
             <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
             <%= image_tag("mo_logo.svg", class: "position-absolute h-100 w-100") %>
@@ -56,8 +58,10 @@
                 ].sort
 
                 select(:search, :type,
-                       options_for_select(options,
-                                          session[:search_type] || :observation),
+                       options_for_select(
+                         options,
+                         session[:search_type] || :observation
+                        ),
                        {},
                        { class: "custom-select" }) %>
 

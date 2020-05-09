@@ -1247,7 +1247,7 @@
   ask_webmaster_question: Question or Comment
   ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
 
-  # comment/add_comment
+  # comment/new
   comment_add_title: Add Comment to [name]
   comment_add_create: "[:CREATE]"
 
@@ -1285,7 +1285,7 @@
   create_name_title: "[:create_object(type=:name)]"
   create_name_multiple_names_match: There are already multiple names matching "[str]".
 
-  # naming/create
+  # namings/create
   create_naming_title: "Propose Name for Observation #[id]"
   create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
 
@@ -2070,7 +2070,7 @@
   # observer/show_site_stats
   show_site_stats_title: Site Statistics
 
-  # observer/_show_votes
+  # observer/_votes_table
   show_votes_title: Show Votes for [name]
   show_votes_users: "[:Users]"
   show_votes_vote: "[:Vote]"

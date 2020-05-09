@@ -9,7 +9,7 @@ class LocationsController
   #
   ##############################################################################
 
-  # TODO: NIMMO - this is an epic method, break it up
+  # TODO: NIMMO - this is an epic method, break it up?
   def new
     store_location
     pass_query_params
@@ -63,7 +63,7 @@ class LocationsController
 
   alias_method :create_location, :new
 
-  # TODO: NIMMO - this is an epic method, break it up
+  # TODO: NIMMO - this is an epic method, break it up?
   def create
     # Set to true below if created successfully, or if a matching location
     # already exists.  In either case, we're done with this form.

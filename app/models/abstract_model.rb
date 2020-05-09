@@ -346,6 +346,10 @@ class AbstractModel < ApplicationRecord
     case name
       when Account, Naming
         name.underscore
+      when NameDescription
+        "names/descriptions"
+      when LocationDescription
+        "locations/descriptions"
       else
         name.plural.underscore
     end

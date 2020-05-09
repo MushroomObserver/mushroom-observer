@@ -166,6 +166,11 @@ ACTIONS = {
   email: {
     email_features: {},
     email_merge_request: {},
+    ask_observation_question: {},
+    ask_webmaster_question: {},
+    ask_user_question: {},
+    commercial_inquiry: {},
+    email_question: {}
   },
   glossary: {
     # create_glossary_term: {}, # aliased only
@@ -268,6 +273,7 @@ ACTIONS = {
     how_to_use: {},
     intro: {},
     show_site_stats: {},
+    search_bar_help: {},
     textile: {}, # aliased only
     textile_sandbox: {},
     translators_note: {}
@@ -419,7 +425,7 @@ ACTIONS = {
     # show: {},
     # update: {}
   },
-  # naming: {
+  # namings: {
   #   create_post: {}, # alias for create
   #   edit_post: {}, # alias for update
   #   # resources
@@ -635,8 +641,8 @@ ACTIONS = {
     cast_vote: {},
     cast_votes: {},
     refresh_vote_cache: {},
-    show: {},
-    show_votes: {}
+    # show_votes: {}, # aliased only
+    show: {}
   }
 }.freeze
 
@@ -733,7 +739,7 @@ MushroomObserver::Application.routes.draw do
   root :to => "observations#index"
 
   resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
-  :herbarium_records, :observations, :projects,
+  :herbarium_records, :namings, :observations, :projects,
   :publications, :sequences, :species_lists
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
@@ -744,8 +750,6 @@ MushroomObserver::Application.routes.draw do
   resources :locations do
     resources :descriptions, module: :locations
   end
-
-  resources :namings, only: [:show, :create, :edit, :update, :destroy]
 
   resources :notifications, only: [:show]
 

@@ -285,7 +285,7 @@
       @naming = naming %>
       <div class="popup" id="show_votes_<%= naming.id %>" data-role="popup">
         <div class="popup-frame" id="show_votes_<%= naming.id %>_frame">
-          <%= render(partial: "votes/show",
+          <%= render(partial: "votes/votes_table",
                      locals: { do_cancel: true, naming: @naming }) %>
         </div>
       </div>

@@ -18,10 +18,10 @@
     <%= render(partial: "show_observation",
                locals: { observation: @observation }) %>
 
-    <%= render(partial: "naming/show",
+    <%= render(partial: "namings/show",
                locals: { observation: @observation }) %>
 
-    <%= render(partial: "comments/show_comments",
+    <%= render(partial: "comments/comments",
                locals: { object: @observation, controls: true, limit: nil }) %>
 
   </div><!-- .left-column -->

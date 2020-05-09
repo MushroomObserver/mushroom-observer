@@ -126,15 +126,15 @@ class AmateurTest < IntegrationTestCase
     click(label: "Add Comment")
     assert_template("account/login")
     login("katrina")
-    assert_template("comments/add_comment")
+    assert_template("comments/new")
 
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
-    # (Make sure there is a tab to go back to show_observation.)
+    # (Make sure there is a tab to go back to show.)
     assert_select("div#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
-    assert_template("comments/add_comment")
+    assert_template("comments/new")
     # (I don't care so long as it says something.)
     assert_flash_text(/\S/)
 
@@ -143,7 +143,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message)
       form.submit
     end
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
 
     com = Comment.last
@@ -154,19 +154,19 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*='edit_comment/#{com.id}']", 1)
-    assert_select("a[href*='destroy_comment/#{com.id}']", 1)
+    assert_select("a[href*='edit/#{com.id}']", 1)
+    assert_select("a[href*='destroy/#{com.id}']", 1)
 
     # Try changing it.
-    click(label: /edit/i, href: /edit_comment/)
-    assert_template("comments/edit_comment")
+    click(label: /edit/i, href: /edit/)
+    assert_template("comments/edit")
     open_form do |form|
       form.assert_value("summary", summary)
       form.assert_value("comment", message)
       form.change("comment", message2)
       form.submit
     end
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
 
     com.reload
@@ -184,11 +184,11 @@ class AmateurTest < IntegrationTestCase
     end
 
     # I grow weary of this comment.
-    click(label: /destroy/i, href: /destroy_comment/)
-    assert_template("observations/show_observation")
+    click(label: /destroy/i, href: /destroy/)
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
-    assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
+    assert_select("a[href*=edit], a[href*=destroy]", false)
     assert_nil(Comment.safe_find(com.id))
   end
 
@@ -238,7 +238,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_edit_image
     login("mary")
-    get("/images/edit_image/1")
+    get("/images/edit/1")
   end
 
   # ------------------------------------------------------------------------
@@ -263,23 +263,23 @@ class AmateurTest < IntegrationTestCase
 
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 1)
 
     click(label: "Hide thumbnail map.")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
 
     login("dick")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 1)
 
     click(label: "Hide thumbnail map.")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
 
     get("/#{observations(:detailed_unknown_obs).id}")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
   end
 
@@ -329,7 +329,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit("Update Votes")
       end
-      # assert_template("observations/show_observation")
+      # assert_template("observations/show")
       assert_match(/call it that/i, response.body)
     end
 
@@ -346,7 +346,7 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
+      assert_select("a[href*='namings/edit'], a[href*='namings/destroy']", false)
       click(label: /propose.*name/i)
       assert_template("account/login")
       open_form do |form|
@@ -358,10 +358,10 @@ class AmateurTest < IntegrationTestCase
     end
 
     def create_name(obs, text_name)
-      assert_template("naming/create")
+      assert_template("namings/new")
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
-      # (Make sure there is a tab to go back to show_observation.)
+      # (Make sure there is a tab to go back to show.)
       assert_select("div#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
@@ -373,7 +373,7 @@ class AmateurTest < IntegrationTestCase
         form.assert_unchecked("reason_4_check")
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("namings/new")
       # (I don't care so long as it says something.)
       assert_flash_text(/\S/)
 
@@ -381,7 +381,7 @@ class AmateurTest < IntegrationTestCase
         form.change("name", text_name)
         form.submit
       end
-      assert_template("naming/create")
+      assert_template("namings/new")
       assert_select("div.alert-warning") do |elems|
         assert(elems.any? do |e|
                  /MO does not recognize the name.*#{text_name}/ =~ e.to_s
@@ -390,7 +390,7 @@ class AmateurTest < IntegrationTestCase
       end
 
       open_form(&:submit)
-      assert_template("naming/create")
+      assert_template("namings/new")
       assert_flash_text(/confidence/i)
 
       open_form do |form|
@@ -402,7 +402,7 @@ class AmateurTest < IntegrationTestCase
         form.select(/vote/, /call it that/i)
         form.submit
       end
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       assert_flash_text(/success/i)
       assert_objs_equal(obs, assigns(:observation))
 
@@ -417,14 +417,14 @@ class AmateurTest < IntegrationTestCase
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*='naming/edit/#{naming.id}']", 2)
-      assert_select("a[href*='naming/destroy/#{naming.id}']", 2)
+      assert_select("a[href*='namings/edit/#{naming.id}']", 2)
+      assert_select("a[href*='namings/destroy/#{naming.id}']", 2)
 
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      click(label: /edit/i, href: %r{namings/edit})
+      assert_template("namings/edit")
       open_form do |form|
         form.assert_value("name", text_name)
         form.assert_checked("reason_1_check")
@@ -435,7 +435,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_value", /call it that/i)
         form.submit
       end
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
 
       obs.reload
@@ -450,8 +450,8 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click(label: /edit/i, href: %r{naming/edit})
-      assert_template("naming/edit")
+      click(label: /edit/i, href: %r{namings/edit})
+      assert_template("namings/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
         form.assert_unchecked("reason_1_check")
@@ -466,13 +466,13 @@ class AmateurTest < IntegrationTestCase
     end
 
     def failed_delete(_obs)
-      click(label: /destroy/i, href: %r{naming/destroy})
+      click(label: /destroy/i, href: %r{namings/destroy})
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click(label: /destroy/i, href: %r{naming/destroy})
-      assert_template("observations/show_observation")
+      click(label: /destroy/i, href: %r{namings/destroy})
+      assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
 

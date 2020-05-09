@@ -18,7 +18,7 @@
 
 <%= render(partial: "name_description", object: @description,
            locals: { review: true }) %>
-<%= render(partial: "comments/show_comments",
+<%= render(partial: "comments/comments",
            locals: { object: @description, controls: true, limit: 10 }
           ) if false%>
 <br/>

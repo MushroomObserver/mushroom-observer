@@ -9,6 +9,21 @@ class SpeciesListsController
   #
   ##############################################################################
 
+  def new # :prefetch: :norobots:
+    @species_list = SpeciesList.new
+    init_name_vars_for_create
+    init_member_vars_for_create
+    init_project_vars_for_create
+    init_name_vars_for_clone(params[:clone]) if params[:clone].present?
+    @checklist ||= calc_checklist
+  end
+
+  alias_method :create_species_list, :new
+
+  def create
+    process_species_list(:create)
+  end
+
   # Specialized javascripty form for creating a list of names, at Darvin's
   # request. Links into "new".
   def name_lister # :norobots:
@@ -52,21 +67,6 @@ class SpeciesListsController
     end
   end
 
-  def new # :prefetch: :norobots:
-    @species_list = SpeciesList.new
-    init_name_vars_for_create
-    init_member_vars_for_create
-    init_project_vars_for_create
-    init_name_vars_for_clone(params[:clone]) if params[:clone].present?
-    @checklist ||= calc_checklist
-  end
-
-  alias_method :create_species_list, :new
-
-  def create
-    process_species_list(:create)
-  end
-
   def edit # :prefetch: :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
@@ -84,7 +84,7 @@ class SpeciesListsController
     process_species_list(:update)
   end
 
-  # Form to let user create/edit species_list from file.
+  # Form to let user create/edit species_list from file. Links into "edit".
   def upload_species_list # :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list

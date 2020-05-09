@@ -731,7 +731,7 @@ class ObservationsControllerTest < FunctionalTestCase
                            ["_show_name_info",
                             "_show_observation",
                             "_show_lists",
-                            "naming/_show",
+                            "namings/_show",
                             "_show_comments",
                             "_show_thumbnail_map",
                             "_show_images"])

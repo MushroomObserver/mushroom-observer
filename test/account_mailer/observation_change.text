@@ -26,7 +26,6 @@ Second fruiting in bark chips
 Here are some handy links:
 
 Show this observation: http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>
-Post a comment: http://mushroomobserver.org/comments/add_comment?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation
+Post a comment: http://mushroomobserver.org/comments/new?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation
 I'm not interested in this observation: http://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
 Latest changes at Mushroom Observer: http://mushroomobserver.org
-

@@ -141,7 +141,7 @@ class VotesControllerTest < FunctionalTestCase
   def test_show_votes
     # First just make sure the page displays.
     get_with_dump(:show, id: namings(:coprinus_comatus_naming).id)
-    assert_template(:show, partial: "_show_votes")
+    assert_template(:show, partial: "_votes_table")
 
     # Now try to make somewhat sure the content is right.
     table = namings(:coprinus_comatus_naming).calc_vote_table

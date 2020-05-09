@@ -231,7 +231,7 @@
    #  Show comments
    # ----------------------------------------
 %>
-<%= render(partial: "comments/show_comments",
+<%= render(partial: "comments/comments",
            locals: {object: @name, controls: true, limit: nil}) %>
 <div class="col-12">
   <%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %><br/>

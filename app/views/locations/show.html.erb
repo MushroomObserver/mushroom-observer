@@ -47,7 +47,7 @@
   </div>
 
   <div class="col-12">
-    <%= render(partial: "comments/show_comments",
+    <%= render(partial: "comments/comments",
                locals: {object: @location, controls: true, limit: 2}) %>
   </div>
 
@@ -56,7 +56,7 @@
       <hr/>
       <%= show_embedded_description_title(@description, @location) %>
       <%= render(partial: "location_description", object: @description) %>
-      <%= render(partial: "comments/show_comments",
+      <%= render(partial: "comments/comments",
                  locals: {object: @description, controls: true, limit: 2}) %>
       <hr/>
     <% end %>

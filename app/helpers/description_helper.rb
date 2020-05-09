@@ -1,5 +1,7 @@
 # TODO: NIMMO check actions of pattern "edit_#{type}_description" in case of
 # controllers/concerns refactor for LocationDescription and NameDescription
+# also abstract_model.rb line 345 - define controller name for
+# namespaced controllers?
 module DescriptionHelper
   def is_writer?(desc)
     desc.is_writer?(@user) || in_admin_mode?
@@ -21,19 +23,19 @@ module DescriptionHelper
     end
     if is_writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
-                              action: "edit_#{type}_description",
+                              action: :edit,
                               id: desc.id)
     end
     if admin
       tabs << link_with_query(:show_description_destroy.t,
-                              { action: "destroy_#{type}_description",
+                              { action: :destroy,
                                 id: desc.id },
                               data: { confirm: :are_you_sure.l })
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
                               controller: type,
-                              action: "create_#{type}_description",
+                              action: :new,
                               id: desc.parent_id, clone: desc.id,
                               help: :show_description_clone_help.l)
     end
@@ -129,13 +131,13 @@ module DescriptionHelper
         if writer
           links << link_with_query(:EDIT.t,
                                    controller: obj.show_controller,
-                                   action: "edit_#{type}_description",
+                                   action: :edit,
                                    id: desc.id)
         end
         if admin
           links << link_with_query(:DESTROY.t,
                                    { controller: obj.show_controller,
-                                     action: "destroy_#{type}_description",
+                                     action: :destroy,
                                      id: desc.id },
                                    data: { confirm: :are_you_sure.t })
         end
@@ -148,7 +150,7 @@ module DescriptionHelper
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_with_query(:CREATE.t, controller: obj.show_controller,
-                                        action: "create_#{type}_description",
+                                        action: :new,
                                         id: obj.id)
       str += indent + "[" + link + "]"
       list.unshift(str)

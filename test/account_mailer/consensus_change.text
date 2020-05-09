@@ -16,7 +16,7 @@ By: Tricky Dick (dick)
 Here are some handy links:
 
 Show this observation: http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>
-Post a comment: http://mushroomobserver.org/comments/add_comment?id=3D4329=
+Post a comment: http://mushroomobserver.org/comments/new?id=3D4329=
 36842&type=3DObservation
 I'm not interested in this observation: http://mushroomobserver.org/inter=
 est/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=3DObservation&user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=
@@ -26,4 +26,3 @@ mail_observations_consensus/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/365790=
 011
 Latest changes at Mushroom Observer: http://mushroomobserver.org
-

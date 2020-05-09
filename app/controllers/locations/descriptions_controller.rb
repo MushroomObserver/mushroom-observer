@@ -38,7 +38,7 @@ class Locations::DescriptionsController < ApplicationController
     :create_location_description, # aliased
     :new
   ]
-
+  
   ##############################################################################
   #
   #  :section: Description Searches and Indexes

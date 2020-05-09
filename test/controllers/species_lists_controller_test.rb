@@ -108,17 +108,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # Show empty list with no one logged in.
     get_with_dump(:show, id: sl_id)
-    assert_template(:show, partial: "_show_comments")
+    assert_template(:show, partial: "_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
     get_with_dump(:show, id: sl_id)
-    assert_template(:show, partial: "_show_comments")
+    assert_template(:show, partial: "_comments")
 
     # Show non-empty list with owner logged in.
     get_with_dump(:show,
                   id: species_lists(:unknown_species_list).id)
-    assert_template(:show, partial: "_show_comments")
+    assert_template(:show, partial: "_comments")
   end
 
   def test_show_species_lists_attached_to_projects
