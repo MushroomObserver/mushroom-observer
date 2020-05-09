@@ -48,6 +48,9 @@ gem "turbolinks"
 # Generates conditionally active menu links
 gem 'active_link_to'
 
+# Generates safe inline SVG from assets
+gem 'inline_svg'
+
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "jbuilder"
 

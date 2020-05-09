@@ -115,6 +115,9 @@ GEM
     hashdiff (1.0.1)
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
+    inline_svg (1.7.1)
+      activesupport (>= 3.0)
+      nokogiri (>= 1.6)
     jaro_winkler (1.5.4)
     jbuilder (2.10.0)
       activesupport (>= 5.0.0)
@@ -325,6 +328,7 @@ DEPENDENCIES
   geocoder
   geokit
   i18n
+  inline_svg
   jbuilder
   jquery-rails
   lightbox-bootstrap-rails (~> 5.1, >= 5.1.0.1)

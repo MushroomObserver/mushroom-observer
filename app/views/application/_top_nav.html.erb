@@ -1,0 +1,88 @@
+<nav id="top_nav"
+     class="navbar-nav navbar navbar-expand navbar-dark flex-column flex-md-row bg-primary row">
+
+  <div class="col-md-3 col-xl-2 left-side-navbar">
+
+    <a id="logo"
+       href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>"
+       class="site-logo navbar-brand d-block mx-4">
+      <div class="logo-wrap position-relative">
+        <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
+        <%= inline_svg_tag(
+              "mo_logo.svg",
+              class: 'position-absolute h-100 w-100',
+              title: :app_banner.t,
+              preserve_aspect_ratio: 'xMaxYMax meet',
+              aria: true,
+              aria_hidden: true
+            ) %>
+      </div>
+    </a>
+
+    <button class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#search_navbar"
+            aria-controls="search_navbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+  </div>
+
+  <div class="col-md-9 col-lg-10 right-side-content mx-auto">
+
+    <div class="collapse navbar-collapse d-flex flex-column flex-md-row justify-content-between" id="search_navbar">
+
+      <%= tag.span id: "", class: "navbar-brand" do -%>
+        Observations
+      <% end %>
+
+      <%= form_tag({controller: :search, action: :pattern_search},
+                   {class: "form-inline my-2 my-lg-0"}) do %>
+
+        <%= text_field(:search,
+                       :pattern,
+                       value: session[:pattern],
+                       class: "form-control",
+                       aria: {label: "Search".t},
+                       placeholder: :app_find.t ) %>
+
+        <%= options = [
+              [:COMMENTS.l, :comment],
+              [:HERBARIA.l, :herbarium],
+              [:IMAGES.l, :image],
+              [:LOCATIONS.l, :location],
+              [:NAMES.l, :name],
+              [:OBSERVATIONS.l, :observation],
+              [:PROJECTS.l, :project],
+              [:SPECIES_LISTS.l, :species_list],
+              [:HERBARIUM_RECORDS.l, :herbarium_record],
+              [:USERS.l, :user],
+              [:app_search_google.l, :google],
+            ].sort
+
+            select(:search, :type,
+                   options_for_select(
+                     options,
+                     session[:search_type] || :observation
+                    ),
+                   {},
+                   { class: "custom-select" }) %>
+
+        <%= submit_tag(:app_search.l,
+                       class: "btn btn-primary mr-2") %>
+
+        <%= link_to search_advanced_search_form_path,
+                    class: "mx-2 btn btn-link border-0",
+                    id: "advanced_search_link" do
+              tag.span :app_advanced_search.t class: "text-nowrap"
+        end %>
+
+      <% end %>
+    </div>
+
+  </div>
+
+</nav>

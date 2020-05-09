@@ -4,30 +4,8 @@
 class ObservationsController
 
   def index
-    @observations = Observation.all
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search # :norobots:
-    if params[:name] || params[:location] || params[:user] || params[:content]
-      search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
-      query = create_query(
-        :Observation,
-        :advanced_search,
-        search
-      )
-    else
-      query = find_query(:Observation)
-    end
+    query = create_query(:Observation, :all, by: :date)
     show_selected_observations(query)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to controller: :search, action: :advanced_search_form
   end
 
   # Displays matrix of selected Observation's (based on current Query).
@@ -111,6 +89,29 @@ class ObservationsController
         show_selected_observations(search.query)
       end
     end
+  end
+
+  # Displays matrix of advanced search results.
+  def advanced_search # :norobots:
+    if params[:name] || params[:location] || params[:user] || params[:content]
+      search = {}
+      search[:name] = params[:name] if params[:name].present?
+      search[:location] = params[:location] if params[:location].present?
+      search[:user] = params[:user] if params[:user].present?
+      search[:content] = params[:content] if params[:content].present?
+      search[:search_location_notes] = params[:search_location_notes].present?
+      query = create_query(
+        :Observation,
+        :advanced_search,
+        search
+      )
+    else
+      query = find_query(:Observation)
+    end
+    show_selected_observations(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to controller: :search, action: :advanced_search_form
   end
 
   # Show selected search results as a matrix with "list_observations" template.

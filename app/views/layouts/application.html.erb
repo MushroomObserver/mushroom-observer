@@ -41,27 +41,33 @@
     <![endif]-->
 
   </head>
-<body>
+<body class="minh-100">
 
-  <!--CONTEXTUAL_NAVIGATION-->
-  <%= render(partial: "header") %>
-  <!--/CONTEXTUAL_NAVIGATION-->
+  <header id="header" class="container-fluid position-sticky">
+    <!--CONTEXTUAL_NAVIGATION-->
+    <%= render(partial: "top_nav") %>
+    <!--/CONTEXTUAL_NAVIGATION-->
+  </header>
 
   <div id="main_container" class="container-fluid">
 
-    <!--CALLOUT_BANNER-->
-    <div class="d-none d-sm-flex d-print-none">
-      <%= render(partial: "banner") %>
-    </div>
-    <!--/CALLOUT_BANNER-->
-
     <div class="row row-offcanvas row-offcanvas-left">
 
-      <!--SITE_NAVIGATION-->
-      <%= render(partial: "left_nav") %>
-      <!--/SITE_NAVIGATION-->
+      <div id="sidebar"
+           class="position-sticky col-md-3 col-xl-2 left-side-navbar d-print-none bg-secondary"
+           aria-label="Site navigation">
+        <!--SITE_NAVIGATION-->
+        <%= render(partial: "left_nav") %>
+        <!--/SITE_NAVIGATION-->
+      </div>
 
-      <main id="right_side" class="col-12 col-md-9 col-lg-10 right-side-content mx-auto" role="main">
+      <main id="main" class="col-12 col-md-9 col-lg-10 right-side-content mx-auto" role="main">
+
+        <!--CALLOUT_BANNER-->
+        <div class="d-none d-sm-flex d-print-none">
+          <%= render(partial: "banner") %>
+        </div>
+        <!--/CALLOUT_BANNER-->
 
         <!--FLASH_NOTICES-->
         <%= render(partial: "flash_notices") %>

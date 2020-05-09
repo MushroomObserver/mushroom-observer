@@ -1,6 +1,5 @@
 <% if @user.nil? %>
   <div class="mo-toc-item">
-    <i class="fa-user"> </i>
     <%= link_to(:app_account.t,
                 { controller: :account,
                   action: :login },
@@ -18,7 +17,6 @@
   </div>
 <% else %>
   <div class="mo-toc-item">
-    <i class="fa-user"> </i>
     <%= link_to(h(@user.login),
                 { controller: :account,
                   action: :login },

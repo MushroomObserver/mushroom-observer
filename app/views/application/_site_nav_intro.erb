@@ -1,10 +1,34 @@
 <div class="mo-toc-item">
-  <i class="fa-intro"> </i>
-  <%= link_to(:app_how_to_use.t, {controller: :info, action: :intro}, {class: "mo-toc-link"}) %>
+  <%= link_to(:app_how_to_use.t,
+              { controller: :info, action: :intro },
+              { class: "mo-toc-link"}) %>
   <ul class="nav mo-sidenav">
-    <li><%= link_to(:app_intro.t, {controller: :info, action: :intro}, {class: ""}) %></li>
-    <li><%= link_to(:app_how_to_use.t, {controller: :info, action: :how_to_use}, {class: ""}) %></li>
-    <li><%= link_to(:app_privacy_policy.t, {controller: :policy, action: :privacy}, {class: ""}) %></li>
-    <li><%= link_to(:GLOSSARY.t, {controller: :glossary, action: :index}, {class: "indent"}) %></li>
+    <li>
+      <%= link_to(:app_intro.t,
+                  { controller: :info, action: :intro },
+                  { class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:app_how_to_use.t,
+                  { controller: :info, action: :how_to_use },
+                  { class: "" }) %>
+    </li>
+    <li>
+      <%= link_to info_search_bar_help_path,
+                  class: "btn btn-link mx-2",
+                  id: "search_bar_help_link" do
+            tag.span :search_bar_help.t class: "text-nowrap"
+      end %>
+    </li>
+    <li>
+      <%= link_to(:GLOSSARY.t,
+                  { controller: :glossary, action: :index},
+                  { class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:app_privacy_policy.t,
+                  { controller: :policy, action: :privacy },
+                  { class: ""}) %>
+    </li>
   </ul>
 </div>

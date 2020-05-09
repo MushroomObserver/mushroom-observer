@@ -12,6 +12,11 @@ module PaginationHelper
   #
   def paginate_block(pages, args = {}, &block) #
 
+    if !pages
+      puts "Nothing to paginate"
+      return
+    end
+    
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s

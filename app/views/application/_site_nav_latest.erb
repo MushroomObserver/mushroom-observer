@@ -1,42 +1,47 @@
 <div class="mo-toc-item">
-  <i class="fa-intro"> </i>
-  <%= link_to(:app_how_to_use.t, {controller: :info, action: :intro}, {class: "mo-toc-link"}) %>
+  <%= link_to(:app_latest.t,
+              { controller: :rss_logs, action: :index },
+              { class: "mo-toc-link" }) %>
   <ul class="nav mo-sidenav">
-    <li><%= link_to(:app_intro.t, {controller: :info, action: :intro}, {class: ""}) %></li>
-    <li><%= link_to(:app_how_to_use.t, {controller: :info, action: :how_to_use}, {class: ""}) %></li>
-    <li><%= link_to(:app_privacy_policy.t, {controller: :policy, action: :privacy}, {class: ""}) %></li>
+    <li>
+      <%= link_to(:app_latest_changes.t,
+                  { controller: :rss_logs, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:app_newest_images.t,
+                  { controller: :images, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:app_comments.t,
+                  { controller: :comments, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:HERBARIA.t,
+                  { controller: :herbaria, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:LOCATIONS.t,
+                  { controller: :locations, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:NAMES.t,
+                  { controller: :names, action: :observation_index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:NEWS.t, 
+                  { controller: :articles, action: :index},
+                  {class: ""}) %>
+    </li>
+    <li>
+      <%= link_to(:PROJECTS.t,
+                  { controller: :projects, action: :index},
+                  {class: ""}) %>
+    </li>
   </ul>
 </div>
-
-<div class="">
-  <%= :app_observations_left.t %>
-</div>
-<%= link_to(:app_create_observation.t, {controller: :observations, action: :new}, {class: ""}) %>
-<%= link_to(:app_your_observations.t, {controller: :observations, action: :observations_by_user, id: @user.id}, {class: ""}) if @user%>
-<%= link_to(:app_sort_by_date_obs.t, {controller: :observations, action: :index}, {class: ""}) %>
-
-<div class="">
-  <%= :app_latest.t %>
-</div>
-<%= link_to(:app_latest_changes.t, {controller: :rss_logs, action: :index}, {class: "indent"}) %>
-<%= link_to(:app_newest_images.t, {controller: :images, action: :index}, {class: "indent"}) %>
-<%= link_to(:app_comments.t, {controller: :comments, action: :index}, {class: "indent"}) %>
-
-<div class="">
-  <%= :app_species_list.t %>
-</div>
-<% unless @user.nil? %>
-  <%= link_to(:app_your_lists.t, {controller: :species_lists, action: :species_lists_by_user, id: @user.id}, {class: "indent"} ) %>
-<% end%>
-<%= link_to(:app_create_list.t, {controller: :species_lists, action: :name_lister}, {class: "indent"} ) %>
-<%= link_to(:app_sort_by_date_spl.t, {controller: :species_lists, action: :index}, {class: "indent"}) %>
-<%= link_to(:app_sort_by_title.t, {controller: :species_lists, action: :species_lists_by_title}, {class: "indent"}) %>
-
-<div class="">
-  <%= :INDEXES.t %>
-</div>
-<%= link_to(:HERBARIA.t, {controller: :herbaria, action: :index}, {class: "indent"}) %>
-<%= link_to(:LOCATIONS.t, {controller: :locations, action: :index}, {class: "indent"}) %>
-<%= link_to(:NAMES.t, {controller: :names, action: :observation_index}, {class: "indent"}) %>
-<%= link_to(:NEWS.t, {controller: :articles, action: :index}, {class: "indent"}) %>
-<%= link_to(:PROJECTS.t, {controller: :projects, action: :index}, {class: "indent"}) %>
