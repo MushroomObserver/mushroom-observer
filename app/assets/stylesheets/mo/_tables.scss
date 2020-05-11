@@ -3,16 +3,16 @@
 // --------------------------------------------------
 
 thead tr {
-  color: $LIST_HEADER_FG_COLOR;
-  background-color: $LIST_HEADER_BG_COLOR;
+  // color: $LIST_HEADER_FG_COLOR;
+  // background-color: $LIST_HEADER_BG_COLOR;
 }
 
 .table-striped {
   tbody > tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
+    // background-color: $LIST_ODD_BG_COLOR;
   }
   tbody > tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
+    // background-color: $LIST_EVEN_BG_COLOR;
   }
 }
 
@@ -69,7 +69,7 @@ thead tr {
     padding: 0.2em 1em;
   }
   tr {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    // border-top: 1px solid $LIST_BORDER_COLOR;
   }
   tr:first-child {
     border-top: none;
@@ -81,7 +81,7 @@ thead tr {
     padding: 0.5em 0.5em;
   }
   td {
-    border-top: 1px solid $LIST_BORDER_COLOR;
+    // border-top: 1px solid $LIST_BORDER_COLOR;
   }
   th:first-child, td:first-child {
     padding-left: 1em;
@@ -106,7 +106,7 @@ thead tr {
 
 .table-review-donations {
   th, td {
-    border-right: 1px solid $LIST_BORDER_COLOR;
+    // border-right: 1px solid $LIST_BORDER_COLOR;
   }
   th:last-child, td:last-child {
     border: 0;
@@ -127,12 +127,12 @@ thead tr {
 table.table-namings {
   width: 100%;
   tbody {
-    border: 1px solid $LIST_BORDER_COLOR;
-    border-radius: $INPUT_BORDER_RADIUS !important;
+    // border: 1px solid $LIST_BORDER_COLOR;
+    // border-radius: $INPUT_BORDER_RADIUS !important;
   }
   th {
-    color: $BODY_FG_COLOR;
-    background: $BODY_BG_COLOR;
+    // color: $BODY_FG_COLOR;
+    // background: $BODY_BG_COLOR;
     font-weight: normal;
     vertical-align: bottom;
   }
@@ -155,10 +155,10 @@ table.table-namings {
     padding: .1em 1em;
   }
   tr:nth-child(odd) {
-    background-color: $LIST_ODD_BG_COLOR;
+    // background-color: $LIST_ODD_BG_COLOR;
   }
   tr:nth-child(even) {
-    background-color: $LIST_EVEN_BG_COLOR;
+    // background-color: $LIST_EVEN_BG_COLOR;
   }
 }
 
@@ -177,10 +177,10 @@ table.table-namings {
 // --------------------------------------------------
 
 .sandbox {
-  border-width: $INPUT_BORDER_WIDTH;
-  border-style: $INPUT_BORDER_STYLE;
-  border-radius: $INPUT_BORDER_RADIUS;
-  border-color: $INPUT_BORDER_COLOR;
+  // border-width: $INPUT_BORDER_WIDTH;
+  // border-style: $INPUT_BORDER_STYLE;
+  // border-radius: $INPUT_BORDER_RADIUS;
+  // border-color: $INPUT_BORDER_COLOR;
   padding: 2px 5px 0px 5px;
 }
 

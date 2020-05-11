@@ -1,4 +1,24 @@
-<nav id="left_nav" class="py-3" aria-label="Site navigation">
+<div class="navbar navbar-dark px-4 bg-accent">
+  <div class="d-block w-100">
+    <a id="left_logo"
+       href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>"
+       class="site-logo navbar-brand d-block">
+      <div class="logo-wrap position-relative">
+        <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
+        <%= inline_svg_tag(
+              "mo_logo.svg",
+              class: 'position-absolute h-100 w-100',
+              title: :app_banner.t,
+              preserve_aspect_ratio: 'xMaxYMax meet',
+              aria: true,
+              aria_hidden: true
+            ) %>
+      </div>
+    </a>
+  </div>
+</div>
+
+<nav id="left_nav" class="navbar-light py-3" aria-label="Site navigation">
 
   <%= render partial: "site_nav_user" %>
   <%= render partial: "site_nav_admin" %>

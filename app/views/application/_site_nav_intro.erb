@@ -14,11 +14,10 @@
                   { class: "" }) %>
     </li>
     <li>
-      <%= link_to info_search_bar_help_path,
-                  class: "btn btn-link mx-2",
-                  id: "search_bar_help_link" do
-            tag.span :search_bar_help.t class: "text-nowrap"
-      end %>
+      <%= link_to :search_bar_help.t,
+                  info_search_bar_help_path,
+                  class: "",
+                  id: "search_bar_help_link" %>
     </li>
     <li>
       <%= link_to(:GLOSSARY.t,

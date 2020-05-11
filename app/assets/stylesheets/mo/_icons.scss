@@ -30,7 +30,7 @@
   text-align: center;
   padding: 10px 0;
   top: 1px;
-  color: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
+  // color: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
 }
 
 .icon-addon.addon-lg .form-control {
@@ -72,7 +72,7 @@
 .icon-addon:hover .glyphicon,
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
-  color: $INPUT_FG_COLOR;
+  // color: $INPUT_FG_COLOR;
 }
 
 //

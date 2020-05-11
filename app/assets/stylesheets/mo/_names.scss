@@ -8,12 +8,12 @@ table.scroller th {
 }
 
 div.scroller {
-    color: $MENU_FG_COLOR;
-    background-color: $MENU_BG_COLOR;
+    // color: $MENU_FG_COLOR;
+    // background-color: $MENU_BG_COLOR;
     height: 450px;
     overflow: auto;
     margin: 0;
-    border: 1px solid $MENU_BORDER_COLOR;
+    // border: 1px solid $MENU_BORDER_COLOR;
     padding: 0;
     font-style: italic;
 
@@ -33,12 +33,12 @@ div.scroller {
     }
 
     li.hot {
-        color: $MENU_WARM_FG_COLOR;
-        background-color: $MENU_WARM_BG_COLOR;
+        // color: $MENU_WARM_FG_COLOR;
+        // background-color: $MENU_WARM_BG_COLOR;
     }
 
     li.warm {
-        color: $MENU_HOT_FG_COLOR;
-        background-color: $MENU_HOT_BG_COLOR;
+        // color: $MENU_HOT_FG_COLOR;
+        // background-color: $MENU_HOT_BG_COLOR;
     }
 }

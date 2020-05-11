@@ -10,13 +10,13 @@
         white-space: nowrap;
     }
     tr:nth-child(odd) {
-        border: 1px solid $LIST_ODD_BG_COLOR;
+        // border: 1px solid $LIST_ODD_BG_COLOR;
     }
     tr:nth-child(even) {
-        border: 1px solid $LIST_EVEN_BG_COLOR;
+        // border: 1px solid $LIST_EVEN_BG_COLOR;
     }
     tr.hot {
-        border: 1px solid $LIST_BORDER_COLOR;
+        // border: 1px solid $LIST_BORDER_COLOR;
     }
     tr.hot a, div.row_controls a {
         background: none;
@@ -45,10 +45,10 @@ div.row_controls {
     position: absolute;
     text-align: left;
     padding: 2px 5px 2px 5px;
-    border: 1px solid $LIST_BORDER_COLOR;
+    // border: 1px solid $LIST_BORDER_COLOR;
     border-top: none;
-    color: $LIST_FG_COLOR;
-    background: $LIST_ODD_BG_COLOR;
+    // color: $LIST_FG_COLOR;
+    // background: $LIST_ODD_BG_COLOR;
     z-index: 2;
     white-space: nowrap;
 }

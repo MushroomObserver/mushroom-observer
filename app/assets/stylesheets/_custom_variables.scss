@@ -167,15 +167,15 @@ $sidebar-max-width: 15em;
 // Color system
 
 $white:    #fff;
-$gray-100: #f8f9fa;
-$gray-200: #e9ecef;
-$gray-300: #dee2e6;
-$gray-400: #ced4da;
-$gray-500: #adb5bd;
-$gray-600: #6c757d;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #212529;
+$gray-100: #f6f6f6;
+$gray-200: #ececec;
+$gray-300: #eee;
+$gray-400: #ddd;
+$gray-500: #bbb;
+$gray-600: #777;
+$gray-700: #555;
+$gray-800: #444;
+$gray-900: #292929;
 $black:    #000;
 
 $grays: ();
@@ -195,14 +195,14 @@ $grays: map-merge(
   $grays
 );
 
-$blue:    #007bff;
+$blue:    #E0FFE0; // #007bff;
 $indigo:  #6610f2;
 $purple:  #6f42c1;
 $pink:    #e83e8c;
-$red:     #cc2616;
-$orange:  #fd7e14;
+$red:     #FFE0E0; // #cc2616;
+$orange:  #F8CC70; // #fd7e14;
 $yellow:  #ffc107;
-$green:   #28a745;
+$green:   #70C070; // #28a745;
 $teal:    #20c997;
 $cyan:    #17a2b8;
 $beige:   #fff4c7;
@@ -228,14 +228,17 @@ $colors: map-merge(
   $colors
 );
 
-$primary:         $red;
+$background:      $gray-100;
+$text:            $black;
+$primary:         $black;
 $primary-text:    $beige;
-$secondary:       $gray-500;
+$secondary:       $gray-400;
 $secondary-text:  $gray-800;
-$success:         $SUCCESS_BORDER_COLOR;
-$info:            $INFO_BORDER_COLOR;
-$warning:         $WARNING_BORDER_COLOR;
-$danger:          $DANGER_BORDER_COLOR;
+$accent:          $gray-700;
+$success:         $green;
+$info:            $blue;
+$warning:         $orange;
+$danger:          $red;
 $light:           $gray-200;
 $dark:            $gray-800;
 
@@ -243,14 +246,19 @@ $theme-colors: ();
 // stylelint-disable-next-line scss/dollar-variable-default
 $theme-colors: map-merge(
   (
-    "primary":    $primary,
-    "secondary":  $secondary,
-    "success":    $success,
-    "info":       $info,
-    "warning":    $warning,
-    "danger":     $danger,
-    "light":      $light,
-    "dark":       $dark
+    "background":     $background,
+    "text":           $text,
+    "primary":        $primary,
+    "primary-text":   $primary-text,
+    "secondary":      $secondary,
+    "secondary-text": $secondary-text,
+    "accent":         $accent,
+    "success":        $success,
+    "info":           $info,
+    "warning":        $warning,
+    "danger":         $danger,
+    "light":          $light,
+    "dark":           $dark
   ),
   $theme-colors
 );
@@ -332,8 +340,8 @@ $sizes: map-merge(
 //
 // Settings for the `<body>` element.
 
-$body-bg:                   $BODY_BG_COLOR;
-$body-color:                $BODY_FG_COLOR;
+$body-bg:                   $background;
+$body-color:                $text;
 
 
 // Links
@@ -342,7 +350,7 @@ $body-color:                $BODY_FG_COLOR;
 
 $link-color:                              inherit; // theme-color("primary")
 $link-decoration:                         none;
-$link-hover-color:                        $indigo;
+$link-hover-color:                        theme-color("primary");
 $link-hover-decoration:                   underline;
 // Darken percentage for links with `.text-*` class (e.g. `.text-success`)
 $emphasized-link-hover-darken-percentage: 15%;
@@ -891,7 +899,7 @@ $navbar-padding-x:                  $spacer;
 
 $navbar-nav-link-padding-x:         .5rem;
 
-$navbar-brand-font-size:            $font-size-lg;
+$navbar-brand-font-size:            $h4-font-size;
 // Compute the navbar-brand padding-y so the navbar-brand will have the same height as navbar-text and nav-link
 $nav-link-height:                   $font-size-base * $line-height-base + $nav-link-padding-y * 2;
 $navbar-brand-height:               $navbar-brand-font-size * $line-height-base;
@@ -902,25 +910,28 @@ $navbar-toggler-padding-x:          .75rem;
 $navbar-toggler-font-size:          $font-size-lg;
 $navbar-toggler-border-radius:      $btn-border-radius;
 
-$navbar-dark-color:                 rgba($white, .5);
-$navbar-dark-hover-color:           rgba($white, .75);
-$navbar-dark-active-color:          $white;
-$navbar-dark-disabled-color:        rgba($white, .25);
+$navbar-dark-color:                 rgba($primary-text, .9);
+$navbar-dark-hover-color:           rgba($primary-text, .75);
+$navbar-dark-active-color:          $primary-text;
+$navbar-dark-disabled-color:        rgba($primary-text, .25);
 $navbar-dark-toggler-icon-bg:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$navbar-dark-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>");
-$navbar-dark-toggler-border-color:  rgba($white, .1);
+$navbar-dark-toggler-border-color:  rgba($primary-text, .1);
 
-$navbar-light-color:                rgba($black, .5);
-$navbar-light-hover-color:          rgba($black, .7);
-$navbar-light-active-color:         rgba($black, .9);
-$navbar-light-disabled-color:       rgba($black, .3);
-$navbar-light-toggler-icon-bg:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$navbar-light-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>");
-$navbar-light-toggler-border-color: rgba($black, .1);
-
-$navbar-light-brand-color:                $navbar-light-active-color;
-$navbar-light-brand-hover-color:          $navbar-light-active-color;
 $navbar-dark-brand-color:                 $navbar-dark-active-color;
 $navbar-dark-brand-hover-color:           $navbar-dark-active-color;
 
+$navbar-light-color:                rgba($secondary-text, .5);
+$navbar-light-hover-color:          rgba($secondary-text, .7);
+$navbar-light-active-color:         rgba($secondary-text, .9);
+$navbar-light-disabled-color:       rgba($secondary-text, .3);
+$navbar-light-toggler-icon-bg:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$navbar-light-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>");
+$navbar-light-toggler-border-color: rgba($secondary-text, .1);
+
+$navbar-light-brand-color:                $navbar-light-active-color;
+$navbar-light-brand-hover-color:          $navbar-light-active-color;
+
+// Not a bootstrap variable!
+$navbar-height:                     5.1rem;
 
 // Dropdowns
 //

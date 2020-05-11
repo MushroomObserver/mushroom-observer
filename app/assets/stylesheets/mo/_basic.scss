@@ -1,187 +1,187 @@
+// //
+// // overall page style
+// // --------------------------------------------------
 //
-// overall page style
-// --------------------------------------------------
-
-a {
-  background-color: $LINK_BG_COLOR;
-  font-weight: $LINK_WEIGHT;
-}
-
-a:visited {
-  color: $LINK_VISITED_FG_COLOR;
-  background-color: $LINK_VISITED_BG_COLOR;
-}
-
-a:hover {
-  color: $LINK_HOVER_FG_COLOR;
-  background-color: $LINK_HOVER_BG_COLOR;
-}
-
-body {
-  word-wrap: break-word;
-}
-
-blockquote {
-  font-size: 100%;
-}
-
-.btn, .btn:visited,
-.btn-default, .btn-default:visited {
-  color: $BUTTON_FG_COLOR;
-  @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
-    background-color: $BUTTON_BG_COLOR1;
-  } @else {
-    // @include gradient-vertical($BUTTON_BG_COLOR1, $BUTTON_BG_COLOR2);
-  }
-  border-color: $BUTTON_BORDER_COLOR;
-  border-width: $BUTTON_BORDER_WIDTH;
-  border-style: $BUTTON_BORDER_STYLE;
-  border-radius: $BUTTON_BORDER_RADIUS;
-  padding: 4px 8px;
-}
-
-.btn:hover, .btn-default:hover {
-  color: $BUTTON_HOVER_FG_COLOR;
-  @if $BUTTON_HOVER_BG_COLOR1 == $BUTTON_HOVER_BG_COLOR2 {
-    background-color: $BUTTON_HOVER_BG_COLOR1;
-  } @else {
-    // @include gradient-vertical($BUTTON_HOVER_BG_COLOR1, $BUTTON_HOVER_BG_COLOR2);
-  }
-  border-color: $BUTTON_HOVER_BORDER_COLOR;
-}
-
-.btn-primary {
-  color: $BUTTON_PRIMARY_FG_COLOR !important;
-  @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
-    background-color: $BUTTON_PRIMARY_BG_COLOR1 !important;
-  } @else {
-    // @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
-  }
-  border-color: $BUTTON_PRIMARY_BORDER_COLOR;
-}
-
-.btn-primary:hover {
-  color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
-  @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
-    background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1 !important;
-  } @else {
-    // @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
-  }
-  border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
-}
-
-.form-control {
-  border-width: $INPUT_BORDER_WIDTH;
-  border-style: $INPUT_BORDER_STYLE;
-  border-radius: $INPUT_BORDER_RADIUS;
-  padding: 4px 8px 3px 8px;
-}
-
-.help-block {
-  max-width: $help-block-max-width
-}
-.tooltip-inner {
-  word-wrap: break-word;
-}
-
-ul.tight-list {
-  list-style: none;
-  margin-bottom: 0.5em;
-  padding-left: 1em;
-}
-
-.arrow-up {
-  margin-top: 3px;
-}
-
+// a {
+//   background-color: $LINK_BG_COLOR;
+//   font-weight: $LINK_WEIGHT;
+// }
 //
-// content
-// --------------------------------------------------
-
-#content {
-  // margin-left: 2em; // NO! This pushes content off screen
-  padding-bottom: 5em;
-}
-
-#title-caption, .owner-id {
-  // font-size: 170%;
-  // margin-top: 5px;
-}
-
-.user-thumbnail {
-  width: 25%;
-  max-width: 160px;
-  max-height: 160px;
-}
-
-
+// a:visited {
+//   color: $LINK_VISITED_FG_COLOR;
+//   background-color: $LINK_VISITED_BG_COLOR;
+// }
 //
-// alerts
-// --------------------------------------------------
-
-.alert {
-  margin: 0.5em 1.0em;
-  border-width: $ALERT_BORDER_WIDTH;
-  border-style: $ALERT_BORDER_STYLE;
-  border-radius: $ALERT_BORDER_RADIUS;
-  padding: 0.5em 1.0em;
-  text-align: left;
-}
-
+// a:hover {
+//   color: $LINK_HOVER_FG_COLOR;
+//   background-color: $LINK_HOVER_BG_COLOR;
+// }
 //
-// message banner at top
-// --------------------------------------------------
-
-.alert.message-banner {
-  margin: 0.5em 1.0em;
-  border-width: $BANNER_BORDER_WIDTH;
-  border-style: $BANNER_BORDER_STYLE;
-  border-radius: $BANNER_BORDER_RADIUS;
-  padding: 0.5em 1.0em;
-  font-size: 150%;
-  text-align: center;
-}
-
-
-
+// body {
+//   word-wrap: break-word;
+// }
 //
-// autocompletion
-// --------------------------------------------------
-
-div.auto_complete {
-  position: absolute;
-  color: $MENU_FG_COLOR;
-  background-color: $MENU_BG_COLOR;
-  margin: 0px;
-  border: 1px solid $MENU_BORDER_COLOR;
-  padding: 0px;
-  overflow-x: hidden;
-  display: none;
-  text-align: left;
-  z-index: 100;
-
-  ul {
-    margin: 0px;
-    border: 0px;
-    padding: 0px;
-    list-style: none;
-    overflow-x: hidden;
-
-    li {
-      margin: 0px;
-      border: 0px;
-      padding: 2px 4px 2px 4px;
-      white-space: nowrap;
-    }
-
-    li.selected {
-      color: $MENU_HOT_FG_COLOR;
-      background-color: $MENU_HOT_BG_COLOR;
-    }
-  }
-}
-
-
+// blockquote {
+//   font-size: 100%;
+// }
+//
+// .btn, .btn:visited,
+// .btn-default, .btn-default:visited {
+//   color: $BUTTON_FG_COLOR;
+//   @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
+//     background-color: $BUTTON_BG_COLOR1;
+//   } @else {
+//     // @include gradient-vertical($BUTTON_BG_COLOR1, $BUTTON_BG_COLOR2);
+//   }
+//   border-color: $BUTTON_BORDER_COLOR;
+//   border-width: $BUTTON_BORDER_WIDTH;
+//   border-style: $BUTTON_BORDER_STYLE;
+//   border-radius: $BUTTON_BORDER_RADIUS;
+//   padding: 4px 8px;
+// }
+//
+// .btn:hover, .btn-default:hover {
+//   color: $BUTTON_HOVER_FG_COLOR;
+//   @if $BUTTON_HOVER_BG_COLOR1 == $BUTTON_HOVER_BG_COLOR2 {
+//     background-color: $BUTTON_HOVER_BG_COLOR1;
+//   } @else {
+//     // @include gradient-vertical($BUTTON_HOVER_BG_COLOR1, $BUTTON_HOVER_BG_COLOR2);
+//   }
+//   border-color: $BUTTON_HOVER_BORDER_COLOR;
+// }
+//
+// .btn-primary {
+//   color: $BUTTON_PRIMARY_FG_COLOR !important;
+//   @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
+//     background-color: $BUTTON_PRIMARY_BG_COLOR1 !important;
+//   } @else {
+//     // @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
+//   }
+//   border-color: $BUTTON_PRIMARY_BORDER_COLOR;
+// }
+//
+// .btn-primary:hover {
+//   color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
+//   @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
+//     background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1 !important;
+//   } @else {
+//     // @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
+//   }
+//   border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
+// }
+//
+// .form-control {
+//   border-width: $INPUT_BORDER_WIDTH;
+//   border-style: $INPUT_BORDER_STYLE;
+//   border-radius: $INPUT_BORDER_RADIUS;
+//   padding: 4px 8px 3px 8px;
+// }
+//
+// .help-block {
+//   max-width: $help-block-max-width
+// }
+// .tooltip-inner {
+//   word-wrap: break-word;
+// }
+//
+// ul.tight-list {
+//   list-style: none;
+//   margin-bottom: 0.5em;
+//   padding-left: 1em;
+// }
+//
+// .arrow-up {
+//   margin-top: 3px;
+// }
+//
+// //
+// // content
+// // --------------------------------------------------
+//
+// #content {
+//   // margin-left: 2em; // NO! This pushes content off screen
+//   padding-bottom: 5em;
+// }
+//
+// #title-caption, .owner-id {
+//   // font-size: 170%;
+//   // margin-top: 5px;
+// }
+//
+// .user-thumbnail {
+//   width: 25%;
+//   max-width: 160px;
+//   max-height: 160px;
+// }
+//
+//
+// //
+// // alerts
+// // --------------------------------------------------
+//
+// .alert {
+//   margin: 0.5em 1.0em;
+//   border-width: $ALERT_BORDER_WIDTH;
+//   border-style: $ALERT_BORDER_STYLE;
+//   border-radius: $ALERT_BORDER_RADIUS;
+//   padding: 0.5em 1.0em;
+//   text-align: left;
+// }
+//
+// //
+// // message banner at top
+// // --------------------------------------------------
+//
+// .alert.message-banner {
+//   margin: 0.5em 1.0em;
+//   border-width: $BANNER_BORDER_WIDTH;
+//   border-style: $BANNER_BORDER_STYLE;
+//   border-radius: $BANNER_BORDER_RADIUS;
+//   padding: 0.5em 1.0em;
+//   font-size: 150%;
+//   text-align: center;
+// }
+//
+//
+//
+// //
+// // autocompletion
+// // --------------------------------------------------
+//
+// div.auto_complete {
+//   position: absolute;
+//   color: $MENU_FG_COLOR;
+//   background-color: $MENU_BG_COLOR;
+//   margin: 0px;
+//   border: 1px solid $MENU_BORDER_COLOR;
+//   padding: 0px;
+//   overflow-x: hidden;
+//   display: none;
+//   text-align: left;
+//   z-index: 100;
+//
+//   ul {
+//     margin: 0px;
+//     border: 0px;
+//     padding: 0px;
+//     list-style: none;
+//     overflow-x: hidden;
+//
+//     li {
+//       margin: 0px;
+//       border: 0px;
+//       padding: 2px 4px 2px 4px;
+//       white-space: nowrap;
+//     }
+//
+//     li.selected {
+//       color: $MENU_HOT_FG_COLOR;
+//       background-color: $MENU_HOT_BG_COLOR;
+//     }
+//   }
+// }
+//
+//
 //
 // generally useful classes
 // --------------------------------------------------
@@ -272,115 +272,115 @@ div.auto_complete {
   text-transform: uppercase;
   letter-spacing: 0.3em;
 }
-
-.badge-outline {
-  border: 1px solid $gray-300;
-}
-
-// Most browsers allow you to zoom in or out: let the user decide what
-// an optimal width for a line of text should be.  There is no way for us
-// to decide for them intelligently, since browsers differ so much in how
-// they deal with print views.
-@media screen {
-  .max-width-text {
-    max-width: 600px;
-  }
-
-  .max-width-text-plus-padding {
-    max-width: 650px;
-  }
-
-  .max-width-text-plus-image {
-    max-width: 850px; // 600px text column + 160pm max thumbnail
-  }
-
-  .max-width-text-times-two {
-    max-width: 1200px;
-  }
-}
-
 //
-// style tweaks
-// --------------------------------------------------
-
-.well p {
-  margin: 0;
-  padding: 0;
-}
-
-.name-section p {
-  margin: 0;
-  padding-left: 1em;
-  text-indent: -1em;
-}
-
-.obs-notes p {
-  margin: 0;
-  padding: 0;
-  text-indent: 0;
-}
-
-.list-group.list-group-compact .list-group-item {
-  padding: 4px;
-}
-
-.input-group .icon-addon .form-control {
-  border-radius: 0;
-}
-
-input[type=checkbox] {
-  // fixes alignment issue in firefox; bootstrap applies this only to IE9:
-  // margin-top: 1px \9;
-  margin-top: 1px;
-}
-
-[data-role=link]:hover {
-  cursor: pointer;
-}
-
-// got this trick from:
-// http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
-.file-field {
-  position: relative;
-  overflow: hidden;
-  input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    background: red;
-    cursor: inherit;
-    display: block;
-  }
-  + span {
-    margin-left: 0.5em;
-  }
-}
-
+// .badge-outline {
+//   border: 1px solid $gray-300;
+// }
 //
-// specialized stuff for print view
-// --------------------------------------------------
-
-@media print {
-  #right_side {
-    width: 100% !important;
-  }
-}
-
+// // Most browsers allow you to zoom in or out: let the user decide what
+// // an optimal width for a line of text should be.  There is no way for us
+// // to decide for them intelligently, since browsers differ so much in how
+// // they deal with print views.
+// @media screen {
+//   .max-width-text {
+//     max-width: 600px;
+//   }
 //
-// don't bold the labels on image date and geotag helper boxes
-// on create observation page
-
-.image_messages label,
-.geocode_messages label {
-  font-weight: normal;
-}
-
-.dashed-border {
-  border: 5px dashed;
-}
+//   .max-width-text-plus-padding {
+//     max-width: 650px;
+//   }
+//
+//   .max-width-text-plus-image {
+//     max-width: 850px; // 600px text column + 160pm max thumbnail
+//   }
+//
+//   .max-width-text-times-two {
+//     max-width: 1200px;
+//   }
+// }
+//
+// //
+// // style tweaks
+// // --------------------------------------------------
+//
+// .well p {
+//   margin: 0;
+//   padding: 0;
+// }
+//
+// .name-section p {
+//   margin: 0;
+//   padding-left: 1em;
+//   text-indent: -1em;
+// }
+//
+// .obs-notes p {
+//   margin: 0;
+//   padding: 0;
+//   text-indent: 0;
+// }
+//
+// .list-group.list-group-compact .list-group-item {
+//   padding: 4px;
+// }
+//
+// .input-group .icon-addon .form-control {
+//   border-radius: 0;
+// }
+//
+// input[type=checkbox] {
+//   // fixes alignment issue in firefox; bootstrap applies this only to IE9:
+//   // margin-top: 1px \9;
+//   margin-top: 1px;
+// }
+//
+// [data-role=link]:hover {
+//   cursor: pointer;
+// }
+//
+// // got this trick from:
+// // http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+// .file-field {
+//   position: relative;
+//   overflow: hidden;
+//   input[type=file] {
+//     position: absolute;
+//     top: 0;
+//     right: 0;
+//     min-width: 100%;
+//     min-height: 100%;
+//     font-size: 100px;
+//     text-align: right;
+//     filter: alpha(opacity=0);
+//     opacity: 0;
+//     background: red;
+//     cursor: inherit;
+//     display: block;
+//   }
+//   + span {
+//     margin-left: 0.5em;
+//   }
+// }
+//
+// //
+// // specialized stuff for print view
+// // --------------------------------------------------
+//
+// @media print {
+//   #right_side {
+//     width: 100% !important;
+//   }
+// }
+//
+// //
+// // don't bold the labels on image date and geotag helper boxes
+// // on create observation page
+//
+// .image_messages label,
+// .geocode_messages label {
+//   font-weight: normal;
+// }
+//
+// .dashed-border {
+//   border: 5px dashed;
+// }
