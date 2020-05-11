@@ -48,7 +48,7 @@ class LogItemPresenter
     # get_rss_log_details(rss_log, target)
 
     self.what = target
-    self.name = target.text_name
+    self.name = target.format_name.delete_suffix(observation.name.author).t
     self.author =
       if target.name.respond_to?(:author)
          target.name.author
@@ -78,7 +78,7 @@ class LogItemPresenter
   def observation_to_presenter(observation, view)
 
     self.what   = observation
-    self.name   = observation.text_name
+    self.name   = observation.format_name.delete_suffix(observation.name.author).t
     self.author = observation.name.author
     self.id     = observation.id
     self.when   = observation.when.web_date

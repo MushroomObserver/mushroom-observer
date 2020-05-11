@@ -1,12 +1,12 @@
-<div class="navbar navbar-dark px-4 bg-accent">
+<div class="navbar navbar-dark px-3 bg-accent">
   <div class="d-block w-100">
     <a id="left_logo"
        href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>"
-       class="site-logo navbar-brand d-block">
+       class="site-logo navbar-brand d-block mx-auto">
       <div class="logo-wrap position-relative">
         <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
         <%= inline_svg_tag(
-              "mo_logo.svg",
+              "combo_logo-01.svg",
               class: 'position-absolute h-100 w-100',
               title: :app_banner.t,
               preserve_aspect_ratio: 'xMaxYMax meet',

@@ -4,6 +4,10 @@
 
 .theater-btn {
   opacity: 0;
+  background: $black;
+  border-radius: $border-radius-sm;
+  padding: 0.25em;
+  color: white;
   transition: opacity 0.3s ease-out;
 }
 
@@ -11,6 +15,7 @@
 .image-sizer:focus {
   .theater-btn {
     opacity: 1;
+    text-decoration: none;
   }
 }
 // .theater-btn {
@@ -25,13 +30,12 @@
 //     font-size: 18px;
 // }
 //
-// .theater-btn:hover, .theater-btn:focus {
-//     background: black;
-//     color: white;
-//     padding: 5px;
-//     top: 0px;
-//     border: 1px solid;
-//     text-decoration: none;
+// .theater-btn:hover,
+// .theater-btn:focus {
+//   background: $black;
+//   color: white;
+//   border: 1px solid $black;
+//   text-decoration: none;
 // }
 
 

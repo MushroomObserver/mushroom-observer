@@ -3,9 +3,10 @@
 // --------------------------------------------------
 
 .left-side-navbar {
-  flex: 0 1 240px;
+  flex: 0 1 210px;
 
-  @include media-breakpoint-up(md) {
+  @include media-breakpoint-up(xl) {
+    flex: 0 1 240px;
   }
 }
 
@@ -23,6 +24,11 @@
 .navbar {
   height: $navbar-height;
 }
+
+#content {
+  padding-bottom: 10rem;
+}
+
 //
 // top nav bar
 // --------------------------------------------------
@@ -31,25 +37,38 @@
   @include media-breakpoint-up(md) {
     position: sticky;
     top: 0;
-    z-index: $zindex-popover;
+    z-index: $zindex-sticky;
   }
 }
 
 #top_nav {
 
-  .nav-link {
+  .nav-link, .btn {
     font-weight: $font-weight-bold;
+    font-size: 1.125rem;
     color: $primary-text;
   }
 
   .form-control {
+    font-weight: $font-weight-semibold;
+    font-size: 1.125rem;
     // background-color: $primary-text;
+  }
+
+  input.form-control {
+    background-color: $accent;
+    border-color: $accent;
+    color: $primary-text;
+
+    &::placeholder {
+      color: rgba($primary-text, 0.63);
+    }
   }
 }
 
 .site-logo {
   z-index: $zindex-tooltip;
-  max-width: 150px;
+  max-width: 100%;
 
   svg path {
     fill: $primary-text;
@@ -58,13 +77,13 @@
 
 .navbar-dark .navbar-brand,
 .navbar-light .navbar-brand {
-  font-weight: $font-weight-bold;
+  font-weight: $font-weight-semibold;
   color: $primary-text;
 }
 
 .logo-wrap {
   padding-top: 0;
-  padding-bottom: 28.7%;
+  padding-bottom: 34%;
 
   svg, img {
     object-fit: contain;
@@ -81,17 +100,18 @@
   @include media-breakpoint-up(md) {
     position: sticky;
     top: 0;
-    z-index: $zindex-popover;
+    z-index: $zindex-sticky;
     height: 100vh; //calc(100vh - 4rem)
     margin-top: -$navbar-height;
-    overflow-y: scroll;
+    // overflow-y: auto;
   }
 }
 
 #left_nav {
   @include media-breakpoint-up(md) {
-    position: sticky;
-    top: 4rem;
+    // position: sticky;
+    // top: 4rem;
+    // height: calc(100vh - $navbar-height);
   }
 
   .mo-sidenav {
@@ -100,11 +120,11 @@
 
   ul.nav > li > a {
     display: block;
-    padding: .25rem 1.5rem .25rem 2.4rem;
-    color: rgba( $secondary-text, .75 );
+    padding: .25rem 1.5rem .25rem 1.5rem;
+    color: rgba( $secondary-text, .72 );
 
     &:visited {
-      color: rgba( $secondary-text, .75 );
+      color: rgba( $secondary-text, .72 );
     }
   }
 }
@@ -121,10 +141,10 @@
   padding: .25rem 1.5rem;
   font-size: $h5-font-size;
   font-weight: $font-weight-bold;
-  color: rgba( $secondary-text, .81 );
+  color: rgba( $secondary-text, .9 );
 
   &:visited {
-    color: rgba( $secondary-text, .81 );
+    color: rgba( $secondary-text, .9 );
   }
 }
 

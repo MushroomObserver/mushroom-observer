@@ -1,0 +1,9 @@
+//
+// log_items
+// --------------------------------------------------
+
+.log-name {
+  i, b i {
+    @extend .h5, .font-weight-bold, .font-italic;
+  }
+}

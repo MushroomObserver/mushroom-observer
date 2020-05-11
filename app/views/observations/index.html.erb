@@ -1,3 +1,15 @@
+<% provide :title do
+  render "context_title"
+end %>
+
+<% provide :search do
+  render "context_search"
+end %>
+
+<% provide :create do
+  render "context_create"
+end %>
+
 <%
   if @links.any? && @objects.any?
     # tabs = create_links(@links)
