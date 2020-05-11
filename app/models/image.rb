@@ -307,7 +307,7 @@ class Image < AbstractModel
   # in the image.  It's just that we haven't seen any other types yet.)
   def self.all_content_types
     ["image/jpeg", "image/gif", "image/png", "image/tiff", "image/x-ms-bmp",
-     nil]
+     "image/bmp", nil]
   end
 
   def image_url(size)
@@ -374,6 +374,7 @@ class Image < AbstractModel
     when "image/gif" then "gif"
     when "image/png" then "png"
     when "image/tiff" then "tiff"
+    when "image/bmp" then "bmp"
     when "image/x-ms-bmp" then "bmp"
     else; "raw"
     end
@@ -453,7 +454,7 @@ class Image < AbstractModel
   # Length of the file.
   attr_accessor :upload_length
 
-  # Mime type, e.g. "image/jpeg" or "image/x-ms-bmp".
+  # Mime type, e.g. "image/jpeg".
   attr_accessor :upload_type
 
   # MD5 sum (if available).
