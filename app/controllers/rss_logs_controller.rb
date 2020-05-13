@@ -122,7 +122,7 @@ class RssLogsController < ApplicationController
   alias_method :show_rss_log, :show
 
   # Go to next RssLog: redirects to show_<object>.
-  def next_rss_log # :norobots:
+  def show_next # :norobots:
     redirect_to_next_object(
       :next,
       RssLog,

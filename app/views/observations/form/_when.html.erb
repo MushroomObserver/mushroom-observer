@@ -1,0 +1,15 @@
+<!-- WHEN -->
+<div class="row">
+  <div class="col-12 max-width-text">
+    <%= label_tag(:observation_when_li,
+                  :WHEN.t + ":") %>
+    <div class="form-group form-inline">
+      <%= date_select(:observation,
+                      :when,
+                      date_select_opts(@observation),
+                      { class: "form-control mb-1" }) %>
+      <% turn_into_year_auto_completer(:observation_when_1i) %>
+    </div>
+  </div>
+</div>
+<!-- /WHEN -->

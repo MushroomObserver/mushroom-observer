@@ -1,0 +1,22 @@
+<% if @lists.any? %>
+  <div class="row mt-3">
+    <div class="col-12 max-width-text-times-two">
+      <div class="col-12 col-sm-6 pull-right">
+        <div class="well well-sm max-width-text help-block">
+          <div class="arrow-left d-none d-sm-block"></div>
+          <%= :form_observations_list_help.t %>
+        </div>
+      </div>
+      <strong><%= :SPECIES_LISTS.t %>:</strong>
+      <% for list in @lists %>
+        <div class="form-inline max-width-text">
+          <%= check_box(:list, "id_#{list.id}",
+                        checked: @list_checks[list.id],
+                        disabled: !check_permission(list),
+                        class: "form-control-xxx") %>
+          <%= link_to_object(list) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

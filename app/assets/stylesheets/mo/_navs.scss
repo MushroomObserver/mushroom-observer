@@ -113,20 +113,6 @@
     // top: 4rem;
     // height: calc(100vh - $navbar-height);
   }
-
-  .mo-sidenav {
-    display: block;
-  }
-
-  ul.nav > li > a {
-    display: block;
-    padding: .25rem 1.5rem .25rem 1.5rem;
-    color: rgba( $secondary-text, .72 );
-
-    &:visited {
-      color: rgba( $secondary-text, .72 );
-    }
-  }
 }
 
 .mo-toc-item {
@@ -136,9 +122,17 @@
   }
 }
 
-.mo-toc-link {
+.mo-toc-link,
+.mo-sidenav > li > a {
   display: block;
   padding: .25rem 1.5rem;
+
+  @include media-breakpoint-up(xl){
+    padding: 0.25rem 1.8rem;
+  }
+}
+
+.mo-toc-link {
   font-size: $h5-font-size;
   font-weight: $font-weight-bold;
   color: rgba( $secondary-text, .9 );
@@ -146,7 +140,22 @@
   &:visited {
     color: rgba( $secondary-text, .9 );
   }
+
 }
+
+.mo-sidenav {
+  display: block;
+
+  > li > a {
+    color: rgba( $secondary-text, .72 );
+
+    &:visited {
+      color: rgba( $secondary-text, .72 );
+    }
+  }
+}
+
+
 
 //
 // offcanvas

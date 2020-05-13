@@ -1,3 +1,9 @@
+<%= link_to observations_path,
+            id: "page-title",
+            class: "navbar-brand" do -%>
+  <%= @title %>
+<% end %>
+
 <%= form_with url: search_pattern_search_path,
               scope: :search,
               class: "form-inline my-2 my-lg-0" do |form|%>
@@ -23,8 +29,17 @@
 
   <%= link_to search_advanced_search_form_path,
               class: "mx-2 btn btn-link border-0",
-              id: "advanced_search_link" do
-        tag.span :app_advanced_search.t class: "text-nowrap"
-  end %>
+              id: "advanced_search_link" do %>
+    <%= tag.span :app_advanced_search.t class: "text-nowrap" %>
+  <% end %>
 
+<% end %>
+
+<%= link_to new_observation_path,
+            class: "mx-2 btn btn-link border-0",
+            id: "create_link" do -%>
+      <%= tag.span class: "text-nowrap" do -%>
+        <%= tag.span :CREATE.t, class: "mr-2" -%>
+        <%= tag.span class: "fas fa-edit" -%>
+      <% end %>
 <% end %>

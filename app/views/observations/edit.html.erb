@@ -11,9 +11,9 @@
 
 <%= render "form", locals: {
                      action: :edit,
-                     logging_optional: true,
-                     include_naming: false,
-                     include_images: true,
+                     logging_optional?: true,
+                     include_naming?: false,
+                     include_images?: true,
                      button_name: :SAVE_EDITS.l,
-                     has_specimen: (@observation.herbarium_records.length > 0)
+                     has_specimen?: (@observation.herbarium_records.length > 0)
                    } %>
