@@ -32,7 +32,7 @@
   <div class="col-xs-12 col-sm-6 max-width-text">
     <div class="form-group">
       <%= label_tag(:observation_place_name, "#{:WHERE.t}: (#{:required.t})") %>
-      <%= text_field(:observation, :place_name, class: "form-control", autocomplete: "off") %>
+      <%= text_field(:observation, :place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:observation_place_name, primer: Location.primer) %>
       <span class="map-locate map-btn">Locate on Map</span>
     </div>
