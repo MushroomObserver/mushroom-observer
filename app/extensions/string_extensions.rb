@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #  = Extensions to String
 #  == Class Methods
