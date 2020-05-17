@@ -6,16 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 287
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleStyles, EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle.
-# SupportedHashRocketStyles: key, separator, table
-# SupportedColonStyles: key, separator, table
-# SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
-Layout/HashAlignment:
-  Exclude:
-    - 'app/extensions/string_extensions.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Layout/SpaceAroundMethodCallOperator:
@@ -37,17 +27,6 @@ Layout/SpaceAroundOperators:
 Layout/SpaceInsideArrayLiteralBrackets:
   Exclude:
     - 'app/classes/api/observation_api.rb'
-
-# Offense count: 68
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideStringInterpolation:
-  Exclude:
-    - 'test/controllers/location_controller_test.rb'
-    - 'test/controllers/observer_controller_test.rb'
-    - 'test/integration/capybara_lurker_test.rb'
-    - 'test/integration/filter_test.rb'
 
 # Offense count: 1
 Lint/AmbiguousRegexpLiteral:
