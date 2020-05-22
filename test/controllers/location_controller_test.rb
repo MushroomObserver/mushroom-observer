@@ -215,7 +215,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:albion_desc)
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
-      %r{/location/show_location_description/#{ desc.id }}
+      %r{/location/show_location_description/#{desc.id}}
     )
   end
 

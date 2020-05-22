@@ -24,7 +24,7 @@ class FilterTest < IntegrationTestCase
     click_button("Search")
 
     assert_match(
-      /#{:app_title.l }: Observations Matching ‘#{obs.name.text_name}/,
+      /#{:app_title.l}: Observations Matching ‘#{obs.name.text_name}/,
       page.title, "Wrong page"
     )
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
