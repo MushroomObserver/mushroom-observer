@@ -36,7 +36,7 @@ class String
 
   # :stopdoc:
   # Disable cop in order to make code more readable
-  # rubocop:disable Layout/HashAlignment,Layout/AlignHash
+  # rubocop:disable Layout/HashAlignment
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
     # characters and accents -- it covers HTML codes &#1 to &#400.
@@ -365,7 +365,7 @@ class String
       "nbsp"  => " "
     }.freeze
   end
-  # rubocop:enable Layout/HashAlignment,Layout/AlignHash
+  # rubocop:enable Layout/HashAlignment
   # :startdoc:
 
   # This should safely match anything that could possibly be interpreted as
