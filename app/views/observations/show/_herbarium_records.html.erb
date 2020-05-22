@@ -1,22 +1,22 @@
 <%
-  records = observation.herbarium_records
-  can_add = in_admin_mode? || observation.can_edit? ||
+  records = @observation.herbarium_records
+  can_add = in_admin_mode? || @observation.can_edit? ||
             @user && @user.curated_herbaria.any?
 
   # This is passed in to show_herbarium_record, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
+  query = Query.lookup(:HerbariumRecord, :all, observations: @observation.id)
 %>
 
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          @observation.user.try(&:hide_specimen_stuff?) %>
   <% if records.any? && can_add %>
     <div>
       <%= :Herbarium_records.t %>: [<%=
         link_with_query(:create_herbarium_record.t,
                         controller: :herbarium_records,
                         action: :new,
-                        id: observation.id)
+                        id: @observation.id)
       %>]
     </div>
     <ul class="tight-list">
@@ -29,12 +29,12 @@
                                  controller: :herbarium_records,
                                  action: :edit,
                                  id: record.id,
-                                 back: observation.id) %> |
+                                 back: @observation.id) %> |
              <%= link_with_query(:REMOVE.t,
                                  { controller: :herbarium_records,
                                    action: :remove_observation,
                                    id: record.id,
-                                   obs: observation.id },
+                                   obs: @observation.id },
                                  { data: { confirm: :are_you_sure.t } }) %>]
           <% end %>
         </li>
@@ -59,7 +59,7 @@
       link_with_query(:create_herbarium_record.t,
                       controller: :herbarium_records,
                       action: :new,
-                      id: observation.id)
+                      id: @observation.id)
     %>]
   <% end %>
 <% end %>

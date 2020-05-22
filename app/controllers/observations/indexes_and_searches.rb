@@ -3,6 +3,8 @@
 # see observations_controller.rb
 class ObservationsController
 
+  # Displays matrix of all Observation's, sorted by date.
+  # Currently same as list_observations, for testing.
   def index
     query = create_query(:Observation, :all, by: :date)
     show_selected_observations(query)
@@ -76,7 +78,7 @@ class ObservationsController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to @observation
+      redirect_to observation_path(@observation)
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?

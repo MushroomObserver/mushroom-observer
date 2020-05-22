@@ -1,7 +1,7 @@
 <%= link_to observations_path,
             id: "page-title",
             class: "navbar-brand" do -%>
-  <%= @title %>
+  <%= controller.controller_name.capitalize %>
 <% end %>
 
 <%= form_with url: search_pattern_search_path,

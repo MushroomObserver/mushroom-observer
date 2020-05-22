@@ -1,14 +1,14 @@
 <%
-  sequences = observation.sequences
-  can_edit  = in_admin_mode? || observation.can_edit?
+  sequences = @observation.sequences
+  can_edit  = in_admin_mode? || @observation.can_edit?
 
   # This is passed in to show_sequence, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:Sequence, :all, observations: observation.id)
+  query = Query.lookup(:Sequence, :all, observations: @observation.id)
 %>
 
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          @observation.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
     <div>
       <%= sequences.any? ? :Sequences.t + ":".html_safe :
@@ -16,7 +16,7 @@
         link = link_with_query(:show_observation_add_sequence.t,
                                controller: :sequences,
                                action: :new,
-                               id: observation.id)
+                               id: @observation.id)
         "[#{link}]".html_safe if @user
       %>
     </div>
@@ -46,7 +46,7 @@
                                        controller: :sequences,
                                        action: :edit,
                                        id: sequence.id,
-                                       back: observation.id)
+                                       back: @observation.id)
               links << link_with_query(:DESTROY.t,
                                        { controller: :sequences,
                                          action: :destroy,

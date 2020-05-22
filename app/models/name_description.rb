@@ -144,7 +144,11 @@ class NameDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "name_descriptions"
+    "names/descriptions"
+  end
+
+  def self.show_link_args(id)
+    { module: 'names', controller: 'descriptions', action: 'show', id: id }
   end
 
   # Don't add any authors until someone has written something "useful".

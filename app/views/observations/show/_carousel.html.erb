@@ -1,0 +1,50 @@
+<%
+  # TODO: NIMMO This is a carousel template, make it link to fullscreen lightbox
+  # javascript_include("image_slider")
+  default_image = @observation.thumb_image
+  has_images = !@observation.images.nil? && @observation.images.any?
+%>
+
+<% if has_images %>
+  <div id="carouselExampleControls" class="carousel slide card-img" data-ride="false">
+    <div class="carousel-inner bg-secondary">
+      <% unless default_image.nil? %>
+        <div class="carousel-item active">
+          <%
+             notes = !default_image.notes || default_image.notes.blank? ? "" : default_image.notes
+             notes += "\n#{default_image.original_name}" if !default_image.original_name.blank? && \
+                 (check_permission(default_image) || default_image.user && default_image.user.keep_filenames == :keep_and_show)
+          %>
+          <%= carousel_thumbnail(default_image, notes: notes) %>
+        </div>
+      <% end %>
+      <% @observation.images.each do |img| %>
+        <%
+          notes = !img.notes || img.notes.blank? ? "" : img.notes
+          notes += "\n#{img.original_name}" if !img.original_name.blank? && \
+                (check_permission(img) || img.user && \
+                img.user.keep_filenames == :keep_and_show)
+        %>
+        <% if img != default_image %>
+          <div class="carousel-item">
+            <%= carousel_thumbnail(img, notes: notes) %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <a class="carousel-control-prev"
+       href="#carouselExampleControls"
+       role="button"
+       data-slide="prev">
+      <span class="fas fa-chevron-left fa-2x text-accent" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next"
+       href="#carouselExampleControls"
+       role="button"
+       data-slide="next">
+      <span class="fas fa-chevron-right fa-2x text-accent" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+<% end %>

@@ -130,7 +130,7 @@ module FooterHelper
     if obj.respond_to?(:rss_log_id) && obj.rss_log_id
       html << link_to(:show_object.t(type: :log),
                       controller: :rss_logs,
-                      action: :show_rss_log,
+                      action: :show,
                       id: obj.rss_log_id)
     end
 

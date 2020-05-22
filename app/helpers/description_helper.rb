@@ -123,7 +123,7 @@ module DescriptionHelper
     # Turn each into a link to show_description, and add optional controls.
     list.map! do |desc|
       any = true
-      item = description_link(desc)
+      item = description_link(desc, type)
       writer = is_writer?(desc)
       admin  = is_admin?(desc)
       if writer || admin

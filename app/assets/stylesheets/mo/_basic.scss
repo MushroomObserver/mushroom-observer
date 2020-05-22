@@ -272,11 +272,11 @@
   text-transform: uppercase;
   letter-spacing: 0.3em;
 }
-//
-// .badge-outline {
-//   border: 1px solid $gray-300;
-// }
-//
+
+.badge-outline {
+  border: 1px solid $gray-500;
+}
+
 // // Most browsers allow you to zoom in or out: let the user decide what
 // // an optimal width for a line of text should be.  There is no way for us
 // // to decide for them intelligently, since browsers differ so much in how

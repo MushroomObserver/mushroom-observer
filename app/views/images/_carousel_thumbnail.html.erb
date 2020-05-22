@@ -1,0 +1,12 @@
+
+<%
+  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+  # so we only have image_id.  It's still possible to render the image with
+  # nothing but the image_id.  (But not votes, original name, etc.)
+  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+   #If the image is part of an image set.
+  is_set = is_set || false
+%>
+
+
+<%= image_tag(thumb_url, html_options) %>

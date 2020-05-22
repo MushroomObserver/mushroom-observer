@@ -449,7 +449,8 @@ class AccountController < ApplicationController
         #   action: :show,
         #   id: @user.id
         # )
-        redirect_to @user
+        # redirect_to user_path(@user)
+        render "users/show" locals: { id: @user.id }
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -471,7 +472,8 @@ class AccountController < ApplicationController
           #   action: :show,
           #   id: @user.id
           # )
-          redirect_to @user
+          # redirect_to user_path(@user)
+          render "users/show" locals: { id: @user.id }
         end
       end
     end
@@ -487,7 +489,8 @@ class AccountController < ApplicationController
     #   action: :show,
     #   id: @user.id
     # )
-    redirect_to @user
+    # redirect_to @user
+    render "users/show" locals: { id: @user.id }
   end
 
   def no_email_comments_owner

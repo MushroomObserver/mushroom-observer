@@ -10,33 +10,33 @@
      class="form_image">
 
   <p class="text-nowrap">
-  <%= radio_button(:observation,
-                   :thumb_image_id,
-                   -index) %>
-  <%= custom_file_field(:image,
-                        :image,
-                        index: index,
-                        onchange: "auto_image_new(#{index})") %>
+    <%= radio_button(:observation,
+                     :thumb_image_id,
+                     -index) %>
+    <%= custom_file_field(:image,
+                          :image,
+                          index: index,
+                          onchange: "auto_image_new(#{index})") %>
 
-  <% if @js %>
-    <span class="ml-2">&nbsp;</span>
-    <input id="image_<%=index%>_more"
-           onclick="image_on(<%=index%>);"
-           type="button"
-           class="btn"
-           value="<%=:MORE.t%> »" />
-    <input id="image_<%=index%>_less"
-           onclick="image_off(<%=index%>);"
-           type="button"
-           class="btn d-none"
-           value="« <%=:LESS.t%>" />
-  <% end %><br/>
+    <% if @js %>
+      <span class="ml-2">&nbsp;</span>
+      <input id="image_<%=index%>_more"
+             onclick="image_on(<%=index%>);"
+             type="button"
+             class="btn"
+             value="<%=:MORE.t%> »" />
+      <input id="image_<%=index%>_less"
+             onclick="image_off(<%=index%>);"
+             type="button"
+             class="btn d-none"
+             value="« <%=:LESS.t%>" />
+    <% end %><br/>
 
-  <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
-  <%= text_field(:image,
-                 :notes,
-                 index: index,
-                 size: 50) %>
+    <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
+    <%= text_field(:image,
+                   :notes,
+                   index: index,
+                   size: 50) %>
   </p>
 
   <div id="image_<%= index %>_div" class="lh-100<%= " d-none" if @js %>">

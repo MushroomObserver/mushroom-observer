@@ -18,7 +18,7 @@
                       link,
                       class: "stretched-link") %>
 
-  <%= # TODO: move this to the presenter, too
+  <%= # TODO: NIMMO move this to the presenter, too
     lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
     show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
     show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"

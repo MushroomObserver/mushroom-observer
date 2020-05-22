@@ -4,61 +4,59 @@
   user_url = url_for(controller: :users, action: :show, id: user.id)
 %>
 
-<div class="card comment">
-  <div class="card-body">
+<div class="comment card-body">
 
-    <% if user.image_id %>
-      <div class="d-none d-sm-block user-thumbnail float-right text-center">
-        <%= image_tag(Image.url(:thumbnail, user.image_id),
-                      style: "max-width:100%; max-height:100%",
-                      data: {role: "link", url: user_url}) %>
-      </div>
-    <% end %>
-
-    <% if local_assigns[:show_name] && show_name %>
-      <h4 class="mt-0">
-        <%= link_to(target.unique_format_name.t,
-                    controller: target.show_controller,
-                    action: target.show_action,
-                    id: target.id) \
-                    rescue :comment_list_deleted.t %>
-        <small>(<%= target.class.name.to_sym.t rescue :runtime_object_deleted %>)</small>
-      </h4>
-    <% end %>
-
-    <div class="font-weight-bold">
-      <%= comment.summary.tl %>
+  <% if user.image_id %>
+    <div class="d-none d-sm-block user-thumbnail float-right text-center">
+      <%= image_tag(Image.url(:thumbnail, user.image_id),
+                    style: "max-width:100%; max-height:100%",
+                    data: { role: "link", url: user_url }) %>
     </div>
+  <% end %>
 
-    <div class="max-width-text">
-      <%= :BY.t %>: <%= user_link(user) %>
-      <% if check_permission(comment) %>
-        <span class="text-nowrap">
-          [<%= link_with_query(:EDIT.t,
-                               controller: :comments,
-                               action: :edit,
-                               id: comment.id) %> |
-          <%= link_with_query(:DESTROY.t,
-                              { controller: :comments,
-                                action: :destroy,
-                                id: comment.id },
-                              { data: { confirm: :are_you_sure.l } }) %>]
-        </span>
-      <% end %>
-      <div class="float-right text-nowrap small my-0 mx-3">
-        <%= comment.created_at.web_time %>
-      </div>
+  <% if local_assigns[:show_name] && show_name %>
+    <strong class="">
+      <%= link_to(target.unique_format_name.t,
+                  controller: target.show_controller,
+                  action: target.show_action,
+                  id: target.id) \
+                  rescue :comment_list_deleted.t %>
+      <small>(<%= target.class.name.to_sym.t rescue :runtime_object_deleted %>)</small>
+    </strong>
+  <% end %>
+
+  <div class="font-weight-bold">
+    <%= comment.summary.tl %>
+  </div>
+
+  <div class="max-width-text">
+    <%= :BY.t %>: <%= user_link(user) %>
+    <% if check_permission(comment) %>
+      <span class="text-nowrap">
+        [<%= link_with_query(:EDIT.t,
+                             controller: :comments,
+                             action: :edit,
+                             id: comment.id) %> |
+        <%= link_with_query(:DESTROY.t,
+                            { controller: :comments,
+                              action: :destroy,
+                              id: comment.id },
+                            { data: { confirm: :are_you_sure.l } }) %>]
+      </span>
+    <% end %>
+    <div class="float-right text-nowrap small my-0 mx-3">
+      <%= comment.created_at.web_time %>
     </div>
+  </div>
 
-    <% unless comment.comment.blank? %>
-      <div class="p-1 max-width-text">
-        <%= comment.comment.tpl %>
-      </div>
-    <% end %>
+  <% unless comment.comment.blank? %>
+    <div class="p-1 max-width-text">
+      <%= comment.comment.tpl %>
+    </div>
+  <% end %>
 
-    <% if user.image_id %>
-      <div class="clearfix"></div>
-    <% end %>
+  <% if user.image_id %>
+    <div class="clearfix"></div>
+  <% end %>
 
-  </div><!-- .card-body -->
-</div><!-- .card -->
+</div><!-- .card-body -->

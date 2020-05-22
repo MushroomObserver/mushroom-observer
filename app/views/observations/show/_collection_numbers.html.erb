@@ -1,21 +1,21 @@
 <%
-  numbers  = observation.collection_numbers
-  can_edit = in_admin_mode? || observation.can_edit?
+  numbers  = @observation.collection_numbers
+  can_edit = in_admin_mode? || @observation.can_edit?
 
   # This is passed in to show_collection_number, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
-  query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
+  query = Query.lookup(:CollectionNumber, :all, observations: @observation.id)
 %>
 
 <% unless @user.try(&:hide_specimen_stuff?) ||
-          observation.user.try(&:hide_specimen_stuff?) %>
+          @observation.user.try(&:hide_specimen_stuff?) %>
   <% if numbers.any? && can_edit %>
     <div>
       <%= :Collection_numbers.t %>: [<%=
         link_with_query(:create_collection_number.t,
                         controller: :collection_numbers,
                         action: :new,
-                        id: observation.id)
+                        id: @observation.id)
       %>]
     </div>
     <ul class="tight-list">
@@ -27,12 +27,12 @@
                                controller: :collection_numbers,
                                action: :edit,
                                id: number.id,
-                               back: observation.id) %> |
+                               back: @observation.id) %> |
            <%= link_with_query(:REMOVE.t,
                                { controller: :collection_numbers,
                                  action: :remove_observation,
                                  id: number.id,
-                                 obs: observation.id },
+                                 obs: @observation.id },
                                { data: { confirm: :are_you_sure.t } }) %>]
         </li>
       <% end %>
@@ -50,7 +50,7 @@
       link_with_query(:create_collection_number.t,
                       controller: :collection_numbers,
                       action: :new,
-                      id: observation.id)
+                      id: @observation.id)
     %>]
   <% end %>
 <% end %>

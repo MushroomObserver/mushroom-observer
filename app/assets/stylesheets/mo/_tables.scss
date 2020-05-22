@@ -125,28 +125,41 @@ thead tr {
 }
 
 table.table-namings {
+  table-layout: fixed;
   width: 100%;
   tbody {
     // border: 1px solid $LIST_BORDER_COLOR;
     // border-radius: $INPUT_BORDER_RADIUS !important;
   }
   th {
-    // color: $BODY_FG_COLOR;
+    color: $secondary-text;
     // background: $BODY_BG_COLOR;
     font-weight: normal;
     vertical-align: bottom;
   }
   th, td {
-    padding: 5px;
+    // padding: 5px;
   }
   th:first-child {
-    padding-left: 0;
+    width: 30%;
+  }
+  th:nth-child(2) {
+    width: 25%;
+  }
+  th:nth-child(3) {
+    width: 15%;
+  }
+  th:nth-child(4) {
+    width: 15%;
+  }
+  th:nth-child(5) {
+    width: 15%;
   }
   td:first-child {
-    padding-left: 1em;
+    // padding-left: 1em;
   }
   td:last-child {
-    padding-right: 1em;
+    // padding-right: 1em;
   }
 }
 

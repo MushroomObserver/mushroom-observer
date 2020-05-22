@@ -140,11 +140,14 @@ module ObjectLinkHelper
   #
   #   Description: <%= description_link(name.description) %>
   #
-  def description_link(desc)
+  def description_link(desc, type)
     result = description_title(desc)
     return result if result.match?("(#{:private.t})$")
 
-    link_with_query(result, desc.show_link_args)
+    # TODO: NIMMO fix this using module: type returns name or location
+    # show_link_args is not working for namespaced description controllers.
+    # link_with_query(result, desc.show_link_args)
+    return type.to_s
   end
 
   # Array of links to searches on external sites;

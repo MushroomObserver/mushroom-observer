@@ -1,0 +1,34 @@
+<!--VOTE POPUPS-->
+<div class="row">
+  <% @observation.namings.select { |naming| naming.votes.count > 0 }.each do |naming|
+    @naming = naming %>
+    <div class="popup" id="show_votes_<%= naming.id %>" data-role="popup">
+      <div class="popup-frame" id="show_votes_<%= naming.id %>_frame">
+        <%= render(partial: "votes/votes_table",
+                   locals: { do_cancel: true, naming: @naming }) %>
+      </div>
+    </div>
+  <% end %>
+</div>
+<% inject_javascript_at_end %(
+  VotePopupModule({
+    show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
+    show_namings_saving: '#{j :show_namings_saving.l}'
+  })
+) %>
+<!--/VOTE POPUPS-->
+
+<!--SUGGESTIONS-->
+<% url = url_for(add_query_param(controller: :observations,
+                                 action: :suggestions,
+                                 id: @observation.id,
+                                 names: :xxx))
+inject_javascript_at_end %(
+  SuggestionModule(#{@observation.image_ids}, "#{url}", {
+    suggestions_processing_images:  "#{j :suggestions_processing_images.t}",
+    suggestions_processing_image:   "#{j :suggestions_processing_image.t}",
+    suggestions_processing_results: "#{j :suggestions_processing_results.t}",
+    suggestions_error:              "#{j :suggestions_error.t}"
+  });
+) %>
+<!--/SUGGESTIONS-->
