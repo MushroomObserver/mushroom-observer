@@ -108,7 +108,9 @@ gem "brakeman", require: false
 # Use rubocop and associated gems for code quality control
 # WARNING: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-gem "rubocop", require: false
+# Temporarily lock RuboCop version while we are working our way through
+# autocorrectable offenses
+gem "rubocop", "= 0.83", require: false
 gem "rubocop-performance"
 gem "rubocop-rails"
 
