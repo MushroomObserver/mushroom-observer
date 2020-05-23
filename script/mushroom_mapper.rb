@@ -60,7 +60,6 @@ name_data = Name.connection.select_rows %(
   FROM names
 )
 
-# rubocop:disable Metrics/ParameterLists
 # > 5 parameters needed for 2nd name.data block, and it's efficient
 # to use name_data for the 1st block to avoid hitting db twice
 name_data.
@@ -86,7 +85,6 @@ name_data.
       ids[text_name] = id
     end
   end
-# rubocop:enable Metrics/ParameterLists
 
 # Build table of number of observations per genus.
 observations = {}
