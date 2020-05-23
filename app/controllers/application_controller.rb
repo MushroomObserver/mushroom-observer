@@ -88,7 +88,8 @@
 #                                 methods)
 #  update_view_stats::           Called after each show_object request.
 #  calc_layout_params::          Gather User's list layout preferences.
-#  catch_errors_and_log_request_stats::  (filter: catches errors for integration tests)
+#  catch_errors_and_log_request_stats::
+#                                (filter: catches errors for integration tests)
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #

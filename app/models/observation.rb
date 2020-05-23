@@ -686,7 +686,6 @@ class Observation < AbstractModel
   end
 
   # Disable method name cops to avoid breaking 3rd parties' use of API
-  # rubocop:disable Naming/PredicateName
 
   # Returns true if a given Naming has received one of the highest positive
   # votes from the owner of this observation.
@@ -702,8 +701,6 @@ class Observation < AbstractModel
   def is_users_favorite?(naming, user)
     lookup_naming(naming).is_users_favorite?(user)
   end
-
-  # rubocop:enable Naming/PredicateName
 
   # All of observation.user's votes on all Namings for this Observation
   # Used in Observation and in tests

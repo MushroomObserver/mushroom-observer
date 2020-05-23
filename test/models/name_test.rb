@@ -2401,7 +2401,6 @@ class NameTest < UnitTestCase
   def test_mysql_sort_order
     return unless sql_collates_accents?
 
-    # rubocop:disable Lint/UselessAssignment
     # RuboCop gives false positives
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
@@ -2410,7 +2409,6 @@ class NameTest < UnitTestCase
     n5 = create_test_name("Agaricus Aéiou")
     n6 = create_test_name("Agaricus Aejou")
     n5.update(author: "aÉIOU")
-    # rubocop:enable Lint/UselessAssignment
 
     x = Name.where(id: n1.id..n6.id).order(:author).pluck(:author)
     assert_equal(%w[Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou], x)
