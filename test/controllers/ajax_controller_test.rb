@@ -364,7 +364,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     # Assert
     assert_response(:success)
-    refute_equal(0, @json_response["id"])
+    assert_not_equal(0, @json_response["id"])
     assert_equal(copyright_holder, @json_response["copyright_holder"])
     assert_equal(notes, @json_response["notes"])
     assert_equal("2014-11-27", @json_response["when"])

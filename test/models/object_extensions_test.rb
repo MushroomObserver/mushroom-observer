@@ -5,7 +5,7 @@ class ObjectExtensionsTest < UnitTestCase
   def test_stacktrace_removes_caller
     # Reflect on this test method's name (in case someone chooses to rename it).
     caller = __method__.to_s
-    refute(_stacktrace.first.include?(caller),
+    assert_not(_stacktrace.first.include?(caller),
            "Trace should start with #{caller}'s caller, not #{caller}")
   end
 

@@ -222,7 +222,7 @@ class ProjectControllerTest < FunctionalTestCase
       "no name descriptions should refer to it to set read permissions."
     )
     drafts.each do |draft|
-      refute_equal(
+      assert_not_equal(
         :project, draft.reload.source_type,
         "Project destruction failed to reset NameDescription's source_type"
       )

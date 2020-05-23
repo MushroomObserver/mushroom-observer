@@ -516,7 +516,7 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:agaricus_campestris_obs)
     updated_at = obs.updated_at
     image = images(:commercial_inquiry_image)
-    refute(obs.images.member?(image))
+    assert_not(obs.images.member?(image))
     params = {
       mode: "observation",
       obs_id: obs.id.to_s,
@@ -528,7 +528,7 @@ class ImageControllerTest < FunctionalTestCase
     # assert_template(controller: :observer, action: :show_observation)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
-    refute(obs.reload.images.member?(image))
+    assert_not(obs.reload.images.member?(image))
 
     login(owner)
     get_with_dump(:reuse_image, params)
@@ -712,10 +712,10 @@ class ImageControllerTest < FunctionalTestCase
     img1.change_vote(rolf, 3, true)
     img2.change_vote(rolf, 4, false)
 
-    refute(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
+    assert_not(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
-    refute(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
+    assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
 
     requires_login(:bulk_vote_anonymity_updater)
     assert_template("bulk_vote_anonymity_updater")
@@ -727,7 +727,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
-    refute(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
+    assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
 
     login("rolf")
     post(:bulk_vote_anonymity_updater,
@@ -735,8 +735,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :account, action: :prefs)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
-    refute(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
-    refute(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
+    assert_not(ImageVote.find_by(image_id: img1.id, user_id: rolf.id).anonymous)
+    assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
   end
 
   def test_original_filename_visibility
