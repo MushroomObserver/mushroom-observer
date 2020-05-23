@@ -99,8 +99,10 @@ class FilterTest < IntegrationTestCase
                "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
     #   :has_specimen should be off (It was never turned on).
     has_specimen_checkbox = find_field("user[has_specimen]")
-    assert_not(has_specimen_checkbox.checked?,
-               "'#{:prefs_filters_has_specimen.t}' checkbox should be unchecked.")
+    assert_not(
+      has_specimen_checkbox.checked?,
+      "'#{:prefs_filters_has_specimen.t}' checkbox should be unchecked."
+    )
 
     #   Turn on :has_specimen
     page.check("user[has_specimen]")
