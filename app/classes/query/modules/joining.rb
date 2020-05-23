@@ -273,7 +273,7 @@ module Query
           end
 
           # Calculate conditions.
-          conds = if !col1.to_s.match(/_id$/)
+          conds = if !col1.to_s.end_with?("_id")
                     "#{from}.#{col1}_id = #{to}.id AND " \
                     "#{from}.#{col1}_type = '#{to.singularize.camelize}'"
                   else
