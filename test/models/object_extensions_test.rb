@@ -6,7 +6,7 @@ class ObjectExtensionsTest < UnitTestCase
     # Reflect on this test method's name (in case someone chooses to rename it).
     caller = __method__.to_s
     assert_not(_stacktrace.first.include?(caller),
-           "Trace should start with #{caller}'s caller, not #{caller}")
+               "Trace should start with #{caller}'s caller, not #{caller}")
   end
 
   def test_stacktrace_appends_executable

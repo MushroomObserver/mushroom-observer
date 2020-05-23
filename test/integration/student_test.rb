@@ -26,7 +26,7 @@ class StudentTest < IntegrationTestCase
     dick_session.login!(dick)
 
     assert_not_equal(mary_session.session[:session_id],
-                 dick_session.session[:session_id])
+                     dick_session.session[:session_id])
     url = mary_session.create_draft(name, gen_desc, project)
     rolf_session.check_admin(url, gen_desc, project)
     katrina_session.check_another_student(url)
