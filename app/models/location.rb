@@ -325,9 +325,9 @@ class Location < AbstractModel
   # auto-completers.
   #
   def self.primer
-    # Temporarily disable.  It rarely takes autocomplete long even on my horrible
-    # internet connection.  And the primer can -- at least briefly -- have names
-    # that have been merged or changed.  That may be confusing some users.  Let's
+    # Temporarily disable. It rarely takes autocomplete long even on my horrible
+    # internet connection. And the primer can -- at least briefly -- have names
+    # that have been merged or changed.  That may be confusing some users. Let's
     # try it without for a while to see if anyone complains.
     # where = ""
     # where = "WHERE observations.user_id = #{User.current_id}" if User.current
@@ -532,7 +532,8 @@ class Location < AbstractModel
         # Mexico was an ambiguous state/country!  Now this code only applies
         # to a bare country which may be ambiguous.
         if understood_state?(this_country, real_country)
-          reasons << :location_dubious_ambiguous_country.t(country: this_country)
+          reasons << :location_dubious_ambiguous_country.
+                     t(country: this_country)
         end
       end
     elsif this_state && understood_country?(this_state)

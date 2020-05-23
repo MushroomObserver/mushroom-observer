@@ -10,8 +10,8 @@ class Name < AbstractModel
   # in a plain old file (MO.name_primer_cache_file).
   #
   def self.primer
-    # Temporarily disable.  It rarely takes autocomplete long even on my horrible
-    # internet connection.  And the primer can -- at least briefly -- have names
+    # Temporarily disable. It rarely takes autocomplete long even on my horrible
+    # internet connection. And the primer can -- at least briefly -- have names
     # that have been merged or deprecated or misspelled.  That may be confusing
     # some users.  Let's try it without for a while to see if anyone complains.
     # current_name_cache || refreshed_name_cache

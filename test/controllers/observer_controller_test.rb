@@ -4031,7 +4031,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_nil(obs.thumb_image)
     assert_obj_list_equal([], name2a.reload.observations)
     assert_obj_list_equal([obs], name2b.reload.observations)
-    suggestions = '[[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]]'
+    suggestions = '[[["Coprinus comatus",0.7654],' \
+                    '["Lentinellus ursinus",0.321]]]'
     requires_login(:suggestions, id: obs.id, names: suggestions)
     data = @controller.instance_variable_get("@suggestions")
     assert_equal(2, data.length)
