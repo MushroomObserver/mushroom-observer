@@ -47,11 +47,9 @@ class EolData
   end
 
   # grandfather method name to avoid breaking 3rd-party use of API
-  # rubocop:disable Naming/PredicateName: Rename
   def has_images?(id)
     @name_id_to_images.member?(id)
   end
-  # rubocop:enable Naming/PredicateName: Rename
 
   def all_images
     @id_to_image.values
@@ -66,11 +64,9 @@ class EolData
   end
 
   # grandfather method name to avoid breaking 3rd-party use of API
-  # rubocop:disable Naming/PredicateName: Rename
   def has_descriptions?(id)
     @name_id_to_descriptions.member?(id)
   end
-  # rubocop:enable Naming/PredicateName: Rename
 
   def all_descriptions
     @id_to_description.values

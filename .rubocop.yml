@@ -36,6 +36,10 @@ AllCops:
 
 ###################### Global Enables #########################################
 # Enable pending cops added by recent RuboCop versions
+# (0.83)
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: true
+
 # (0.82)
 Layout/SpaceAroundMethodCallOperator:
   Enabled: true
@@ -62,6 +66,10 @@ Style/HashTransformKeys:
 
 # (0.80)
 Style/HashTransformValues:
+  Enabled: true
+
+# (0.83)
+Style/SlicingWithRange:
   Enabled: true
 
 ###################### Global Disables #########################################
@@ -171,6 +179,11 @@ Layout/HashAlignment:
 # Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:
   EnforcedStyle: trailing
+
+# Rubocop supports multiple options and MO uses a non-default
+Layout/LineLength:
+  # RuboCop default is 120 as of 0.84
+  Max: 80
 
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
