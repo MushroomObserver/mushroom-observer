@@ -180,6 +180,11 @@ Layout/HashAlignment:
 Layout/DotPosition:
   EnforcedStyle: trailing
 
+# Rubocop supports multiple options and MO uses a non-default
+Layout/LineLength:
+  # RuboCop default is 120 as of 0.84
+  Max: 80
+
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
