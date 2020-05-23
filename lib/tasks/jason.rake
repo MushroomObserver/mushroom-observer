@@ -532,7 +532,7 @@ namespace :jason do
         lines.push('>>>>>>>> missing "where"') unless where
         lines.push('>>>>>>>> missing "vote"')  if what && !vote
 
-        if lines.select { |l| l.match(/^>>>>/) }.empty?
+        if lines.select { |l| l.start_with?(">>>>") }.empty?
           date ||= Date.today
           spec ||= false
           is_co ||= true

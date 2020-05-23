@@ -259,7 +259,7 @@ class TranslationController < ApplicationController
       tag = Regexp.last_match(1)
       str = $'
       process_tag_line(tag)
-      @in_tag = true if /^>/.match?(str)
+      @in_tag = true if str.start_with?(">")
     elsif @in_tag
       @in_tag = false unless /\S/.match?(line)
     elsif line.blank?

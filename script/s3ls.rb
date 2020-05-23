@@ -29,9 +29,9 @@ EOB
 
 verbose = true if ARGV.any? { |arg| ["-v", "--verbose"].include?(arg) }
 replace = true if ARGV.any? { |arg| ["-r", "--replace"].include?(arg) }
-flags = ARGV.select { |arg| arg.match(/^-/) }.
+flags = ARGV.select { |arg| arg.start_with?("-") }.
         reject { |arg| arg.match(/^(-v|-r|--verbose|--replace)$/) }
-words = ARGV.reject { |arg| arg.match(/^-/) }
+words = ARGV.reject { |arg| arg.start_with?("-") }
 abort("Bad flag(s): #{flags.inspect}") unless flags.empty?
 abort("Missing server!") if words.empty?
 server = words.shift

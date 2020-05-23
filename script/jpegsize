@@ -59,7 +59,7 @@ when "-f", "--file"
 
 # Just given single filename.
 else
-  if (ARGV.length == 1) && !ARGV[0].match(/^-/)
+  if (ARGV.length == 1) && !ARGV[0].start_with?("-")
     file = ARGV[0]
     w, h = get_size(file)
     if w

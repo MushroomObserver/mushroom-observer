@@ -5,7 +5,7 @@
 class Configuration
   def method_missing(method, *args)
     @data ||= {}
-    if method.to_s.match?(/=$/)
+    if method.to_s.end_with?("=")
       @data[method.to_s.chop.to_sym] = args[0]
     else
       @data[method]
@@ -62,7 +62,7 @@ end
 
 def verify_ips(ips)
   ips.select do |ip|
-    ip.match(/^66\.249\./) || verify_ip(ip)
+    ip.start_with?("66.249.") || verify_ip(ip)
   end
 end
 

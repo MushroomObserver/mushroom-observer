@@ -568,7 +568,7 @@ class Image < AbstractModel
       # Override whatever user gave us with result of "file --mime".
       self.upload_type = \
         MimeMagic.by_magic(File.open(upload_temp_file)).try(&:type)
-      if %r{^image/}.match?(upload_type)
+      if upload_type&.start_with?("image")
         result = true
       else
         file = upload_original_name.to_s
