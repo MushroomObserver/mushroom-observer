@@ -52,9 +52,7 @@ class FunctionalTestCase < ActionController::TestCase
   def extract_body(args)
     if args.length >= 2
       params = args[1][:params]
-      if params.member?(:body)
-        args[1][:body] = params.delete(:body).read
-      end
+      args[1][:body] = params.delete(:body).read if params.member?(:body)
     end
     args
   end

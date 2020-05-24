@@ -13,7 +13,7 @@ class API
       {
         notes: parse(:string, :app, help: 1),
         user: @for_user,
-        verified: (@for_user == @user ? Time.now : nil)
+        verified: (@for_user == @user ? Time.zone.now : nil)
       }
     end
 

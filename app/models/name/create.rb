@@ -160,7 +160,7 @@ class Name < AbstractModel
   # Returns a Name instance, *UNSAVED*!!
   def self.new_name(params)
     result = Name.new(params)
-    result.created_at = now = Time.now
+    result.created_at = now = Time.zone.now
     result.updated_at = now
     result
   end

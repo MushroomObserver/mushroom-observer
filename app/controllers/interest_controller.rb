@@ -94,7 +94,7 @@ class InterestController < ApplicationController
           )
         else
           interest.state = state.positive?
-          interest.updated_at = Time.now
+          interest.updated_at = Time.zone.now
           if !interest.save
             flash_notice(:set_interest_failure.l(name: target.unique_text_name))
           else

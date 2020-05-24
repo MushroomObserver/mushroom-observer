@@ -210,7 +210,7 @@ class NameSorter
 
     # Did user enter a date/timestamp via comment?
     begin
-      comment_time = Time.parse(name_parse.comment) || timestamp
+      comment_time = Time.zone.parse(name_parse.comment) || timestamp
     rescue StandardError
       comment_time = timestamp
     end

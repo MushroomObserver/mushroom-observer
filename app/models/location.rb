@@ -161,11 +161,11 @@ class Location < AbstractModel
     result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
     if match && (match[4].blank? || [direction1, direction2].member?(match[4]))
-      if match[1].to_f.positive?
-        val = match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
-      else
-        val = match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
-      end
+      val = if match[1].to_f.positive?
+              match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
+            else
+              match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
+            end
       val = -val if match[4] == direction2
       result = val.round(4) if val >= -max_degrees && val <= max_degrees
     end
@@ -649,7 +649,7 @@ class Location < AbstractModel
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: "\
+    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: "\
              "North: #{old_loc.north}, South: #{old_loc.south}, "\
              "West: #{old_loc.west}, East: #{old_loc.east}")
 

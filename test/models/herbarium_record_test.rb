@@ -2,7 +2,7 @@ require "test_helper"
 
 class HerbariumRecordTest < UnitTestCase
   def test_fields
-    refute(herbarium_records(:interesting_unknown).observations.empty?)
+    assert_not(herbarium_records(:interesting_unknown).observations.empty?)
     assert(herbarium_records(:interesting_unknown).herbarium)
     assert(herbarium_records(:interesting_unknown).herbarium_label)
     assert(herbarium_records(:interesting_unknown).notes)
