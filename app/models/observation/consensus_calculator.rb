@@ -242,37 +242,89 @@ class Observation
       votes
     end
 
+    class WeightedValue
+      attr_reader :val
+      attr_reader :wgt
+
+      def initialize(val: nil, wgt: nil)
+        @val = val
+        @wgt = wgt
+      end
+
+      # def val
+      #   @value && (@value / (@wgt + 1.0))
+      # end
+
+      # def better_than(other, tie_breaker)
+      #   other.value.nil? ||
+      #     weighted_value > other.weighted_value ||
+      #     weighted_value == other.weighted_value &&
+      #     (@weight > other.weight || @weight == other.weight && tie_breaker)
+      # end
+    end
+
+    # def find_best_name(votes)
+    #   # Now we can determine the winner among the set of
+    #   # synonym-groups.  (Nathan calls these synonym-groups "taxa",
+    #   # because it better uniquely represents the underlying mushroom
+    #   # taxon, while it might have multiple names.)
+
+    #   best_wv = WeightedValue.new
+    #   best_age = nil
+    #   best_id  = nil
+    #   votes.each_key do |taxon_id|
+    #     wv = WeightedValue.new(value: votes[taxon_id][1],
+    #                            wgt: votes[taxon_id][0].to_f)
+    #     age = @taxon_ages[taxon_id]
+    #     add_debug_message("#{taxon_id}: " \
+    #                       "val=#{wv.val} " \
+    #                       "wgt=#{wv.wgt} age=#{age}<br/>")
+    #     next unless best_wv.val.nil? ||
+    #                 wv.val > best_wv.val ||
+    #                 wv.val == best_wv.val && (
+    #                   wv.wgt > best_wv.wgt || wv.wgt == best_wv.wgt && (
+    #                     age < best_age
+    #                   )
+    #                 )
+
+    #     best_wv = wv
+    #     best_age = age
+    #     best_id  = taxon_id
+    #   end
+    #   add_debug_message("best: id=#{best_id}, val=#{best_wv.val}, " \
+    #                     "wgt=#{best_wv.wgt}, age=#{best_age}<br/>")
+    #   [taxon_identifier_to_name(best_id), best_wv.val]
+    # end
+
     def find_best_name(votes)
       # Now we can determine the winner among the set of
       # synonym-groups.  (Nathan calls these synonym-groups "taxa",
       # because it better uniquely represents the underlying mushroom
       # taxon, while it might have multiple names.)
-      best_val = nil
-      best_wgt = nil
+      best_wv = WeightedValue.new
       best_age = nil
       best_id  = nil
       votes.each_key do |taxon_id|
-        wgt = votes[taxon_id][1]
-        val = votes[taxon_id][0].to_f / (wgt + 1.0)
+        wv = WeightedValue.new(val: votes[taxon_id][0].to_f / (votes[taxon_id][1] + 1.0),
+                              wgt: votes[taxon_id][1])
         age = @taxon_ages[taxon_id]
         add_debug_message("#{taxon_id}: " \
-                          "val=#{val} wgt=#{wgt} age=#{age}<br/>")
-        next unless best_val.nil? ||
-                    val > best_val ||
-                    val == best_val && (
-                      wgt > best_wgt || wgt == best_wgt && (
+                          "val=#{wv.val} wgt=#{wv.wgt} age=#{age}<br/>")
+        next unless best_wv.val.nil? ||
+                    wv.val > best_wv.val ||
+                    wv.val == best_wv.val && (
+                      wv.wgt > best_wv.wgt || wv.wgt == best_wv.wgt && (
                         age < best_age
                       )
                     )
 
-        best_val = val
-        best_wgt = wgt
+        best_wv = wv
         best_age = age
         best_id  = taxon_id
       end
-      add_debug_message("best: id=#{best_id}, val=#{best_val}, " \
-                        "wgt=#{best_wgt}, age=#{best_age}<br/>")
-      [taxon_identifier_to_name(best_id), best_val]
+      add_debug_message("best: id=#{best_id}, val=#{best_wv.val}, " \
+                        "wgt=#{best_wv.wgt}, age=#{best_age}<br/>")
+      [taxon_identifier_to_name(best_id), best_wv.val]
     end
 
     def taxon_identifier_to_name(best_id)
