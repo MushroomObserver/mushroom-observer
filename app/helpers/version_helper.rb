@@ -94,9 +94,9 @@ module VersionHelper
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
       # Was this the result of a merge?
-      merge = if ver.respond_to?(:merge_source_id)
-                get_version_merge_link(obj, ver)
-              end
+      if ver.respond_to?(:merge_source_id)
+        merge = get_version_merge_link(obj, ver)
+      end
 
       i = indent(1)
       [date, i, user, i, link, i, merge]
