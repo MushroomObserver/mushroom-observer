@@ -256,46 +256,14 @@ class Observation
         @value && (@value / (@weight + 1.0))
       end
 
-      # def better_than(other, tie_breaker)
-      #   other.value.nil? ||
-      #     weighted_value > other.weighted_value ||
-      #     weighted_value == other.weighted_value &&
-      #     (@weight > other.weight || @weight == other.weight && tie_breaker)
-      # end
+      def better_than(other, tie_breaker)
+        other.val.nil? ||
+          val > other.val ||
+          val == other.val && (
+          weight > other.weight || weight == other.weight && tie_breaker
+        )
+      end
     end
-
-    # def find_best_name(votes)
-    #   # Now we can determine the winner among the set of
-    #   # synonym-groups.  (Nathan calls these synonym-groups "taxa",
-    #   # because it better uniquely represents the underlying mushroom
-    #   # taxon, while it might have multiple names.)
-
-    #   best_wv = WeightedValue.new
-    #   best_age = nil
-    #   best_id  = nil
-    #   votes.each_key do |taxon_id|
-    #     wv = WeightedValue.new(value: votes[taxon_id][1],
-    #                            wgt: votes[taxon_id][0].to_f)
-    #     age = @taxon_ages[taxon_id]
-    #     add_debug_message("#{taxon_id}: " \
-    #                       "val=#{wv.val} " \
-    #                       "wgt=#{wv.wgt} age=#{age}<br/>")
-    #     next unless best_wv.val.nil? ||
-    #                 wv.val > best_wv.val ||
-    #                 wv.val == best_wv.val && (
-    #                   wv.wgt > best_wv.wgt || wv.wgt == best_wv.wgt && (
-    #                     age < best_age
-    #                   )
-    #                 )
-
-    #     best_wv = wv
-    #     best_age = age
-    #     best_id  = taxon_id
-    #   end
-    #   add_debug_message("best: id=#{best_id}, val=#{best_wv.val}, " \
-    #                     "wgt=#{best_wv.wgt}, age=#{best_age}<br/>")
-    #   [taxon_identifier_to_name(best_id), best_wv.val]
-    # end
 
     def find_best_name(votes)
       # Now we can determine the winner among the set of
@@ -307,17 +275,11 @@ class Observation
       best_id  = nil
       votes.each_key do |taxon_id|
         wv = WeightedValue.new(value: votes[taxon_id][0].to_f,
-                              weight: votes[taxon_id][1])
+                               weight: votes[taxon_id][1])
         age = @taxon_ages[taxon_id]
         add_debug_message("#{taxon_id}: " \
                           "val=#{wv.val} wgt=#{wv.weight} age=#{age}<br/>")
-        next unless best_wv.val.nil? ||
-                    wv.val > best_wv.val ||
-                    wv.val == best_wv.val && (
-                      wv.weight > best_wv.weight || wv.weight == best_wv.weight && (
-                        age < best_age
-                      )
-                    )
+        next unless wv.better_than(best_wv, best_age && (age < best_age))
 
         best_wv = wv
         best_age = age
