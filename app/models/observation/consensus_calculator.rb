@@ -157,13 +157,12 @@ class Observation
     end
 
     class VoteScale
-      attr_reader :value
       attr_reader :weight
       attr_reader :age
 
-      def initialize(value: nil, weight: nil, age: nil)
-        @weight = weight
-        @value = value
+      def initialize(vote: nil, age: nil)
+        @weight = vote && vote[1]
+        @value = vote && vote[0].to_f
         @age = age
       end
 
@@ -172,7 +171,7 @@ class Observation
       end
 
       def better_than(other)
-        other.value.nil? ||
+        other.weight.nil? ||
           weighted_value > other.weighted_value ||
           weighted_value == other.weighted_value && (
           weight > other.weight || weight == other.weight &&
@@ -189,8 +188,7 @@ class Observation
       best_wv = VoteScale.new
       best_id = nil
       votes.each_key do |taxon_id|
-        wv = VoteScale.new(value: votes[taxon_id][0].to_f,
-                           weight: votes[taxon_id][1],
+        wv = VoteScale.new(vote: votes[taxon_id],
                            age: @taxon_ages[taxon_id])
         add_debug_message("#{taxon_id}: scale=#{wv}<br/>")
         next unless wv.better_than(best_wv)
@@ -304,8 +302,7 @@ class Observation
         vote = votes[name_id]
         next unless vote
 
-        wv = VoteScale.new(value: vote[0].to_f,
-                           weight: vote[1],
+        wv = VoteScale.new(vote: vote,
                            age: @name_ages[name_id])
         add_debug_message("#{name_id}: scale=#{wv}<br/>")
         next unless wv.better_than(best_wv)
