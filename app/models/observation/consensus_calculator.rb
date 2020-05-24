@@ -231,79 +231,77 @@ class Observation
       best
     end
 
+    # Now deal with synonymy properly.  If there is a single accepted name,
+    # great, otherwise we need to somehow disambiguate.
     def unsynonymize(best)
-      # Now deal with synonymy properly.  If there is a single accepted name,
-      # great, otherwise we need to somehow disambiguate.
-      if best&.synonym_id
-        # This does not allow the community to choose a deprecated synonym over
-        # an approved synonym.  See obs #45234 for reasonable-use case.
-        # names = best.approved_synonyms
-        # names = best.synonyms if names.length == 0
-        names = best.synonyms
-        if names.length == 1
-          best = names.first
-        elsif names.length > 1
-          synonyms = names.map(&:id).join(", ")
-          add_debug_message("Multiple synonyms: #{synonyms}<br>")
+      return best unless best&.synonym_id
+      # This does not allow the community to choose a deprecated synonym over
+      # an approved synonym.  See obs #45234 for reasonable-use case.
+      # names = best.approved_synonyms
+      # names = best.synonyms if names.length == 0
+      names = best.synonyms
+      return names.first if names.length == 1
+      return best if names.blank?
 
-          # First combine votes for each name; exactly analagous to what we did
-          # with taxa above.
-          votes = {}
-          @name_votes.each_key do |name_id|
-            vote = votes[name_id] = [0, 0]
-            @name_votes[name_id].each_key do |user_id|
-              user_vote = @name_votes[name_id][user_id]
-              val = user_vote[0]
-              wgt = user_vote[1]
-              vote[0] += val * wgt
-              vote[1] += wgt
-              add_debug_message("vote: name_id=#{name_id}, " \
-                                "user_id=#{user_id}, " \
-                                "val=#{val}, wgt=#{wgt}<br/>")
-            end
-          end
+      synonyms = names.map(&:id).join(", ")
+      add_debug_message("Multiple synonyms: #{synonyms}<br>")
 
-          # Now pick the winner among the ambiguous names.  If none
-          # are voted on, just pick the first one (I grow weary of
-          # these games).  This latter is all too real of a
-          # possibility: users may vigorously debate deprecated names,
-          # then at some later date two *new* names are created for
-          # the taxon, both are considered "accepted" until the
-          # scientific community rules definitively.  Now we have two
-          # possible names winning, but no votes on either!  If you
-          # have a problem with the one I chose, then vote on the
-          # damned thing, already! :)
-          best_val2 = nil
-          best_wgt2 = nil
-          best_age2 = nil
-          best_id2  = nil
-          names.each do |name|
-            name_id = name.id
-            vote = votes[name_id]
-            next unless vote
-
-            wgt = vote[1]
-            val = vote[0].to_f / (wgt + 1.0)
-            age = @name_ages[name_id]
-            add_debug_message("#{name_id}: val=#{val} wgt=#{wgt} " \
-                              "age=#{age}<br/>")
-            next unless best_val2.nil? ||
-                        val > best_val2 || val == best_val2 && (
-                          wgt > best_wgt2 || wgt == best_wgt2 && (
-                            age < best_age2
-                          )
-                        )
-
-            best_val2 = val
-            best_wgt2 = wgt
-            best_age2 = age
-            best_id2  = name_id
-          end
-          add_debug_message("best: id=#{best_id2}, val=#{best_val2}, " \
-                            "wgt=#{best_wgt2}, age=#{best_age2}<br/>")
-          best = best_id2 ? Name.find(best_id2) : names.first
+      # First combine votes for each name; exactly analagous to what we did
+      # with taxa above.
+      votes = {}
+      @name_votes.each_key do |name_id|
+        vote = votes[name_id] = [0, 0]
+        @name_votes[name_id].each_key do |user_id|
+          user_vote = @name_votes[name_id][user_id]
+          val = user_vote[0]
+          wgt = user_vote[1]
+          vote[0] += val * wgt
+          vote[1] += wgt
+          add_debug_message("vote: name_id=#{name_id}, " \
+                            "user_id=#{user_id}, " \
+                            "val=#{val}, wgt=#{wgt}<br/>")
         end
       end
+
+      # Now pick the winner among the ambiguous names.  If none
+      # are voted on, just pick the first one (I grow weary of
+      # these games).  This latter is all too real of a
+      # possibility: users may vigorously debate deprecated names,
+      # then at some later date two *new* names are created for
+      # the taxon, both are considered "accepted" until the
+      # scientific community rules definitively.  Now we have two
+      # possible names winning, but no votes on either!  If you
+      # have a problem with the one I chose, then vote on the
+      # damned thing, already! :)
+      best_val2 = nil
+      best_wgt2 = nil
+      best_age2 = nil
+      best_id2  = nil
+      names.each do |name|
+        name_id = name.id
+        vote = votes[name_id]
+        next unless vote
+
+        wgt = vote[1]
+        val = vote[0].to_f / (wgt + 1.0)
+        age = @name_ages[name_id]
+        add_debug_message("#{name_id}: val=#{val} wgt=#{wgt} " \
+                          "age=#{age}<br/>")
+        next unless best_val2.nil? ||
+                    val > best_val2 || val == best_val2 && (
+                      wgt > best_wgt2 || wgt == best_wgt2 && (
+                        age < best_age2
+                      )
+                    )
+
+        best_val2 = val
+        best_wgt2 = wgt
+        best_age2 = age
+        best_id2  = name_id
+      end
+      add_debug_message("best: id=#{best_id2}, val=#{best_val2}, " \
+                        "wgt=#{best_wgt2}, age=#{best_age2}<br/>")
+      best = best_id2 ? Name.find(best_id2) : names.first
       add_debug_message("unsynonymize: " \
                         "best=#{best ? best.real_text_name : "nil"}<br/>")
       best
