@@ -270,20 +270,20 @@ class RssLog < AbstractModel
   def url
     if location_id
       format("/location/show_location/%d?time=%d", location_id,
-              updated_at.tv_sec)
+             updated_at.tv_sec)
     elsif name_id
       format("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
       format("/observer/show_observation/%d?time=%d", observation_id,
-              updated_at.tv_sec)
+             updated_at.tv_sec)
     elsif project_id
       format("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
       format("/observer/show_species_list/%d?time=%d", species_list_id,
-              updated_at.tv_sec)
+             updated_at.tv_sec)
     elsif glossary_term_id
       format("/glossary/show_glossary_term/%d?time=%d",
-              glossary_term_id, updated_at.tv_sec)
+             glossary_term_id, updated_at.tv_sec)
     elsif article_id
       format("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
