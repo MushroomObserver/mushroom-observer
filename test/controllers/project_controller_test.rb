@@ -28,7 +28,7 @@ class ProjectControllerTest < FunctionalTestCase
   def destroy_project_helper(project, changer)
     assert(project)
     drafts = NameDescription.where(source_name: project.title)
-    assert(!drafts.empty?)
+    assert_not(drafts.empty?)
     params = { id: project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
     assert_redirected_to(action: :show_project, id: project.id)

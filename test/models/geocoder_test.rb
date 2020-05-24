@@ -3,7 +3,7 @@ require "test_helper"
 class GeocoderTest < UnitTestCase
   def test_unknown_place_name
     obj = Geocoder.new("Somewhere Out There")
-    assert(!obj.valid)
+    assert_not(obj.valid)
     assert_nil(obj.north)
   end
 

@@ -44,7 +44,7 @@ class ObservationTest < UnitTestCase
     @cc_obs.user = nil
     @cc_obs.when = nil   # no longer an error, defaults to today
     @cc_obs.where = nil  # no longer an error, defaults to Location.unknown
-    assert(!@cc_obs.save)
+    assert_not(@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
     assert_equal(:validate_observation_user_missing.t,
                  @cc_obs.errors[:user].first)
@@ -83,7 +83,7 @@ class ObservationTest < UnitTestCase
       name_been_proposed?(names(:coprinus_comatus)))
     assert(observations(:coprinus_comatus_obs).
       name_been_proposed?(names(:agaricus_campestris)))
-    assert(!observations(:coprinus_comatus_obs).
+    assert_not(observations(:coprinus_comatus_obs).
       name_been_proposed?(names(:conocybe_filaris)))
   end
 

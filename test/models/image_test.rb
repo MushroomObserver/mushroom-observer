@@ -124,8 +124,8 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert(!File.exist?("#{::Rails.root}/script/bogus_script"),
-           "script/bogus_script should not exist!")
+    assert_not(File.exist?("#{::Rails.root}/script/bogus_script"),
+               "script/bogus_script should not exist!")
     assert(File.exist?("#{::Rails.root}/script/process_image"),
            "Missing script/process_image!")
     assert(File.exist?("#{::Rails.root}/script/rotate_image"),

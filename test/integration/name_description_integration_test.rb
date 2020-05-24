@@ -195,7 +195,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def should_not_be_reviewer
-      assert(!UserGroup.reviewers.users.include?(user))
+      assert_not(UserGroup.reviewers.users.include?(user))
     end
 
     def should_be_able_to_do_anything
