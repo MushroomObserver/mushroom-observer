@@ -999,37 +999,37 @@ class SpeciesListController < ApplicationController
     if query || (query = query_from_session)
       results = case query.model
                 when Name
-        query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          limit: 1000
-        )
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    limit: 1000
+                  )
                 when Observation
-        query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: :names,
-          limit: 1000
-        )
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: :names,
+                    limit: 1000
+                  )
                 when Image
-        query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { images_observations: { observations: :names } },
-          limit: 1000
-        )
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { images_observations: { observations: :names } },
+                    limit: 1000
+                  )
                 when Location
-        query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { observations: :names },
-          limit: 1000
-        )
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { observations: :names },
+                    limit: 1000
+                  )
                 when RssLog
-        query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { observations: :names },
-          where: "rss_logs.observation_id > 0",
-          limit: 1000
-        )
-      else
-        []
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { observations: :names },
+                    where: "rss_logs.observation_id > 0",
+                    limit: 1000
+                  )
+                else
+                  []
                 end
     end
     results

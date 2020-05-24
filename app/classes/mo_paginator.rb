@@ -165,7 +165,7 @@ class MOPaginator
   def used_letters=(list)
     @used_letters = if list
                       list.map { |l| l.to_s[0, 1].upcase }.uniq.
-                                      select { |l| l.match(/[A-Z]/) }.sort
+                        select { |l| l.match(/[A-Z]/) }.sort
                     end
   end
 

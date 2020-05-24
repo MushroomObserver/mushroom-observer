@@ -78,9 +78,7 @@ class ObserverController
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
-      if field == :user
-        val = val.sub(/ <.*/, "")
-      end
+      val = val.sub(/ <.*/, "") if field == :user
       query_params[field] = val
     end
   end
