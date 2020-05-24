@@ -44,27 +44,7 @@ class Observation
         process_naming(naming)
       end
       votes = find_taxon_votes
-      best_id, best_val = find_best_id(votes)
-
-      # Reverse our kludge that mashed names-without-synonyms and synonym-groups
-      # together.  In the end we just want a name.
-      if best_id
-        best = nil
-        match = /^(.)(\d+)/.match(best_id)
-        # Synonym id: go through namings and pick first one that belongs to this
-        # synonym group.  Any will do for our purposes, because we will convert
-        # it to the currently accepted name below.
-        if match[1] == "s"
-          @namings.each do |naming|
-            next if naming.name.synonym_id.to_s != match[2]
-
-            best = naming.name
-            break
-          end
-        else
-          best = Name.find(match[2].to_i)
-        end
-      end
+      best, best_val = find_best_name(votes)
       best_name = best ? best.real_text_name : "nil"
       add_debug_message("unmash: best=#{best_name}<br/>")
 
@@ -262,7 +242,7 @@ class Observation
       votes
     end
 
-    def find_best_id(votes)
+    def find_best_name(votes)
       # Now we can determine the winner among the set of
       # synonym-groups.  (Nathan calls these synonym-groups "taxa",
       # because it better uniquely represents the underlying mushroom
@@ -292,7 +272,31 @@ class Observation
       end
       add_debug_message("best: id=#{best_id}, val=#{best_val}, " \
                         "wgt=#{best_wgt}, age=#{best_age}<br/>")
-      [best_id, best_val]
+      [taxon_identifier_to_name(best_id), best_val]
+    end
+
+    def taxon_identifier_to_name(best_id)
+      # Reverse our kludge that mashed names-without-synonyms and synonym-groups
+      # together.  In the end we just want a name.
+      best = nil
+      if best_id
+        match = /^(.)(\d+)/.match(best_id)
+        # Synonym id: go through namings and pick first one that
+        # belongs to this synonym group.  Any will do for our
+        # purposes, because we will convert it to the currently
+        # accepted name below.
+        if match[1] == "s"
+          @namings.each do |naming|
+            next if naming.name.synonym_id.to_s != match[2]
+
+            best = naming.name
+            break
+          end
+        else
+          best = Name.find(match[2].to_i)
+        end
+      end
+      best
     end
   end
 end
