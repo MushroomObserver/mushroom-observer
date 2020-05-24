@@ -147,7 +147,7 @@ module ActiveSupport
     # clear these logs periodically, they can get freaking huge, and that
     # causes this test to take up to several minutes to complete.
     def clear_logs
-      ["development", "test", "email-debug", "process_image"].each do |file|
+      %w[development test email-debug process_image].each do |file|
         file = Rails.root.join("log", "#{file}.log")
         next unless File.exist?(file)
 
