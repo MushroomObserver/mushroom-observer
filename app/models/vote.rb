@@ -222,7 +222,7 @@ class Vote < AbstractModel
   def anonymous?
     (user.votes_anonymous == :no) ||
       (user.votes_anonymous == :old &&
-                               updated_at > Time.zone.parse(MO.vote_cutoff))
+       updated_at > Time.zone.parse(MO.vote_cutoff))
   end
 
   ##############################################################################
