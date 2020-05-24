@@ -16,7 +16,7 @@ class QueuedEmail::CommentAdd < QueuedEmail
 
     if email
       # Only happens when queuing is enabled, just touch 'queued' time.
-      email.queued = Time.now
+      email.queued = Time.zone.now
       email.save
     else
       email = create(sender, receiver)

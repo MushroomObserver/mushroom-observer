@@ -68,7 +68,7 @@ class Naming < AbstractModel
   end
 
   def self.construct(args, observation)
-    now = Time.now
+    now = Time.zone.now
     naming = Naming.new(args)
     naming.created_at = now
     naming.updated_at = now

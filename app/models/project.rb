@@ -127,7 +127,7 @@ class Project < AbstractModel
     return unless images.include?(img)
 
     images.delete(img)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   # Add observation (and its images) to this project if not already done so.
@@ -160,7 +160,7 @@ class Project < AbstractModel
     end
     observations.delete(obs)
     imgs.each { |img| images.delete(img) }
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   # Add species_list to this project if not already done so.  Saves it.
@@ -173,7 +173,7 @@ class Project < AbstractModel
     return unless species_lists.include?(spl)
 
     species_lists.delete(spl)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   ##############################################################################

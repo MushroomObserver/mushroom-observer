@@ -649,7 +649,7 @@ class Location < AbstractModel
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: "\
+    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: "\
              "North: #{old_loc.north}, South: #{old_loc.south}, "\
              "West: #{old_loc.west}, East: #{old_loc.east}")
 

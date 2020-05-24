@@ -789,7 +789,7 @@ class SpeciesListController < ApplicationController
     redirected = false
 
     # Update the timestamps/user/when/where/title/notes fields.
-    now = Time.now
+    now = Time.zone.now
     @species_list.created_at = now if create_or_update == :create
     @species_list.updated_at = now
     @species_list.user = @user

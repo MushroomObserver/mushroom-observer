@@ -543,7 +543,7 @@ namespace :jason do
           obs.specimen   = spec
           obs.user_id    = user.id
           obs.is_collection_location = is_co
-          obs.created_at = obs.updated_at = Time.now
+          obs.created_at = obs.updated_at = Time.zone.now
           obs.name_id = what.id if what
           if where.is_a?(Location)
             obs.where = where.name

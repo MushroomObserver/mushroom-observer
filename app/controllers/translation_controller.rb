@@ -152,7 +152,7 @@ class TranslationController < ApplicationController
   end
 
   def touch_translation(str)
-    str.update!(updated_at: Time.now)
+    str.update!(updated_at: Time.zone.now)
   end
 
   def preview_string(str, limit = 250)

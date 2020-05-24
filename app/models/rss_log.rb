@@ -309,7 +309,9 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, args = {})
-    entry = RssLog.encode(tag, relevant_args(args), args[:time] || Time.now)
+    entry = RssLog.encode(tag,
+                          relevant_args(args),
+                          args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     self.notes = entry + "\n" + notes.to_s
     # self.updated_at = args[:time] if args[:touch]
@@ -408,7 +410,7 @@ class RssLog < AbstractModel
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env == "production"
-        time = Time.now # (but don't crash in production)
+        time = Time.zone.now # (but don't crash in production)
       else
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
       end

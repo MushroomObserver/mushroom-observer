@@ -202,7 +202,7 @@ class QueuedEmail < AbstractModel
     super(
       user: sender,
       to_user: receiver,
-      queued: Time.now
+      queued: Time.zone.now
     )
   end
 
@@ -303,7 +303,7 @@ class QueuedEmail < AbstractModel
   # and when they are actually sent.
   def self.debug_log(msg)
     File.open("#{::Rails.root}/log/email-debug.log", "a:utf-8") do |fh|
-      fh.puts("#{Time.now} #{msg}")
+      fh.puts("#{Time.zone.now} #{msg}")
     end
   end
 

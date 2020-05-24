@@ -279,7 +279,7 @@ module ApplicationHelper
       start_year = init_value
     end
     { start_year: start_year,
-      end_year: Time.now.year,
+      end_year: Time.zone.now.year,
       order: [:day, :month, :year] }
   end
 

@@ -977,7 +977,7 @@ class Image < AbstractModel
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.
-    self.when ||= Time.now
+    self.when ||= Time.zone.now
 
     if content_type.to_s.size > 100
       self.content_type = content_type.to_s.truncate(100)
