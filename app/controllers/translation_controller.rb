@@ -333,7 +333,7 @@ class TranslationController < ApplicationController
     def initialize(*strs)
       self.string = strs.join("\n")
     end
-    alias_method :to_s, :string
+    alias to_s string
   end
 
   class TranslationFormMajorHeader < TranslationFormString
@@ -346,6 +346,6 @@ class TranslationController < ApplicationController
   end
 
   class TranslationFormTagField < TranslationFormString
-    alias_method :tag, :string
+    alias tag string
   end
 end

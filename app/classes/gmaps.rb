@@ -127,7 +127,7 @@ module GM
       self.overlays = []
     end
 
-    alias_method :var, :name
+    alias var name
 
     def center_zoom_init(center, zoom)
       self.lat  = center[0]

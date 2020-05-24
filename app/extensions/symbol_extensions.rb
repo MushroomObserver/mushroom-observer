@@ -281,7 +281,7 @@ class Symbol
     end
   end
 
-  alias_method :l, :localize
+  alias l localize
 
   def t(*args)
     localize(*args).t(false)
