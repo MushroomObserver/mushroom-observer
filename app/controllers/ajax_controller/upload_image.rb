@@ -5,7 +5,7 @@ class AjaxController
   def multi_image_template
     @user = session_user!
     @licenses = License.current_names_and_ids(@user.license)
-    @image = Image.new(user: @user, when: Time.now)
+    @image = Image.new(user: @user, when: Time.zone.now)
     render(partial: "/observer/form_multi_image_template")
   end
 
@@ -47,7 +47,7 @@ class AjaxController
 
   def create_image(args)
     Image.new(
-      created_at: Time.now,
+      created_at: Time.zone.now,
       user: @user,
       when: image_date(args),
       license_id: args[:license].to_i,

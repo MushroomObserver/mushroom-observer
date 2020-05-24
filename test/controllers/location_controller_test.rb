@@ -296,7 +296,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location,
                          action: :show_location_description,
                          id: loc.descriptions.last.id)
-    refute_empty(loc.descriptions)
+    assert_not_empty(loc.descriptions)
     assert_equal(params[:description][:notes], loc.descriptions.last.notes)
   end
 
@@ -316,8 +316,8 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_edit_and_save_location_description
     loc = locations(:albion) # use a location that has no description
-    refute_nil(loc.description,
-               "Test should use a location that has a description.")
+    assert_not_nil(loc.description,
+                   "Test should use a location that has a description.")
     params = { description: { source_type: "public",
                               source_name: "",
                               project_id: "",
@@ -336,7 +336,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location,
                          action: :show_location_description,
                          id: loc.descriptions.last.id)
-    refute_empty(loc.descriptions)
+    assert_not_empty(loc.descriptions)
     assert_equal(params[:description][:notes], loc.descriptions.last.notes)
   end
 

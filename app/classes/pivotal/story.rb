@@ -94,7 +94,7 @@ class Pivotal
         result = "none"
         if @comments.any?
           comment = @comments.last
-          time = Time.parse(comment.time)
+          time = Time.zone.parse(comment.time)
           if time > 1.day.ago
             result = "day"
           elsif time > 1.week.ago

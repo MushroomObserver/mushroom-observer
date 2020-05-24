@@ -232,7 +232,7 @@ class SpeciesList < AbstractModel
     return if observations.include?(obs)
 
     observations.push(obs)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   # Remove observation from list and set updated_at.  Saves it.
@@ -240,7 +240,7 @@ class SpeciesList < AbstractModel
     return unless observations.include?(obs)
 
     observations.delete(obs)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   ##############################################################################
@@ -313,7 +313,7 @@ class SpeciesList < AbstractModel
         key, value = kv
         if key == "Date"
           # timestamp = Time.local(*(ParseDate.parsedate(value)))
-          timestamp = Time.parse(value)
+          timestamp = Time.zone.parse(value)
         elsif key == "Name"
           what = value.strip.squeeze(" ")
         elsif key == "Time"

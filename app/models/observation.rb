@@ -204,9 +204,7 @@ class Observation < AbstractModel
       self.text_name = name.text_name
       self.classification = name.classification
     end
-    if location && location_id_changed?
-      self.where = location.name
-    end
+    self.where = location.name if location && location_id_changed?
   end
 
   # This is meant to be run nightly to ensure that the cached name
@@ -994,7 +992,7 @@ class Observation < AbstractModel
     unless images.include?(img)
       images << img
       self.thumb_image = img unless thumb_image
-      self.updated_at = Time.now
+      self.updated_at = Time.zone.now
       save
       notify_users(:added_image)
       reload
@@ -1211,18 +1209,18 @@ class Observation < AbstractModel
     self.where = nil if where == ""
 
     if !self.when
-      self.when ||= Time.now
+      self.when ||= Time.zone.now
       # errors.add(:when, :validate_observation_when_missing.t)
     elsif self.when.is_a?(Date) && self.when > Date.today + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
                         "Date.today=#{Date.today}")
       errors.add(:when, :validate_observation_future_time.t)
-    elsif self.when.is_a?(Time) && self.when > Time.now + 1.day
+    elsif self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
-                        "Time.now=#{Time.now + 6.hours}")
+                        "Time.now=#{Time.zone.now + 6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
     elsif !self.when.respond_to?(:year) || self.when.year < 1500 ||
-          self.when.year > (Time.now + 1.day).year
+          self.when.year > (Time.zone.now + 1.day).year
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when}")
       errors.add(:when, :validate_observation_invalid_year.t)
     end

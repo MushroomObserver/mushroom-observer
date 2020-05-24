@@ -27,7 +27,7 @@ class ObserverController
   def create_observation # :prefetch: :norobots:
     # These are needed to create pulldown menus in form.
     @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(Time.now)
+    @new_image = init_image(Time.zone.now)
 
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
@@ -354,7 +354,7 @@ class ObserverController
       # Only save observation if there are changes.
       if @dubious_where_reasons == []
         if @observation.changed?
-          @observation.updated_at = Time.now
+          @observation.updated_at = Time.zone.now
           if save_observation(@observation)
             id = @observation.id
             flash_notice(:runtime_edit_observation_success.t(id: id))
@@ -481,7 +481,7 @@ class ObserverController
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
   def create_observation_object(args)
-    now = Time.now
+    now = Time.zone.now
     observation = if args
                     Observation.new(args.permit(whitelisted_observation_args))
                   else
@@ -641,7 +641,7 @@ class ObserverController
           # image = Image.new(args2) # Rails 3.2
           image = Image.new(args2.permit(whitelisted_image_args))
           # image = Image.new(args2.permit(:all))
-          image.created_at = Time.now
+          image.created_at = Time.zone.now
           image.updated_at = image.created_at
           # If image.when is 1950 it means user never saw the form
           # field, so we should use default instead.
@@ -699,7 +699,7 @@ class ObserverController
                   image.license_id_changed? ||
                   image.original_name_changed?
 
-      image.updated_at = Time.now
+      image.updated_at = Time.zone.now
       if image.save
         flash_notice(:runtime_image_updated_notes.t(id: image.id))
       else

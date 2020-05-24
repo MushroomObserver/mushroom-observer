@@ -38,7 +38,7 @@ class TranslationString < AbstractModel
   def update_version?
     result = false
     self.user = User.current || User.admin
-    self.updated_at = Time.now unless updated_at_changed?
+    self.updated_at = Time.zone.now unless updated_at_changed?
     if text_changed? && text_change[0].to_s != text_change[1].to_s
       latest = versions.latest
       if !latest || # (for testing)

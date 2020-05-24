@@ -134,12 +134,12 @@ module ActiveSupport
     # Record time this test started to run.
     def start_timer
       @@times = {} unless defined?(@@times)
-      @@times[method_name] = Time.now
+      @@times[method_name] = Time.zone.now
     end
 
     # Report time this test took to run.
     def end_timer
-      ellapsed = Time.now - @@times[method_name]
+      ellapsed = Time.zone.now - @@times[method_name]
       puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
     end
 

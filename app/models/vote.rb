@@ -77,7 +77,7 @@ class Vote < AbstractModel
   MAXIMUM_VOTE   =  3
 
   def self.construct(args, naming)
-    now = Time.now
+    now = Time.zone.now
     vote = Vote.new
     vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
@@ -221,7 +221,8 @@ class Vote < AbstractModel
   # Now we are free to change the implementation later.
   def anonymous?
     (user.votes_anonymous == :no) ||
-      (user.votes_anonymous == :old && updated_at > Time.parse(MO.vote_cutoff))
+      (user.votes_anonymous == :old &&
+       updated_at > Time.zone.parse(MO.vote_cutoff))
   end
 
   ##############################################################################

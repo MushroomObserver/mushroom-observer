@@ -99,7 +99,7 @@ module LanguageTracking
   def periodically_clean_up
     cutoff = 10.minutes.ago
     if !@@last_clean || @@last_clean < cutoff
-      @@last_clean = Time.now
+      @@last_clean = Time.zone.now
       glob = tag_file("*")
       for file in Dir.glob(glob)
         begin

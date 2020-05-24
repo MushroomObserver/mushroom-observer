@@ -13,7 +13,7 @@ namespace :email do
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     for e in QueuedEmail.all
-      now = Time.now()
+      now = Time.zone.now()
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.
       if e.queued + MO.email_queue_delay.seconds < now
 
@@ -47,7 +47,7 @@ namespace :email do
           # After a few tries give up and delete it.
           elsif e.num_attempts && (e.num_attempts >= MO.email_num_attempts - 1)
             File.open(MO.email_log, "a") do |fh|
-              fh.puts("Failed to send email #%d at %s" % [e.id, now])
+              fh.puts(format("Failed to send email #%d at %s", e.id, now))
               fh.puts(e.dump)
             end
             e.destroy

@@ -298,11 +298,11 @@ class HerbariumRecordController < ApplicationController
       @back_object = Observation.safe_find(@back)
       return if @back_object
 
-      if @herbarium_record.observations.count == 1
-        @back_object = @herbarium_record.observations.first
-      else
-        @back_object = @herbarium_record
-      end
+      @back_object = if @herbarium_record.observations.count == 1
+                       @herbarium_record.observations.first
+                     else
+                       @herbarium_record
+                     end
     end
   end
 

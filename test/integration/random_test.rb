@@ -56,9 +56,9 @@ class RandomTest < IntegrationTestCase
 
     rolf_session.get("/")
     assert(/rolf/i, rolf_session.response.body)
-    refute_equal(rolf_session.session[:session_id],
-                 mary_session.session[:session_id])
-    refute_equal(katrina_session.session[:session_id],
-                 mary_session.session[:session_id])
+    assert_not_equal(rolf_session.session[:session_id],
+                     mary_session.session[:session_id])
+    assert_not_equal(katrina_session.session[:session_id],
+                     mary_session.session[:session_id])
   end
 end

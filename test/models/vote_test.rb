@@ -34,7 +34,7 @@ class VoteTest < UnitTestCase
   # Make sure it fails if we screw up.
   def test_validate
     vote = Vote.new
-    assert !vote.save
+    assert_not vote.save
     assert_equal(:validate_vote_naming_missing.t, vote.errors[:naming].first)
     assert_equal(:validate_vote_user_missing.t, vote.errors[:user].first)
     assert_equal(:validate_vote_value_missing.t, vote.errors[:value].first)
@@ -45,7 +45,7 @@ class VoteTest < UnitTestCase
       user: rolf,
       value: "blah"
     )
-    assert !vote.save
+    assert_not vote.save
     assert_equal(:validate_vote_value_not_integer.t, vote.errors[:value].first)
     assert_equal(1, vote.errors.count)
 
@@ -54,7 +54,7 @@ class VoteTest < UnitTestCase
       user: rolf,
       value: -10
     )
-    assert !vote.save
+    assert_not vote.save
     assert_equal(:validate_vote_value_out_of_bounds.t,
                  vote.errors[:value].first)
     assert_equal(1, vote.errors.count)

@@ -119,7 +119,7 @@ module GeneralExtensions
   # Assert that something is false.
   def assert_false(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be false."
-    refute(value, msg)
+    assert_not(value, msg)
   end
 
   # Assert that something is blank.
@@ -131,7 +131,7 @@ module GeneralExtensions
   # Assert that something is not blank.
   def assert_not_blank(value, msg = nil)
     msg ||= "Expected #{value.inspect} not to be blank."
-    refute(value.blank?, msg)
+    assert_not(value.blank?, msg)
   end
 
   # Compare two Date/Time/DateTime/TimeWithZone instances.

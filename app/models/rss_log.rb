@@ -269,25 +269,25 @@ class RssLog < AbstractModel
   # URL.
   def url
     if location_id
-      sprintf("/location/show_location/%d?time=%d", location_id,
-              updated_at.tv_sec)
+      format("/location/show_location/%d?time=%d", location_id,
+             updated_at.tv_sec)
     elsif name_id
-      sprintf("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
+      format("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observer/show_observation/%d?time=%d", observation_id,
-              updated_at.tv_sec)
+      format("/observer/show_observation/%d?time=%d", observation_id,
+             updated_at.tv_sec)
     elsif project_id
-      sprintf("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
+      format("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/observer/show_species_list/%d?time=%d", species_list_id,
-              updated_at.tv_sec)
+      format("/observer/show_species_list/%d?time=%d", species_list_id,
+             updated_at.tv_sec)
     elsif glossary_term_id
-      sprintf("/glossary/show_glossary_term/%d?time=%d",
-              glossary_term_id, updated_at.tv_sec)
+      format("/glossary/show_glossary_term/%d?time=%d",
+             glossary_term_id, updated_at.tv_sec)
     elsif article_id
-      sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
+      format("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
-      sprintf("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
+      format("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
   end
 
@@ -309,7 +309,9 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, args = {})
-    entry = RssLog.encode(tag, relevant_args(args), args[:time] || Time.now)
+    entry = RssLog.encode(tag,
+                          relevant_args(args),
+                          args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     self.notes = entry + "\n" + notes.to_s
     # self.updated_at = args[:time] if args[:touch]
@@ -408,7 +410,7 @@ class RssLog < AbstractModel
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env == "production"
-        time = Time.now # (but don't crash in production)
+        time = Time.zone.now # (but don't crash in production)
       else
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
       end

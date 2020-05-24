@@ -109,7 +109,7 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_no_translation
-    assert !:no_translation.has_translation?
+    assert_not :no_translation.has_translation?
   end
 
   def test_upcase_first
