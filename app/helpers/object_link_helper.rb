@@ -140,14 +140,31 @@ module ObjectLinkHelper
   #
   #   Description: <%= description_link(name.description) %>
   #
-  def description_link(desc, type)
+  def description_link(obj, desc, type)
     result = description_title(desc)
     return result if result.match?("(#{:private.t})$")
 
-    # TODO: NIMMO fix this using module: type returns name or location
-    # show_link_args is not working for namespaced description controllers.
+    # TODO: NIMMO resolve or standardize this usage:
+    # type returns name or location
+    # return type.to_s
+    # type.to_s.pluralize.to_sym
+    # show_link_args will not work for namespaced description controllers.
     # link_with_query(result, desc.show_link_args)
-    return type.to_s
+    # This also does not work, with the module.
+    # link_with_query(result,
+    #                 { module: :names,
+    #                   controller: :descriptions,
+    #                   action: 'show',
+    #                   name_id: obj.id,
+    #                   id: desc.id })
+    # I believe the way to go is using the path helpers, preferred in Rails docs
+    if type.to_s === "name"
+      link_to(result,
+              name_description_path(obj.id, desc.id, :q => get_query_param))
+    elsif type.to_s === "location"
+      link_to(result,
+              location_description_path(obj.id, desc.id, :q => get_query_param))
+    end
   end
 
   # Array of links to searches on external sites;

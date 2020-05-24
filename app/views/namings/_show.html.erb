@@ -1,5 +1,6 @@
 <%
-  # TODO: NIMMO Simplify Naming Table markup with conditional classes in CSS
+  # TODO: NIMMO This has two layouts, Large and Mobile. Should be possible to
+  # simplify Naming Table to one markup with conditional d-lg-x classes in CSS
   logged_in = !@user.nil? && @user.verified
   consensus = @observation.consensus_naming
   any_names = @observation.namings && @observation.namings.count > 0
