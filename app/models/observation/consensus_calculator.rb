@@ -243,21 +243,18 @@ class Observation
     end
 
     class WeightedValue
-      attr_reader :val
+      attr_reader :value
       attr_reader :wgt
 
       def initialize(value: nil, wgt: nil)
         @wgt = wgt
-        if value.nil?
-          @val = val
-        else
-          @val = value / (wgt + 1.0)
-        end
+        @value = value
+        # @val = value && (value / (wgt + 1.0))
       end
 
-      # def val
-      #   @value && (@value / (@wgt + 1.0))
-      # end
+      def val
+        @value && (@value / (@wgt + 1.0))
+      end
 
       # def better_than(other, tie_breaker)
       #   other.value.nil? ||
