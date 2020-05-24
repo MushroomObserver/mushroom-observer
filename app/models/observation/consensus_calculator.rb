@@ -235,6 +235,7 @@ class Observation
     # great, otherwise we need to somehow disambiguate.
     def unsynonymize(best)
       return best unless best&.synonym_id
+
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
@@ -245,9 +246,34 @@ class Observation
 
       synonyms = names.map(&:id).join(", ")
       add_debug_message("Multiple synonyms: #{synonyms}<br>")
+      votes = process_votes_for_synonyms
+      best = find_best_synonym(names, votes)
+      add_debug_message("unsynonymize: " \
+                        "best=#{best ? best.real_text_name : "nil"}<br/>")
+      best
+    end
 
-      # First combine votes for each name; exactly analagous to what we did
-      # with taxa above.
+    def fallback_if_needed(best)
+      # This should only occur for observations created by
+      # species_list.construct_observation(), which doesn't necessarily create
+      # any votes associated with its naming.  Therefore this should only ever
+      # happen when there is a single naming, so there is nothing arbitray in
+      # using first.  (I think it can also happen if zero-weighted users are
+      # voting.)
+      result = best ||
+               (@namings.first.name if @namings.present?) ||
+               Name.unknown
+      add_debug_message("fallback: best=#{text_name(result)}")
+      result
+    end
+
+    def text_name(name)
+      name ? name.real_text_name : "nil"
+    end
+
+    # First combine votes for each name; exactly analagous to what we did
+    # with taxa
+    def process_votes_for_synonyms
       votes = {}
       @name_votes.each_key do |name_id|
         vote = votes[name_id] = [0, 0]
@@ -262,17 +288,20 @@ class Observation
                             "val=#{val}, wgt=#{wgt}<br/>")
         end
       end
+      votes
+    end
 
-      # Now pick the winner among the ambiguous names.  If none
-      # are voted on, just pick the first one (I grow weary of
-      # these games).  This latter is all too real of a
-      # possibility: users may vigorously debate deprecated names,
-      # then at some later date two *new* names are created for
-      # the taxon, both are considered "accepted" until the
-      # scientific community rules definitively.  Now we have two
-      # possible names winning, but no votes on either!  If you
-      # have a problem with the one I chose, then vote on the
-      # damned thing, already! :)
+    # Now pick the winner among the ambiguous names.  If none
+    # are voted on, just pick the first one (I grow weary of
+    # these games).  This latter is all too real of a
+    # possibility: users may vigorously debate deprecated names,
+    # then at some later date two *new* names are created for
+    # the taxon, both are considered "accepted" until the
+    # scientific community rules definitively.  Now we have two
+    # possible names winning, but no votes on either!  If you
+    # have a problem with the one I chose, then vote on the
+    # damned thing, already! :)
+    def find_best_synonym(names, votes)
       best_val2 = nil
       best_wgt2 = nil
       best_age2 = nil
@@ -302,27 +331,6 @@ class Observation
       add_debug_message("best: id=#{best_id2}, val=#{best_val2}, " \
                         "wgt=#{best_wgt2}, age=#{best_age2}<br/>")
       best = best_id2 ? Name.find(best_id2) : names.first
-      add_debug_message("unsynonymize: " \
-                        "best=#{best ? best.real_text_name : "nil"}<br/>")
-      best
-    end
-
-    def fallback_if_needed(best)
-      # This should only occur for observations created by
-      # species_list.construct_observation(), which doesn't necessarily create
-      # any votes associated with its naming.  Therefore this should only ever
-      # happen when there is a single naming, so there is nothing arbitray in
-      # using first.  (I think it can also happen if zero-weighted users are
-      # voting.)
-      result = best ||
-               (@namings.first.name if @namings.present?) ||
-               Name.unknown
-      add_debug_message("fallback: best=#{text_name(result)}")
-      result
-    end
-
-    def text_name(name)
-      name ? name.real_text_name : "nil"
     end
   end
 end
