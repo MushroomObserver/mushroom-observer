@@ -96,8 +96,6 @@ module VersionHelper
       # Was this the result of a merge?
       merge = if ver.respond_to?(:merge_source_id)
                 get_version_merge_link(obj, ver)
-              else
-                nil
               end
 
       i = indent(1)

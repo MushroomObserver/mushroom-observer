@@ -609,7 +609,7 @@ module DescriptionControllerHelpers
               User.find_by_login(Regexp.last_match(1))
             else
               User.find_by_login(name) ||
-                      UserGroup.find_by_name(name)
+                UserGroup.find_by_name(name)
             end
     group = UserGroup.one_user(group) if group.is_a?(User)
     if group

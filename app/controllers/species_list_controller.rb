@@ -998,30 +998,30 @@ class SpeciesListController < ApplicationController
     results = []
     if query || (query = query_from_session)
       results = case query.model
-      when Name
+                when Name
         query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           limit: 1000
         )
-      when Observation
+                when Observation
         query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join: :names,
           limit: 1000
         )
-      when Image
+                when Image
         query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join: { images_observations: { observations: :names } },
           limit: 1000
         )
-      when Location
+                when Location
         query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join: { observations: :names },
           limit: 1000
         )
-      when RssLog
+                when RssLog
         query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join: { observations: :names },

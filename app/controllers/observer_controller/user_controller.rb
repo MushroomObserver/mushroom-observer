@@ -69,7 +69,7 @@ class ObserverController
 
     # Paginate by "correct" letter.
     args[:letters] = if (query.params[:by] == "login") ||
-       (query.params[:by] == "reverse_login")
+                        (query.params[:by] == "reverse_login")
                        "users.login"
                      else
                        "users.name"
