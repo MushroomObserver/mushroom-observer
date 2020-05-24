@@ -244,16 +244,16 @@ class Observation
 
     class WeightedValue
       attr_reader :value
-      attr_reader :wgt
+      attr_reader :weight
 
-      def initialize(value: nil, wgt: nil)
-        @wgt = wgt
+      def initialize(value: nil, weight: nil)
+        @weight = weight
         @value = value
-        # @val = value && (value / (wgt + 1.0))
+        # @val = value && (value / (weight + 1.0))
       end
 
       def val
-        @value && (@value / (@wgt + 1.0))
+        @value && (@value / (@weight + 1.0))
       end
 
       # def better_than(other, tie_breaker)
@@ -307,14 +307,14 @@ class Observation
       best_id  = nil
       votes.each_key do |taxon_id|
         wv = WeightedValue.new(value: votes[taxon_id][0].to_f,
-                              wgt: votes[taxon_id][1])
+                              weight: votes[taxon_id][1])
         age = @taxon_ages[taxon_id]
         add_debug_message("#{taxon_id}: " \
-                          "val=#{wv.val} wgt=#{wv.wgt} age=#{age}<br/>")
+                          "val=#{wv.val} wgt=#{wv.weight} age=#{age}<br/>")
         next unless best_wv.val.nil? ||
                     wv.val > best_wv.val ||
                     wv.val == best_wv.val && (
-                      wv.wgt > best_wv.wgt || wv.wgt == best_wv.wgt && (
+                      wv.weight > best_wv.weight || wv.weight == best_wv.weight && (
                         age < best_age
                       )
                     )
@@ -324,7 +324,7 @@ class Observation
         best_id  = taxon_id
       end
       add_debug_message("best: id=#{best_id}, val=#{best_wv.val}, " \
-                        "wgt=#{best_wv.wgt}, age=#{best_age}<br/>")
+                        "wgt=#{best_wv.weight}, age=#{best_age}<br/>")
       [taxon_identifier_to_name(best_id), best_wv.val]
     end
 
