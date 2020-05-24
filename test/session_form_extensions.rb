@@ -336,9 +336,7 @@ module SessionExtensions
                      "Must be a check-box or radio-box.")
 
       # Just change "checked" property for checkboxes.
-      if field.type == :checkbox
-        field.node["checked"] = "checked"
-      end
+      field.node["checked"] = "checked" if field.type == :checkbox
 
       # Uncheck all the other radio-boxes in this group.
       if field.type == :radio

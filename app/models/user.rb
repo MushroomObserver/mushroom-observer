@@ -918,9 +918,7 @@ class User < AbstractModel
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    if password.present?
-      write_attribute("password", self.class.sha1(password))
-    end
+    write_attribute("password", self.class.sha1(password)) if password.present?
     write_attribute("auth_code", String.random(40))
   end
 

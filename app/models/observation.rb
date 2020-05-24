@@ -204,9 +204,7 @@ class Observation < AbstractModel
       self.text_name = name.text_name
       self.classification = name.classification
     end
-    if location && location_id_changed?
-      self.where = location.name
-    end
+    self.where = location.name if location && location_id_changed?
   end
 
   # This is meant to be run nightly to ensure that the cached name

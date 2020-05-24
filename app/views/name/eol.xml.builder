@@ -15,17 +15,13 @@ xml.response(
       xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
       xml.dc(:source, "#{MO.http_domain}/name/show_name/#{taxon.id}")
       for (rank, name) in Name.parse_classification(taxon.classification)
-        if MO.eol_ranks.member?(rank)
-          xml.dwc(rank, name)
-        end
+        xml.dwc(rank, name) if MO.eol_ranks.member?(rank)
       end
       xml.dwc(:ScientificName, taxon.real_search_name)
       xml.dcterms(:modified,
                   taxon.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
       citation = taxon.citation
-      if citation.present?
-        xml.reference(citation.t)
-      end
+      xml.reference(citation.t) if citation.present?
       refs = []
       @data.descriptions(taxon.id).each do |desc|
         next unless desc.refs.present?

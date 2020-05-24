@@ -332,9 +332,7 @@ class QueuedEmail < AbstractModel
   # model::     class of model to look for id in
   def get_object(key, model)
     @objects ||= {}
-    unless @objects.key?(key)
-      @objects[key] = model.safe_find(get_integer(key))
-    end
+    @objects[key] = model.safe_find(get_integer(key)) unless @objects.key?(key)
     @objects[key]
   end
 
