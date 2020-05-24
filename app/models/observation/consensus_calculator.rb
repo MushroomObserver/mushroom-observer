@@ -156,25 +156,27 @@ class Observation
       votes
     end
 
-    class WeightedValue
+    class VoteScale
       attr_reader :value
       attr_reader :weight
+      attr_reader :age
 
-      def initialize(value: nil, weight: nil)
+      def initialize(value: nil, weight: nil, age: nil)
         @weight = weight
         @value = value
-        # @val = value && (value / (weight + 1.0))
+        @age = age
       end
 
       def weighted_value
         @value && (@value / (@weight + 1.0))
       end
 
-      def better_than(other, tie_breaker)
+      def better_than(other)
         other.value.nil? ||
           weighted_value > other.weighted_value ||
           weighted_value == other.weighted_value && (
-          weight > other.weight || weight == other.weight && tie_breaker
+          weight > other.weight || weight == other.weight &&
+          age < other.age
         )
       end
     end
@@ -184,26 +186,19 @@ class Observation
       # synonym-groups.  (Nathan calls these synonym-groups "taxa",
       # because it better uniquely represents the underlying mushroom
       # taxon, while it might have multiple names.)
-      best_wv = WeightedValue.new
-      best_age = nil
-      best_id  = nil
+      best_wv = VoteScale.new
+      best_id = nil
       votes.each_key do |taxon_id|
-        wv = WeightedValue.new(value: votes[taxon_id][0].to_f,
-                               weight: votes[taxon_id][1])
-        age = @taxon_ages[taxon_id]
-        add_debug_message("#{taxon_id}: " \
-                          "val=#{wv.weighted_value} wgt=#{wv.weight} " \
-                          "age=#{age}<br/>")
-        next unless wv.better_than(best_wv, best_age && (age < best_age))
+        wv = VoteScale.new(value: votes[taxon_id][0].to_f,
+                           weight: votes[taxon_id][1],
+                           age: @taxon_ages[taxon_id])
+        add_debug_message("#{taxon_id}: scale=#{wv}<br/>")
+        next unless wv.better_than(best_wv)
 
         best_wv = wv
-        best_age = age
-        best_id  = taxon_id
+        best_id = taxon_id
       end
-      add_debug_message("best: id=#{best_id}, " \
-                        "val=#{best_wv.weighted_value}, " \
-                        "wgt=#{best_wv.weight}, " \
-                        "age=#{best_age}<br/>")
+      add_debug_message("best: id=#{best_id}, scale=#{best_wv}<br/>")
       [taxon_identifier_to_name(best_id), best_wv.weighted_value]
     end
 
@@ -302,35 +297,24 @@ class Observation
     # have a problem with the one I chose, then vote on the
     # damned thing, already! :)
     def find_best_synonym(names, votes)
-      best_val2 = nil
-      best_wgt2 = nil
-      best_age2 = nil
-      best_id2  = nil
+      best_wv = VoteScale.new
+      best_id = nil
       names.each do |name|
         name_id = name.id
         vote = votes[name_id]
         next unless vote
 
-        wgt = vote[1]
-        val = vote[0].to_f / (wgt + 1.0)
-        age = @name_ages[name_id]
-        add_debug_message("#{name_id}: val=#{val} wgt=#{wgt} " \
-                          "age=#{age}<br/>")
-        next unless best_val2.nil? ||
-                    val > best_val2 || val == best_val2 && (
-                      wgt > best_wgt2 || wgt == best_wgt2 && (
-                        age < best_age2
-                      )
-                    )
+        wv = VoteScale.new(value: vote[0].to_f,
+                           weight: vote[1],
+                           age: @name_ages[name_id])
+        add_debug_message("#{name_id}: scale=#{wv}<br/>")
+        next unless wv.better_than(best_wv)
 
-        best_val2 = val
-        best_wgt2 = wgt
-        best_age2 = age
-        best_id2  = name_id
+        best_wv = wv
+        best_id = name_id
       end
-      add_debug_message("best: id=#{best_id2}, val=#{best_val2}, " \
-                        "wgt=#{best_wgt2}, age=#{best_age2}<br/>")
-      best = best_id2 ? Name.find(best_id2) : names.first
+      add_debug_message("best: id=#{best_id}, scale=#{best_wv}<br/>")
+      best_id ? Name.find(best_id) : names.first
     end
   end
 end
