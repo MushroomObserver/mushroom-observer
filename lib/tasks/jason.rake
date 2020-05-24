@@ -589,7 +589,8 @@ namespace :jason do
                 end
                 naming.change_vote(user, vote)
                 warn(
-                  format("  Created naming: #%d (%s)", naming.id, naming.name.search_name)
+                  format("  Created naming: #%d (%s)",
+                         naming.id, naming.name.search_name)
                 )
               else
                 warn("Failed to create naming: %s" % naming.dump_errors)
@@ -633,7 +634,8 @@ namespace :jason do
                   end
                   warn("  Created image: #%d" % image.id)
                 else
-                  warn(format('Failed to create image "%s": %s', file, image.dump_errors))
+                  warn(format('Failed to create image "%s": %s',
+                              file, image.dump_errors))
                 end
               end
             end
