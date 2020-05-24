@@ -252,14 +252,14 @@ class Observation
         # @val = value && (value / (weight + 1.0))
       end
 
-      def val
+      def weighted_value
         @value && (@value / (@weight + 1.0))
       end
 
       def better_than(other, tie_breaker)
-        other.val.nil? ||
-          val > other.val ||
-          val == other.val && (
+        other.value.nil? ||
+          weighted_value > other.weighted_value ||
+          weighted_value == other.weighted_value && (
           weight > other.weight || weight == other.weight && tie_breaker
         )
       end
@@ -278,16 +278,19 @@ class Observation
                                weight: votes[taxon_id][1])
         age = @taxon_ages[taxon_id]
         add_debug_message("#{taxon_id}: " \
-                          "val=#{wv.val} wgt=#{wv.weight} age=#{age}<br/>")
+                          "val=#{wv.weighted_value} wgt=#{wv.weight} " \
+                          "age=#{age}<br/>")
         next unless wv.better_than(best_wv, best_age && (age < best_age))
 
         best_wv = wv
         best_age = age
         best_id  = taxon_id
       end
-      add_debug_message("best: id=#{best_id}, val=#{best_wv.val}, " \
-                        "wgt=#{best_wv.weight}, age=#{best_age}<br/>")
-      [taxon_identifier_to_name(best_id), best_wv.val]
+      add_debug_message("best: id=#{best_id}, " \
+                        "val=#{best_wv.weighted_value}, " \
+                        "wgt=#{best_wv.weight}, " \
+                        "age=#{best_age}<br/>")
+      [taxon_identifier_to_name(best_id), best_wv.weighted_value]
     end
 
     def taxon_identifier_to_name(best_id)
