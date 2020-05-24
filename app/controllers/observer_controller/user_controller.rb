@@ -48,32 +48,32 @@ class ObserverController
     }.merge(args)
 
     # Add some alternate sorting criteria.
-    if in_admin_mode?
-      args[:sorting_links] = [
-        ["id",          :sort_by_id.t],
-        ["login",       :sort_by_login.t],
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["last_login",  :sort_by_last_login.t]
-      ]
-    else
-      args[:sorting_links] = [
-        ["login",         :sort_by_login.t],
-        ["name",          :sort_by_name.t],
-        ["created_at",    :sort_by_created_at.t],
-        ["location",      :sort_by_location.t],
-        ["contribution",  :sort_by_contribution.t]
-      ]
-    end
+    args[:sorting_links] = if in_admin_mode?
+                             [
+                               ["id",          :sort_by_id.t],
+                               ["login",       :sort_by_login.t],
+                               ["name",        :sort_by_name.t],
+                               ["created_at",  :sort_by_created_at.t],
+                               ["updated_at",  :sort_by_updated_at.t],
+                               ["last_login",  :sort_by_last_login.t]
+                             ]
+                           else
+                             [
+                               ["login",         :sort_by_login.t],
+                               ["name",          :sort_by_name.t],
+                               ["created_at",    :sort_by_created_at.t],
+                               ["location",      :sort_by_location.t],
+                               ["contribution",  :sort_by_contribution.t]
+                             ]
+                           end
 
     # Paginate by "correct" letter.
-    if (query.params[:by] == "login") ||
+    args[:letters] = if (query.params[:by] == "login") ||
        (query.params[:by] == "reverse_login")
-      args[:letters] = "users.login"
-    else
-      args[:letters] = "users.name"
-    end
+                       "users.login"
+                     else
+                       "users.name"
+                     end
 
     show_index_of_objects(query, args)
   end

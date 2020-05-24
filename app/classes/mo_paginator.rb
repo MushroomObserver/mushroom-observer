@@ -163,12 +163,12 @@ class MOPaginator
   # duplicates and non-letters.  (Set to +nil+ to mean assume all letters have
   # results.)
   def used_letters=(list)
-    if list
-      @used_letters = list.map { |l| l.to_s[0, 1].upcase }.uniq.
-                      select { |l| l.match(/[A-Z]/) }.sort
-    else
-      @used_letters = nil
-    end
+    @used_letters = if list
+                      list.map { |l| l.to_s[0, 1].upcase }.uniq.
+                                      select { |l| l.match(/[A-Z]/) }.sort
+                    else
+                      nil
+                    end
   end
 
   # Number of pages of results available.

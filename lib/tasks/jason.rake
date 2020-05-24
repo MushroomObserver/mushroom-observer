@@ -553,13 +553,13 @@ namespace :jason do
           end
 
           if obs.save
-            if notes =~ /(\d{8}\.\d+\w*)/
-              name = Regexp.last_match(1)
-            elsif what
-              name = format("%s %s", date.strftime("%Y%m%d"), what.text_name)
-            else
-              name = "unknown"
-            end
+            name = if notes =~ /(\d{8}\.\d+\w*)/
+                     Regexp.last_match(1)
+                   elsif what
+                     format("%s %s", date.strftime("%Y%m%d"), what.text_name)
+                   else
+                     "unknown"
+                   end
             warn(format("Created observation: #%d (%s)", obs.id, name))
             obs.log(:log_observation_created_at, { user: user.login }, true)
             lines.clear

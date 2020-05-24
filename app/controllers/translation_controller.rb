@@ -85,11 +85,11 @@ class TranslationController < ApplicationController
 
   def get_record_maps(lang, tags)
     @translated_records = build_record_map(lang, tags)
-    if lang.official
-      @official_records = @translated_records
-    else
-      @official_records = build_record_map(Language.official, tags)
-    end
+    @official_records = if lang.official
+                          @translated_records
+                        else
+                          build_record_map(Language.official, tags)
+                        end
   end
 
   def build_record_map(lang, _tags)

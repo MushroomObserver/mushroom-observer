@@ -67,11 +67,11 @@ module VersionHelper
              end
 
       # User making the change.
-      if user = User.safe_find(ver.user_id)
-        user = user_link(user, user.login)
-      else
-        user = :unknown.t
-      end
+      user = if user = User.safe_find(ver.user_id)
+               user_link(user, user.login)
+             else
+               :unknown.t
+             end
 
       # Version number (and name if available).
       link = "#{:VERSION.t} #{ver.version}"
@@ -94,11 +94,11 @@ module VersionHelper
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
       # Was this the result of a merge?
-      if ver.respond_to?(:merge_source_id)
-        merge = get_version_merge_link(obj, ver)
-      else
-        merge = nil
-      end
+      merge = if ver.respond_to?(:merge_source_id)
+                get_version_merge_link(obj, ver)
+              else
+                nil
+              end
 
       i = indent(1)
       [date, i, user, i, link, i, merge]
