@@ -43,53 +43,8 @@ class Observation
       @namings.each do |naming|
         process_naming(naming)
       end
-
-      # Now that we've weeded out potential duplicate votes, we can combine them
-      # safely.
-      votes = {}
-      @taxon_votes.each_key do |taxon_id|
-        vote = votes[taxon_id] = [0, 0]
-        @taxon_votes[taxon_id].each_key do |user_id|
-          user_vote = @taxon_votes[taxon_id][user_id]
-          val = user_vote[0]
-          wgt = user_vote[1]
-          vote[0] += val * wgt
-          vote[1] += wgt
-          add_debug_message("vote: taxon_id=#{taxon_id}, " \
-                            "user_id=#{user_id}, " \
-                            "val=#{val}, wgt=#{wgt}<br/>")
-        end
-      end
-
-      # Now we can determine the winner among the set of
-      # synonym-groups.  (Nathan calls these synonym-groups "taxa",
-      # because it better uniquely represents the underlying mushroom
-      # taxon, while it might have multiple names.)
-      best_val = nil
-      best_wgt = nil
-      best_age = nil
-      best_id  = nil
-      votes.each_key do |taxon_id|
-        wgt = votes[taxon_id][1]
-        val = votes[taxon_id][0].to_f / (wgt + 1.0)
-        age = @taxon_ages[taxon_id]
-        add_debug_message("#{taxon_id}: " \
-                          "val=#{val} wgt=#{wgt} age=#{age}<br/>")
-        next unless best_val.nil? ||
-                    val > best_val ||
-                    val == best_val && (
-                      wgt > best_wgt || wgt == best_wgt && (
-                        age < best_age
-                      )
-                    )
-
-        best_val = val
-        best_wgt = wgt
-        best_age = age
-        best_id  = taxon_id
-      end
-      add_debug_message("best: id=#{best_id}, val=#{best_val}, " \
-                        "wgt=#{best_wgt}, age=#{best_age}<br/>")
+      votes = find_taxon_votes
+      best_id, best_val = find_best_id(votes)
 
       # Reverse our kludge that mashed names-without-synonyms and synonym-groups
       # together.  In the end we just want a name.
@@ -215,54 +170,69 @@ class Observation
       end
       sum_val = 0
       sum_wgt = 0
-      # Go through all the votes for this naming.  Should be zero or one per
-      # user.
       naming.votes.each do |vote|
-        user_id = vote.user_id
-        val = vote.value
-        wgt = @user_wgts[user_id]
-        wgt = @user_wgts[user_id] = vote.user_weight if wgt.nil?
-        # It may be possible in the future for us to weight some "special"
-        # users zero, who knows...  (It can cause a division by zero below if
-        # we ignore zero weights.)
-        next unless wgt.positive?
-
-        # Calculate score for naming.vote_cache.
-        sum_val += val * wgt
+        val, wgt = process_vote(naming, vote, name_id)
+        sum_val += val
         sum_wgt += wgt
-        # Record best vote for this user for this name.  This will be used
-        # later to determine which name wins in the case of the winning taxon
-        # (see below) having multiple accepted names.
-        @name_votes[name_id] = {} unless @name_votes[name_id]
-        if !@name_votes[name_id][user_id] ||
-           @name_votes[name_id][user_id][0] < val
-          @name_votes[name_id][user_id] = [val, wgt]
-        end
-        # Record best vote for this user for this group of synonyms.  (Since
-        # not all taxa have synonyms, I've got to create a "fake" id that
-        # uses the synonym id if it exists, else uses the name id, but still
-        # keeps them separate.)
-        taxon_id = if naming.name.synonym_id
-                     "s" + naming.name.synonym_id.to_s
-                   else
-                     "n" + name_id.to_s
-                   end
-        if !@taxon_ages[taxon_id] ||
-           naming.created_at < @taxon_ages[taxon_id]
-          @taxon_ages[taxon_id] = naming.created_at
-        end
-        @taxon_votes[taxon_id] = {} unless @taxon_votes[taxon_id]
-        add_debug_message("raw vote: taxon_id=#{taxon_id}, " \
-                          "name_id=#{name_id}, " \
-                          "user_id=#{user_id}, " \
-                          "val=#{val}<br/>")
-        if !@taxon_votes[taxon_id][user_id] ||
-           @taxon_votes[taxon_id][user_id][0] < val
-          @taxon_votes[taxon_id][user_id] = [val, wgt]
-        end
       end
       cache_value = sum_wgt.positive? ? sum_val.to_f / (sum_wgt + 1.0) : 0.0
       update_naming_cache(naming, cache_value)
+    end
+
+    def process_vote(naming, vote, name_id)
+      user_id = vote.user_id
+      val = vote.value
+      wgt = user_weight(user_id, vote)
+      return [0, 0] unless wgt.positive?
+
+      update_user_votes(name_id, user_id, val, wgt)
+      update_taxon_votes(naming, name_id, user_id, val, wgt)
+      [val * wgt, wgt]
+    end
+
+    def user_weight(user_id, vote)
+      @user_wgts[user_id] ||= vote.user_weight
+      @user_wgts[user_id]
+    end
+
+    # Record best vote for this user for this name.  This will be used
+    # later to determine which name wins in the case of the winning taxon
+    # (see below) having multiple accepted names.
+    def update_user_votes(name_id, user_id, val, weight)
+      @name_votes[name_id] ||= {}
+      if !@name_votes[name_id][user_id] ||
+         @name_votes[name_id][user_id][0] < val
+        @name_votes[name_id][user_id] = [val, weight]
+      end
+    end
+
+    def update_taxon_votes(naming, name_id, user_id, val, wgt)
+      # Record best vote for this user for this group of synonyms.  (Since
+      # not all taxa have synonyms, I've got to create a "fake" id that
+      # uses the synonym id if it exists, else uses the name id, but still
+      # keeps them separate.)
+      taxon_id = taxon_identifier(naming, name_id)
+      if !@taxon_ages[taxon_id] ||
+         naming.created_at < @taxon_ages[taxon_id]
+        @taxon_ages[taxon_id] = naming.created_at
+      end
+      @taxon_votes[taxon_id] = {} unless @taxon_votes[taxon_id]
+      add_debug_message("raw vote: taxon_id=#{taxon_id}, " \
+                        "name_id=#{name_id}, " \
+                        "user_id=#{user_id}, " \
+                        "val=#{val}<br/>")
+      if !@taxon_votes[taxon_id][user_id] ||
+         @taxon_votes[taxon_id][user_id][0] < val
+        @taxon_votes[taxon_id][user_id] = [val, wgt]
+      end
+    end
+
+    def taxon_identifier(naming, name_id)
+      if naming.name.synonym_id
+        "s" + naming.name.synonym_id.to_s
+      else
+        "n" + name_id.to_s
+      end
     end
 
     def update_naming_cache(naming, value)
@@ -270,6 +240,59 @@ class Observation
         naming.vote_cache = value
         naming.save
       end
+    end
+
+    def find_taxon_votes
+      # Now that we've weeded out potential duplicate votes, we can
+      # combine them safely.
+      votes = {}
+      @taxon_votes.each_key do |taxon_id|
+        vote = votes[taxon_id] = [0, 0]
+        @taxon_votes[taxon_id].each_key do |user_id|
+          user_vote = @taxon_votes[taxon_id][user_id]
+          val = user_vote[0]
+          wgt = user_vote[1]
+          vote[0] += val * wgt
+          vote[1] += wgt
+          add_debug_message("vote: taxon_id=#{taxon_id}, " \
+                            "user_id=#{user_id}, " \
+                            "val=#{val}, wgt=#{wgt}<br/>")
+        end
+      end
+      votes
+    end
+
+    def find_best_id(votes)
+      # Now we can determine the winner among the set of
+      # synonym-groups.  (Nathan calls these synonym-groups "taxa",
+      # because it better uniquely represents the underlying mushroom
+      # taxon, while it might have multiple names.)
+      best_val = nil
+      best_wgt = nil
+      best_age = nil
+      best_id  = nil
+      votes.each_key do |taxon_id|
+        wgt = votes[taxon_id][1]
+        val = votes[taxon_id][0].to_f / (wgt + 1.0)
+        age = @taxon_ages[taxon_id]
+        add_debug_message("#{taxon_id}: " \
+                          "val=#{val} wgt=#{wgt} age=#{age}<br/>")
+        next unless best_val.nil? ||
+                    val > best_val ||
+                    val == best_val && (
+                      wgt > best_wgt || wgt == best_wgt && (
+                        age < best_age
+                      )
+                    )
+
+        best_val = val
+        best_wgt = wgt
+        best_age = age
+        best_id  = taxon_id
+      end
+      add_debug_message("best: id=#{best_id}, val=#{best_val}, " \
+                        "wgt=#{best_wgt}, age=#{best_age}<br/>")
+      [best_id, best_val]
     end
   end
 end
