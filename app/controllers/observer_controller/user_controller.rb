@@ -148,7 +148,7 @@ class ObserverController
         @val = ""
         if @user2.bonuses
           vals = @user2.bonuses.map do |points, reason|
-            sprintf("%-6d %s", points, reason.gsub(/\s+/, " "))
+            format("%-6d %s", points, reason.gsub(/\s+/, " "))
           end
           @val = vals.join("\n")
         end
