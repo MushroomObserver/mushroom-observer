@@ -56,7 +56,7 @@ class AjaxController
   end
 
   def update_link(link, url)
-    link.update_attributes(url: url)
+    link.update(url: url)
     render_errors_or_id(link)
   end
 

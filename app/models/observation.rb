@@ -1285,7 +1285,7 @@ class Observation < AbstractModel
     return unless herbarium_records.empty?
     return unless sequences.empty?
 
-    update_attributes(specimen: false)
+    update(specimen: false)
   end
 
   # Return primary collector and their number if available, else just return

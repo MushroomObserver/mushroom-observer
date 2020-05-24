@@ -298,7 +298,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
     num2 = collection_numbers(:coprinus_comatus_coll_num)
-    num1.update_attributes(name: "Joe Schmoe")
+    num1.update(name: "Joe Schmoe")
     assert_users_equal(rolf, num1.user)
     assert_users_equal(rolf, num2.user)
     assert_obj_list_equal([num1], obs1.collection_numbers)
