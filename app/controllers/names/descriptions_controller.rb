@@ -206,9 +206,9 @@ class Names::DescriptionsController < ApplicationController
     end
   end
 
-  # TODO: NIMMO should this be /name/#{@name.id}/description/#{@description.id} ?
+  # this was /name/show_name_description/#{@description.id} - NIMMO
   def description_canonical_url
-    "#{MO.http_domain}/name/show_name_description/#{@description.id}"
+    "#{MO.http_domain}/names/#{@name.id}/descriptions/#{@description.id}"
   end
 
   def users_projects_which_dont_have_desc_of_this_name

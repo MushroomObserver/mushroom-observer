@@ -6,7 +6,7 @@
   any_names = @observation.namings && @observation.namings.count > 0
 
   do_suggestions = logged_in && @observation.thumb_image_id.present? &&
-                   (@user.admin || [123, 40148].include?(@user.id))
+                   (@user.admin || [123, 40148, 48075].include?(@user.id))
 
   locals = {
     observation: @observation,

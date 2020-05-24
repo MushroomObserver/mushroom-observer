@@ -615,7 +615,7 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        message = if /^<select/.match?(elements.first.to_s)
+        message = if elements.first.to_s.start_with?("<select")
                     check_select_value(elements.first, expect_val, id)
                   else
                     check_input_value(elements.first.to_s, expect_val, id)

@@ -369,8 +369,8 @@ module LanguageExporter
       @in_tag = false
       @pass = false
     end
-    if (quoted_tag.match(/^'/) && !quoted_tag.match(/'$/)) ||
-       (quoted_tag.match(/^"/) && !quoted_tag.match(/"$/)) ||
+    if (quoted_tag.start_with?("'") && !quoted_tag.end_with?("'")) ||
+       (quoted_tag.start_with?('"') && !quoted_tag.end_with?('"')) ||
        (quoted_tag.match(/['"]$/) && !quoted_tag.match(/^['"]/))
       verbose("#{locale} #{@line_number}: " \
               "invalid tag quotes: #{quoted_tag.inspect}")
@@ -399,7 +399,7 @@ module LanguageExporter
   def check_export_multi_line(line)
     if !line.match(/\S/)
       @in_tag = false
-    elsif !line.match(/^ /)
+    elsif !line.start_with?(" ")
       verbose("#{locale} #{@line_number}: " \
               "failed to indent multi-ine string for #{@in_tag}")
       @pass = false
@@ -425,9 +425,9 @@ module LanguageExporter
     pass = true
     if /^(yes|no)$/i.match?(str)
       pass = false
-    elsif /^'/.match?(str)
+    elsif str.start_with?("'")
       pass = false unless /^'([^'\\]|\\.)*'$/.match?(str)
-    elsif /^"/.match?(str)
+    elsif str.start_with?('"')
       pass = false unless /^"([^"\\]|\\.)*"$/.match?(str)
     elsif /:(\s|$)| #/.match?(str) ||
           (/^[^\w\(]/.match?(str) && str[0].is_ascii_character?)

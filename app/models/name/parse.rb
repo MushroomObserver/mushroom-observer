@@ -235,7 +235,7 @@ class Name < AbstractModel
 
   def self.standardized_group_abbr(str)
     word = group_wd(str.to_s.downcase)
-    /^g/.match?(word) ? "group" : word
+    word.start_with?("g") ? "group" : word
   end
 
   # sripped group_abbr

@@ -99,7 +99,7 @@ module AutocompleteHelper
         list = val ? val.reject(&:blank?).map(&:to_s).uniq.join("\n") : ""
         js_args << "primer: '" + escape_javascript(list) + "'"
       else
-        if !key.to_s.match(/^on/) &&
+        if !key.to_s.start_with?("on") &&
            !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
           val = "'" + escape_javascript(val.to_s) + "'"
         end

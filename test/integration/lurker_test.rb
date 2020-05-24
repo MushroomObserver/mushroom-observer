@@ -126,10 +126,10 @@ class LurkerTest < IntegrationTestCase
     form.submit("Search")
     assert_select("div.results a[href]") do |links|
       labels = links.map { |l| l.to_s.html_to_ascii }
-      assert(labels.any? { |l| l.match(/Canada$/) },
+      assert(labels.any? { |l| l.end_with?("Canada") },
              "Expected one of the results to be in Canada.\n" \
              "Found these: #{labels.inspect}")
-      assert(labels.any? { |l| l.match(/USA$/) },
+      assert(labels.any? { |l| l.end_with?("USA") },
              "Expected one of the results to be in the US.\n" \
              "Found these: #{labels.inspect}")
     end

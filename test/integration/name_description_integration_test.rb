@@ -167,7 +167,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def edit_description_link_there?
-      abilities[:edit].to_s.match(/^visible/)
+      abilities[:edit].to_s.start_with?("visible")
     end
 
     def edit_description_requires_login?
@@ -175,7 +175,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def destroy_description_link_there?
-      abilities[:destroy].to_s.match(/^visible/)
+      abilities[:destroy].start_with?("visible")
     end
 
     def source_name_field_state

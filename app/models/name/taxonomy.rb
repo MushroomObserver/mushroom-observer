@@ -134,7 +134,7 @@ class Name < AbstractModel
       genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
-      nonsensu   = genera.reject { |n| n.author =~ /^sensu / }
+      nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
       genera     = nonsensu if nonsensu.any?
       genera.first
     end
@@ -201,7 +201,7 @@ class Name < AbstractModel
     matches  = Name.where(text_name: name, correct_spelling_id: nil)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
-    nonsensu = matches.reject { |match| match.author =~ /^sensu / }
+    nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
     matches  = nonsensu if nonsensu.any?
     matches.first
   end
