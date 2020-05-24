@@ -246,9 +246,13 @@ class Observation
       attr_reader :val
       attr_reader :wgt
 
-      def initialize(val: nil, wgt: nil)
-        @val = val
+      def initialize(value: nil, wgt: nil)
         @wgt = wgt
+        if value.nil?
+          @val = val
+        else
+          @val = value / (wgt + 1.0)
+        end
       end
 
       # def val
@@ -305,7 +309,7 @@ class Observation
       best_age = nil
       best_id  = nil
       votes.each_key do |taxon_id|
-        wv = WeightedValue.new(val: votes[taxon_id][0].to_f / (votes[taxon_id][1] + 1.0),
+        wv = WeightedValue.new(value: votes[taxon_id][0].to_f,
                               wgt: votes[taxon_id][1])
         age = @taxon_ages[taxon_id]
         add_debug_message("#{taxon_id}: " \
