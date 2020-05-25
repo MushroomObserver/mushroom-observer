@@ -60,6 +60,7 @@ class Name < AbstractModel
     results
   end
 
+  private
 
   # Guess correct name of partial string.
   def self.guess_word(prefix, word) # :nodoc:
@@ -124,6 +125,7 @@ class Name < AbstractModel
     result.join(" ")
   end
 
+  public
 
   # Check if the reason that the given name (String) is unrecognized is because
   # it's within a deprecated genus.  Use case: Cladina has been included back
