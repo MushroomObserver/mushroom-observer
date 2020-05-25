@@ -69,7 +69,7 @@ class AjaxController
   def render_errors_or_id(link)
     if link.errors.any?
       msg = link.formatted_errors.join("\n")
-      render(plain: msg.strip_html, status: 500)
+      render(plain: msg.strip_html, status: :internal_server_error)
     else
       render(plain: link.id)
     end

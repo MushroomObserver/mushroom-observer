@@ -31,7 +31,7 @@ class TranslationController < ApplicationController
     render(partial: "form")
   rescue StandardError => e
     msg = error_message(e).join("\n")
-    render(plain: msg, status: 500)
+    render(plain: msg, status: :internal_server_error)
   end
 
   def edit_translations_ajax_post # :norobots:
