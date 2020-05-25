@@ -59,7 +59,7 @@ class CacheTest < UnitTestCase
   def test_changing_observation_name
     obs      = observations(:coprinus_comatus_obs)
     old_name = obs.name
-    naming   = obs.namings.select { |n| n.name != old_name }.first
+    naming   = obs.namings.find { |n| n.name != old_name }
     new_name = naming.name
     assert_not_equal("", new_name.lifeform.to_s)
     assert_not_equal("", new_name.classification.to_s)
