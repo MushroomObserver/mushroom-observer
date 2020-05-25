@@ -237,11 +237,9 @@ class ImageController < ApplicationController
 
     # Grab list of votes.
     @votes = @image.image_votes.sort_by do |v|
-      begin
-        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
-      rescue StandardError
-        "?"
-      end
+      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
+    rescue StandardError
+      "?"
     end
 
     # Update view stats on image we're actually showing.
