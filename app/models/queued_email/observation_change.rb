@@ -73,7 +73,6 @@ class QueuedEmail::ObservationChange < QueuedEmail
 
   ##############################################################################
 
-  private
 
   # Check to see if there is already an email started.
   def self.find_email(recipient, observation)
