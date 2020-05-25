@@ -743,7 +743,7 @@ class ApplicationController < ActionController::Base
     # is a way to test if it's html_safe before, and if so, then it should be
     # okay to remove the first character without making it html_unsafe??
     # rubocop:disable Rails/OutputSafety
-    session[:notice].to_s[1..-1].html_safe
+    session[:notice].to_s[1..].html_safe
     # rubocop:enable Rails/OutputSafety
   end
   helper_method :flash_get_notices

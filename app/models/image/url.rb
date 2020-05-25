@@ -55,7 +55,7 @@ class Image
     end
 
     def local_file_exists?(spec)
-      File.exist?(file_name(spec)[7..-1])
+      File.exist?(file_name(spec)[7..])
     end
 
     def remote_file_exists?(spec)
