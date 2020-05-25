@@ -376,7 +376,7 @@ class LanguageExporterTest < UnitTestCase
                    @official.localization_strings) # Deletes should be gone
 
       assert_equal(
-        3, @official.translation_strings.select { |str| str.user == dick }.count
+        3, @official.translation_strings.count { |str| str.user == dick }
       )
     end
   end
