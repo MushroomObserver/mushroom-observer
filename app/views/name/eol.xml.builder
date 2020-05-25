@@ -9,7 +9,7 @@ xml.response(
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
   "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 "\
                           "http://services.eol.org/schema/content_0_2.xsd"
-) {
+) do
   for taxon in @data.names
     xml.taxon do
       xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
@@ -89,4 +89,4 @@ xml.response(
       break
     end
   end
-}
+end
