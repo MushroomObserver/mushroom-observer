@@ -330,6 +330,7 @@ class TranslationController < ApplicationController
 
   class TranslationFormString
     attr_accessor :string
+
     def initialize(*strs)
       self.string = strs.join("\n")
     end

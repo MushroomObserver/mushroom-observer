@@ -438,6 +438,7 @@ class Image < AbstractModel
 
   # Directory images are stored under.  (Default is +MO.local_image_files+.)
   attr_accessor :image_dir
+
   def image_dir
     @image_dir || MO.local_image_files
   end
@@ -462,6 +463,7 @@ class Image < AbstractModel
 
   # Proc to call after #process_image has been called.
   attr_accessor :clean_up_proc
+
   def clean_up
     clean_up_proc.try(&:call)
   end
