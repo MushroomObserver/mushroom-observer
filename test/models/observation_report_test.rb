@@ -146,7 +146,7 @@ class ObservationReportTest < UnitTestCase
   def test_mycoflora_with_exact_lat_long
     obs = observations(:unknown_with_lat_long)
     obs.notes = {
-      :"Collector's_Name" => "John Doe",
+      "Collector's_Name": "John Doe",
       Substrate: "wood chips",
       Habitat: "lawn",
       Host: "_Agaricus_",
