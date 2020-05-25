@@ -24,7 +24,7 @@ xml.response(
       xml.reference(citation.t) if citation.present?
       refs = []
       @data.descriptions(taxon.id).each do |desc|
-        next unless desc.refs.present?
+        next if desc.refs.blank?
 
         desc.refs.split(/[\n\r]/).each do |ref|
           ref = ref.strip
@@ -35,7 +35,7 @@ xml.response(
       for desc in @data.descriptions(taxon.id)
         for f in NameDescription.eol_note_fields
           value = desc.send(f)
-          next unless value.present?
+          next if value.blank?
 
           xml.dataObject do
             lang = desc.locale || MO.default_locale
