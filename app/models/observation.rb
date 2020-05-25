@@ -857,10 +857,10 @@ class Observation < AbstractModel
     result
   end
 
-  def calc_consensus(debug = false)
+  def calc_consensus
     reload
     calculator = Observation::ConsensusCalculator.new(namings)
-    best, best_val = calculator.calc(debug)
+    best, best_val = calculator.calc
     old = name
     if name != best || vote_cache != best_val
       self.name = best
@@ -868,7 +868,6 @@ class Observation < AbstractModel
       save
     end
     announce_consensus_change(old, best) if best != old
-    return calculator.debug_messages if debug
   end
 
   # Admin tool that refreshes the vote cache for all observations with a vote.

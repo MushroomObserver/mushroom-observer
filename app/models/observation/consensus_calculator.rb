@@ -1,7 +1,5 @@
 class Observation
   class ConsensusCalculator
-    attr_reader :debug_messages
-
     def initialize(namings)
       @namings = namings
       @name_votes  = {}  # Strongest vote for a given name for a user.
@@ -10,14 +8,6 @@ class Observation
       @name_ages   = {}  # Oldest date that a name was proposed.
       @taxon_ages  = {}  # Oldest date that a taxon was proposed.
       @user_wgts   = {}  # Caches user rankings.
-      @collect_debug_messages = false
-    end
-
-    def add_debug_message(message)
-      if @collect_debug_messages
-        @debug_messages ||= ""
-        @debug_messages += message
-      end
     end
 
     # Get the community consensus on what the name should be.  It just
@@ -30,9 +20,7 @@ class Observation
     #
     # Returns Naming instance or nil.  Refreshes vote_cache as a
     # side-effect.
-    def calc(debug)
-      @collect_debug_messages = debug
-
+    def calc
       # Gather votes for names and synonyms.  Note that this is
       # trickier than one would expect since it is possible to propose
       # several synonyms for a single observation, and even worse
@@ -45,7 +33,6 @@ class Observation
       end
       votes = find_taxon_votes
       best, best_val = find_best_name(votes)
-      add_debug_message("unmash: best=#{text_name(best)}<br/>")
       best = fallback_if_needed(unsynonymize(best))
 
       # Just humor me -- I'm sure there is some pathological case where we can
@@ -111,10 +98,6 @@ class Observation
         @taxon_ages[taxon_id] = naming.created_at
       end
       @taxon_votes[taxon_id] = {} unless @taxon_votes[taxon_id]
-      add_debug_message("raw vote: taxon_id=#{taxon_id}, " \
-                        "name_id=#{name_id}, " \
-                        "user_id=#{user_id}, " \
-                        "val=#{val}<br/>")
       if !@taxon_votes[taxon_id][user_id] ||
          @taxon_votes[taxon_id][user_id][0] < val
         @taxon_votes[taxon_id][user_id] = [val, wgt]
@@ -148,9 +131,6 @@ class Observation
           wgt = user_vote[1]
           vote[0] += val * wgt
           vote[1] += wgt
-          add_debug_message("vote: taxon_id=#{taxon_id}, " \
-                            "user_id=#{user_id}, " \
-                            "val=#{val}, wgt=#{wgt}<br/>")
         end
       end
       votes
@@ -190,13 +170,11 @@ class Observation
       votes.each_key do |taxon_id|
         wv = VoteScale.new(vote: votes[taxon_id],
                            age: @taxon_ages[taxon_id])
-        add_debug_message("#{taxon_id}: scale=#{wv}<br/>")
         next unless wv.better_than(best_wv)
 
         best_wv = wv
         best_id = taxon_id
       end
-      add_debug_message("best: id=#{best_id}, scale=#{best_wv}<br/>")
       [taxon_identifier_to_name(best_id), best_wv.weighted_value]
     end
 
@@ -238,12 +216,8 @@ class Observation
       return best if names.blank?
 
       synonyms = names.map(&:id).join(", ")
-      add_debug_message("Multiple synonyms: #{synonyms}<br>")
       votes = process_votes_for_synonyms
-      best = find_best_synonym(names, votes)
-      add_debug_message("unsynonymize: " \
-                        "best=#{best ? best.real_text_name : "nil"}<br/>")
-      best
+      find_best_synonym(names, votes)
     end
 
     def fallback_if_needed(best)
@@ -253,11 +227,9 @@ class Observation
       # happen when there is a single naming, so there is nothing arbitray in
       # using first.  (I think it can also happen if zero-weighted users are
       # voting.)
-      result = best ||
-               (@namings.first.name if @namings.present?) ||
-               Name.unknown
-      add_debug_message("fallback: best=#{text_name(result)}")
-      result
+      best ||
+        (@namings.first.name if @namings.present?) ||
+        Name.unknown
     end
 
     def text_name(name)
@@ -276,9 +248,6 @@ class Observation
           wgt = user_vote[1]
           vote[0] += val * wgt
           vote[1] += wgt
-          add_debug_message("vote: name_id=#{name_id}, " \
-                            "user_id=#{user_id}, " \
-                            "val=#{val}, wgt=#{wgt}<br/>")
         end
       end
       votes
@@ -304,13 +273,11 @@ class Observation
 
         wv = VoteScale.new(vote: vote,
                            age: @name_ages[name_id])
-        add_debug_message("#{name_id}: scale=#{wv}<br/>")
         next unless wv.better_than(best_wv)
 
         best_wv = wv
         best_id = name_id
       end
-      add_debug_message("best: id=#{best_id}, scale=#{best_wv}<br/>")
       best_id ? Name.find(best_id) : names.first
     end
   end
