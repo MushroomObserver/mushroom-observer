@@ -7,7 +7,7 @@ class CacheTest < UnitTestCase
     loc = locations(:burbank)
     assert_not_empty(loc.observations)
     first_updated_at = loc.observations.first.updated_at
-    loc.update_attributes(name: "Truman, California, USA")
+    loc.update(name: "Truman, California, USA")
     assert(loc.observations.all? { |o| o.where == loc.name })
     assert_equal(first_updated_at, loc.observations.first.updated_at)
   end
@@ -18,7 +18,7 @@ class CacheTest < UnitTestCase
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
     first_updated_at = name.observations.first.updated_at
-    name.update_attributes(lifeform: " lichen ")
+    name.update(lifeform: " lichen ")
     assert(name.observations.all? { |o| o.lifeform == name.lifeform })
     assert_equal(first_updated_at, name.observations.first.updated_at)
   end
@@ -46,7 +46,7 @@ class CacheTest < UnitTestCase
     name_updated_at = name.updated_at
     first_updated_at = name.observations.first.updated_at
     new_str = desc.classification.sub(/Ascomycota/, "Basidiomycota")
-    desc.update_attributes(classification: new_str)
+    desc.update(classification: new_str)
     assert_equal(new_str, name.reload.classification)
     assert(name.observations.all? { |o| o.classification == new_str })
     # Name modification date is updated, but not observations.
@@ -59,7 +59,7 @@ class CacheTest < UnitTestCase
   def test_changing_observation_name
     obs      = observations(:coprinus_comatus_obs)
     old_name = obs.name
-    naming   = obs.namings.select { |n| n.name != old_name }.first
+    naming   = obs.namings.find { |n| n.name != old_name }
     new_name = naming.name
     assert_not_equal("", new_name.lifeform.to_s)
     assert_not_equal("", new_name.classification.to_s)
@@ -77,7 +77,7 @@ class CacheTest < UnitTestCase
   def test_propagate_classification
     name = names(:agaricus)
     new_classification = names(:peltigera).classification
-    name.update_attributes(classification: new_classification)
+    name.update(classification: new_classification)
     name.propagate_classification
     Observation.where("text_name LIKE 'Agaricus%'").each do |obs|
       assert_equal(new_classification, obs.classification)

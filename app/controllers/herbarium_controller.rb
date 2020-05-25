@@ -253,7 +253,7 @@ class HerbariumController < ApplicationController
 
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
-      return false
+      false
     else
       @herbarium = perform_or_request_merge(@herbarium, other)
     end

@@ -13,7 +13,7 @@ class ObserverController
 
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
-  alias_method :list_users, :index_user
+  alias list_users index_user
 
   # User index, restricted to admins.
   def users_by_name # :norobots:

@@ -115,7 +115,7 @@ module ObservationReport
       end.join("; ")
       return str if str.present?
 
-      return "vouchered"
+      "vouchered"
     end
 
     def sort_before(rows)

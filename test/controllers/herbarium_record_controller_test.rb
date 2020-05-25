@@ -153,7 +153,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_create_herbarium_record_post_not_curator
     nybg = herbaria(:nybg_herbarium)
     obs  = observations(:strobilurus_diminutivus_obs)
-    obs.update_attributes(user: dick)
+    obs.update(user: dick)
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     params[:id] = obs.id

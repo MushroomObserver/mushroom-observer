@@ -39,7 +39,7 @@ class ArticleController < ApplicationController
     return if permitted?
 
     flash_notice(:permission_denied.t)
-    redirect_to(action: "index_article") and return
+    redirect_to(action: "index_article")
   end
 
   # permitted to create/update/destroy any Article

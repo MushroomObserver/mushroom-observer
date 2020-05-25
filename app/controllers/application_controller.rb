@@ -800,11 +800,11 @@ class ApplicationController < ActionController::Base
     type_sym = obj.class.to_s.underscore.to_sym
     if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
-      return true
+      true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
-      return false
+      false
     end
   end
 
