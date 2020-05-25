@@ -339,19 +339,19 @@ class Observation < AbstractModel
   def lat=(val)
     lat = Location.parse_latitude(val)
     lat = val if lat.nil? && val.present?
-    write_attribute(:lat, lat)
+    self[:lat] = lat
   end
 
   def long=(val)
     long = Location.parse_longitude(val)
     long = val if long.nil? && val.present?
-    write_attribute(:long, long)
+    self[:long] = long
   end
 
   def alt=(val)
     alt = Location.parse_altitude(val)
     alt = val if alt.nil? && val.present?
-    write_attribute(:alt, alt)
+    self[:alt] = alt
   end
 
   # Is lat/long more than 10% outside of location extents?
