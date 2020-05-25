@@ -46,7 +46,7 @@ class AjaxController < ApplicationController
     yield
   rescue StandardError => e
     msg = e.to_s + "\n"
-    msg += backtrace(e) if Rails.env != "production"
+    msg += backtrace(e) unless Rails.env.production?
     render(plain: msg, status: 500)
   end
 
