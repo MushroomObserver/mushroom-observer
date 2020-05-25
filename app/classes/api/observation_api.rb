@@ -16,7 +16,7 @@ class API
       { images: :license },
       :location,
       :name,
-      { namings: [ :name, { votes: :user } ] },
+      { namings: [:name, { votes: :user }] },
       :collection_numbers,
       { herbarium_records: :herbarium },
       :sequences,
