@@ -881,7 +881,7 @@ class User < AbstractModel
   def has_unshown_naming_notifications?(_observation = nil)
     result = false
     QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                      user_id: id).each do |q|
+                      user_id: id).find_each do |q|
       _naming_id, notification_id, shown =
         q.get_integers([:naming, :notification, :shown])
       next unless shown.nil?

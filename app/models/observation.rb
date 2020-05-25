@@ -1123,7 +1123,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.each(&:calc_consensus)
+    Observation.all.find_each(&:calc_consensus)
   end
 
   # Return the review status based on the Vote's on the consensus Name by
@@ -1377,7 +1377,7 @@ class Observation < AbstractModel
     end
 
     # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).each do |user|
+    User.where(email_observations_all: true).find_each do |user|
       recipients.push(user)
     end
 

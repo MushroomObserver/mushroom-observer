@@ -166,7 +166,7 @@ class Naming < AbstractModel
       done_user = {}
       flavor = Notification.flavors[:name]
       taxa.each do |taxon|
-        Notification.where(flavor: flavor, obj_id: taxon.id).each do |n|
+        Notification.where(flavor: flavor, obj_id: taxon.id).find_each do |n|
           next unless (n.user != user) && !done_user[n.user_id] &&
                       (!n.require_specimen || observation.specimen)
 
