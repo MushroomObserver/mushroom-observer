@@ -35,7 +35,7 @@ class HerbariumTest < UnitTestCase
     ny = herbaria(:nybg_herbarium)
     f  = herbaria(:field_museum)
     # Make sure it takes at least one field from F.
-    ny.update_attributes(mailing_address: "")
+    ny.update(mailing_address: "")
     assert_operator(ny.created_at, :<, f.created_at)
     name              = ny.name
     code              = ny.code

@@ -258,15 +258,15 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record.herbarium = herbarium
     if name.blank?
       flash_error(:create_herbarium_record_missing_herbarium_name.t)
-      return false
+      false
     elsif !@herbarium_record.herbarium.nil?
-      return true
+      true
     elsif name != @user.personal_herbarium_name || @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)
-      return false
+      false
     else
       @herbarium_record.herbarium = @user.create_personal_herbarium
-      return true
+      true
     end
   end
 

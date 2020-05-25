@@ -75,7 +75,7 @@ class API
 
     # Stub for hook before creating object.  Return an object instance if the
     # object already exists and you don't want to create a new object.
-    def before_create(params)
+    def before_create(_params)
       nil
     end
 

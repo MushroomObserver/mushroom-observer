@@ -67,7 +67,7 @@ class ImageController < ApplicationController
   def list_images
     if params[:page].to_s.to_i > 1000
       render(
-        status: 429,
+        status: :too_many_requests,
         content_type: "text/plain",
         plain: "Your queries are killing our server. " \
                "There are much better ways to scrape the images " \

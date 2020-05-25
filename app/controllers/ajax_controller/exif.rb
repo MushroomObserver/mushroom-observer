@@ -22,7 +22,7 @@ class AjaxController
     if status.success?
       render_exif_data(result, hide_gps)
     else
-      render(plain: result, status: 500)
+      render(plain: result, status: :internal_server_error)
     end
   end
 

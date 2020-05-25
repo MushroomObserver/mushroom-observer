@@ -339,19 +339,19 @@ class Observation < AbstractModel
   def lat=(val)
     lat = Location.parse_latitude(val)
     lat = val if lat.nil? && val.present?
-    write_attribute(:lat, lat)
+    self[:lat] = lat
   end
 
   def long=(val)
     long = Location.parse_longitude(val)
     long = val if long.nil? && val.present?
-    write_attribute(:long, long)
+    self[:long] = long
   end
 
   def alt=(val)
     alt = Location.parse_altitude(val)
     alt = val if alt.nil? && val.present?
-    write_attribute(:alt, alt)
+    self[:alt] = alt
   end
 
   # Is lat/long more than 10% outside of location extents?
@@ -873,7 +873,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.each(&:calc_consensus)
+    Observation.all.find_each(&:calc_consensus)
   end
 
   # Return the review status based on the Vote's on the consensus Name by
@@ -1035,7 +1035,7 @@ class Observation < AbstractModel
     return unless herbarium_records.empty?
     return unless sequences.empty?
 
-    update_attributes(specimen: false)
+    update(specimen: false)
   end
 
   # Return primary collector and their number if available, else just return
@@ -1127,7 +1127,7 @@ class Observation < AbstractModel
     end
 
     # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).each do |user|
+    User.where(email_observations_all: true).find_each do |user|
       recipients.push(user)
     end
 

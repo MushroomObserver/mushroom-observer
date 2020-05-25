@@ -218,8 +218,8 @@ class ProjectController < ApplicationController
       @summary = params[:project][:summary]
       if @title.blank?
         flash_error(:add_project_need_title.t)
-      elsif project2 = Project.find_by_title(@title) and
-            project2 != @project
+      elsif (project2 = Project.find_by_title(@title)) &&
+            (project2 != @project)
         flash_error(:add_project_already_exists.t(title: @title))
       elsif !@project.update(whitelisted_project_params)
         flash_object_errors(@project)
@@ -313,8 +313,8 @@ class ProjectController < ApplicationController
   # Posts to same action.  Redirects to show_project when done.
   def change_member_status # :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s) and
-       @candidate = find_or_goto_index(User, params[:candidate])
+    if (@project = find_or_goto_index(Project, params[:id].to_s)) &&
+       (@candidate = find_or_goto_index(User, params[:candidate]))
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)
         redirect_with_query(action: :show_project, id: @project.id)

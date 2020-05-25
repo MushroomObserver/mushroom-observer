@@ -338,25 +338,25 @@ class PatternSearchTest < UnitTestCase
     x.vals = [1, 2]
     assert_raises(PatternSearch::TooManyValuesError) { x.parse_date_range }
     x.vals = ["2010"]
-    assert_equal(["2010-01-01", "2010-12-31"], x.parse_date_range)
+    assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
     x.vals = ["2010-9"]
-    assert_equal(["2010-09-01", "2010-09-31"], x.parse_date_range)
+    assert_equal(%w[2010-09-01 2010-09-31], x.parse_date_range)
     x.vals = ["2010-9-5"]
-    assert_equal(["2010-09-05", "2010-09-05"], x.parse_date_range)
+    assert_equal(%w[2010-09-05 2010-09-05], x.parse_date_range)
     x.vals = ["2010-09-05"]
-    assert_equal(["2010-09-05", "2010-09-05"], x.parse_date_range)
+    assert_equal(%w[2010-09-05 2010-09-05], x.parse_date_range)
     x.vals = ["2010-2012"]
-    assert_equal(["2010-01-01", "2012-12-31"], x.parse_date_range)
+    assert_equal(%w[2010-01-01 2012-12-31], x.parse_date_range)
     x.vals = ["2010-3-2010-5"]
-    assert_equal(["2010-03-01", "2010-05-31"], x.parse_date_range)
+    assert_equal(%w[2010-03-01 2010-05-31], x.parse_date_range)
     x.vals = ["2010-3-12-2010-5-1"]
-    assert_equal(["2010-03-12", "2010-05-01"], x.parse_date_range)
+    assert_equal(%w[2010-03-12 2010-05-01], x.parse_date_range)
     x.vals = ["6"]
-    assert_equal(["06-01", "06-31"], x.parse_date_range)
+    assert_equal(%w[06-01 06-31], x.parse_date_range)
     x.vals = ["3-5"]
-    assert_equal(["03-01", "05-31"], x.parse_date_range)
+    assert_equal(%w[03-01 05-31], x.parse_date_range)
     x.vals = ["3-12-5-1"]
-    assert_equal(["03-12", "05-01"], x.parse_date_range)
+    assert_equal(%w[03-12 05-01], x.parse_date_range)
     x.vals = ["1-2-3-4-5-6"]
     assert_raises(PatternSearch::BadDateRangeError) { x.parse_date_range }
   end

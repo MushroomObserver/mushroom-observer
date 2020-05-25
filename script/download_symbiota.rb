@@ -14,7 +14,7 @@ def do_report(year, do_labels = false)
   sleep 60
 end
 
-do_report(["1000", "1999"], :do_labels)
+do_report(%w[1000 1999], :do_labels)
 (2000..2019).each do |year|
   do_report([year.to_s, year.to_s])
 end

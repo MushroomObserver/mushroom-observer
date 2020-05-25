@@ -45,7 +45,7 @@ class ObserverController
   end
 
   # I keep forgetting the stupid "_sandbox" thing.
-  alias_method :textile, :textile_sandbox
+  alias textile textile_sandbox
 
   # Allow translator to enter a special note linked to from the lower left.
   def translators_note
