@@ -389,10 +389,6 @@ class AmateurTest < IntegrationTestCase
                "Expected error about name not existing yet.")
       end
 
-      open_form(&:submit)
-      assert_template("naming/create")
-      assert_flash_text(/confidence/i)
-
       open_form do |form|
         form.assert_value("name", text_name)
         form.assert_unchecked("reason_1_check")

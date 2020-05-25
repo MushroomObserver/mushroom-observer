@@ -499,7 +499,7 @@ class NamingControllerTest < FunctionalTestCase
     }
     login("dick")
     post(:create, params)
-    assert_response(:success) # really means failed
+    assert_response(:redirect)
     assert(name = Name.find_by(text_name: 'Foo "bar"'))
     assert_equal('Foo "bar" Author', name.search_name)
   end
