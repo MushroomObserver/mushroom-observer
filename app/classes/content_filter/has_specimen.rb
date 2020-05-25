@@ -10,7 +10,7 @@ class ContentFilter
       )
     end
 
-    def sql_conditions(query, model, val)
+    def sql_conditions(_query, _model, val)
       ["observations.specimen IS #{val ? "TRUE" : "FALSE"}"]
     end
   end
