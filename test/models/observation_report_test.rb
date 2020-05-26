@@ -306,7 +306,7 @@ class ObservationReportTest < UnitTestCase
       'wood chips',
       "Agaricus",
       'Habitat: lawn Other: First line. Second line.',
-      "#{obs.id}",
+      (obs.id).to_s,
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
@@ -342,7 +342,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "",
       "From somewhere else",
-      "#{obs.id}",
+      (obs.id).to_s,
       "http://mushroomobserver.org/#{obs.id}"
     ]
     do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
