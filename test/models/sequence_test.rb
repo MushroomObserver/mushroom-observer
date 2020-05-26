@@ -248,7 +248,7 @@ class SequenceTest < UnitTestCase
 
   def test_blast_url
     assert_equal(
-      %(#{Sequence. blast_url_prefix}ACGT),
+      %(#{Sequence.blast_url_prefix}ACGT),
       sequences(:local_sequence).blast_url
     )
     assert_equal(

@@ -146,7 +146,7 @@ class ObservationReportTest < UnitTestCase
   def test_mycoflora_with_exact_lat_long
     obs = observations(:unknown_with_lat_long)
     obs.notes = {
-      :"Collector's_Name" => "John Doe",
+      "Collector's_Name": "John Doe",
       Substrate: "wood chips",
       Habitat: "lawn",
       Host: "_Agaricus_",
@@ -303,10 +303,10 @@ class ObservationReportTest < UnitTestCase
       "148",
       "294",
       "#{obs.updated_at.api_time} UTC",
-      'wood chips',
+      "wood chips",
       "Agaricus",
-      'Habitat: lawn Other: First line. Second line.',
-      "#{obs.id}",
+      "Habitat: lawn Other: First line. Second line.",
+      obs.id.to_s,
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
@@ -342,7 +342,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "",
       "From somewhere else",
-      "#{obs.id}",
+      obs.id.to_s,
       "http://mushroomobserver.org/#{obs.id}"
     ]
     do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)

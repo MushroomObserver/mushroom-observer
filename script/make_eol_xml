@@ -41,7 +41,7 @@ class ParsedUrl
 
   def port
     p = @m[2]
-    p ? p[1..-1].to_i : 443
+    p ? p[1..].to_i : 443
   end
 end
 

@@ -597,7 +597,7 @@ class Location < AbstractModel
     return if tokens.length < 2
 
     alt = [tokens[0]]
-    tokens[1..-1].each { |t| alt.push(t) if t[-4..-1] != " Co." }
+    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
     result = alt.join(", ")
     result == name ? nil : result
   end

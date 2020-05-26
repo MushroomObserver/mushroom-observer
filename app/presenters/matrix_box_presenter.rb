@@ -126,7 +126,7 @@ class MatrixBoxPresenter
     if !target_type
       self.detail = :rss_destroyed.t(type: :object)
     elsif !target ||
-          tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
+          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
       self.detail = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
       self.detail = :rss_created_at.t(type: target_type)
