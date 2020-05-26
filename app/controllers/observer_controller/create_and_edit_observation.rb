@@ -451,7 +451,7 @@ class ObserverController
     begin
       @observation = Observation.find(id)
       @observation.name.display_name
-      @observation.calc_consensus(true)
+      @observation.calc_consensus
     rescue StandardError => e
       flash_error(:observer_recalc_caught_error.t(error: e))
     end
