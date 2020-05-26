@@ -532,7 +532,7 @@ class Image < AbstractModel
     self.upload_length = upload.content_length
     self.upload_type   = upload.content_type
     self.upload_md5sum = upload.content_md5
-    self.clean_up_proc = lambda { upload.clean_up }
+    self.clean_up_proc = -> { upload.clean_up }
   end
 
   # Perform what checks we can on the prospective upload before actually
