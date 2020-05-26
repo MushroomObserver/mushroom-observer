@@ -303,9 +303,9 @@ class ObservationReportTest < UnitTestCase
       "148",
       "294",
       "#{obs.updated_at.api_time} UTC",
-      'wood chips',
+      "wood chips",
       "Agaricus",
-      'Habitat: lawn Other: First line. Second line.',
+      "Habitat: lawn Other: First line. Second line.",
       obs.id.to_s,
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
