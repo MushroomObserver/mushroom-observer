@@ -69,9 +69,9 @@ class API
 
     def process_response(response, limit)
       case response
-      when Net::HTTPSuccess then
+      when Net::HTTPSuccess
         process_http_success(response)
-      when Net::HTTPRedirection then
+      when Net::HTTPRedirection
         fetch(response["location"], limit - 1)
       else
         raise("Unexpected response type: #{response.value}")
