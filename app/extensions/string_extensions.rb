@@ -575,7 +575,7 @@ class String
 
   # Find amount first line is indented and remove that from all lines.
   def unindent
-    gsub /^#{self[/\A\s*/]}/, ""
+    gsub(/^#{self[/\A\s*/]}/, "")
   end
 
   ### String Queries ###
