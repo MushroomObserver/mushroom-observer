@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
-gem "sprockets"
-
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem "rails", "~> 5.2.4"
 
@@ -139,9 +137,6 @@ gem "bootstrap", "~> 4.4.1"
 # Use Bootstrap Lightbox for lightbox
 gem "lightbox-bootstrap-rails", "~> 5.1", ">= 5.1.0.1"
 
-
-# for detecting file type of uploaded images
-gem "mimemagic"
 
 ########## Development, Testing, and Analysis ##################################
 
