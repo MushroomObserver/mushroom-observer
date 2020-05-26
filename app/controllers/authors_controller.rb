@@ -16,6 +16,9 @@ class AuthorsController < ApplicationController
       AuthorEmail.build(@user, receiver, @object, subject, content).deliver_now
     end
     flash_notice(:request_success.t)
+    # TODO: NIMMO i don't know how to refactor this with a path helper.
+    # otherwise if it's a description, this will need module/namespace
+    # Second one below in review_authors
     redirect_with_query(
       controller: @object.show_controller,
       action: @object.show_action,

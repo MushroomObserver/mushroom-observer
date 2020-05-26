@@ -93,7 +93,7 @@ class NamesController
         #   action: :show,
         #   id: @name.id
         # )
-        redirect_with_query(@name.show_link_args)
+        redirect_to name_path(@name.id, :q => get_query_param)
       else
         flash_object_errors(@name)
         flash_object_errors(@name.synonym)
@@ -182,7 +182,7 @@ class NamesController
       #   action: :show,
       #   id: @name.id
       # )
-      redirect_with_query(@name.show_link_args)
+      redirect_to name_path(@name.id, :q => get_query_param)
     end
   end
 

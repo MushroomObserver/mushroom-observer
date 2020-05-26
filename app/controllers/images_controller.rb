@@ -125,7 +125,7 @@ class ImagesController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@image = Image.safe_find(pattern))
-      redirect_to @image
+      redirect_to image_path(@image.id)
     else
       query = create_query(:Image, :pattern_search, pattern: pattern)
       show_selected_images(query)
@@ -138,7 +138,8 @@ class ImagesController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to controller: :observations, action: :advanced_search
+    # redirect_to controller: :observations, action: :advanced_search
+    redirect_to observations_advanced_search_path
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -173,7 +174,12 @@ class ImagesController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    @links << coerced_query_link(query, Observation)
+    # @links << coerced_query_link(query, Observation)
+    # NIMMO: Haven't figured out how to get coerced_query_link
+    # (from application_controller) to work with paths. Building link here.
+    if query&.coercable?(:Observation)
+      @links << [link_to :show_objects.t(type: :observation),
+                  observations_index_observation_path(:q => get_query_param)]
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
@@ -318,7 +324,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: id
       # )
-      redirect_with_query @image
+      redirect_to image_path(@image.id, :q => get_query_param)
     end
   end
 
@@ -351,7 +357,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query @observation
+      redirect_to observation_path(@observation, :q => get_query_param)
   end
     @image = Image.new
     @image.license = @user.license
@@ -377,7 +383,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query @observation
+      redirect_to observation_path(@observation, :q => get_query_param)
     end
 
     if params[:upload].blank?
@@ -387,7 +393,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query @observation
+      redirect_to observation_path(@observation, :q => get_query_param)
     else
       args = params[:image]
       i = 1
@@ -400,7 +406,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query @observation
+      redirect_to observation_path(@observation, :q => get_query_param)
     end
   end
 
@@ -456,7 +462,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image
       # )
-      redirect_with_query @image
+      redirect_to image_path(@image.id, :q => get_query_param)
     end
     init_project_vars_for_add_or_edit(@image)
   end
@@ -513,7 +519,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image.id
       # )
-      redirect_with_query @image
+      redirect_to image_path(@image.id, :q => get_query_param)
     else
       init_project_vars_for_reload(@image)
     end
@@ -604,7 +610,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image.id
       # )
-      redirect_with_query @image
+      redirect_to image_path(@image.id, :q => get_query_param)
     else
       @image.log_destroy
       @image.destroy
@@ -616,7 +622,7 @@ class ImagesController < ApplicationController
           id: next_state.current_id
         )
       else
-        redirect_to action: :index
+        redirect_to images_path
       end
     end
   end
@@ -647,7 +653,7 @@ class ImagesController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_with_query @observation
+    redirect_to observation_path(@observation, :q => get_query_param)
   end
 
   def serve_reuse_form(params)
@@ -716,7 +722,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query @observation
+      redirect_to observation_path(@observation, :q => get_query_param)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -739,7 +745,7 @@ class ImagesController < ApplicationController
         #   action: :show,
         #   id: @observation.id
         # )
-        redirect_with_query @observation
+        redirect_to observation_path(@observation, :q => get_query_param)
         done = true
 
       else
@@ -755,7 +761,7 @@ class ImagesController < ApplicationController
         #   action: :show,
         #   id: @user.id
         # )
-        redirect_to @users
+        redirect_to user_path(@users, :q => get_query_param)
         done = true
       end
     end
@@ -801,20 +807,18 @@ class ImagesController < ApplicationController
           @object.log_remove_image(image)
           flash_notice(:runtime_image_remove_success.t(id: image_id))
         end
-        # redirect_with_query(
-        #   controller: target_class.show_controller,
-        #   action: target_class.show_action,
-        #   id: @object.id
-        # )
-        redirect_with_query @object
+        redirect_with_query(
+          controller: target_class.show_controller,
+          action: target_class.show_action,
+          id: @object.id
+        )
       end
     else
-      # redirect_with_query(
-      #   controller: target_class.show_controller,
-      #   action: target_class.show_action,
-      #   id: @object.id
-      # )
-      redirect_with_query @object
+      redirect_with_query(
+        controller: target_class.show_controller,
+        action: target_class.show_action,
+        id: @object.id
+      )
     end
   end
 
@@ -848,14 +852,15 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: image
       # )
-      redirect_with_query @image
+      redirect_to image_path(@image.id, :q => get_query_param)
     else
       # redirect_with_query(
       #   action: :show,
       #   id: @image.id,
       #   size: params[:size]
       # )
-      redirect_with_query @image, size: params[:size]
+      redirect_to image_path(@image.id,
+        :q => get_query_param, :size => params[:size])
     end
   end
 

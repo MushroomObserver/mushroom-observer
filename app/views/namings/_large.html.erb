@@ -1,9 +1,7 @@
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
 <div class="d-none d-sm-block">
-  <%= form_tag(add_query_param(controller: :votes,
-                               action: :cast_votes,
-                               id: @observation.id),
-               id: "cast_votes_1") do %>
+  <%= form_with(url: votes_cast_votes_path(@observation.id), method: "post",
+                id: "cast_votes_1") do %>
 
     <table class="table table-namings">
       <thead class="bg-secondary border-0">

@@ -106,7 +106,7 @@ class ObservationsController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query(@observation.show_link_args)
+      redirect_to observation_path(@observation.id, :q => get_query_param)
     end
 
     # Initialize form.
@@ -180,7 +180,7 @@ class ObservationsController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_with_query(@observation.show_link_args)
+      redirect_to observation_path(@observation.id, :q => get_query_param)
     end
   end
 
@@ -242,7 +242,7 @@ class ObservationsController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_with_query(@observation.show_link_args)
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   # ----------------------------------------------------------------------------
@@ -531,10 +531,11 @@ class ObservationsController
     else
       session[:hide_thumbnail_maps] = true
     end
-    redirect_with_query(
-      action: :show,
-      id: id
-    )
+    # redirect_with_query(
+    #   action: :show,
+    #   id: id
+    # )
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   def strip_images!
@@ -785,24 +786,27 @@ class ObservationsController
 
   def redirect_to_next_page
     if @observation.location.nil?
-      redirect_to(
-        controller: :locations,
-        action: :new,
-        where: @observation.place_name,
-        set_observation: @observation.id
-      )
+      # redirect_to(
+      #   controller: :locations,
+      #   action: :new,
+      #   where: @observation.place_name,
+      #   set_observation: @observation.id
+      # )
+      redirect_to new_location_path(:where => @observation.place_name,
+                                    :set_observation => @observation.id)
     elsif unshown_notifications?(@user, :naming)
-      redirect_to(
-        controller: :notifications,
-        action: :show,
-        id: @observation.id
-      )
+      # redirect_to(
+      #   controller: :notifications,
+      #   action: :show,
+      #   id: @observation.id
+      # )
+      redirect_to notification_path(@observation.id)
     else
       # redirect_to(
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to @observation
+      redirect_to observation_path(@observation.id)
     end
   end
 

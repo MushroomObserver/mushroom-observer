@@ -17,7 +17,7 @@ class SpeciesListsController
     return unless (@species_list)
 
     if !check_permission!(@species_list)
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     else
       @projects = projects_to_manage
       @object_states = manage_object_states
@@ -25,13 +25,13 @@ class SpeciesListsController
       if request.method == "POST"
         if params[:commit] == :ATTACH.l
           if attach_objects_to_projects
-            redirect_to @species_list
+            redirect_to species_list_path(@species_list.id)
           else
             flash_warning(:runtime_no_changes.t)
           end
         elsif params[:commit] == :REMOVE.l
           if remove_objects_from_projects
-            redirect_to @species_list
+            redirect_to species_list_path(@species_list.id)
           else
             flash_warning(:runtime_no_changes.t)
           end

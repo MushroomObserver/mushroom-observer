@@ -43,7 +43,8 @@ class UsersController < ApplicationController
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      redirect_to controller: :rss_logs, action: :index
+      # redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     end
   end
 
@@ -56,7 +57,7 @@ class UsersController < ApplicationController
       #   action: :show,
       #   id: user.id
       # )
-      redirect_to @user
+      redirect_to user_path(@user.id)
     else
       query = create_query(
         :User,
@@ -231,11 +232,11 @@ class UsersController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          redirect_to @user2
+          redirect_to user_path(@user2.id)
         end
       end
     else
-      redirect_to @user2
+      redirect_to user_path(@user2.id)
     end
   end
 end

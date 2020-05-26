@@ -13,10 +13,12 @@
   <% if records.any? && can_add %>
     <div>
       <%= :Herbarium_records.t %>: [<%=
-        link_with_query(:create_herbarium_record.t,
-                        controller: :herbarium_records,
-                        action: :new,
-                        id: @observation.id)
+        # link_with_query(:create_herbarium_record.t,
+        #                 controller: :herbarium_records,
+        #                 action: :new,
+        #                 id: @observation.id)
+        link_to new_herbarium_record_path(:id => @observation.id,
+                                          :q => get_query_param)
       %>]
     </div>
     <ul class="tight-list">
@@ -56,10 +58,12 @@
 
   <% elsif records.none? && can_add %>
     <%= :show_observation_no_herbarium_records.t %> [<%=
-      link_with_query(:create_herbarium_record.t,
-                      controller: :herbarium_records,
-                      action: :new,
-                      id: @observation.id)
+      # link_with_query(:create_herbarium_record.t,
+      #                 controller: :herbarium_records,
+      #                 action: :new,
+      #                 id: @observation.id)
+      link_to new_herbarium_record_path(:id => @observation.id,
+                                        :q => get_query_param)
     %>]
   <% end %>
 <% end %>

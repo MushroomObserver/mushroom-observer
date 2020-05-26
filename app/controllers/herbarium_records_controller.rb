@@ -40,7 +40,7 @@ class HerbariumRecordsController < ApplicationController
       #   action: :show_herbarium_record,
       #   id: @herbarium_record.id
       # )
-      redirect_to @herbarium_record
+      redirect_to herbarium_record_path(@herbarium_record.id)
     else
       query = create_query(:HerbariumRecord, :pattern_search, pattern: pattern)
       show_selected_herbarium_records(query)
@@ -59,12 +59,17 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:id].to_s, by: :herbarium_label)
     @links = [
-      [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
-      [:create_herbarium_record.l,
-       { action: :new,
-         id: params[:id] }
-      ]
+      # [:show_object.l(type: :observation),
+      #  Observation.show_link_args(params[:id])],
+      [ link_to :show_object.l(type: :observation),
+        observation_path(:id => params[:id]) ]
+      # [:create_herbarium_record.l,
+      #  { action: :new,
+      #    id: params[:id] }
+      # ]
+      [ link_to :create_herbarium_record.l,
+        new_herbarium_record_path(:id => params[:id]) ]
+
     ]
     show_selected_herbarium_records(query, always_index: true)
   end
@@ -101,8 +106,8 @@ class HerbariumRecordsController < ApplicationController
     @back_object = @observation
     if request.method == "GET"
       @herbarium_record = default_herbarium_record
-    elsif request.method == "POST"
-      post_create_herbarium_record
+    # elsif request.method == "POST"
+    #   post_create_herbarium_record
     else
       redirect_back_or_default("/")
     end
@@ -181,7 +186,8 @@ class HerbariumRecordsController < ApplicationController
     return unless make_sure_can_delete!(@herbarium_record)
 
     @herbarium_record.remove_observation(@observation)
-    redirect_with_query(@observation.show_link_args)
+    # redirect_with_query(@observation.show_link_args)
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   def destroy # :norobots:
@@ -192,8 +198,11 @@ class HerbariumRecordsController < ApplicationController
 
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    redirect_with_query(
-      action: :index_herbarium_record
+    # redirect_with_query(
+    #   action: :index_herbarium_record
+    # )
+    redirect_to herbarium_record_index_herbarium_record_path(
+      :q => get_query_param
     )
   end
 
@@ -211,10 +220,11 @@ class HerbariumRecordsController < ApplicationController
     }.merge(args)
 
     @links ||= []
-    @links << [:create_herbarium.l,
-               { controller: :herbaria,
-                 action: :new }
-              ]
+    # @links << [:create_herbarium.l,
+    #            { controller: :herbaria,
+    #              action: :new }
+    #           ]
+    @links << [ link_to :create_herbarium.l, new_herbarium_path ]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -264,7 +274,8 @@ class HerbariumRecordsController < ApplicationController
     return true if herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to(herbarium_record.show_link_args)
+    # redirect_to(herbarium_record.show_link_args)
+    redirect_to herbarium_record_path(herbarium_record.id)
     false
   end
 
@@ -336,9 +347,12 @@ class HerbariumRecordsController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(
-        action: :index_herbarium_record,
-        id: @herbarium_record.id
+      # redirect_with_query(
+      #   action: :index_herbarium_record,
+      #   id: @herbarium_record.id
+      # )
+      redirect_to herbarium_record_index_herbarium_record_path(
+        :q => get_query_param
       )
     end
   end

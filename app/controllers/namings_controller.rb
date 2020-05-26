@@ -10,7 +10,9 @@ class NamingsController < ApplicationController
   ]
 
   # TODO: NIMMO "new" was originally called "create", therefore not aliasable.
-  # during this refactor. Check forms and tests
+  # during this refactor.
+  # Check forms and tests
+  # redirects need refactor to paths? Controller passed as variable below
 
   def new # :prefetch: :norobots:
     pass_query_params

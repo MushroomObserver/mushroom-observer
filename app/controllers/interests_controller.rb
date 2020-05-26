@@ -120,18 +120,23 @@ class InterestsController < ApplicationController
         )
       )
     else
+      # redirect_back_or_default(
+      #   controller: :interests,
+      #   action: :list_interests
+      # )
       redirect_back_or_default(
-        controller: :interests,
-        action: :list_interests
+        interests_list_interests_path
       )
+
     end
   end
 
   def destroy_notification
     pass_query_params
     Notification.find(params[:id].to_i).destroy
-    redirect_with_query(
-      action: :list_interests
-    )
+    # redirect_with_query(
+    #   action: :list_interests
+    # )
+    redirect_to interests_list_interests_path(:q => get_query_param)
   end
 end

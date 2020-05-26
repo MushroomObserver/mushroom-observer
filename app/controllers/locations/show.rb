@@ -61,7 +61,7 @@ class LocationsController
       #   action: :show,
       #   id: @location.id
       # )
-      redirect_to @location
+      redirect_to location_path(@location.id)
     end
   end
 

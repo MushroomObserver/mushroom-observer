@@ -66,10 +66,11 @@ class NamesController
         :email_tracking_no_longer_tracking.t(name: @name.display_name)
       )
     end
-    redirect_with_query(
-      action: :show,
-      id: name_id
-    )
+    # redirect_with_query(
+    #   action: :show,
+    #   id: name_id
+    # )
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
 end

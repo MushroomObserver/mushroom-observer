@@ -55,13 +55,22 @@ class SequencesController < ApplicationController
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
-      [:show_observation_add_sequence.l,
-       { action: :new,
-         id: params[:id] }
-      ]
+    # @links = [
+    #   [:show_object.l(type: :observation),
+    #    Observation.show_link_args(params[:id])],
+    #   [:show_observation_add_sequence.l,
+    #    { action: :new,
+    #      id: params[:id] }
+    #   ]
+    # ]
+    @links = []
+    @links << [
+      link_to :show_object.l(type: :observation),
+              observation_path(params[:id])
+    ]
+    @links << [
+      link_to :show_observation_add_sequence.l,
+              new_sequence_path(:id => params[:id])
     ]
     show_selected_sequences(query, always_index: true)
   end
@@ -101,7 +110,8 @@ class SequencesController < ApplicationController
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@observation.show_link_args)
+      # redirect_with_query(@observation.show_link_args)
+      redirect_to observation_path(@observation.id, :q => get_query_param)
     else
       flash_object_errors(@sequence)
     end
@@ -115,7 +125,9 @@ class SequencesController < ApplicationController
 
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
-      redirect_with_query(@sequence.observation.show_link_args)
+      # redirect_with_query(@sequence.observation.show_link_args)
+      redirect_to observation_path(@sequence.observation_id,
+                                   :q => get_query_param)
     end
   end
 
@@ -149,6 +161,7 @@ class SequencesController < ApplicationController
         action: :index_sequence
       )
     else
+      #TODO: NIMMO isn't @back_object always an observation? Check
       redirect_with_query(@back_object.show_link_args)
     end
   end

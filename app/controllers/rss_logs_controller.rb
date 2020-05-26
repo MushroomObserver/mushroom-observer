@@ -98,11 +98,18 @@ class RssLogsController < ApplicationController
         @user.default_rss_type = @types.join(" ")
         @user.save_without_our_callbacks
       elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [ :rss_make_default.t,
-                    add_query_param(
-                      action: :index_rss_log,
-                      make_default: 1
-                    ) ]
+        # @links << [ :rss_make_default.t,
+        #             add_query_param(
+        #               action: :index_rss_log,
+        #               make_default: 1
+        #             ) ]
+        @links << [
+          link_to :rss_make_default.t,
+                  rss_logs_index_rss_log_path(
+                    :make_default => 1,
+                    :q => get_query_param
+                  )
+        ]
       end
     end
 
@@ -158,7 +165,8 @@ class RssLogsController < ApplicationController
   def change_banner # :root: :norobots:
     if !in_admin_mode?
       flash_error(:permission_denied.t)
-      redirect_to controller: :rss_logs, action: :index
+      # redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
@@ -180,7 +188,8 @@ class RssLogsController < ApplicationController
         str.language.update_localization_file
         str.language.update_export_file
       end
-      redirect_to controller: :rss_logs, action: :index
+      # redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     else
       @val = :app_banner_box.l.to_s
     end

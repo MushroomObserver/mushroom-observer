@@ -28,7 +28,7 @@ class SpeciesListsController
     return unless query
 
     do_add_remove_observations(@species_list, query)
-    redirect_to @species_list
+    redirect_to species_list_path(@species_list.id)
   end
 
   def find_obs_query_or_redirect(@species_list = nil)
@@ -37,9 +37,9 @@ class SpeciesListsController
 
     flash_error(:species_list_add_remove_no_query.t)
     if @species_list
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     else
-      redirect_to action: :index
+      redirect_to species_lists_path
     end
     nil
   end
@@ -49,11 +49,14 @@ class SpeciesListsController
     return list if list
 
     flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
-    redirect_to(
-      add_query_param(
-        action: :add_remove_observations,
-        species_list: id
-      )
+    # redirect_to(
+    #   add_query_param(
+    #     action: :add_remove_observations,
+    #     species_list: id
+    #   )
+    # )
+    redirect_to species_lists_add_remove_observations_path(
+      :species_list => id, :q => get_query_param
     )
     nil
   end
@@ -120,9 +123,12 @@ class SpeciesListsController
       @species_list.remove_observation(@observation)
       flash_notice(:runtime_species_list_remove_observation_success.
         t(name: @species_list.unique_format_name, id: @observation.id))
-      redirect_to action: :manage_species_lists, id: @observation.id
+      # redirect_to action: :manage_species_lists, id: @observation.id
+      redirect_to species_lists_manage_species_lists_path(
+        :id => @observation.id
+      )
     else
-      redirect_to @species_list.id
+      redirect_to species_list_path(@species_list.id)
     end
   end
 
@@ -138,9 +144,12 @@ class SpeciesListsController
       @species_list.add_observation(@observation)
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: @species_list.unique_format_name, id: @observation.id))
-      redirect_to action: :manage_species_lists, id: @observation.id
+      # redirect_to action: :manage_species_lists, id: @observation.id
+      redirect_to species_lists_manage_species_lists_path(
+        :id => @observation.id
+      )
     else
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     end
   end
 
@@ -177,10 +186,11 @@ class SpeciesListsController
     @no_vote.value = 0
     if @observation.empty?
       flash_error(:species_list_bulk_editor_you_own_no_observations.t)
-      redirect_to(
-        action: :show,
-        id: @species_list.id
-      )
+      # redirect_to(
+      #   action: :show,
+      #   id: @species_list.id
+      # )
+      redirect_to species_list_path(@species_list.id)
     elsif request.method == "POST"
       updates = 0
       stay_on_page = false
@@ -257,7 +267,7 @@ class SpeciesListsController
         flash_notice(:species_list_bulk_editor_success.t(n: updates))
       end
 
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     end
   end
 

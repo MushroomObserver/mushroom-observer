@@ -3,6 +3,9 @@
 # see observations_controller.rb
 class ObservationsController
 
+  # TODO: NIMMO Rewrite method to handle incoming params in the below functions,
+  # so it can handle ALL the following index actions
+  #
   # Displays matrix of all Observation's, sorted by date.
   # Currently same as list_observations, for testing.
   def index
@@ -10,24 +13,28 @@ class ObservationsController
     show_selected_observations(query)
   end
 
+  # TODO: NIMMO replace this with index, pass param by:
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
     show_selected_observations(query, id: params[:id].to_s, always_index: true)
   end
 
+  # TODO: NIMMO replace this with index
   # Displays matrix of all Observation's, sorted by date.
   def list_observations
     query = create_query(:Observation, :all, by: :date)
     show_selected_observations(query)
   end
 
+  # TODO: NIMMO replace this with index, pass param by:
   # Displays matrix of all Observation's, alphabetically.
   def observations_by_name
     query = create_query(:Observation, :all, by: :name)
     show_selected_observations(query)
   end
 
+  # TODO: NIMMO replace this with index, pass param names:, include_synonyms:
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name
     query = create_query(:Observation, :all, names: [params[:name]],
@@ -51,7 +58,7 @@ class ObservationsController
     show_selected_observations(query)
   end
 
-  alias show_location_observations observations_at_location
+  alias_method show_location_observations, observations_at_location
 
   # Display matrix of Observation's whose "where" matches a string.
   def observations_at_where
@@ -113,7 +120,8 @@ class ObservationsController
     show_selected_observations(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to controller: :search, action: :advanced_search_form
+    # redirect_to controller: :search, action: :advanced_search_form
+    redirect_to search_advanced_search_form_path
   end
 
   # Show selected search results as a matrix with "list_observations" template.
@@ -127,17 +135,30 @@ class ObservationsController
     # Add some extra links to the index user is sent to if they click on an
     # undefined location.
     if query.flavor == :at_where
-      @links << [:list_observations_location_define.l,
-                 { controller: :locations,
-                   action: :create,
-                   where: query.params[:user_where] }]
-      @links << [:list_observations_location_merge.l,
-                 { controller: :locations,
-                   action: :list_merge_options,
-                   where: query.params[:user_where] }]
-      @links << [:list_observations_location_all.l,
-                 { controller: :locations,
-                   action: :index }]
+      # @links << [:list_observations_location_define.l,
+      #            { controller: :locations,
+      #              action: :new,
+      #              where: query.params[:user_where] }]
+      @links << [
+        link_to :list_observations_location_define.l,
+                new_location_path(:where => query.params[:user_where])
+      ]
+      # @links << [:list_observations_location_merge.l,
+      #            { controller: :locations,
+      #              action: :list_merge_options,
+      #              where: query.params[:user_where] }]
+      @links << [
+        link_to :list_observations_location_merge.l,
+                locations_list_merge_options_path(
+                  :where => query.params[:user_where]
+                )
+      ]
+      # @links << [:list_observations_location_all.l,
+      #            { controller: :locations,
+      #              action: :index }]
+      @links << [
+        link_to :list_observations_location_all.l, locations_path
+      ]
     end
 
     # Add some alternate sorting criteria.
@@ -154,35 +175,59 @@ class ObservationsController
     ]
     args[:sorting_links] = links
 
-    link = [
-      :show_object.t(type: :map),
-      add_query_param(
-        { controller: :observations,
-          action: :map_observations },
-        query)
-    ]
-    @links << link
+    # link = [
+    #   :show_object.t(type: :map),
+    #   add_query_param(
+    #     { controller: :observations,
+    #       action: :map_observations },
+    #     query)
+    # ]
+    # @links << link
+    @links << [link_to :show_object.t(type: :map),
+                observations_map_observations_path(:q => get_query_param)]
 
-    @links << coerced_query_link(query, Location)
-    @links << coerced_query_link(query, Name)
-    @links << coerced_query_link(query, Image)
+    # @links << coerced_query_link(query, Location)
+    # @links << coerced_query_link(query, Name)
+    # @links << coerced_query_link(query, Image)
 
+    # NIMMO: Haven't figured out how to get coerced_query_link method
+    # (from application_controller) to work with paths. Building links here.
+    if query&.coercable?(:Location)
+      @links << [link_to :show_objects.t(type: :location),
+                  locations_index_location_path(:q => get_query_param)]
+
+    if query&.coercable?(:Name)
+      @links << [link_to :show_objects.t(type: :name),
+                  names_index_name_path(:q => get_query_param)]
+
+    if query&.coercable?(:Image)
+      @links << [link_to :show_objects.t(type: :image),
+                  images_index_image_path(:q => get_query_param)]
+
+    # @links << [
+    #   :list_observations_add_to_list.t,
+    #   add_query_param(
+    #     { controller: :species_lists,
+    #       action: :add_remove_observations },
+    #     query
+    #   )
+    # ]
     @links << [
-      :list_observations_add_to_list.t,
-      add_query_param(
-        { controller: :species_lists,
-          action: :add_remove_observations },
-        query
-      )
+      link_to :list_observations_add_to_list.t,
+              species_lists_add_remove_observations_path(:q => get_query_param)
     ]
 
+    # @links << [
+    #   :list_observations_download_as_csv.t,
+    #   add_query_param(
+    #     { controller: :observations,
+    #       action: :download_observations },
+    #     query
+    #   )
+    # ]
     @links << [
-      :list_observations_download_as_csv.t,
-      add_query_param(
-        { controller: :observations,
-          action: :download_observations },
-        query
-      )
+      link_to :list_observations_download_as_csv.t,
+              observations_download_observations_path(:q => get_query_param)
     ]
 
     # Paginate by letter if sorting by user.
@@ -247,7 +292,7 @@ class ObservationsController
     query = find_query(:Observation)
     if query
       @labels = make_labels(query.results)
-      render(action: :print_labels, layout: :printable)
+      render action: :print_labels, layout: :printable
     else
       flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default("/")
@@ -270,9 +315,13 @@ class ObservationsController
 
   def download_observations_switch
     if params[:commit] == :CANCEL.l
-      redirect_with_query(
-        action: :index_observation,
-        always_index: true
+      # redirect_with_query(
+      #   action: :index_observation,
+      #   always_index: true
+      # )
+      redirect_to observations_index_observation_path(
+        :always_index => true,
+        :q => get_query_param
       )
     elsif params[:commit] == :DOWNLOAD.l
       render_observation_report

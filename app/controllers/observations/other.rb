@@ -54,6 +54,7 @@ class ObservationsController
 
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
+  # TODO: NIMMO check this redirect_with_query
   def set_export_status # :norobots:
     pass_query_params
     id    = params[:id].to_s

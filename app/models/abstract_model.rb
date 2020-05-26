@@ -344,14 +344,10 @@ class AbstractModel < ApplicationRecord
   #
   def self.show_controller
     case name
-      when Account, Naming
+      when "Account", "Naming"
         name.underscore
-      when NameDescription
-        "names/descriptions"
-      when LocationDescription
-        "locations/descriptions"
       else
-        name.plural.underscore
+        name.pluralize.underscore
     end
   end
 

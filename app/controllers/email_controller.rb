@@ -19,7 +19,7 @@ class EmailController < ApplicationController
       end
     else
       flash_error(:permission_denied.t)
-      redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     end
   end
 
@@ -40,7 +40,7 @@ class EmailController < ApplicationController
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     end
   end
 
@@ -74,7 +74,7 @@ class EmailController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_with_query @observation
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   def commercial_inquiry # :norobots:
@@ -90,7 +90,7 @@ class EmailController < ApplicationController
     #   action: :show,
     #   id: @image.id
     # )
-    redirect_with_query @image
+    redirect_to image_path(@image.id, :q => get_query_param)
   end
 
   def email_question(target, method = :email_general_question)

@@ -47,7 +47,7 @@ class PublicationsController < ApplicationController
   # GET /publications/1/edit
   def edit
     @publication = Publication.find(params[:id])
-    redirect_to(publications_url) unless can_edit?(@publication)
+    redirect_to publications_path unless can_edit?(@publication)
   end
 
   # POST /publications
@@ -58,7 +58,7 @@ class PublicationsController < ApplicationController
     respond_to do |format|
       if @publication.save
         flash_notice(:runtime_created_at.t(type: :publication))
-        format.html { redirect_to(@publication) }
+        format.html { redirect_to publication_path(@publication.id) }
         format.xml  do
           render xml: @publication, status: :created,
                  location: @publication
@@ -80,11 +80,11 @@ class PublicationsController < ApplicationController
     @publication = Publication.find(params[:id])
     respond_to do |format|
       if !can_edit?(@publication)
-        format.html { redirect_to(publications_url) }
+        format.html { redirect_to publications_path }
         format.xml  { render xml: "can't edit", status: :unprocessable_entity }
       elsif @publication.update(whitelisted_publication_params)
         flash_notice(:runtime_updated_at.t(type: :publication))
-        format.html { redirect_to(@publication) }
+        format.html { redirect_to publication_path(@publication.id) }
         format.xml  { head :ok }
       else
         flash_object_errors(@publication)
@@ -104,10 +104,10 @@ class PublicationsController < ApplicationController
     respond_to do |format|
       if can_delete?(@publication)
         @publication.destroy
-        format.html { redirect_to(publications_url) }
+        format.html { redirect_to publications_path }
         format.xml  { head :ok }
       else
-        format.html { redirect_to(publications_url) }
+        format.html { redirect_to publications_path }
         format.xml  do
           render xml: "can't delete",
                  status: :unprocessable_entity

@@ -173,7 +173,7 @@ class Names::DescriptionsController < ApplicationController
     return true if @name
 
     flash_error(:runtime_name_for_description_not_found.t)
-    redirect_to controller: :names, action: :index
+    redirect_to names_path
     false
   end
 
@@ -195,14 +195,14 @@ class Names::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.project_id
       # )
-      redirect_to @description.project
+      redirect_to project_path(@description.project_id)
     else
       # redirect_to(
       #   controller: :names,
       #   action: :show,
       #   id: @description.name_id
       # )
-      redirect_to @description.name
+      redirect_to name_path(@description.name_id)
     end
   end
 
@@ -266,11 +266,12 @@ class Names::DescriptionsController < ApplicationController
     id = params[:id].to_s
     desc = NameDescription.find(id)
     desc.update_review_status(params[:value]) if reviewer?
-    redirect_with_query(
-      controller: :names,
-      action: :show,
-      id: desc.name_id
-    )
+    # redirect_with_query(
+    #   controller: :names,
+    #   action: :show,
+    #   id: desc.name_id
+    # )
+    redirect_to name_path(desc.name_id, :q => get_query_param)
   end
 
   ##############################################################################
@@ -327,7 +328,7 @@ class Names::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to name_description_path(@description.name_id, @description.id)
     else
       flash_object_errors @description
     end
@@ -367,7 +368,7 @@ class Names::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to name_description_path(@description.name_id, @description.id)
 
     # There were error(s).
     elsif !@description.save
@@ -416,7 +417,7 @@ class Names::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to name_description_path(@description.name_id, @description.id)
     end
   end
 
@@ -430,24 +431,27 @@ class Names::DescriptionsController < ApplicationController
                             touch: true,
                             name: @description.unique_partial_format_name)
       @description.destroy
-      redirect_with_query(
-        controller: :names,
-        action: :show,
-        id: @description.name_id
-      )
+      # redirect_with_query(
+      #   controller: :names,
+      #   action: :show,
+      #   id: @description.name_id
+      # )
+      redirect_to name_path(@description.name_id, :q => get_query_param)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(
-          action: :show,
-          id: @description.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @description.id
+        # )
+        redirect_to name_description_path(@description.name_id, @description.id)
       else
-        redirect_with_query(
-          controller: :names,
-          action: :show,
-          id: @description.name_id
-        )
+        # redirect_with_query(
+        #   controller: :names,
+        #   action: :show,
+        #   id: @description.name_id
+        # )
+        redirect_to name_path(@description.name_id, :q => get_query_param)
       end
     end
   end

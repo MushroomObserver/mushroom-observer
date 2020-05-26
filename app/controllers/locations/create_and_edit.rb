@@ -9,7 +9,6 @@ class LocationsController
   #
   ##############################################################################
 
-  # TODO: NIMMO - this is an epic method, break it up?
   def new
     store_location
     pass_query_params
@@ -63,7 +62,6 @@ class LocationsController
 
   alias_method :create_location, :new
 
-  # TODO: NIMMO - this is an epic method, break it up?
   def create
     # Set to true below if created successfully, or if a matching location
     # already exists.  In either case, we're done with this form.
@@ -119,7 +117,7 @@ class LocationsController
           #   action: :show,
           #   id: @set_observation
           # )
-          redirect_to @set_observation
+          redirect_to observation_path(@set_observation)
         end
       elsif @set_species_list
         # redirect_to(
@@ -127,7 +125,7 @@ class LocationsController
         #   action: :show,
         #   id: @set_species_list
         # )
-        redirect_to @set_species_list
+        redirect_to species_list_path(@set_species_list)
       elsif @set_herbarium
         if (herbarium = Herbarium.safe_find(@set_herbarium))
           herbarium.location = @location
@@ -137,7 +135,7 @@ class LocationsController
           #   action: :show,
           #   id: @set_herbarium
           # )
-          redirect_to @set_herbarium
+          redirect_to herbarium_path(@set_herbarium)
         end
       elsif @set_user
         if (user = User.safe_find(@set_user))
@@ -148,7 +146,7 @@ class LocationsController
           #   action: :show,
           #   id: @set_user
           # )
-          redirect_to @set_user
+          redirect_to user_path(@set_user)
         end
       else
         # redirect_to(
@@ -156,7 +154,7 @@ class LocationsController
         #   action: :show,
         #   id: @location.id
         # )
-        redirect_to @location
+        redirect_to location_path(@location)
       end
     end
   end
@@ -236,15 +234,17 @@ class LocationsController
 
     if !@location.changed?
       flash_warning(:runtime_edit_location_no_change.t)
-      redirect_to(
-        action: :show,
-        id: @location.id
-      )
+      # redirect_to(
+        # action: :show,
+        # id: @location.id
+      # )
+      redirect_to location_path(@location.id)
     elsif !@location.save
       flash_object_errors(@location)
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
-      redirect_to(@location.show_link_args)
+      # redirect_to(@location.show_link_args)
+      redirect_to location_path(@location.id)
     end
   end
 
@@ -295,10 +295,11 @@ class LocationsController
       location.name = Location.reverse_name(location.name)
       location.save
     end
-    redirect_to(
-      action: :show,
-      id: params[:id].to_s
-    )
+    # redirect_to(
+    #   action: :show,
+    #   id: params[:id].to_s
+    # )
+    redirect_to location_path(params[:id].to_s)
   end
 
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
@@ -319,9 +320,10 @@ class LocationsController
                                           that: location.display_name)
       )
     end
-    redirect_to(
-      action: :index
-    )
+    # redirect_to(
+    #   action: :index
+    # )
+    redirect_to locations_path
   end
 
   # Help for locations

@@ -17,7 +17,8 @@ class NamesController
     return unless make_sure_name_is_genus!(name)
 
     name.propagate_classification
-    redirect_with_query(name.show_link_args)
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
   end
 
   def refresh_classification
@@ -30,9 +31,8 @@ class NamesController
     name.update(classification: name.genus.classification)
     desc = name.description
     desc&.update(classification: name.genus.classification)
-    redirect_with_query(
-      name.show_link_args
-    )
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
   end
 
   def inherit_classification
@@ -50,9 +50,8 @@ class NamesController
     return unless make_sure_parent_higher_rank!(parent)
 
     @name.inherit_classification(parent)
-    redirect_with_query(
-      @name.show_link_args
-    )
+    # redirect_with_query(@name.show_link_args)
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
   def edit_classification
@@ -66,9 +65,8 @@ class NamesController
     return unless validate_classification!
 
     @name.change_classification(@name.classification)
-    redirect_with_query(
-      @name.show_link_args
-    )
+    # redirect_with_query(@name.show_link_args)
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
   # ----------------------------------------------------------------------------
@@ -89,9 +87,8 @@ class NamesController
     return true unless name.below_genus?
 
     flash_error("only works at or above genera!")
-    redirect_with_query(
-      name.show_link_args
-    )
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
     false
   end
 
@@ -99,9 +96,8 @@ class NamesController
     return true if name.rank == :Genus
 
     flash_error("only works on genera!")
-    redirect_with_query(
-      name.show_link_args
-    )
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
     false
   end
 
@@ -109,9 +105,8 @@ class NamesController
     return true if name.below_genus?
 
     flash_error("only works on taxa below genus!")
-    redirect_with_query(
-      name.show_link_args
-    )
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
     false
   end
 
@@ -119,9 +114,8 @@ class NamesController
     return true if name.genus&.classification.present?
 
     flash_error(:edit_name_fill_in_classification_for_genus_first.t)
-    redirect_with_query(
-      name.show_link_args
-    )
+    # redirect_with_query(name.show_link_args)
+    redirect_to name_path(name.id, :q => get_query_param)
     false
   end
 

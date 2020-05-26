@@ -7,6 +7,7 @@ class SearchController < ApplicationController
 
   before_action :disable_link_prefetching
 
+  # TODO: NIMMO Re-check these redirection patterns, how to get path from model
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comments/comment_search
@@ -42,7 +43,6 @@ class SearchController < ApplicationController
       return
     end
 
-    # TODO: Re-check these redirection patterns, they are changing
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
       redirect_to(
@@ -60,10 +60,11 @@ class SearchController < ApplicationController
 
   def site_google_search(pattern)
     if pattern.blank?
-      redirect_to(
-        controller: :observations,
-        action: :index
-      )
+      # redirect_to(
+      #   controller: :observations,
+      #   action: :index
+      # )
+      redirect_to observations_path
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")

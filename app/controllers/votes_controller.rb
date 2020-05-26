@@ -33,7 +33,7 @@ class VotesController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_to observation_path(@observation)
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   # This is the new POST method for show_observation.
@@ -59,7 +59,7 @@ class VotesController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_to observation_path(@observation)
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   # Refresh vote cache for all observations in the database.
@@ -75,6 +75,6 @@ class VotesController < ApplicationController
     #   action: :index,
     #   id: @observation.id
     # )
-    redirect_to rss_logs_path(@observation)
+    redirect_to rss_logs_path(@observation.id, :q => get_query_param)
   end
 end

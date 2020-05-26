@@ -449,8 +449,7 @@ class AccountController < ApplicationController
         #   action: :show,
         #   id: @user.id
         # )
-        # redirect_to user_path(@user)
-        render "users/show" locals: { id: @user.id }
+        redirect_to user_path(@user.id)
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -459,11 +458,15 @@ class AccountController < ApplicationController
         end
         if need_to_create_location
           flash_notice(:runtime_profile_must_define.t)
-          redirect_to(
-            controller: :locations,
-            action: :new,
-            where: @place_name,
-            set_user: @user.id
+          # redirect_to(
+          #   controller: :locations,
+          #   action: :new,
+          #   where: @place_name,
+          #   set_user: @user.id
+          # )
+          redirect_to new_location_path(
+            :where => @place_name,
+            :set_user => @user.id
           )
         else
           flash_notice(:runtime_profile_success.t)
@@ -472,8 +475,7 @@ class AccountController < ApplicationController
           #   action: :show,
           #   id: @user.id
           # )
-          # redirect_to user_path(@user)
-          render "users/show" locals: { id: @user.id }
+          redirect_to user_path(@user.id)
         end
       end
     end
@@ -489,8 +491,7 @@ class AccountController < ApplicationController
     #   action: :show,
     #   id: @user.id
     # )
-    # redirect_to @user
-    render "users/show" locals: { id: @user.id }
+    redirect_to user_path(@user.id)
   end
 
   def no_email_comments_owner
@@ -589,10 +590,12 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to controller: :rss_logs, action: :index
+        # redirect_to controller: :rss_logs, action: :index
+        redirect_to rss_logs_path
       end
     else
-      redirect_to controller: :rss_logs, action: :index
+      # redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     end
   end
 
@@ -639,7 +642,8 @@ class AccountController < ApplicationController
         key.verify!
         flash_notice(:account_api_keys_activated.t(notes: key.notes))
       end
-      redirect_to controller: :api, action: :api_keys
+      # redirect_to controller: :api, action: :api_keys
+      redirect_to api_api_keys_path
     end
   rescue StandardError => e
     flash_error(e.to_s)
@@ -653,10 +657,12 @@ class AccountController < ApplicationController
             @key.update!(params[:key].permit!)
             flash_notice(:account_api_keys_updated.t)
           end
-          redirect_to controller: :api, action: :api_keys
+          # redirect_to controller: :api, action: :api_keys
+          redirect_to api_api_keys_path
         end
       else
-        redirect_to controller: :api, action: :api_keys
+        # redirect_to controller: :api, action: :api_keys
+        redirect_to api_api_keys_path
       end
     end
   rescue StandardError => e
@@ -671,18 +677,20 @@ class AccountController < ApplicationController
 
   def turn_admin_on # :root:
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(
-      controller: :rss_logs,
-      action: :index
-    )
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def turn_admin_off # :root:
     session[:admin] = nil
-    redirect_back_or_default(
-      controller: :rss_logs,
-      action: :index
-    )
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def add_user_to_group # :root:
@@ -709,10 +717,11 @@ class AccountController < ApplicationController
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(:do_activity)
     else
-      redirect_back_or_default(
-        controller: :info,
-        action: :how_to_help
-      )
+      # redirect_back_or_default(
+      #   controller: :info,
+      #   action: :how_to_help
+      # )
+      redirect_back_or_default( info_how_to_help_path )
     end
   end
 
@@ -775,10 +784,11 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(
-      controller: :rss_logs,
-      action: :index
-    )
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def can_add_user_to_group?(user, group)
@@ -803,10 +813,11 @@ class AccountController < ApplicationController
 
   def add_user_to_group_user_mode
     flash_error :permission_denied.t
-    redirect_back_or_default(
-      controller: :rss_logs,
-      action: :index
-    )
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   public

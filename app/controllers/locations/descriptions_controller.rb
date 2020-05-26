@@ -38,7 +38,7 @@ class Locations::DescriptionsController < ApplicationController
     :create_location_description, # aliased
     :new
   ]
-  
+
   ##############################################################################
   #
   #  :section: Description Searches and Indexes
@@ -115,9 +115,9 @@ class Locations::DescriptionsController < ApplicationController
     @description = find_or_goto_index(LocationDescription, params[:id].to_s)
     return unless @description
 
-    # TODO: NIMMO - should this be /locations/descriptions/#{@description.id} ?
-    @canonical_url = "#{MO.http_domain}/locations/show_location_description/"\
-                     "#{@description.id}"
+    # TODO: NIMMO - check this new url
+    @canonical_url = "#{MO.http_domain}/locations/#{@description.location_id}/"\
+                     "descriptions/#{@description.id}"
     # Public or user has permission.
     if in_admin_mode? || @description.is_reader?(@user)
       @location = @description.location
@@ -137,14 +137,14 @@ class Locations::DescriptionsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to @project
+        redirect_to project_path(@project.id)
       else
         # redirect_to(
         #   controller: :locations,
         #   action: :show,
         #   id: @description.location_id
         # )
-        redirect_back fallback_location: @location
+        redirect_to_location
       end
     else
       flash_error(:runtime_show_description_denied.t)
@@ -152,7 +152,7 @@ class Locations::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.location_id
       # )
-      redirect_to @location
+      redirect_to_location
     end
   end
 
@@ -224,6 +224,7 @@ class Locations::DescriptionsController < ApplicationController
     pass_query_params
     # Create new description.
     @description.attributes = whitelisted_location_description_params
+    @location = @description.location
 
     if @description.valid?
       initialize_description_permissions(@description)
@@ -244,7 +245,7 @@ class Locations::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to_location_description
     else
       flash_object_errors @description
     end
@@ -266,6 +267,7 @@ class Locations::DescriptionsController < ApplicationController
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
+    @location = @description.location
     @licenses = License.current_names_and_ids
     @description.attributes = whitelisted_location_description_params
 
@@ -279,7 +281,7 @@ class Locations::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to_location_description
 
     # There were error(s).
     elsif !@description.save
@@ -324,7 +326,7 @@ class Locations::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.id
       # )
-      redirect_to @description
+      redirect_to_location_description
     end
 
   end
@@ -334,9 +336,9 @@ class Locations::DescriptionsController < ApplicationController
   def destroy
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
+    @location = @description.location
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
-      @location = @description.location
       @description.location.log(
         :log_description_destroyed,
         user: @user.login,
@@ -349,7 +351,7 @@ class Locations::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.location_id
       # )
-      redirect_to @location
+      redirect_to_location_with_query
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
@@ -357,14 +359,14 @@ class Locations::DescriptionsController < ApplicationController
         #   action: :show,
         #   id: @description.id
         # )
-        redirect_to @description
+        redirect_to_location_description_with_query
       else
         # redirect_with_query(
         #   controller: :locations,
         #   action: :show,
         #   id: @description.location_id
         # )
-        redirect_to @location
+        redirect_to_location_with_query
       end
     end
   end
@@ -382,4 +384,23 @@ class Locations::DescriptionsController < ApplicationController
       permit(:source_type, :source_name, :project_id, :public_write, :public,
              :license_id, :gen_desc, :ecology, :species, :notes, :refs)
   end
+
+  def redirect_to_location
+    redirect_to location_path(@description.location_id)
+  end
+
+  def redirect_to_location_with_query
+    redirect_to location_path(@description.location_id, :q => get_query_param)
+  end
+
+  def redirect_to_location_description
+    redirect_to location_description_path(@description.location_id,
+                                          @description.id)
+  end
+
+  def redirect_to_location_description_with_query
+    redirect_to location_description_path(@description.location_id,
+      @description.id, :q => get_query_param)
+  end
+
 end

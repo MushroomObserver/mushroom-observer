@@ -275,39 +275,48 @@ class NamesController
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+      url: "#{MO.http_domain}/names/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
   def redirect_to_show_name
-    redirect_with_query(
-      @name.show_link_args
-    )
+    # redirect_with_query(
+    #   @name.show_link_args
+    # )
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(
-        action: :deprecate_name,
-        id: @name.id
-      )
+      # redirect_with_query(
+      #   action: :deprecate_name,
+      #   id: @name.id
+      # )
+      redirect_to names_deprecate_name_path(@name.id, :q => get_query_param)
     else
-      redirect_with_query(
-        action: :approve_name,
-        id: @name.id
-      )
+      # redirect_with_query(
+      #   action: :approve_name,
+      #   id: @name.id
+      # )
+      redirect_to names_approve_name_path(@name.id, :q => get_query_param)
     end
   end
 
   def redirect_to_merge_request(new_name)
-    redirect_with_query(
-      controller: :email,
-      action: :email_merge_request,
-      type: :Name,
-      old_id: @name.id,
-      new_id: new_name.id
+    # redirect_with_query(
+    #   controller: :email,
+    #   action: :email_merge_request,
+    #   type: :Name,
+    #   old_id: @name.id,
+    #   new_id: new_name.id
+    # )
+    redirect_to email_email_merge_request_path(
+      :type => :Name,
+      :old_id => @name.id,
+      :new_id => new_name.id,
+      :q => get_query_param
     )
   end
 end

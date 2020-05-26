@@ -56,10 +56,12 @@ module DescriptionControllerHelpers
     desc = find_description(params[:id].to_s)
     return unless desc
 
-    redirect_with_query(
-      action: desc.show_action,
-      id: desc.id
-    )
+    # redirect_with_query(
+    #   action: desc.show_action,
+    #   id: desc.id
+    # )
+    redirect_to_description_with_query(desc)
+    
     unless desc.fully_public
       flash_error(:runtime_description_make_default_only_public.t)
       return
@@ -85,10 +87,11 @@ module DescriptionControllerHelpers
       # Doesn't have permission to see source.
       if !in_admin_mode? && !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
-        redirect_with_query(
-          action: src.parent.show_action,
-          id: src.parent_id
-        )
+        # redirect_with_query(
+        #   action: src.parent.show_action,
+        #   id: src.parent_id
+        # )
+        redirect_to_parent_with_query(@description)
 
       # POST method
       elsif request.method == "POST"
@@ -131,21 +134,23 @@ module DescriptionControllerHelpers
       @merge = true
       @old_desc_id = src.id
       @delete_after = delete_after
-      #TODO: Check this action name on refactor!
-      render(action: "edit_#{src.parent.type_tag}_description")
+      #TODO: NIMMO Check this action name on refactor!
+      render(action: "edit")
 
     # Merged successfully.
+    #TODO: NIMMO check change of "desc" to "dest" in next line, below. Has to be
     else
-      desc.parent.log(:log_object_merged_by_user,
+      dest.parent.log(:log_object_merged_by_user,
                       user: @user.login,
                       touch: true, from: src_name,
                       to: dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
                    t(old: src_title, new: dest.format_name))
-      redirect_with_query(
-        action: dest.show_action,
-        id: dest.id
-      )
+      # redirect_with_query(
+      #   action: dest.show_action,
+      #   id: dest.id
+      # )
+      redirect_to_description_with_query(dest)
     end
   end
 
@@ -182,10 +187,11 @@ module DescriptionControllerHelpers
       end
       flash_notice(:runtime_description_move_success.
                    t(old: src_title, new: dest.format_name))
-      redirect_with_query(
-        action: src.show_action,
-        id: src.id
-      )
+      # redirect_with_query(
+      #   action: src.show_action,
+      #   id: src.id
+      # )
+      redirect_to_description_with_query(src)
 
     # Create a clone in the destination name/location.
     else
@@ -231,7 +237,11 @@ module DescriptionControllerHelpers
                  touch: true)
         flash_notice(:runtime_description_copy_success.
                      t(old: src_title, new: desc.format_name))
-        redirect_with_query(action: desc.show_action, id: desc.id)
+        # redirect_with_query(
+        #   action: desc.show_action,
+        #   id: desc.id
+        # )
+        redirect_to_description_with_query(desc)
       end
     end
   end
@@ -253,12 +263,20 @@ module DescriptionControllerHelpers
       # to delete the draft after publishing it.)
       if !in_admin_mode? && !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
-        redirect_with_query(action: parent.show_action, id: parent.id)
+        # redirect_with_query(
+        #   action: parent.show_action,
+        #   id: parent.id
+        # )
+        redirect_to_parent_with_query(draft)
 
       # Can't merge it into itself!
       elsif old == draft
         flash_error(:runtime_description_already_default.t)
-        redirect_with_query(action: draft.show_action, id: draft.id)
+        # redirect_with_query(
+        #   action: draft.show_action,
+        #   id: draft.id
+        # )
+        redirect_to_description_with_query(draft)
 
       # I've temporarily decided to always just turn it into a public desc.
       # User can then merge by hand if public desc already exists.
@@ -279,7 +297,11 @@ module DescriptionControllerHelpers
                    touch: true)
         parent.description = draft
         parent.save
-        redirect_with_query(action: parent.show_action, id: parent.id)
+        # redirect_with_query(
+        #   action: parent.show_action,
+        #   id: parent.id
+        # )
+        redirect_to_parent_with_query(draft)
       end
     end
   end
@@ -379,8 +401,11 @@ module DescriptionControllerHelpers
       end
 
       if done
-        redirect_with_query(action: @description.show_action,
-                            id: @description.id)
+        # redirect_with_query(
+        #   action: @description.show_action,
+        #   id: @description.id
+        # )
+        redirect_to_description_with_query(@description)
 
       # Gather list of all the groups, authors, editors and owner.
       # If the user wants more they can write them in.
@@ -452,11 +477,12 @@ module DescriptionControllerHelpers
       else
         flash_error(:runtime_create_draft_create_denied.
                       t(title: project.title))
-        redirect_to(
-          controller: :projects,
-          action: :show,
-          id: project.id
-        )
+        # redirect_to(
+        #   controller: :projects,
+        #   action: :show,
+        #   id: project.id
+        # )
+        redirect_to project_path(project.id)
       end
 
     # Cloning an existing description.
@@ -471,10 +497,11 @@ module DescriptionControllerHelpers
         desc.public_write = false
       else
         flash_error(:runtime_description_private.t)
-        redirect_to(
-          action: desc.parent.show_action,
-          id: desc.parent_id
-        )
+        # redirect_to(
+        #   action: desc.parent.show_action,
+        #   id: desc.parent_id
+        # )
+        redirect_to_parent_with_query(desc)
       end
 
     # Otherwise default to :public description.
@@ -549,15 +576,17 @@ module DescriptionControllerHelpers
     unless in_admin_mode? || desc.is_writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       if in_admin_mode? || desc.is_reader?(@user)
-        redirect_to(
-          action: desc.show_action,
-          id: desc.id
-        )
+        # redirect_to(
+        #   action: desc.show_action,
+        #   id: desc.id
+        # )
+        redirect_to_description_with_query(desc)
       else
-        redirect_to(
-          action: desc.parent.show_action,
-          id: desc.parent_id
-        )
+        # redirect_to(
+        #   action: desc.parent.show_action,
+        #   id: desc.parent_id
+        # )
+        redirect_to_parent_with_query(desc)
       end
       okay = false
     end
@@ -752,4 +781,31 @@ module DescriptionControllerHelpers
     end
     result
   end
+
+  # TODO: NIMMO check how to get parent type & id here, for RESTful path
+  # I don't believe it's possible to retrieve a working path as a variable
+  def redirect_to_description_with_query(desc = nil)
+    if desc.present?
+      if desc.parent.is_a?(Name)
+        redirect_to name_description_path(desc.parent_id, desc.id,
+                                          :q => get_query_param))
+      elsif desc.parent.is_a?(Location)
+        redirect_to location_description_path(desc.parent_id, desc.id,
+                                              :q => get_query_param))
+      end
+    end
+  end
+
+  def redirect_to_parent_with_query(desc = nil)
+    if desc.present?
+      if desc.parent.is_a?(Name)
+        redirect_to name_path(desc.parent_id,
+                              :q => get_query_param))
+      elsif desc.parent.is_a?(Location)
+        redirect_to location_path(desc.parent_id,
+                                  :q => get_query_param))
+      end
+    end
+  end
+
 end

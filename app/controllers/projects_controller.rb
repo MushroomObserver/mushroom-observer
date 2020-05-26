@@ -91,7 +91,7 @@ class ProjectsController < ApplicationController
       #   action: :show,
       #   id: @project.id
       # )
-      redirect_to @project
+      redirect_to_project
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
@@ -227,7 +227,7 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       end
     end
   end
@@ -252,7 +252,7 @@ class ProjectsController < ApplicationController
       #   action: :show,
       #   id: @project.id
       # )
-      redirect_to_referrer || redirect_to_project_index
+      redirect_to_project_with_query
     end
   end
 
@@ -275,7 +275,7 @@ class ProjectsController < ApplicationController
       #   action: :show,
       #   id: @project.id
       # )
-      redirect_to_referrer || redirect_to_project_index
+      redirect_to_project_with_query
     end
   end
 
@@ -292,21 +292,21 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
         # redirect_with_query(
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       else
         @project.log_destroy
         flash_notice(:destroy_project_success.t)
         # redirect_with_query(
         #   action: :index
         # )
-        redirect_to_project_index
+        redirect_to_project_index_with_query
       end
     end
   end
@@ -342,7 +342,7 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       end
     end
   end
@@ -364,7 +364,7 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       elsif params[:candidate].present?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -386,10 +386,11 @@ class ProjectsController < ApplicationController
        @candidate = find_or_goto_index(User, params[:candidate])
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)
-        redirect_with_query(
-          action: :show,
-          id: @project.id
-        )
+        # redirect_with_query(
+        #   action: :show,
+        #   id: @project.id
+        # )
+        redirect_to_project_with_query
       elsif request.method == "POST"
         user_group = @project.user_group
         admin_group = @project.admin_group
@@ -406,7 +407,8 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        redirect_to_referrer || redirect_to_project_index
+        # redirect_to_referrer || redirect_to_project_index
+        redirect_to_project_with_query
       end
     end
   end
@@ -436,6 +438,7 @@ class ProjectsController < ApplicationController
     params.require(:project).permit(:title, :summary)
   end
 
+  # borrowed from herbaria_controller:
   def redirect_to_referrer
     return false if @back.blank?
 
@@ -443,11 +446,20 @@ class ProjectsController < ApplicationController
     true
   end
 
-  def redirect_to_project_index(project = @project)
-    redirect_with_query(
-      action: :index,
-      id: project.try(&:id)
-    )
+  def redirect_to_project
+    redirect_to project_path(@project.id)
+  end
+
+  def redirect_to_project_with_query
+    redirect_to project_path(@project.id, :q => get_query_param)
+  end
+
+  def redirect_to_project_index_with_query(project = @project)
+    # redirect_with_query(
+    #   action: :index,
+    #   id: project.try(&:id)
+    # )
+    redirect_to projects_path(:id => project.try(&:id), :q => get_query_param)
   end
 
 end

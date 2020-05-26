@@ -140,7 +140,7 @@ class ArticlesController < ApplicationController
     #   action: :show,
     #   id: @article.id
     # )
-    redirect_to @article
+    redirect_to article_path(@article.id)
   end
 
   # add flash message if title missing
@@ -179,7 +179,7 @@ class ArticlesController < ApplicationController
     #   action: :show,
     #   id: @article.id
     # )
-    redirect_to @article
+    redirect_to article_path(@article.id)
   end
 
   alias_method :save_edits, :update

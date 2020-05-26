@@ -18,7 +18,8 @@ class NamesController
       params["lifeform_#{word}"] == "1"
     end
     @name.update(lifeform: " #{words.join(" ")} ")
-    redirect_with_query(@name.show_link_args)
+    # redirect_with_query(@name.show_link_args)
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
   def propagate_lifeform
@@ -33,7 +34,8 @@ class NamesController
         @name.propagate_remove_lifeform(word)
       end
     end
-    redirect_with_query(@name.show_link_args)
+    # redirect_with_query(@name.show_link_args)
+    redirect_to name_path(@name.id, :q => get_query_param)
   end
 
 end

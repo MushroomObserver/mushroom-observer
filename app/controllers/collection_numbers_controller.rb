@@ -36,7 +36,7 @@ class CollectionNumbersController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (@collection_number = CollectionNumber.safe_find(pattern))
       # redirect_to(action: :show, id: @collection_number.id)
-      redirect_to @collection_number
+      redirect_to collection_number_path(@collection_number.id)
     else
       query = create_query(:CollectionNumber, :pattern_search, pattern: pattern)
       show_selected_collection_numbers(query)
@@ -48,10 +48,14 @@ class CollectionNumbersController < ApplicationController
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
     @links = [
-      [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
-      [:create_collection_number.l,
-       { action: :create_collection_number, id: params[:id] }]
+      # [:show_object.l(type: :observation),
+      #  Observation.show_link_args(params[:id])],
+      # [:create_collection_number.l,
+      #  { action: :create_collection_number, id: params[:id] }]
+      [ link_to :show_object.l(type: :observation),
+                observation_path(:id => params[:id])],
+      [ link_to :create_collection_number.l,
+                new_collection_number_path(:id => params[:id])]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
@@ -174,7 +178,8 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_delete!(@collection_number)
 
     @collection_number.remove_observation(@observation)
-    redirect_with_query(@observation.show_link_args)
+    # redirect_with_query(@observation.show_link_args)
+    redirect_to observation_path(@observation.id, :q => get_query_param)
   end
 
   def destroy # :norobots:
@@ -184,7 +189,10 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_delete!(@collection_number)
 
     @collection_number.destroy
-    redirect_with_query(action: :index_collection_number)
+    # redirect_with_query(action: :index_collection_number)
+    redirect_to collection_number_index_collection_number_path(
+      :q => get_query_param
+    )
   end
 
   alias_method :destroy_collection_number, :destroy
@@ -271,8 +279,12 @@ class CollectionNumbersController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(action: :index_collection_number,
-                          id: @collection_number.id)
+      # redirect_with_query(action: :index_collection_number,
+      #                     id: @collection_number.id)
+      redirect_to collection_number_index_collection_number_path(
+        @collection_number.id,
+        :q => get_query_param
+      )
     end
   end
 end

@@ -90,7 +90,7 @@ class SpeciesListsController
     return unless @species_list
 
     if !check_permission!(@species_list)
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     elsif request.method != "POST"
       query = create_query(
         :Observation,
@@ -121,7 +121,7 @@ class SpeciesListsController
       flash_notice(:runtime_species_list_destroy_success.t(id: id))
       redirect_to action: :index
     else
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     end
   end
 

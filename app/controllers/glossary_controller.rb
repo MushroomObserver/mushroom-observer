@@ -42,7 +42,7 @@ class GlossaryController < ApplicationController
     #   action: :show,
     #   id: glossary_term.id
     # )
-    redirect_to @glossary_term
+    redirect_to glossary_path(@glossary_term.id)
   end
 
   alias_method :glossary_term_post, :create
@@ -107,7 +107,7 @@ class GlossaryController < ApplicationController
     #   action: :show,
     #   id: glossary_term.id
     # )
-    redirect_to @glossary_term
+    redirect_to glossary_path(@glossary_term.id)
   end
 
   # no alias needed
@@ -126,7 +126,7 @@ class GlossaryController < ApplicationController
         #   action: :show,
         #   id: glossary_term.id
         # )
-        redirect_to @glossary_term
+        redirect_to glossary_path(@glossary_term.id)
       end
     end
   end

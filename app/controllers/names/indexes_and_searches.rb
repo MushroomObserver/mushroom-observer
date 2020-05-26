@@ -115,7 +115,7 @@ class NamesController
       #   action: :show,
       #   id: @name.id
       # )
-      redirect_to @name
+      redirect_to name_path(@name.id)
     else
       search = PatternSearch::Name.new(pattern)
       if search.errors.any?
@@ -136,7 +136,8 @@ class NamesController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to controller: :search, action: :advanced_search_form
+    # redirect_to controller: :search, action: :advanced_search_form
+    redirect_to search_advanced_search_form_path
   end
 
   # Used to test pagination.
@@ -176,14 +177,23 @@ class NamesController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    @links << coerced_query_link(query, Observation)
+    # @links << coerced_query_link(query, Observation)
+    # NIMMO: Haven't figured out how to get coerced_query_link
+    # (from application_controller) to work with paths. Building link here.
+    if query&.coercable?(:Observation)
+      @links << [link_to :show_objects.t(type: :observation),
+                  observations_index_observation_path(:q => get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
     if query.coercable?(:NameDescription)
-      @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: :index_name_description },
-                                 query)]
+      # @links << [:show_objects.t(type: :description),
+      #            add_query_param({ action: :index_name_description },
+      #                            query)]
+      @links << [
+        link_to :show_objects.t(type: :description),
+          name_descriptions_index_name_description_path(:q => get_query_param)
+        ]
     end
 
     # Add some extra fields to the index for authored_names.

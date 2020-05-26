@@ -261,12 +261,12 @@ class CommentsController < ApplicationController
       type = @target.type_tag
       @comment.log_create
       flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-      # redirect_with_query(
-      #   controller: @target.show_controller,
-      #   action: @target.show_action,
-      #   id: @target.id
-      # )
-      redirect_with_query @target
+      redirect_with_query(
+        controller: @target.show_controller,
+        action: @target.show_action,
+        id: @target.id
+      )
+      # redirect_with_query @target
     end
   end
 
@@ -286,12 +286,11 @@ class CommentsController < ApplicationController
     if @comment = find_or_goto_index(Comment, params[:id].to_s)
       @target = @comment.target
       if !check_permission!(@comment)
-        # redirect_with_query(
-        #   controller: @target.show_controller,
-        #   action: @target.show_action,
-        #   id: @target.id
-        # )
-        redirect_with_query @target
+        redirect_with_query(
+          controller: @target.show_controller,
+          action: @target.show_action,
+          id: @target.id
+        )
       end
     end
   end
@@ -314,12 +313,11 @@ class CommentsController < ApplicationController
       done = true
     end
     if done
-      # redirect_with_query(
-      #   controller: @target.show_controller,
-      #   action: @target.show_action,
-      #   id: @target.id
-      # )
-      redirect_with_query @target
+      redirect_with_query(
+        controller: @target.show_controller,
+        action: @target.show_action,
+        id: @target.id
+      )
     end
   end
 
@@ -341,12 +339,11 @@ class CommentsController < ApplicationController
         @comment.log_destroy
         flash_notice(:runtime_form_comments_destroy_success.t(id: id))
       end
-      # redirect_with_query(
-      #   controller: @target.show_controller,
-      #   action: @target.show_action,
-      #   id: @target.id
-      # )
-      redirect_with_query @target
+      redirect_with_query(
+        controller: @target.show_controller,
+        action: @target.show_action,
+        id: @target.id
+      )
     end
   end
 
@@ -363,12 +360,11 @@ class CommentsController < ApplicationController
        !in_admin_mode?
       flash_error(:runtime_show_description_denied.t)
       @parent = object.parent
-      # redirect_to(
-      #   controller: @parent.show_controller,
-      #   action: @parent.show_action,
-      #   id: @parent.id
-      # )
-      redirect_to @parent
+      redirect_to(
+        controller: @parent.show_controller,
+        action: @parent.show_action,
+        id: @parent.id
+      )
       false
     else
       true

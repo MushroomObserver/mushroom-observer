@@ -54,7 +54,7 @@ class SpeciesListsController
     pattern = params[:pattern].to_s
     @species_list = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if @species_list
-      redirect_to @species_list
+      redirect_to species_list_path(@species_list.id)
     else
       query = create_query(:SpeciesList, :pattern_search, pattern: pattern)
       show_selected_species_lists(query)

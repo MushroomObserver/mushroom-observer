@@ -71,7 +71,8 @@ class LocationsController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to controller: :search, action: :advanced_search_form
+    # redirect_to controller: :search, action: :advanced_search_form
+    redirect_to search_advanced_search_form_path
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -89,17 +90,28 @@ class LocationsController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    @links << coerced_query_link(query, Observation)
+    # @links << coerced_query_link(query, Observation)
+    # NIMMO: Haven't figured out how to get coerced_query_link
+    # (from application_controller) to work with paths. Building link here.
+    if query&.coercable?(:Observation)
+      @links << [link_to :show_objects.t(type: :observation),
+                  observations_index_observation_path(:q => get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
     if query.coercable?(:LocationDescription)
-      @links << [:show_objects.t(type: :description),
-                 add_query_param(
-                   { controller: :location_descriptions_controller,
-                     action: :index_location_description },
-                   query
-                 )]
+      # @links << [:show_objects.t(type: :description),
+      #            add_query_param(
+      #              { controller: :location_descriptions_controller,
+      #                action: :index_location_description },
+      #              query
+      #            )]
+      @links << [
+        link_to :show_objects.t(type: :description),
+                location_descriptions_index_location_description_path(
+                  :q => get_query_param
+                )
+      ]
     end
 
     # Restrict to subset within a geographical region (used by map

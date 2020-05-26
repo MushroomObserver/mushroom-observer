@@ -193,6 +193,7 @@ ACTIONS = {
     # edit_herbarium: {}, # aliased only
     herbarium_search: {},
     index_herbarium: {},
+    index_nonpersonal_herbarium: {},
     # list_herbaria: {}, # aliased only
     merge_herbaria: {},
     # next_herbarium: {}, # aliased only
