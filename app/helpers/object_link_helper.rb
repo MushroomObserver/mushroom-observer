@@ -107,11 +107,11 @@ module ObjectLinkHelper
     if user.is_a?(Integer)
       name ||= :USER.t + " #" + user.to_s
       # link_to(name, User.show_link_args(user))
-      link_to(str, user_path(user))
+      link_to(name, user_path(user))
     elsif user
       name ||= user.unique_text_name
       # link_to(name, user.show_link_args)
-      link_to(str, user_path(user.id))
+      link_to(name, user_path(user.id))
     else
       "?"
     end

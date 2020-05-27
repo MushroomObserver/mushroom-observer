@@ -1,7 +1,7 @@
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
 <div class="d-none d-sm-block">
   <%= form_with(url: votes_cast_votes_path(@observation.id), method: "post",
-                id: "cast_votes_1") do %>
+                id: "cast_votes_1") do |votes_f| %>
 
     <table class="table table-namings">
       <thead class="bg-secondary border-0">
@@ -20,20 +20,23 @@
           <tr>
             <% Textile.register_name(naming.name) %>
             <td>
-              <%= link_with_query(naming.display_name_brief_authors.t,
-                                  controller: :names,
-                                  action: :show,
-                                  id: naming.name) %>
+              <%= link_to naming.display_name_brief_authors.t,
+                          name_path(
+                            :id => naming.name,
+                            :q => get_query_param
+                          ) %>
               <% if check_permission(naming) %>
-                [<%= link_with_query(:EDIT.t,
-                                     { controller: :namings,
-                                       action: :edit,
-                                       id: naming }) %> |
-                <%= link_with_query(:DESTROY.t,
-                                    { controller: :namings,
-                                      action: :destroy,
-                                      id: naming.id },
-                                    data: {confirm: :are_you_sure.l }) %>]
+                [<%= link_to :EDIT.t,
+                             edit_naming_path(
+                               :id => naming.id,
+                               :q => get_query_param
+                             ) %> |
+                <%= link_to :DESTROY.t,
+                            destroy_naming_path(
+                              :id => naming.id,
+                              :q => get_query_param
+                            ),
+                            data: { confirm: :are_you_sure.l } %>]
               <% end %>
             </td>
             <td>
@@ -42,7 +45,9 @@
                 <% if reason.used? %>
                   <div>
                     <span class="text-secondary-text">
-                      <%= reason.notes.blank? ? reason.label.t : (reason.label.l + ": " + reason.notes.to_s.html_safe).tl %>
+                      <%= reason.notes.blank? ? reason.label.t : \
+                          (reason.label.l + ": " + \
+                          reason.notes.to_s.html_safe).tl %>
                     </span>
                   </div>
                 <% end %>
@@ -50,27 +55,32 @@
             </td>
             <td>
               <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-              <%= link_with_query(h(txt), { controller: :votes,
-                                            action: :show,
-                                            id: naming.id },
-                                  { data: { role: "open_popup",
-                                            id: naming.id } }
-                  ) if naming.votes.any? %>
-              <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.count})" %>
+              <% if naming.votes.any? %>
+                <%= link_to h(txt),
+                            votes_show_path(
+                              :id => naming.id,
+                              :q => get_query_param
+                            ),
+                            { data: { role: "open_popup",
+                                      id: naming.id } } %>
+              <% end %>
+              <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : \
+                                               naming.votes.count})" %>
             </td>
             <td>
               <% if logged_in %>
                 <% @vote = @votes[naming.id]
                    menu = Vote.confidence_menu
-                   if check_permission(naming) ? (!@vote || @vote.value == 0) : true
+                   if check_permission(naming) ? \
+                    (!@vote || @vote.value == 0) : true
                    menu = [Vote.no_opinion] + menu
                 end %>
                 <%= select(:vote, :value, menu, {},
                            { index: naming.id,
                              data: { role: "change_vote", id: naming.id } }
                     ) %>
-                <%= submit_tag(:show_namings_cast.l,
-                               class: "btn") if !browser.modern_browser? %>
+                <%= votes_f.submit :show_namings_cast.l,
+                                   class: "btn" if !browser.modern_browser? %>
               <% end %>
             </td>
             <td class="text-right">
@@ -81,21 +91,22 @@
         <% end # each_name %>
         <tr class="bg-secondary align-middle">
           <td colspan="1">
-            <%= link_with_query(:show_namings_propose_new_name.t,
-                                { controller: :namings,
-                                  action: :new,
-                                  id: @observation.id },
-                                class: "btn btn-sm btn-accent") %>
+            <%= link_to :show_namings_propose_new_name.t,
+                        new_naming_path(
+                          :id => @observation.id,
+                          :q => get_query_param
+                        ),
+                        class: "btn btn-sm btn-accent" %>
             <% if do_suggestions %>
-              <br/><%= link_to(:show_namings_suggest_names.l,
+              <br/><%= link_to :show_namings_suggest_names.l,
                                "#",
                                data: { role: "suggest_names" },
-                               class: "btn btn-sm btn-accent") %>
+                               class: "btn btn-sm btn-accent" %>
             <% end %>
             <% if logged_in && any_names %>
-              <br/><%= submit_tag(:show_namings_update_votes.l,
-                                  data: { role: "save_votes" },
-                                  class: "btn btn-sm btn-accent") %>
+              <br/><%= votes_f.submit :show_namings_update_votes.l,
+                                      data: { role: "save_votes" },
+                                      class: "btn btn-sm btn-accent" %>
             <% end %>
           </td>
           <td colspan="4">

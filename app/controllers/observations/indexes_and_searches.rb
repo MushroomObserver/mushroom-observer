@@ -34,11 +34,11 @@ class ObservationsController
     show_selected_observations(query)
   end
 
-  # TODO: NIMMO replace this with index, pass param names:, include_synonyms:
+  # TODO: NIMMO replace this with index? pass param names:, include_synonyms:
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name
     query = create_query(:Observation, :all, names: [params[:name]],
-                                             include_synonyms: true, by: :created_at)
+                         include_synonyms: true, by: :created_at)
     show_selected_observations(query)
   end
 
@@ -58,14 +58,14 @@ class ObservationsController
     show_selected_observations(query)
   end
 
-  alias_method show_location_observations, observations_at_location
+  alias_method :show_location_observations, :observations_at_location
 
   # Display matrix of Observation's whose "where" matches a string.
   def observations_at_where
     where = params[:where].to_s
     params[:location] = where
     query = create_query(:Observation, :at_where, user_where: where,
-                                                  location: Location.user_name(@user, where))
+                         location: Location.user_name(@user, where))
     show_selected_observations(query, always_index: 1)
   end
 
@@ -139,26 +139,18 @@ class ObservationsController
       #            { controller: :locations,
       #              action: :new,
       #              where: query.params[:user_where] }]
-      @links << [
-        link_to :list_observations_location_define.l,
-                new_location_path(:where => query.params[:user_where])
-      ]
+      @links << [:list_observations_location_define.l,
+        new_location_path(:where => query.params[:user_where])]
       # @links << [:list_observations_location_merge.l,
       #            { controller: :locations,
       #              action: :list_merge_options,
       #              where: query.params[:user_where] }]
-      @links << [
-        link_to :list_observations_location_merge.l,
-                locations_list_merge_options_path(
-                  :where => query.params[:user_where]
-                )
-      ]
+      @links << [:list_observations_location_merge.l,
+        locations_list_merge_options_path(:where => query.params[:user_where])]
       # @links << [:list_observations_location_all.l,
       #            { controller: :locations,
       #              action: :index }]
-      @links << [
-        link_to :list_observations_location_all.l, locations_path
-      ]
+      @links << [:list_observations_location_all.l, locations_path]
     end
 
     # Add some alternate sorting criteria.
@@ -183,26 +175,26 @@ class ObservationsController
     #     query)
     # ]
     # @links << link
-    @links << [link_to :show_object.t(type: :map),
-                observations_map_observations_path(:q => get_query_param)]
+    @links << [:show_object.t(type: :map),
+      observations_map_observations_path(:q => get_query_param)]
 
     # @links << coerced_query_link(query, Location)
     # @links << coerced_query_link(query, Name)
     # @links << coerced_query_link(query, Image)
 
     # NIMMO: Haven't figured out how to get coerced_query_link method
-    # (from application_controller) to work with paths. Building links here.
+    # (from application_controller) to work with paths.
+    # Building link_with_query here.
     if query&.coercable?(:Location)
-      @links << [link_to :show_objects.t(type: :location),
-                  locations_index_location_path(:q => get_query_param)]
-
-    if query&.coercable?(:Name)
-      @links << [link_to :show_objects.t(type: :name),
-                  names_index_name_path(:q => get_query_param)]
-
-    if query&.coercable?(:Image)
-      @links << [link_to :show_objects.t(type: :image),
-                  images_index_image_path(:q => get_query_param)]
+      @links << [:show_objects.t(type: :location),
+        locations_index_location_path(:q => get_query_param)]
+    elsif query&.coercable?(:Name)
+      @links << [:show_objects.t(type: :name),
+        names_index_name_path(:q => get_query_param)]
+    elsif query&.coercable?(:Image)
+      @links << [:show_objects.t(type: :image),
+        images_index_image_path(:q => get_query_param)]
+    end
 
     # @links << [
     #   :list_observations_add_to_list.t,
@@ -212,10 +204,8 @@ class ObservationsController
     #     query
     #   )
     # ]
-    @links << [
-      link_to :list_observations_add_to_list.t,
-              species_lists_add_remove_observations_path(:q => get_query_param)
-    ]
+    @links << [:list_observations_add_to_list.t,
+      species_lists_add_remove_observations_path(:q => get_query_param)]
 
     # @links << [
     #   :list_observations_download_as_csv.t,
@@ -225,10 +215,8 @@ class ObservationsController
     #     query
     #   )
     # ]
-    @links << [
-      link_to :list_observations_download_as_csv.t,
-              observations_download_observations_path(:q => get_query_param)
-    ]
+    @links << [:list_observations_download_as_csv.t,
+      observations_download_observations_path(:q => get_query_param)]
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
