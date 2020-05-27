@@ -86,7 +86,7 @@ class ObserverController
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
     success = false if @name && !validate_object(@naming)
-    success = false if @name && !validate_object(@vote)
+    success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
 
@@ -154,7 +154,7 @@ class ObserverController
       @naming.create_reasons(reason, params[:was_js_on] == "yes")
       save_with_log(@naming)
       @observation.reload
-      @observation.change_vote(@naming, @vote.value)
+      @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
     end
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
