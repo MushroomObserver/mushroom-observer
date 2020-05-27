@@ -122,7 +122,7 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    for new_name in names[1..-1]
+    for new_name in names[1..]
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable

@@ -2490,13 +2490,13 @@ class ApiTest < UnitTestCase
       api_key: @api_key.key,
       id: rolfs_obs.id
     }
-    assert_api_pass(params.merge(:set_notes => "wow!",
-                                 :"set_notes[Cap]" => "red",
-                                 :"set_notes[Ring]" => "none",
-                                 :"set_notes[Gills]" => ""))
+    assert_api_pass(params.merge(set_notes: "wow!",
+                                 "set_notes[Cap]": "red",
+                                 "set_notes[Ring]": "none",
+                                 "set_notes[Gills]": ""))
     rolfs_obs.reload
     assert_equal({ Cap: "red", Ring: "none", Other: "wow!" }, rolfs_obs.notes)
-    assert_api_pass(params.merge(:"set_notes[Cap]" => ""))
+    assert_api_pass(params.merge("set_notes[Cap]": ""))
     rolfs_obs.reload
     assert_equal({ Ring: "none", Other: "wow!" }, rolfs_obs.notes)
 
@@ -4090,7 +4090,7 @@ class ApiTest < UnitTestCase
     else
       assert_equal("API::HelpMessage", api.errors.first.class.name)
       file = help_messages_file
-      return unless File.exists?(file)
+      return unless File.exist?(file)
 
       File.open(file, "a") do |fh|
         fh.puts "#{method.to_s.upcase} #{action}"

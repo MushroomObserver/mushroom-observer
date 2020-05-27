@@ -2,12 +2,12 @@
 module SequenceHelper
   def sequence_accession_link(sequence)
     link_to(truncate(sequence.accession, length: sequence.locus_width / 2).t,
-            sequence.accession_url, target: "_blank")
+            sequence.accession_url, target: "_blank", rel: "noopener")
   end
 
   def sequence_archive_link(sequence)
     url = WebSequenceArchive.archive_home(sequence.archive)
-    link_to(sequence.archive.t, url, target: "_blank")
+    link_to(sequence.archive.t, url, target: "_blank", rel: "noopener")
   end
 
   # dropdown list for create_sequence

@@ -93,12 +93,10 @@ class API
       setter = build_setter(params)
       abort_if_any_errors!
       results.map! do |obj|
-        begin
-          setter.call(obj)
-        rescue StandardError => e
-          errors << e
-          nil
-        end
+        setter.call(obj)
+      rescue StandardError => e
+        errors << e
+        nil
       end.reject!(&:nil?)
     end
 
@@ -126,11 +124,9 @@ class API
       deleter = build_deleter
       abort_if_any_errors!
       results.each do |obj|
-        begin
-          deleter.call(obj)
-        rescue StandardError => e
-          errors << e
-        end
+        deleter.call(obj)
+      rescue StandardError => e
+        errors << e
       end
     end
 

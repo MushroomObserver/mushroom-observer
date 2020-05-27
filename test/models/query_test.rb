@@ -472,7 +472,7 @@ class QueryTest < UnitTestCase
                map(&:to_s)
     assert_equal(num_agaricus, agaricus.uniq.length)
     assert_equal(num_agaricus,
-                 agaricus.select { |x| x[0, 8] == "Agaricus" }.count)
+                 agaricus.count { |x| x[0, 8] == "Agaricus" })
 
     assert_equal(Name.all.map { |x| [x.id] }, query.select_rows)
     assert_equal(Name.all.map { |x| { "id" => x.id } }, query.select_all)

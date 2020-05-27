@@ -366,7 +366,7 @@ class HerbariumController < ApplicationController
   end
 
   def keep_track_of_referrer
-    @back = params[:back] || request.referrer
+    @back = params[:back] || request.referer
   end
 
   def redirect_to_referrer

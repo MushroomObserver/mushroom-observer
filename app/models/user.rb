@@ -971,7 +971,7 @@ class User < AbstractModel
   end
 
   def notes_template_forbid_duplicates # :nodoc
-    return unless notes_template.present?
+    return if notes_template.blank?
 
     squished = notes_template.split(",").map(&:squish)
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
@@ -981,7 +981,7 @@ class User < AbstractModel
   end
 
   def notes_template_bad_parts # :nodoc
-    return [] unless notes_template.present?
+    return [] if notes_template.blank?
 
     notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)
