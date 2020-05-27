@@ -2,10 +2,38 @@
 // log_items
 // --------------------------------------------------
 
+.log-item {
+  .card {
+    background-color: $ground;
+    transition: background-color 0.3s ease-out;
+
+    &:hover {
+      background-color: $primary-text;
+    }
+  }
+}
+
+.log-item-link {
+  &:hover {
+    color: $primary;
+
+    .log-id {
+      background: $primary;
+      color: $ground !important;
+      text-decoration: none;
+    }
+  }
+}
+
 .log-name {
   i, b i {
     @extend .h5, .font-weight-bold, .font-italic;
   }
+}
+
+.log-id {
+  @extend .text-muted, .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2;
+  font-weight: $font-weight-normal;
 }
 
 .title-caption {
@@ -28,15 +56,13 @@
 
 }
 
-.carousel-item {
-  padding-bottom: 75%;
-  position: relative;
+.prev-next-nav {
+  color: $accent;
+  transition: color 0.3s ease-out;
 
-  > div {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
+  a:hover {
+    text-decoration: none;
+    color: $primary;
+    border-color: $accent;
   }
 }

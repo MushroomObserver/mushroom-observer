@@ -10,21 +10,20 @@
 
 <div class="image-sizer position-relative w-100">
 
-  <%= tag.div class: "image-lazy-sizer overflow-hidden", style: "padding-bottom: #{img_proportion}%;" do
+  <%= tag.div class: "image-lazy-sizer overflow-hidden",
+              style: "padding-bottom: #{img_proportion}%;" do
     image_tag(thumb_url, html_options)
   end %>
 
-  <%= link_with_query("",
-                      link,
-                      class: "stretched-link") %>
+  <%= link_to "", link, class: "stretched-link" %>
 
-  <%= # TODO: NIMMO move this to the presenter, too
+  <%= # TODO: NIMMO maybe move this to the presenter, too
     lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
     show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
     show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"
     caption = "#{show_orig} | #{show_exif}".html_safe
     icon = "<i class='fas fa-expand-alt fa-lg'></i>".html_safe
-    link_to(icon,
+    link_to icon,
             "#",
             class: "theater-btn position-absolute top-right mr-2 mt-2 d-block zindex-2 text-light",
             data: {
@@ -33,21 +32,19 @@
               gallery: lightbox_id,
               type: "image",
               footer: caption
-            })
+            }
   %>
 
-  <div class="text-center">
-    <div class="">
-      <% if User.current and votes and image %>
-        <%= render(partial: "images/image_vote_links", locals: {image: image}) %>
-      <% end %>
-      <% if original && image && !image.original_name.blank? &&
-            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-        <div class="text-center">
-          <span><%= image.original_name %></span>
-        </div>
-      <% end %>
-    </div>
+  <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
+    <% if User.current and votes and image %>
+      <%= render(partial: "images/image_vote_links", locals: {image: image}) %>
+    <% end %>
+    <% if original && image && !image.original_name.blank? &&
+          (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+      <div class="text-center">
+        <span><%= image.original_name %></span>
+      </div>
+    <% end %>
   </div>
 
 </div>

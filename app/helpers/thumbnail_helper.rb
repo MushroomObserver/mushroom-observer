@@ -17,10 +17,14 @@ module ThumbnailHelper
     full_url   = Image.url(:full_size, image_id)
     orig_url   = Image.url(:original, image_id)
 
-    # For lazy load content sizing: set img width and height, or proportional padding-bottom
+    # For lazy load content sizing: set img width and height,
+    # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
     img_width = image.width ? BigDecimal(image.width) : 100
     img_height = image.height ? BigDecimal(image.height) : 100
     img_proportion = "%.1f" % ( BigDecimal( img_height / img_width ) * 100 )
+    if img_proportion.to_i > 300
+      img_proportion = "300"
+    end
 
     img_class = "img-fluid w-100 lazyload position-absolute object-fit-cover #{img_class}" if responsive
     img_class = "img-unresponsive lazyload #{img_class}" if !responsive
@@ -184,10 +188,11 @@ module ThumbnailHelper
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
     # return a link if the user has NOT voted this way
     link = link_to(vote_text,
-                   { controller: :images,
-                     action: :show,
-                     id: image.id,
-                     vote: vote },
+                   # { controller: :images,
+                   #   action: :show,
+                   #   id: image.id,
+                   #   vote: vote },
+                   image_path(id: image.id, vote: vote, q: get_query_param),
                    title: image_vote_as_help_string(vote),
                    data: { role: "image_vote", id: image.id, val: vote })
     if current_vote == vote

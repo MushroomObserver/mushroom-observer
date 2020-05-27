@@ -78,8 +78,13 @@ class LogItemPresenter
   def observation_to_presenter(observation, view)
 
     self.what   = observation
-    self.name   = observation.format_name.delete_suffix(observation.name.author).t
-    self.author = observation.name.author
+    if observation.name.respond_to?(:author)
+      self.name   = observation.format_name.delete_suffix(observation.name.author).t
+      self.author = observation.name.author
+    else
+      self.name = observation.format_name
+      self.author = ""
+    end
     self.id     = observation.id
     self.when   = observation.when.web_date
     self.who    = view.user_link(observation.user) if observation.user

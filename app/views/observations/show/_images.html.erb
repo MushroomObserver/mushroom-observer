@@ -12,20 +12,15 @@
       <% if check_permission(observation) %>
         <div class="col-sm-8 float-sm-right">
           <small>
-            <%= link_with_query(:show_observation_add_images.t,
-                                controller: :images,
-                                action: :new,
-                                id: observation.id) %>
-            | <%= link_with_query(:show_observation_reuse_image.t,
-                                  controller: :images,
-                                  action: :reuse_image,
-                                  obs_id: observation.id,
-                                  mode: :observation) %>
+            <%= link_to :show_observation_add_images.t,
+                  new_image_path(id: observation.id, q: get_query_param) %>
+            | <%= link_to :show_observation_reuse_image.t,
+                    images_reuse_image_path(obs_id: observation.id,
+                      mode: :observation, q: get_query_param) %>
             <% if observation.images.length > 0 %>
-              | <%= link_with_query(:show_observation_remove_images.t,
-                                    controller: :images,
-                                    action: :remove_images,
-                                    id: observation.id) %>
+              | <%= link_to :show_observation_remove_images.t,
+                      images_remove_images_path(id: observation.id,
+                        q: get_query_param) %>
               <% end %>
           </small>
         </div>
@@ -41,10 +36,12 @@
       for image in observation.images.
                sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id} %>
           <%= thumbnail(image,
-                        link: { controller: image.show_controller,
-                                action: image.show_action,
-                                id: image.id,
-                                obs: observation.id },
+                        # link: { controller: image.show_controller,
+                        #         action: image.show_action,
+                        #         id: image.id,
+                        #         obs: observation.id },
+                        link: image_path(id: image.id, obs: observation.id,
+                          q: get_query_param),
                         votes: true,
                         original: true,
                         is_set: true,

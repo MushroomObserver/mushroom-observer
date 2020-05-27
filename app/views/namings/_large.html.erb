@@ -3,7 +3,7 @@
   <%= form_with(url: votes_cast_votes_path(@observation.id), method: "post",
                 id: "cast_votes_1") do |votes_f| %>
 
-    <table class="table table-namings">
+    <table class="table table-namings mb-0">
       <thead class="bg-secondary border-0">
         <tr>
           <th class="text-nowrap"><%= tag.strong any_names ?
@@ -27,16 +27,11 @@
                           ) %>
               <% if check_permission(naming) %>
                 [<%= link_to :EDIT.t,
-                             edit_naming_path(
-                               :id => naming.id,
-                               :q => get_query_param
-                             ) %> |
+                       edit_naming_path(id: naming.id, q: get_query_param) %> |
                 <%= link_to :DESTROY.t,
-                            destroy_naming_path(
-                              :id => naming.id,
-                              :q => get_query_param
-                            ),
-                            data: { confirm: :are_you_sure.l } %>]
+                      naming_path(id: naming.id, q: get_query_param),
+                      method: :delete,
+                      data: { confirm: :are_you_sure.l } %>]
               <% end %>
             </td>
             <td>
@@ -44,7 +39,7 @@
               <% naming.get_reasons.each do |reason| %>
                 <% if reason.used? %>
                   <div>
-                    <span class="text-secondary-text">
+                    <span class="text-secondary-text small">
                       <%= reason.notes.blank? ? reason.label.t : \
                           (reason.label.l + ": " + \
                           reason.notes.to_s.html_safe).tl %>
@@ -57,12 +52,8 @@
               <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
               <% if naming.votes.any? %>
                 <%= link_to h(txt),
-                            votes_show_path(
-                              :id => naming.id,
-                              :q => get_query_param
-                            ),
-                            { data: { role: "open_popup",
-                                      id: naming.id } } %>
+                      votes_show_path(id: naming.id, q: get_query_param),
+                      data: { role: "open_popup", id: naming.id } %>
               <% end %>
               <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : \
                                                naming.votes.count})" %>
@@ -92,11 +83,8 @@
         <tr class="bg-secondary align-middle">
           <td colspan="1">
             <%= link_to :show_namings_propose_new_name.t,
-                        new_naming_path(
-                          :id => @observation.id,
-                          :q => get_query_param
-                        ),
-                        class: "btn btn-sm btn-accent" %>
+                  new_naming_path(id: @observation.id, q: get_query_param),
+                  class: "btn btn-sm btn-accent" %>
             <% if do_suggestions %>
               <br/><%= link_to :show_namings_suggest_names.l,
                                "#",

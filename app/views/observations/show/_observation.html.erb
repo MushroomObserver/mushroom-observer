@@ -3,21 +3,21 @@
 <section id="observation_partial" class="h-100">
 
   <div class="card-body bg-secondary text-secondary-text pl-md-5 py-2">
-    <strong class="">Observation details</strong>
+    <strong class=""><%= :OBSERVATION.t + " Details" %></strong>
   </div>
 
-  <div class="name-section card-body pl-md-5">
+  <div class="observation-section card-body pl-md-5">
 
     <p id="observation_when">
-      <span class="font-weight-bold"><%= :WHEN.t %>:</span> <%= @observation.when.web_date %>
+      <b><%= :WHEN.t %>:</b> <%= @observation.when.web_date %>
     </p>
 
     <p id="observation_where">
-      <span class="font-weight-bold">
+      <b>
         <%= @observation.is_collection_location ?
             :show_observation_collection_location.t :
             :show_observation_seen_at.t %>:
-      </span>
+      </b>
       <%= location_link(@observation.place_name,
                         @observation.location, nil, true) %>
     </p>
@@ -28,18 +28,20 @@
     </p>
 
     <p id="observation_who">
-      <span class="font-weight-bold"><%= :WHO.t %>:</span> <%= user_link(@observation.user) %>
+      <b><%= :WHO.t %>:</b> <%= user_link(@observation.user) %>
     </p>
 
     <div id="observation_projects">
       <% @observation.projects.each do |project| %>
-           <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
+           <p><b><%= :PROJECT.t %>:</b> <%= link_to_object(project) %></p>
       <% end %>
     </div>
 
     <div id="specimen_available">
-      <%= @observation.specimen ? :show_observation_specimen_available.t :
+      <p><b><%= :SPECIMEN.t %>:</b>
+        <%= @observation.specimen ? :show_observation_specimen_available.t :
                                  :show_observation_specimen_not_available.t %>
+      </p>
     </div>
 
     <div id="observation_collection_numbers">
@@ -63,7 +65,7 @@
         Textile.register_name(*@observation.namings.map(&:name))
         Textile.register_name(@observation.name)
         content_tag(
-          :div, @observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+          :div, @observation.notes_show_formatted.sub(/^\A/, "<b>#{:NOTES.t}:</b>\n").tpl
         )
       end %>
     </div><!-- .obs-notes -->

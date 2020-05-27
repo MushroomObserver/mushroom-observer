@@ -12,7 +12,7 @@
           @observation.user.try(&:hide_specimen_stuff?) %>
   <% if records.any? && can_add %>
     <div>
-      <%= :Herbarium_records.t %>: [<%=
+      <%= tag.b :Herbarium_records.t %>: [<%=
         # link_with_query(:create_herbarium_record.t,
         #                 controller: :herbarium_records,
         #                 action: :new,
@@ -24,20 +24,15 @@
     <ul class="tight-list">
       <% records.each do |record| %>
         <li>
-          <%= link_to(record.accession_at_herbarium.t,
-                      add_query_param(record.show_link_args, query)) %>
+          <%= link_to record.accession_at_herbarium.t,
+                herbarium_record_path(record.id, :q => get_query_param) %>
           <% if in_admin_mode? || record.can_edit? %>
-            [<%= link_with_query(:EDIT.t,
-                                 controller: :herbarium_records,
-                                 action: :edit,
-                                 id: record.id,
-                                 back: @observation.id) %> |
-             <%= link_with_query(:REMOVE.t,
-                                 { controller: :herbarium_records,
-                                   action: :remove_observation,
-                                   id: record.id,
-                                   obs: @observation.id },
-                                 { data: { confirm: :are_you_sure.t } }) %>]
+            [<%= link_to :EDIT.t, edit_herbarium_record_path(id: record.id,
+                    back: @observation.id, q: get_query_param) %> |
+             <%= link_to :REMOVE.t,
+                    herbarium_records_remove_observation_path(id: record.id,
+                      obs: @observation.id, :q => get_query_param),
+                    { data: { confirm: :are_you_sure.t } } %>]
           <% end %>
         </li>
       <% end %>
@@ -50,8 +45,8 @@
     <ul class="tight-list">
       <% records.each do |record| %>
         <li>
-          <%= link_to(record.accession_at_herbarium.t,
-                      add_query_param(record.show_link_args, query)) %>
+          <%= link_to record.accession_at_herbarium.t,
+                herbarium_record_path(record.id, :q => get_query_param) %>
         </li>
       <% end %>
     </ul>

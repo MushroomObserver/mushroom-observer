@@ -75,6 +75,7 @@ $colors: map-merge(
 );
 
 $background:      $gray-200;
+$ground:          $white;
 $text:            $black;
 $primary:         $black;
 $primary-text:    $beige;
@@ -93,6 +94,7 @@ $theme-colors: ();
 $theme-colors: map-merge(
   (
     "background":     $background,
+    "ground":         $ground,
     "text":           $text,
     "primary":        $primary,
     "primary-text":   $primary-text,
@@ -104,7 +106,9 @@ $theme-colors: map-merge(
     "warning":        $warning,
     "danger":         $danger,
     "light":          $light,
-    "dark":           $dark
+    "dark":           $dark,
+    "white":          $white,
+    "black":          $black
   ),
   $theme-colors
 );

@@ -766,6 +766,19 @@ MushroomObserver::Application.routes.draw do
   get ":id" => "observations#show", id: /\d+/
   # get "observations/:id" => "observations#show", id: /\d+/
 
+  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # New routing - peel the controller name out of the string "lookup_#{action}"
+  LOOKUP_XXX_ID_ACTIONS.each do |action|
+    # get(
+    #   "observations/#{action}/:id",
+    #   controller: action[7,action.length].pluralize.to_sym,
+    #   action: action,
+    #   id: /.*/
+    # )
+    get "observations/#{action}/:id" =>
+      redirect("/#{action[7,action.length].pluralize}/%{id}")
+  end
+
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   AJAX_ACTIONS.each do |action|
@@ -774,16 +787,6 @@ MushroomObserver::Application.routes.draw do
       controller: :ajax,
       action: action,
       id: /\S.*/
-    )
-  end
-
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  LOOKUP_XXX_ID_ACTIONS.each do |action|
-    get(
-      "observations/#{action}/:id",
-      controller: :observations,
-      action: action,
-      id: /.*/
     )
   end
 

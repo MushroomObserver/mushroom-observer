@@ -10,16 +10,13 @@
 <% unless @user.try(&:hide_specimen_stuff?) ||
           @observation.user.try(&:hide_specimen_stuff?) %>
   <% if @user || sequences.any? %>
-    <div>
-      <%= sequences.any? ? :Sequences.t + ":".html_safe :
-                           :show_observation_no_sequences.t %> <%=
-        link = link_with_query(:show_observation_add_sequence.t,
-                               controller: :sequences,
-                               action: :new,
-                               id: @observation.id)
-        "[#{link}]".html_safe if @user
-      %>
-    </div>
+    <p>
+      <b><%= sequences.any? ? :Sequences.t + ":".html_safe :
+                           :show_observation_no_sequences.t %></b> [<%=
+        link_to :show_observation_add_sequence.t,
+                new_sequence_path(id: @observation.id)
+      %>]
+    </p>
   <% end %>
 
   <% if sequences.any? %>
@@ -28,11 +25,11 @@
         <li>
           <%= locus = sequence.locus.truncate(sequence.locus_width)
           if sequence.deposit?
-            link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-                    add_query_param(sequence.show_link_args, query))
+            link_to "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
+                    sequence_path(sequence.id, :q => get_query_param)
           else
-            link_to("#{locus} - MO ##{sequence.id}".t,
-                    add_query_param(sequence.show_link_args, query))
+            link_to "#{locus} - MO ##{sequence.id}".t,
+                    sequence_path(sequence.id, :q => get_query_param)
           end %>
           <%=
             links = []
@@ -42,16 +39,16 @@
                                target: "_blank")
             end
             if in_admin_mode? || sequence.can_edit?(@user)
-              links << link_with_query(:EDIT.t,
-                                       controller: :sequences,
-                                       action: :edit,
-                                       id: sequence.id,
-                                       back: @observation.id)
-              links << link_with_query(:DESTROY.t,
-                                       { controller: :sequences,
-                                         action: :destroy,
-                                         id: sequence.id },
-                                       { data: { confirm: :are_you_sure.t } })
+              links << link_to(:EDIT.t,
+                        edit_sequence_path(
+                          id: sequence.id,
+                          back: @observation.id,
+                          q: get_query_param
+                        ))
+              links << link_to(:DESTROY.t,
+                        sequence_path(id: sequence.id, q: get_query_param),
+                        method: :delete,
+                        data: { confirm: :are_you_sure.t })
             end
             if sequence.blastable?
               links << link_to(:show_observation_blast_link.t,
