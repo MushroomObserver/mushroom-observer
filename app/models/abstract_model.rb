@@ -299,28 +299,31 @@ class AbstractModel < ApplicationRecord
     out
   end
 
-  # FIXME: The following methods establish regularized, non-Rails-default
+  # TODO: NIMMO The following methods established regularized, non-Rails-default
   # controller, action and template names for show, edit & delete.
   # They are used throughout the site (4/27/20).
   #
-  # These methods require corresponding controller and template names, and
-  # although they can be over-ridden in the Models, using these methods may
-  # still be more complex than using the newer abbreviated "RESTful resource"
-  # syntax in current Rails (5.2). They also seem to introduce an added layer
-  # of configuration complexity which will make the app harder to maintain.
+  # However, in general Rails docs advise using the newer abbreviated "RESTful
+  # routes" syntax in current Rails (5.2) for link_to, redirect_to, etc
+  # instead of building URLs by controller and action.
   #
-  # If we switch to inferred controller names defined by the models, and use
-  # default Rails actions and template names, we can potentially eliminate this
-  # whole section from AbstractModel, and take a large number of configuration
-  # overrides out of the code, in favor of the RESTful routes of vanilla Rails.
+  # The methods build urls from controller and template names, but on the upside
+  # they allow for model names (passed as a variable) to be used for calling the
+  # methods. This is a desirable versatility.
   #
-  # This would mean eventually finding and replacing every instance of show_url,
-  # show_link_args, show_controller, index_action and show_action, as well as
+  # So, to enable getting route paths via model names, ideally i'd like to add
+  # methods show_path and index_path to each relevant model.
+  # This means including Rails.application.routes.url_helpers below,
+  # and calling the appropriate route path rather than building it here.
+  #
+  # Also i'm examining every instance of show_controller,
+  # index_action, show_action, show_url, show_link_args,
   # edit_url, edit_link_args, edit_controller, edit_action, destroy_url,
-  # destroy_link_args, destroy_controller, and destroy_action.
+  # destroy_link_args, destroy_controller, and destroy_action in the app to try
+  # to either switch to the path helper, or
   #
-  # But in the meantime, for backwards compatibility, i will rewrite these
-  # methods to produce the same results. Considering that it's tricky to
+  # Intermediate measure, for backwards compatibility, i will rewrite these
+  # methods to produce similar results. Considering that it's tricky to
   # compose a logical rule that generates "users", "info" and "herbaria",
   # I will instead just write a long rule, and directly shorten all the view
   # filenames and actions to the default "show", "edit", "index".
@@ -335,9 +338,8 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-
   # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
+  # that handles the "show" action for this object.
   #
   #   Name.show_controller => "name"
   #   name.show_controller => "name"
@@ -363,14 +365,14 @@ class AbstractModel < ApplicationRecord
   #   Changed from    "index_" + name.underscore
   #
   def self.index_action
-    "index"
+    "index_" + name.underscore
   end
 
   def index_action
     self.class.index_action
   end
 
-  # Return the name of the "show_<object>" action (as a simple
+  # Return the name of the "show" action (as a simple
   # lowercase string) that displays this object.
   #
   #   Name.show_action => "show"
@@ -385,7 +387,7 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
-  # Return the URL of the "show_<object>" action
+  # Return the URL of the "show" action
   #
   #   Name.show_url(12) => "http://mushroomobserver.org/names/12"
   #   name.show_url     => "http://mushroomobserver.org/names/12"
@@ -399,7 +401,7 @@ class AbstractModel < ApplicationRecord
     self.class.show_url(id)
   end
 
-  # Return the link_to args of the "show_<object>" action
+  # Return the link_to args of the "show" action
   #
   #   Name.show_link_args(12) => { controller: :names, action: :show, id: 12 }
   #   name.show_link_args     => { controller: :names, action: :show, id: 12 }

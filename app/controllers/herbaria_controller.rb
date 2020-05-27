@@ -236,21 +236,21 @@ class HerbariaController < ApplicationController
       #            { controller: :herbarium,
       #              action: :list_herbaria }
       #           ]
-      @links << [ link_to :herbarium_index_list_all_herbaria.l, herbaria_path ]
+      @links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
     end
     if query.flavor != :nonpersonal
       # @links << [:herbarium_index_nonpersonal_herbaria.l,
       #            { controller: :herbarium,
       #              action: :index }
       #           ]
-      @links << [ link_to :herbarium_index_nonpersonal_herbaria.l,
-                  herbaria_index_nonpersonal_herbarium_path ]
+      @links << [:herbarium_index_nonpersonal_herbaria.l,
+                  herbaria_index_nonpersonal_herbarium_path]
     end
     # @links << [:create_herbarium.l,
     #            { controller: :herbarium,
     #              action: :new }
     #           ]
-    @links << [ link_to :create_herbarium.l, new_herbarium_path ]
+    @links << [:create_herbarium.l, new_herbarium_path]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.

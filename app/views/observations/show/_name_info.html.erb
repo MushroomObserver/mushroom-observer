@@ -11,17 +11,15 @@
       <strong>About This Name</strong>
     </div>
 
-    <div class="card-body name-section small">
+    <div class="card-body name-section">
 
       <%# links to pages (internal & external) about name
             About Polyozellus
             on MyCoPortal
             on MycoBank %>
       <p>
-        <%= link_to(:show_name.t(name: @name.display_name_brief_authors),
-                    controller: :names,
-                    action: :show,
-                    id: @name.id) %>
+        <%= link_to :show_name.t(name: @name.display_name_brief_authors),
+                    name_path(@name.id) %>
       </p>
       <p>
         <%= link_to("MyCoPortal",

@@ -52,9 +52,9 @@ class CollectionNumbersController < ApplicationController
       #  Observation.show_link_args(params[:id])],
       # [:create_collection_number.l,
       #  { action: :create_collection_number, id: params[:id] }]
-      [ link_to :show_object.l(type: :observation),
+      [ :show_object.l(type: :observation),
                 observation_path(:id => params[:id])],
-      [ link_to :create_collection_number.l,
+      [ :create_collection_number.l,
                 new_collection_number_path(:id => params[:id])]
     ]
     show_selected_collection_numbers(query, always_index: true)

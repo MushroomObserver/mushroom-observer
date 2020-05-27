@@ -178,9 +178,9 @@ class ImagesController < ApplicationController
     # NIMMO: Haven't figured out how to get coerced_query_link
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
-      @links << [link_to :show_objects.t(type: :observation),
-                  observations_index_observation_path(:q => get_query_param)]
-
+      @links << [:show_objects.t(type: :observation),
+                 observations_index_observation_path(:q => get_query_param)]
+    end
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")

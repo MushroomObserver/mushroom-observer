@@ -94,24 +94,22 @@ class LocationsController
     # NIMMO: Haven't figured out how to get coerced_query_link
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
-      @links << [link_to :show_objects.t(type: :observation),
-                  observations_index_observation_path(:q => get_query_param)]
+      @links << [:show_objects.t(type: :observation),
+                 observations_index_observation_path(:q => get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
-    if query.coercable?(:LocationDescription)
+    elsif query.coercable?(:LocationDescription)
       # @links << [:show_objects.t(type: :description),
       #            add_query_param(
       #              { controller: :location_descriptions_controller,
       #                action: :index_location_description },
       #              query
       #            )]
-      @links << [
-        link_to :show_objects.t(type: :description),
-                location_descriptions_index_location_description_path(
-                  :q => get_query_param
-                )
-      ]
+      @links << [:show_objects.t(type: :description),
+        location_descriptions_index_location_description_path(
+          :q => get_query_param
+        )]
     end
 
     # Restrict to subset within a geographical region (used by map

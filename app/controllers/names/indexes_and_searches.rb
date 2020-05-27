@@ -62,7 +62,7 @@ class NamesController
   end
 
   # This no longer makes sense, but is being requested by robots.
-  alias names_by_author names_by_user
+  alias_method :names_by_author, :names_by_user
 
   # Display list of names that a given user is editor on.
   def names_by_editor
@@ -181,19 +181,17 @@ class NamesController
     # NIMMO: Haven't figured out how to get coerced_query_link
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
-      @links << [link_to :show_objects.t(type: :observation),
-                  observations_index_observation_path(:q => get_query_param)]
+      @links << [:show_objects.t(type: :observation),
+                 observations_index_observation_path(:q => get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
-    if query.coercable?(:NameDescription)
+    elsif query.coercable?(:NameDescription)
       # @links << [:show_objects.t(type: :description),
       #            add_query_param({ action: :index_name_description },
       #                            query)]
-      @links << [
-        link_to :show_objects.t(type: :description),
-          name_descriptions_index_name_description_path(:q => get_query_param)
-        ]
+      @links << [:show_objects.t(type: :description),
+          name_descriptions_index_name_description_path(:q => get_query_param)]
     end
 
     # Add some extra fields to the index for authored_names.
