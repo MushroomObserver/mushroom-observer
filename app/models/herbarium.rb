@@ -58,9 +58,9 @@ class Herbarium < AbstractModel
   attr_accessor :personal_user_name
 
   # Override the default show_controller
-  def self.show_controller
-    "herbaria"
-  end
+  # def self.show_controller
+  #   "herbaria"
+  # end
 
   def can_edit?(user = User.current)
     if personal_user_id

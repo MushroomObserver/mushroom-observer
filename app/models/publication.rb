@@ -41,9 +41,9 @@ class Publication < AbstractModel
     errors.add(:full, :validate_publication_ref_missing.t) if full.blank?
   end
 
-  # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "publications"
-  end
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "publications"
+  # end
 
 end

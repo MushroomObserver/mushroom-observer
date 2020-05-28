@@ -63,9 +63,9 @@ class Naming < AbstractModel
   after_destroy :log_destruction
 
   # Override the default show_controller
-  def self.show_controller
-    "namings"
-  end
+  # def self.show_controller
+  #   "namings"
+  # end
 
   def self.construct(args, observation)
     now = Time.now

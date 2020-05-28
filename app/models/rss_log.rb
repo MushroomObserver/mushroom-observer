@@ -158,10 +158,10 @@ class RssLog < AbstractModel
   belongs_to :glossary_term
   belongs_to :article
 
-  # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "rss_logs"
-  end
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "rss_logs"
+  # end
 
 
   # # If switch to ActivityLog name, uncomment: Override the default table_name

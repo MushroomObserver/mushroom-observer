@@ -52,9 +52,9 @@ class Interest < AbstractModel
   belongs_to :user
 
   # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "interests"
-  end
+  # def self.show_controller
+  #   "interests"
+  # end
 
   # Returns Array of all models (Classes) which take interests.
   def self.all_types

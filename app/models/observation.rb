@@ -172,10 +172,10 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "observations"
-  end
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "observations"
+  # end
 
   def is_location?
     false

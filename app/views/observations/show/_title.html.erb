@@ -1,7 +1,7 @@
 <!-- Title Caption -->
 <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
 <%= tag.h2 id: "title-caption", class: "title-caption mb-0" do %>
-  <%= tag.span class: "observation-id h5 order-1 mb-0 text-accent" do %>
+  <%= tag.span class: "observation-id h4 order-1 mb-0 text-accent" do %>
     <%= :show_observation_header.t -%>
     <%= "#{@observation.id || "?"}" -%>
   <% end %>

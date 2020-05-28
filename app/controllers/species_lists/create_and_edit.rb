@@ -71,7 +71,9 @@ class SpeciesListsController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    if !check_permission!(@species_list) redirect_to @species_list
+    if !check_permission!(@species_list)
+      redirect_to species_list_path(@species_list.id)
+    end
     init_name_vars_for_edit(@species_list)
     init_member_vars_for_edit(@species_list)
     init_project_vars_for_edit(@species_list)

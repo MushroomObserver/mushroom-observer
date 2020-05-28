@@ -31,13 +31,13 @@ class SpeciesListsController
     redirect_to species_list_path(@species_list.id)
   end
 
-  def find_obs_query_or_redirect(@species_list = nil)
+  def find_obs_query_or_redirect(species_list = nil)
     query = find_query(:Observation)
     return query if query
 
     flash_error(:species_list_add_remove_no_query.t)
-    if @species_list
-      redirect_to species_list_path(@species_list.id)
+    if species_list
+      redirect_to species_list_path(species_list.id)
     else
       redirect_to species_lists_path
     end

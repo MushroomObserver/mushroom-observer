@@ -384,10 +384,10 @@ class Name < AbstractModel
     (description.gen_desc.presence || description.diag_desc) if description
   end
 
-  # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "names"
-  end
+  # Override the default show_controller
+  # def self.show_controller
+  #   "names"
+  # end
 
   # Used by show_name.
   def self.count_observations(names)

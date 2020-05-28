@@ -1,8 +1,8 @@
-<%= link_to controller.controller_name.capitalize,
-            { controller: controller.controller_name,
-              action: :index },
-            { id: "page-title",
-              class: "navbar-brand" } %>
+<%= link_to images_path,
+            id: "page-title",
+            class: "navbar-brand" do -%>
+  <%= controller.controller_name.capitalize %>
+<% end %>
 
 <%= form_with url: search_pattern_search_path,
               scope: :search,
@@ -35,12 +35,11 @@
 
 <% end %>
 
-<%= link_to({ controller: controller.controller_name,
-              action: :new },
-            { class: "mx-2 btn btn-link border-0",
-              id: "create_link" }) do -%>
+<%= link_to new_image_path,
+            class: "mx-2 btn btn-link border-0",
+            id: "create_link" do -%>
       <%= tag.span class: "text-nowrap" do -%>
-        <%= tag.span :CREATE.t, class: "mr-2" -%>
+        <%= tag.span :UPLOAD.t, class: "mr-2" -%>
         <%= tag.span class: "fas fa-edit" -%>
       <% end %>
 <% end %>

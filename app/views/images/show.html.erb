@@ -1,3 +1,7 @@
+<% provide :context_navbar do
+  render "navbar"
+end %>
+
 <%
   @title = :image_show_title.t(name: @image.unique_format_name)
 

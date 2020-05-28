@@ -333,10 +333,10 @@ class User < AbstractModel
   # password.
   attr_accessor :password_confirmation
 
-  # AbstractModel sets a non-rails default, needs to be overridden
-  def self.show_controller
-    "users"
-  end
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "users"
+  # end
 
   # Find admin's record.
   def self.admin
