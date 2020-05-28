@@ -160,6 +160,7 @@
 .carousel-control-prev,
 .carousel-control-next {
   padding: 2rem;
+  bottom: 6vw;
 
   div.btn {
     background: rgba($black, 0.3);
@@ -182,4 +183,20 @@
 
 .carousel-control-next {
   justify-content: flex-end;
+}
+
+.carousel-indicators {
+  position: static;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+
+  li {
+    background-color: transparent;
+    width: 6vw;
+    height: 6vw;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+  }
 }

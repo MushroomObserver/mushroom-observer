@@ -38,8 +38,8 @@
               <strong><%= user_link(naming.user, naming.user.login) %></strong>
               <% naming.get_reasons.each do |reason| %>
                 <% if reason.used? %>
-                  <div>
-                    <span class="text-secondary-text small">
+                  <div class="text-secondary-text small">
+                    <span>
                       <%= reason.notes.blank? ? reason.label.t : \
                           (reason.label.l + ": " + \
                           reason.notes.to_s.html_safe).tl %>

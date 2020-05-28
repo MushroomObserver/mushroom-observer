@@ -40,7 +40,7 @@
       <%
         if !@name.unknown? && !browser.bot?
         # links to observations %>
-        <%= content_tag(:p, :show_observations_of.t) %>
+        <%= content_tag(:p, :show_observations_of.t, class: "mb-0") %>
         <div class="pl-3">
           <%= # Observations of this name
           content_tag(:p, obss_of_name(@name), class: "mb-1") %>

@@ -6,34 +6,27 @@
 %>
 
 <% if has_images %>
-  <div id="carouselExampleControls" class="carousel slide card-img" data-ride="false">
+  <div id="observation_carousel" class="carousel slide card-img" data-ride="false">
     <div class="carousel-inner bg-secondary">
-      <% unless default_image.nil? %>
-        <div class="carousel-item active">
-          <%
-             notes = !default_image.notes || default_image.notes.blank? ? "" : default_image.notes
-             notes += "\n#{default_image.original_name}" if !default_image.original_name.blank? && \
-                 (check_permission(default_image) || default_image.user && default_image.user.keep_filenames == :keep_and_show)
-          %>
-          <%= carousel_thumbnail(default_image, notes: notes) %>
-        </div>
-      <% end %>
       <% @observation.images.each do |img| %>
         <%
           notes = !img.notes || img.notes.blank? ? "" : img.notes
           notes += "\n#{img.original_name}" if !img.original_name.blank? && \
                 (check_permission(img) || img.user && \
                 img.user.keep_filenames == :keep_and_show)
+          if img == default_image
+            item_class = "carousel-item active"
+          else
+            item_class = "carousel-item"
+          end
         %>
-        <% if img != default_image %>
-          <div class="carousel-item">
-            <%= carousel_thumbnail(img, notes: notes) %>
-          </div>
+        <%= tag.div class: item_class do %>
+            <%= carousel_image(img, notes: notes) %>
         <% end %>
       <% end %>
     </div>
     <a class="carousel-control-prev"
-       href="#carouselExampleControls"
+       href="observation_carousel"
        role="button"
        data-slide="prev">
       <div class="btn">
@@ -42,7 +35,7 @@
       </div>
     </a>
     <a class="carousel-control-next"
-       href="#carouselExampleControls"
+       href="observation_carousel"
        role="button"
        data-slide="next">
       <div class="btn">
@@ -50,5 +43,20 @@
         <span class="sr-only">Next</span>
       </div>
     </a>
+    <ol class="carousel-indicators bg-secondary mb-0">
+      <% @observation.images.each_with_index do |img, index| %>
+        <%
+          if img == default_image
+            item_class = " active"
+          else
+            item_class = ""
+          end %>
+          <li data-target="#observation_carousel"
+              data-slide-to="<%= index %>"
+              class="<%= item_class %>">
+            <%= carousel_thumbnail(img) %>
+          </li>
+      <% end %>
+    </ol>
   </div>
 <% end %>

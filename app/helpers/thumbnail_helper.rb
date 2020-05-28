@@ -83,7 +83,7 @@ module ThumbnailHelper
     render(partial: "images/image_thumbnail", locals: locals)
   end
 
-  def carousel_thumbnail(image, args = {})
+  def carousel_image(image, args = {})
     image_id = image.is_a?(Integer) ? image : image.id
     # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
@@ -157,6 +157,41 @@ module ThumbnailHelper
       theater_on_click: false,
       html_options: html_options,
       notes: notes
+    }.merge(args)
+
+    render(partial: "images/carousel_image", locals: locals)
+  end
+
+  def carousel_thumbnail(image, args = {})
+    image_id = image.is_a?(Integer) ? image : image.id
+    # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+
+    # these defaults could be passed instead
+    responsive = true,
+    notes = "",
+
+    # size_url   = Image.url(size, image_id)
+    thumb_url  = Image.url(:thumbnail, image_id)
+
+    img_class = "img-fluid w-100 lazyload position-absolute object-fit-contain #{img_class}"
+
+    data = {
+      src: thumb_url
+    }
+
+    html_options = {
+      alt: notes,
+      class: img_class,
+      data: data
+    }
+
+    locals = {
+      image: image,
+      thumb_url: thumb_url,
+      link: Image.show_link_args(image_id),
+      size: :thumb,
+      theater_on_click: false,
+      html_options: html_options
     }.merge(args)
 
     render(partial: "images/carousel_thumbnail", locals: locals)
