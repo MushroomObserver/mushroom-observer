@@ -49,7 +49,7 @@ module Query
           QueryRecord.find_by_description(desc) ||
             QueryRecord.new(
               description: desc,
-              updated_at: Time.now,
+              updated_at: Time.zone.now,
               access_count: 0
             )
         end

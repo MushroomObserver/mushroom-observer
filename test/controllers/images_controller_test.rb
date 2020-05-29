@@ -286,7 +286,7 @@ class ImagesControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     updated_at = obs.updated_at
     image = images(:disconnected_coprinus_comatus_image)
-    assert(!obs.images.member?(image))
+    assert_not(obs.images.member?(image))
     requires_login(:reuse_image,
                    mode: "observation",
                    obs_id: obs.id,
@@ -400,7 +400,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observations, action: :show)
     assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
-    assert(!obs.images.member?(remove))
+    assert_not(obs.images.member?(remove))
     assert_equal(keep.id, obs.thumb_image_id)
 
     selected = {}
@@ -414,7 +414,7 @@ class ImagesControllerTest < FunctionalTestCase
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
-    assert(!obs.reload.images.member?(keep))
+    assert_not(obs.reload.images.member?(keep))
     assert_nil(obs.thumb_image_id)
   end
 
@@ -427,7 +427,7 @@ class ImagesControllerTest < FunctionalTestCase
     requires_user(:destroy, :show, params, "mary")
     assert_redirected_to(action: :index)
     assert_equal(0, mary.reload.contribution)
-    assert(!obs.reload.images.member?(image))
+    assert_not(obs.reload.images.member?(image))
   end
 
   def test_edit_image
@@ -550,7 +550,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_reuse_image_for_glossary_term_post
     glossary_term = glossary_terms(:conic_glossary_term)
     image = images(:commercial_inquiry_image)
-    assert(!glossary_term.images.member?(image))
+    assert_not(glossary_term.images.member?(image))
     params = {
       id: glossary_term.id.to_s,
       img_id: image.id.to_s

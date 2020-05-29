@@ -18,9 +18,7 @@ PASSENGER_FILE = "#{ROOT}/tmp/restart.txt".freeze
 
 def parse_top(top, prefix)
   match = top.match(/#{prefix}:\D+(\d+)\D+(\d+)/)
-  if match
-    return match[1..2].map(&:to_f)
-  end
+  return match[1..2].map(&:to_f) if match
 end
 
 date = `date +%Y%m%d:%H%M%S`.chomp

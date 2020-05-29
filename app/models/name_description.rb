@@ -214,7 +214,7 @@ class NameDescription < Description
     end
     self.review_status = value
     self.reviewer_id   = reviewer_id
-    self.last_review   = Time.now
+    self.last_review   = Time.zone.now
 
     # Save unless there are substantive changes pending.
     unless save_version?

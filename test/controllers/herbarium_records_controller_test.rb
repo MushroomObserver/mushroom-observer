@@ -106,7 +106,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     obs = Observation.find(params[:id])
-    assert(!obs.specimen)
+    assert_not(obs.specimen)
     post(:new, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     herbarium_record = HerbariumRecord.last
@@ -160,15 +160,15 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:herbarium_record][:herbarium_name] = nybg.name
 
     login("mary")
-    assert(!nybg.curators.member?(mary))
-    assert(!obs.can_edit?(mary))
+    assert_not(nybg.curators.member?(mary))
+    assert_not(obs.can_edit?(mary))
     post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
     assert_flash_text(/only curators can/i)
 
     login("dick")
-    assert(!nybg.curators.member?(dick))
+    assert_not(nybg.curators.member?(dick))
     assert(obs.can_edit?(dick))
     post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)

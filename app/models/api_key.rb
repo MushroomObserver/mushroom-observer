@@ -13,7 +13,7 @@ class ApiKey < AbstractModel
   end
 
   def provide_defaults
-    self.created_at ||= Time.now
+    self.created_at ||= Time.zone.now
     self.verified ||= nil
     self.last_used ||= nil
     self.num_uses ||= 0
@@ -24,14 +24,14 @@ class ApiKey < AbstractModel
 
   def touch!
     update!(
-      last_used: Time.now,
+      last_used: Time.zone.now,
       num_uses: num_uses + 1
     )
   end
 
   def verify!
     update!(
-      verified: Time.now
+      verified: Time.zone.now
     )
   end
 

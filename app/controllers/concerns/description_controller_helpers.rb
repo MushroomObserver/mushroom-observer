@@ -61,7 +61,7 @@ module DescriptionControllerHelpers
     #   id: desc.id
     # )
     redirect_to_description_with_query(desc)
-    
+
     unless desc.fully_public
       flash_error(:runtime_description_make_default_only_public.t)
       return
@@ -551,16 +551,16 @@ module DescriptionControllerHelpers
 
     # Creating personal description, or entering one from a specific source.
     when :source, :user
-      if read
-        desc.reader_groups << UserGroup.all_users
-      else
-        desc.reader_groups << UserGroup.one_user(@user)
-      end
-      if write
-        desc.writer_groups << UserGroup.all_users
-      else
-        desc.writer_groups << UserGroup.one_user(@user)
-      end
+      desc.reader_groups << if read
+                              UserGroup.all_users
+                            else
+                              UserGroup.one_user(@user)
+                            end
+      desc.writer_groups << if write
+                              UserGroup.all_users
+                            else
+                              UserGroup.one_user(@user)
+                            end
       desc.admin_groups << UserGroup.one_user(@user)
 
     else
@@ -662,12 +662,12 @@ module DescriptionControllerHelpers
   # Update the permissions for a write-in.
   def update_writein(desc, name, reader, writer, admin)
     result = true
-    if name =~ /^(.*\S) +<.*>$/
-      group = User.find_by_login(Regexp.last_match(1))
-    else
-      group = User.find_by_login(name) ||
-              UserGroup.find_by_name(name)
-    end
+    group = if name =~ /^(.*\S) +<.*>$/
+              User.find_by_login(Regexp.last_match(1))
+            else
+              User.find_by_login(name) ||
+                UserGroup.find_by_name(name)
+            end
     group = UserGroup.one_user(group) if group.is_a?(User)
     if group
       update_group(desc, :readers, group, reader)

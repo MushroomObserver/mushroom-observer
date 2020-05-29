@@ -44,7 +44,7 @@ class NamingTest < UnitTestCase
   # Make sure it fails if we screw up.
   def test_validate
     naming = Naming.new
-    assert !naming.save
+    assert_not naming.save
     assert_equal 3, naming.errors.count
     assert_equal :validate_naming_name_missing.t, naming.errors[:name].first
     assert_equal(:validate_naming_observation_missing.t,
@@ -166,8 +166,8 @@ class NamingTest < UnitTestCase
 
     assert(nrs[1].used?)
     assert(nrs[2].used?)
-    assert(!nrs[3].used?)
-    assert(!nrs[4].used?)
+    assert_not(nrs[3].used?)
+    assert_not(nrs[4].used?)
 
     assert_equal("", nrs[1].notes)
     assert_equal("I asked *Uncle Herb*", nrs[2].notes)

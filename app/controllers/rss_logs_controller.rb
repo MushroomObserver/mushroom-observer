@@ -170,7 +170,7 @@ class RssLogsController < ApplicationController
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
-      time = Time.now
+      time = Time.zone.now
       Language.all.each do |lang|
         if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
           str.update!(

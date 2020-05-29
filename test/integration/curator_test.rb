@@ -46,7 +46,7 @@ class CuratorTest < IntegrationTestCase
     assert_template("observations/show_observation")
     assert_match(%r{href="/observations/edit_observation/#{obs.id}},
                  response.body)
-    assert(!obs.reload.herbarium_records.include?(rec))
+    assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
   def test_edit_herbarium_record_from_show_herbarium_record
@@ -74,7 +74,7 @@ class CuratorTest < IntegrationTestCase
     assert_template("herbarium_records/show_herbarium_record")
     click(label: "Destroy Herbarium Record")
     assert_template("herbarium_records/list_herbarium_records")
-    assert(!obs.reload.herbarium_records.include?(rec))
+    assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
   def test_edit_herbarium_record_from_index
@@ -102,7 +102,7 @@ class CuratorTest < IntegrationTestCase
     assert_template("herbarium_records/list_herbarium_records")
     click(href: "/herbarium_record/destroy_herbarium_record/#{rec.id}")
     assert_template("herbarium_records/list_herbarium_records")
-    assert(!obs.reload.herbarium_records.include?(rec))
+    assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
   def test_herbarium_index_from_create_herbarium_record

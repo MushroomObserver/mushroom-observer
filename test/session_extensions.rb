@@ -70,12 +70,12 @@ module SessionExtensions
     send(method.downcase.to_s, url, *args)
     follow_redirect! while response.redirect?
     if status == 500
-      if error = controller.instance_variable_get("@error")
-        msg = "#{error}\n#{error.backtrace.join("\n")}"
-      else
-        msg = "Got unknown 500 error from outside our application?!\n" \
-              "This usually means that a file failed to parse.\n"
-      end
+      msg = if error = controller.instance_variable_get("@error")
+              "#{error}\n#{error.backtrace.join("\n")}"
+            else
+              "Got unknown 500 error from outside our application?!\n" \
+                    "This usually means that a file failed to parse.\n"
+            end
       flunk msg
     end
     assert_equal([], Symbol.missing_tags,

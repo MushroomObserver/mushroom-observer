@@ -6,7 +6,7 @@ class LocationTest < UnitTestCase
   end
 
   def good_location(str)
-    assert(!Location.dubious_name?(str))
+    assert_not(Location.dubious_name?(str))
   end
 
   def test_dubious_name
@@ -58,14 +58,14 @@ class LocationTest < UnitTestCase
   def test_understood_country
     assert(Location.understood_country?("USA"))
     assert(Location.understood_country?("Afghanistan"))
-    assert(!Location.understood_country?("Moon"))
+    assert_not(Location.understood_country?("Moon"))
   end
 
   def test_understood_continent
     assert(Location.understood_continent?("Central America"))
-    assert(!Location.understood_continent?("Atlantis"))
+    assert_not(Location.understood_continent?("Atlantis"))
     assert(Location.countries_in_continent("Europe").include?("France"))
-    assert(!Location.countries_in_continent("Europe").include?("Canada"))
+    assert_not(Location.countries_in_continent("Europe").include?("Canada"))
   end
 
   def test_versioning

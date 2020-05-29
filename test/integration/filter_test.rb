@@ -59,7 +59,7 @@ class FilterTest < IntegrationTestCase
 
     obs_imged_checkbox = find_field("user[has_images]")
     assert_not(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
+               "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
     user.reload
     assert_nil(user.content_filter[:has_images],
                "Unchecking and saving should turn off filter")
@@ -96,11 +96,13 @@ class FilterTest < IntegrationTestCase
     #   :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images]")
     assert_not(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
+               "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
     #   :has_specimen should be off (It was never turned on).
     has_specimen_checkbox = find_field("user[has_specimen]")
-    assert_not(has_specimen_checkbox.checked?,
-           "'#{:prefs_filters_has_specimen.t}' checkbox should be unchecked.")
+    assert_not(
+      has_specimen_checkbox.checked?,
+      "'#{:prefs_filters_has_specimen.t}' checkbox should be unchecked."
+    )
 
     #   Turn on :has_specimen
     page.check("user[has_specimen]")

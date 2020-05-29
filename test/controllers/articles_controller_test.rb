@@ -134,7 +134,7 @@ class ArticlesControllerTest < FunctionalTestCase
     make_admin
     get(:destroy, params)
     assert_not(Article.exists?(article.id),
-           "Failed to destroy Article #{article.id}, '#{article.title}'")
+               "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
 
   # possibly rename this method to test_index_article (index based on query)

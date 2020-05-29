@@ -124,7 +124,7 @@ class Language < AbstractModel
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
     cutoff = @@last_update
-    @@last_update = Time.now
+    @@last_update = Time.zone.now
     for locale, tag, text in Language.connection.select_rows %(
       SELECT locale, tag, text
       FROM translation_strings t, languages l

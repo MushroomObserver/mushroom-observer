@@ -29,7 +29,7 @@ class SpeciesListsController
     redirected = false
 
     # Update the timestamps/user/when/where/title/notes fields.
-    now = Time.now
+    now = Time.zone.now
     @species_list.created_at = now if create_or_update == :create
     @species_list.updated_at = now
     @species_list.user = @user
@@ -247,40 +247,40 @@ class SpeciesListsController
   def calc_checklist(query = nil)
     results = []
     if query || (query = query_from_session)
-      case query.model
-      when Name
-        results = query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          limit: 1000
-        )
-      when Observation
-        results = query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: :names,
-          limit: 1000
-        )
-      when Image
-        results = query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { images_observations: { observations: :names } },
-          limit: 1000
-        )
-      when Location
-        results = query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { observations: :names },
-          limit: 1000
-        )
-      when RssLog
-        results = query.select_rows(
-          select: "DISTINCT names.display_name, names.id",
-          join: { observations: :names },
-          where: "rss_logs.observation_id > 0",
-          limit: 1000
-        )
-      else
-        results = []
-      end
+      results = case query.model
+                when Name
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    limit: 1000
+                  )
+                when Observation
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: :names,
+                    limit: 1000
+                  )
+                when Image
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { images_observations: { observations: :names } },
+                    limit: 1000
+                  )
+                when Location
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { observations: :names },
+                    limit: 1000
+                  )
+                when RssLog
+                  query.select_rows(
+                    select: "DISTINCT names.display_name, names.id",
+                    join: { observations: :names },
+                    where: "rss_logs.observation_id > 0",
+                    limit: 1000
+                  )
+                else
+                  []
+                end
     end
     results
   end

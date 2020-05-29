@@ -321,7 +321,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_edit_and_save_location_description
     loc = locations(:albion) # use a location that has no description
     assert_not_nil(loc.description,
-               "Test should use a location that has a description.")
+                   "Test should use a location that has a description.")
     params = { description: { source_type: "public",
                               source_name: "",
                               project_id: "",

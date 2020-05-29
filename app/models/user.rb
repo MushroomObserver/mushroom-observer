@@ -503,7 +503,7 @@ class User < AbstractModel
 
   # Mark a User account as "verified".
   def verify
-    now = Time.now
+    now = Time.zone.now
     self.verified = now
     self.last_login = now
     self.last_activity = now
@@ -735,7 +735,7 @@ class User < AbstractModel
   def self.primer
     result = []
     if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < Time.now - 1.day
+       File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
 
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
@@ -918,9 +918,7 @@ class User < AbstractModel
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    if password.present?
-      write_attribute("password", self.class.sha1(password))
-    end
+    write_attribute("password", self.class.sha1(password)) if password.present?
     write_attribute("auth_code", String.random(40))
   end
 

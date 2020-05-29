@@ -82,7 +82,7 @@ namespace :jason do
       next unless str.index("_")
 
       if (n % 15).zero?
-        print "%.2f%% done\n" % (100.0 * n / notes.length)
+        print format("%.2f%% done\n", (100.0 * n / notes.length))
         sleep 1
       end
       n += 1
@@ -543,7 +543,7 @@ namespace :jason do
           obs.specimen   = spec
           obs.user_id    = user.id
           obs.is_collection_location = is_co
-          obs.created_at = obs.updated_at = Time.now
+          obs.created_at = obs.updated_at = Time.zone.now
           obs.name_id = what.id if what
           if where.is_a?(Location)
             obs.where = where.name
@@ -553,14 +553,14 @@ namespace :jason do
           end
 
           if obs.save
-            if notes =~ /(\d{8}\.\d+\w*)/
-              name = Regexp.last_match(1)
-            elsif what
-              name = "%s %s" % [date.strftime("%Y%m%d"), what.text_name]
-            else
-              name = "unknown"
-            end
-            warn("Created observation: #%d (%s)" % [obs.id, name])
+            name = if notes =~ /(\d{8}\.\d+\w*)/
+                     Regexp.last_match(1)
+                   elsif what
+                     format("%s %s", date.strftime("%Y%m%d"), what.text_name)
+                   else
+                     "unknown"
+                   end
+            warn(format("Created observation: #%d (%s)", obs.id, name))
             obs.log(:log_observation_created_at, { user: user.login }, true)
             lines.clear
 
@@ -589,8 +589,8 @@ namespace :jason do
                 end
                 naming.change_vote(user, vote)
                 warn(
-                  "  Created naming: #%d (%s)" % [naming.id,
-                                                  naming.name.search_name]
+                  format("  Created naming: #%d (%s)", naming.id,
+                         naming.name.search_name)
                 )
               else
                 warn("Failed to create naming: %s" % naming.dump_errors)
@@ -634,8 +634,8 @@ namespace :jason do
                   end
                   warn("  Created image: #%d" % image.id)
                 else
-                  warn('Failed to create image "%s": %s' % [file,
-                                                            image.dump_errors])
+                  warn(format('Failed to create image "%s": %s', file,
+                       image.dump_errors))
                 end
               end
             end
@@ -733,9 +733,9 @@ namespace :jason do
       val
     elsif File.exist?(file = "%s.jpg" % val)
       file
-    elsif File.exist?(file = "%s/%s" % [path, val])
+    elsif File.exist?(file = format("%s/%s", path, val))
       file
-    elsif File.exist?(file = "%s/%s.jpg" % [path, val])
+    elsif File.exist?(file = format("%s/%s.jpg", path, val))
       file
     end
   end

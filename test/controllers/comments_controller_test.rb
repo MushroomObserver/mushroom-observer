@@ -71,7 +71,7 @@ class CommentsControllerTest < FunctionalTestCase
     )
     assert_equal(9, rolf.reload.contribution)
     obs.reload
-    assert(!obs.comments.member?(comment))
+    assert_not(obs.comments.member?(comment))
   end
 
   def test_save_comment
