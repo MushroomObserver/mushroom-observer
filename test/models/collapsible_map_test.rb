@@ -91,7 +91,7 @@ class CollapsibleMapTest < UnitTestCase
       end
       messages << message
     end
-    refute differ, "Mapsets are wrong: expect -vs- actual\n" \
+    assert_not differ, "Mapsets are wrong: expect -vs- actual\n" \
                    "#{messages.join} \n"
   end
 

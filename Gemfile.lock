@@ -333,6 +333,7 @@ DEPENDENCIES
   jquery-rails
   lightbox-bootstrap-rails (~> 5.1, >= 5.1.0.1)
   mail (= 2.7.0)
+  mimemagic
   mini_racer
   minitest
   minitest-reporters

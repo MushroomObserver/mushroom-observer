@@ -133,7 +133,7 @@ class ArticlesControllerTest < FunctionalTestCase
     login(article.user.login)
     make_admin
     get(:destroy, params)
-    refute(Article.exists?(article.id),
+    assert_not(Article.exists?(article.id),
            "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
 

@@ -5,7 +5,15 @@
   # nothing but the image_id.  (But not votes, original name, etc.)
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
    #If the image is part of an image set.
+
+  # TODO: NIMMO If we can eager-load all the images for an rsslog, and
+  # ideally write a function to re-sort them with the featured image first,
+  # (which would also help for carousels) it would be good to call a
+  # template to make other images from this observation available in the lightbox.
+  # We'd need to set the lightbox id to the observation id.
+  # Syntax is <%= tag.div class: "d-none", data: { remote: image_url, toggle: "lightbox", gallery: lightbox_id, srcset: html_options.data.srcset }
   is_set = is_set || false
+  lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
 %>
 
 <div class="image-sizer position-relative w-100">
@@ -17,8 +25,11 @@
 
   <%= link_to "", link, class: "stretched-link" %>
 
-  <%= # TODO: NIMMO maybe move this to the presenter, too
-    lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
+  <%=
+    # Note: data-remote, below, is what the lightbox pulls img src from, not the image above.
+    # As many items as have data-remote and data-gallery will be members of the lightbox.
+    # TODO: NIMMO add srcset to lightbox-bootstrap...
+    # ...or just replace with bootstrap carousel inside modal
     show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
     show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"
     caption = "#{show_orig} | #{show_exif}".html_safe
@@ -31,7 +42,8 @@
               remote: "#{large_url}",
               gallery: lightbox_id,
               type: "image",
-              footer: caption
+              footer: caption,
+              srcset: srcset
             }
   %>
 

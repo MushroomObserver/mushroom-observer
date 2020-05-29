@@ -93,7 +93,13 @@ gem "simple_enum"
 gem "aws-sdk", "~> 2"
 
 # email generation, parsing and sending
+# version locked to prevent test failures caused by added "=0D" at the
+# end of line in the body of plaintext emails.
+# See https://www.pivotaltracker.com/story/show/172299270/comments/213574631
 gem "mail", "= 2.7.0"
+
+# for detecting file type of uploaded images
+gem "mimemagic"
 
 # Autoprefixer (Required dependency for Bootstrap 4)
 # Parse CSS and add vendor prefixes to CSS rules
@@ -151,6 +157,9 @@ gem "brakeman", require: false
 # Use rubocop and associated gems for code quality control
 # WARNING: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
+# - Regenerate .rubocop_todo.yml
+#     https://docs.rubocop.org/en/stable/configuration,
+#       Automatically Generated Configuration
 gem "rubocop", require: false
 gem "rubocop-performance"
 gem "rubocop-rails"

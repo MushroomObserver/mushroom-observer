@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: NIMMO Split off new controller tests into their own test files!
-# Especially rss_logs
+# Especially search, account, comment, rss_logs
 require "test_helper"
 
 class ObservationsControllerTest < FunctionalTestCase
@@ -60,7 +60,7 @@ class ObservationsControllerTest < FunctionalTestCase
         assert_response(:redirect)
         assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
       else
-        assert_redirected_to(%r{/locations/create_location})
+        assert_redirected_to(%r{/locations/new})
       end
     rescue MiniTest::Assertion => e
       flash = get_last_flash.to_s
@@ -278,19 +278,19 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_altering_types_shown_by_rss_log_index
     # Show none.
     post(:index_rss_log)
-    assert_template(:list_rss_logs)
+    assert_template(:index)
 
     # Show one.
     post(:index_rss_log,
          params: { show_observations: observations(:minimal_unknown_obs).to_s })
-    assert_template(:list_rss_logs)
+    assert_template(:index)
 
     # Show all.
     params = {}
     RssLog.all_types.each { |type| params["show_#{type}"] = "1" }
     post(:index_rss_log, params: params)
     assert_template(
-      :list_rss_logs,
+      :index,
       partial: rss_logs(:observation_rss_log).id
     )
   end
@@ -1174,19 +1174,19 @@ class ObservationsControllerTest < FunctionalTestCase
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add
-      assert(response.body.match(%r{href="/#{type}/create_#{type}/}),
+      assert(response.body.match(%r{href="/#{type}/new/}),
              "Expected to find a create link for #{types}.")
     else
-      assert_not(response.body.match(%r{href="/#{type}/create_#{type}/}),
+      assert_not(response.body.match(%r{href="/#{type}/new/}),
                  "Expected not to find a create link for #{types}.")
     end
 
     items.each do |id, can_edit|
       if can_edit
-        assert(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+        assert(response.body.match(%r{href="/#{type}/edit/#{id}}),
                "Expected to find an edit link for #{type} #{id}.")
       else
-        assert_not(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+        assert_not(response.body.match(%r{href="/#{type}/edit/#{id}}),
                    "Expected not to find an edit link for #{type} #{id}.")
       end
     end
@@ -1764,7 +1764,7 @@ class ObservationsControllerTest < FunctionalTestCase
     score   = user.reload.contribution
     params  = modified_generic_params(params, user)
 
-    post_requires_login(:create_observation, params)
+    post_requires_login(:create, params)
     name = Name.last
 
     # assert_redirected_to(action: :show)
@@ -1940,28 +1940,28 @@ class ObservationsControllerTest < FunctionalTestCase
     agaricus = names(:agaricus)
     params[:name][:name] = "Agaricus"
     params[:approved_name] = nil
-    post(:create_observation, params: params)
+    post(:create, params: params)
     # assert_template(action: expected_page)
-    assert_redirected_to(/#{ expected_page }/)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Agaricus sp"
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Agaricus sp."
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with genus and add author?
     params[:name][:name] = "Agaricus Author"
     params[:approved_name] = "Agaricus Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
     agaricus.author = nil
@@ -1970,8 +1970,8 @@ class ObservationsControllerTest < FunctionalTestCase
 
     params[:name][:name] = "Agaricus sp Author"
     params[:approved_name] = "Agaricus sp Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
     agaricus.author = nil
@@ -1980,55 +1980,55 @@ class ObservationsControllerTest < FunctionalTestCase
 
     params[:name][:name] = "Agaricus sp. Author"
     params[:approved_name] = "Agaricus sp. Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
 
     # Can we create observation with genus specifying author?
     params[:name][:name] = "Agaricus Author"
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Agaricus sp Author"
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Agaricus sp. Author"
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus?
     psalliota = names(:psalliota)
     params[:name][:name] = "Psalliota"
     params[:approved_name] = "Psalliota"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Psalliota sp"
     params[:approved_name] = "Psalliota sp"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = "Psalliota sp."
     params[:approved_name] = "Psalliota sp."
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus, adding author?
     params[:name][:name] = "Psalliota Author"
     params[:approved_name] = "Psalliota Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
     psalliota.author = nil
@@ -2037,8 +2037,8 @@ class ObservationsControllerTest < FunctionalTestCase
 
     params[:name][:name] = "Psalliota sp Author"
     params[:approved_name] = "Psalliota sp Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
     psalliota.author = nil
@@ -2047,83 +2047,83 @@ class ObservationsControllerTest < FunctionalTestCase
 
     params[:name][:name] = "Psalliota sp. Author"
     params[:approved_name] = "Psalliota sp. Author"
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
 
     # Can we create new quoted genus?
     params[:name][:name] = '"One"'
     params[:approved_name] = '"One"'
-    post(:create_observation, params: params)
+    post(:create, params: params)
     # assert_template(controller: :observations, action: expected_page)
-    assert_redirected_to(/#{ expected_page }/)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Two" sp'
     params[:approved_name] = '"Two" sp'
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"Two"', assigns(:observation).name.text_name)
     assert_equal('"Two"', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Three" sp.'
     params[:approved_name] = '"Three" sp.'
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"Three"', assigns(:observation).name.text_name)
     assert_equal('"Three"', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One"'
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" sp'
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" sp.'
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     # Can we create species under the quoted genus?
     params[:name][:name] = '"One" foo'
     params[:approved_name] = '"One" foo'
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One" foo', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" "bar"'
     params[:approved_name] = '"One" "bar"'
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One" "bar"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" Author'
     params[:approved_name] = '"One" Author'
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp Author'
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp. Author'
     params[:approved_name] = nil
-    post(:create_observation, params: params)
-    assert_redirected_to(/#{ expected_page }/)
+    post(:create, params: params)
+    assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" Author', assigns(:observation).name.search_name)
   end
@@ -2148,7 +2148,7 @@ class ObservationsControllerTest < FunctionalTestCase
     FileUtils.cp(fixture, orig_file)
 
     post(
-      :create_observation,
+      :create,
       observation: {
         when: Time.zone.now,
         place_name: "Burbank, California, USA",
@@ -2243,9 +2243,9 @@ class ObservationsControllerTest < FunctionalTestCase
     post_requires_user(:edit, [controller: :observations,
                                            action: :show],
                        params, "mary")
-    # assert_redirected_to(controller: :locations, action: :create_location)
-    assert_redirected_to(/#{ url_for(controller: :locations,
-                                     action: :create_location) }/)
+    # assert_redirected_to(controller: :locations, action: :new)
+    assert_redirected_to(/#{url_for(controller: :locations,
+                                    action: :new)}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -2281,8 +2281,8 @@ class ObservationsControllerTest < FunctionalTestCase
       [controller: :observations, action: :show],
       params, "mary"
     )
-    # assert_redirected_to(controller: :locations, action: :create_location)
-    assert_redirected_to(%r{/locations/create_location})
+    # assert_redirected_to(controller: :locations, action: :new)
+    assert_redirected_to(%r{/locations/new})
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
@@ -2486,7 +2486,7 @@ class ObservationsControllerTest < FunctionalTestCase
     o_size = Observation.count
 
     login(user.login)
-    post(:new, params: params)
+    post(:create, params: params)
 
     assert_equal(o_size + 1, Observation.count)
     obs = Observation.last.reload
@@ -2564,7 +2564,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login("rolf")
 
     # If javascript isn't enabled, then checkbox isn't required.
-    post(:new,
+    post(:create,
          params: {
            observation: { place_name: "Where, Japan", when: Time.zone.now },
            name: { name: names(:coprinus_comatus).text_name },
@@ -2582,7 +2582,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal([2, 3, 4], reasons)
 
     # If javascript IS enabled, then checkbox IS required.
-    post(:new,
+    post(:create,
          params: {
            observation: { place_name: "Where, Japan", when: Time.zone.now },
            name: { name: names(:coprinus_comatus).text_name },
@@ -2780,7 +2780,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
 
     # Make sure it remember state of checks if submit fails.
-    post(:new,
+    post(:create,
          params: {
            name: { name: "Screwy Name" }, # (ensures it will fail)
            project: { "id_#{@proj1.id}" => "0" }
@@ -2897,7 +2897,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
 
     # Make sure it remember state of checks if submit fails.
-    post(:new,
+    post(:create,
          params: {
            name: { name: "Screwy Name" }, # (ensures it will fail)
            list: { "id_#{@spl2.id}" => "0" }
@@ -3053,7 +3053,7 @@ class ObservationsControllerTest < FunctionalTestCase
       login("rolf")
       get(:change_banner)
       assert_flash_error
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(action: :index)
 
       make_admin("rolf")
       get(:change_banner)
@@ -3063,7 +3063,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
       post(:change_banner, params: { val: "new banner" })
       assert_no_flash
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(action: :index)
       assert_equal("new banner", :app_banner_box.l)
 
       strs = TranslationString.where(tag: :app_banner_box)

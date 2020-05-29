@@ -330,22 +330,27 @@ class Location < AbstractModel
   # auto-completers.
   #
   def self.primer
-    where = ""
-    where = "WHERE observations.user_id = #{User.current_id}" if User.current
-    result = connection.select_values(%(
-      SELECT DISTINCT IF(observations.location_id > 0,
-                         locations.name,
-                         observations.where) AS x
-      FROM observations
-      LEFT OUTER JOIN locations ON locations.id = observations.location_id
-      #{where}
-      ORDER BY observations.updated_at DESC
-      LIMIT 100
-    )).sort
-    if User.current_location_format == :scientific
-      result.map! { |n| Location.reverse_name(n) }
-    end
-    result
+    # Temporarily disable.  It rarely takes autocomplete long even on my horrible
+    # internet connection.  And the primer can -- at least briefly -- have names
+    # that have been merged or changed.  That may be confusing some users.  Let's
+    # try it without for a while to see if anyone complains.
+    # where = ""
+    # where = "WHERE observations.user_id = #{User.current_id}" if User.current
+    # result = connection.select_values(%(
+    #   SELECT DISTINCT IF(observations.location_id > 0,
+    #                      locations.name,
+    #                      observations.where) AS x
+    #   FROM observations
+    #   LEFT OUTER JOIN locations ON locations.id = observations.location_id
+    #   #{where}
+    #   ORDER BY observations.updated_at DESC
+    #   LIMIT 100
+    # )).sort
+    # if User.current_location_format == :scientific
+    #   result.map! { |n| Location.reverse_name(n) }
+    # end
+    # result
+    []
   end
 
   # Takes a location string splits on commas, reverses the order,

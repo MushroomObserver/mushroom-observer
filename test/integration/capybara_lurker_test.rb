@@ -16,12 +16,12 @@ class CapybarLurkerTest < IntegrationTestCase
     #   assert_template will be deprecated in Rails 5 (but available as a gem)
     #     because (per DHH) testing content is a better practice
     # Following gives more informative error message than
-    # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
+    # assert(page.has_title?("#{:app_title.l}: Activity Log"), "Wrong page")
     assert_equal("#{:app_title.l}: Activity Log", page.title, "Wrong page")
 
     # Click on first observation in feed results
     first(:xpath, rss_observation_created_xpath).click
-    assert_match(/#{:app_title.l }: Observation/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
@@ -29,26 +29,26 @@ class CapybarLurkerTest < IntegrationTestCase
     go_back_after do
       click_link("« Prev")
     end # back at Observation
-    assert_match(/#{:app_title.l }: Observation/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on the first image.
     go_back_after do
       first(:xpath, observation_image_xpath).click
-      assert_match(/#{:app_title.l }: Image/, page.title, "Wrong page")
+      assert_match(/#{:app_title.l}: Image/, page.title, "Wrong page")
     end # back at Observation
-    assert_match(/#{:app_title.l }: Observation/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Go back to observation and click on "About...".
     click_link("About ")
-    assert_match(/#{:app_title.l }: Name/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: Name/, page.title, "Wrong page")
 
     # Take a look at the occurrence map.
     click_link("Occurrence Map")
-    assert_match(/#{:app_title.l }: Occurrence Map/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: Occurrence Map/, page.title, "Wrong page")
 
     # Check out a few links from left-hand panel.
     click_on("How To Use")
-    assert_match(/#{:app_title.l }: How to Use/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: How to Use/, page.title, "Wrong page")
 
     click_on("Français")
     subtitle = if :how_title.has_translation?
@@ -56,7 +56,7 @@ class CapybarLurkerTest < IntegrationTestCase
                else
                  "How to Use"
                end
-    assert_match(/#{:app_title.l }: #{subtitle}/, page.title, "Wrong page")
+    assert_match(/#{:app_title.l}: #{subtitle}/, page.title, "Wrong page")
 
     click_on("Contributeurs")
     subtitle = if :users_by_contribution_title.has_translation?
@@ -100,7 +100,7 @@ class CapybarLurkerTest < IntegrationTestCase
     assert_equal("#{:app_title.l}: Activity Log", page.title, "Login failed")
 
     visit("/#{obs.id}")
-    assert_match(/#{:app_title.l }: Observation #{obs.id}/, page.title,
+    assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
                  "Wrong page")
 
     # Make sure we're displaying original names of images
@@ -130,7 +130,7 @@ class CapybarLurkerTest < IntegrationTestCase
     # Check out location.
     go_back_after do
       click_link(obs.location.name)
-      assert_match(/^#{:app_title.l }: Location/, page.title, "Login failed")
+      assert_match(/^#{:app_title.l}: Location/, page.title, "Login failed")
     end # back at Observation
 
     # Check out species list.
@@ -138,7 +138,7 @@ class CapybarLurkerTest < IntegrationTestCase
       list = SpeciesList.joins(:observations).
              where("observation_id = ?", obs.id).first
       click_link(list.title)
-      assert_match(/^#{:app_title.l }: Species List: #{list.title}/,
+      assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
                    page.title, "Wrong page")
 
       # (Make sure observation is shown somewhere.)

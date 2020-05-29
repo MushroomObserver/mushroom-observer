@@ -551,6 +551,8 @@ var Lightbox = (function ($) {
         if (typeof next == 'undefined') return;
 
         var src = next.attr('data-remote') || next.attr('href');
+        // var srcset = next.attr('data-srcset');
+        // console.log("srcset: " + srcset)
         if (next.attr('data-type') === 'image' || this._isImage(src)) this._preloadImage(src, false);
 
         if (numberOfTimes > 0) return this._preloadImageByIndex(startIndex + 1, numberOfTimes - 1);
@@ -576,6 +578,7 @@ var Lightbox = (function ($) {
               loadingTimeout = null;
               var image = $('<img />');
               image.attr('src', img.src);
+              // image.attr('srcset', img.srcset);
               image.addClass('img-fluid');
 
               // backward compatibility for bootstrap v3
@@ -596,6 +599,7 @@ var Lightbox = (function ($) {
         }
 
         img.src = src;
+        // img.srcset = srcset;
         return img;
       }
     }, {

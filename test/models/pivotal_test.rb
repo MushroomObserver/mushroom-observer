@@ -12,7 +12,7 @@ class PivotalTest < UnitTestCase
     assert_true(test_story.active?)
     assert_equal("test", test_story.name)
     assert_match(/test story/, test_story.description)
-    refute_match(/USER|VOTE/, test_story.description)
+    assert_no_match(/USER|VOTE/, test_story.description)
     assert_equal(1, test_story.comments.length)
     assert_equal(3, test_story.votes.length)
     assert_equal(1, test_story.user_vote(rolf))

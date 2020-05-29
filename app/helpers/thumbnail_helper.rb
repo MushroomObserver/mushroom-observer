@@ -69,6 +69,7 @@ module ThumbnailHelper
       thumb_url: thumb_url,
       large_url: large_url,
       orig_url: orig_url,
+      srcset: data_srcset,
       link: Image.show_link_args(image_id),
       size: :small,
       img_proportion: img_proportion,

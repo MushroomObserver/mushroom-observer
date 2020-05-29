@@ -65,7 +65,7 @@ class StringExtensionsTest < UnitTestCase
 
   def test_character_asciiness
     assert("a".is_ascii_character?)
-    refute("á".is_ascii_character?)
+    assert_not("á".is_ascii_character?)
   end
 
   def test_levenshtein_distance

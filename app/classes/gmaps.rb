@@ -1,7 +1,3 @@
-# rubocop:disable Style/FrozenStringLiteralComment
-# disable cop: magic comment "frozen_string_literal: true" causes
-#   ActionView::Template::Error: can't modify frozen String
-#
 #  = Google Maps interface
 #
 #  GM::GMap::      Represents a "google.maps.Map" object.
@@ -316,4 +312,3 @@ module GM
     end
   end
 end
-# rubocop:enable Style/FrozenStringLiteralComment

@@ -46,7 +46,7 @@ class FunctionalTestCase < ActionController::TestCase
   def check_for_params(args)
     return args if args.length < 2 or args[1][:params]
 
-    [args[0], { params: args[1] }] + args[2..-1]
+    [args[0], { params: args[1] }] + args[2..]
   end
 
   def extract_body(args)

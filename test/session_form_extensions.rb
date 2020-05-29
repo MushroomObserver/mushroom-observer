@@ -292,7 +292,7 @@ module SessionExtensions
     def assert_enabled(id, msg = nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be enabled."
-      context.refute(field.disabled, msg)
+      context.assert_not(field.disabled, msg)
       field
     end
 
@@ -419,7 +419,7 @@ module SessionExtensions
                     (button.is_a?(String) && (field.value == button) ||
                      button.nil?)
 
-        context.refute(field.disabled,
+        context.assert_not(field.disabled,
                        "Tried to submit form with disabled button: " \
                        "#{button.inspect}")
         context.assert(!found || found == field.value,

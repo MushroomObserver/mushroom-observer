@@ -201,7 +201,7 @@ class PostObservationTest < IntegrationTestCase
     if new_obs.specimen
       assert_match(/show_herbarium_record/, response.body)
     else
-      refute_match(/No specimen/, response.body)
+      assert_no_match(/No specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)

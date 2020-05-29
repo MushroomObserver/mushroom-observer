@@ -2132,18 +2132,19 @@ class NameTest < UnitTestCase
     assert_not(names(:petigera).is_misspelling?)
     assert_nil(names(:petigera).correct_spelling)
 
-    # Coprinus comatus should normally end up in name primer.
-    if File.exist?(MO.name_primer_cache_file)
-      File.delete(MO.name_primer_cache_file)
-    end
-    assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
-
-    # Mark it as misspelled and see that it gets removed from the primer list.
-    names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
-    names(:coprinus_comatus).change_deprecated(true)
-    names(:coprinus_comatus).save
-    File.delete(MO.name_primer_cache_file)
-    assert(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
+    # Temporarily disabling the name primer.  See comments there.
+    # # Coprinus comatus should normally end up in name primer.
+    # if File.exist?(MO.name_primer_cache_file)
+    #   File.delete(MO.name_primer_cache_file)
+    # end
+    # assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
+    #
+    # # Mark it as misspelled and see that it gets removed from the primer list.
+    # names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
+    # names(:coprinus_comatus).change_deprecated(true)
+    # names(:coprinus_comatus).save
+    # File.delete(MO.name_primer_cache_file)
+    # assert(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
   end
 
   def test_lichen
@@ -2400,7 +2401,6 @@ class NameTest < UnitTestCase
   def test_mysql_sort_order
     return unless sql_collates_accents?
 
-    # rubocop:disable Lint/UselessAssignment
     # RuboCop gives false positives
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
@@ -2409,7 +2409,6 @@ class NameTest < UnitTestCase
     n5 = create_test_name("Agaricus Aéiou")
     n6 = create_test_name("Agaricus Aejou")
     n5.update(author: "aÉIOU")
-    # rubocop:enable Lint/UselessAssignment
 
     x = Name.where(id: n1.id..n6.id).order(:author).pluck(:author)
     assert_equal(%w[Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou], x)
