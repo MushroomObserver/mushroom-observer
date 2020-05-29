@@ -271,7 +271,7 @@ class Names::DescriptionsController < ApplicationController
     #   action: :show,
     #   id: desc.name_id
     # )
-    redirect_to name_path(desc.name_id, :q => get_query_param)
+    redirect_to name_path(desc.name_id, q: get_query_param)
   end
 
   ##############################################################################
@@ -436,7 +436,7 @@ class Names::DescriptionsController < ApplicationController
       #   action: :show,
       #   id: @description.name_id
       # )
-      redirect_to name_path(@description.name_id, :q => get_query_param)
+      redirect_to name_path(@description.name_id, q: get_query_param)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
@@ -451,7 +451,7 @@ class Names::DescriptionsController < ApplicationController
         #   action: :show,
         #   id: @description.name_id
         # )
-        redirect_to name_path(@description.name_id, :q => get_query_param)
+        redirect_to name_path(@description.name_id, q: get_query_param)
       end
     end
   end

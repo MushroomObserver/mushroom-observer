@@ -147,7 +147,7 @@ class API
       obj
     end
 
-    def merge_herbarium_records(this_obj, other_obj)
+    def merge_herbarium_records(this_obj, _other_obj)
       raise HerbariumRecordAlreadyExists.new(this_obj)
     end
 

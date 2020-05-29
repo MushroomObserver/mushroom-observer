@@ -182,7 +182,7 @@ class NamesController
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
-                 observations_index_observation_path(:q => get_query_param)]
+                 observations_index_observation_path(q: get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
@@ -191,7 +191,7 @@ class NamesController
       #            add_query_param({ action: :index_name_description },
       #                            query)]
       @links << [:show_objects.t(type: :description),
-          name_descriptions_index_name_description_path(:q => get_query_param)]
+          name_descriptions_index_name_description_path(q: get_query_param)]
     end
 
     # Add some extra fields to the index for authored_names.

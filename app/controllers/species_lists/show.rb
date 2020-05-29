@@ -65,7 +65,7 @@ class SpeciesListsController
     #     action: :print_labels },
     #   query
     # )
-    redirect_to observations_print_labels_path(:q => get_query_param(query))
+    redirect_to observations_print_labels_path(q: get_query_param(query))
   end
 
 end

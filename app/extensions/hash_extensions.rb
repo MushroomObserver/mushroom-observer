@@ -12,9 +12,9 @@ class Hash
   # Flatten multi-dimensional hash in the style of link_to.  That is, it merges
   # all sub-hashes (ignoring the top-level key) into the top-level hash.
   #
-  #   args = { :id => 5, :params => { :q => 123 } }
+  #   args = { id: 5, params: { q: 123 } }
   #   puts args.flatten.inspect
-  #   # { :id => 5, :q => 123 }
+  #   # { id: 5, q: 123 }
   #
   def flatten
     result = {}

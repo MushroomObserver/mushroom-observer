@@ -26,10 +26,10 @@
           <%= locus = sequence.locus.truncate(sequence.locus_width)
           if sequence.deposit?
             link_to "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
-                    sequence_path(sequence.id, :q => get_query_param)
+                    sequence_path(sequence.id, q: get_query_param)
           else
             link_to "#{locus} - MO ##{sequence.id}".t,
-                    sequence_path(sequence.id, :q => get_query_param)
+                    sequence_path(sequence.id, q: get_query_param)
           end %>
           <%=
             links = []

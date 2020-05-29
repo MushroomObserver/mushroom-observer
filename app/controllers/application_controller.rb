@@ -743,7 +743,7 @@ class ApplicationController < ActionController::Base
     # is a way to test if it's html_safe before, and if so, then it should be
     # okay to remove the first character without making it html_unsafe??
     # rubocop:disable Rails/OutputSafety
-    session[:notice].to_s[1..-1].html_safe
+    session[:notice].to_s[1..].html_safe
     # rubocop:enable Rails/OutputSafety
   end
   helper_method :flash_get_notices
@@ -800,11 +800,11 @@ class ApplicationController < ActionController::Base
     type_sym = obj.class.to_s.underscore.to_sym
     if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
-      return true
+      true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
-      return false
+      false
     end
   end
 

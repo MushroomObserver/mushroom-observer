@@ -32,7 +32,7 @@ class AjaxController
     name = args[:original_name].to_s
     errors += "\n" + :runtime_no_upload_image.t(name: name)
     logger.error("UPLOAD_FAILED: #{errors.inspect}")
-    render(plain: errors.strip_html, status: 500)
+    render(plain: errors.strip_html, status: :internal_server_error)
   end
 
   def create_and_upload_image(args)

@@ -8,8 +8,8 @@ pid "/tmp/unicorn.pid"
 stderr_path APP_PATH + "/log/unicorn.stderr.log"
 stdout_path APP_PATH + "/log/unicorn.stdout.log"
 preload_app false
-GC.respond_to?(:copy_on_write_friendly=) and
-  GC.copy_on_write_friendly = true
+GC.respond_to?(:copy_on_write_friendly=) &&
+  (GC.copy_on_write_friendly = true)
 check_client_connection false
 before_fork do |_server, _worker|
   defined?(ActiveRecord::Base) &&

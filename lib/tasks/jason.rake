@@ -743,6 +743,7 @@ namespace :jason do
   class FakeUpload
     attr_accessor :path
     attr_accessor :content_type
+    
     def size
       File.size(path)
     end

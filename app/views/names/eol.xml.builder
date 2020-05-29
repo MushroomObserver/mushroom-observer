@@ -9,7 +9,7 @@ xml.response(
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
   "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 "\
                           "http://services.eol.org/schema/content_0_2.xsd"
-) {
+) do
   for taxon in @data.names
     xml.taxon do
       xml.dc(:identifier, "#{MO.http_domain}/names/show_name/#{taxon.id}")
@@ -24,7 +24,7 @@ xml.response(
       xml.reference(citation.t) if citation.present?
       refs = []
       @data.descriptions(taxon.id).each do |desc|
-        next unless desc.refs.present?
+        next if desc.refs.blank?
 
         desc.refs.split(/[\n\r]/).each do |ref|
           ref = ref.strip
@@ -35,7 +35,7 @@ xml.response(
       for desc in @data.descriptions(taxon.id)
         for f in NameDescription.eol_note_fields
           value = desc.send(f)
-          next unless value.present?
+          next if value.blank?
 
           xml.dataObject do
             lang = desc.locale || MO.default_locale
@@ -89,4 +89,4 @@ xml.response(
       break
     end
   end
-}
+end

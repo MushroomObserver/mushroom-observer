@@ -468,7 +468,7 @@ class RssLog < AbstractModel
       time = time2
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
-      if Rails.env == "production"
+      if Rails.env.production?
         time = Time.now # (but don't crash in production)
       else
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"

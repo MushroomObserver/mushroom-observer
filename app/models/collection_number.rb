@@ -78,7 +78,7 @@ class CollectionNumber < AbstractModel
     return if observations.include?(obs)
 
     observations.push(obs)
-    obs.update_attributes(specimen: true) unless obs.specimen
+    obs.update(specimen: true) unless obs.specimen
     obs.log(:log_collection_number_added, name: format_name, touch: true)
   end
 

@@ -1,6 +1,6 @@
 xml.instruct! :xml, version: "1.0"
-xml.rss(version: "2.0") {
-  xml.channel {
+xml.rss(version: "2.0") do
+  xml.channel do
     xml.title(:rss_title.l)
     xml.link(MO.http_domain + "/rss_log/list_rss_logs")
     xml.description(:rss_description.l)
@@ -18,5 +18,5 @@ xml.rss(version: "2.0") {
         xml.guid(MO.http_domain + log.url, isPermaLink: "false")
       end
     end
-  }
-}
+  end
+end

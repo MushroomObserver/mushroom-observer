@@ -112,7 +112,12 @@
             imgs += obs.images
             for img in imgs.uniq %>
               <%= img_tag = image_tag(img.thumbnail_url, class: "tiny")
-              link_to(img_tag, img.show_link_args, target: "_blank") %>
+              link_to(
+                img_tag,
+                img.show_link_args,
+                target: "_blank",
+                rel:"noopener"
+              ) %>
             <% end %>
           </td>
         </tr>

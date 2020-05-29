@@ -74,7 +74,7 @@ class EmailController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_to observation_path(@observation.id, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   def commercial_inquiry # :norobots:
@@ -90,7 +90,7 @@ class EmailController < ApplicationController
     #   action: :show,
     #   id: @image.id
     # )
-    redirect_to image_path(@image.id, :q => get_query_param)
+    redirect_to image_path(@image.id, q: get_query_param)
   end
 
   def email_question(target, method = :email_general_question)

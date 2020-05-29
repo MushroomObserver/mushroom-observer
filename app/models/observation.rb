@@ -339,19 +339,19 @@ class Observation < AbstractModel
   def lat=(val)
     lat = Location.parse_latitude(val)
     lat = val if lat.nil? && val.present?
-    write_attribute(:lat, lat)
+    self[:lat] = lat
   end
 
   def long=(val)
     long = Location.parse_longitude(val)
     long = val if long.nil? && val.present?
-    write_attribute(:long, long)
+    self[:long] = long
   end
 
   def alt=(val)
     alt = Location.parse_altitude(val)
     alt = val if alt.nil? && val.present?
-    write_attribute(:alt, alt)
+    self[:alt] = alt
   end
 
   # Is lat/long more than 10% outside of location extents?
@@ -660,7 +660,7 @@ class Observation < AbstractModel
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.select { |n| n.name == name }.count.positive?
+    namings.count { |n| n.name == name }.positive?
   end
 
   # Has the owner voted on a given Naming?
@@ -857,21 +857,17 @@ class Observation < AbstractModel
     result
   end
 
-  def calc_consensus(debug = false)
-     reload		     reload
-     result = "" if debug		     calculator = Observation::ConsensusCalculator.new(namings)
-
-      best, best_val = calculator.calc(debug)
-     # Gather votes for names and synonyms.  Note that this is trickier than one		     old = name
-     # would expect since it is possible to propose several synonyms for a		     if name != best || vote_cache != best_val
+  def calc_consensus
+    reload
+    calculator = Observation::ConsensusCalculator.new(namings)
+    best, best_val = calculator.calc
+    old = name
+    if name != best || vote_cache != best_val
       self.name = best
       self.vote_cache = best_val
       save
     end
-
     announce_consensus_change(old, best) if best != old
-
-    return calculator.debug_messages if debug
   end
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
@@ -1038,7 +1034,7 @@ class Observation < AbstractModel
     return unless herbarium_records.empty?
     return unless sequences.empty?
 
-    update_attributes(specimen: false)
+    update(specimen: false)
   end
 
   # Return primary collector and their number if available, else just return
@@ -1130,7 +1126,7 @@ class Observation < AbstractModel
     end
 
     # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).each do |user|
+    User.where(email_observations_all: true).find_each do |user|
       recipients.push(user)
     end
 

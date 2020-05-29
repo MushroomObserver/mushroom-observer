@@ -2138,7 +2138,7 @@ class NameTest < UnitTestCase
     #   File.delete(MO.name_primer_cache_file)
     # end
     # assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
-    #
+    # 
     # # Mark it as misspelled and see that it gets removed from the primer list.
     # names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
     # names(:coprinus_comatus).change_deprecated(true)
@@ -2804,7 +2804,7 @@ class NameTest < UnitTestCase
   #
   #   a = names(:agaricus)
   #   ac = names(:agaricus_campestris)
-  #   ac.update_attributes(classification: "")
+  #   ac.update(classification: "")
   #   msgs = Name.propagate_generic_classifications
   #   assert_equal(["Updating Agaricus campestris"], msgs)
   #   assert_equal(a.classification, ac.reload.classification)

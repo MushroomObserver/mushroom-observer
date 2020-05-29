@@ -602,7 +602,7 @@ class Location < AbstractModel
     return if tokens.length < 2
 
     alt = [tokens[0]]
-    tokens[1..-1].each { |t| alt.push(t) if t[-4..-1] != " Co." }
+    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
     result = alt.join(", ")
     result == name ? nil : result
   end
@@ -637,17 +637,18 @@ class Location < AbstractModel
     end
 
     # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).each do |spl|
+    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
       spl.update_attribute(:location, self)
     end
 
     # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).each do |user|
+    User.where(location_id: old_loc.id).find_each do |user|
       user.update_attribute(:location, self)
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location", target_id: old_loc.id).each do |int|
+    Interest.where(target_type: "Location",
+                   target_id: old_loc.id).each do |int|
       int.target = self
       int.save
     end
@@ -738,7 +739,7 @@ class Location < AbstractModel
     end
 
     # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).each do |user|
+    User.where(email_locations_all: true).find_each do |user|
       recipients.push(user)
     end
 

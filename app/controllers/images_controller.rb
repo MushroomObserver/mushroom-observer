@@ -90,7 +90,7 @@ class ImagesController < ApplicationController
   def index
     if params[:page].to_s.to_i > 1000
       render(
-        status: 429,
+        status: :too_many_requests,
         content_type: "text/plain",
         plain: "Your queries are killing our server. There are much better ways to scrape the images from our site. Please contact the webmaster.  And please stop hammering our server!")
       return
@@ -179,7 +179,7 @@ class ImagesController < ApplicationController
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
-                 observations_index_observation_path(:q => get_query_param)]
+                 observations_index_observation_path(q: get_query_param)]
     end
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
@@ -267,11 +267,9 @@ class ImagesController < ApplicationController
 
     # Grab list of votes.
     @votes = @image.image_votes.sort_by do |v|
-      begin
-        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
-      rescue StandardError
-        "?"
-      end
+      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
+    rescue StandardError
+      "?"
     end
 
     # Update view stats on image we're actually showing.
@@ -324,7 +322,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: id
       # )
-      redirect_to image_path(@image.id, :q => get_query_param)
+      redirect_to image_path(@image.id, q: get_query_param)
     end
   end
 
@@ -357,7 +355,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
   end
     @image = Image.new
     @image.license = @user.license
@@ -383,7 +381,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     end
 
     if params[:upload].blank?
@@ -393,7 +391,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     else
       args = params[:image]
       i = 1
@@ -406,7 +404,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     end
   end
 
@@ -462,7 +460,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image
       # )
-      redirect_to image_path(@image.id, :q => get_query_param)
+      redirect_to image_path(@image.id, q: get_query_param)
     end
     init_project_vars_for_add_or_edit(@image)
   end
@@ -519,7 +517,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image.id
       # )
-      redirect_to image_path(@image.id, :q => get_query_param)
+      redirect_to image_path(@image.id, q: get_query_param)
     else
       init_project_vars_for_reload(@image)
     end
@@ -610,7 +608,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @image.id
       # )
-      redirect_to image_path(@image.id, :q => get_query_param)
+      redirect_to image_path(@image.id, q: get_query_param)
     else
       @image.log_destroy
       @image.destroy
@@ -653,7 +651,7 @@ class ImagesController < ApplicationController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_to observation_path(@observation, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   def serve_reuse_form(params)
@@ -722,7 +720,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -745,7 +743,7 @@ class ImagesController < ApplicationController
         #   action: :show,
         #   id: @observation.id
         # )
-        redirect_to observation_path(@observation, :q => get_query_param)
+        redirect_to observation_path(@observation.id, q: get_query_param)
         done = true
 
       else
@@ -761,7 +759,7 @@ class ImagesController < ApplicationController
         #   action: :show,
         #   id: @user.id
         # )
-        redirect_to user_path(@users, :q => get_query_param)
+        redirect_to user_path(@user.id, q: get_query_param)
         done = true
       end
     end
@@ -852,7 +850,7 @@ class ImagesController < ApplicationController
       #   action: :show,
       #   id: image
       # )
-      redirect_to image_path(@image.id, :q => get_query_param)
+      redirect_to image_path(@image.id, q: get_query_param)
     else
       # redirect_with_query(
       #   action: :show,
@@ -860,7 +858,7 @@ class ImagesController < ApplicationController
       #   size: params[:size]
       # )
       redirect_to image_path(@image.id,
-        :q => get_query_param, :size => params[:size])
+        q: get_query_param, size: params[:size])
     end
   end
 

@@ -62,13 +62,13 @@ class HerbariumRecordsController < ApplicationController
       # [:show_object.l(type: :observation),
       #  Observation.show_link_args(params[:id])],
       [:show_object.l(type: :observation),
-       observation_path(:id => params[:id])],
+       observation_path(id: params[:id])],
       # [:create_herbarium_record.l,
       #  { action: :new,
       #    id: params[:id] }
       # ]
       [:create_herbarium_record.l,
-        new_herbarium_record_path(:id => params[:id])]
+        new_herbarium_record_path(id: params[:id])]
     ]
     show_selected_herbarium_records(query, always_index: true)
   end
@@ -186,7 +186,7 @@ class HerbariumRecordsController < ApplicationController
 
     @herbarium_record.remove_observation(@observation)
     # redirect_with_query(@observation.show_link_args)
-    redirect_to observation_path(@observation.id, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   def destroy # :norobots:
@@ -201,7 +201,7 @@ class HerbariumRecordsController < ApplicationController
     #   action: :index_herbarium_record
     # )
     redirect_to herbarium_record_index_herbarium_record_path(
-      :q => get_query_param
+      q: get_query_param
     )
   end
 
@@ -294,15 +294,15 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.herbarium = herbarium
     if name.blank?
       flash_error(:create_herbarium_record_missing_herbarium_name.t)
-      return false
+      false
     elsif !@herbarium_record.herbarium.nil?
-      return true
+      true
     elsif name != @user.personal_herbarium_name || @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)
-      return false
+      false
     else
       @herbarium_record.herbarium = @user.create_personal_herbarium
-      return true
+      true
     end
   end
 
@@ -351,7 +351,7 @@ class HerbariumRecordsController < ApplicationController
       #   id: @herbarium_record.id
       # )
       redirect_to herbarium_record_index_herbarium_record_path(
-        :q => get_query_param
+        q: get_query_param
       )
     end
   end

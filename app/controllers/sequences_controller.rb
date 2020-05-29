@@ -67,7 +67,7 @@ class SequencesController < ApplicationController
     @links << [:show_object.l(type: :observation),
               observation_path(params[:id])]
     @links << [:show_observation_add_sequence.l,
-              new_sequence_path(:id => params[:id])]
+              new_sequence_path(id: params[:id])]
     show_selected_sequences(query, always_index: true)
   end
 
@@ -107,7 +107,7 @@ class SequencesController < ApplicationController
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
       # redirect_with_query(@observation.show_link_args)
-      redirect_to observation_path(@observation.id, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     else
       flash_object_errors(@sequence)
     end
@@ -123,7 +123,7 @@ class SequencesController < ApplicationController
       flash_warning(:permission_denied.t)
       # redirect_with_query(@sequence.observation.show_link_args)
       redirect_to observation_path(@sequence.observation_id,
-                                   :q => get_query_param)
+                                   q: get_query_param)
     end
   end
 
@@ -157,12 +157,12 @@ class SequencesController < ApplicationController
       #   action: :index_sequence
       # )
       redirect_to sequences_index_sequence_path(@sequence.id,
-                                   :q => get_query_param)
+                                                q: get_query_param)
 
     else
       #TODO: NIMMO isn't @back_object here always an observation? Check
       # redirect_with_query(@back_object.show_link_args)
-      redirect_to observation_path(@back_object.id, :q => get_query_param)
+      redirect_to observation_path(@back_object.id, q: get_query_param)
     end
   end
 

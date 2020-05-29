@@ -464,10 +464,7 @@ class AccountController < ApplicationController
           #   where: @place_name,
           #   set_user: @user.id
           # )
-          redirect_to new_location_path(
-            :where => @place_name,
-            :set_user => @user.id
-          )
+          redirect_to new_location_path(where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
           # redirect_to(

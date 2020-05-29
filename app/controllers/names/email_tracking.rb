@@ -70,7 +70,7 @@ class NamesController
     #   action: :show,
     #   id: name_id
     # )
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
 end

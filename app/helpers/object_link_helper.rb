@@ -27,14 +27,14 @@ module ObjectLinkHelper
       link_string = where_string(location.display_name, count)
       link_string += " [#{:click_for_map.t}]" if click
       # link_to(link_string, location.show_link_args)
-      link_to(link_string, location_path(:id => location.id))
+      link_to(link_string, location_path(id: location.id))
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
       # link_to(link_string, controller: :observations,
       #                      action: :observations_at_where, where: where)
       link_to(link_string,
-              observations_observations_at_where_path(:where => where))
+              observations_observations_at_where_path(where: where))
     end
   end
 
@@ -174,10 +174,10 @@ module ObjectLinkHelper
     # (or namespace as symbol: type.to_s.pluralize.to_sym)
     if type.to_s === "name"
       link_to(result,
-              name_description_path(obj.id, desc.id, :q => get_query_param))
+              name_description_path(obj.id, desc.id, q: get_query_param))
     elsif type.to_s === "location"
       link_to(result,
-              location_description_path(obj.id, desc.id, :q => get_query_param))
+              location_description_path(obj.id, desc.id, q: get_query_param))
     end
   end
 
@@ -205,7 +205,7 @@ module ObjectLinkHelper
     #                        action: :new,
     #                        id: obs.id)
     link = link_to(:show_observation_add_sequence.t,
-                   new_sequence_path(:id => obs.id, :q => get_query_param))
+                   new_sequence_path(id: obs.id, q: get_query_param))
 
     " | ".html_safe + link
   end
@@ -218,7 +218,7 @@ module ObjectLinkHelper
       #         action: :observation_index,
       #         id: obs.id)
       link_to(pluralize(count, :herbarium_record.t),
-              herbarium_records_observation_index_path(:id => obs.id))
+              herbarium_records_observation_index_path(id: obs.id))
     else
       return :show_observation_specimen_available.t if obs.specimen
 

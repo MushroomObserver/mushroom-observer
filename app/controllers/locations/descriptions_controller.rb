@@ -390,7 +390,7 @@ class Locations::DescriptionsController < ApplicationController
   end
 
   def redirect_to_location_with_query
-    redirect_to location_path(@description.location_id, :q => get_query_param)
+    redirect_to location_path(@description.location_id, q: get_query_param)
   end
 
   def redirect_to_location_description
@@ -400,7 +400,7 @@ class Locations::DescriptionsController < ApplicationController
 
   def redirect_to_location_description_with_query
     redirect_to location_description_path(@description.location_id,
-      @description.id, :q => get_query_param)
+      @description.id, q: get_query_param)
   end
 
 end

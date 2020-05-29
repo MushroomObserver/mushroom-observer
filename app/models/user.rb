@@ -715,7 +715,7 @@ class User < AbstractModel
 
   def notes_template=(str)
     str = User.parse_notes_template(str).join(", ")
-    write_attribute(:notes_template, str)
+    self[:notes_template] = str
   end
 
   def self.parse_notes_template(str)
@@ -881,7 +881,7 @@ class User < AbstractModel
   def has_unshown_naming_notifications?(_observation = nil)
     result = false
     QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                      user_id: id).each do |q|
+                      user_id: id).find_each do |q|
       _naming_id, notification_id, shown =
         q.get_integers([:naming, :notification, :shown])
       next unless shown.nil?
@@ -918,8 +918,8 @@ class User < AbstractModel
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    write_attribute("password", self.class.sha1(password)) if password.present?
-    write_attribute("auth_code", String.random(40))
+    self["password"] = self.class.sha1(password) if password.present?
+    self["auth_code"] = String.random(40)
   end
 
   ##############################################################################
@@ -971,7 +971,7 @@ class User < AbstractModel
   end
 
   def notes_template_forbid_duplicates # :nodoc
-    return unless notes_template.present?
+    return if notes_template.blank?
 
     squished = notes_template.split(",").map(&:squish)
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
@@ -981,7 +981,7 @@ class User < AbstractModel
   end
 
   def notes_template_bad_parts # :nodoc
-    return [] unless notes_template.present?
+    return [] if notes_template.blank?
 
     notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)

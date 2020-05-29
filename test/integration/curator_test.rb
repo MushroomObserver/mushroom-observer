@@ -20,7 +20,7 @@ class CuratorTest < IntegrationTestCase
   def test_edit_and_remove_herbarium_record_from_show_observation
     login!("mary", "testpassword", true)
     obs = observations(:detailed_unknown_obs)
-    rec = obs.herbarium_records.select { |r| r.can_edit?(mary) }.first
+    rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
     click(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
     assert_template("herbarium_records/edit_herbarium_record")
@@ -52,7 +52,7 @@ class CuratorTest < IntegrationTestCase
   def test_edit_herbarium_record_from_show_herbarium_record
     login!("mary", "testpassword", true)
     obs = observations(:detailed_unknown_obs)
-    rec = obs.herbarium_records.select { |r| r.can_edit?(mary) }.first
+    rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
     click(href: "/herbarium_record/show_herbarium_record/#{rec.id}")
     assert_template("herbarium_records/show_herbarium_record")
@@ -80,7 +80,7 @@ class CuratorTest < IntegrationTestCase
   def test_edit_herbarium_record_from_index
     login!("mary", "testpassword", true)
     obs = observations(:detailed_unknown_obs)
-    rec = obs.herbarium_records.select { |r| r.can_edit?(mary) }.first
+    rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/herbarium/show_herbarium/#{rec.herbarium.id}")
     click(href: /herbarium_index/)
     assert_template("herbarium_records/list_herbarium_records")

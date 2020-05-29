@@ -1,6 +1,7 @@
 module PatternSearch
   class Error < ::StandardError
     attr_accessor :args
+    
     def initialize(args)
       self.args = args
     end

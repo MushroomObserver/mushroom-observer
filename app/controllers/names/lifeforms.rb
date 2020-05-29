@@ -19,7 +19,7 @@ class NamesController
     end
     @name.update(lifeform: " #{words.join(" ")} ")
     # redirect_with_query(@name.show_link_args)
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
   def propagate_lifeform
@@ -35,7 +35,7 @@ class NamesController
       end
     end
     # redirect_with_query(@name.show_link_args)
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
 end

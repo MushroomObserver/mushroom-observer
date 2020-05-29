@@ -136,8 +136,8 @@ class SpeciesListsController
           #   set_species_list: @species_list.id
           # )
           redirect_to new_location_path(
-            :where => @place_name,
-            :set_species_list => @species_list.id
+            where: @place_name,
+            set_species_list: @species_list.id
           )
         elsif unshown_notifications?(@user, :naming)
           # redirect_to controller: :notifications, action: :show

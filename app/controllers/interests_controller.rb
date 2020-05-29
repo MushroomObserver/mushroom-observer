@@ -137,6 +137,6 @@ class InterestsController < ApplicationController
     # redirect_with_query(
     #   action: :list_interests
     # )
-    redirect_to interests_list_interests_path(:q => get_query_param)
+    redirect_to interests_list_interests_path(q: get_query_param)
   end
 end

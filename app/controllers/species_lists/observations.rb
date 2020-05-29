@@ -56,7 +56,8 @@ class SpeciesListsController
     #   )
     # )
     redirect_to species_lists_add_remove_observations_path(
-      :species_list => id, :q => get_query_param
+      species_list: id,
+      q: get_query_param
     )
     nil
   end
@@ -124,9 +125,7 @@ class SpeciesListsController
       flash_notice(:runtime_species_list_remove_observation_success.
         t(name: @species_list.unique_format_name, id: @observation.id))
       # redirect_to action: :manage_species_lists, id: @observation.id
-      redirect_to species_lists_manage_species_lists_path(
-        :id => @observation.id
-      )
+      redirect_to species_lists_manage_species_lists_path(@observation.id)
     else
       redirect_to species_list_path(@species_list.id)
     end
@@ -145,9 +144,7 @@ class SpeciesListsController
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: @species_list.unique_format_name, id: @observation.id))
       # redirect_to action: :manage_species_lists, id: @observation.id
-      redirect_to species_lists_manage_species_lists_path(
-        :id => @observation.id
-      )
+      redirect_to species_lists_manage_species_lists_path(@observation.id)
     else
       redirect_to species_list_path(@species_list.id)
     end

@@ -17,21 +17,21 @@
         #                 controller: :herbarium_records,
         #                 action: :new,
         #                 id: @observation.id)
-        link_to new_herbarium_record_path(:id => @observation.id,
-                                          :q => get_query_param)
+        link_to new_herbarium_record_path(id: @observation.id,
+                                          q: get_query_param)
       %>]
     </div>
     <ul class="tight-list">
       <% records.each do |record| %>
         <li>
           <%= link_to record.accession_at_herbarium.t,
-                herbarium_record_path(record.id, :q => get_query_param) %>
+                herbarium_record_path(record.id, q: get_query_param) %>
           <% if in_admin_mode? || record.can_edit? %>
             [<%= link_to :EDIT.t, edit_herbarium_record_path(id: record.id,
                     back: @observation.id, q: get_query_param) %> |
              <%= link_to :REMOVE.t,
                     herbarium_records_remove_observation_path(id: record.id,
-                      obs: @observation.id, :q => get_query_param),
+                      obs: @observation.id, q: get_query_param),
                     { data: { confirm: :are_you_sure.t } } %>]
           <% end %>
         </li>
@@ -46,7 +46,7 @@
       <% records.each do |record| %>
         <li>
           <%= link_to record.accession_at_herbarium.t,
-                herbarium_record_path(record.id, :q => get_query_param) %>
+                herbarium_record_path(record.id, q: get_query_param) %>
         </li>
       <% end %>
     </ul>
@@ -57,8 +57,8 @@
       #                 controller: :herbarium_records,
       #                 action: :new,
       #                 id: @observation.id)
-      link_to new_herbarium_record_path(:id => @observation.id,
-                                        :q => get_query_param)
+      link_to new_herbarium_record_path(id: @observation.id,
+                                        q: get_query_param)
     %>]
   <% end %>
 <% end %>

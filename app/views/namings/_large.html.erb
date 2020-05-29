@@ -21,10 +21,7 @@
             <% Textile.register_name(naming.name) %>
             <td>
               <%= link_to naming.display_name_brief_authors.t,
-                          name_path(
-                            :id => naming.name,
-                            :q => get_query_param
-                          ) %>
+                          name_path(id: naming.name, q: get_query_param) %>
               <% if check_permission(naming) %>
                 [<%= link_to :EDIT.t,
                        edit_naming_path(id: naming.id, q: get_query_param) %> |

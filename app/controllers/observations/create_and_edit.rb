@@ -106,7 +106,7 @@ class ObservationsController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation.id, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     end
 
     # Initialize form.
@@ -180,7 +180,7 @@ class ObservationsController
       #   action: :show,
       #   id: @observation.id
       # )
-      redirect_to observation_path(@observation.id, :q => get_query_param)
+      redirect_to observation_path(@observation.id, q: get_query_param)
     end
   end
 
@@ -233,7 +233,7 @@ class ObservationsController
     begin
       @observation = Observation.find(id)
       @observation.name.display_name
-      @observation.calc_consensus(true)
+      @observation.calc_consensus
     rescue StandardError => e
       flash_error(:observer_recalc_caught_error.t(error: e))
     end
@@ -242,7 +242,7 @@ class ObservationsController
     #   action: :show,
     #   id: @observation.id
     # )
-    redirect_to observation_path(@observation.id, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   # ----------------------------------------------------------------------------
@@ -535,7 +535,7 @@ class ObservationsController
     #   action: :show,
     #   id: id
     # )
-    redirect_to observation_path(@observation.id, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   def strip_images!
@@ -792,8 +792,8 @@ class ObservationsController
       #   where: @observation.place_name,
       #   set_observation: @observation.id
       # )
-      redirect_to new_location_path(:where => @observation.place_name,
-                                    :set_observation => @observation.id)
+      redirect_to new_location_path(where: @observation.place_name,
+                                    set_observation: @observation.id)
     elsif unshown_notifications?(@user, :naming)
       # redirect_to(
       #   controller: :notifications,

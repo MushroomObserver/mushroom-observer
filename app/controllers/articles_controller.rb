@@ -43,7 +43,11 @@ class ArticlesController < ApplicationController
     return if permitted?
 
     flash_notice(:permission_denied.t)
-    redirect_to(action: :index) and return
+    # rubocop disable Style/AndOr
+    # RuboCop 0.83 autocorrects the following line to:
+    #   redirect_to(action: "index_article") && (return)
+    redirect_to action: :index_article
+    # rubocop enable Style/AndOr
   end
 
   # permitted to create/update/destroy any Article

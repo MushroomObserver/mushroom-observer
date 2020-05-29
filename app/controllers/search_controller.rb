@@ -94,7 +94,7 @@ class SearchController < ApplicationController
   def add_filled_in_text_fields(query_params)
     [:content, :location, :name, :user].each do |field|
       val = params[:search][field].to_s
-      next unless val.present?
+      next if val.blank?
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.

@@ -96,7 +96,7 @@ class HerbariumRecord < AbstractModel
     return if observations.include?(obs)
 
     observations.push(obs)
-    obs.update_attributes(specimen: true) unless obs.specimen
+    obs.update(specimen: true) unless obs.specimen
     obs.log(:log_herbarium_record_added,
             name: accession_at_herbarium,
             touch: true)

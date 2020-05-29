@@ -53,9 +53,9 @@ class CollectionNumbersController < ApplicationController
       # [:create_collection_number.l,
       #  { action: :create_collection_number, id: params[:id] }]
       [ :show_object.l(type: :observation),
-                observation_path(:id => params[:id])],
+                observation_path(id: params[:id])],
       [ :create_collection_number.l,
-                new_collection_number_path(:id => params[:id])]
+                new_collection_number_path(id: params[:id])]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
@@ -179,7 +179,7 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.remove_observation(@observation)
     # redirect_with_query(@observation.show_link_args)
-    redirect_to observation_path(@observation.id, :q => get_query_param)
+    redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
   def destroy # :norobots:
@@ -191,7 +191,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number.destroy
     # redirect_with_query(action: :index_collection_number)
     redirect_to collection_number_index_collection_number_path(
-      :q => get_query_param
+      q: get_query_param
     )
   end
 
@@ -283,7 +283,7 @@ class CollectionNumbersController < ApplicationController
       #                     id: @collection_number.id)
       redirect_to collection_number_index_collection_number_path(
         @collection_number.id,
-        :q => get_query_param
+        q: get_query_param
       )
     end
   end

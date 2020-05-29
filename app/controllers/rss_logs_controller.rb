@@ -106,8 +106,8 @@ class RssLogsController < ApplicationController
         @links << [
           link_to :rss_make_default.t,
                   rss_logs_index_rss_log_path(
-                    :make_default => 1,
-                    :q => get_query_param
+                    make_default: 1,
+                    q: get_query_param
                   )
         ]
       end

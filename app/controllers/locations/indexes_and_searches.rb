@@ -95,7 +95,7 @@ class LocationsController
     # (from application_controller) to work with paths. Building link here.
     if query&.coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
-                 observations_index_observation_path(:q => get_query_param)]
+                 observations_index_observation_path(q: get_query_param)]
 
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
@@ -108,7 +108,7 @@ class LocationsController
       #            )]
       @links << [:show_objects.t(type: :description),
         location_descriptions_index_location_description_path(
-          :q => get_query_param
+          q: get_query_param
         )]
     end
 

@@ -298,7 +298,7 @@ class HerbariaController < ApplicationController
 
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
-      return false
+      false
     else
       @herbarium = perform_or_request_merge(@herbarium, other)
     end
@@ -404,10 +404,10 @@ class HerbariaController < ApplicationController
     #   new_id: that.id
     # )
     redirect_to email_email_merge_request_path(
-      :type => :Herbarium,
-      :old_id => this.id,
-      :new_id => that.id,
-      :q => get_query_param
+      type: :Herbarium,
+      old_id: this.id,
+      new_id: that.id,
+      q: get_query_param
     )
     false
   end
@@ -438,8 +438,8 @@ class HerbariaController < ApplicationController
     #   id: herbarium.try(&:id)
     # )
     redirect_to herbarium_index_herbarium_path(
-      :id => herbarium.try(&:id),
-      :q => get_query_param
+      id: herbarium.try(&:id),
+      q: get_query_param
     )
   end
 
@@ -447,7 +447,7 @@ class HerbariaController < ApplicationController
     # redirect_with_query(herbarium.show_link_args)
     redirect_to herbarium_path(
       herbarium.id,
-      :q => get_query_param
+      q: get_query_param
     )
   end
 
@@ -463,9 +463,9 @@ class HerbariaController < ApplicationController
     #   set_herbarium: @herbarium.id
     # )
     redirect_to new_location_path(
-      :back => @back,
-      :where => @herbarium.place_name,
-      :set_herbarium => @herbarium.id
+      back: @back,
+      where: @herbarium.place_name,
+      set_herbarium: @herbarium.id
     )
     true
   end

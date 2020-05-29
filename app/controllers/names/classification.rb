@@ -18,7 +18,7 @@ class NamesController
 
     name.propagate_classification
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
   end
 
   def refresh_classification
@@ -32,7 +32,7 @@ class NamesController
     desc = name.description
     desc&.update(classification: name.genus.classification)
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
   end
 
   def inherit_classification
@@ -51,7 +51,7 @@ class NamesController
 
     @name.inherit_classification(parent)
     # redirect_with_query(@name.show_link_args)
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
   def edit_classification
@@ -66,7 +66,7 @@ class NamesController
 
     @name.change_classification(@name.classification)
     # redirect_with_query(@name.show_link_args)
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
   # ----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ class NamesController
 
     flash_error("only works at or above genera!")
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
     false
   end
 
@@ -97,7 +97,7 @@ class NamesController
 
     flash_error("only works on genera!")
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
     false
   end
 
@@ -106,7 +106,7 @@ class NamesController
 
     flash_error("only works on taxa below genus!")
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
     false
   end
 
@@ -115,7 +115,7 @@ class NamesController
 
     flash_error(:edit_name_fill_in_classification_for_genus_first.t)
     # redirect_with_query(name.show_link_args)
-    redirect_to name_path(name.id, :q => get_query_param)
+    redirect_to name_path(name.id, q: get_query_param)
     false
   end
 

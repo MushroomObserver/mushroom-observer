@@ -86,29 +86,17 @@ end
 
 # Make MO date and time formats available to Time, just in case.
 class Time
-  def web_date
-    in_time_zone.web_date
-  end
+  delegate :web_date, to: :in_time_zone
 
-  def web_time
-    in_time_zone.web_time
-  end
+  delegate :web_time, to: :in_time_zone
 
-  def api_date
-    in_time_zone.api_date
-  end
+  delegate :api_date, to: :in_time_zone
 
-  def api_time
-    in_time_zone.api_time
-  end
+  delegate :api_time, to: :in_time_zone
 
-  def email_date
-    in_time_zone.email_date
-  end
+  delegate :email_date, to: :in_time_zone
 
-  def email_time
-    in_time_zone.email_time
-  end
+  delegate :email_time, to: :in_time_zone
 
   def fancy_time(*args)
     in_time_zone.fancy_time(*args)
@@ -133,17 +121,11 @@ end
 # Make MO Time formats available to DateTime, just in case.
 # DateTime inherits MO Date formats from Date, its superclass.
 class DateTime
-  def web_time
-    in_time_zone.web_time
-  end
+  delegate :web_time, to: :in_time_zone
 
-  def api_time
-    in_time_zone.api_time
-  end
+  delegate :api_time, to: :in_time_zone
 
-  def email_time
-    in_time_zone.email_time
-  end
+  delegate :email_time, to: :in_time_zone
 
   # This fails with *** TypeError Exception: expected numeric
   # in class ActiveSupport::TimeWithZone.fancy_time

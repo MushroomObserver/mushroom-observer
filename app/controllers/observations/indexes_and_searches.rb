@@ -140,13 +140,13 @@ class ObservationsController
       #              action: :new,
       #              where: query.params[:user_where] }]
       @links << [:list_observations_location_define.l,
-        new_location_path(:where => query.params[:user_where])]
+        new_location_path(where: query.params[:user_where])]
       # @links << [:list_observations_location_merge.l,
       #            { controller: :locations,
       #              action: :list_merge_options,
       #              where: query.params[:user_where] }]
       @links << [:list_observations_location_merge.l,
-        locations_list_merge_options_path(:where => query.params[:user_where])]
+        locations_list_merge_options_path(where: query.params[:user_where])]
       # @links << [:list_observations_location_all.l,
       #            { controller: :locations,
       #              action: :index }]
@@ -176,7 +176,7 @@ class ObservationsController
     # ]
     # @links << link
     @links << [:show_object.t(type: :map),
-      observations_map_observations_path(:q => get_query_param)]
+      observations_map_observations_path(q: get_query_param)]
 
     # @links << coerced_query_link(query, Location)
     # @links << coerced_query_link(query, Name)
@@ -187,13 +187,13 @@ class ObservationsController
     # Building link_with_query here.
     if query&.coercable?(:Location)
       @links << [:show_objects.t(type: :location),
-        locations_index_location_path(:q => get_query_param)]
+        locations_index_location_path(q: get_query_param)]
     elsif query&.coercable?(:Name)
       @links << [:show_objects.t(type: :name),
-        names_index_name_path(:q => get_query_param)]
+        names_index_name_path(q: get_query_param)]
     elsif query&.coercable?(:Image)
       @links << [:show_objects.t(type: :image),
-        images_index_image_path(:q => get_query_param)]
+        images_index_image_path(q: get_query_param)]
     end
 
     # @links << [
@@ -205,7 +205,7 @@ class ObservationsController
     #   )
     # ]
     @links << [:list_observations_add_to_list.t,
-      species_lists_add_remove_observations_path(:q => get_query_param)]
+      species_lists_add_remove_observations_path(q: get_query_param)]
 
     # @links << [
     #   :list_observations_download_as_csv.t,
@@ -216,7 +216,7 @@ class ObservationsController
     #   )
     # ]
     @links << [:list_observations_download_as_csv.t,
-      observations_download_observations_path(:q => get_query_param)]
+      observations_download_observations_path(q: get_query_param)]
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
@@ -308,8 +308,8 @@ class ObservationsController
       #   always_index: true
       # )
       redirect_to observations_index_observation_path(
-        :always_index => true,
-        :q => get_query_param
+        always_index: true,
+        q: get_query_param
       )
     elsif params[:commit] == :DOWNLOAD.l
       render_observation_report

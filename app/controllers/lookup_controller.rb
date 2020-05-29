@@ -103,7 +103,7 @@ class LookupController < ApplicationController
         end
       end
     rescue StandardError => e
-      flash_error(e.to_s) unless Rails.env == "production"
+      flash_error(e.to_s) unless Rails.env.production?
     end
 
     if matches.empty? && suggestions.empty?

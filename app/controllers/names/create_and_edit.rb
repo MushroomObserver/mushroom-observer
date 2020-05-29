@@ -285,7 +285,7 @@ class NamesController
     # redirect_with_query(
     #   @name.show_link_args
     # )
-    redirect_to name_path(@name.id, :q => get_query_param)
+    redirect_to name_path(@name.id, q: get_query_param)
   end
 
   def redirect_to_approve_or_deprecate
@@ -294,13 +294,13 @@ class NamesController
       #   action: :deprecate_name,
       #   id: @name.id
       # )
-      redirect_to names_deprecate_name_path(@name.id, :q => get_query_param)
+      redirect_to names_deprecate_name_path(@name.id, q: get_query_param)
     else
       # redirect_with_query(
       #   action: :approve_name,
       #   id: @name.id
       # )
-      redirect_to names_approve_name_path(@name.id, :q => get_query_param)
+      redirect_to names_approve_name_path(@name.id, q: get_query_param)
     end
   end
 
@@ -313,10 +313,10 @@ class NamesController
     #   new_id: new_name.id
     # )
     redirect_to email_email_merge_request_path(
-      :type => :Name,
-      :old_id => @name.id,
-      :new_id => new_name.id,
-      :q => get_query_param
+      type: :Name,
+      old_id: @name.id,
+      new_id: new_name.id,
+      q: get_query_param
     )
   end
 end

@@ -788,10 +788,10 @@ module DescriptionControllerHelpers
     if desc.present?
       if desc.parent.is_a?(Name)
         redirect_to name_description_path(desc.parent_id, desc.id,
-                                          :q => get_query_param))
+                                          q: get_query_param))
       elsif desc.parent.is_a?(Location)
         redirect_to location_description_path(desc.parent_id, desc.id,
-                                              :q => get_query_param))
+                                              q: get_query_param))
       end
     end
   end
@@ -799,11 +799,9 @@ module DescriptionControllerHelpers
   def redirect_to_parent_with_query(desc = nil)
     if desc.present?
       if desc.parent.is_a?(Name)
-        redirect_to name_path(desc.parent_id,
-                              :q => get_query_param))
+        redirect_to name_path(desc.parent_id, q: get_query_param))
       elsif desc.parent.is_a?(Location)
-        redirect_to location_path(desc.parent_id,
-                                  :q => get_query_param))
+        redirect_to location_path(desc.parent_id, q: get_query_param))
       end
     end
   end
