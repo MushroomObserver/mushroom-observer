@@ -16,7 +16,7 @@ module PaginationHelper
       puts "Nothing to paginate"
       return
     end
-    
+
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
@@ -99,8 +99,10 @@ module PaginationHelper
       prev_str = "« #{:PREV.t}"
       next_str = "#{:NEXT.t} »"
       if this > 1
-        args[:style] = "page-item flex-fill"
+        args[:style] = "page-item flex-fill font-weight-bold"
         result << pagination_link(prev_str, this - 1, arg, args)
+      else
+        result << pagination_end_disabled()
       end
       if from > 1
         args[:style] = "page-item"
@@ -125,8 +127,10 @@ module PaginationHelper
         result << pagination_link(num, num, arg, args)
       end
       if this < num
-        args[:style] = "page-item flex-fill text-right"
+        args[:style] = "page-item flex-fill font-weight-bold text-right"
         result << pagination_link(next_str, this + 1, arg, args)
+      else
+        result << pagination_end_disabled()
       end
     end
 
@@ -148,7 +152,7 @@ module PaginationHelper
       url += "#" + args[:anchor]
     end
     tag.li class: args[:style] do
-      link_to(label, url, class: 'page-link')
+      link_to(label, url, class: "page-link")
     end
   end
 
@@ -165,10 +169,18 @@ module PaginationHelper
   # Render a blank (...) pagination link disabled.
   def pagination_link_disabled()
     tag.li class: "page-item disabled" do
-      tag.span class: 'page-link' do
+      tag.span class: "page-link" do
         "..."
       end
     end
   end
 
+  # Render a blank end pagination link disabled that fills space.
+  def pagination_end_disabled()
+    tag.li class: "page-item flex-fill" do
+      tag.span class: "invisible" do
+        "..."
+      end
+    end
+  end
 end
