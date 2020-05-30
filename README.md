@@ -5,7 +5,7 @@ Mushroom Observer
 [![Coverage Status][3]][4]
 [![CodePolice][5]][6]
 
-Last Revised: January 28, 2019
+Last Revised: Jan 28, 2019
 
 This README provides a quick overview of the tools used by Mushroom Observer
 (MO) and an overview of the other READMEs that accompany this file.  See
