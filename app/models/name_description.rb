@@ -144,7 +144,11 @@ class NameDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "name"
+    "names/descriptions"
+  end
+
+  def self.show_link_args(id)
+    { module: 'names', name_id: name_id, controller: 'descriptions', action: 'show', id: id }
   end
 
   # Don't add any authors until someone has written something "useful".
@@ -210,7 +214,7 @@ class NameDescription < Description
     end
     self.review_status = value
     self.reviewer_id   = reviewer_id
-    self.last_review   = Time.now
+    self.last_review   = Time.zone.now
 
     # Save unless there are substantive changes pending.
     unless save_version?
@@ -229,7 +233,7 @@ class NameDescription < Description
   def update_classification_cache
     if (name.description_id == id) &&
        (name.classification != classification)
-      name.update_attributes(classification: classification)
+      name.update(classification: classification)
       name.propagate_classification if name.rank == :Genus
     end
   end

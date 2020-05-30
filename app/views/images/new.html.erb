@@ -1,0 +1,20 @@
+<%
+  @title = :image_add_title.t(name: @observation.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args),
+    link_with_query(:image_add_edit.t,
+                    controller: :observations,
+                    action: :edit,
+                    id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <% render "form" locals: { action: :new,
+                             button_name: :image_add_upload.l,
+                             width: 80,
+                             leave_out_original_file_name: true } %>
+</div>

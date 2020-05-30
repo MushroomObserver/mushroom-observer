@@ -1,0 +1,307 @@
+<%
+  @title = :species_list_bulk_editor_title.t(name: @species_list.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :species_list),
+                    @species_list.show_link_args),
+    link_with_query(:species_list_show_edit.t,
+                    action: :edit,
+                    id: @species_list.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text help-block">
+  <%= :species_list_bulk_editor_help.tp %>
+</div>
+
+<%= form_tag(action: :bulk_editor,
+             id: @species_list.id) do %>
+  <%= submit_tag(:UPDATE.l,
+                 class: "btn mx-auto mt-3 mb-3") %>
+
+  <%= paginate_block(@pages) do %>
+    <table class="table-striped table-bulk-editor">
+      <% for obs in @observations %>
+        <tr id="row_<%=obs.id%>" onmouseover="enter_row(<%=obs.id%>)">
+          <td class="form-inline">
+            <div class="id_and_name">
+              <%= obs.id %>: <%= obs.format_name.t %>
+            </div>
+            <%= text_field(:observation,
+                           :other_notes,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:40em",
+                           data: { tooltip:true },
+                           title: :Notes.l) %><br/>
+            <%= text_field(:observation,
+                           :when_str,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:8em",
+                           data: { tooltip:true },
+                           title: :Date.l) %>
+            <%= text_field(:observation,
+                           :place_name,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:40em",
+                           data: { tooltip:true },
+                           title: :Location.l) %>
+            <%= text_field(:observation,
+                           :lat,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:6em",
+                           data: { tooltip:true },
+                           title: :Latitude.l) %>
+            <%= text_field(:observation,
+                           :long,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:6em",
+                           data: {tooltip:true},
+                           title: :Longitude.l) %>
+            <%= text_field(:observation,
+                           :alt,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:4em",
+                           data: { tooltip:true },
+                           title: :Altitude.l) %>
+            <%= check_box(:observation,
+                          :is_collection_location,
+                          index: obs.id,
+                          object: obs,
+                          class: "form-control",
+                          data: { tooltip:true },
+                          title: :form_observations_is_collection_location_help.l) %>
+            <%= check_box(:observation,
+                          :specimen,
+                          index: obs.id,
+                          object: obs,
+                          class: "form-control",
+                          data: { tooltip:true },
+                          title: :form_observations_specimen_available_help.l) %>
+            <%=
+              menu = Vote.confidence_menu
+              vote = @votes[obs.id] || @no_vote
+              menu << [ :vote_no_opinion.t, 0 ] if vote.value == 0
+              select(:observation,
+                     :value,
+                     menu,
+                     { object: vote },
+                     { index: obs.id,
+                       class: "form-control",
+                       data: { tooltip:true },
+                       title: :Confidence_level.l })
+            %> &nbsp;
+          </td>
+          <td>
+            <% # This mess just puts the thumbnail first, but using the image
+            # instance stored in obs.images, because it has already been eager-
+            # loaded, instead of obs.thumb_image which has not.
+            imgs = obs.images.select {|i| i.id == obs.thumb_image_id}
+            imgs += obs.images
+            for img in imgs.uniq %>
+              <%= img_tag = image_tag(img.thumbnail_url, class: "tiny")
+              link_to(
+                img_tag,
+                img.show_link_args,
+                target: "_blank",
+                rel:"noopener"
+              ) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+
+  <div id="row_controls" class="row_controls">
+    <%= :OBSERVATION.t %>:
+    <%=
+      args = Observation.show_link_args("XXX")
+      url = url_for(add_query_param(args, @query))
+      link_to(:SHOW.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :observations,
+               action: :edit,
+               id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:EDIT.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :observations,
+               action: :destroy,
+               id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:DESTROY.l,
+              "javascript:row_button(#{j url})",
+              data: { confirm: :are_you_sure.l })
+    %>
+    &nbsp;
+
+    <%= :NAMES.t %>: (<span id="number_of_names"></span>)
+    <%=
+      args = { controller: :naming,
+               action: :edit,
+               observation_id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:EDIT.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :naming,
+               action: :create,
+               id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:species_list_bulk_editor_another.l,
+              "javascript:row_button(#{j url})")
+    %>
+    &nbsp;
+
+    <%= :COMMENTS.t %>: (<span id="number_of_comments"></span>)
+    <%=
+      args = { controller: :comments,
+               action: :show_comments_for_target,
+               id: "XXX",
+               type: "Observation" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:SHOW.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :comments,
+               action: :new,
+               id: "XXX",
+               type: "Observation" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:CREATE.l,
+              "javascript:row_button(#{j url})")
+    %>
+    &nbsp;
+
+    <%= :IMAGES.t %>: (<span id="number_of_images"></span>)
+    <%=
+      args = { controller: :images,
+               action: :new,
+               id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:UPLOAD.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :images,
+               action: :reuse_image,
+               obs_id: "XXX",
+               mode: "observation" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:species_list_bulk_editor_reuse.l,
+              "javascript:row_button(#{j url})")
+    %> |
+    <%=
+      args = { controller: :images,
+               action: :remove_images,
+               id: "XXX" }
+      url = url_for(add_query_param(args, @query))
+      link_to(:REMOVE.l,
+              "javascript:row_button(#{j url})")
+    %>
+  </div>
+
+  <%= submit_tag(:UPDATE.l,
+                 class: "btn mx-auto mt-3 mb-3") %>
+<% end %>
+
+<% first_id = @observations.first.id
+  turn_into_location_auto_completer("observation_#{first_id}_place_name",
+                                    update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_other_notes",
+                                primer: @observations.map(&:other_notes),
+                                update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_when_str",
+                                primer: @observations.map(&:when_str),
+                                update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_lat",
+                                primer: @observations.map(&:lat),
+                                update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_long",
+                                primer: @observations.map(&:long),
+                                update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_alt",
+                                primer: @observations.map(&:alt),
+                                update_primer_on_blur: true)
+%>
+<% for obs in @observations %>
+  <% if obs.id != first_id
+    reuse_auto_completer("observation_#{first_id}_place_name",
+                         "observation_#{obs.id}_place_name")
+    reuse_auto_completer("observation_#{first_id}_other_notes",
+                         "observation_#{obs.id}_other_notes")
+    reuse_auto_completer("observation_#{first_id}_when_str",
+                         "observation_#{obs.id}_when_str")
+    reuse_auto_completer("observation_#{first_id}_lat",
+                         "observation_#{obs.id}_lat")
+    reuse_auto_completer("observation_#{first_id}_long",
+                         "observation_#{obs.id}_long")
+    reuse_auto_completer("observation_#{first_id}_alt",
+                         "observation_#{obs.id}_alt")
+  end %>
+<% end %>
+
+<% inject_javascript_at_end %(
+  var NUMBER_OF_NAMES    = {#{@observations.map {|o| "#{o.id}:#{o.namings.length}"}.join(",")}};
+  var NUMBER_OF_COMMENTS = {#{@observations.map {|o| "#{o.id}:#{o.comments.length}"}.join(",")}};
+  var NUMBER_OF_IMAGES   = {#{@observations.map {|o| "#{o.id}:#{o.images.length}"}.join(",")}};
+  var current_id = null;
+  var ignore_click = false;
+  function enter_row(i) {
+    if (i != current_id) {
+      var old_row = jQuery("#row_" + current_id);
+      var row = jQuery("#row_" + i);
+      var div = jQuery("#row_controls");
+      var x = row.position().left - 1;
+      var y = row.position().top + row.outerHeight() - 1;
+      div.css({
+        left: "" + x + "px",
+        top: "" + y + "px",
+        display: "block"
+      });
+      row.addClass("hot");
+      if (old_row) old_row.removeClass("hot");
+      jQuery("#number_of_names").html(NUMBER_OF_NAMES[i]);
+      jQuery("#number_of_comments").html(NUMBER_OF_COMMENTS[i]);
+      jQuery("#number_of_images").html(NUMBER_OF_IMAGES[i]);
+      current_id = i;
+    }
+  }
+  function row_button(url) {
+    window.open(url.replace("XXX", current_id));
+    current_id = null;
+  }
+  jQuery(document).ready(function() {
+    jQuery("#observation_table").click(function() { ignore_click = true });
+    jQuery("#row_controls").click(function() { ignore_click = true });
+    jQuery(document).click(function() {
+      if (current_id != null && !ignore_click) {
+        var row = jQuery("#row_" + current_id);
+        var div = jQuery("#row_controls");
+        row.removeClass("hot");
+        div.hide();
+        current_id = null;
+      }
+      ignore_click = false;
+    });
+  });
+) %>

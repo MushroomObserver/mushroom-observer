@@ -2,7 +2,7 @@
 
 require "yaml"
 
-class DatabaseTranslations < ActiveRecord::Migration
+class DatabaseTranslations < ActiveRecord::Migration[4.2]
   def self.up
     begin
       drop_table :languages

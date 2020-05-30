@@ -1,4 +1,4 @@
-class SplitHerbariumLabel < ActiveRecord::Migration
+class SplitHerbariumLabel < ActiveRecord::Migration[4.2]
   def up
     add_column :herbarium_records, :initial_det, :string, null: false, limit: 221
     add_column :herbarium_records, :accession_number, :string, null: false, limit: 80

@@ -17,31 +17,20 @@
   <br/>
 
   <% if !@users.empty? %>
-    <style>
-      table.user_table th {
-        margin: 2px;
-        background: #F0C;
-        white-space: nowrap;
-      }
-      table.user_table td {
-        margin: 2px 5px 2px 5px;
-        padding: 0px 5px 0px 5px;
-        background: #F7F;
-        white-space: nowrap;
-      }
-    </style>
-
-    <table class="user_table">
-      <tr>
-        <th><%= :ID.t %></th>
-        <th><%= :LOGIN_NAME.t %></th>
-        <th><%= :FULL_NAME.t %></th>
-        <th><%= :EMAIL_ADDRESS.t %></th>
-        <th><%= :PASSWORD.t %></th>
-        <th><%= :account_manager_verified.t %></th>
-        <th><%= :account_manager_last_login.t %></th>
-        <th><%= :account_manager_actions.t %></th>
-      </tr>
+    <table class="table user_table">
+      <thead class="text-nowrap"
+        <tr>
+          <th><%= :ID.t %></th>
+          <th><%= :LOGIN_NAME.t %></th>
+          <th><%= :FULL_NAME.t %></th>
+          <th><%= :EMAIL_ADDRESS.t %></th>
+          <th><%= :PASSWORD.t %></th>
+          <th><%= :account_manager_verified.t %></th>
+          <th><%= :account_manager_last_login.t %></th>
+          <th><%= :account_manager_actions.t %></th>
+        </tr>
+      </thead>
+      <tbody>
       <% for user in @users %>
         <tr>
           <td><%= user.id %></td>
@@ -57,11 +46,12 @@
           <td><%= user.last_login ? user.last_login.web_date : "" %></td>
           <td>
             <%= link_to(:account_manager_alert.t, action: :create_alert, id: user.id) %> |
-            <%= link_to(:account_manager_bonus.t, controller: :observer,
+            <%= link_to(:account_manager_bonus.t, controller: :users,
                         action: :change_user_bonuses, id: user.id) %>
           </td>
         </tr>
       <% end %>
+      </tbody>
     </table>
 
     <br/>

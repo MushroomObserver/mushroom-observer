@@ -1,0 +1,131 @@
+<%= # form_tag(add_query_param(action: :new, id: @observation.id,
+    #                          approved_name: @params.what)) do %>
+<%= # form_tag(add_query_param(action: :edit, id: @params.naming.id,
+    #                          approved_name: @params.what)) do %>
+<%= form_with model: :naming do |f| %>
+
+  <div class="row">
+    <div class="col-12 col-sm-8 max-width-text">
+      <div class="mt-3">
+        <%= render(partial: "observations/show",
+                   locals: { observation: @observation }) %>
+      </div>
+
+      <%= submit_tag(button_name.t, class: "btn mx-auto mt-4") %>
+
+      <div class="mt-3">
+        <%
+           # Changing naming form html in _form_new.erb in case we want to roll back
+           # TODO: NIMMO CHECK JS AT BOTTOM
+           # Prefer NamingParams, but use raw params if no params.
+           what = @params.what rescue @what
+           valid_names = @params.valid_names rescue @valid_names
+           suggest_corrections = @params.suggest_corrections rescue @suggested_corrections
+           parent_deprecated = @params.parent_deprecated rescue @parent_deprecated
+           reason = @params.reason rescue @reason
+           names = @params.names rescue @names
+           vote = @params.vote rescue @vote
+
+           unfocused ||= false
+           focus_on_name = !unfocused && (button_name != :CREATE.l || what.empty?)
+           focus_on_vote = !unfocused && (button_name == :CREATE.l && what.present?)
+        %>
+
+        <%= render(partial: "shared/form_name_feedback",
+                   locals: {
+                     button_name: button_name,
+                     what: what,
+                     valid_names: valid_names,
+                     suggest_corrections: suggest_corrections,
+                     parent_deprecated: parent_deprecated,
+                     names: names
+                   }
+                  ) %>
+
+        <div class="row">
+          <div class="col-sm-6">
+
+            <div class="form-group">
+              <%= label_tag(:name_name, :WHAT.t + ":") %>
+              <%= text_field(:name, :name, value: what, size: 40, class: "form-control",
+                             data: { autofocus: focus_on_name }) %>
+              <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
+            </div>
+
+            <div class="form-group">
+              <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
+              <%= select(:vote, :value,
+                         options_for_select(Vote.confidence_menu, vote.value),
+                         { include_blank: (action == :new) } ,
+                         class: "form-control",
+                         data: { autofocus: focus_on_vote }) %>
+            </div>
+
+            <% reason.values.sort_by(&:order).each do |r| %>
+              <div class="form-group form-inline m-0">
+                <label>
+                  <%= check_box(:reason, :check,
+                                { index: r.num, checked: r.used?,
+                                  data: { role: "collapser",
+                                          target: "#reason_#{r.num}_notes" },
+                                  class: "" },
+                                "1") %>
+                  <%= r.label.t %>
+                </label>
+              </div>
+              <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
+                <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
+                              class: "form-control") %>
+              </div>
+            <% end %>
+
+          </div>
+
+          <div class="col-sm-6">
+            <div class="well well-sm">
+              <div class="arrow-left d-none d-sm-block"></div>
+              <% if !show_reasons %>
+                <p class="help-block mb-3">
+                  <%= :form_naming_name_help_create.t %>
+                </p>
+              <% end %>
+              <p class="help-block">
+                <%= :form_naming_name_help.t %>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <%= hidden_field_tag(:was_js_on, "yes") if browser.modern_browser? %>
+        <% inject_javascript_at_end %(
+          jQuery(document).ready(function() {
+            function collapse_reason() {
+              var this2 = jQuery(this);
+              var target = jQuery(this2.attr("data-target")).parent();
+              var old_state = target.hasClass("collapse");
+              var new_state = !this2.is(':checked');
+              if (old_state && !new_state) {
+                target.removeClass("collapse");
+              } else if (!old_state && new_state) {
+                target.addClass("collapse");
+              }
+            }
+            jQuery('[data-role="collapser"]').each(collapse_reason)
+                                             .change(collapse_reason);
+            jQuery('.collapse').on('shown.bs.collapse', function () {
+              $(this).focus();
+            });
+          });
+        ) %>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-4">
+      <%= render(partial: "observations/show_images",
+                 locals: { observation: @observation,
+                           thumb_size_control: false }) %>
+    </div>
+  </div>
+
+<% end %>

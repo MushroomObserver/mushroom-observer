@@ -117,7 +117,7 @@
 # Stores an email and details about it to get delivered later
 class QueuedEmail < AbstractModel
   has_many :queued_email_integers, dependent: :destroy
-  has_many :queued_email_strings,  dependent: :destroy
+  has_many :queued_email_strings, dependent: :destroy
   has_one :queued_email_note, dependent: :destroy
   belongs_to :user
   belongs_to :to_user, class_name: "User", foreign_key: "to_user_id"
@@ -202,7 +202,7 @@ class QueuedEmail < AbstractModel
     super(
       user: sender,
       to_user: receiver,
-      queued: Time.now
+      queued: Time.zone.now
     )
   end
 
@@ -303,7 +303,7 @@ class QueuedEmail < AbstractModel
   # and when they are actually sent.
   def self.debug_log(msg)
     File.open("#{::Rails.root}/log/email-debug.log", "a:utf-8") do |fh|
-      fh.puts("#{Time.now} #{msg}")
+      fh.puts("#{Time.zone.now} #{msg}")
     end
   end
 
@@ -332,9 +332,7 @@ class QueuedEmail < AbstractModel
   # model::     class of model to look for id in
   def get_object(key, model)
     @objects ||= {}
-    unless @objects.key?(key)
-      @objects[key] = model.safe_find(get_integer(key))
-    end
+    @objects[key] = model.safe_find(get_integer(key)) unless @objects.key?(key)
     @objects[key]
   end
 

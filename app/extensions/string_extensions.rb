@@ -18,7 +18,6 @@
 #  strip_html::         Remove HTML tags (not entities) from string.
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
-#  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
@@ -36,7 +35,7 @@ class String
 
   # :stopdoc:
   # Disable cop in order to make code more readable
-  # rubocop:disable Layout/AlignHash
+  # rubocop:disable Layout/HashAlignment
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
     # characters and accents -- it covers HTML codes &#1 to &#400.
@@ -365,7 +364,7 @@ class String
       "nbsp"  => " "
     }.freeze
   end
-  # rubocop:enable Layout/AlignHash
+  # rubocop:enable Layout/HashAlignment
   # :startdoc:
 
   # This should safely match anything that could possibly be interpreted as
@@ -411,7 +410,7 @@ class String
   # Convert string (assumed to be in UTF-8) to any other charset.  All invalid
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
-    encode(charset, fallback: lambda { |c| UTF8_TO_ASCII[c] || "?" })
+    encode(charset, fallback: ->(c) { UTF8_TO_ASCII[c] || "?" })
   end
 
   # Escape a string to be safe to place in double-quotes inside javascript.
@@ -575,7 +574,7 @@ class String
 
   # Find amount first line is indented and remove that from all lines.
   def unindent
-    gsub /^#{self[/\A\s*/]}/, ""
+    gsub(/^#{self[/\A\s*/]}/, "")
   end
 
   ### String Queries ###

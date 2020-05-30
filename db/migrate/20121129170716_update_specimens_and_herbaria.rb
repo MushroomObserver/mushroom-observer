@@ -1,4 +1,4 @@
-class UpdateSpecimensAndHerbaria < ActiveRecord::Migration
+class UpdateSpecimensAndHerbaria < ActiveRecord::Migration[4.2]
   def self.up
     add_column(:specimens, :user_id, :integer, null: false)
     add_column(:specimens, :herbarium_label, :string, limit: 80, default: "", null: false)

@@ -63,6 +63,11 @@ class Sequence < AbstractModel
   INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i.freeze
   # rubocop:enable Layout/ExtraSpacing
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "sequences"
+  end
+
   ##############################################################################
   #
   #  :section: Formatting

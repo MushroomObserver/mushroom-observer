@@ -26,12 +26,15 @@ module ObjectLinkHelper
       location = Location.find(location) unless location.is_a?(AbstractModel)
       link_string = where_string(location.display_name, count)
       link_string += " [#{:click_for_map.t}]" if click
-      link_to(link_string, location.show_link_args)
+      # link_to(link_string, location.show_link_args)
+      link_to(link_string, location_path(id: location.id))
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observer,
-                           action: :observations_at_where, where: where)
+      # link_to(link_string, controller: :observations,
+      #                      action: :observations_at_where, where: where)
+      link_to(link_string,
+              observations_observations_at_where_path(where: where))
     end
   end
 
@@ -42,10 +45,12 @@ module ObjectLinkHelper
   def name_link(name, str = nil)
     if name.is_a?(Integer)
       str ||= :NAME.t + " #" + name.to_s
-      link_to(str, Name.show_link_args(name))
+      # link_to(str, Name.show_link_args(name))
+      link_to(str, name_path(name))
     else
       str ||= name.display_name_brief_authors.t
-      link_to(str, name.show_link_args)
+      # link_to(str, name.show_link_args)
+      link_to(str, name_path(name.id))
     end
   end
 
@@ -101,10 +106,12 @@ module ObjectLinkHelper
   def user_link(user, name = nil)
     if user.is_a?(Integer)
       name ||= :USER.t + " #" + user.to_s
-      link_to(name, User.show_link_args(user))
+      # link_to(name, User.show_link_args(user))
+      link_to(name, user_path(user))
     elsif user
       name ||= user.unique_text_name
-      link_to(name, user.show_link_args)
+      # link_to(name, user.show_link_args)
+      link_to(name, user_path(user.id))
     else
       "?"
     end
@@ -140,11 +147,38 @@ module ObjectLinkHelper
   #
   #   Description: <%= description_link(name.description) %>
   #
-  def description_link(desc)
+  def description_link(obj, desc, type)
     result = description_title(desc)
     return result if result.match?("(#{:private.t})$")
 
-    link_with_query(result, desc.show_link_args)
+    # TODO: NIMMO resolve or standardize new usage with path/get_query_param
+    # Reason: the former way of building links and urls with a passed query,
+    # using application_helper's link_with_query and abstract model's
+    # show_link_args, will not work for namespaced description controllers.
+    #
+    # The old way was: link_with_query(result, desc.show_link_args)
+    #
+    # I tried specifying the module, but the following also does not work:
+    # link_with_query(result,
+    #                 { module: :names,
+    #                   controller: :descriptions,
+    #                   action: 'show',
+    #                   name_id: obj.id,
+    #                   id: desc.id })
+    # However this whole way of building paths is no longer preferred in Rails
+    # according to the docs. I believe the way to go is to transition to using
+    # link_to, the path helpers, and the new method get_query_param broken out
+    # from add_query_param in application_controller
+    #
+    # (type returns name or location -- type.to_s)
+    # (or namespace as symbol: type.to_s.pluralize.to_sym)
+    if type.to_s === "name"
+      link_to(result,
+              name_description_path(obj.id, desc.id, q: get_query_param))
+    elsif type.to_s === "location"
+      link_to(result,
+              location_description_path(obj.id, desc.id, q: get_query_param))
+    end
   end
 
   # Array of links to searches on external sites;
@@ -166,18 +200,25 @@ module ObjectLinkHelper
   def add_sequence_link(obs)
     return nil unless check_permission(obs)
 
-    link = link_with_query(:show_observation_add_sequence.t,
-                           controller: :sequence, action: :create_sequence,
-                           id: obs.id)
+    # link = link_with_query(:show_observation_add_sequence.t,
+    #                        controller: :sequences,
+    #                        action: :new,
+    #                        id: obs.id)
+    link = link_to(:show_observation_add_sequence.t,
+                   new_sequence_path(id: obs.id, q: get_query_param))
+
     " | ".html_safe + link
   end
 
   def observation_herbarium_record_link(obs)
     count = obs.herbarium_records.count
     if count.positive?
+      # link_to(pluralize(count, :herbarium_record.t),
+      #         controller: :herbarium_records,
+      #         action: :observation_index,
+      #         id: obs.id)
       link_to(pluralize(count, :herbarium_record.t),
-              controller: :herbarium_record, action: :observation_index,
-              id: obs.id)
+              herbarium_records_observation_index_path(id: obs.id))
     else
       return :show_observation_specimen_available.t if obs.specimen
 

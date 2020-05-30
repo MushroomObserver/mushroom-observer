@@ -1,6 +1,6 @@
 require "extensions.rb"
 
-class CleanHerbaria < ActiveRecord::Migration
+class CleanHerbaria < ActiveRecord::Migration[4.2]
   VALID_CODES = [
     "",
     "CANL",
@@ -58,9 +58,9 @@ class CleanHerbaria < ActiveRecord::Migration
         last_herbarium = herbarium
       end
     end
-    
+
     # Try to fill in personal_user_id for those missing it.  Also correct
-    # personal herbaria which have the incorrect user. 
+    # personal herbaria which have the incorrect user.
     puts "Making users owner of their own herbarium."
     Herbarium.connection.select_rows(%(
       SELECT id, name, personal_user_id FROM herbaria
@@ -107,11 +107,11 @@ class CleanHerbaria < ActiveRecord::Migration
       INSERT INTO herbaria_curators (herbarium_id, user_id) VALUES
       #{ personal_herbaria.map { |h| "(#{h.id},#{h.personal_user_id})" }.join(",") }
     ))
-    
+
     # Remove bogus email addresses from all non-personal herbaria.  In fact
     # remove them all, because we will provide a default email address for
     # personal herbaria.  That way if the user changes their email address,
-    # they won't also have to change their herbarium's email address. 
+    # they won't also have to change their herbarium's email address.
     puts "Removing all email addresses"
     Herbarium.connection.execute(%(
       UPDATE herbaria SET email = ""

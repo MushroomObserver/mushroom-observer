@@ -4,41 +4,41 @@
 
 <div class="max-width-text">
   <%= form_tag(action: :signup) do %>
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_login, :signup_login.t + ":") %>
       <%= text_field(:new_user, :login, data: {autofocus: true}, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_password, :signup_choose_password.t + ":") %>
       <%= password_field(:new_user, :password, value: @new_user.password, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_password_confirmation, :signup_confirm_password.t + ":") %>
       <%= password_field(:new_user, :password_confirmation, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_email, :signup_email_address.t + ":") %>
       <%= text_field(:new_user, :email, class: "form-control") %>
       <%= label_tag(:new_user_email_confirmation, :signup_email_confirmation.t + ":") %>
       <%= text_field(:new_user, :email_confirmation, class: "form-control") %>
-      <div class="HelpNote">
+      <div class="help-note">
         <%= :signup_email_help.tp + :email_spam_notice.tp %>
       </div>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_name, :signup_name.t + ":") %>
       <%= text_field(:new_user, :name, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:new_user_theme, :signup_preferred_theme.t + ":") %>
       <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + MO.themes, class: "form-control") %>
     </div>
 
-    <%= submit_tag(:signup_button.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:signup_button.l, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>

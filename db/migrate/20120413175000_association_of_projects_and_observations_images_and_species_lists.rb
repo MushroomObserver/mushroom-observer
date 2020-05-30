@@ -1,4 +1,4 @@
-class AssociationOfProjectsAndObservationsImagesAndSpeciesLists < ActiveRecord::Migration
+class AssociationOfProjectsAndObservationsImagesAndSpeciesLists < ActiveRecord::Migration[4.2]
   def self.up
     create_table :images_projects do |t|
       t.column "image_id",   :integer, null: false

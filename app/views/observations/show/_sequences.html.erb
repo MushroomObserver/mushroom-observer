@@ -1,0 +1,64 @@
+<%
+  sequences = @observation.sequences
+  can_edit  = in_admin_mode? || @observation.can_edit?
+
+  # This is passed in to show_sequence, allowing users to do prev,
+  # next and index from there to navigate through all the rest for this obs.
+  query = Query.lookup(:Sequence, :all, observations: @observation.id)
+%>
+
+<% unless @user.try(&:hide_specimen_stuff?) ||
+          @observation.user.try(&:hide_specimen_stuff?) %>
+  <% if @user || sequences.any? %>
+    <p>
+      <b><%= sequences.any? ? :Sequences.t + ":".html_safe :
+                           :show_observation_no_sequences.t %></b> [<%=
+        link_to :show_observation_add_sequence.t,
+                new_sequence_path(id: @observation.id)
+      %>]
+    </p>
+  <% end %>
+
+  <% if sequences.any? %>
+    <ul class="tight-list">
+      <% sequences.each do |sequence| %>
+        <li>
+          <%= locus = sequence.locus.truncate(sequence.locus_width)
+          if sequence.deposit?
+            link_to "#{locus} - #{sequence.archive} ##{sequence.accession}".t,
+                    sequence_path(sequence.id, q: get_query_param)
+          else
+            link_to "#{locus} - MO ##{sequence.id}".t,
+                    sequence_path(sequence.id, q: get_query_param)
+          end %>
+          <%=
+            links = []
+            if sequence.deposit?
+              links << link_to(:show_observation_archive_link.t,
+                               sequence.accession_url,
+                               target: "_blank")
+            end
+            if in_admin_mode? || sequence.can_edit?(@user)
+              links << link_to(:EDIT.t,
+                        edit_sequence_path(
+                          id: sequence.id,
+                          back: @observation.id,
+                          q: get_query_param
+                        ))
+              links << link_to(:DESTROY.t,
+                        sequence_path(id: sequence.id, q: get_query_param),
+                        method: :delete,
+                        data: { confirm: :are_you_sure.t })
+            end
+            if sequence.blastable?
+              links << link_to(:show_observation_blast_link.t,
+                               sequence.blast_url,
+                               target: "_blank")
+            end
+            "[#{links.safe_join(' | ')}]".html_safe if links.any?
+          %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

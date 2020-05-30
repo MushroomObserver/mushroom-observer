@@ -18,6 +18,8 @@ module ApplicationHelper
   include ThumbnailHelper
   include VersionHelper
 
+  # include Pagy::Frontend
+
   def safe_empty
     "".html_safe
   end
@@ -51,6 +53,7 @@ module ApplicationHelper
     link_to(*link)
   end
 
+  # TODO: Check this. Maybe delete, these links are moving elsewhere
   # Convert @links in index views into a list of tabs for RHS tab set.
   def create_links(links)
     return [] unless links
@@ -275,11 +278,9 @@ module ApplicationHelper
   def date_select_opts(obj = nil)
     start_year = 20.years.ago.year
     init_value = obj.try(&:when).try(&:year)
-    if init_value && init_value < start_year
-      start_year = init_value
-    end
+    start_year = init_value if init_value && init_value < start_year
     { start_year: start_year,
-      end_year: Time.now.year,
+      end_year: Time.zone.now.year,
       order: [:day, :month, :year] }
   end
 

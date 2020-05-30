@@ -1,0 +1,3 @@
+<% @title = :show_votes_title.t(name: @naming.unique_format_name) %>
+
+<%= render(partial: "votes_table", locals: {do_cancel: false}) %>

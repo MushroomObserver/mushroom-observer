@@ -1,0 +1,239 @@
+<%
+  @title = :show_name_title.t(name: @name.display_name)
+
+  description_links = list_descriptions(@name) || []
+  Textile.register_name(@name)
+
+  tabs = [
+    link_with_query(:show_name_edit_name.t,
+                    action: :edit,
+                    id: @name.id),
+    link_with_query(:show_name_bulk_name_edit.t,
+                    action: :bulk_name_edit),
+    link_with_query(:show_name_add_name.t,
+                    action: :new)
+  ]
+  if in_admin_mode? || !@name.locked
+    tabs << link_with_query(:show_name_change_synonyms.t,
+                            action: :change_synonyms,
+                            id: @name.id)
+    if @name.deprecated
+      tabs << link_with_query(:APPROVE.t,
+                              action: :approve_name,
+                              id: @name.id)
+    else
+      tabs << link_with_query(:DEPRECATE.t,
+                              action: :deprecate_name,
+                              id: @name.id)
+    end
+  end
+  tabs += [
+    link_with_query(:show_name_email_tracking.t,
+                    action: :email_tracking,
+                    id: @name.id),
+    draw_interest_icons(@name)
+  ]
+  @tabsets = {
+    pager_for: @name,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="row">
+  <div class="col-sm-5">
+    <% if @first_four and @first_four.length > 0 %>
+      <strong><%= :show_name_most_confident.t %>:</strong>
+      <div class="list-group">
+        <% @first_four.each do |obs| %>
+          <div class="list-group-item">
+            <%= show_best_image(obs) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    <div>
+      <%= show_previous_version(@name) %>
+      <%= set_export_status_controls(@name) %>
+      <br/>
+      <br/>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+	<%= show_authors_and_editors(@name) %>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-7">
+    <div class="list-group">
+      <div class="list-group-item">
+        <div class="row">
+          <div class="col-sm-7 name-section">
+            <%= content_tag(:p, :show_observations_of.t) %>
+            <div class="pl-3">
+              <%= # Observations of this name
+                content_tag(:p,
+                  obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
+              <%= # Observations of taxon under other names
+                content_tag(:p,
+                  taxon_obss_other_names(@name) ||
+                    "#{:taxon_obss_other_names.t} (0)") %>
+              <%= # Observations of taxon under any name
+                content_tag(:p,
+                  taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
+              <%= # Observations of other taxa where this taxon was proposed
+                content_tag(:p,
+                  taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
+               <%= # Observations where this Nae was proposed
+                content_tag(:p,
+                  name_proposed(@name) || "#{:obss_name_proposed.t} (0)") %>
+             <%= name_section_link(:show_subtaxa_obss.t,
+                                    @has_subtaxa, @subtaxa_query) %>
+            </div>
+          </div>
+          <div class="col-sm-5 name-section">
+            <%= content_tag(:p, link_to(
+                  "MyCoPortal", mycoportal_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "MycoBank", mycobank_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "EOL", @name.eol_url, target: :_blank
+                )) if @name.eol_url %>
+            <%= content_tag(:p, link_to(
+                  :google_images.t,
+                  "http://images.google.com/images?q=#{@name.real_text_name}",
+                  target: :_blank
+                )) %>
+            <%= content_tag(:p, link_with_query(
+                  :show_name_distribution_map.t, action: :map, id: @name.id
+                )) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <strong><%= :show_name_nomenclature.t %>:</strong>
+    <div class="list-group">
+      <div class="list-group-item name-section">
+        <%= render(partial: "name", object: @name, locals: {synonyms: true}) %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <strong><%= :show_name_classification.t %>:</strong>
+          <% if @user %>
+            [<%= link_with_query(:EDIT.t,
+                                 controller: :names,
+                                 action: :edit_classification,
+                                 id: @name.id) %>]
+          <% end %>
+        <div class="list-group">
+          <div class="list-group-item name-section" id="classification_section">
+            <%= render(partial: "classification") %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <strong><%= :show_name_lifeform.t %>:</strong>
+          <% if @user %>
+            [<%= link_with_query(:EDIT.t,
+                                 controller: :names,
+                                 action: :edit_lifeform,
+                                 id: @name.id) %>]
+          <% end %>
+        <div class="list-group">
+          <div class="list-group-item name-section" id="lifeform_section">
+            <%= render(partial: "lifeform") %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% inject_javascript_at_end %(
+      var d1 = jQuery("#classification_section");
+      var d2 = jQuery("#lifeform_section");
+      var h1 = d1.height();
+      var h2 = d2.height();
+      if (h1 > h2) d2.height(h1);
+      if (h1 < h2) d1.height(h2);
+    ) %>
+
+    <% if @name.has_notes? %>
+      <strong><%= :show_name_notes.t %>:</strong>
+        [<%= link_with_query(:EDIT.t,
+                             controller: :names,
+                             action: :edit,
+                             id: @name.id) %>]
+      <div class="list-group">
+        <div class="list-group-item">
+          <%= @name.notes.tpl %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if !@best_description.blank? %>
+      <strong><%= :show_name_brief_description.t %>:</strong>
+      <div>
+        <span class="pull-right">
+          <%= link_with_query(:show_name_see_more.t,
+                              controller: :names,
+                              action: :show_name_description,
+                              id: @name.description.id) %> |
+          <%= link_with_query(:EDIT.t,
+                              controller: :names,
+                              action: :edit_name_description,
+                              id: @name.description.id) %>
+        </span>
+      </div>
+      <div class="list-group">
+        <div class="list-group-item">
+          <%= @best_description.tpl %>
+        </div>
+      </div>
+    <% end %>
+    <strong><%= :show_name_descriptions.t %>:</strong>
+      [<%= link_with_query(:show_name_create_description.t,
+                           controller: :names,
+	                         action: :create_name_description,
+                           id: @name.id) %>]
+    <div class="list-group">
+      <div class="list-group-item">
+        <% description_links.each do |desc| %>
+         <div><%= desc %></div>
+        <% end %>
+        <%= :show_name_no_descriptions.t if description_links.empty? %>
+      </div>
+    </div>
+    <% if @projects && @projects.length > 0 %>
+      <div>
+        <strong><%= :show_name_create_draft.t %>:</strong>
+      </div>
+      <div class="list-group">
+        <div class="list-group-item">
+          <% @projects.each do |project| %>
+            <%= link_with_query(project.title,
+                                action: :create_name_description,
+                                id: @name.id,
+                                project: project.id,
+                                source: :project) %><br>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%
+   # ----------------------------------------
+   #  Show comments
+   # ----------------------------------------
+%>
+<%= render(partial: "comments/comments",
+           locals: {object: @name, controls: true, limit: nil}) %>
+<div class="col-12">
+  <%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %><br/>
+  <%= show_object_footer(@name) %>
+</div>

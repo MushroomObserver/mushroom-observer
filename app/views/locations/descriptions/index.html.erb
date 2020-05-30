@@ -1,0 +1,22 @@
+<%
+  tabs = [
+    link_with_query(:list_place_names_map.t, action: :map_locations),
+    link_to(:all_objects.t(type: :location), action: :index)
+  ]
+  tabs += create_links(@links)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <div class="card">
+      <% for desc in @objects %>
+        <div class="card-body">
+          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

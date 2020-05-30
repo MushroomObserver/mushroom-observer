@@ -1,0 +1,18 @@
+<!-- Title Caption -->
+<!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
+<%= tag.h2 id: "title-caption", class: "title-caption mb-0" do %>
+  <%= tag.span class: "observation-id h4 order-1 mb-0 text-accent" do %>
+    <%= :show_observation_header.t -%>
+    <%= "#{@observation.id || "?"}" -%>
+  <% end %>
+  <%= tag.span class: "observation-name order-2" do %>
+    <%= obs_title_consensus_id(@observation.name) %>
+  <% end %>
+<% end %>
+
+<%= if @any_content_filters_applied
+      add_context_help(content_tag(:span, "(#{:filtered.t})",
+                                   class: ""),
+                       :rss_filtered_mouseover.t)
+    end -%>
+<%= content_tag_if(@owner_id, :div, @owner_id, class: "owner-id") %>

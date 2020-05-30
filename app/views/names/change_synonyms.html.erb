@@ -1,0 +1,14 @@
+<%
+  @title = :name_change_synonyms_title.t(name: @name.display_name)
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_tag(action: :change_synonyms, id: @name.id, approved_names: @new_names,
+            approved_synonyms: @synonym_name_ids) do %>
+  <%= render(partial: "form_synonyms") %>
+  <%= submit_tag(:name_change_synonyms_submit.l, class: "btn mx-auto") %>
+<% end %>

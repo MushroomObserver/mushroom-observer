@@ -23,11 +23,10 @@ Here are some new =E2=80=98notes=E2=80=99 to play with.
 
 Here are some handy links:
 
-Show this location: http://mushroomobserver.org/location/show_location/82=
+Show this location: http://mushroomobserver.org/locations/show_location/82=
 0908802
-I'm not interested in this location: http://mushroomobserver.org/interest=
+I'm not interested in this location: http://mushroomobserver.org/interests=
 /set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:albion) %>&type=3DLocation&user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=3D-1
 Change your preferences: http://mushroomobserver.org/account/prefs/365790=
 011
 Latest changes at Mushroom Observer: http://mushroomobserver.org
-

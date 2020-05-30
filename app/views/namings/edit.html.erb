@@ -1,0 +1,14 @@
+<%
+  @observation = @params.observation
+  @reason = @params.reason
+  @title = :edit_naming_title.t(id: @observation.id)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "form", locals: { action: :edit, button_name: :SAVE_EDITS.l,
+                             show_reasons: true } %>

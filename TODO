@@ -10,7 +10,7 @@ Jason:
   Should list_locations order by user format or stick with postal?
   'Show Locations' not limiting results when looking at index_observation for an undefined location
   Mention queued_email fix for I18n.locale problem.
-  
+
 
 Some recent suggestions from email:
   Show the subgenera that species belong to.
@@ -55,7 +55,7 @@ Admin - Do anything
 ??? - Can see, edit and review any description they oversee
 Group - Can see
 
-Each class creates 
+Each class creates
 
 -------------
 
@@ -109,7 +109,7 @@ Advanced search ideas:
 Figure out a way to support authors with leading lower case (e.g., van Tiegham)
 
 Features for EOL Class support:
-  
+
   Missing Tests:
     show_notifications shouldn't show empty notifications
     add_user_to_group
@@ -118,37 +118,37 @@ Features for EOL Class support:
     Default transition for a non-reviewer and a reviewer
     Reviewer tests for image quality, names and votes
 
-  Expanded ability to review what a user has contributed.  
+  Expanded ability to review what a user has contributed.
     This will allow professors to easily review the contributions made by a student.
-    I've included a proposed workflow below.  
+    I've included a proposed workflow below.
     Early October.
     Need general way to review what's been reviewed
     Need to be able to search past_names for vetted data
 
   Implement NameNotes: Mid-October
     Comments on NameNotes.  Comments on Names?
-    
+
     Add license management for NameNotes
-    
+
     6) Allow users to create new field categories.
 
     7) Allow individual fields to be versioned.
 
     8) Differentiate between author and editor.
 
-    9) Support multiple authors and editors.  
-    Only an author can add an author.  
+    9) Support multiple authors and editors.
+    Only an author can add an author.
     Anyone can be an editor.
 
-    10) Mark notes by language and readership level (Novice, General, Expert).  
+    10) Mark notes by language and readership level (Novice, General, Expert).
     Allow users to set a preferred language and preferred readership level.
     Items 6-10 are likely to be released together around the end of October.
 
-    11) Allow vetters to nominate new vetters.  
+    11) Allow vetters to nominate new vetters.
     Might include more specificity for vetters based on taxa and/or geographic area.
     Delivery TBD.
 
-    12) Provide a voting scheme for notes and images.  
+    12) Provide a voting scheme for notes and images.
     Delivery TBD.
 
 Herbarium status gets __localization_missing__ in email for observation by forestwander ided by debbie
@@ -203,7 +203,7 @@ Email queuing:
     genus notifications:
       tests for higher taxa
     email to self should be a user preference
-    User Summary should have a list of that User's notification with ability to Delete or Edit (to change the alert): observer/show_notifications
+    User Summary should have a list of that User's notification with ability to Delete or Edit (to change the alert): notification/show_notifications
     Notifications:
       Name contained in a higher taxon gets applied: name_id, user, note
       Every comment (user preference?): user
@@ -254,7 +254,7 @@ New user options:
 Bugs:
 May be fixed: Reported by Darvin on July 6, 2008:
   To recreate:
-  http://mushroomobserver.org/image/show_image/6882?search_seq=846&obs=4337&seq_key=297
+  http://mushroomobserver.org/images/show_image/6882?search_seq=846&obs=4337&seq_key=297
   Look at the photo FULL SIZE, go back to medium size then hit NEXT
 Noticed July 14, 2008:
   Search for Panaeolus, select the Genus, select observation 8363, click on an image (15529),
@@ -315,7 +315,7 @@ Potentially interesting features for improving amateur/professional communicatio
 %? Owned descriptions (32)
     Right now anyone can edit any part of any description for a Name.  It would be nice if there was a community
     description and a set of owned descriptions.
-  
+
 %? Common name support. (40)
 
 %? Hierarchical locations (40)
@@ -342,14 +342,14 @@ Image improvements:
 Improve caching and Javascript awareness
 
 Organize user preferences into logical groups (8)
-  
+
 Featured Mushroom pages (8)
 
 Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations. (40)
     Can be used to create species lists, or simply displayed and copied for publication somewhere else.
     Use to create observations
     Dynamic checklists based on location or user or the result of a search
-    
+
     Feedback from Doug Smith on species lists:
     Mostly the feature I need to be able to make 20-100 observations
     all with the same location and date info., based on an existing
@@ -359,10 +359,10 @@ Checklists - Lists of Names that have a Title and Purpose/notes, but no associat
     is a lot of check back and forth, and that takes awhile.  And
     click back to the list can be troublesome, for some of these
     lists have almost 600 observations now, and getting that many
-    observations onto the one page with thumbs takes awhile to 
+    observations onto the one page with thumbs takes awhile to
     download.  Which adds a good few seconds to each clicking back
     and forth.
-    
+
     Need to think about mergeable lists for the Name List Generator.
 
 Sort by date (mod year) (16)
@@ -393,7 +393,7 @@ Count at each location (4)
 
 Different marker colors:
   synonym, your own observation, specimens with herbarium material
- 
+
 Shape information from Darwin Core (40)
 
 Photos of location (16)
@@ -449,7 +449,7 @@ Local client that can only add (160)
 
 'More images'/'Less images' toggle (8)
   this would change the grid layout to rows with all the thumbs displayed
-  
+
 Show all images when looking at a Name page (Darvin) (4)
 
 name_search - Added mark to give count of observations and images. (2)

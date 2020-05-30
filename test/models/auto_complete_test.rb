@@ -4,6 +4,7 @@ require "auto_complete"
 
 class AutoCompleteMock < AutoCompleteByString
   attr_accessor :rough_matches, :limit
+
   def truncate_matches
     super
   end
@@ -15,6 +16,7 @@ end
 
 class AutoCompleteMockByWord < AutoCompleteByWord
   attr_accessor :rough_matches, :limit
+  
   def truncate_matches
     super
   end

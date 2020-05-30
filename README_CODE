@@ -3,7 +3,7 @@ Last Revised: May 25, 2012
 = MushroomObserver
 
 The following is an overview of the code for the Mushroom Observer website for
-prospective developers.  See http://mushroomobserver.org/observer/intro for an
+prospective developers.  See http://mushroomobserver.org/info/intro for an
 introduction to the website itself.
 
 
@@ -154,7 +154,7 @@ Migration Cheatsheet:: http://garrettsnider.backpackit.com/pub/367902
 There are only a few controllers (in <tt>app/controllers</tt>), roughly one for
 each of the major data types:
 
-ObserverController::    Deals with Observation's, Naming's, Vote's, and everything else.
+ObservationsController::Deals with Observation's, Naming's, Vote's, and everything else.
 AccountController::     Deals with User's.
 NameController::        Deals with Name's and NameDescription's.
 LocationController::    Deals with Location's and LocationDescription's.
@@ -172,11 +172,11 @@ instance methods.  These correspond directly to the URL of the request:
 
   http://mushroomobserver.org/controller/action
 
-Note that the default controller is "observer" and the "id" parameter is
+Note that the default controller is "observations" and the "id" parameter is
 shortened to a bare integer:
 
   http://mo.org/42                      Show observation #42.
-  http://mo.org/observer/show_user/252  Show summary for user #3.
+  http://mo.org/users/show_user/252  Show summary for user #3.
 
 Controller methods -- that is, actions -- have access to quite a number of
 helpers and data.  Here are just a few, see ActionController for more:
@@ -269,7 +269,7 @@ An example makes it plentifully clear:
   <h1>Observation #<%= @observation.id %></h1>
 
   <% if @user == @observation.user %>
-    <a href="/observer/edit/<%= @observation.id %>">Edit Observations</a>
+    <a href="/observations/edit/<%= @observation.id %>">Edit Observations</a>
   <% end %>
 
   Name: <%= @observation.name %><br/>

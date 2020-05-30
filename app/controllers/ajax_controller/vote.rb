@@ -27,7 +27,7 @@ class AjaxController
     render(inline: %(<div>
       <%= content_tag(:div, show_obs_title(@observation),
             title: show_obs_title(@observation).strip_html.html_safe) %>
-      <%= content_tag(:div, render(partial: 'naming/show',
+      <%= content_tag(:div, render(partial: 'namings/show',
             locals: { observation: @observation })) %>
     </div>))
   end
@@ -39,6 +39,6 @@ class AjaxController
     value = value == "0" ? nil : Image.validate_vote(value)
     anon = (@user.votes_anonymous == :yes)
     image.change_vote(@user, value, anon)
-    render(partial: "image/image_vote_links", locals: { image: image })
+    render(partial: "images/image_vote_links", locals: { image: image })
   end
 end

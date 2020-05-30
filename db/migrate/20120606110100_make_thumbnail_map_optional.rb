@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class MakeThumbnailMapOptional < ActiveRecord::Migration
+class MakeThumbnailMapOptional < ActiveRecord::Migration[4.2]
   def self.up
     add_column :users, :thumbnail_maps, :boolean, null: false, default: true
   end

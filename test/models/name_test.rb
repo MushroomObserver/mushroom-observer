@@ -258,7 +258,7 @@ class NameTest < UnitTestCase
       Name.format_name("Amanita sect. Vaginatae")
     )
     assert_equal(
-      "**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**", # rubocop:disable Metrics/LineLength
+      "**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**", # rubocop:disable Layout/LineLength
       Name.format_name("Amanita subg. One subsect. Two stirps Three")
     )
     assert_equal(
@@ -270,7 +270,7 @@ class NameTest < UnitTestCase
       Name.format_name("Amanita vaginata subsp. grisea")
     )
     assert_equal(
-      "**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**", # rubocop:disable Metrics/LineLength
+      "**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**", # rubocop:disable Layout/LineLength
       Name.format_name("Amanita vaginata subsp. one var. two f. three")
     )
     assert_equal(
@@ -626,7 +626,7 @@ class NameTest < UnitTestCase
       search_name: "Synchytrium subgenus Endochytrium du Plessis",
       real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
       sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
-      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable LineLength
+      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable Layout/LineLength
       parent_name: "Synchytrium",
       rank: :Subgenus,
       author: "du Plessis"
@@ -2132,18 +2132,19 @@ class NameTest < UnitTestCase
     assert_not(names(:petigera).is_misspelling?)
     assert_nil(names(:petigera).correct_spelling)
 
-    # Coprinus comatus should normally end up in name primer.
-    if File.exist?(MO.name_primer_cache_file)
-      File.delete(MO.name_primer_cache_file)
-    end
-    assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
-
-    # Mark it as misspelled and see that it gets removed from the primer list.
-    names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
-    names(:coprinus_comatus).change_deprecated(true)
-    names(:coprinus_comatus).save
-    File.delete(MO.name_primer_cache_file)
-    assert(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
+    # Temporarily disabling the name primer.  See comments there.
+    # # Coprinus comatus should normally end up in name primer.
+    # if File.exist?(MO.name_primer_cache_file)
+    #   File.delete(MO.name_primer_cache_file)
+    # end
+    # assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
+    #
+    # # Mark it as misspelled and see that it gets removed from the primer list.
+    # names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
+    # names(:coprinus_comatus).change_deprecated(true)
+    # names(:coprinus_comatus).save
+    # File.delete(MO.name_primer_cache_file)
+    # assert(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
   end
 
   def test_lichen
@@ -2400,7 +2401,6 @@ class NameTest < UnitTestCase
   def test_mysql_sort_order
     return unless sql_collates_accents?
 
-    # rubocop:disable Lint/UselessAssignment
     # RuboCop gives false positives
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
@@ -2409,7 +2409,6 @@ class NameTest < UnitTestCase
     n5 = create_test_name("Agaricus Aéiou")
     n6 = create_test_name("Agaricus Aejou")
     n5.update(author: "aÉIOU")
-    # rubocop:enable Lint/UselessAssignment
 
     x = Name.where(id: n1.id..n6.id).order(:author).pluck(:author)
     assert_equal(%w[Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou], x)
@@ -2805,7 +2804,7 @@ class NameTest < UnitTestCase
   #
   #   a = names(:agaricus)
   #   ac = names(:agaricus_campestris)
-  #   ac.update_attributes(classification: "")
+  #   ac.update(classification: "")
   #   msgs = Name.propagate_generic_classifications
   #   assert_equal(["Updating Agaricus campestris"], msgs)
   #   assert_equal(a.classification, ac.reload.classification)

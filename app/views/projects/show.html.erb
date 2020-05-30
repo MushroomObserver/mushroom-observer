@@ -1,0 +1,128 @@
+<%
+  @title ||= :show_project_title.t(title: @project.title)
+
+  tabs = [
+    link_to(:app_list_projects.t,
+            action: :index),
+    link_with_query(:show_project_admin_request.t,
+                    action: :admin_request,
+                    id: @project.id)
+  ]
+  if @project.is_admin?(@user)
+    tabs += [
+      link_with_query(:show_project_add_members.t,
+                      action: :add_members,
+                      id: @project.id)
+    ]
+  end
+  if check_permission(@project)
+    tabs += [
+      link_with_query(:show_project_destroy.t,
+                      { action: :destroy,
+                        id: @project.id },
+                      data: { confirm: :are_you_sure.l }),
+      link_with_query(:show_project_edit.t,
+                      action: :edit,
+                      id: @project.id)
+    ]
+  end
+  tabs << draw_interest_icons(@project)
+  @tabsets = {
+    pager_for: @project,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="list-group">
+      <div class="list-group-item">
+        <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
+        <% if false %>
+          <p><b><%= :show_project_published.t %>:</b> <%= @name_count %></p>
+        <% end %>
+        <p><b><%= :show_project_by.t %>:</b> <%= user_link(@project.user) %></p>
+        <p><b><%= :show_project_user_group.t %>:</b> <%= @project.user_group.name.t %></p>
+        <p><b><%= :show_project_admin_group.t %>:</b> <%= @project.admin_group.name.t %></p>
+        <%= ("*" + :show_project_summary.l + ":* " + @project.summary.to_s.html_safe).tpl %>
+        <%= if @user && @project.user_group.users.member?(@user)
+          render(partial: "show_groups", locals: {project: @project})
+        end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="list-group">
+      <div class="list-group-item">
+
+        <b><%= :OBSERVATIONS.t %>:</b>
+        <% if @project.observations.any? %>
+          <%= @project.observations.length %>
+          (<%= link_to(:SHOW.t,
+                       controller: :observations,
+                       action: :observations_for_project,
+                       id: @project.id) %> |
+          <%= link_to(:app_checklist.t,
+                      controller: :observations,
+                      action: :checklist,
+                      project_id: @project.id) %>)
+        <% else %>
+          <%= :NONE.t %>
+        <% end %>
+        <br/>
+
+        <b><%= :IMAGES.t %>:</b>
+        <% if @project.images.any? %>
+          <%= @project.images.length %>
+          (<%= link_to(:SHOW.t,
+                       controller: :images,
+                       action: :images_for_project,
+                       id: @project.id) %>)
+        <% else %>
+          <%= :NONE.t %>
+        <% end %>
+        <br/>
+
+        <b><%= :SPECIES_LISTS.t %>:</b>
+        <% if @project.species_lists.any? %>
+          <%= @project.species_lists.length %>
+          (<%= link_to(:SHOW.t,
+                       controller: :species_lists,
+                       action: :species_lists_for_project,
+                       id: @project.id) %>)
+        <% else %>
+          <%= :NONE.t %>
+        <% end %>
+        <br/>
+
+        <b><%= :show_project_drafts.t %>:</b>
+        <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
+        <div class="ml-3">
+          <% @draft_data.each do |datum| %>
+            <%= link_with_query(datum["display_name"].t,
+                                { controller: :names,
+                                  action: :show_name_description,
+                                  id: datum["id"] }) %>
+            (<%= user_link(User.find(datum["user_id"])) %>)<br/>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <%= render(partial: "comments/comments",
+               locals: { object: @project,
+                         controls: true,
+                         limit: nil }) %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 mt-3">
+    <%= show_object_footer(@project) %>
+  </div>
+</div>

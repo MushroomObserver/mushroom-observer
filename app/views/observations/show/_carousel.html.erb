@@ -1,0 +1,62 @@
+<%
+  # TODO: NIMMO This is a carousel template, make it link to fullscreen lightbox
+  # javascript_include("image_slider")
+  default_image = @observation.thumb_image
+  has_images = !@observation.images.nil? && @observation.images.any?
+%>
+
+<% if has_images %>
+  <div id="observation_carousel" class="carousel slide card-img" data-ride="false">
+    <div class="carousel-inner bg-secondary">
+      <% @observation.images.each do |img| %>
+        <%
+          notes = !img.notes || img.notes.blank? ? "" : img.notes
+          notes += "\n#{img.original_name}" if !img.original_name.blank? && \
+                (check_permission(img) || img.user && \
+                img.user.keep_filenames == :keep_and_show)
+          if img == default_image
+            item_class = "carousel-item active"
+          else
+            item_class = "carousel-item"
+          end
+        %>
+        <%= tag.div class: item_class do %>
+            <%= carousel_image(img, notes: notes) %>
+        <% end %>
+      <% end %>
+    </div>
+    <a class="carousel-control-prev"
+       href="#observation_carousel"
+       role="button"
+       data-slide="prev">
+      <div class="btn">
+        <span class="fas fa-chevron-left fa-2x text-white" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </div>
+    </a>
+    <a class="carousel-control-next"
+       href="#observation_carousel"
+       role="button"
+       data-slide="next">
+      <div class="btn">
+        <span class="fas fa-chevron-right fa-2x text-white" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </div>
+    </a>
+    <ol class="carousel-indicators bg-secondary mb-0">
+      <% @observation.images.each_with_index do |img, index| %>
+        <%
+          if img == default_image
+            item_class = " active"
+          else
+            item_class = ""
+          end %>
+          <li data-target="#observation_carousel"
+              data-slide-to="<%= index %>"
+              class="<%= item_class %>">
+            <%= carousel_thumbnail(img) %>
+          </li>
+      <% end %>
+    </ol>
+  </div>
+<% end %>

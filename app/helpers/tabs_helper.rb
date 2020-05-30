@@ -36,14 +36,17 @@ module TabsHelper
 
   def google_distribution_map_for(obs_name)
     link_with_query(:show_name_distribution_map.t,
-                    controller: :name, action: :map, id: obs_name.id)
+                    controller: :names,
+                    action: :map,
+                    id: obs_name.id)
   end
 
   def general_questions_link(obs, user)
     return unless obs.user.email_general_question && obs.user != user
 
     link_with_query(:show_observation_send_question.t,
-                    controller: :observer, action: :ask_observation_question,
+                    controller: :email,
+                    action: :ask_observation_question,
                     id: obs.id)
   end
 
@@ -51,7 +54,8 @@ module TabsHelper
     return unless user&.has_unshown_naming_notifications?(obs)
 
     link_with_query(:show_observation_view_notifications.t,
-                    controller: :observation, action: :show_notifications,
+                    controller: :notifications,
+                    action: :show,
                     id: obs.id)
   end
 
@@ -59,14 +63,17 @@ module TabsHelper
     return unless user&.species_lists&.any?
 
     link_with_query(:show_observation_manage_species_lists.t,
-                    controller: :species_list, action: :manage_species_lists,
+                    controller: :species_lists,
+                    action: :manage_species_lists,
                     id: obs.id)
   end
 
   def map_link
     return unless @mappable
 
-    link_with_query(:MAP.t, controller: :location, action: :map_locations)
+    link_with_query(:MAP.t,
+                    controller: :locations,
+                    action: :map_locations)
   end
 
   def obs_change_links(obs)
@@ -74,25 +81,33 @@ module TabsHelper
 
     [
       link_with_query(:show_observation_edit_observation.t,
-                      controller: :observer, action: :edit_observation,
+                      controller: :observations,
+                      action: :edit,
                       id: obs.id),
       link_with_query(:DESTROY.t,
-                      { controller: :observer, action: :destroy_observation,
+                      { controller: :observations,
+                        action: :destroy,
                         id: obs.id },
-                      class: "text-danger", data: { confirm: :are_you_sure.l })
+                      class: "text-danger",
+                      data: { confirm: :are_you_sure.l })
     ]
   end
 
   def prefs_tabset
     tabs = [
       link_to(:bulk_license_link.t,
-              controller: :image, action: :license_updater),
+              controller: :images,
+              action: :license_updater),
       link_to(:prefs_change_image_vote_anonymity.t,
-              controller: :image, action: :bulk_vote_anonymity_updater),
-      link_to(:profile_link.t, action: :profile),
+              controller: :images,
+              action: :bulk_vote_anonymity_updater),
+      link_to(:profile_link.t,
+              action: :profile),
       link_to(:show_user_your_notifications.t,
-              controller: :interest, action: :list_interests),
-      link_to(:account_api_keys_link.t, action: :api_keys)
+              controller: :interests,
+              action: :list_interests),
+      link_to(:account_api_keys_link.t,
+              action: :api_keys)
     ]
     { right: draw_tab_set(tabs) }
   end

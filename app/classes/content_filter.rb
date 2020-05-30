@@ -50,7 +50,7 @@ class ContentFilter
 
   # Lookup a filter by name (symbol).
   def self.find(key)
-    all.select { |fltr| fltr.sym == key }.first
+    all.find { |fltr| fltr.sym == key }
   end
 
   def self.by_model(model)

@@ -1,0 +1,75 @@
+<%
+  @title = :edit_translations_title.t
+  javascript_include("translations")
+%>
+
+<% inject_javascript_at_end %(
+  TranslationsModule({
+    locale: "#{j @lang.locale}",
+    confirm_string: "#{j :edit_translations_will_lose_changes.l}",
+    loading_string: "#{j :edit_translations_loading.l}",
+    saving_string:  "#{j :edit_translations_saving.l}"
+  });
+) %>
+
+<div id="whirly" class="hidden">
+  <span id="whirly_text" class="pb-4"></span>
+  <%= image_tag("indicator.gif") %>
+</div>
+
+<div class="row">
+  <div class="col-12 max-width-text">
+    <p class="help-block"><%= :edit_translations_help.t %></p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-6 translation_container">
+    <div>
+      <div id="left_translation_container">
+        <% @form.each do |item| %>
+          <%= case item.class.name
+          when /MajorHeader/
+            content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "major_header")
+          when /MinorHeader/
+            content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "minor_header")
+          when /Comment/
+            content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, class: "comment")
+          when /TagField/
+            tag = item.tag
+            str = preview_string(@strings[tag])
+            official_record = @official_records[tag]
+            translated_record = @translated_records[tag]
+            up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
+            if !up_to_date &&
+               official_record &&
+               official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+              # Mark as translated if there is nothing to actually translate!
+              up_to_date = true
+            end
+            span_class = up_to_date ? "faint" : "bold bright"
+            str = content_tag(:span, h(str), class: span_class, id: "str_#{tag}")
+            label = content_tag(:span, h(tag) + ":", class: "tag")
+            label = link_to(label, {page: @page, tag: tag}, data: {tag: tag, role: "show_tag"})
+            content_tag(:p, label + " " + str, class: "tag_field")
+          else
+            raise "Unexpected form item type: #{line.class.name}"
+          end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 translation_container">
+    <div>
+      <div id="right_translation_container">
+        <%= form_tag({action: :edit_translations, page: @page}, {id: "post_form"}) %>
+          <div id="form_div">
+            <%= render(partial: "form") if @edit_tags.any? %>
+          </div>
+        </form>
+      </div>
+      <iframe id="hidden_frame" name="hidden_frame" src="" style="display:none"></iframe>
+    </div>
+  </div>
+</div>

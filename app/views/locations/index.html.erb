@@ -1,0 +1,67 @@
+<%
+  tabs = [
+    link_with_query(:show_location_create.t, action: :new),
+    link_with_query(:list_place_names_map.t, action: :map_locations),
+    link_to(:list_countries.t, action: :list_countries)
+  ]
+  tabs += create_links(@links)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  @known_pages = @pages
+  @known_data  = @objects
+
+  observation_counts = calc_counts(@objects)
+  flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
+%>
+
+<div>
+  <br>
+  <%= :list_place_names_popularity.t %>
+  <%= :list_place_names_parenthetical.t %>
+</div>
+
+<div class="row mt-3">
+  <div class="col-md-7">
+    <% if @known_pages.any? && @known_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_known.t %>
+        <%= :list_place_names_known_order.t if @default_orders %>
+      </div>
+      <%= paginate_block(@known_pages) do %>
+        <div class="card">
+          <% @known_data.each do |location| %>
+            <div class="card-body">
+              <%= link_with_query(location.display_name.t,
+                                  location.show_link_args) %>
+              (<%= observation_counts[location.id].to_i %>)
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="col-md-5">
+    <% if @undef_pages.any? && @undef_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_undef.t %>
+        <%= :list_place_names_undef_order.t if @default_orders %>
+      </div>
+      <%= paginate_block(@undef_pages) do %>
+        <div class="card">
+          <% @undef_data.each do |location, count|
+            if @undef_location_format == :scientific
+              location = Location.reverse_name(location)
+            end %>
+            <div class="card-body">
+              <%= location_link(location, nil, count) %>
+              <%= link_to(:list_place_names_merge.t,
+                          action: :list_merge_options,
+                          where: location) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -108,9 +108,9 @@ end
 def get_initial_state(obs)
   @observation = obs
   @cur_name    = obs.name
-  @old_naming  = obs.namings.select { |n| n.name == @old_name }.first
-  @new_naming  = obs.namings.select { |n| n.name == @new_name }.first
-  @cur_naming  = obs.namings.select { |n| n.name == @cur_name }.first
+  @old_naming  = obs.namings.find { |n| n.name == @old_name }
+  @new_naming  = obs.namings.find { |n| n.name == @new_name }
+  @cur_naming  = obs.namings.find { |n| n.name == @cur_name }
   @old_score   = average_votes(@old_naming)
   @new_score   = average_votes(@new_naming)
   @cur_score   = obs.vote_cache

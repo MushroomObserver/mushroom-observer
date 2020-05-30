@@ -1,3 +1,7 @@
+# TODO: NIMMO check actions of pattern "edit_#{type}_description" in case of
+# controllers/concerns refactor for LocationDescription and NameDescription
+# also abstract_model.rb line 345 - define controller name for
+# namespaced controllers?
 module DescriptionHelper
   def is_writer?(desc)
     desc.is_writer?(@user) || in_admin_mode?
@@ -14,38 +18,43 @@ module DescriptionHelper
     tabs = []
     if true
       tabs << link_with_query(:show_object.t(type: type),
-                              action: "show_#{type}", id: desc.parent_id)
+                              action: :show,
+                              id: desc.parent_id)
     end
     if is_writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
-                              action: "edit_#{type}_description", id: desc.id)
+                              action: :edit,
+                              id: desc.id)
     end
     if admin
       tabs << link_with_query(:show_description_destroy.t,
-                              { action: "destroy_#{type}_description",
+                              { action: :destroy,
                                 id: desc.id },
                               data: { confirm: :are_you_sure.l })
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
                               controller: type,
-                              action: "create_#{type}_description",
+                              action: :new,
                               id: desc.parent_id, clone: desc.id,
                               help: :show_description_clone_help.l)
     end
     if admin
       tabs << link_with_query(:show_description_merge.t,
-                              action: :merge_descriptions, id: desc.id,
+                              action: :merge_descriptions,
+                              id: desc.id,
                               help: :show_description_merge_help.l)
     end
     if admin
       tabs << link_with_query(:show_description_adjust_permissions.t,
-                              action: :adjust_permissions, id: @description.id,
+                              action: :adjust_permissions,
+                              id: @description.id,
                               help: :show_description_adjust_permissions_help.l)
     end
     if desc.public && @user && (desc.parent.description_id != desc.id)
       tabs << link_with_query(:show_description_make_default.t,
-                              action: :make_description_default, id: desc.id,
+                              action: :make_description_default,
+                              id: desc.id,
                               help: :show_description_make_default_help.l)
     end
     if (desc.source_type == :project) &&
@@ -55,7 +64,8 @@ module DescriptionHelper
     end
     if admin && (desc.source_type != :public)
       tabs << link_with_query(:show_description_publish.t,
-                              action: :publish_description, id: desc.id,
+                              action: :publish_description,
+                              id: desc.id,
                               help: :show_description_publish_help.l)
     end
     tabs
@@ -73,11 +83,14 @@ module DescriptionHelper
     title = description_title(desc)
     links = []
     if is_writer?(desc)
-      links << link_with_query(:EDIT.t, action: "edit_#{type}", id: desc.id)
+      links << link_with_query(:EDIT.t,
+                               action: :edit,
+                               id: desc.id)
     end
     if is_admin?(desc)
       links << link_with_query(:DESTROY.t,
-                               { action: "destroy_#{type}", id: desc.id },
+                               { action: :destroy,
+                                 id: desc.id },
                                data: { confirm: :are_you_sure.l })
     end
     content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
@@ -110,7 +123,7 @@ module DescriptionHelper
     # Turn each into a link to show_description, and add optional controls.
     list.map! do |desc|
       any = true
-      item = description_link(desc)
+      item = description_link(obj, desc, type)
       writer = is_writer?(desc)
       admin  = is_admin?(desc)
       if writer || admin
@@ -118,13 +131,13 @@ module DescriptionHelper
         if writer
           links << link_with_query(:EDIT.t,
                                    controller: obj.show_controller,
-                                   action: "edit_#{type}_description",
+                                   action: :edit,
                                    id: desc.id)
         end
         if admin
           links << link_with_query(:DESTROY.t,
                                    { controller: obj.show_controller,
-                                     action: "destroy_#{type}_description",
+                                     action: :destroy,
                                      id: desc.id },
                                    data: { confirm: :are_you_sure.t })
         end
@@ -137,7 +150,7 @@ module DescriptionHelper
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_with_query(:CREATE.t, controller: obj.show_controller,
-                                        action: "create_#{type}_description",
+                                        action: :new,
                                         id: obj.id)
       str += indent + "[" + link + "]"
       list.unshift(str)
@@ -171,7 +184,8 @@ module DescriptionHelper
     head = content_tag(:b, :show_name_descriptions.t) + ": "
     head += link_with_query(:show_name_create_description.t,
                             controller: obj.show_controller,
-                            action: "create_#{type}_description", id: obj.id)
+                            action: "create_#{type}_description",
+                            id: obj.id)
     any = false
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
@@ -183,12 +197,13 @@ module DescriptionHelper
     html = content_tag(:p, html)
 
     # Show list of projects user is a member of.
-    if projects && !projects.empty?
+    if projects.present?
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
         item = link_with_query(project.title,
                                action: "create_#{type}_description",
-                               id: obj.id, project: project.id,
+                               id: obj.id,
+                               project: project.id,
                                source: "project")
         indent + item
       end
@@ -208,14 +223,13 @@ module DescriptionHelper
   #
   def colored_notes_box(even, msg = nil, &block)
     msg = capture(&block) if block_given?
-    klass = "ListLine#{even ? 0 : 1}"
-    style = [
-      "margin-left:10px",
-      "margin-right:10px",
-      "padding:10px",
-      "border:1px dotted"
-    ].join(";")
-    result = content_tag(:div, msg, class: klass, style: style)
+    klass = [
+      "ListLine#{even ? 0 : 1}",
+      "mx-2",
+      "p-2",
+      "border-all"
+    ].join(" ")
+    result = content_tag(:div, msg, class: klass)
     if block_given?
       concat(result)
     else
@@ -245,7 +259,10 @@ module DescriptionHelper
 
   def name_section_link(title, data, query)
     if data && data != 0
-      action = { controller: :observer, action: :index_observation }
+      action = {
+        controller: :observations,
+        action: :index_observation
+      }
       url = add_query_param(action, query)
       content_tag(:p, link_to(title, url))
     end

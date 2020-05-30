@@ -134,7 +134,7 @@ class Name < AbstractModel
       genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
-      nonsensu   = genera.reject { |n| n.author =~ /^sensu / }
+      nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
       genera     = nonsensu if nonsensu.any?
       genera.first
     end
@@ -201,7 +201,7 @@ class Name < AbstractModel
     matches  = Name.where(text_name: name, correct_spelling_id: nil)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
-    nonsensu = matches.reject { |match| match.author =~ /^sensu / }
+    nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
     matches  = nonsensu if nonsensu.any?
     matches.first
   end
@@ -413,8 +413,8 @@ class Name < AbstractModel
   # genus.  Propagate to subtaxa if changing genus.
   def change_classification(new_str)
     root = below_genus? && genus || self
-    root.update_attributes(classification: new_str)
-    root.description.update_attributes(classification: new_str) if
+    root.update(classification: new_str)
+    root.description.update(classification: new_str) if
       root.description_id
     root.propagate_classification if root.rank == :Genus
   end

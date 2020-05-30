@@ -1,0 +1,74 @@
+<%
+  @title = :app_advanced_search.t
+%>
+
+<div class="max-width-text">
+  <p class="help-block"><%= :advanced_search_caveat.t %></p>
+
+  <%= form_tag(action: :advanced_search_form) do %>
+    <p>
+      <%= submit_tag(:advanced_search_submit.l,
+                     class: "btn mx-auto") %>
+    </p>
+
+    <div class="form-group">
+      <%= label_tag(:search_model, :advanced_search_result_type.t + ":") %>
+      <span class="help"><%= :advanced_search_result_type_help.t %></span><br/>
+      <%= select(:search,
+                 :model,
+                 [
+                   [:OBSERVATIONS.l, :observation],
+                   [:IMAGES.l, :image],
+                   [:LOCATIONS.l, :location],
+                   [:NAMES.l, :name],
+                 ]) %>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag(:search_name, :NAME.t + ":") %>
+      <span class="help"><%= :advanced_search_name_help.t %></span>
+      <%= text_field(:search,
+                     :name,
+                     class: "form-control") %>
+      <% turn_into_name_auto_completer(:search_name,
+                                       primer: Name.primer,
+                                       token: " OR ") %>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag(:search_user, :OBSERVER.t + ":") %>
+      <span class="help"><%= :advanced_search_observer_help.t %></span>
+      <%= text_field(:search,
+                     :user,
+                     class: "form-control") %>
+      <% turn_into_user_auto_completer(:search_user,
+                                       primer: User.primer,
+                                       token: " OR ") %>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag(:search_location, :LOCATION.t + ":") %>
+      <span class="help"><%= :advanced_search_location_help.t %></span>
+      <%= text_field(:search,
+                     :location,
+                     class: "form-control") %>
+      <% turn_into_location_auto_completer(:search_location,
+                                           primer: Location.primer,
+                                           token: " OR ") %>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag(:search_content, :advanced_search_content.t + ":") %>
+      <span class="help"><%= :advanced_search_content_help.t %></span>
+      <%= text_field(:search,
+                     :content,
+                     class: "form-control") %>
+      <p class="help-block"><%= :advanced_search_content_notes.t %></p>
+    </div>
+
+    <%= render partial: "advanced_search_filters" %>
+
+    <%= submit_tag(:advanced_search_submit.l,
+                   class: "btn mx-auto") %>
+  <% end %>
+</div>

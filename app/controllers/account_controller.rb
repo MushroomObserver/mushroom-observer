@@ -95,11 +95,11 @@ class AccountController < ApplicationController
     # logged in.  "auth_code" will be missing.
     if auth_code != user.auth_code
       @unverified_user = user
-      render(action: :reverify)
+      render action: :reverify
 
     # If already logged in and verified, just send to "welcome" page.
     elsif @user == user
-      redirect_to(action: :welcome)
+      redirect_to action: :welcome
 
     # If user is already verified, send them back to the login page.  (If
     # someone grabs a user's verify email, they could theoretically use it to
@@ -109,7 +109,7 @@ class AccountController < ApplicationController
       @user = nil
       User.current = nil
       session_user_set(nil)
-      redirect_to(action: :login)
+      redirect_to action: :login
 
     # If user was created via API, we must ask the user to choose a password
     # first before we can verify them.
@@ -117,7 +117,7 @@ class AccountController < ApplicationController
       @user = user
       if request.method != "POST"
         flash_warning(:account_choose_password_warning.t)
-        render(action: :choose_password)
+        render action: :choose_password
       else
         password = begin
                      params[:user][:password]
@@ -145,7 +145,7 @@ class AccountController < ApplicationController
         if user.errors.any?
           @user.password = password
           flash_object_errors(user)
-          render(action: :choose_password)
+          render action: :choose_password
         end
       end
 
@@ -235,7 +235,7 @@ class AccountController < ApplicationController
 
   def login_unverified(user)
     @unverified_user = user
-    render(action: "reverify")
+    render action: :reverify
   end
 
   def email_new_password_get
@@ -255,7 +255,7 @@ class AccountController < ApplicationController
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
         PasswordEmail.build(@new_user, password).deliver_now
-        render(action: "login")
+        render action: :login
       else
         flash_object_errors(@new_user)
       end
@@ -444,7 +444,12 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_to(controller: "observer", action: "show_user", id: @user.id)
+        # redirect_to(
+        #   controller: :users,
+        #   action: :show,
+        #   id: @user.id
+        # )
+        redirect_to user_path(@user.id)
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -453,11 +458,21 @@ class AccountController < ApplicationController
         end
         if need_to_create_location
           flash_notice(:runtime_profile_must_define.t)
-          redirect_to(controller: "location", action: "create_location",
-                      where: @place_name, set_user: @user.id)
+          # redirect_to(
+          #   controller: :locations,
+          #   action: :new,
+          #   where: @place_name,
+          #   set_user: @user.id
+          # )
+          redirect_to new_location_path(where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
-          redirect_to(controller: "observer", action: "show_user", id: @user.id)
+          # redirect_to(
+          #   controller: :users,
+          #   action: :show,
+          #   id: @user.id
+          # )
+          redirect_to user_path(@user.id)
         end
       end
     end
@@ -468,7 +483,12 @@ class AccountController < ApplicationController
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
-    redirect_to(controller: "observer", action: "show_user", id: @user.id)
+    # redirect_to(
+    #   controller: :users,
+    #   action: :show,
+    #   id: @user.id
+    # )
+    redirect_to user_path(@user.id)
   end
 
   def no_email_comments_owner
@@ -567,10 +587,12 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to(controller: :observer, action: :list_rss_logs)
+        # redirect_to controller: :rss_logs, action: :index
+        redirect_to rss_logs_path
       end
     else
-      redirect_to(controller: :observer, action: :list_rss_logs)
+      # redirect_to controller: :rss_logs, action: :index
+      redirect_to rss_logs_path
     end
   end
 
@@ -617,7 +639,8 @@ class AccountController < ApplicationController
         key.verify!
         flash_notice(:account_api_keys_activated.t(notes: key.notes))
       end
-      redirect_to(action: :api_keys)
+      # redirect_to controller: :api, action: :api_keys
+      redirect_to api_api_keys_path
     end
   rescue StandardError => e
     flash_error(e.to_s)
@@ -631,10 +654,12 @@ class AccountController < ApplicationController
             @key.update!(params[:key].permit!)
             flash_notice(:account_api_keys_updated.t)
           end
-          redirect_to(action: :api_keys)
+          # redirect_to controller: :api, action: :api_keys
+          redirect_to api_api_keys_path
         end
       else
-        redirect_to(action: :api_keys)
+        # redirect_to controller: :api, action: :api_keys
+        redirect_to api_api_keys_path
       end
     end
   rescue StandardError => e
@@ -649,12 +674,20 @@ class AccountController < ApplicationController
 
   def turn_admin_on # :root:
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(controller: :observer, action: :index)
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def turn_admin_off # :root:
     session[:admin] = nil
-    redirect_back_or_default(controller: :observer, action: :index)
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def add_user_to_group # :root:
@@ -681,7 +714,11 @@ class AccountController < ApplicationController
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(:do_activity)
     else
-      redirect_back_or_default("/observer/how_to_help")
+      # redirect_back_or_default(
+      #   controller: :info,
+      #   action: :how_to_help
+      # )
+      redirect_back_or_default( info_how_to_help_path )
     end
   end
 
@@ -744,7 +781,11 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(controller: "observer", action: "index")
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   def can_add_user_to_group?(user, group)
@@ -769,7 +810,11 @@ class AccountController < ApplicationController
 
   def add_user_to_group_user_mode
     flash_error :permission_denied.t
-    redirect_back_or_default(controller: "observer", action: "index")
+    # redirect_back_or_default(
+    #   controller: :rss_logs,
+    #   action: :index
+    # )
+    redirect_back_or_default( rss_logs_path )
   end
 
   public
@@ -850,7 +895,9 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
       DeniedEmail.build(params["new_user"]).deliver_now
     end
-    redirect_back_or_default(action: :welcome)
+    redirect_back_or_default(
+      action: :welcome
+    )
     false
   end
 

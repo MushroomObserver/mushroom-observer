@@ -49,7 +49,7 @@
 #
 #  4) Add partial view for +list_rss_logs+:
 #
-#       (just clone, e.g., app/views/observer/_location.rhtml)
+#       (just clone, e.g., app/views/observations/_location.rhtml)
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
@@ -141,6 +141,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
+#  detail::             Return the detail message for the latest update.
 #
 #  == Callbacks
 #
@@ -157,10 +158,21 @@ class RssLog < AbstractModel
   belongs_to :glossary_term
   belongs_to :article
 
-  # Override the default show_controller
-  def self.show_controller
-    "observer"
-  end
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "rss_logs"
+  # end
+
+
+  # # If switch to ActivityLog name, uncomment: Override the default table_name
+  # def self.table_name
+  #   "rss_log"
+  # end
+  #
+  # # If switch to ActivityLog name, uncomment: Override the default primary_key
+  # def self.primary_key
+  #   "rss_log_id"
+  # end
 
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
@@ -264,30 +276,34 @@ class RssLog < AbstractModel
 
   # Returns URL of <tt>show_#{object}</tt> action for the associated object.
   # That is, the RssLog for an Observation would return
-  # <tt>"/observer/show_observation/#{id}"</tt>, and so on.  If the RssLog is
-  # an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt>
+  # <tt>"/observations/show_observation/#{id}"</tt>, and so on.  If the RssLog is
+  # an orphan, it returns the generic <tt>"/rss_log/show_rss_log/#{id}"</tt>
   # URL.
+
+  # TODO: Retire this method, use Rails built-in "RESTful" url_for(target)
+  # These paths are now in routes.rb and have now all been broken out of
+  # the old "observer" controller into their own controllers
   def url
     if location_id
-      sprintf("/location/show_location/%d?time=%d", location_id,
+      format("/locations/show_location/%d?time=%d", location_id,
               updated_at.tv_sec)
     elsif name_id
-      sprintf("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
+      format("/names/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observer/show_observation/%d?time=%d", observation_id,
+      format("/observations/show_observation/%d?time=%d", observation_id,
               updated_at.tv_sec)
     elsif project_id
-      sprintf("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
+      format("/projects/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/observer/show_species_list/%d?time=%d", species_list_id,
+      format("/species_lists/show_species_list/%d?time=%d", species_list_id,
               updated_at.tv_sec)
     elsif glossary_term_id
-      sprintf("/glossary/show_glossary_term/%d?time=%d",
+      format("/glossary/show_glossary_term/%d?time=%d",
               glossary_term_id, updated_at.tv_sec)
     elsif article_id
-      sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
+      format("/articles/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
-      sprintf("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
+      format("/rss_logs/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
   end
 
@@ -309,7 +325,9 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, args = {})
-    entry = RssLog.encode(tag, relevant_args(args), args[:time] || Time.now)
+    entry = RssLog.encode(tag,
+                          relevant_args(args),
+                          args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     self.notes = entry + "\n" + notes.to_s
     # self.updated_at = args[:time] if args[:touch]
@@ -366,6 +384,49 @@ class RssLog < AbstractModel
     results
   end
 
+  # Figure out the detail message for the most recent update.
+  def detail
+    # target_type = target ? target.type_tag : target_type
+    begin
+      tag, args, time = parse_log.first
+    rescue StandardError
+      []
+    end
+    if !target_type
+      result = :rss_destroyed.t(type: :object)
+    elsif !target ||
+          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
+      result = :rss_destroyed.t(type: target_type)
+    elsif !time || time < target.created_at + 1.minute
+      result = :rss_created_at.t(type: target_type)
+      unless [:observation, :species_list].include?(target_type)
+        begin
+          result += " ".html_safe + :rss_by.t(user: target.user.legal_name)
+        rescue StandardError
+          nil
+        end
+      end
+    else
+      if [:observation, :species_list].include?(target_type) &&
+         [target.user.login, target.user.name, target.user.legal_name].
+         include?(args[:user])
+        # This will remove redundant user from observation logs.
+        tag2 = :"#{tag}0"
+        result = tag2.t(args) if tag2.has_translation?
+      end
+      unless result
+        tag2 = tag.to_s.sub(/^log/, "rss").to_sym
+        detail = tag2.t(args) if tag2.has_translation?
+      end
+      begin
+        result ||= tag.t(args)
+      rescue StandardError
+        nil
+      end
+    end
+    result
+  end
+
   ##############################################################################
 
   private
@@ -407,7 +468,7 @@ class RssLog < AbstractModel
       time = time2
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
-      if Rails.env == "production"
+      if Rails.env.production?
         time = Time.now # (but don't crash in production)
       else
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"

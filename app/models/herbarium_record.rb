@@ -52,6 +52,11 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  # def self.show_controller
+  #   "herbarium_records"
+  # end
+
   def herbarium_label
     if initial_det.blank?
       accession_number
@@ -91,7 +96,7 @@ class HerbariumRecord < AbstractModel
     return if observations.include?(obs)
 
     observations.push(obs)
-    obs.update_attributes(specimen: true) unless obs.specimen
+    obs.update(specimen: true) unless obs.specimen
     obs.log(:log_herbarium_record_added,
             name: accession_at_herbarium,
             touch: true)

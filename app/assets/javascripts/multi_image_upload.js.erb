@@ -102,7 +102,7 @@ function MultiImageUploader(localized_text) {
             obsDate = _this.observationDate();
 
         $imgRadioContainer.html('');
-        $obsRadioContainer.html('');       
+        $obsRadioContainer.html('');
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
@@ -502,8 +502,8 @@ function MultiImageUploader(localized_text) {
         if (!_this.isUploading) {
             _this.isUploading = true;
             _$container.html(
-              '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + localized_text.uploading_text + '</strong></div>' +
-              '<div class="progress-bar" style="position: absolute; width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
+              '<div class="col-12" style="z-index: 1"><strong class="progress-text">' + localized_text.uploading_text + '</strong></div>' +
+              '<div class="progress-bar position-absolute" style="width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
             )
             doDots(1);
         } else {
@@ -695,23 +695,23 @@ function MultiImageUploader(localized_text) {
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
-        
-               
+
+
         //Drag and Drop bindings on the window
-        
+
         $content.bind('dragover dragenter', function (e){
             if (e.preventDefault) { e.preventDefault(); }
             jQuery('#right_side').addClass('dashed-border');
             return false;
         });
 
-        $content.bind('dragend dragleave dragexit', function (e){            
-            jQuery('#right_side').removeClass('dashed-border');            
+        $content.bind('dragend dragleave dragexit', function (e){
+            jQuery('#right_side').removeClass('dashed-border');
         });
         $content.bind('drop', function (e) {
             if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
             jQuery('#right_side').removeClass('dashed-border');
-            var dataTransfer = e.originalEvent.dataTransfer;            
+            var dataTransfer = e.originalEvent.dataTransfer;
             if (dataTransfer.files.length > 0)
                 fileStore.addFiles(dataTransfer.files);
             // There are issues to work out concerning dragging and dropping

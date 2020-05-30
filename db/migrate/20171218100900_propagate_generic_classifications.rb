@@ -1,4 +1,4 @@
-class PropagateGenericClassifications < ActiveRecord::Migration
+class PropagateGenericClassifications < ActiveRecord::Migration[4.2]
   def up
     puts "Refresh classification for genera from descriptions..."
     Name.connection.execute(%(

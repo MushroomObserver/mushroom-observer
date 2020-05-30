@@ -1,0 +1,28 @@
+<%
+  vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
+  user = User.current
+%>
+
+<% if vote_percentage > 0 %>
+  <div class="vote-meter"  title="<%="#{image.num_votes} #{:Votes.t}" %>">
+    <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar"
+         role="progressbar" style="width: <%=vote_percentage%>%">
+    </div>
+  </div>
+<% end %>
+
+<div id="vote_buttons">
+  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>" style="margin-top:-5px">
+    <center>
+      <small>
+        <%= if user && !image.users_vote(user).blank?
+           "&nbsp;" + image_vote_link(image, 0) + "&nbsp;".html_safe
+        end %><%= Image.all_votes.map do |vote|
+          image_vote_link(image, vote)
+        end.safe_join(tag.span "|", class: "mx-1") %>
+      </small>
+    </center>
+    <span class="hidden data_container" data-id="<%= image.id %>"
+          data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>
+  </div>
+</div>

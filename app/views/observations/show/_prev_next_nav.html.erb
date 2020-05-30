@@ -1,0 +1,27 @@
+<!-- Previous/Next navigation -->
+<div class="prev-next-nav text-right">
+
+  <% back_text = tag.span class: "text-nowrap d-flex flex-row align-items-center" do %>
+    <% concat tag.span class: "fas fa-caret-left fa-3x" %>
+    <% concat tag.span :BACK.t, class: "ml-2 font-weight-bold lh-1" %>
+  <% end %>
+
+  <% forward_text = tag.span class: "text-nowrap d-flex flex-row align-items-center" do %>
+    <% concat tag.span :FORWARD.t, class: "mr-2 font-weight-bold" %>
+    <% concat tag.span class: "fas fa-caret-right fa-3x lh-1" %>
+  <% end %>
+
+  <%= link_with_query(back_text,
+                      { controller: :observations,
+                        action: :show_prev,
+                        id: @observation.id },
+                      { class: "btn btn-link" }) %>
+
+  <%= tag.span class: "mx-3" %>
+
+  <%= link_with_query(forward_text,
+                      { controller: :observations,
+                        action: :show_next,
+                        id: @observation.id },
+                      { class: "btn btn-link" }) %>
+</div>

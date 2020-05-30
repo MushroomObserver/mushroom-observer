@@ -1,0 +1,22 @@
+<!-- Filters Settings of Advanced Search Form -->
+<% javascript_include "advanced_search" %>
+<div id="advanced_search_filters">
+  <div class="form-group">
+    <div class="mt-3">
+      <span class="bold"><%= :advanced_search_filters.t %></span>
+      <p><%= :advanced_search_filters_explain.t %>.<p>
+    </div>
+    <% ContentFilter.all.each do |filter| %>
+      <% models = filter.models.map {|m| m.name.underscore}.join(" ") %>
+      <div class="form-inline" data-role="filter" data-models="<%= j models %>">
+        <% if filter.type == :boolean %>
+          <%= render partial: "advanced_search_filter_radio_buttons",
+                     locals: { filter: filter } %>
+        <% elsif filter.type == :string %>
+          <%= render partial: "advanced_search_filter_text_field",
+                     locals: { filter: filter } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

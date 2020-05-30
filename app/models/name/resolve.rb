@@ -134,11 +134,11 @@ class Name < AbstractModel
   def self.save_names(names, deprecate)
     log = nil
     unless deprecate.nil?
-      if deprecate
-        log = :log_deprecated_by
-      else
-        log = :log_approved_by
-      end
+      log = if deprecate
+              :log_deprecated_by
+            else
+              :log_approved_by
+            end
     end
     names.each do |n|
       next unless n&.new_record?

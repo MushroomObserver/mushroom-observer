@@ -1,0 +1,76 @@
+<%= # form_for(:image, url: add_query_param(action: :new, id: @observation.id),
+    #          html: {multipart: true}) do |form| %>
+<%= form_with model: :image html: { multipart: true } do |f| %>
+
+  <% if action == :new %>
+    <%= hidden_field(:observation, :id) %>
+
+    <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
+
+    <div class="form-group form-inline mt-3">
+      <%= label_tag(:upload_image1, :image_add_image.t + " 1:") %>
+        <%= custom_file_field(:upload, :image1) %>
+        (<%= :image_add_default.t %>)<br/>
+      <%= label_tag(:upload_image2, :image_add_image.t + " 2:") %>
+        <%= custom_file_field(:upload, :image2) %>
+        (<%= :image_add_optional.t %>)<br/>
+      <%= label_tag(:upload_image3, :image_add_image.t + " 3:") %>
+        <%= custom_file_field(:upload, :image3) %>
+        (<%= :image_add_optional.t %>)<br/>
+      <%= label_tag(:upload_image4, :image_add_image.t + " 4:") %>
+        <%= custom_file_field(:upload, :image4) %>
+        (<%= :image_add_optional.t %>)<br/>
+    </div>
+  <% end %>
+
+  <!--[form:image]-->
+  <div class="form-group">
+    <%= label_tag(:image_copyright_holder, :form_images_copyright_holder.t + ":") %>
+    <%= f.text_field(:copyright_holder, class: "form-control") %>
+  </div>
+
+  <% unless leave_out_original_file_name %>
+    <div class="form-group">
+      <%= label_tag(:image_original_name, :form_images_original_name.t + ":") %>
+      <%= f.text_field(:original_name, class: "form-control") %>
+    </div>
+  <% end %>
+
+  <div class="form-group form-inline">
+    <%= label_tag(:image_when_1i, :WHEN.t + ":") %>
+    <%= date_select(:image, :when, date_select_opts(@image),
+                    { class: "form-control" }) %>
+    <% turn_into_year_auto_completer(:image_when_1i) %>
+    <%= content_tag(:p, class: "help-block") { :form_images_when_help.t } %>
+  </div>
+
+  <div class="form-group">
+    <%= label_tag(:image_license_id, :LICENSE.t + ":") %>
+    <%= f.select(:license_id, @licenses, {}, {class: "form-control"}) %>
+    <%= content_tag(:p, class: "help-block") { :form_images_license_help.t } %>
+  </div>
+
+  <div class="form-group">
+    <%= label_tag(:image_notes, :NOTES.t + ":") %>
+    <%= f.text_area(:notes, data: {autofocus: true}, class: "form-control") %>
+    <%= content_tag(:p, class: "help-block") { :form_images_notes_help.t } %>
+    <%= render(partial: "shared/textilize_help") %>
+  </div>
+
+  <% if @projects.any? %>
+    <div class="form-group form-inline">
+      <%= content_tag(:p, class: "bold") { :PROJECTS.t + ":" } %>
+      <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
+      <%= render(partial: "project", collection: @projects) %>
+    </div>
+  <% end %>
+
+  <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+
+  <% if action == :edit %>
+    <div class="col-12 col-sm-4 col-md-6 col-lg-8">
+      <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+    </div>
+  <% end %>
+
+<% end %>

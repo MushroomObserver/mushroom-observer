@@ -1,0 +1,129 @@
+<!--TABLE OF NAMES FOR MOBILE-->
+<div class="d-block d-sm-none">
+  <%= form_tag(add_query_param(controller: :votes,
+                               action: :cast_votes,
+                               id: @observation.id),
+               id: "cast_votes_2") do %>
+
+    <div class="row d-block d-sm-none">
+      <div class="col-12">
+        <%= content_tag(:h4, any_names ?
+            :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %>
+        <% if any_names %>
+          <div class="list-group">
+            <% @observation.namings.sort_by(&:created_at).each do |naming| %>
+              <% Textile.register_name(naming.name) %>
+              <div class="list-group-item">
+                <div class="row">
+                  <div class="col-12">
+                    <%= link_with_query(naming.format_name.t,
+                                        controller: :names,
+                                        action: :show,
+                                        id: naming.name) %>
+                  </div>
+                  <% if check_permission(naming) %>
+                    <div class="col-12">
+                      [<%= link_with_query(:EDIT.t,
+                                           { controller: :namings,
+                                             action: :edit,
+                                             id: naming }) %> |
+                       <%= link_with_query(:DESTROY.t,
+                                           { controller: :namings,
+                                             action: :destroy,
+                                             id: naming.id },
+                                           data: { confirm: :are_you_sure.l }
+                           ) %>]
+                    </div>
+                  <% end %>
+                  <div class="col-6">
+                    <strong><%= user_link(naming.user, naming.user.login) %></strong>
+                  </div>
+                  <div class="col-6">
+                    <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
+                    <%= link_with_query(h(txt), { controller: :votes,
+                                                  action: :show,
+                                                  id: naming.id },
+                                                { data: { role: "open_popup",
+                                                          id: naming.id } }) if naming.votes.any? %>
+                    <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.count})" %>
+                  </div>
+                  <div class="col-6">
+                    <% if logged_in %>
+                      <% @vote = @votes[naming.id]
+                      menu = Vote.confidence_menu
+                      if check_permission(naming) ? (!@vote || @vote.value == 0) : true
+                        menu = [Vote.no_opinion] + menu
+                      end %>
+                      <%= select(:vote,
+                                 :value,
+                                 menu, {},
+                                 { index: naming.id,
+                                   data: { role: "change_vote",
+                                           id: naming.id } }) %>
+                      <%= submit_tag(:show_namings_cast.l,
+                                     class: "btn") if !browser.modern_browser? %>
+                    <% end %>
+                  </div>
+                  <div class="col-6">
+                    <%= image_tag("eye3.png") if @observation.is_owners_favorite?(naming) %>
+                    <%= image_tag("eyes3.png") if naming == consensus %>
+                  </div>
+                  <% naming.get_reasons.select(&:used?).each do |reason| %>
+                    <div class="col-12">
+                      <span>
+                        <%= reason.notes.blank? ? reason.label.t : (reason.label.l + ": " + reason.notes.to_s.html_safe).tl %>
+                      </span>
+                    </div>
+                  <% end # each_reason %>
+                </div>
+              </div>
+            <% end # each_name %>
+          </div>
+        <% end # any_names %>
+      </div>
+    </div>
+    <!--/TABLE OF NAMES FOR MOBILE-->
+
+    <!--HELP TEXT AND EYES FOR MOBILE-->
+    <div class="row m-0 py-0">
+      <div class="col-12">
+        <div class="float-sm-right mt-sm-3">
+          <%= link_with_query(:show_namings_propose_new_name.t,
+                              { controller: :namings,
+                                action: :new,
+                                id: @observation.id },
+                              class: "btn") %>
+          <%= link_to(:show_namings_suggest_names.l, "#",
+                      data: { role: "suggest_names" },
+                      class: "btn") \
+                      if do_suggestions %>
+          <%= submit_tag(:show_namings_update_votes.l,
+                         data: { role: "save_votes" },
+                         class: "btn") \
+                         if logged_in && any_names %>
+        </div>
+        <p class="help-block max-width-text">
+          <% if !logged_in %>
+              <%= :show_namings_please_login.t %>
+          <% else %>
+              <%= :show_namings_consensus_help.t %>
+          <% end %>
+        </p>
+        <div class="row">
+          <div class="col-6">
+            <div class="p-1">
+              <%= image_tag("eye3.png") %> = <%= :show_namings_eye_help.t %>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-1">
+              <%= image_tag("eyes3.png") %> = <%= :show_namings_eyes_help.t %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/HELP TEXT AND EYES FOR MOBILE-->
+
+  <% end # form %>
+</div>

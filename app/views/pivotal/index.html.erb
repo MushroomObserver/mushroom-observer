@@ -47,20 +47,20 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <% if @stories.count > 900 %>
-      <b>Displaying <%= @stories.count %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/observer/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
+      <b>Displaying <%= @stories.count %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/email/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
     <% end %>
     <%= :pivotal_index_header.tp %>
   </div>
 </div>
 
 <div id="pivotal_index">
-  <table id="pivotal_labels" style="margin-bottom:1em">
+  <table id="pivotal_labels" class="mb-3">
     <tr>
       <td>
         <table>
-          <% for label in %w( 
+          <% for label in %w(
             open -
             critical bottleneck -
             started unstarted unscheduled -
@@ -71,7 +71,7 @@
             other
           ) %>
             <tr>
-              <td align="right" style="font-size:120%; white-space:nowrap"><%=
+              <td align="right text-nowrap"><%=
                 if label == "-"
                   safe_nbsp
                 else
@@ -112,14 +112,14 @@
           <span class="pivotal_name"><%=
             link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
           %></span><br/>
-          <span style="white-space:nowrap">
+          <span class="text-nowrap">
             <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
               pivotal_vote_controls(story)
             %></span>
             <span class="pivotal_state pivotal_<%= story.state %>"><%=
               :"pivotal_state_#{story.state}".l
             %></span>
-            <span class="pivotal_num_comments">(<%= :comments.l %>: 
+            <span class="pivotal_num_comments">(<%= :comments.l %>:
               <span id="pivotal_num_comments_<%= story.id %>"><%=
                 story.comments.length.to_s
               %></span>)</span>

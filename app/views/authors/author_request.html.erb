@@ -1,0 +1,20 @@
+<% @title = :author_request_title.t(title: @object.format_name) %>
+
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :author_request, id: @object.id,
+                               type: @object.type_tag)) do %>
+    <%= :author_request_note.tp %>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:email_subject, :request_subject.t + ":") %>
+      <%= text_field(:email, :subject, data: {autofocus: true}, class: "form-control") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:email_content, :request_message.t + ":") %>
+      <%= text_area(:email, :content, rows: 10, class: "form-control") %>
+    </div>
+
+    <%= submit_tag(:SEND.l, class: "btn") %></center><br/>
+  <% end %>
+</div>

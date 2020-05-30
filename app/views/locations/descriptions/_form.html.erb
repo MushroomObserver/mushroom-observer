@@ -1,0 +1,39 @@
+<%= # form_for(:description, url: add_query_param(
+    #   action: :create_location_description,
+    #   id:     @description.location_id
+    # )) do |form| %>
+
+<%= # form_for(:description, url: add_query_param(
+    #    action: :edit_location_description,
+    #    id: @description.id,
+    # )) do |form| %>
+
+<%= form_with model: :location_description do |f| %>
+
+  <%= render(partial: "shared/form_description", locals: {form: f}) %>
+
+  <%= submit_tag(button_name.l, class: "btn mx-auto mt-3") %>
+
+  <hr/>
+
+  <% for field in LocationDescription.all_note_fields %>
+    <div class="form-group">
+      <%= label_tag("description_#{field}", "form_locations_#{field}".to_sym.t + ":",
+                    class: "mb-0") %>
+      <div class="help-block mt-0">
+        <%= "form_locations_#{field}_help".to_sym.l %>
+      </div>
+      <%= f.text_area(field, rows: 10, class: "form-control") %>
+    </div>
+  <% end %>
+
+  <%= render(partial: "shared/textilize_help") %>
+
+  <%= submit_tag(button_name.l, class: "btn mx-auto mt-3") %>
+
+  <% if @merge %>
+    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
+    <%= hidden_field_tag(:delete_after, @delete_after) %>
+  <% end %>
+
+<% end %>

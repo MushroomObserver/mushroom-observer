@@ -1,0 +1,16 @@
+<% if flash_notices? %>
+  <div class="d-print-none">
+    <div class="max-width-text">
+      <%=
+        klass = case flash_notice_level
+          when 0; "alert-success"
+          when 1; "alert-warning"
+          when 2; "alert-danger"
+        end
+        content_tag(:div, flash_get_notices,
+                    class: "alert mt-3 #{klass}")
+      %>
+    </div>
+  </div>
+<% end %>
+<% flash_clear %>

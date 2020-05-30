@@ -1,7 +1,7 @@
 // Observation Form Map - Lat/Long/Alt Helper
 /* globals $, google */
 
-// ./observer/create_observation
+// ./observations/create_observation
 if ( $('#observationFormMap').length ) {
 
     (function() {

@@ -60,9 +60,8 @@ Good for making birds nests... if you're a bird.
 You received this email because you are an author of a description of the changed name.
 Here are some handy links:
 
-Show this name: http://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>
-I'm not interested in this name: http://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&type=Name&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Show this name: http://mushroomobserver.org/names/show_name/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>
+I'm not interested in this name: http://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&type=Name&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
 Stop sending me email like this: http://mushroomobserver.org/account/no_email_names_author/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
-

@@ -1,4 +1,4 @@
-class StripRegionCodes < ActiveRecord::Migration
+class StripRegionCodes < ActiveRecord::Migration[4.2]
   def self.up
     add_column :languages, :region, :string, limit: 4
     for l in Language.all

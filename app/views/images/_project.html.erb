@@ -1,0 +1,7 @@
+<div class="text-nowrap">
+  <label for="project_id_<%=project.id%>"><%= link_to_object(project) %></label>
+  <%= check_box(:project, "id_#{project.id}",
+                checked: @project_checks[project.id],
+                disabled: @image.user != @user && !project.is_member?(@user),
+                class: "form-control") %>
+</div

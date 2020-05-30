@@ -1,4 +1,4 @@
-class RemoveVotesStringFromImages < ActiveRecord::Migration
+class RemoveVotesStringFromImages < ActiveRecord::Migration[4.2]
   def self.up
     remove_column :images, :votes
   end

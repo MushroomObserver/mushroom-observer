@@ -38,7 +38,7 @@ Lint/EmptyWhen:
 
 # Offense count: 19
 # Configuration parameters: AllowComments.
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'app/helpers/api_helper.rb'
     - 'app/models/language_tracking.rb'
@@ -107,7 +107,7 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 13
 # Cop supports --auto-correct.
-Lint/UnneededCopDisableDirective:
+Lint/RedundantCopDisableDirective:
   Exclude:
     - 'app/models/name/parse.rb'
     - 'test/controllers/location_controller_test.rb'
@@ -261,8 +261,8 @@ Style/Alias:
   Exclude:
     - 'app/classes/gmaps.rb'
     - 'app/classes/mo_paginator.rb'
-    - 'app/controllers/observer_controller/info_controller.rb'
-    - 'app/controllers/observer_controller/user_controller.rb'
+    - 'app/controllers/info_controller.rb'
+    - 'app/controllers/user_controller.rb'
     - 'app/controllers/translation_controller.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/models/notification.rb'
@@ -290,7 +290,7 @@ Style/AndOr:
 Style/BlockDelimiters:
   Exclude:
     - 'app/views/name/eol.xml.builder'
-    - 'app/views/observer/rss.xml.builder'
+    - 'app/views/rss_log/rss.xml.builder'
 
 # Offense count: 143
 # Cop supports --auto-correct.
@@ -338,7 +338,7 @@ Style/DoubleNegation:
 # SupportedStyles: compact, expanded
 Style/EmptyMethod:
   Exclude:
-    - 'app/controllers/observer_controller/info_controller.rb'
+    - 'app/controllers/info_controller.rb'
     - 'app/controllers/theme_controller.rb'
 
 # Offense count: 156
@@ -354,7 +354,7 @@ Style/For:
 # SupportedStyles: format, sprintf, percent
 Style/FormatString:
   Exclude:
-    - 'app/controllers/observer_controller/user_controller.rb'
+    - 'app/controllers/user_controller.rb'
     - 'app/helpers/api_helper.rb'
     - 'app/models/name_sorter.rb'
     - 'app/models/rss_log.rb'
@@ -367,7 +367,7 @@ Style/FormatString:
 # SupportedStyles: annotated, template, unannotated
 Style/FormatStringToken:
   Exclude:
-    - 'app/controllers/observer_controller/user_controller.rb'
+    - 'app/controllers/user_controller.rb'
     - 'app/helpers/api_helper.rb'
     - 'app/helpers/tabs_helper.rb'
     - 'app/models/name_sorter.rb'
@@ -436,10 +436,3 @@ Style/Lambda:
   Exclude:
     - 'app/extensions/string_extensions.rb'
     - 'app/models/image.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Metrics/LineLength:
-  Max: 94

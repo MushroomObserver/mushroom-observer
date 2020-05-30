@@ -46,7 +46,7 @@ class CommentTest < UnitTestCase
   def test_comment_notification
     # owned by rolf, namings by rolf and mary, no comments
     obs = observations(:coprinus_comatus_obs).reload
-    rolf.update_attributes!(email_comments_owner: false)
+    rolf.update!(email_comments_owner: false)
     do_comment_response_where_everyone_opts_out(obs)
     do_comment_response_where_mary_opts_in(obs)
     do_comment_response_where_mary_and_dick_opt_in(obs)
@@ -97,13 +97,13 @@ class CommentTest < UnitTestCase
 
   def opt_out_of_comment_responses(*users)
     users.each do |user|
-      user.update_attributes!(email_comments_response: false)
+      user.update!(email_comments_response: false)
     end
   end
 
   def opt_in_to_comment_responses(*users)
     users.each do |user|
-      user.update_attributes!(email_comments_response: true)
+      user.update!(email_comments_response: true)
     end
   end
 

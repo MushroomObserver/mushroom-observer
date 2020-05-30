@@ -15,9 +15,9 @@ and this is why...
 
 Here are some handy links:
 
-Make sender an author: http://mushroomobserver.org/observer/review_author=
+Make sender an author: http://mushroomobserver.org/authors/review_author=
 s/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=3Dname_description&add=3D<%= ActiveRecord::FixtureSet.identify(:katrina) %>
-Show user's profile: http://mushroomobserver.org/observer/show_user/48423=
+Show user's profile: http://mushroomobserver.org/users/show_user/48423=
 3936
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 

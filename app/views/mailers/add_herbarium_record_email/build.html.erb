@@ -1,0 +1,43 @@
+<%
+  herbarium = @herbarium_record.herbarium
+  intro = :email_add_herbarium_record_not_curator_intro.l(
+    login: @user.login,
+    herbarium_name: herbarium.name,
+    herbarium_label: @herbarium_record.herbarium_label
+  )
+
+  handy_links = :email_handy_links.l
+
+  links = [[:email_links_show_object.t(type: :herbarium_record),
+            "#{MO.http_domain}/herbarium_record/show_herbarium_record/#{@herbarium_record.id}"],
+           [:email_links_show_object.t(type: :herbarium),
+            "#{MO.http_domain}/herbarium/show_herbarium/#{herbarium.id}"],
+           [:email_links_show_user.t(user: @user.login),
+            "#{MO.http_domain}/users/show_user/#{@sender.id}"]]
+
+if @user.email_html %>
+<html>
+<head>
+  <title><%= "#{:app_title.t}: #{@title}" %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else %><%= intro.tp.html_to_ascii %>
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = "".html_safe
+  for label, url in links
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
+  end
+  result %>
+<% end %>

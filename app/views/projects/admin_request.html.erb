@@ -1,0 +1,21 @@
+<%
+  @title = :admin_request_title.t(title: @project.title)
+%>
+
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :admin_request, id: @project.id)) do %>
+    <%= :admin_request_note.tp %>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:email_subject, :request_subject.t + ":") %>
+      <%= text_field(:email, :subject, class: "form-control", data: {autofocus: true}) %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:email_content, :request_message.t + ":") %>
+      <%= text_area(:email, :content, rows: 5, class: "form-control") %>
+    </div>
+
+    <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
+  <% end %>
+</div>

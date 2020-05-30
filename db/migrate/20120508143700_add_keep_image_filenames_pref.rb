@@ -1,4 +1,4 @@
-class AddKeepImageFilenamesPref < ActiveRecord::Migration
+class AddKeepImageFilenamesPref < ActiveRecord::Migration[4.2]
   def self.up
     add_column :users, :keep_filenames, :boolean, default: true, null: false
   end

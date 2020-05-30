@@ -1,0 +1,35 @@
+<%= case object.class.name
+
+  when "Location"
+    render(partial: "locations/location", object: object)
+
+  when "LocationDescription"
+    render(partial: "locations/location_description", object: object)
+
+  when "Name"
+    str = render(partial: "names/name", object: object, locals: {synonyms: true})
+    if object.has_notes?
+      str += content_tag(:p, :show_name_notes.t + ":")
+      str += colored_notes_box(true, object.notes.tpl)
+    end
+    content_tag(:div, str, class: "name-section", style: "margin:1em")
+
+  when "NameDescription"
+    render(partial: "names/name_description", object: object, locals: {review: false})
+
+  when "Observation"
+    render(partial: "observations/show_observation", locals: {observation: object})
+
+  when "Project"
+    render(partial: "projects/project", object: object)
+
+  when "SpeciesList"
+    render(partial: "species_lists/species_list", object: object)
+
+  else
+    raise("We appear to have forgotten to tell add/edit_comment " +
+          "how to display objects of type \"#{object.class.name}\".")
+end %>
+
+<%= render(partial: "comments",
+           locals: {object: object, controls: false, limit: 10}) %>

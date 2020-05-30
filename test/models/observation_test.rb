@@ -44,7 +44,7 @@ class ObservationTest < UnitTestCase
     @cc_obs.user = nil
     @cc_obs.when = nil   # no longer an error, defaults to today
     @cc_obs.where = nil  # no longer an error, defaults to Location.unknown
-    assert(!@cc_obs.save)
+    assert_not(@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
     assert_equal(:validate_observation_user_missing.t,
                  @cc_obs.errors[:user].first)
@@ -83,7 +83,7 @@ class ObservationTest < UnitTestCase
       name_been_proposed?(names(:coprinus_comatus)))
     assert(observations(:coprinus_comatus_obs).
       name_been_proposed?(names(:agaricus_campestris)))
-    assert(!observations(:coprinus_comatus_obs).
+    assert_not(observations(:coprinus_comatus_obs).
       name_been_proposed?(names(:conocybe_filaris)))
   end
 
@@ -147,10 +147,10 @@ class ObservationTest < UnitTestCase
   # --------------------------------------
 
   def test_herbarium_records
-    refute(observations(:strobilurus_diminutivus_obs).specimen)
+    assert_not(observations(:strobilurus_diminutivus_obs).specimen)
     assert_empty(observations(:strobilurus_diminutivus_obs).herbarium_records)
     assert(observations(:detailed_unknown_obs).specimen)
-    refute(observations(:detailed_unknown_obs).herbarium_records.empty?)
+    assert_not(observations(:detailed_unknown_obs).herbarium_records.empty?)
   end
 
   def test_minimal_map_observation
@@ -167,8 +167,8 @@ class ObservationTest < UnitTestCase
     assert_equal(locations(:burbank).id, min_map.location_id)
 
     assert(min_map.is_observation?)
-    refute(min_map.is_location?)
-    refute(min_map.lat_long_dubious?)
+    assert_not(min_map.is_location?)
+    assert_not(min_map.lat_long_dubious?)
 
     min_map.location = locations(:albion)
     assert_objs_equal(locations(:albion), min_map.location)
@@ -572,17 +572,17 @@ class ObservationTest < UnitTestCase
     obs.reload
     assert_equal(@fungi, obs.name)
     assert_nil(obs.consensus_naming)
-    refute(obs.owner_voted?(namg1))
-    refute(obs.user_voted?(namg1, rolf))
-    refute(obs.user_voted?(namg1, mary))
-    refute(obs.user_voted?(namg1, dick))
+    assert_not(obs.owner_voted?(namg1))
+    assert_not(obs.user_voted?(namg1, rolf))
+    assert_not(obs.user_voted?(namg1, mary))
+    assert_not(obs.user_voted?(namg1, dick))
     assert_nil(obs.owners_vote(namg1))
     assert_nil(obs.users_vote(namg1, rolf))
     assert_nil(obs.users_vote(namg1, mary))
     assert_nil(obs.users_vote(namg1, dick))
-    refute(obs.is_users_favorite?(namg1, rolf))
-    refute(obs.is_users_favorite?(namg1, mary))
-    refute(obs.is_users_favorite?(namg1, dick))
+    assert_not(obs.is_users_favorite?(namg1, rolf))
+    assert_not(obs.is_users_favorite?(namg1, mary))
+    assert_not(obs.is_users_favorite?(namg1, dick))
 
     # They're all the same, none with votes yet, so first apparently wins.
     obs.calc_consensus
@@ -611,8 +611,8 @@ class ObservationTest < UnitTestCase
 
     obs.change_vote(namg1, -0.01, rolf)
     namg1.reload
-    refute(obs.is_owners_favorite?(namg1))
-    refute(namg1.is_users_favorite?(rolf))
+    assert_not(obs.is_owners_favorite?(namg1))
+    assert_not(namg1.is_users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
@@ -621,17 +621,17 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 1, rolf)
     namings.each(&:reload)
     namg2.reload
-    refute(obs.is_owners_favorite?(namg1))
+    assert_not(obs.is_owners_favorite?(namg1))
     assert(obs.is_owners_favorite?(namg2))
-    refute(obs.is_owners_favorite?(namg3))
+    assert_not(obs.is_owners_favorite?(namg3))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     obs.change_vote(namg3, 2, rolf)
     namings.each(&:reload)
-    refute(obs.is_owners_favorite?(namg1))
-    refute(obs.is_owners_favorite?(namg2))
+    assert_not(obs.is_owners_favorite?(namg1))
+    assert_not(obs.is_owners_favorite?(namg2))
     assert(obs.is_owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
@@ -640,16 +640,16 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg1, 3, rolf)
     namings.each(&:reload)
     assert(obs.is_owners_favorite?(namg1))
-    refute(obs.is_owners_favorite?(namg2))
-    refute(obs.is_owners_favorite?(namg3))
+    assert_not(obs.is_owners_favorite?(namg2))
+    assert_not(obs.is_owners_favorite?(namg3))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     # Make votes namg1: 1, namg2: 1, namg3: 2
     obs.change_vote(namg1, 1, rolf)
     namings.each(&:reload)
-    refute(obs.is_owners_favorite?(namg1))
-    refute(obs.is_owners_favorite?(namg2))
+    assert_not(obs.is_owners_favorite?(namg1))
+    assert_not(obs.is_owners_favorite?(namg2))
     assert(obs.is_owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
@@ -662,9 +662,9 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 2, mary)
     obs.change_vote(namg3, -1, mary)
     namings.each(&:reload)
-    refute(namg1.is_users_favorite?(mary))
+    assert_not(namg1.is_users_favorite?(mary))
     assert(namg2.is_users_favorite?(mary))
-    refute(namg3.is_users_favorite?(mary))
+    assert_not(namg3.is_users_favorite?(mary))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
@@ -674,22 +674,22 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 0.01, mary)
     namings.each(&:reload)
     assert(namg1.is_users_favorite?(mary))
-    refute(namg2.is_users_favorite?(mary))
-    refute(namg3.is_users_favorite?(mary))
+    assert_not(namg2.is_users_favorite?(mary))
+    assert_not(namg3.is_users_favorite?(mary))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, -0.01, mary)
     namings.each(&:reload)
-    refute(namg1.is_users_favorite?(mary))
+    assert_not(namg1.is_users_favorite?(mary))
     assert(namg2.is_users_favorite?(mary))
-    refute(namg3.is_users_favorite?(mary))
-    refute(namg1.is_users_favorite?(rolf))
-    refute(namg2.is_users_favorite?(rolf))
+    assert_not(namg3.is_users_favorite?(mary))
+    assert_not(namg1.is_users_favorite?(rolf))
+    assert_not(namg2.is_users_favorite?(rolf))
     assert(namg3.is_users_favorite?(rolf))
-    refute(namg1.is_users_favorite?(dick))
-    refute(namg2.is_users_favorite?(dick))
-    refute(namg3.is_users_favorite?(dick))
+    assert_not(namg1.is_users_favorite?(dick))
+    assert_not(namg2.is_users_favorite?(dick))
+    assert_not(namg3.is_users_favorite?(dick))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
   end

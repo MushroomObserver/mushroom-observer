@@ -1,13 +1,13 @@
-<p class="push-down">
+<p class="mt-3">
   <b><%= :glossary_term_name.t %>:</b> <%= @glossary_term.name.t %>
 </p>
 
-<p class="push-down">
+<p class="mt-3">
   <%= "*#{:glossary_term_description.t}:* #{@glossary_term.description}".tpl %>
 </p>
 
 <% if @glossary_term.thumb_image_id and @glossary_term.thumb_image_id != 0 %>
-  <p class="push-down">
+  <p class="mt-3">
     <%= thumbnail(@glossary_term.thumb_image_id, votes: false) %>
   </p>
 <% end %>

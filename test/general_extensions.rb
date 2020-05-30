@@ -13,7 +13,7 @@
 #  assert_false::               Make sure something is false.
 #  assert_blank::               Make sure something is blank.
 #  assert_not_blank::           Make sure something is not blank.
-#  assert_not_match::           Make sure a string does NOT match.
+#  assert_no_match::           Make sure a string does NOT match.
 #  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone
 #                               instances as dates.
 #  assert_objs_equal::          Compare two model instances.
@@ -119,7 +119,7 @@ module GeneralExtensions
   # Assert that something is false.
   def assert_false(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be false."
-    refute(value, msg)
+    assert_not(value, msg)
   end
 
   # Assert that something is blank.
@@ -131,7 +131,7 @@ module GeneralExtensions
   # Assert that something is not blank.
   def assert_not_blank(value, msg = nil)
     msg ||= "Expected #{value.inspect} not to be blank."
-    refute(value.blank?, msg)
+    assert_not(value.blank?, msg)
   end
 
   # Compare two Date/Time/DateTime/TimeWithZone instances.
@@ -391,7 +391,7 @@ module GeneralExtensions
   # Private helper method used in XML assertions above:
   #
   #   _assert_xml(10, @doc.elements['/response/results'].attributes['number'])
-  #   _assert_xml('rolf', @doc.elements['/response/user/login'].text)
+  #   _assert_xml('rolf', @doc.elements['/response/users/login'].text)
   #   _assert_xml(/\d\d-\d\d-\d\d/, @doc.elements['/response/script_date'].text)
   #
   def _assert_xml(val, str, msg = nil)

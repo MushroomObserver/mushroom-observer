@@ -9,7 +9,7 @@ class RandomTest < IntegrationTestCase
 
   # Test "/controller/action/type/id" route used by AJAX controller.
   test "ajax router" do
-    get("/ajax/auto_complete/name/Agaricus")
+    get("/ajax/auto_complete/names/Agaricus")
     assert_response(:success)
     lines = response.body.split("\n")
     assert_equal("A", lines.first)
@@ -19,30 +19,30 @@ class RandomTest < IntegrationTestCase
 
   test "the homepage" do
     get("/")
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_logs/list_rss_logs")
     assert(/account/i, response.body)
   end
 
   test "login and logout" do
     login!(rolf)
 
-    get("/observer/how_to_help")
-    assert_template("observer/how_to_help")
+    get("/info/how_to_help")
+    assert_template("info/how_to_help")
     assert_no_link_exists("/account/login")
     assert_link_exists("/account/logout_user")
-    assert_link_exists("/observer/show_user/#{rolf.id}")
+    assert_link_exists("/users/show_user/#{rolf.id}")
 
     click(label: "Logout")
     assert_template("account/logout_user")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
-    assert_no_link_exists("/observer/show_user/#{rolf.id}")
+    assert_no_link_exists("/users/show_user/#{rolf.id}")
 
     click(label: "How To Help")
-    assert_template("observer/how_to_help")
+    assert_template("info/how_to_help")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
-    assert_no_link_exists("/observer/show_user/#{rolf.id}")
+    assert_no_link_exists("/users/show_user/#{rolf.id}")
   end
 
   test "sessions" do
@@ -56,9 +56,9 @@ class RandomTest < IntegrationTestCase
 
     rolf_session.get("/")
     assert(/rolf/i, rolf_session.response.body)
-    refute_equal(rolf_session.session[:session_id],
-                 mary_session.session[:session_id])
-    refute_equal(katrina_session.session[:session_id],
-                 mary_session.session[:session_id])
+    assert_not_equal(rolf_session.session[:session_id],
+                     mary_session.session[:session_id])
+    assert_not_equal(katrina_session.session[:session_id],
+                     mary_session.session[:session_id])
   end
 end

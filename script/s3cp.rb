@@ -35,9 +35,9 @@ delete  = true if ARGV.any? { |arg| ["-d", "--delete"].include?(arg) }
 force   = true if ARGV.any? { |arg| ["-f", "--force"].include?(arg) }
 verbose = true if ARGV.any? { |arg| ["-v", "--verbose"].include?(arg) }
 copy = !delete
-flags = ARGV.select { |arg| arg.match(/^-/) }.
+flags = ARGV.select { |arg| arg.start_with?("-") }.
         reject { |arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/) }
-words = ARGV.reject { |arg| arg.match(/^-/) }
+words = ARGV.reject { |arg| arg.start_with?("-") }
 abort("Bad flag(s): #{flags.inspect}") unless flags.empty?
 if copy
   abort("Missing file!") if words.empty?

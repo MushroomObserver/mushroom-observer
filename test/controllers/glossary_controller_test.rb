@@ -35,8 +35,8 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   # ***** show *****
   def test_show_glossary_term
     glossary_term = glossary_terms(:plane_glossary_term)
-    get_with_dump(:show_glossary_term, id: glossary_term.id)
-    assert_template("show_glossary_term")
+    get_with_dump(:show, id: glossary_term.id)
+    assert_template("show")
   end
 
   def test_show_past_glossary_term
@@ -53,7 +53,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   def test_show_past_glossary_term_prior_version_link_target
     prior_version_target = "/glossary/show_past_glossary_term/" \
                           "#{square.id}?version=#{square.version - 1}"
-    get(:show_glossary_term, id: square.id)
+    get(:show, id: square.id)
     assert_select "a[href='#{prior_version_target}']"
   end
 
@@ -88,24 +88,24 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
 
   def login_and_post_convex
     login
-    post(:create_glossary_term, convex_params)
+    post(:new, convex_params)
   end
 
   def test_create_glossary_term_no_login
-    get(:create_glossary_term)
+    get(:new)
     assert_response(:redirect)
   end
 
   def test_create_glossary_term_logged_in
     login
-    get_with_dump(:create_glossary_term)
-    assert_template(:create_glossary_term)
+    get_with_dump(:new)
+    assert_template(:new)
   end
 
   def test_create_glossary_term_post
     user = login
     params = create_glossary_term_params
-    post(:create_glossary_term, params)
+    post(:new, params)
     glossary_term = GlossaryTerm.order(created_at: :desc).first
 
     assert_equal(params[:glossary_term][:name], glossary_term.name)
@@ -139,7 +139,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
   def post_conic_edit_changes
     make_admin
-    post(:edit_glossary_term, changes_to_conic)
+    post(:edit, changes_to_conic)
   end
 
   def post_conic_edit_changes_and_reload
@@ -149,14 +149,14 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
   ##### tests #####
   def test_edit_glossary_term_no_login
-    get_with_dump(:edit_glossary_term, id: conic.id)
+    get_with_dump(:edit, id: conic.id)
     assert_response(:redirect)
   end
 
   def test_edit_glossary_term_logged_in
     login
-    get_with_dump(:edit_glossary_term, id: conic.id)
-    assert_template(:edit_glossary_term)
+    get_with_dump(:edit, id: conic.id)
+    assert_template(:edit)
   end
 
   def test_edit_glossary_term_post
@@ -165,7 +165,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
     params = create_glossary_term_params
     params[:id] = conic.id
 
-    post(:edit_glossary_term, params)
+    post(:edit, params)
     conic.reload
 
     assert_equal(params[:glossary_term][:name], conic.name)

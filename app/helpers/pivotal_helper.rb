@@ -54,7 +54,9 @@ module PivotalHelper
                 type: :button,
                 value: :pivotal_post_comment.l,
                 data: { role: "post_comment", story: story.id })
-    result += content_tag(:form, form, action: "", style: "margin-top:1em")
+    result += content_tag(:form, form,
+                          action: "",
+                          class: "mt-3")
     result
   end
 

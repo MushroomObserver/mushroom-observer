@@ -1,0 +1,78 @@
+<%
+  @title = :show_site_stats_title.t
+
+  tabs = [
+    link_to(:app_contributors.t,
+            controller: :users,
+            action: :users_by_contribution),
+    link_to(:site_stats_observed_taxa.t,
+            controller: :users,
+            action: :checklist)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row mt-3">
+  <div class="d-none d-sm-block col-md-3">
+    <% obs_length = @observations ? @observations.length : 0
+    if obs_length > 0 %>
+      <% @observations[0,3].each do |obs| %>
+        <div class="pb-3">
+          <%= thumbnail(obs.thumb_image,
+                        link: { controller: :observations,
+                                action: :show,
+                                id: obs.id },
+                        votes: true) %><br/><br/>
+
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="col-md-6">
+    <center>
+      <table class="table">
+        <% fields = [
+          :images,
+          :observations,
+          :observations_with_voucher,
+          :observations_without_voucher,
+          :listed_taxa,
+          :observed_taxa,
+          :name_descriptions_authors,
+          :locations,
+          :location_descriptions_authors,
+          :species_lists,
+          :species_list_entries,
+          :namings,
+          :comments,
+          :votes,
+          :users,
+        ]
+
+        fields.each do |field|
+          label = "site_stats_#{field}".to_sym.t
+          count = @site_data[field]
+          if count and !label.blank? %>
+            <tr>
+              <td><%= "site_stats_#{field}".to_sym.t %></td>
+              <td align="right"><%= count %></td>
+            </tr>
+          <% end %>
+        <% end %>
+      </table>
+    </center>
+  </div>
+
+  <div class="d-none d-sm-block col-md-3">
+    <% if obs_length > 3 %>
+      <% @observations[3,3].each do |obs| %>
+        <%= thumbnail(obs.thumb_image,
+                      link: { controller: :observations,
+                              action: :show, 
+                              id: obs.id },
+                      votes: true) %><br/><br/>
+      <% end %>
+    <% end %>
+  </div>
+</div>

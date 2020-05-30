@@ -173,7 +173,7 @@ class TextileTest < UnitTestCase
     loc = "OSU, Corvallis, Oregon, USA"
     textile = "_location #{loc}_".tpl
     assert_match(
-      "#{MO.http_domain}/observer/lookup_location/#{CGI.escape(loc)}", # href
+      "#{MO.http_domain}/lookup/lookup_location/#{CGI.escape(loc)}", # href
       textile
     )
     assert_match("<i>#{loc}</i>", textile) # anchor text
@@ -181,7 +181,7 @@ class TextileTest < UnitTestCase
 
   def test_url_formatting
     assert_href_equal(
-      "#{MO.http_domain}/observer/lookup_name/Amanita+%22sp-O01%22",
+      "#{MO.http_domain}/lookup/lookup_name/Amanita+%22sp-O01%22",
       '_Amanita "sp-O01"_'
     )
     assert_href_equal("http://www.amanitaceae.org?Amanita+sp-O01",

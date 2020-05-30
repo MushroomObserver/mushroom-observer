@@ -1,0 +1,75 @@
+<% # Section showing information about the observation itself in ShowObservation %>
+
+<section id="observation_partial" class="h-100">
+
+  <div class="card-body bg-secondary text-secondary-text pl-md-5 py-2">
+    <strong class=""><%= :OBSERVATION.t + " Details" %></strong>
+  </div>
+
+  <div class="observation-section card-body pl-md-5">
+
+    <p id="observation_when">
+      <b><%= :WHEN.t %>:</b> <%= @observation.when.web_date %>
+    </p>
+
+    <p id="observation_where">
+      <b>
+        <%= @observation.is_collection_location ?
+            :show_observation_collection_location.t :
+            :show_observation_seen_at.t %>:
+      </b>
+      <%= location_link(@observation.place_name,
+                        @observation.location, nil, true) %>
+    </p>
+
+    <p id="observation_lat_lng">
+      <%= render "observations/show/lat_lng",
+                 locals: { observation: @observation } %>
+    </p>
+
+    <p id="observation_who">
+      <b><%= :WHO.t %>:</b> <%= user_link(@observation.user) %>
+    </p>
+
+    <div id="observation_projects">
+      <% @observation.projects.each do |project| %>
+           <p><b><%= :PROJECT.t %>:</b> <%= link_to_object(project) %></p>
+      <% end %>
+    </div>
+
+    <div id="specimen_available">
+      <p><b><%= :SPECIMEN.t %>:</b>
+        <%= @observation.specimen ? :show_observation_specimen_available.t :
+                                 :show_observation_specimen_not_available.t %>
+      </p>
+    </div>
+
+    <div id="observation_collection_numbers">
+      <%= render "observations/show/collection_numbers",
+                 locals: { observation: @observation } %>
+    </div>
+
+    <div id="observation_herbarium_records">
+      <%= render "observations/show/herbarium_records",
+                 locals: { observation: @observation } %>
+    </div>
+
+    <div id="observation_sequences">
+      <%= render "observations/show/sequences",
+                 locals: { observation: @observation } %>
+    </div>
+
+    <div class="obs-notes">
+      <%= if @observation.notes?
+        Textile.clear_textile_cache
+        Textile.register_name(*@observation.namings.map(&:name))
+        Textile.register_name(@observation.name)
+        content_tag(
+          :div, @observation.notes_show_formatted.sub(/^\A/, "<b>#{:NOTES.t}:</b>\n").tpl
+        )
+      end %>
+    </div><!-- .obs-notes -->
+
+  </div><!-- .card-body -->
+
+</section><!-- #observation_partial -->

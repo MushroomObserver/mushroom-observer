@@ -1,5 +1,5 @@
 # encoding: utf-8
-class HouseCleaning < ActiveRecord::Migration
+class HouseCleaning < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :add_image_test_logs
     drop_table :t1

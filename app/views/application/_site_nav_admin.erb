@@ -1,0 +1,45 @@
+<% if in_admin_mode? %>
+  <div class="mo-toc-item">
+    <%= link_to(:app_admin.t,
+                { controller: :account,
+                  action: :blocked_ips },
+                { class: "mo-toc-link" }) %>
+    <ul class="nav mo-sidenav">
+      <li><%= link_to(:app_blocked_ips.t,
+                      { controller: :account,
+                        action: :blocked_ips },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:app_users.t,
+                      { controller: :users,
+                        action: :users_by_name },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:change_banner_title.t,
+                      { controller: :observations,
+                        action: :change_banner },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:app_email_all_users.t,
+                      { controller: :email,
+                        action: :email_features },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:app_add_to_group.t,
+                      { controller: :account,
+                        action: :add_user_to_group },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:account_manager_title.t,
+                      { controller: :account,
+                        action: :manager },
+                      { class: "" }) %>
+      </li>
+      <li><%= link_to(:app_turn_admin_off.t,
+                      { controller: :account,
+                        action: :turn_admin_off },
+                      { class: "" }) %>
+      </li>
+    </ul>
+  </div>
+<% end %>

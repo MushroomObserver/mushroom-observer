@@ -1,0 +1,26 @@
+<%= # form_tag(add_query_param(action: :new, id: @observation.id)) do %>
+<%= form_with model: :collection_number do |f| %>
+
+  <%= submit_tag(button.t, class: "btn mx-auto mt-3") %>
+
+  <% if @collection_number.observations.count > 1 %>
+    <div class="alert alert-warning mt-3">
+      <%= :edit_affects_multiple_observations.t(type: :collection_number) %>
+    </div>
+  <% end %>
+
+  <div class="form-group mt-3">
+    <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= text_field(:collection_number, :name, class: "form-control") %>
+  </div>
+
+  <div class="form-group mt-3">
+    <%= label_tag(:collection_number_number, :collection_number_number.t + ":") %>
+    <span class="help-note">(<%= :required.t %>)</span>
+    <%= text_field(:collection_number, :number, class:"form-control") %>
+  </div>
+
+  <%= submit_tag(button.t, class: "btn mx-auto mt-3") %>
+
+<% end %>

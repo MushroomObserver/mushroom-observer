@@ -1,0 +1,19 @@
+<%
+  @title = :create_observation_title.t
+
+  tabs = [
+    link_with_query(:create_herbarium.t,
+                    controller: :herbaria,
+                    action: :new)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "form", locals: {
+                     action: :new,
+                     logging_optional?: false,
+                     include_naming?: true,
+                     include_images?: true,
+                     button_name: :CREATE.l,
+                     has_specimen?: false
+                   } %>

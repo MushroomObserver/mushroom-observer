@@ -29,7 +29,7 @@ class LanguageTest < UnitTestCase
   def test_update_localization
     # TODO: While this seems to work, it doesn't really.  If you
     # put a str.language.update_localization_file before the
-    # update_attributes! it will fail to correctly rewrite the
+    # update! it will fail to correctly rewrite the
     # lang file.
     use_test_locales do
       str = translation_strings(:english_one)

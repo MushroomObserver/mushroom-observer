@@ -63,12 +63,12 @@ class Naming < AbstractModel
   after_destroy :log_destruction
 
   # Override the default show_controller
-  def self.show_controller
-    "observer"
-  end
+  # def self.show_controller
+  #   "namings"
+  # end
 
   def self.construct(args, observation)
-    now = Time.now
+    now = Time.zone.now
     naming = Naming.new(args)
     naming.created_at = now
     naming.updated_at = now
@@ -166,7 +166,7 @@ class Naming < AbstractModel
       done_user = {}
       flavor = Notification.flavors[:name]
       taxa.each do |taxon|
-        Notification.where(flavor: flavor, obj_id: taxon.id).each do |n|
+        Notification.where(flavor: flavor, obj_id: taxon.id).find_each do |n|
           next unless (n.user != user) && !done_user[n.user_id] &&
                       (!n.require_specimen || observation.specimen)
 

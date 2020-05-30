@@ -1,0 +1,19 @@
+<%
+  @title = :edit_observation_title.t(name: @observation.unique_format_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    action: :show,
+                    id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "form", locals: {
+                     action: :edit,
+                     logging_optional?: true,
+                     include_naming?: false,
+                     include_images?: true,
+                     button_name: :SAVE_EDITS.l,
+                     has_specimen?: (@observation.herbarium_records.length > 0)
+                   } %>

@@ -1,0 +1,15 @@
+<%
+  @title = :edit_glossary_term_title.t(name: @glossary_term.name)
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :glossary_term),
+            action: :show, id: @glossary_term.id),
+    link_to(:glossary_term_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= render "form" locals: { button_name: :edit_glossary_term_save,
+                              action: :edit } %>
+</div>

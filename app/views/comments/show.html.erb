@@ -1,0 +1,45 @@
+<%
+  @title = :comment_show_title.t(name: @target.unique_format_name)
+  target_type = @comment.target_type_localized
+
+  # Register pertinent names so that Textile knows what the "G." in "_G.
+  # species_" stands for.  Include all proposed names, because there's no
+  # telling which names will be referred to in the comment.  Likewise, include
+  # all synonyms if commenting on taxonomy of Name.
+  if @comment.target_type == "Observation"
+    for naming in @comment.target.namings
+      Textile.register_name(naming.name)
+    end
+    Textile.register_name(@comment.target.name)
+  elsif @comment.target_type == "Name"
+    for name in @comment.target.synonyms
+      Textile.register_name(name)
+    end
+    Textile.register_name(@comment.target)
+  end
+
+  tabs = [
+    link_with_query(:comment_show_show.t(type: target_type),
+                    @target.show_link_args)
+  ]
+  if check_permission(@comment)
+    tabs += [
+      link_with_query(:comment_show_edit.t, controller: :comments,
+                            action: :edit, id: @comment.id),
+      link_with_query(:comment_show_destroy.t, {controller: :comments,
+                            action: :destroy, id: @comment.id},
+                            data: {confirm: :are_you_sure.l})
+    ]
+  end
+  @tabsets = {
+    pager_for: @comment,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="max-width-text">
+  <p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>
+  <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
+  <p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
+  <%= (:comment_show_comment.l + ": " + @comment.comment.to_s.html_safe).tpl %>
+</div>

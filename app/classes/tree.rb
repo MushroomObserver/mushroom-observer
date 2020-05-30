@@ -85,11 +85,11 @@ class Tree
           return tree
         end
       end
-      if add_this
-        tree << { look_for => add_this }
-      else
-        tree << look_for
-      end
+      tree << if add_this
+                { look_for => add_this }
+              else
+                look_for
+              end
       tree
     when Hash
       unless add_this

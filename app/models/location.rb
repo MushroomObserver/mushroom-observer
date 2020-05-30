@@ -120,6 +120,11 @@ class Location < AbstractModel
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!]
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "locations"
+  end
+
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
@@ -161,11 +166,11 @@ class Location < AbstractModel
     result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
     if match && (match[4].blank? || [direction1, direction2].member?(match[4]))
-      if match[1].to_f.positive?
-        val = match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
-      else
-        val = match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
-      end
+      val = if match[1].to_f.positive?
+              match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
+            else
+              match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
+            end
       val = -val if match[4] == direction2
       result = val.round(4) if val >= -max_degrees && val <= max_degrees
     end
@@ -325,22 +330,27 @@ class Location < AbstractModel
   # auto-completers.
   #
   def self.primer
-    where = ""
-    where = "WHERE observations.user_id = #{User.current_id}" if User.current
-    result = connection.select_values(%(
-      SELECT DISTINCT IF(observations.location_id > 0,
-                         locations.name,
-                         observations.where) AS x
-      FROM observations
-      LEFT OUTER JOIN locations ON locations.id = observations.location_id
-      #{where}
-      ORDER BY observations.updated_at DESC
-      LIMIT 100
-    )).sort
-    if User.current_location_format == :scientific
-      result.map! { |n| Location.reverse_name(n) }
-    end
-    result
+    # Temporarily disable.  It rarely takes autocomplete long even on my horrible
+    # internet connection.  And the primer can -- at least briefly -- have names
+    # that have been merged or changed.  That may be confusing some users.  Let's
+    # try it without for a while to see if anyone complains.
+    # where = ""
+    # where = "WHERE observations.user_id = #{User.current_id}" if User.current
+    # result = connection.select_values(%(
+    #   SELECT DISTINCT IF(observations.location_id > 0,
+    #                      locations.name,
+    #                      observations.where) AS x
+    #   FROM observations
+    #   LEFT OUTER JOIN locations ON locations.id = observations.location_id
+    #   #{where}
+    #   ORDER BY observations.updated_at DESC
+    #   LIMIT 100
+    # )).sort
+    # if User.current_location_format == :scientific
+    #   result.map! { |n| Location.reverse_name(n) }
+    # end
+    # result
+    []
   end
 
   # Takes a location string splits on commas, reverses the order,
@@ -527,7 +537,8 @@ class Location < AbstractModel
         # Mexico was an ambiguous state/country!  Now this code only applies
         # to a bare country which may be ambiguous.
         if understood_state?(this_country, real_country)
-          reasons << :location_dubious_ambiguous_country.t(country: this_country)
+          reasons << :location_dubious_ambiguous_country.
+                     t(country: this_country)
         end
       end
     elsif this_state && understood_country?(this_state)
@@ -591,7 +602,7 @@ class Location < AbstractModel
     return if tokens.length < 2
 
     alt = [tokens[0]]
-    tokens[1..-1].each { |t| alt.push(t) if t[-4..-1] != " Co." }
+    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
     result = alt.join(", ")
     result == name ? nil : result
   end
@@ -626,24 +637,25 @@ class Location < AbstractModel
     end
 
     # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).each do |spl|
+    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
       spl.update_attribute(:location, self)
     end
 
     # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).each do |user|
+    User.where(location_id: old_loc.id).find_each do |user|
       user.update_attribute(:location, self)
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location", target_id: old_loc.id).each do |int|
+    Interest.where(target_type: "Location",
+                   target_id: old_loc.id).each do |int|
       int.target = self
       int.save
     end
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: "\
+    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: "\
              "North: #{old_loc.north}, South: #{old_loc.south}, "\
              "West: #{old_loc.west}, East: #{old_loc.east}")
 
@@ -727,7 +739,7 @@ class Location < AbstractModel
     end
 
     # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).each do |user|
+    User.where(email_locations_all: true).find_each do |user|
       recipients.push(user)
     end
 

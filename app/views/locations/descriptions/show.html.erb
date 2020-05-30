@@ -1,0 +1,30 @@
+<%
+  @title ||= @description.format_name.t
+
+  tabs = show_description_tab_set(@description)
+  @tabsets = {
+    pager_for: @description,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="row">
+  <div class="col-md-6 max-width-text">
+    <%= render(partial: "shared/show_description",
+               locals: {description: @description}) %>
+  </div>
+  <div class="col-md-6 max-width-text">
+    <%= show_alt_descriptions(@location, @projects) %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 max-width-text-plus-padding">
+    <%= render(partial: "location_description", object: @description) %>
+    <%= render(partial: "comments/comments",
+               locals: {object: @description, controls: true, limit: 10}) %>
+    <div class="mt-3">
+      <%= show_object_footer(@description) %>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-class MoApiKeys < ActiveRecord::Migration
+class MoApiKeys < ActiveRecord::Migration[4.2]
   def self.up
     create_table :mo_api_keys, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
       t.column :created, :datetime

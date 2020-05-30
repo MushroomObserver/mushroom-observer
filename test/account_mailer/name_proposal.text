@@ -16,7 +16,7 @@ Used references: I asked Uncle Herb
 Here are some handy links:
 
 Show this observation: http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>
-I'm not interested in this observation: http://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:rolf) %>&state=-1
+I'm not interested in this observation: http://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:rolf) %>&state=-1
 Stop sending me email like this: http://mushroomobserver.org/account/no_email_observations_naming/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org

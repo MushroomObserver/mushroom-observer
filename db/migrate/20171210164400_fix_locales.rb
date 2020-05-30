@@ -1,4 +1,4 @@
-class FixLocales < ActiveRecord::Migration
+class FixLocales < ActiveRecord::Migration[4.2]
   def up
     User.connection.execute(%(
       UPDATE users

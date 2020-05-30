@@ -1,4 +1,4 @@
-class MakeSurePublicDescriptionsArePublic < ActiveRecord::Migration
+class MakeSurePublicDescriptionsArePublic < ActiveRecord::Migration[4.2]
   def up
     Name.connection.execute(%(
       UPDATE name_descriptions SET public = TRUE

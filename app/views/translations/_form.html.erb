@@ -1,0 +1,128 @@
+<%= hidden_field_tag(:tag, @tag) %>
+
+<!-- Show "official" text at top -->
+<!-- --------------------------- -->
+
+<% unless @lang.official %>
+  <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
+
+  <% @edit_tags.each do |tag| %>
+    <% if record = @official_records[tag] %>
+      <span class="text-underline"><%= h(tag) %>:</span>
+      <p><%=
+        str = record.text.gsub(/\\n/, "\n")
+        h(str).gsub("\n", "<br/>\n")
+      %></p>
+    <% end %>
+  <% end %>
+
+  <hr class="py-3"/>
+<% end %>
+
+<!-- Show form for this language's translations -->
+<!-- ------------------------------------------ -->
+
+<h3 class="font-weight-bold"><%= @lang.name %>:</h3>
+
+<% @edit_tags.each do |tag| %>
+  <%
+    # Estimate number of rows needed for text area.
+    str = @strings[tag].to_s.gsub(/\\n/, "\n")
+    rows = 1
+    for line in str.each_line
+      rows += (line.length / 80).truncate + 1
+    end
+    rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
+  %>
+
+  <%
+    # Add help notes for plurals and uppercase entries.
+    notes = []
+    if tag.match(/s$/i) && @edit_tags.include?(tag.sub(/.$/,""))
+      notes << :edit_translations_plural.t
+    elsif @edit_tags.include?(tag+"s") || @edit_tags.include?(tag+"S")
+      notes << :edit_translations_singular.t
+    end
+    if tag == tag.upcase && @edit_tags.include?(tag.downcase)
+      notes << :edit_translations_uppercase.t
+    elsif tag == tag.downcase && @edit_tags.include?(tag.upcase)
+      notes << :edit_translations_lowercase.t
+    end
+  %>
+
+  <div class="form-group">
+    <%= label_tag("tag_#{tag}", tag) %>
+    <span><%= "(" + notes.safe_join(", ") + ")" if notes.any? %></span><br/>
+    <%= text_area_tag("tag_#{tag}", str, rows: rows, class: "form-control pb-4") %>
+  </div>
+
+<% end %>
+
+<div class="text-center">
+  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn pl-4") %>
+  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn pl-4",
+                 type: "cancel") %>
+  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn pl-4",
+                 type: "button", data: {tag: @tag}) %>
+  <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
+                 class: "pl-4", data: {tag: @tag}) %>
+</div>
+
+<!-- Show past versions of translations -->
+<!-- ---------------------------------- -->
+
+<%
+  done_header = false
+  user_logins = { @user.id => @user.login }
+%>
+<% @edit_tags.each do |tag| %>
+  <% if record = @translated_records[tag] %>
+    <%
+      user_logins[record.user_id] ||= record.user.login rescue nil
+      last_text = record.text
+      versions_to_show = []
+      for version in record.versions.reverse
+        if version.text != last_text
+          versions_to_show << version
+          last_text = version.text
+        end
+      end
+    %>
+
+    <% if versions_to_show.any? %>
+
+      <% if !done_header %>
+        <hr class="py-2"/>
+        <h3 class="pb-4"><b><%= :edit_translations_old_versions.t %>:</b></h3>
+        <% done_header = true %>
+      <% end %>
+
+      <span class="underline"><%= h(tag) %>:</span><br/>
+      <table class="table-striped old_versions pb-3">
+        <% versions_to_show.each do |version| %>
+          <tr>
+            <td>
+              <%=
+                user_id = version.user_id
+                login = user_logins[user_id] ||= User.find(user_id).login rescue ""
+                login.blank? ? "--" : user_link(user_id, login)
+              %>
+            </td>
+            <td>
+              <%= version.updated_at.web_date %>
+            </td>
+            <td>
+              <%= h(str = preview_string(version.text, 80)) %>
+              <%= if str.length > 80
+                label = "[" + :edit_translations_full_text.t + "]"
+                link_to(label, {controller: :ajax, action: :old_translation, id: version.id},
+                        data:{role: "show_old_version", id: version.id})
+              end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+
+    <% end %>
+  <% end %>
+<% end %>

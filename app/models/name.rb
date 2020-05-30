@@ -354,7 +354,7 @@ class Name < AbstractModel
   after_create do |name|
     user    = User.current || User.admin
     subject = "#{user.login} created #{name.real_text_name}"
-    content = "#{MO.http_domain}/name/show_name/#{name.id}"
+    content = "#{MO.http_domain}/names/show_name/#{name.id}"
     WebmasterEmail.build(user.email, content, subject)
   end
 
@@ -383,6 +383,11 @@ class Name < AbstractModel
   def best_brief_description
     (description.gen_desc.presence || description.diag_desc) if description
   end
+
+  # Override the default show_controller
+  # def self.show_controller
+  #   "names"
+  # end
 
   # Used by show_name.
   def self.count_observations(names)

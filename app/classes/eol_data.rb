@@ -47,11 +47,9 @@ class EolData
   end
 
   # grandfather method name to avoid breaking 3rd-party use of API
-  # rubocop:disable Naming/PredicateName: Rename
   def has_images?(id)
     @name_id_to_images.member?(id)
   end
-  # rubocop:enable Naming/PredicateName: Rename
 
   def all_images
     @id_to_image.values
@@ -66,11 +64,9 @@ class EolData
   end
 
   # grandfather method name to avoid breaking 3rd-party use of API
-  # rubocop:disable Naming/PredicateName: Rename
   def has_descriptions?(id)
     @name_id_to_descriptions.member?(id)
   end
-  # rubocop:enable Naming/PredicateName: Rename
 
   def all_descriptions
     @id_to_description.values
@@ -126,7 +122,7 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    for new_name in names[1..-1]
+    for new_name in names[1..]
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable

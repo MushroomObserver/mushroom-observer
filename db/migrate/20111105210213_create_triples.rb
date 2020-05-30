@@ -1,4 +1,4 @@
-class CreateTriples < ActiveRecord::Migration
+class CreateTriples < ActiveRecord::Migration[4.2]
   def self.up
     create_table :triples, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
       t.column "subject", :string, limit: 1024

@@ -1,4 +1,4 @@
-class SaveOriginalImageFilenames < ActiveRecord::Migration
+class SaveOriginalImageFilenames < ActiveRecord::Migration[4.2]
   def self.up
     add_column(:images, :original_name, :string, limit: 120, default: "")
   end

@@ -17,9 +17,9 @@ class AccountMailerTest < UnitTestCase
   # Run off an email in both HTML and text form.
   def run_mail_test(name, user = nil)
     text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
-                 reject { |x| x.match(/\.new$/) }
+                 reject { |x| x.end_with?(".new") }
     html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
-                 reject { |x| x.match(/\.new$/) }
+                 reject { |x| x.end_with?(".new") }
 
     assert(text_files.any? || html_files.any?)
 

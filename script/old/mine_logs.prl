@@ -32,8 +32,8 @@ my %ALIASES = qw(
   location/list_location_descriptions  location/index_location_description
   name/list_names                      name/index_name
   name/list_name_descriptions          name/index_name_description
-  observer/index                       observer/list_rss_logs
-  observer/index_rss_log               observer/list_rss_logs
+  observer/index                       rss_log/list_rss_logs
+  observer/index_rss_log               rss_log/list_rss_logs
   observer/list_observations           observer/index_observation
   observer/show_obs                    observer/show_observation
   project/list_projects                project/index_project

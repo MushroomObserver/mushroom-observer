@@ -1,9 +1,30 @@
+# frozen_string_literal: true
+
+# added methods relating to js
 module JavascriptHelper
-  # For now, just use Browser gem's "modern?" criteria.
-  # (Webkit, Firefox 17+, IE 9+ and Opera 12+)
-  def can_do_ajax?
-    browser.modern? || browser.ie?(8) || Rails.env == "test"
-  end
+  # Note: browser_helper.rb now inactive - NIMMO
+  # Note: Browser gem's "modern?" criteria has been removed. - NIMMO
+  # modern_browser? method currently defined in in browser_extensions.rb - NIMMO
+
+  # FIXME: NIMMO can_do_ajax? calls disabled in views ... check and fix
+  # Note: commented out after trying to get modern_browser? to work - NIMMO
+  # def can_do_ajax?
+  #   modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
+  # end
+
+  # from https://github.com/fnando/browser/pull/435 2020-04-13
+  # def modern_browser?(browser)
+  #   browser.chrome? && browser.version.to_i >= 65 ||
+  #     browser.safari? && browser.version.to_i >= 10 ||
+  #     browser.firefox? && browser.version.to_i >= 52 ||
+  #     browser.ie? && browser.version.to_i >= 11 &&
+  #       !browser.compatibility_view? ||
+  #     browser.edge? && browser.version.to_i >= 15 ||
+  #     browser.opera? && browser.version.to_i >= 50 ||
+  #     browser.facebook? &&
+  #       browser.safari_webapp_mode? &&
+  #       browser.webkit_full_version.to_i >= 602
+  # end
 
   # Use this test to determine if a user can upload multiple images at a time.
   # It checks for support of the following requirements:
@@ -12,7 +33,7 @@ module JavascriptHelper
   #   FileAPI
   # CanIuse.com is the source of this information.
   def can_do_multifile_upload?
-    browser.modern? && !browser.ie?(9)
+    !browser.platform.android?
   end
 
   # Schedule javascript modules for inclusion in header.  This is much safer
@@ -21,7 +42,7 @@ module JavascriptHelper
   #   # Example usage in view template:
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
-    if args.select { |arg| arg.class != String } != []
+    if args.reject { |arg| arg.class == String } != []
       raise ArgumentError.new(
         "javascript_include doesn't take symbols like :default, etc."
       )

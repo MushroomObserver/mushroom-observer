@@ -97,6 +97,11 @@ class SpeciesList < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  # AbstractModel sets a default, can override here
+  # def self.show_controller
+  #   "species_lists"
+  # end
+
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(_obs)
     SiteData.update_contribution(:add, :species_list_entries, user_id)
@@ -232,7 +237,7 @@ class SpeciesList < AbstractModel
     return if observations.include?(obs)
 
     observations.push(obs)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   # Remove observation from list and set updated_at.  Saves it.
@@ -240,7 +245,7 @@ class SpeciesList < AbstractModel
     return unless observations.include?(obs)
 
     observations.delete(obs)
-    update_attribute(:updated_at, Time.now)
+    update_attribute(:updated_at, Time.zone.now)
   end
 
   ##############################################################################
@@ -313,7 +318,7 @@ class SpeciesList < AbstractModel
         key, value = kv
         if key == "Date"
           # timestamp = Time.local(*(ParseDate.parsedate(value)))
-          timestamp = Time.parse(value)
+          timestamp = Time.zone.parse(value)
         elsif key == "Name"
           what = value.strip.squeeze(" ")
         elsif key == "Time"

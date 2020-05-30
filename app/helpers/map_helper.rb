@@ -89,19 +89,19 @@ module MapHelper
   def mapset_marker_title(set)
     result = ""
     strings = map_location_strings(set.objects)
-    if strings.length > 1
-      result = "#{strings.length} #{:locations.t}"
-    else
-      result = strings.first
-    end
+    result = if strings.length > 1
+               "#{strings.length} #{:locations.t}"
+             else
+               strings.first
+             end
     num_obs = set.observations.length
     if num_obs > 1 && num_obs != strings.length
       num_str = "#{num_obs} #{:observations.t}"
-      if strings.length > 1
-        result += ", #{num_str}"
-      else
-        result += " (#{num_str})"
-      end
+      result += if strings.length > 1
+                  ", #{num_str}"
+                else
+                  " (#{num_str})"
+                end
     end
     result
   end
@@ -152,7 +152,8 @@ module MapHelper
 
   def mapset_submap_links(set, args, type)
     params = args[:query_params] || {}
-    params = params.merge(controller: type.to_s.sub("observation", "observer"))
+    # Should not be needed because the "observation" controller is now "observation"
+    # params = params.merge(controller: type.to_s.sub("observation", "observation"))
     params = params.merge(mapset_box_params(set))
     [link_to(:show_all.t, params.merge(action: "index_#{type}")),
      link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
@@ -160,15 +161,18 @@ module MapHelper
 
   def mapset_observation_link(obs, args)
     link_to("#{:Observation.t} ##{obs.id}",
-            controller: :observer,
-            action: :show_observation,
+            controller: :observations,
+            action: :show,
             id: obs.id,
             params: args[:query_params] || {})
   end
 
   def mapset_location_link(loc, args)
-    link_to(loc.display_name.t, controller: :location, action: :show_location,
-                                id: loc.id, params: args[:query_params] || {})
+    link_to(loc.display_name.t,
+            controller: :locations,
+            action: :show,
+            id: loc.id,
+            params: args[:query_params] || {})
   end
 
   def mapset_box_params(set)

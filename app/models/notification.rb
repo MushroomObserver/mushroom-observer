@@ -45,6 +45,11 @@ class Notification < AbstractModel
     [:name]
   end
 
+  # Override the default show_controller
+  # def self.show_controller
+  #   "notifications"
+  # end
+
   # Create body of the email we're about to send.  Each flavor requires a
   # different set of arguments:
   #
@@ -86,7 +91,7 @@ class Notification < AbstractModel
       "Unrecognized notification flavor"
     end
   end
-  alias_method :text_name, :summary
+  alias text_name summary
 
   # Returns hash of options to pass into link_to to link to edit action:
   #

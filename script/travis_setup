@@ -15,6 +15,13 @@ else
     echo database.yml exists
 fi
 
+if [ ! -f config/gmaps_api_key.yml ]; then
+    cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
+    echo Copied config/gmaps_api_key.yml-template
+else
+    echo gmaps_api_key.yml exists
+fi
+
 for dir in images test_images;
 do
     for subdir in thumb 320 640 960 1280 orig;
@@ -33,13 +40,6 @@ if [ ! -f /usr/local/bin/jpegresize ]; then
     echo Created and installed jpegresize executable
 else
     echo jpegresize exists
-fi
-
-if [ ! -f /usr/local/bin/jpegexiforient ]; then
-    sudo gcc script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
-    echo Created and installed jpegexiforient executable
-else
-    echo jpegexiforient exists
 fi
 
 if [ ! -f /usr/local/bin/exifautotran ]; then

@@ -1,4 +1,4 @@
-class ChangeObservationNotesToYaml < ActiveRecord::Migration
+class ChangeObservationNotesToYaml < ActiveRecord::Migration[4.2]
   # ***** THIS MIGRATION MUST BE RUN WITH Observation::serialize :notes ********
 
   # migrate notes to a YAML serialized hash, any notes converted to the

@@ -1,0 +1,35 @@
+<%
+  # TODO: NIMMO This has two layouts, Large and Mobile. Should be possible to
+  # simplify Naming Table to one markup with conditional d-lg-x classes in CSS
+  logged_in = !@user.nil? && @user.verified
+  consensus = @observation.consensus_naming
+  any_names = @observation.namings && @observation.namings.count > 0
+
+  do_suggestions = logged_in && @observation.thumb_image_id.present? &&
+                   (@user.admin || [123, 40148, 48075].include?(@user.id))
+
+  locals = {
+    observation: @observation,
+    logged_in: logged_in,
+    consensus: consensus,
+    any_names: any_names,
+    do_suggestions: do_suggestions
+  }
+%>
+
+<section id="naming_partial" class="mb-4">
+
+  <div class="card">
+
+    <%= render partial: "namings/large",
+               locals: locals %>
+
+    <%= render partial: "namings/mobile",
+              locals: locals %>
+
+    <%= render partial: "namings/vote_popups",
+              locals: { observation: @observation } %>
+
+  </div><!-- .card -->
+
+</section><!-- #naming_partial -->

@@ -33,11 +33,11 @@ if what.present?
     </span><br/><%
     if valid_names.length > 0
       if suggest_corrections %>
-        <span class="HelpNote">
+        <span class="help-note">
           <%= :form_naming_correct_help.t(button: button_name, name: what) %>
         </span><br/><%
       else %>
-        <span class="HelpNote">
+        <span class="help-note">
           <%= :form_naming_deprecated_help.t(button: button_name, name: what) %>
          </span><br/><%
       end %>
@@ -51,7 +51,7 @@ if what.present?
       end %>
       </span><%
     else %>
-      <span class="HelpNote">
+      <span class="help-note">
       <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/><%
     end %>
@@ -64,7 +64,7 @@ if what.present?
       <span class="Data">
         <%= :form_naming_not_recognized.t(name: what) %>
       </span><br/>
-      <span class="HelpNote">
+      <span class="help-note">
         <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/>
     </div><%
@@ -78,7 +78,7 @@ if what.present?
           <%= n.display_name.t %> (<%= n.observations.size %>)<br/><%
         end %>
       </span>
-      <span class="HelpNote">
+      <span class="help-note">
         <%= :form_naming_multiple_names_help.t %>
       </span><br/>
     </div><%

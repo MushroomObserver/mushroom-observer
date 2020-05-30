@@ -3,12 +3,12 @@
 %>
 
 <div class="row">
-  <div class="col-xs-6 max-width-text">
+  <div class="col-6 max-width-text">
     <p><%= link_to("Refresh Stats", {controller: :account,
                    action: :blocked_ips}) %></p>
 
-    <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+    <div class="p-3 m-3" style="background:#f7f">
+      <%= form_tag {}, { class: "pb-5"} do %>
         <div class="form-group form-inline">
           <big>Okay IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_okay, "", size: 20, data: {autofocus: true}, class: "form-control") %>
@@ -16,7 +16,7 @@
           [<%= link_to("Clear List", {controller: :account,
                        action: :blocked_ips, clear_okay: 1}) %>]
         </div>
-      </form>
+      <% end %>
       <table class="ips">
         <% @okay_ips.each do |ip| %>
           <tr>
@@ -27,16 +27,16 @@
       </table>
     </div>
 
-    <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+    <div class="p-3 m-3" style="background:#f7f">
+      <%= form_tag {}, { class: "pb-5"} do %>
         <div class="form-group form-inline">
           <big>Blocked IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_bad, "", size: 20, data: {autofocus: true}, class: "form-control") %>
-          <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+          <%= submit_tag(:ADD.l, class: "btn ml-3") %>
           [<%= link_to("Clear List", {controller: :account,
                        action: :blocked_ips, clear_bad: 1}) %>]
         </div>
-      </form>
+      <% end %>
       <table class="ips">
         <% @blocked_ips.each do |ip| %>
           <tr>
@@ -48,7 +48,7 @@
     </div>
   </div>
 
-  <div class="col-xs-6 max-width-text">
+  <div class="col-6 max-width-text">
     <% if @ip.present? %><p><%= render partial: "ip_stats" %></p><% end %>
     <p><%= render partial: "ip_summary" %></p>
   </div>

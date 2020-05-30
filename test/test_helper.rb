@@ -134,12 +134,12 @@ module ActiveSupport
     # Record time this test started to run.
     def start_timer
       @@times = {} unless defined?(@@times)
-      @@times[method_name] = Time.now
+      @@times[method_name] = Time.zone.now
     end
 
     # Report time this test took to run.
     def end_timer
-      ellapsed = Time.now - @@times[method_name]
+      ellapsed = Time.zone.now - @@times[method_name]
       puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
     end
 
@@ -147,7 +147,7 @@ module ActiveSupport
     # clear these logs periodically, they can get freaking huge, and that
     # causes this test to take up to several minutes to complete.
     def clear_logs
-      ["development", "test", "email-debug", "process_image"].each do |file|
+      %w[development test email-debug process_image].each do |file|
         file = Rails.root.join("log", "#{file}.log")
         next unless File.exist?(file)
 

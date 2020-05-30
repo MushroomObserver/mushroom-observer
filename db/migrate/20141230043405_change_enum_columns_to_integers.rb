@@ -1,4 +1,4 @@
-class ChangeEnumColumnsToIntegers < ActiveRecord::Migration
+class ChangeEnumColumnsToIntegers < ActiveRecord::Migration[4.2]
   def up
     change_column :location_descriptions, :source_type, :integer
     change_column :name_descriptions, :review_status, :integer, default: 0

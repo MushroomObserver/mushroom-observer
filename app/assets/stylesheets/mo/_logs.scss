@@ -1,0 +1,68 @@
+//
+// log_items
+// --------------------------------------------------
+
+.log-item {
+  .card {
+    background-color: $ground;
+    transition: background-color 0.3s ease-out;
+
+    &:hover {
+      background-color: $primary-text;
+    }
+  }
+}
+
+.log-item-link {
+  &:hover {
+    color: $primary;
+
+    .log-id {
+      background: $primary;
+      color: $ground !important;
+      text-decoration: none;
+    }
+  }
+}
+
+.log-name {
+  i, b i {
+    @extend .h5, .font-weight-bold, .font-italic;
+  }
+}
+
+.log-id {
+  @extend .text-muted, .micro, .badge, .badge-outline, .py-1, .mt-1, .ml-2;
+  font-weight: $font-weight-normal;
+}
+
+.title-caption {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+}
+
+.observation-name {
+  font-size: $h5-font-size;
+  font-weight: $font-weight-normal;
+
+  i, b i {
+    font-size: $h4-font-size;
+    font-weight: $font-weight-bold;
+    font-style: italic;
+  }
+
+}
+
+.prev-next-nav {
+  color: $accent;
+  transition: color 0.3s ease-out;
+
+  a:hover {
+    text-decoration: none;
+    color: $primary;
+    border-color: $accent;
+  }
+}

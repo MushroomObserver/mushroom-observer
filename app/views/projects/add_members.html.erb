@@ -1,0 +1,34 @@
+<%
+  @title = :add_members_title.t(title: @project.title)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<table class="table-striped table-project-members mt-3">
+  <thead>
+    <tr>
+      <th><%= :Login_name.t %></th>
+      <th><%= :Full_name.t %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for user in @users %>
+      <tr>
+        <td>
+          <%= user_link(user, user.login) %>
+        </td>
+        <td>
+          <%= user.name %>
+        </td>
+        <td>
+          <%= link_with_query(:ADD.t, action: :add_members, id: @project.id,
+                              candidate: user.id) %>
+        </td>
+      </tr
+    <% end %>
+  </tbody>
+</table>

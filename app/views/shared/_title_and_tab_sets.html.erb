@@ -6,53 +6,38 @@
   @tabsets ||= {}
 %>
 
-  <!-- Push down pager, title on small, xs screens so buttons do not block -->
-  <%= content_tag(:div, safe_nbsp, class: "hidden-print visible-xs visible-sm
-                                           push-below-buttons") %>
+  <!-- Pager -->
+  <%= tag.div class: "d-print-none" do
+        if @tabsets[:pager_for]
+          render partial: "/shared/prev_next_pager",
+            locals: { object: @tabsets[:pager_for] }
+        end
+      end %>
 
-  <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
-    <!-- Pager -->
-    <%= content_tag(:div, class: "hidden-print") do
-          if @tabsets[:pager_for]
-            render(partial: "/shared/prev_next_pager",
-              locals: { object: @tabsets[:pager_for] })
-          end
-        end %>
+  <div id="title" class="d-flex flex-row justify-content-between align-items-end mb-3">
 
     <!-- Title Caption -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= content_tag(:span, @title, id: "title-caption") -%>
+    <%= tag.span @title, id: "title-caption", class: "h2 d-inline"-%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                       class: "align-1px"),
+                                       class: ""),
                            :rss_filtered_mouseover.t)
         end -%>
     <%= content_tag_if(@owner_id, :div, @owner_id, class: "owner-id") %>
+
+    <!-- Timer -->
+    <%= render partial: "/shared/timer", locals: { } %>
+
   </div>
 
   <!-- Tabsets -->
   <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
                      id: "right_tabs",
-                     class: "hidden-print align-right col-sm-4 push-up") %>
+                     class: "d-print-none text-right float-right mb-3") %>
 
   <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                     class: "hidden-print col-xs-12") %>
+                     class: "d-print-none") %>
 
   <!-- Sorter -->
-  <% if @sorts %>
-    <div class="hidden-print col-xs-12">
-      <div class="pad-top">
-        <%= content_tag(:span, :sort_by_header.t) %>
-        <div id="sorts" class="btn-group btn-group-xs" role="group">
-          <% @sorts.each do |title, action| %>
-            <%= if action.nil?
-                  link_with_query(title, {}, class: "btn btn-default active",
-                                             disabled: true)
-                else
-                  link_with_query(title, action, class: "btn btn-default")
-                end %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  <% end %>
+  <%= render partial: "/shared/sorter", locals: { } %>

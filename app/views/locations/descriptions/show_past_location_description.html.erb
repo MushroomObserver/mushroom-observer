@@ -1,0 +1,22 @@
+<%
+  @title = :show_past_location_description_title.t(
+    num: @description.version,
+    name: description_title(@description)
+  )
+
+  desc = description_title(@description)
+
+  tabs = [
+    link_with_query(:show_location_description.t(description: desc),
+                    @description.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= show_past_versions(@description) %>
+  <%= render(partial: "location_description", object: @description) %>
+  <div class="mt-3">
+    <%= show_object_footer(@description) %>
+  </div>
+</div>

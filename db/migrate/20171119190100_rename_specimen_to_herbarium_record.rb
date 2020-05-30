@@ -1,4 +1,4 @@
-class RenameSpecimenToHerbariumRecord < ActiveRecord::Migration
+class RenameSpecimenToHerbariumRecord < ActiveRecord::Migration[4.2]
 
   TAG_PAIRS = [
     [ :SPECIMEN, :HERBARIUM_RECORD ],

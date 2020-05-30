@@ -1,0 +1,37 @@
+<!-- MONO_IMAGE_UPLOAD_FORM -->
+<%= javascript_tag %(
+  var NEXT_IMAGE_INDEX = #{@images.length+1};
+  var CHANGED_DATES = [];
+) %>
+<div id="image_forms">
+  <% i = 0 %>
+  <% @images.push(@new_image) %>
+  <% while i < @images.length %>
+    <%= render "observations/form/mono_image", locals: {index: i}) %>
+    <% i += 1 %>
+  <% end %>
+</div>
+<input id="new_image_button"
+       onclick="image_new();"
+       type="button"
+       value="<%= :form_observations_upload_another.t %>"
+       class="btn"/>
+<% javascript_include("single_image_uploader") %>
+<%= javascript_tag %(
+  var x = String.fromCharCode(60);
+  var y = String.fromCharCode(93);
+  var IMAGE_FORM = "#{
+    i = @images.length - 1 rescue 0
+    str = render(partial: "form_image", locals: {index: i})
+    str.gsub!("image_#{i}_", "image_XXX_")
+    str.gsub!("image_id_#{i}", "image_id_XXX")
+    str.gsub!("(#{i})", "(XXX)")
+    str.gsub!("[#{i}]", "[XXX]")
+    str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+    str.sub!("checked=\"checked\" ", "")
+    str = escape_javascript(str)
+    str.gsub("<", '"+x+"')
+    str.gsub("]", '"+y+"')
+  }";
+) %>
+<!-- /MONO_IMAGE_UPLOAD_FORM -->

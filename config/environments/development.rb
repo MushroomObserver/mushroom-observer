@@ -68,10 +68,10 @@ MushroomObserver::Application.configure do
 
   # Debug mode disables concatenation and preprocessing of assets.
   # This option may cause significant delays in view rendering with a large
-  # number of complex assets.
+  # number of complex assets. Nimmo change - set digest true for dev with turbolinks.
   config.assets.debug = false
   config.assets.logger = false
-  config.assets.digest = false
+  config.assets.digest = true
 
   # Enable web console for MushroomObserver VM
   config.web_console.whitelisted_ips = "10.0.2.2"

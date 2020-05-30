@@ -1,12 +1,14 @@
 require "test_helper"
 
+# FIXME: NIMMO These are not the right URLs anymore.
+# Show is "observations/:id", "observations/:id/edit"
 class PostObservationTest < IntegrationTestCase
   LOGIN_PAGE = "account/login".freeze
-  SHOW_OBSERVATION_PAGE = "observer/show_observation".freeze
-  CREATE_OBSERVATION_PAGE = "observer/create_observation".freeze
-  EDIT_OBSERVATION_PAGE = "observer/edit_observation".freeze
-  CREATE_LOCATION_PAGE = "location/create_location".freeze
-  OBSERVATION_INDEX_PAGE = "observer/list_observations".freeze
+  SHOW_OBSERVATION_PAGE = "observations".freeze
+  CREATE_OBSERVATION_PAGE = "observations/new".freeze
+  EDIT_OBSERVATION_PAGE = "observations/edit".freeze
+  CREATE_LOCATION_PAGE = "locations/new".freeze
+  OBSERVATION_INDEX_PAGE = "observations".freeze
 
   PASADENA_EXTENTS = {
     north: 34.251905,
@@ -201,7 +203,7 @@ class PostObservationTest < IntegrationTestCase
     if new_obs.specimen
       assert_match(/show_herbarium_record/, response.body)
     else
-      refute_match(/No specimen/, response.body)
+      assert_no_match(/No specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
@@ -241,7 +243,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_exists_deleted_item_log
     found = false
-    assert_select("a[href*=show_rss_log]") do |elems|
+    assert_select("a[href*=rss_logs]") do |elems|
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
     assert(found,

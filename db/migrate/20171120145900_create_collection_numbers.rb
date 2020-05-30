@@ -1,4 +1,4 @@
-class CreateCollectionNumbers < ActiveRecord::Migration
+class CreateCollectionNumbers < ActiveRecord::Migration[4.2]
   def up
     create_table :collection_numbers, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
       t.timestamps

@@ -5,8 +5,8 @@ class AjaxController
   def multi_image_template
     @user = session_user!
     @licenses = License.current_names_and_ids(@user.license)
-    @image = Image.new(user: @user, when: Time.now)
-    render(partial: "/observer/form_multi_image_template")
+    @image = Image.new(user: @user, when: Time.zone.now)
+    render(partial: "/observations/form_multi_image_template")
   end
 
   # Uploads an image object without an observation.
@@ -32,7 +32,7 @@ class AjaxController
     name = args[:original_name].to_s
     errors += "\n" + :runtime_no_upload_image.t(name: name)
     logger.error("UPLOAD_FAILED: #{errors.inspect}")
-    render(plain: errors.strip_html, status: 500)
+    render(plain: errors.strip_html, status: :internal_server_error)
   end
 
   def create_and_upload_image(args)
@@ -47,7 +47,7 @@ class AjaxController
 
   def create_image(args)
     Image.new(
-      created_at: Time.now,
+      created_at: Time.zone.now,
       user: @user,
       when: image_date(args),
       license_id: args[:license].to_i,

@@ -1,9 +1,9 @@
  <!-- Privacy Settings of Account Preferences Form -->
-<div class="form-group push-down bold">
+<div class="form-group mt-3 bold">
   <%= :prefs_privacy.t %>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_votes_anonymous,
                 :prefs_votes_anonymous.t + ":") %><br/>
   <%= values = [
@@ -16,15 +16,15 @@
         values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
       end
       form.select(:votes_anonymous, values, class: "form-control") %>
-  <span class="HelpNote">
+  <span class="help-note">
     <%= link_to(:prefs_change_image_vote_anonymity.t,
-                controller: :image,
+                controller: :images,
                 action: :bulk_vote_anonymity_updater) %>
   </span>
 
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_keep_filenames,
                 :prefs_keep_image_filenames.t + ":") %><br/>
   <%= form.select(:keep_filenames,
@@ -34,23 +34,23 @@
                     [:prefs_keep_image_filenames_keep_and_show.l,
                      :keep_and_show]],
                   class: "form-control") %>
-  <span class="HelpNote">
+  <span class="help-note">
     <%= link_to(:prefs_bulk_filename_purge.t,
-                 { controller: :image,
+                 { controller: :images,
                    action: :bulk_filename_purge },
                  { data:
                    { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>
   </span>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_license_id, :License.t + ":") %>
-  <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+  <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
   <%= form.select(:license_id, @licenses, class: "form-control") %>
-  <span class="HelpNote">
-    <%= link_to(:bulk_license_link.t, controller: :image,
+  <span class="help-note">
+    <%= link_to(:bulk_license_link.t, controller: :images,
                                       action: :license_updater) %>
   </span>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>

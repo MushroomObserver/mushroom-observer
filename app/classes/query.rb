@@ -150,24 +150,29 @@
 #                         observation: @observation)
 #    inner.results each do |image|
 #      link_to(image,
-#        add_query_param({action: :show_image, id: image.id}, inner))
+#        add_query_param(
+#          { controller: :images, action: :show, id: image.id }, inner))
 #    end
 #
 #    # Now show_image can be oblivous:
 #    query = find_or_create_query(:Image)
 #    link_to("Prev",
-#      add_query_param({action: :prev_image, id: image.id}, query))
+#      add_query_param(
+#        { controller: :images, action: :show_prev, id: image.id }, query))
 #    link_to("Next",
-#      add_query_param({action: :next_image, id: image.id}, query))
+#      add_query_param(
+#        { controller: :images, action: :show_next, id: image.id }, query))
 #    link_to("Back",
-#      add_query_param({action: :show_observation, id: image.id, query))
+#      add_query_param(
+#        { controller: :observations, action: :show, id: image.id }, query))
 #
 #    # And this is how prev and next work:
 #    query = find_or_create_query(:Image, current: params[:id].to_s)
 #    if new_query = query.next
 #      redirect_to(
-#        add_query_param({action: :show_image, id: new_query.current_id},
-#                        new_query)
+#        add_query_param(
+#          { controller: :images, action: :show, id: new_query.current_id },
+#          new_query)
 #      )
 #    else
 #      flash_error 'No more images!'

@@ -1,0 +1,82 @@
+<!-- MULTIFILE_UPLOAD_FORM -->
+<% javascript_include("multi_image_upload") %>
+
+<%= hidden_field(:observation, :thumb_image_id) %>
+<div class="row">
+  <div class="col-sm-6">
+    <input type="file" multiple id="multiple_images_button" accept="image/*" class="mt-3"/>
+  </div>
+  <div class="col-sm-6">
+    <div class="well well-sm max-width-text">
+      <div class="arrow-left d-none d-sm-block"></div>
+      <p class="help-block">
+        <%= :form_observations_upload_help_multi_select.t %>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Container to show messages relating to the selected images -->
+<div class="row image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+  <div class="col-sm-7">
+    <div class="inconsistent_date_options">
+      <div class="col-sm-12">
+        <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
+        <div id="image_date_radio_container"></div>
+        <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
+        <div id="observation_date_radio_container"></div>
+      </div>
+      <div class="col-sm-12 mt-3">
+        <button id="fix_dates" type="button" class="btn"><%= :form_observations_use_date.t %></button>
+        <button id="ignore_dates" type="button" class="btn"><%= :IGNORE.t %></button>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <span><%= :form_observations_date_warning.t %></span>
+  </div>
+</div>
+
+<div class="row geocode_messages mt-2" style="background: rgba(211, 211, 211, 0.22); display: none;">
+  <div class="col-sm-7">
+      <div class="col-sm-12">
+        <div><strong>Set observation Latitude/Longitude to:</strong></div>
+        <div id="geocode_radio_container">
+
+        </div>
+      </div>
+      <div class="col-sm-12 mt-3">
+        <button id="set_geocode" type="button" class="btn"><%= :UPDATE.t %></button>
+        <button id="ignore_geocode" type="button" class="btn"><%= :IGNORE.t %></button>
+      </div>
+  </div>
+  <div class="col-sm-4">
+    <span><%= :form_observations_gps_info.t %></span>
+    <div id="geocode_map">
+
+    </div>
+  </div>
+</div>
+
+<!-- Container for appending images -->
+<div class="images_container margin-top">
+  <div id="added_images_container">
+    <!-- Target for insertion -->
+  </div>
+</div>
+<script type='text/javascript' src='https://maps.googleapis.com/maps/api/js?key=AIzaSyCV0pi0Kp9SEBThW7W1g1K3_rEIqdQmPys'></script>
+<% inject_javascript_at_end %(
+     jQuery(document).ready(function () {
+       var uploader = new MultiImageUploader({
+         uploading_text: "#{j :form_observations_uploading_images.t}",
+         image_too_big_text:  "#{j :form_observations_image_too_big.t(max: (MO.image_upload_max_size.to_f/1024/1024).round)}",
+         creating_observation_text: "#{j :form_observations_creating_observation.t}",
+         months: "#{j :all_months.t}",
+         show_on_map: "#{j :show_on_map.t}",
+         something_went_wrong: "#{j :form_observations_upload_error.t}"
+       })
+       uploader.init();
+     });
+   ) %>
+<!-- /MULTIFILE_UPLOAD_FORM -->

@@ -97,229 +97,253 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  article: {
-    create_article: {},
-    destroy_article: {},
-    edit_article: {},
+  articles: {
+    # create_article: {}, # aliased only
+    # destroy_article: {}, # aliased only
+    # edit_article: {}, # aliased only
     index_article: {},
-    list_articles: {},
-    show_article: {}
+    # list_articles: {}, # aliased only
+    # show_article: {}, # aliased only
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  collection_number: {
+  authors: {
+    review_authors: {}
+  },
+  collection_numbers: {
     collection_number_search: {},
-    create_collection_number: {},
-    destroy_collection_number: {},
-    edit_collection_number: {},
+    # create_collection_number: {}, # aliased only
+    # destroy_collection_number: {}, # aliased only
+    # edit_collection_number: {}, # aliased only
     index_collection_number: {},
-    list_collection_numbers: {},
-    next_collection_number: {},
+    # list_collection_numbers: {}, # aliased only
+    # next_collection_number: {}, # aliased only
     observation_index: {},
-    prev_collection_number: {},
+    # prev_collection_number: {}, # aliased only
     remove_observation: {},
-    show_collection_number: {}
+    # show_collection_number: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  comment: {
-    add_comment: {},
+  comments: {
+    # add_comment: {}, # aliased only
     comment_search: {},
-    destroy_comment: {},
-    edit_comment: {},
+    # destroy_comment: {}, # aliased only
+    # edit_comment: {}, # aliased only
     index_comment: {},
-    list_comments: {},
-    next_comment: {},
-    prev_comment: {},
-    show_comment: {},
+    # list_comments: {}, # aliased only
+    # next_comment: {}, # aliased only
+    # prev_comment: {}, # aliased only
+    # show_comment: {}, # aliased only
     show_comments_by_user: {},
     show_comments_for_target: {},
-    show_comments_for_user: {}
+    show_comments_for_user: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  },
+  email: {
+    email_features: {},
+    email_merge_request: {},
+    ask_observation_question: {},
+    ask_webmaster_question: {},
+    ask_user_question: {},
+    commercial_inquiry: {},
+    email_question: {}
   },
   glossary: {
-    create_glossary_term: {},
-    edit_glossary_term: {},
-    index: {},
-    show_glossary_term: {},
+    # create_glossary_term: {}, # aliased only
+    # edit_glossary_term: {}, # aliased only
+    # show_glossary_term: {}, # aliased only
     show_past_glossary_term: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  herbarium: {
-    create_herbarium: {},
+  herbaria: {
+    # create_herbarium: {}, # aliased only
     delete_curator: {},
-    destroy_herbarium: {},
-    edit_herbarium: {},
+    # destroy_herbarium: {}, # aliased only
+    # edit_herbarium: {}, # aliased only
     herbarium_search: {},
-    index: {},
     index_herbarium: {},
-    list_herbaria: {},
+    index_nonpersonal_herbarium: {},
+    # list_herbaria: {}, # aliased only
     merge_herbaria: {},
-    next_herbarium: {},
-    prev_herbarium: {},
+    # next_herbarium: {}, # aliased only
+    # prev_herbarium: {}, # aliased only
     request_to_be_curator: {},
-    show_herbarium: {}
+    # show_herbarium: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  herbarium_record: {
-    create_herbarium_record: {},
-    destroy_herbarium_record: {},
-    edit_herbarium_record: {},
+  herbarium_records: {
+    # create_herbarium_record: {}, # aliased only
+    # destroy_herbarium_record: {}, # aliased only
+    # edit_herbarium_record: {}, # aliased only
     herbarium_index: {},
     herbarium_record_search: {},
     index_herbarium_record: {},
-    list_herbarium_records: {},
-    next_herbarium_record: {},
+    # list_herbarium_records: {}, # aliased only
+    # next_herbarium_record: {}, # aliased only
     observation_index: {},
-    prev_herbarium_record: {},
+    # prev_herbarium_record: {}, # aliased only
     remove_observation: {},
-    show_herbarium_record: {}
+    # show_herbarium_record: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  image: {
-    add_image: {},
+  images: {
+    # add_image: {}, # aliased only
     advanced_search: {},
     bulk_filename_purge: {},
     bulk_vote_anonymity_updater: {},
     cast_vote: {},
-    destroy_image: {},
-    edit_image: {},
+    # destroy_image: {}, # aliased only
+    # edit_image: {}, # aliased only
     image_search: {},
     images_by_user: {},
     images_for_project: {},
     index_image: {},
     license_updater: {},
-    list_images: {},
-    next_image: {},
-    prev_image: {},
+    # list_images: {}, # aliased only
+    # next_image: {}, # aliased only
+    # prev_image: {}, # aliased only
     remove_images: {},
     remove_images_for_glossary_term: {},
     reuse_image: {},
     reuse_image_for_glossary_term: {},
-    show_image: {},
+    # show_image: {}, # aliased only
     show_original: {},
-    transform_image: {}
+    transform_image: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  interest: {
+  info: {
+    how_to_help: {},
+    how_to_use: {},
+    intro: {},
+    show_site_stats: {},
+    search_bar_help: {},
+    textile: {}, # aliased only
+    textile_sandbox: {},
+    translators_note: {}
+  },
+  interests: {
     destroy_notification: {},
     list_interests: {},
     set_interest: {}
   },
-  location: {
+  locations: {
     add_to_location: {},
     adjust_permissions: {},
     advanced_search: {},
-    create_location: {},
-    create_location_description: {},
-    destroy_location: {},
-    destroy_location_description: {},
-    edit_location: {},
-    edit_location_description: {},
+    # create_location: {}, # aliased only
+    # destroy_location: {}, # aliased only
+    # edit_location: {}, # aliased only
     help: {},
     index_location: {},
-    index_location_description: {},
     list_by_country: {},
     list_countries: {},
-    list_location_descriptions: {},
-    list_locations: {},
+    # list_locations: {}, # aliased only
     list_merge_options: {},
-    location_descriptions_by_author: {},
-    location_descriptions_by_editor: {},
     location_search: {},
     locations_by_editor: {},
     locations_by_user: {},
-    make_description_default: {},
     map_locations: {},
-    merge_descriptions: {},
-    next_location: {},
-    next_location_description: {},
-    prev_location: {},
-    prev_location_description: {},
-    publish_description: {},
+    # next_location: {}, # aliased only
+    # prev_location: {}, # aliased only
     reverse_name_order: {},
-    show_location: {},
-    show_location_description: {},
+    # show_location: {}, # aliased only
     show_past_location: {},
-    show_past_location_description: {}
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  name: {
-    adjust_permissions: {},
-    advanced_search: {},
-    approve_name: {},
-    authored_names: {},
-    bulk_name_edit: {},
-    change_synonyms: {},
-    create_name: {},
-    create_name_description: {},
-    deprecate_name: {},
-    destroy_name_description: {},
-    edit_classification: {},
-    edit_lifeform: {},
-    edit_name: {},
-    edit_name_description: {},
-    email_tracking: {},
-    eol: {},
-    eol_expanded_review: {},
-    eol_preview: {},
-    index_name: {},
-    index_name_description: {},
-    inherit_classification: {},
-    list_name_descriptions: {},
-    list_names: {},
+  location_descriptions: {
+    # create_location_description: {}, # aliased only
+    # destroy_location_description: {}, # aliased only
+    # edit_location_description: {}, # aliased only
+    index_location_description: {},
+    # list_location_descriptions: {}, # aliased only
+    location_descriptions_by_author: {},
+    location_descriptions_by_editor: {},
     make_description_default: {},
-    map: {},
-    merge_descriptions: {},
-    name_descriptions_by_author: {},
-    name_descriptions_by_editor: {},
-    name_search: {},
-    names_by_author: {},
-    names_by_editor: {},
-    names_by_user: {},
-    needed_descriptions: {},
-    next_name: {},
-    next_name_description: {},
-    observation_index: {},
-    prev_name: {},
-    prev_name_description: {},
-    propagate_classification: {},
-    propagate_lifeform: {},
-    publish_description: {},
-    refresh_classification: {},
-    set_review_status: {},
-    show_name: {},
-    show_name_description: {},
-    show_past_name: {},
-    show_past_name_description: {},
-    test_index: {}
+    merge_descriptions: {}, # ?
+    # next_location_description: {}, # aliased only
+    # prev_location_description: {}, # aliased only
+    publish_description: {}, # ?
+    # show_location_description: {}, # aliased only
+    show_past_location_description: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  naming: {
-    create: {},
-    destroy: {},
-    edit: {}
-  },
-  observer: {
-    advanced_search: {},
-    advanced_search_form: {},
-    ask_observation_question: {},
-    ask_user_question: {},
-    ask_webmaster_question: {},
-    author_request: {},
-    change_banner: {},
-    change_user_bonuses: {},
-    checklist: {},
-    commercial_inquiry: {},
-    create_observation: {},
-    destroy_observation: {},
-    download_observations: {},
-    edit_observation: {},
-    email_features: {},
-    email_merge_request: {},
-    guess: {},
-    hide_thumbnail_map: {},
-    how_to_help: {},
-    how_to_use: {},
-    ilist_users: {},
-    index: {},
-    index_observation: {},
-    index_rss_log: {},
-    index_user: {},
-    intro: {},
-    letter_to_community: {},
-    list_observations: {},
-    list_rss_logs: {},
-    list_users: {},
+  lookup: {
     lookup_accepted_name: {},
     lookup_comment: {},
     lookup_image: {},
@@ -328,13 +352,105 @@ ACTIONS = {
     lookup_observation: {},
     lookup_project: {},
     lookup_species_list: {},
-    lookup_user: {},
+    lookup_user: {}
+  },
+  names: {
+    adjust_permissions: {},
+    advanced_search: {},
+    approve_name: {},
+    authored_names: {},
+    bulk_name_edit: {},
+    change_synonyms: {},
+    # create_name: {}, # aliased only
+    deprecate_name: {},
+    edit_classification: {},
+    edit_lifeform: {},
+    # edit_name: {}, # aliased only
+    email_tracking: {},
+    eol: {},
+    eol_expanded_review: {},
+    eol_preview: {},
+    index_name: {},
+    inherit_classification: {},
+    # list_names: {}, # aliased only
+    make_description_default: {},
+    map: {},
+    merge_descriptions: {},
+    name_search: {},
+    names_by_author: {},
+    names_by_editor: {},
+    names_by_user: {},
+    needed_descriptions: {},
+    # next_name: {}, # aliased only
+    observation_index: {},
+    # prev_name: {}, # aliased only
+    propagate_classification: {},
+    propagate_lifeform: {},
+    publish_description: {},
+    refresh_classification: {},
+    set_review_status: {},
+    # show_name: {}, # aliased only
+    show_past_name: {},
+    test_index: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  },
+  name_descriptions: {
+    # create_name_description: {}, # aliased only
+    # destroy_name_description: {}, # aliased only
+    # edit_name_description: {}, # aliased only
+    index_name_description: {},
+    # list_name_descriptions: {}, # aliased only
+    name_descriptions_by_author: {},
+    name_descriptions_by_editor: {},
+    # next_name_description: {}, # aliased only
+    # prev_name_description: {}, # aliased only
+    # show_name_description: {}, # aliased only
+    show_past_name_description: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  },
+  # namings: {
+  #   create_post: {}, # alias for create
+  #   edit_post: {}, # alias for update
+  #   # resources
+  #   create: {}, # action has changed, now "new"
+  #   destroy: {},
+  #   edit: {},
+  #   new: {},
+  #   update: {}
+  # },
+  # notifications: {
+  #   show_notifications: {}, # aliased only
+  #   show: {}
+  # },
+  observations: {
+    # create_observation: {}, # aliased only
+    # destroy_observation: {}, # aliased only
+    download_observations: {},
+    # edit_observation: {}, # aliased only
+    hide_thumbnail_map: {},
+    index_observation: {},
+    # list_observations: {}, # aliased only
     map_observation: {},
     map_observations: {},
-    news: {},
-    next_observation: {},
-    next_rss_log: {},
-    next_user: {},
+    # next_observation: {}, # aliased only
     observation_search: {},
     observations_at_location: {},
     observations_at_where: {},
@@ -342,100 +458,146 @@ ACTIONS = {
     observations_by_user: {},
     observations_for_project: {},
     observations_of_name: {},
-    pattern_search: {},
-    prev_observation: {},
-    prev_rss_log: {},
-    prev_user: {},
+    # prev_observation: {}, # aliased only
     print_labels: {},
     recalc: {},
-    review_authors: {},
-    rss: {},
     search_bar_help: {},
-    set_export_status: {},
     show_location_observations: {},
-    show_notifications: {},
-    show_obs: {},
-    show_observation: {},
-    show_rss_log: {},
-    show_site_stats: {},
-    show_user: {},
+    # show_obs: {}, # aliased only
+    # show_observation: {}, # aliased only
     suggestions: {},
+    update_whitelisted_observation_attributes: {},
+    # other
+    set_export_status: {},
     test_flash_redirection: {},
-    textile: {},
-    textile_sandbox: {},
-    translators_note: {},
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    update_whitelisted_observation_attributes: {},
-    user_search: {},
-    users_by_contribution: {},
-    users_by_name: {},
     w3c_tests: {},
-    wrapup_2011: {}
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  pivotal: {
-    index: {}
-  },
-  project: {
+  # pivotal: {
+    # index: {}
+  # },
+  projects: {
     add_members: {},
-    add_project: {},
+    # add_project: {}, # aliased only
     admin_request: {},
     change_member_status: {},
-    destroy_project: {},
-    edit_project: {},
+    # destroy_project: {}, # aliased only
+    # edit_project: {}, # aliased only
     index_project: {},
-    list_projects: {},
-    next_project: {},
-    prev_project: {},
+    # list_projects: {}, # aliased only
+    # next_project: {}, # aliased only
+    # prev_project: {}, # aliased only
     project_search: {},
-    show_project: {}
+    # show_project: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  publications: {
-    create: {},
-    destroy: {},
-    edit: {},
-    index: {},
-    new: {},
-    show: {},
-    update: {}
+  # publications: {
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  # },
+  rss_logs: {
+    change_banner: {},
+    index_rss_log: {},
+    # list_rss_logs: {}, # aliased only
+    # next_rss_log: {}, # aliased only
+    # prev_rss_log: {}, # aliased only
+    rss: {},
+    # show_rss_log: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # index: {},
+    # show: {}
   },
-  sequence: {
-    create_sequence: {},
-    destroy_sequence: {},
-    edit_sequence: {},
+  search: {
+    advanced_search: {},
+    advanced_search_form: {},
+    pattern_search: {},
+    site_google_search: {}
+  },
+  sequences: {
+    # create_sequence: {}, # aliased only
+    # destroy_sequence: {}, # aliased only
+    # edit_sequence: {}, # aliased only
     index_sequence: {},
-    list_sequences: {},
-    next_sequence: {},
+    # list_sequences: {}, # aliased only
+    # next_sequence: {}, # aliased only
     observation_index: {},
-    prev_sequence: {},
+    # prev_sequence: {}, # aliased only
     sequence_search: {},
-    show_sequence: {}
+    # show_sequence: {}, # aliased only
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
-  species_list: {
+  species_lists: {
     add_observation_to_species_list: {},
     add_remove_observations: {},
     bulk_editor: {},
-    create_species_list: {},
-    destroy_species_list: {},
-    edit_species_list: {},
+    # create_species_list: {}, # aliased only
+    # destroy_species_list: {}, # aliased only
+    # edit_species_list: {}, # aliased only
     index_species_list: {},
-    list_species_lists: {},
+    # list_species_lists: {}, # aliased only
     make_report: {},
     manage_projects: {},
     manage_species_lists: {},
     name_lister: {},
-    next_species_list: {},
+    # next_species_list: {}, # aliased only
     post_add_remove_observations: {},
-    prev_species_list: {},
+    # prev_species_list: {}, # aliased only
     print_labels: {},
     remove_observation_from_species_list: {},
-    show_species_list: {},
+    # show_species_list: {}, # aliased only
     species_list_search: {},
     species_lists_by_title: {},
     species_lists_by_user: {},
     species_lists_for_project: {},
-    upload_species_list: {}
+    upload_species_list: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
   support: {
     confirm: {},
@@ -444,24 +606,44 @@ ACTIONS = {
     donors: {},
     governance: {},
     letter: {},
+    letter_to_community: {},
     review_donations: {},
     thanks: {},
     wrapup_2011: {},
     wrapup_2012: {}
   },
-  theme: {
+  themes: {
     color_themes: {}
   },
-  translation: {
+  translations: {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
   },
-  vote: {
+  users: {
+    change_user_bonuses: {},
+    checklist: {},
+    index_user: {},
+    ilist_users: {},
+    # list_users: {}, # aliased only
+    # next_user: {}, # aliased only
+    # prev_user: {}, # aliased only
+    # show_user: {}, # aliased only
+    users_by_contribution: {},
+    users_by_name: {},
+    user_search: {},
+    show_next: {},
+    show_prev: {}
+    # resources
+    # index: {},
+    # show: {}
+  },
+  votes: {
     cast_vote: {},
     cast_votes: {},
     refresh_vote_cache: {},
-    show_votes: {}
+    # show_votes: {}, # aliased only
+    show: {}
   }
 }.freeze
 
@@ -492,7 +674,7 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 ].freeze
 
 MushroomObserver::Application.routes.draw do
-  get "policy/privacy"
+
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -548,26 +730,64 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  get "publications/:id/destroy" => "publications#destroy"
-  resources :publications
+  # Logged in - Default page is /rss_logs#index.
+  # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
+  # constraints ->(req) { !req.session[:user_id].blank? } do
+    # root :to => "rss_logs#index"
+  # end
 
-  # Default page is /observer/list_rss_logs.
-  root "observer#list_rss_logs"
+  # Not logged in - Default page is /observations#index.
+  root :to => "observations#index"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
+  :herbarium_records, :images, :namings, :observations, :projects,
+  :publications, :sequences, :species_lists
+
+  # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
+  resources :names do
+    resources :descriptions, module: :names
+  end
+
+  resources :locations do
+    resources :descriptions, module: :locations
+  end
+
+  resources :notifications, only: [:show]
+
+  resources :pivotal, only: [:index]
+
+  resources :rss_logs, only: [:index, :show]
+
+  resources :users, only: [:index, :show]
+
+  get "policy/privacy"
+
+  # Route /123 to /observations/show_observation/123.
+  get ":id" => "observations#show", id: /\d+/
+  # get "observations/:id" => "observations#show", id: /\d+/
+
+  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # New routing - peel the controller name out of the string "lookup_#{action}"
+  LOOKUP_XXX_ID_ACTIONS.each do |action|
+    # get(
+    #   "observations/#{action}/:id",
+    #   controller: action[7,action.length].pluralize.to_sym,
+    #   action: action,
+    #   id: /.*/
+    # )
+    get "observations/#{action}/:id" =>
+      redirect("/#{action[7,action.length].pluralize}/%{id}")
+  end
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   AJAX_ACTIONS.each do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
-  end
-
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  LOOKUP_XXX_ID_ACTIONS.each do |action|
-    get("observer/#{action}/:id",
-        controller: "observer", action: action, id: /.*/)
+    get(
+      "ajax/#{action}/:type/:id",
+      controller: :ajax,
+      action: action,
+      id: /\S.*/
+    )
   end
 
   ACTIONS.each do |controller, actions|

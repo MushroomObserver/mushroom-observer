@@ -1,0 +1,23 @@
+<%
+  tabs = [
+    link_to(:all_objects.t(type: :location),
+            controller: :locations, action: :index),
+    link_to_coerced_query(@query, Observation),
+    link_to_coerced_query(@query, Location)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text-plus-image">
+  <center>
+    <%=
+      if @locations.any?
+        gmap = make_map(@locations)
+        finish_map(gmap)
+        gmap.div(width: 800, height: 550).html_safe
+      else
+        :runtime_map_nothing_to_map.t
+      end
+    %>
+  </center>
+</div>

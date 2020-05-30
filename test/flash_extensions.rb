@@ -47,7 +47,7 @@ module FlashExtensions
   def assert_flash(expect, msg = "")
     if (got = get_last_flash)
       lvl = got[0, 1].to_i
-      got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n")
+      got = got[1..].gsub(/(\n|<br.?>)+/, "\n")
     end
     msg&.sub(/\n*$/, "\n")
     if !expect && got
@@ -75,7 +75,7 @@ module FlashExtensions
   # Assert that a flash was rendered or is pending with the expected text.
   def assert_flash_text(expect, msg = "Flash text incorrect")
     got = get_last_flash
-    got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n") if got.present?
+    got = got[1..].gsub(/(\n|<br.?>)+/, "\n") if got.present?
     if expect.is_a?(Regexp)
       assert_match(expect, got, msg)
     else

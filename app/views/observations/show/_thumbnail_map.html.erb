@@ -1,0 +1,88 @@
+<%
+  if observation.location
+    loc = observation.location
+    n = ((90.0 - loc.north) / 1.80).round(6)
+    s = ((90.0 - loc.south) / 1.80).round(6)
+    e = ((180.0 + loc.east) / 3.60).round(6)
+    w = ((180.0 + loc.west) / 3.60).round(6)
+  end
+
+  lat, long = if observation.lat && observation.long
+    [observation.public_lat, observation.public_long]
+  elsif observation.location
+    observation.location.center
+  end
+  if lat && long
+    x = ((180.0 + long) / 3.60).round(6)
+    y = ((90.0 - lat) / 1.80).round(6)
+  end
+
+  map_url = url_for(add_query_param(controller: :observations,
+                                    action: :map_observation,
+                                    id: observation.id))
+%>
+
+<section id="thumbnail_map_partial" class="d-none d-sm-block mb-4">
+
+  <div class="card">
+    <div class="card-header bg-secondary text-secondary-text d-flex flex-row justify-content-between align-items-end">
+      <strong><%= :MAP.t %></strong>
+      <span class="ml-auto small">
+        <%= link_with_query(:show_observation_hide_map.t,
+                            action: :hide_thumbnail_map,
+                            id: @observation.id) %>
+      </span>
+    </div>
+
+    <div class="thumbnail-map-container">
+
+      <div class="thumbnail-buttons">
+        <div class="plus-button"></div>
+        <div class="minus-button"></div>
+      </div>
+
+      <div class="thumbnail-map">
+
+        <%= if observation.location
+          if w < e && s > n
+            content_tag(:div, "",
+              class: "thumbnail-map-box",
+              style: "left:#{w}%; top:#{n}%; width:#{e-w}%; height:#{s-n}%"
+            )
+          elsif w > e && s > n
+            content_tag(:div, "",
+              class: "thumbnail-map-box",
+              style: "left:0%; top:#{n}%; width:#{e}%; height:#{s-n}%"
+            ) +
+            content_tag(:div, "",
+              class: "thumbnail-map-box",
+              style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
+            )
+          end
+        end %>
+
+        <% if lat && long %>
+          <div class="pin-offset">
+            <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
+          </div>
+        <% end %>
+
+        <%= image_tag("globe.jpg", width: "100%") %>
+
+      </div><!-- .thumbnail-map -->
+
+    </div><!-- .thumbnail-map-container -->
+
+  </div><!-- .card -->
+
+</section><!-- #thumbnail_map_partial -->
+
+<%= if lat && long
+  javascript_include "thumbnail_map"
+  javascript_tag %{
+    var THUMBNAIL_MAP_ON   = true;
+    var THUMBNAIL_MAP_X    = #{x};
+    var THUMBNAIL_MAP_Y    = #{y};
+    var THUMBNAIL_MAP_LINK = "#{map_url}";
+  }
+end %>

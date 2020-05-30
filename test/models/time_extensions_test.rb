@@ -67,7 +67,7 @@ class TimeExtensionsTest < ActiveSupport::TestCase
   include TimeExtensionsInterfaceTest
 
   def setup
-    @object = Time.now
+    @object = Time.zone.now
   end
 
   def test_fancy_time
@@ -89,7 +89,7 @@ class TimeExtensionsTest < ActiveSupport::TestCase
   end
 
   def assert_fancy_time(diff, tag, args = {})
-    ref = Time.now
+    ref = Time.zone.now
     time = ref - diff
     expect = tag.l(args.merge(date: time.web_date))
     actual = time.fancy_time(ref)
@@ -97,7 +97,7 @@ class TimeExtensionsTest < ActiveSupport::TestCase
   end
 
   def test_future_fancy_time
-    ref = Time.now
+    ref = Time.zone.now
     ten_minutes_away = ref + 10.minutes
     fancy_future_time = ten_minutes_away.fancy_time(ref)
     expect = ten_minutes_away.in_time_zone.strftime(MO.web_time_format)

@@ -1,0 +1,97 @@
+<table cellpadding="0" cellspacing="5" class="m-2 text-nowrap">
+
+  <tr class="text-wrap">
+    <td colspan="9"><%= :show_votes_descript.t %></td>
+  </tr>
+
+  <tr>
+    <th width="20"><table width="25"><tr><td></td></tr></table></th>
+    <th width="20"><%= :show_votes_vote.t %></th>
+    <th width="20">&nbsp;</th>
+    <th width="20"><%= :show_votes_score.t %></th>
+    <th width="20">&nbsp;</th>
+    <th width="20"><%= :show_votes_weight.t %></th>
+    <th width="5" >&nbsp;</th>
+    <th width="20"><%= :show_votes_users.t %></th>
+    <th width="20">&nbsp;</th>
+  </tr>
+
+  <% table = @naming.calc_vote_table %>
+  <% for str in table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}
+    val = table[str][:value]
+    wgt = table[str][:wgt]
+    num = table[str][:num] %>
+    <% if val != 0 %>
+      <tr>
+        <td>&nbsp;</td>
+        <td><%= str.t %></td>
+        <td>&nbsp;</td>
+        <td align="center"><%= val %></td>
+        <td>&nbsp;</td>
+        <td align="center"><%= "%.2f" % wgt %></td>
+        <td>&nbsp;</td>
+        <td align="center"><%= num %></td>
+        <td align="left"><small><%=
+          votes = table[str][:votes].select(&:anonymous?) \
+                                    .sort_by {|v| v.id.to_s.reverse}
+                                    # pseudorandom but deterministic order
+          if votes.length > 0
+            n = 0
+            "(".html_safe + votes.map do |vote|
+              n += 1
+              if n < 4
+                user_link(vote.user, vote.user.login)
+              else
+                "..."
+              end
+            end.safe_join(",") + ")"
+          end
+        %></small></td>
+        <td>&nbsp;</td>
+      </tr>
+    <% end %>
+  <% end %>
+
+  <tr>
+    <td>&nbsp;</td>
+    <td colspan="7"><hr/></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td>&nbsp;</td>
+    <td colspan="3" align="center"><%= :show_votes_total.t %></td>
+    <td colspan="2" align="center"><%= "%.2f" % @naming.vote_cache %></td>
+    <td colspan="2" align="center"><%= "%.2f%%" % @naming.vote_percent %></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <% if @user %>
+    <tr style="white-space:normal">
+      <td colspan="9" align="center">
+        <%= if @user.votes_anonymous == :yes
+          link_with_query(:show_votes_go_public.t,
+                          { controller: :observations,
+                            action: :show,
+                            id: @naming.observation.id,
+                            go_public: "1" },
+                          { data: { confirm: :show_votes_go_public_confirm.l } })
+        else
+          link_to(:show_votes_go_private.t,
+                  { controller: :observations,
+                    action: :show,
+                    id: @naming.observation.id, go_private: "1" },
+                  { data: { confirm: :show_votes_go_private_confirm.l }})
+        end %>
+      </td>
+    </tr>
+  <% end %>
+
+</table>
+
+<% if do_cancel %>
+  <%= button_tag(:CLOSE.t,
+                 type: "button",
+                 class: "btn close_votes_popup mx-auto mb-3",
+                 data: { role: "close_popup" }) %>
+<% end %>

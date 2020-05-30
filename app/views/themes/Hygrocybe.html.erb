@@ -1,0 +1,49 @@
+<%
+  @title = :theme_hygrocybe.tl
+
+  tabs = [
+    link_to(:theme_list.t,
+            controller: :themes,
+            action: :color_themes),
+    link_to(:app_preferences.t,
+            controller: :account,
+            action: :prefs)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= :theme_hygrocybe_miniata.tp(link: "XXX").sub("XXX",
+      link_to("**__Hygrocybe miniata__**".t,
+              controller: :images,
+              action: :show,
+              id: 369)).html_safe %>
+
+  <%= :theme_hygrocybe_pittacina.tp(link: "XXX").sub("XXX",
+      link_to("**__Hygrocybe pittacina__**".t,
+              controller: :images,
+              action: :show,
+              id: 368)).html_safe %>
+
+  <p>
+    <span class="ListLine1">
+      <%= :theme_hygrocybe_conica.t(link: "XXX").sub("XXX",
+          link_to("**__Hygrocybe conica__**".t,
+                  controller: :images,
+                  action: :show,
+                  id: 371)).html_safe %>
+    </span>
+  </p>
+
+  <p>
+    <span class="ListLine0">
+      <%= :theme_hygrocybe_punicea.t(link: "XXX").sub("XXX",
+          link_to("**__Hygrocybe punicea__**".t,
+                  controller: :images,
+                  action: :show,
+                  id: 366)).html_safe %>
+    </span>
+  </p>
+
+  <%= :theme_switch.tp(theme: :Hygrocybe.t) %>
+</div>

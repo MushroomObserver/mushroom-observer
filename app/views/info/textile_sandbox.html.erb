@@ -1,0 +1,48 @@
+<% @title = :sandbox_title.t %>
+
+<div class="max-width-text">
+  <div class="help-block">
+    <%= :sandbox_header.tp %>
+  </div>
+
+  <% if !@code.nil? %>
+    <strong><%= :sandbox_look_like.t %>:</strong>
+    <div class="sandbox">
+      <% if @submit == :sandbox_test.l %>
+        <%= @code.tpl %>
+      <% else %>
+        <code>
+          <%= escape_html(@code.tpl) %>
+        </code>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= form_tag(action: :textile_sandbox) %>
+    <% if !@code.nil? %>
+      <div class="sandbox-up-ptr mx-auto mt-3 mb-3">
+        <%= image_tag("up_arrow.png") %>
+        <%= submit_tag(:sandbox_test.l, class: "btn") %>
+        <%= submit_tag(:sandbox_test_codes.l, class: "btn") %>
+        <%= image_tag("up_arrow.png") %>
+      </div>
+    <% end %>
+    <strong><%= :sandbox_enter.t %>:</strong>
+    <%= text_area_tag(:code, @code, class: "form-control", rows: 8) %>
+    <% if @code.nil? %>
+      <%= submit_tag(:sandbox_test.l, class: "btn mx-auto mt-3") %>
+    <% end %>
+  </form>
+
+  <div class="mt-3">
+    <p><strong><%= :sandbox_quick_ref.t %>:</strong></p>
+    <pre><%= :sandbox_sample.l %></pre>
+  </div>
+
+  <strong><%= :sandbox_web_refs.t %>:</strong>
+  <div class="indent">
+    <%= link_to(:sandbox_link4.t, "http://redcloth.org/textile") %><br/>
+    <%= link_to(:sandbox_link5.t, "http://redcloth.org/hobix.com/textile/") %><br/>
+    <%= link_to(:sandbox_link6.t, "http://warpedvisions.org/projects/textile-cheat-sheet.md") %><br/>
+  </div>
+</div>

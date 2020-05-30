@@ -95,11 +95,11 @@ class IpStats
     end
 
     def clear_blocked_ips
-      File.open(MO.blocked_ips_file, File::TRUNC) {}
+      File.truncate(MO.blocked_ips_file, 0)
     end
 
     def clear_okay_ips
-      File.open(MO.okay_ips_file, File::TRUNC) {}
+      File.truncate(MO.okay_ips_file, 0) {}
     end
 
     def clean_blocked_ips

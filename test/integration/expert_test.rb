@@ -30,7 +30,7 @@ class ExpertTest < IntegrationTestCase
       "#{name4} = #{name5}"
 
     login!(dick)
-    get("/name/bulk_name_edit")
+    get("/names/bulk_name_edit")
     open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
@@ -38,7 +38,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_error
     assert_response(:success)
-    assert_template("name/bulk_name_edit")
+    assert_template("names/bulk_name_edit")
 
     # Don't mess around, just let it do whatever it does, and make sure it is
     # correct.  I don't want to make any assumptions about how the internals
@@ -51,7 +51,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_logs/index")
 
     assert_not_nil(Name.find_by(text_name: "Caloplaca"))
 
@@ -125,7 +125,7 @@ class ExpertTest < IntegrationTestCase
 
     # First attempt at creating a list.
     login!(dick)
-    get("/species_list/create_species_list")
+    get("/species_lists/new")
     member_notes = "Member notes."
     open_form do |form|
       form.assert_value("list_members", "")
@@ -141,7 +141,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_error
     assert_response(:success)
-    assert_template("species_list/create_species_list")
+    assert_template("species_lists/new")
 
     assert_select("div#missing_names", /Caloplaca arnoldii ssp. obliterate/)
     assert_select("div#deprecated_names", /Lactarius alpigenes/)
@@ -166,7 +166,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
 
     spl = SpeciesList.last
     obs = spl.observations
@@ -210,7 +210,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_error
     assert_response(:success)
-    assert_template("species_list/edit_species_list")
+    assert_template("species_lists/edit")
 
     assert_select("div#missing_names", /Agaricus nova/)
     assert_select("div#ambiguous_names", /Amanita baccata.*sensu Arora/)
@@ -222,7 +222,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("location/create_location")
+    assert_template("locations/new")
 
     spl.reload
     obs = spl.observations
@@ -259,7 +259,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
     assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
@@ -275,8 +275,8 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.
-    click(href: /add_comment/)
-    assert_template("comment/add_comment")
+    click(href: /new/)
+    assert_template("comments/new")
     assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     open_form do |form|
@@ -285,7 +285,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("species_list/show_species_list")
+    assert_template("species_lists/show")
     assert_select("div#title", text: /#{spl.title}/)
     assert_select("div.comment", text: /Slartibartfast/)
     assert_select("div.comment", text: /Steatopygia/)

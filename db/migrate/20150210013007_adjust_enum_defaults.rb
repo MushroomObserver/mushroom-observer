@@ -1,4 +1,4 @@
-class AdjustEnumDefaults < ActiveRecord::Migration
+class AdjustEnumDefaults < ActiveRecord::Migration[4.2]
   def up
     change_column_default :name_descriptions, :review_status, 1
     change_column_default :users, :thumbnail_size, 1

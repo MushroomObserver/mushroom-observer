@@ -63,7 +63,7 @@ class Name < AbstractModel
     $/x.freeze
 
   # Disable cop to allow alignment and easier comparison of regexps
-  # rubocop:disable Metrics/LineLength
+  # rubocop:disable Layout/LineLength
 
   # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x.freeze
@@ -78,7 +78,7 @@ class Name < AbstractModel
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
   SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x.freeze
-  # rubocop:enable Metrics/LineLength
+  # rubocop:enable Layout/LineLength
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x.freeze
   SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x.freeze
@@ -235,7 +235,7 @@ class Name < AbstractModel
 
   def self.standardized_group_abbr(str)
     word = group_wd(str.to_s.downcase)
-    /^g/.match?(word) ? "group" : word
+    word.start_with?("g") ? "group" : word
   end
 
   # sripped group_abbr

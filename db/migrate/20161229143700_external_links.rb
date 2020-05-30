@@ -1,4 +1,4 @@
-class ExternalLinks < ActiveRecord::Migration
+class ExternalLinks < ActiveRecord::Migration[4.2]
   def self.up
     create_table :external_sites, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
       t.string   "name",       limit: 100

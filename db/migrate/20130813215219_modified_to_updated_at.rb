@@ -1,4 +1,4 @@
-class ModifiedToUpdatedAt < ActiveRecord::Migration
+class ModifiedToUpdatedAt < ActiveRecord::Migration[4.2]
   def self.up
     rename_column :comments, :modified, :updated_at
     rename_column :copyright_changes, :modified, :updated_at

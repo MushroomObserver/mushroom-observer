@@ -1,0 +1,159 @@
+<%
+  @title = :species_list_show_title.t(name: @species_list.unique_format_name)
+
+  tabs = []
+  if @user
+    tabs += [
+      link_with_query(:species_list_show_clone_list.t,
+                      { action: :new,
+                        clone: @species_list.id },
+                      { help: :species_list_show_clone_list_help.l }),
+      link_with_query(:species_list_show_set_source.t,
+                      { action: :show,
+                        id: @species_list.id,
+                        set_source: 1},
+                      { help: :species_list_show_set_source_help.l }),
+      link_with_query(:species_list_show_bulk_edit.t,
+                      { action: :bulk_editor,
+                        id: @species_list.id },
+                      { help: :species_list_show_bulk_edit_help.l })
+    ]
+  end
+  if check_permission(@species_list)
+    tabs += [
+      link_with_query(:species_list_show_manage_projects.t,
+                      action: :manage_projects,
+                      id: @species_list.id),
+      link_with_query(:species_list_show_edit.t,
+                      action: :edit,
+                      id: @species_list.id),
+      link_with_query(:DESTROY.t,
+                      { action: :destroy,
+                        id: @species_list.id },
+                      { class: "text-danger",
+                        data: { confirm: :are_you_sure.l } })
+    ]
+  end
+  tabs += [
+    link_with_query(:species_list_show_save_as_txt.t,
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "txt"),
+    link_with_query(:species_list_show_save_as_rtf.t,
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "rtf"),
+    link_with_query(:species_list_show_save_as_csv.t,
+                    action: :make_report,
+                    id: @species_list.id,
+                    type: "csv")
+  ]
+  tabs << draw_interest_icons(@species_list) if @user
+  @tabsets = {
+    pager_for: @species_list,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="row">
+  <div class="col-12 max-width-text-plus-padding">
+    <div class="list-group">
+      <div class="list-group-item">
+        <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+        <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
+        <div><b><%= :WHERE.t %>:</b>
+          <%= location_link(@species_list.place_name,
+                            @species_list.location, nil, true) rescue :UNKNOWN.t %>
+        </div>
+        <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
+        <% if @species_list.projects.any? %>
+          <div><b><%= :PROJECTS.t %>:</b>
+            <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
+          </div>
+        <% end %>
+        <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @pages.any?
+  query_params_set(@query) %>
+
+  <div class="row">
+    <div class="col-12 max-width-text-plus-image">
+      <%= paginate_block(@pages) do %>
+        <div class="card">
+
+          <div class="card-body default">
+            <%= :species_list_show_members.t %>:
+            <%= link_to_coerced_query(@query, Observation) %> |
+            <%= link_to_coerced_query(@query, Image) %> |
+            <%= link_to_coerced_query(@query, Name) %> |
+            <%= link_to(:app_checklist.t,
+                        controller: :users,
+                        action: :checklist,
+                        species_list_id: @species_list.id) %> |
+            <%= link_with_query(:species_list_show_print_labels.t,
+                                controller: :observations,
+                                action: :print_labels) %> |
+            <%= link_with_query(:DOWNLOAD.t,
+                                controller: :observations,
+                                action: :download_observations) %>
+          </div>
+
+          <% if @objects.any? %>
+            <% for observation in @objects %>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-4 col-md-3 col-lg-2">
+                    <%= if observation.thumb_image_id
+                      thumbnail(observation.thumb_image,
+                                link: observation.show_link_args,
+                                votes: true)
+                    end %>
+                  </div>
+                  <div class="col-sm-8 col-md-9 col-lg-10">
+                    <div class="bold">
+                      <%= link_with_query(observation.unique_format_name.t,
+                                          observation.show_link_args) %>
+                    </div>
+                    <div>
+                      <b><%= location_link(observation.place_name,
+                                           observation.location) %></b><br/>
+                      <span><%= user_link(observation.user) %></span>:
+                      <span><%= observation.when.web_date %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+<% else %>
+  <div class="row">
+    <div class="col-12 max-width-text">
+      <%= :species_list_show_no_members.tp %>
+    </div>
+  </div>
+<% end %>
+
+<div class="row">
+  <div class="col-12 max-width-text mt-3">
+    <%= render(partial: "comments/comments",
+               locals: { object: @species_list,
+                         controls: true,
+                         limit: nil }) %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 max-width-text mt-3">
+    <%= show_object_footer(@species_list) %>
+  </div>
+</div>

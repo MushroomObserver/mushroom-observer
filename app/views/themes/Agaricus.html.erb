@@ -1,0 +1,67 @@
+<%
+  @title = :theme_agaricus.tl
+
+  tabs = [
+    link_to(:theme_list.t,
+            controller: :themes,
+            action: :color_themes),
+    link_to(:app_preferences.t,
+            controller: :account,
+            action: :prefs)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= :theme_agaricus_campestris.tp(link: "XXX").sub("XXX",
+      link_to("**__Agaricus campestris__**".t,
+              controller: :images,
+              action: :show,
+              id: 694)).html_safe %>
+
+  <%= :theme_agaricus_cupreobrunneus.tp(link: "XXX").sub("XXX",
+      link_to("**__Agaricus cupreobrunneus__**".t,
+              controller: :images,
+              action: :show,
+              id: 693)).html_safe %>
+
+  <%= :theme_agaricus_subrufescens.tp(link: "XXX").sub("XXX",
+      link_to("**__Agaricus subrufescens__**".t,
+              controller: :images,
+              action: :show,
+              id: 699)).html_safe %>
+
+  <%= :theme_agaricus_semotus.tp(link: "XXX").sub("XXX",
+      link_to("**__Agaricus semotus__**".t,
+              controller: :images,
+              action: :show,
+              id: 687)).html_safe %>
+
+  <%= :theme_agaricus_augustus.tp(link: "XXX").sub("XXX",
+      link_to("**__Agaricus augustus__**".t,
+      controller: :images,
+      action: :show,
+      id: 708)).html_safe %>
+
+  <p>
+    <span class="ListLine0">
+      <%= :theme_agaricus_xanthodermus.t(link: "XXX").sub("XXX",
+          link_to("**__Agaricus xanthodermus__**".t,
+          controller: :images,
+          action: :show,
+          id: 679)).html_safe %>
+    </span>
+  </p>
+
+  <p>
+    <span class="ListLine1">
+      <%= :theme_agaricus_lilaceps.t(link: "XXX").sub("XXX",
+          link_to("**__Agaricus lilaceps__**".t,
+          controller: :images,
+          action: :show,
+          id: 690)).html_safe %>
+    </span>
+  </p>
+
+  <%= :theme_switch.tp(theme: :Agaricus.t) %>
+</div>

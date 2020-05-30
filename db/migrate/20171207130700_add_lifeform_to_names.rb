@@ -1,4 +1,4 @@
-class AddLifeformToNames < ActiveRecord::Migration
+class AddLifeformToNames < ActiveRecord::Migration[4.2]
   def up
     add_column :names, :lifeform, :string, limit: 1024, null: false, default: " "
     add_column :names_versions, :lifeform, :string, limit: 1024, null: false, default: " "

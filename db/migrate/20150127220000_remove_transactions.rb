@@ -1,4 +1,4 @@
-class RemoveTransactions < ActiveRecord::Migration
+class RemoveTransactions < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :transactions
     remove_column :comments, :sync_id

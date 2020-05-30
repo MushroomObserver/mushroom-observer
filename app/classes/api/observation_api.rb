@@ -16,7 +16,7 @@ class API
       { images: :license },
       :location,
       :name,
-      { namings: [ :name, { votes: :user } ] },
+      { namings: [:name, { votes: :user }] },
       :collection_numbers,
       { herbarium_records: :herbarium },
       :sequences,
@@ -326,14 +326,12 @@ class API
     #  Validation
     # --------------------
 
-    # rubocop:disable CyclomaticComplexity (no reasonable way to fix offense)
     def no_adds_or_removes?
       @add_images.empty? && @remove_images.empty? &&
         !@add_to_project && !@remove_from_project &&
         !@add_to_list && !@remove_from_list &&
         @notes.empty?
     end
-    # rubocop:enable CyclomaticComplexity
 
     def make_sure_both_latitude_and_longitude!
       return if @latitude && @longitude || !@longitude && !@latitude
@@ -341,7 +339,6 @@ class API
       raise LatLongMustBothBeSet.new
     end
 
-    # rubocop:disable CyclomaticComplexity (no reasonable way to fix offense)
     def make_sure_has_specimen_set!
       return if @has_specimen
 
@@ -352,7 +349,6 @@ class API
       raise error_class.new(:initial_det)       if @initial_det
       raise error_class.new(:accession_number)  if @accession_number
     end
-    # rubocop:enable CyclomaticComplexity
 
     def make_sure_location_provided!
       raise MissingParameter.new(:location) unless @location

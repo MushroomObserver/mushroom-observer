@@ -53,7 +53,7 @@
 #    # Use the same code in your view template for either case:
 #    <%= paginate_block(@pages) do %>
 #      <% for object in @results
-#        <%= link_to(object.name, action: "show_object", id: object.id) %><br/>
+#        <%= link_to(object.name, action: :show_object, id: object.id) %><br/>
 #      <% end %>
 #    <% end %>
 #
@@ -90,9 +90,9 @@ class MOPaginator
   attr_reader :num_total     # Total number of results.
   attr_reader :used_letters  # List of letters that have results.
 
-  alias_method :page_arg, :number_arg
-  alias_method :page, :number
-  alias_method :length, :num_total
+  alias page_arg number_arg
+  alias page number
+  alias length num_total
 
   def blank?
     num_total.zero?
@@ -126,7 +126,7 @@ class MOPaginator
     end
     @number
   end
-  alias_method :page=, :number=
+  alias page= number=
 
   # Validate the letter selection.
   def letter=(char)
@@ -149,7 +149,7 @@ class MOPaginator
     end
     @num_total
   end
-  alias_method :length=, :num_total=
+  alias length= num_total=
 
   # Validate the number per page.
   def num_per_page=(num)
@@ -163,12 +163,10 @@ class MOPaginator
   # duplicates and non-letters.  (Set to +nil+ to mean assume all letters have
   # results.)
   def used_letters=(list)
-    if list
-      @used_letters = list.map { |l| l.to_s[0, 1].upcase }.uniq.
-                      select { |l| l.match(/[A-Z]/) }.sort
-    else
-      @used_letters = nil
-    end
+    @used_letters = if list
+                      list.map { |l| l.to_s[0, 1].upcase }.uniq.
+                        select { |l| l.match(/[A-Z]/) }.sort
+                    end
   end
 
   # Number of pages of results available.

@@ -1,4 +1,4 @@
-class ConvertYourDatabase < ActiveRecord::Migration
+class ConvertYourDatabase < ActiveRecord::Migration[4.2]
   def self.up
     puts %(
 

@@ -1,0 +1,64 @@
+<%
+  @title ||= :list_herbaria_title.t
+
+  tabs = create_links(@links)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<% if @merge %>
+  <div class="alert alert-warning max-width-text mt-3">
+    <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
+                                       url: reload_with_args(merge: nil)) %>
+  </div>
+<% end %>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table-striped table-herbarium mt-3">
+      <thead>
+        <tr>
+          <th><%= :herbarium_index_records.t %></th>
+          <th><%= :USER.t unless @no_user_column %></th>
+          <th><%= :herbarium_code.t %></th>
+          <th><%= :NAME.t %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @objects.each do |herbarium| %>
+          <tr>
+            <td>
+              <%= herbarium.herbarium_records.length %>
+            </td>
+            <td>
+              <%= if herbarium.personal_user_id.present? && !@no_user_column
+                content_tag(:span, user_link(herbarium.personal_user),
+                            title: herbarium.personal_user.unique_text_name)
+              end %>
+            </td>
+            <td>
+              <%= herbarium.code %>
+            </td>
+            <td>
+              <% if !@merge || !@user %>
+                <%= link_with_query(herbarium.name.t,
+                                    herbarium.show_link_args) %>
+              <% elsif @merge != herbarium %>
+                <%= link_with_query(herbarium.name.t,
+                                    controller: :herbaria, action: :merge_herbaria,
+                                    that: @merge.id, this: herbarium.id) %>
+              <% else %>
+                [<%= content_tag(:i, herbarium.name.t, style: "color:red") %>]
+              <% end %>
+              <% if @user && !@merge && (herbarium.can_edit? || in_admin_mode?) %>
+                [<%= link_with_query(:EDIT.t, action: :edit, id: herbarium.id) %> |
+                 <%= link_to(:MERGE.t, reload_with_args(merge: herbarium.id)) %>]
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>

@@ -14,7 +14,7 @@ Did test_commercial_inquiry work?
 It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this image: http://mushroomobserver.org/image/show_image/<%= ActiveRecord::FixtureSet.identify(:commercial_inquiry_image) %>
+Show this image: http://mushroomobserver.org/images/show_image/<%= ActiveRecord::FixtureSet.identify(:commercial_inquiry_image) %>
 Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_commercial/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org

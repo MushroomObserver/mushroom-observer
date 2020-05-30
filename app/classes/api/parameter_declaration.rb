@@ -54,7 +54,6 @@ class API
       end
     end
 
-    # rubocop:disable CyclomaticComplexity
     def show_val(val)
       case val
       when String, Symbol, Integer, Float, Range
@@ -75,6 +74,5 @@ class API
         raise "Don't know how to display #{val.class.name} in api help msg."
       end
     end
-    # rubocop:enable CyclomaticComplexity
   end
 end

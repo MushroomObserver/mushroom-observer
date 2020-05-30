@@ -3,13 +3,13 @@
       description.id
     )) do |form| %>
 
-  <%= submit_tag(:SUBMIT.l, class: "btn center-block push-down push-up") %>
+  <%= submit_tag(:SUBMIT.l, class: "btn mx-auto mt-3 mb-3") %>
 
   <center>
     <table class="table-striped table-description-permissions">
       <thead>
         <tr>
-          <th style="margin-right:20px"><%= :adjust_permissions_user_header.t %></th>
+          <th class="mr-4"><%= :adjust_permissions_user_header.t %></th>
           <th width="50"><%= :adjust_permissions_reader_header.t %></th>
           <th width="50"><%= :adjust_permissions_writer_header.t %></th>
           <th width="50"><%= :adjust_permissions_admin_header.t %></th>
@@ -119,5 +119,5 @@
     </table>
   </center>
 
-  <%= submit_tag(:SUBMIT.l, class: "btn center-block push-down") %>
+  <%= submit_tag(:SUBMIT.l, class: "btn mx-auto mt-3") %>
 <% end %>

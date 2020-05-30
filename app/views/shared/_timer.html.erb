@@ -1,0 +1,7 @@
+<%=
+@timer_end ||= Time.now
+secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+timer = "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
+
+content_tag(:span, timer, class: "ml-auto text-muted small")
+%>

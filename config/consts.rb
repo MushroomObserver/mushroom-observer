@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "yaml"
 
 class ImageConfigData
@@ -181,9 +183,10 @@ MushroomObserver::Application.configure do
   #   }
   config.s3_credentials = {}
 
-  # Default number of items for an RSS page
-  config.default_layout_count = 18
+  # Default number of items for an RSS Log page
+  config.default_layout_count = 24
 
+  # TODO: NIMMO Remove whatever is not listed in sprockets manifest!
   # Set of javascript and stylesheet files not included by default and
   # therefore need to be precompiled explicitly.
   if config.assets&.precompile
@@ -197,7 +200,6 @@ MushroomObserver::Application.configure do
       multi_image_upload.js
       name_lister.js
       pivotal.js
-      rss_feed_select_helper.js
       selectize.min.js
       single_image_uploader.js
       suggestions.js

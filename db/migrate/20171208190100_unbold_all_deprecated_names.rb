@@ -1,4 +1,4 @@
-class UnboldAllDeprecatedNames < ActiveRecord::Migration
+class UnboldAllDeprecatedNames < ActiveRecord::Migration[4.2]
   def up
     Name.connection.select_rows(%(
       SELECT id, display_name FROM names

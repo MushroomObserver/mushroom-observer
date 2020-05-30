@@ -1,0 +1,38 @@
+<%
+  @title = :image_remove_title.t(name: @object.unique_format_name)
+
+  tabs = [
+    link_with_query(:show_object.t(type: target_class),
+                    @object.show_link_args),
+    link_with_query(:edit_object.t(type: target_class),
+                    controller: target_class.show_controller,
+                    action: target_class.edit_action,
+                    id: @object.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_tag(add_query_param(action: form_action,
+                             id: @object.id)) do %>
+  <div class="row">
+    <div class="col-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn mx-auto mt-3 mb-3") %>
+    </div>
+  </div>
+
+  <%= render(partial: "shared/log_item", locals: {objects: @object.images}) do |image| %>
+    <div class="mt-3 mb-3">
+      <%= thumbnail(image, votes: true, original: true) %>
+      <div class="text-center">
+        <%= check_box(:selected, image.id, {}, "yes", "no") %>
+        <label for="selected_#{image.id}"><%= :image.t %> #<%= image.id %></label>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn mx-auto mt-3") %>
+    <% end %>
+  </div>
+</div>

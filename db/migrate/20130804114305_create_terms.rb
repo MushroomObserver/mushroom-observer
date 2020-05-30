@@ -1,4 +1,4 @@
-class CreateTerms < ActiveRecord::Migration
+class CreateTerms < ActiveRecord::Migration[4.2]
   def self.up
     create_table :terms do |t|
       t.string "name", limit: 1024

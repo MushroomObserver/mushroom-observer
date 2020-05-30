@@ -1,5 +1,6 @@
 require "test_helper"
 
+# TODO: NIMMO the routing of name description urls has totally changed, fix
 # Test typical sessions of university student who is writing descriptions.
 class StudentTest < IntegrationTestCase
   # -----------------------------------
@@ -25,8 +26,8 @@ class StudentTest < IntegrationTestCase
     katrina_session.login!(katrina)
     dick_session.login!(dick)
 
-    refute_equal(mary_session.session[:session_id],
-                 dick_session.session[:session_id])
+    assert_not_equal(mary_session.session[:session_id],
+                     dick_session.session[:session_id])
     url = mary_session.create_draft(name, gen_desc, project)
     rolf_session.check_admin(url, gen_desc, project)
     katrina_session.check_another_student(url)
@@ -40,7 +41,7 @@ class StudentTest < IntegrationTestCase
       assert_select("a[href*=show_name_description]", 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
-      refute_match(/#{gen_desc}/, response.body)
+      assert_no_match(/#{gen_desc}/, response.body)
       assert_select("a[href*=create_name_description]", 1)
       click(href: /show_name_description/)
       assert_select("a[href*=edit_name_description]")
@@ -87,7 +88,7 @@ class StudentTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      # assert_template("name/show_name_description")
+      # assert_template("names/show_name_description")
 
       # Make sure it shows up on main show_name page and can edit it.
       get(url)

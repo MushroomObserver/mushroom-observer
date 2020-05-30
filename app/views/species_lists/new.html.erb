@@ -1,0 +1,10 @@
+<%
+  @title = :species_list_create_title.t
+
+  tabs = [
+    link_to(:name_lister_title.t, action: :name_lister)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "form", locals: { button_name: :CREATE } %>

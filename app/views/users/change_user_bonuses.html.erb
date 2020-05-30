@@ -1,0 +1,14 @@
+<% @title = :change_user_bonuses_title.t(user: @user2.legal_name) %>
+
+<div class="max-width-text">
+  <%= form_tag(action: :change_user_bonuses) do %>
+
+    <div class="help-note">
+      <%= :change_user_bonuses_help.tp %>
+    </div>
+
+    <%= text_area_tag(:val, h(@val), rows: 5, class: "form-control mt-3") %>
+
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+  <% end %>
+</div>

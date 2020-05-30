@@ -97,6 +97,7 @@ class ApplicationController < ActionController::Base
   require "login_system"
   require "csv"
   include LoginSystem
+  include ViewsPath
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -190,7 +191,7 @@ class ApplicationController < ActionController::Base
     return true if @user&.is_successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default(controller: :rss_logs, action: :index)
     false
   end
 
@@ -268,7 +269,7 @@ class ApplicationController < ActionController::Base
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
     if args.member?(:back)
-      redirect_back(fallback_location: "/")
+      redirect_back(fallback_location: "#{MO.http_domain}")
     else
       super
     end
@@ -742,7 +743,7 @@ class ApplicationController < ActionController::Base
     # is a way to test if it's html_safe before, and if so, then it should be
     # okay to remove the first character without making it html_unsafe??
     # rubocop:disable Rails/OutputSafety
-    session[:notice].to_s[1..-1].html_safe
+    session[:notice].to_s[1..].html_safe
     # rubocop:enable Rails/OutputSafety
   end
   helper_method :flash_get_notices
@@ -799,11 +800,11 @@ class ApplicationController < ActionController::Base
     type_sym = obj.class.to_s.underscore.to_sym
     if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
-      return true
+      true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
-      return false
+      false
     end
   end
 
@@ -838,7 +839,7 @@ class ApplicationController < ActionController::Base
   #   Xxx yyy sensu Blah
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
-  #   (this is described better in views/observer/bulk_name_edit.rhtml)
+  #   (this is described better in views/observations/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
     return unless approved_names
@@ -1012,14 +1013,24 @@ class ApplicationController < ActionController::Base
   end
   helper_method :query_params
 
-  def add_query_param(params, query = nil)
+  # This is split off so now we can add the query param to a RESTful path,
+  # rather than having to specify controller and action the old way.
+  def get_query_param(query = nil)
     if browser.bot?
       # do nothing
     elsif query
       query.save unless query.id
-      params[:q] = query.id.alphabetize
+      q_param = query.id.alphabetize
     elsif @query_params
-      params[:q] = @query_params[:q]
+      q_param = @query_params[:q]
+    end
+    q_param
+  end
+  helper_method :get_query_param
+
+  def add_query_param(params, query = nil)
+    if !browser.bot?
+      params[:q] = get_query_param(query)
     end
     params
   end
@@ -1431,10 +1442,14 @@ class ApplicationController < ActionController::Base
     @error ||= :runtime_no_matches.t(type: type)
 
     # Get user prefs for displaying results as a matrix.
+    # CHANGED for better performance: No overriding the default count!
     if args[:matrix]
-      @layout = calc_layout_params
-      num_per_page = @layout["count"]
+      # @layout = calc_layout_params
+      # num_per_page = @layout["count"]
+      num_per_page = MO.default_layout_count
     end
+
+    # PAGINATION SECTION. Uses MOPaginator class and pagination_helper
 
     # Inform the query that we'll need the first letters as well as ids.
     query.need_letters = args[:letters] if args[:letters]
@@ -1562,7 +1577,11 @@ class ApplicationController < ActionController::Base
   end
 
   def reverse_by(query, this_by)
-    /^reverse_/.match?(query.params[:by].to_s) ? this_by : "reverse_#{this_by}"
+    if query.params[:by].to_s.start_with?("reverse_")
+       this_by
+     else
+       "reverse_#{this_by}"
+     end
   end
 
   public ##########
@@ -1750,7 +1769,7 @@ class ApplicationController < ActionController::Base
   end
 
   def calc_layout_params
-    count = (@user&.layout_count) || MO.default_layout_count
+    count = @user&.layout_count || MO.default_layout_count
     { "count" => count }
   end
 
@@ -1788,7 +1807,7 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # defined here because used by both image_controller and observer_controller
+  # defined here because used by both image_controller and observations_controller
   def whitelisted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end

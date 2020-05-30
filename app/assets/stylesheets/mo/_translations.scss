@@ -1,0 +1,40 @@
+//
+// edit translations
+// --------------------------------------------------
+
+.translation_container {
+    height: 750px;
+    padding-right: 0;
+
+    > div {
+        height: 750px;
+        overflow-y: auto;
+        height: 100%;
+        // background-color: $LIST_BG_COLOR;
+        // border: 1px solid $LIST_BORDER_COLOR;
+        padding: 2px 5px;
+    }
+
+    .major_header {
+        margin: 1em 0;
+        font-weight: bold;
+    }
+
+    .minor_header {
+        margin: 0.5em 0;
+        font-weight: bold;
+    }
+
+    .comment {
+        margin: 0.5em 0;
+    }
+
+    .tag_field {
+        margin: 0;
+    }
+
+    .old_versions td {
+        vertical-align: top;
+        padding: 0 0.5em;
+    }
+}

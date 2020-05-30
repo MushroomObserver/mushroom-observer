@@ -70,12 +70,12 @@ module SessionExtensions
     send(method.downcase.to_s, url, *args)
     follow_redirect! while response.redirect?
     if status == 500
-      if error = controller.instance_variable_get("@error")
-        msg = "#{error}\n#{error.backtrace.join("\n")}"
-      else
-        msg = "Got unknown 500 error from outside our application?!\n" \
-              "This usually means that a file failed to parse.\n"
-      end
+      msg = if error = controller.instance_variable_get("@error")
+              "#{error}\n#{error.backtrace.join("\n")}"
+            else
+              "Got unknown 500 error from outside our application?!\n" \
+                    "This usually means that a file failed to parse.\n"
+            end
       flunk msg
     end
     assert_equal([], Symbol.missing_tags,
@@ -136,7 +136,7 @@ module SessionExtensions
   # Get an Array of URLs for the given links.
   #
   #   # This gets all the name links in the results of the last page.
-  #   urls = get_links('div.results a[href^=/name/show_name]')
+  #   urls = get_links('div.results a[href^=/names/show_name]')
   #
   def get_links(*args)
     results = []
@@ -262,7 +262,7 @@ module SessionExtensions
       elsif arg == :sort_tabs
         arg = "div#sorts"
       elsif arg == :left_panel
-        arg = "div#navigation"
+        arg = "nav#site_nav"
       elsif arg == :results
         arg = "div.results"
       elsif arg == :title

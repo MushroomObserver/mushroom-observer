@@ -1,5 +1,5 @@
 # encoding: utf-8
-class RemoveOldTables < ActiveRecord::Migration
+class RemoveOldTables < ActiveRecord::Migration[4.2]
   def self.up
     for old_table in %w(
       authors_descriptions

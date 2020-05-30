@@ -46,8 +46,8 @@ class AjaxController < ApplicationController
     yield
   rescue StandardError => e
     msg = e.to_s + "\n"
-    msg += backtrace(e) if Rails.env != "production"
-    render(plain: msg, status: 500)
+    msg += backtrace(e) if Rails.env.production?
+    render(plain: msg, status: :internal_server_error)
   end
 
   def prepare_parameters

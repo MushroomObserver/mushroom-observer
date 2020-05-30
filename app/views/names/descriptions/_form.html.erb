@@ -1,0 +1,41 @@
+<!--[form:name_description]-->
+<%= # form_for(:description,
+    #          url: add_query_param(action: :new, id: @description.name_id)
+    #         ) do |form| %>
+<%= # form_for(:description,
+    #          url: add_query_param(action: :edit, id: @description.id)
+    #         ) do |form| %>
+<%= form_with model: :name_description do |f| %>
+
+  <div class="max-width-text">
+    <%= submit_tag(button_name, class: "btn mx-auto mt-3 mb-3") %>
+
+    <%= render(partial: "shared/form_description", locals: {form: f}) %>
+
+    <%= submit_tag(button_name, class: "btn mx-auto mt-3 mb-3") %>
+
+    <p><strong><%= :DESCRIPTION.t %>:</strong></p>
+    <%= render(partial: "shared/textilize_help") %>
+
+    <% rank = rank_as_lower_string(@description.parent.rank) %>
+    <% for field in NameDescription.all_note_fields %>
+      <div class="form-group">
+        <%= label_tag("description_#{field}", :"form_names_#{field}".t + ":") %>
+        <p class="help-block mt-0">
+          <%= :"form_names_#{field}_help".l(rank: rank) %>
+        </p>
+        <%= f.text_area(field, rows: 10, class: "form-control") %>
+      </div>
+    <% end %>
+
+    <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+  </div>
+
+  <% if @merge %>
+    <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
+    <%= hidden_field_tag(:delete_after, @delete_after) %>
+  <% end %>
+
+<% end %>
+
+<!--[eoform:name_description]-->

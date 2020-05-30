@@ -1,4 +1,4 @@
-class FixProjectAssociationTables < ActiveRecord::Migration
+class FixProjectAssociationTables < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :images_projects
     drop_table :observations_projects

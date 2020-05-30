@@ -25,6 +25,11 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  # def self.show_controller
+  #   "articles"
+  # end
+
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]
 

@@ -1,0 +1,43 @@
+<%= # form_tag({ action: :new,
+    #            approved_name: @what,
+    #            approved_where: @place_name },
+    #          { multipart: true,
+    #            name: "observation_form" }) do %>
+<%= # form_tag(add_query_param(action: :edit,
+    #                          id: @observation,
+    #                          approved_name: @what,
+    #                          approved_where: @place_name),
+    #          { multipart: true,
+    #            name: "observation_form" }) do %>
+
+<%= form_with model: :observation html: { multipart: true } do |form| %>
+
+  <%= form.submit button_name, class: "btn mx-auto mt-3" %>
+
+  <%= render "/observations/form/when" %>
+  <%= render "/observations/form/where" %>
+  <%= render "/observations/form/lat_long_alt" %>
+  <%= render "/observations/form/naming" %>
+  <%= render "/observations/form/specimen" %>
+  <%= render "/observations/form/notes" %>
+
+  <% if @projects.any? || @lists.any? %>
+    <%= render "/observations/form/projects" %>
+    <%= render "/observations/form/lists" %>
+  <% end %>
+
+  <%= form.submit button_name, class: "btn mx-auto mt-3" %>
+
+  <% if logging_optional? %>
+    <%= tag.div class: "form-inline" do %>
+      <%= form.check_box :log_change,
+                         :checked,
+                         checked: "1",
+                         class: "form-control-xxx",
+                         id: "log_change_checked" -%>
+      <%= form.label :log_change,
+                     :form_observations_log_change.t %>
+    <% end %>
+  <% end %>
+
+<% end %>

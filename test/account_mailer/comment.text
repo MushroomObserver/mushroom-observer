@@ -19,9 +19,9 @@ Wow!  That's really cool
 Please do not reply to this email! Use the link below to respond via your own public comment.
 Here are some handy links:
 
-Show this observation: http://mushroomobserver.org/observer/show_observation/<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
-Post a comment: http://mushroomobserver.org/comment/add_comment?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation
-I'm not interested in this observation: http://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Show this observation: http://mushroomobserver.org/observations/show_observation/<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
+Post a comment: http://mushroomobserver.org/comments/new?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation
+I'm not interested in this observation: http://mushroomobserver.org/interests/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>&type=Observation&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
 Stop sending me email like this: http://mushroomobserver.org/account/no_email_comments_owner/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org

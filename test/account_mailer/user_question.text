@@ -14,7 +14,7 @@ Shall we discuss it in email?
 It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this user: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
+Show this user: http://mushroomobserver.org/users/show_user/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_question/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org

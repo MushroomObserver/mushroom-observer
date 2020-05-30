@@ -1,4 +1,4 @@
-class HerbariumCode < ActiveRecord::Migration
+class HerbariumCode < ActiveRecord::Migration[4.2]
   def self.up
     add_column(:herbaria, :code, :string, limit: 8, default: "", null: false)
   end

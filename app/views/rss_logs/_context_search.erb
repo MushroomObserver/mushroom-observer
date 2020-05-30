@@ -1,0 +1,42 @@
+<%= form_tag({controller: :search, action: :pattern_search},
+             {class: "form-inline my-2 my-lg-0"}) do %>
+
+  <%= text_field(:search,
+                 :pattern,
+                 value: session[:pattern],
+                 class: "form-control",
+                 aria: {label: "Search".t},
+                 placeholder: :app_find.t ) %>
+
+  <%= options = [
+        [:COMMENTS.l, :comment],
+        [:HERBARIA.l, :herbarium],
+        [:IMAGES.l, :image],
+        [:LOCATIONS.l, :location],
+        [:NAMES.l, :name],
+        [:OBSERVATIONS.l, :observation],
+        [:PROJECTS.l, :project],
+        [:SPECIES_LISTS.l, :species_list],
+        [:HERBARIUM_RECORDS.l, :herbarium_record],
+        [:USERS.l, :user],
+        [:app_search_google.l, :google],
+      ].sort
+
+      select(:search, :type,
+             options_for_select(
+               options,
+               session[:search_type] || :observation
+              ),
+             {},
+             { class: "custom-select" }) %>
+
+  <%= submit_tag(:app_search.l,
+                 class: "btn btn-primary mr-2") %>
+
+  <%= link_to search_advanced_search_form_path,
+              class: "mx-2 btn btn-link border-0",
+              id: "advanced_search_link" do
+        tag.span :app_advanced_search.t class: "text-nowrap"
+  end %>
+
+<% end %>

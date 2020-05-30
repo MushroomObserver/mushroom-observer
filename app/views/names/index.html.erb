@@ -1,0 +1,56 @@
+<%
+  tabs = [
+    link_to(:name_index_add_name.t, action: :new),
+    link_to(:name_index_bulk_edit.t, action: :bulk_name_edit)
+  ]
+  tabs += create_links(@links)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<% if @suggest_alternate_spellings && @objects.empty?
+     names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
+     if names.any? %>
+        <div class="alert-warning">
+          <%= :list_observations_alternate_spellings.t %><br/>
+          <ul class="list-unstyled">
+            <% names.sort_by(&:sort_name).each do |name| %>
+              <%= link_to(name.display_name.t, name.show_link_args) %><br/>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+<% end %>
+
+<%= @help.tp if @help %>
+
+<% # Let test_index test pass args to pagination_links.
+   args = @test_pagination_args || {} %>
+<%= paginate_block(@pages, args) do %>
+    <% if @objects.any? %>
+        <% counts = Name.count_observations(@objects) %>
+        <table class="table table-striped w-100">
+          <% @objects.each do |name| %>
+              <tr>
+                <td>
+                  <%= link_with_query(name.display_name.html_safe.t,
+                                      name.show_link_args) + " [#{counts[name.id]}]" %>
+                </td>
+                <% if @extra_data %>
+                    <% data = @extra_data[name.id]
+                       if data.any?
+                         for val in data %>
+                            <td><%= val %></td>
+                        <% end
+                           else %>
+                        <td align="center" colspan="3" class="ls-5">
+                          --- not the default ---
+                        </td>
+                    <% end %>
+                <% end %>
+              </tr>
+          <% end %>
+        </table>
+    <% end %>
+<% end %>

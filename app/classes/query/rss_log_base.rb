@@ -30,13 +30,13 @@ class Query::RssLogBase < Query::Base
 
     types = self.types
     types &= RssLog.all_types
-    if types.empty?
-      where << "FALSE"
-    else
-      where << types.map do |type|
-        "rss_logs.#{type}_id IS NOT NULL"
-      end.join(" OR ")
-    end
+    where << if types.empty?
+               "FALSE"
+             else
+               types.map do |type|
+                 "rss_logs.#{type}_id IS NOT NULL"
+               end.join(" OR ")
+             end
   end
 
   def default_order

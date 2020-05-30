@@ -2,47 +2,52 @@
 class GlossaryController < ApplicationController
   before_action :login_required, except: [
     :index,
+    :show,
     :show_past_glossary_term,
-    :show_glossary_term
+    :show_glossary_term # aliased
   ]
 
-  def show_glossary_term
+  def show
     store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/"\
-                     "#{@glossary_term.id}"
+    @canonical_url = "#{MO.http_domain}/glossary/#{@glossary_term.id}"
     @layout = calc_layout_params
     @objects = @glossary_term.images
   end
+
+  alias_method :show_glossary_term, :show
 
   def index
     store_location
     @glossary_terms = GlossaryTerm.all.order(:name)
   end
 
-  def create_glossary_term # :norobots:
-    if request.method == "POST"
-      glossary_term_post
-    else
-      glossary_term_get
-    end
-  end
-
-  def glossary_term_get
+  def new
     @copyright_holder = @user.name
     @copyright_year = Time.now.utc.year
     @upload_license_id = @user.license_id
     @licenses = License.current_names_and_ids(@user.license)
   end
 
-  def glossary_term_post
-    glossary_term = \
+  alias_method :create_glossary_term, :new
+  alias_method :glossary_term_get, :new
+
+  def create
+    @glossary_term = \
       GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
                        description: params[:glossary_term][:description])
-    glossary_term.add_image(process_image(image_args))
-    glossary_term.save
-    redirect_to(action: "show_glossary_term", id: glossary_term.id)
+    @glossary_term.add_image(process_image(image_args))
+    @glossary_term.save
+    # redirect_to(
+    #   action: :show,
+    #   id: glossary_term.id
+    # )
+    redirect_to glossary_path(@glossary_term.id)
   end
+
+  alias_method :glossary_term_post, :create
+
+  private
 
   def image_args
     {
@@ -84,20 +89,28 @@ class GlossaryController < ApplicationController
     end
   end
 
-  def edit_glossary_term # :norobots:
+  def edit # :norobots:
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
-    if request.method == "POST"
-      glossary_term = GlossaryTerm.find(params[:id].to_s)
-      glossary_term.attributes = params[:glossary_term].
-                                 permit(:name, :description)
-      glossary_term.user = @user
-      glossary_term.save
-      redirect_to(action: "show_glossary_term", id: glossary_term.id)
-    else
-      @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    end
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
   end
+
+  alias_method :edit_glossary_term, :edit
+
+  def update
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    @glossary_term.attributes = params[:glossary_term].
+                               permit(:name, :description)
+    @glossary_term.user = @user
+    @glossary_term.save
+    # redirect_to(
+    #   action: :show,
+    #   id: glossary_term.id
+    # )
+    redirect_to glossary_path(@glossary_term.id)
+  end
+
+  # no alias needed
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
@@ -109,7 +122,11 @@ class GlossaryController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(action: "show_glossary_term", id: @glossary_term.id)
+        # redirect_to(
+        #   action: :show,
+        #   id: glossary_term.id
+        # )
+        redirect_to glossary_path(@glossary_term.id)
       end
     end
   end

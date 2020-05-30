@@ -44,17 +44,15 @@ class FunctionalTestCase < ActionController::TestCase
   end
 
   def check_for_params(args)
-    return args if args.length < 2 or args[1][:params]
+    return args if (args.length < 2) || args[1][:params]
 
-    [args[0], { params: args[1] }] + args[2..-1]
+    [args[0], { params: args[1] }] + args[2..]
   end
 
   def extract_body(args)
     if args.length >= 2
       params = args[1][:params]
-      if params.member?(:body)
-        args[1][:body] = params.delete(:body).read
-      end
+      args[1][:body] = params.delete(:body).read if params.member?(:body)
     end
     args
   end

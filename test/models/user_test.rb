@@ -24,11 +24,11 @@ class UserTest < UnitTestCase
     u.mailing_address = ""
 
     u.password = u.password_confirmation = "tiny"
-    assert !u.save
+    assert_not u.save
     assert u.errors[:password].any?
 
     u.password = u.password_confirmation = "huge" * 43 # size = 4 * 43 == 172
-    assert !u.save
+    assert_not u.save
     assert u.errors[:password].any?
 
     # This is allowed now to let API create users without a password chosen yet.
@@ -46,15 +46,15 @@ class UserTest < UnitTestCase
     u.mailing_address = ""
 
     u.login = "x"
-    assert !u.save
+    assert_not u.save
     assert u.errors[:login].any?
 
     u.login = "hugebob" * 26 # size = 7 * 26 == 182
-    assert !u.save
+    assert_not u.save
     assert u.errors[:login].any?
 
     u.login = ""
-    assert !u.save
+    assert_not u.save
     assert u.errors[:login].any?
 
     u.login = "okbob"
@@ -70,7 +70,7 @@ class UserTest < UnitTestCase
     u.notes = ""
     u.mailing_address = ""
     u.password = u.password_confirmation = "rolfs_secure_password"
-    assert !u.save
+    assert_not u.save
   end
 
   def test_create
@@ -141,13 +141,13 @@ class UserTest < UnitTestCase
   # Test has been revised accordingly.
   # 2017-06-16 JDC
   def test_myxomops_debacle
-    # rubocop:disable Metrics/LineLength
+    # rubocop:disable Layout/LineLength
     name_79_chars_82_bytes = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
     name_90_chars_93_bytes = "Herbario Forestal Nacional de Bolivia Martín Cárdenas de la Universidad Mayor de San Simón"
-    # rubocop:enable Metrics/LineLength
+    # rubocop:enable Layout/LineLength
 
     mary.name = name_90_chars_93_bytes
-    assert(!mary.save)
+    assert_not(mary.save)
     mary.name = name_79_chars_82_bytes
     assert(mary.save)
     mary.reload
@@ -209,7 +209,7 @@ class UserTest < UnitTestCase
     User.erase_user(user_id)
     assert_raises(ActiveRecord::RecordNotFound) { User.find(user_id) }
     assert_raises(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
-    assert(!UserGroup.all_users.user_ids.include?(user_id))
+    assert_not(UserGroup.all_users.user_ids.include?(user_id))
     assert_raises(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
   end
 

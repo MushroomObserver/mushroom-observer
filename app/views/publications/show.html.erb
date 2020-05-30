@@ -7,9 +7,12 @@
   ]
   if in_admin_mode? || @publication.can_edit?(@user)
     tabs += [
-      link_to(:EDIT.t, edit_publication_path(@publication)),
-      link_to(:DESTROY.t, {action: :destroy, id: @publication.id},
-                          {data: {confirm: :are_you_sure.t}})
+      link_to(:EDIT.t,
+              edit_publication_path(@publication)),
+      link_to(:DESTROY.t,
+              { action: :destroy,
+                id: @publication.id },
+              { data: {confirm: :are_you_sure.t } })
     ]
   end
   @tabsets = { right: draw_tab_set(tabs) }
@@ -22,7 +25,7 @@
   </p>
 
   <% unless @publication.link.blank? %>
-    <p style="word-break:break-all">
+    <p class="text-break">
       <b><%= :publication_link.t %>:</b><br/>
       <%= link_to(@publication.link, @publication.link) %>
     </p>
@@ -44,7 +47,7 @@
   </p>
 
   <p>
-    <b><%= :show_publication_added_by.t %></b>: 
+    <b><%= :show_publication_added_by.t %></b>:
     <%= user_link(@publication.user) %>
     <%= @publication.created_at.web_date %><br/>
     <%= if @publication.created_at.web_date != @publication.updated_at.web_date

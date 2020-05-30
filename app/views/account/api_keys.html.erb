@@ -12,16 +12,16 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <%= :account_api_keys_help.tp %>
   </div>
 </div>
 
-<div class="row push-down">
-  <div class="col-xs-12">
+<div class="row mt-3">
+  <div class="col-12">
     <% if @user.api_keys.any? %>
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
-        <table class="table table-striped slight-pad">
+      <%= form_tag({}, { class: "pb-5"}) %>
+        <table class="table table-striped py-1">
           <tr>
             <th></th>
             <th><%= :CREATED.t %></th>
@@ -63,20 +63,20 @@
             </tr>
           <% end %>
         </table>
-        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn center-block") %>
+        <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn mx-auto") %>
       </form>
     <% end %>
   </div>
 </div>
 
-<div class="row push-down">
-  <div class="col-xs-12 max-width-text">
+<div class="row mt-3">
+  <div class="col-12 max-width-text">
     <%= form_for(:key) do |form| %>
-      <div class="form-group push-down">
+      <div class="form-group mt-3">
         <%= label_tag(:user_notes, :account_api_keys_notes_label.t) %>
         <%= form.text_field(:notes, class: "form-control") %>
       </div>
-      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn center-block push-down") %>
+      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn mx-auto mt-3") %>
     <% end %>
   </div>
 </div>

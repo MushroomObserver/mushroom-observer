@@ -41,7 +41,7 @@ class ParsedUrl
 
   def port
     p = @m[2]
-    p ? p[1..-1].to_i : 443
+    p ? p[1..].to_i : 443
   end
 end
 
@@ -85,8 +85,8 @@ if testing
   LOCAL_URL = "https://localhost:3000/api/observations?id=1".freeze
   REMOTE_URL = "https://mushroomobserver.org/api/observations?id=1".freeze
 else
-  LOCAL_URL = "https://localhost:3000/name/eol".freeze
-  REMOTE_URL = "https://mushroomobserver.org/name/eol".freeze
+  LOCAL_URL = "https://localhost:3000/names/eol".freeze
+  REMOTE_URL = "https://mushroomobserver.org/names/eol".freeze
 end
 
 temp_file = Tempfile.new("eol")

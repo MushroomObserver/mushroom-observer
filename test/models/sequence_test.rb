@@ -231,11 +231,11 @@ class SequenceTest < UnitTestCase
 
   def test_deposit?
     # Prove it's false if neither archive nor accession
-    refute(sequences(:local_sequence).deposit?)
+    assert_not(sequences(:local_sequence).deposit?)
     # Prove it's false if accession but no archive
-    refute(sequences(:missing_archive_sequence).deposit?)
+    assert_not(sequences(:missing_archive_sequence).deposit?)
     # Prove it's false if archive but no accession
-    refute(sequences(:missing_accession_sequence).deposit?)
+    assert_not(sequences(:missing_accession_sequence).deposit?)
     # Prove it's true if both archive and accession
     assert(sequences(:deposited_sequence).deposit?)
   end
@@ -248,7 +248,7 @@ class SequenceTest < UnitTestCase
 
   def test_blast_url
     assert_equal(
-      %(#{Sequence. blast_url_prefix}ACGT),
+      %(#{Sequence.blast_url_prefix}ACGT),
       sequences(:local_sequence).blast_url
     )
     assert_equal(
