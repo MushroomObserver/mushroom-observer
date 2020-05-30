@@ -1,12 +1,14 @@
 require "test_helper"
 
+# FIXME: NIMMO These are not the right URLs anymore.
+# Show is "observations/:id", "observations/:id/edit"
 class PostObservationTest < IntegrationTestCase
   LOGIN_PAGE = "account/login".freeze
-  SHOW_OBSERVATION_PAGE = "observation/show_observation".freeze
-  CREATE_OBSERVATION_PAGE = "observation/create_observation".freeze
-  EDIT_OBSERVATION_PAGE = "observation/edit_observation".freeze
-  CREATE_LOCATION_PAGE = "location/create_location".freeze
-  OBSERVATION_INDEX_PAGE = "observation/list_observations".freeze
+  SHOW_OBSERVATION_PAGE = "observations".freeze
+  CREATE_OBSERVATION_PAGE = "observations/new".freeze
+  EDIT_OBSERVATION_PAGE = "observations/edit".freeze
+  CREATE_LOCATION_PAGE = "locations/new".freeze
+  OBSERVATION_INDEX_PAGE = "observations".freeze
 
   PASADENA_EXTENTS = {
     north: 34.251905,
@@ -241,7 +243,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_exists_deleted_item_log
     found = false
-    assert_select("a[href*=show_rss_log]") do |elems|
+    assert_select("a[href*=rss_logs]") do |elems|
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
     assert(found,

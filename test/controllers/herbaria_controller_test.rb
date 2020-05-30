@@ -270,7 +270,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
     assert_empty(herbarium.curators)
-    assert_redirected_to(controller: :locations, action: :create_location,
+    assert_redirected_to(controller: :locations, action: :new,
                          where: "New Location", set_herbarium: herbarium.id)
   end
 

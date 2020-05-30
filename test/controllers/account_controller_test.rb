@@ -97,7 +97,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_signup_theme_errors
-    referrer = "http://localhost/bogus/location"
+    referer = "http://localhost/bogus/location"
 
     params = {
       login: "spammer",
@@ -108,19 +108,19 @@ class AccountControllerTest < FunctionalTestCase
       notes: ""
     }
 
-    @request.session["return-to"] = referrer
+    @request.session["return-to"] = referer
     post(:signup, new_user: params.merge(theme: ""))
     assert_no_flash
     assert_nil(User.find_by_login("spammer"))
     assert_nil(@request.session["user_id"])
-    assert_redirected_to(referrer)
+    assert_redirected_to(referer)
 
-    @request.session["return-to"] = referrer
+    @request.session["return-to"] = referer
     post(:signup, new_user: params.merge(theme: "spammer"))
     assert_no_flash
     assert_nil(User.find_by_login("spammer"))
     assert_nil(@request.session["user_id"])
-    assert_redirected_to(referrer)
+    assert_redirected_to(referer)
   end
 
   def test_block_known_evil_signups

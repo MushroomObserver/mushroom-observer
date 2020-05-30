@@ -1769,7 +1769,7 @@ class ApplicationController < ActionController::Base
   end
 
   def calc_layout_params
-    count = (@user&.layout_count) || MO.default_layout_count
+    count = @user&.layout_count || MO.default_layout_count
     { "count" => count }
   end
 

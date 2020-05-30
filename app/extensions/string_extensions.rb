@@ -410,7 +410,7 @@ class String
   # Convert string (assumed to be in UTF-8) to any other charset.  All invalid
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
-    encode(charset, fallback: lambda { |c| UTF8_TO_ASCII[c] || "?" })
+    encode(charset, fallback: ->(c) { UTF8_TO_ASCII[c] || "?" })
   end
 
   # Escape a string to be safe to place in double-quotes inside javascript.
@@ -574,7 +574,7 @@ class String
 
   # Find amount first line is indented and remove that from all lines.
   def unindent
-    gsub /^#{self[/\A\s*/]}/, ""
+    gsub(/^#{self[/\A\s*/]}/, "")
   end
 
   ### String Queries ###

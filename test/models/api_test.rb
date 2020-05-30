@@ -4090,7 +4090,7 @@ class ApiTest < UnitTestCase
     else
       assert_equal("API::HelpMessage", api.errors.first.class.name)
       file = help_messages_file
-      return unless File.exists?(file)
+      return unless File.exist?(file)
 
       File.open(file, "a") do |fh|
         fh.puts "#{method.to_s.upcase} #{action}"

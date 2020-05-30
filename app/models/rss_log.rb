@@ -395,7 +395,7 @@ class RssLog < AbstractModel
     if !target_type
       result = :rss_destroyed.t(type: :object)
     elsif !target ||
-          tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
+          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
       result = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
       result = :rss_created_at.t(type: target_type)

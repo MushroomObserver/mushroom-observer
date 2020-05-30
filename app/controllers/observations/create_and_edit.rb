@@ -169,11 +169,10 @@ class ObservationsController
 
     # Redirect to show_observation or create_location on success.
     if @observation.location.nil?
-      redirect_with_query(
-        controller: :locations,
-        action: :create,
+      redirect_to new_location_path(
         where: @observation.place_name,
-        set_observation: @observation.id
+        set_observation: @observation.id,
+        q: get_query_param
       )
     else
       # redirect_with_query(
@@ -200,6 +199,8 @@ class ObservationsController
       next_state = this_state.next
     end
 
+    # TODO: NIMMO use paths? Will this work:
+    # redirect_to observation_path(obs_id, q: get_query_param(this_state))
     if !check_permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
       redirect_to(add_query_param({ action: :show,

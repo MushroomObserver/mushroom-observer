@@ -108,7 +108,7 @@ class HerbariaController < ApplicationController
   def new # :norobots:
     store_location
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     @herbarium = Herbarium.new
   end
 
@@ -125,7 +125,7 @@ class HerbariaController < ApplicationController
       @herbarium.add_curator(@user) if @herbarium.personal_user
       notify_admins_of_new_herbarium unless @herbarium.personal_user
       redirect_to_create_location ||
-        redirect_to_referrer ||
+        redirect_to_referer ||
         redirect_to_show_herbarium
     end
   end
@@ -133,7 +133,7 @@ class HerbariaController < ApplicationController
   def edit # :norobots:
     store_location
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
@@ -154,14 +154,14 @@ class HerbariaController < ApplicationController
        validate_admin_personal_user!
       @herbarium.save
       redirect_to_create_location ||
-        redirect_to_referrer ||
+        redirect_to_referer ||
         redirect_to_show_herbarium
     end
   end
 
   def merge_herbaria # :norobots:
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     this = find_or_goto_index(Herbarium, params[:this]) || return
     that = find_or_goto_index(Herbarium, params[:that]) || return
     result = perform_or_request_merge(this, that) || return
@@ -170,7 +170,7 @@ class HerbariaController < ApplicationController
 
   def delete_curator # :norobots:
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -180,12 +180,12 @@ class HerbariaController < ApplicationController
     elsif user && @herbarium.curator?(user)
       @herbarium.delete_curator(user)
     end
-    redirect_to_referrer || redirect_to_show_herbarium
+    redirect_to_referer || redirect_to_show_herbarium
   end
 
   def request_to_be_curator # :norobots:
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
 
@@ -196,12 +196,12 @@ class HerbariaController < ApplicationController
       "Notes: #{params[:notes]}"
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:show_herbarium_request_sent.t)
-    redirect_to_referrer || redirect_to_show_herbarium
+    redirect_to_referer || redirect_to_show_herbarium
   end
 
   def destroy # :norobots:
     pass_query_params
-    keep_track_of_referrer
+    keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -209,10 +209,10 @@ class HerbariaController < ApplicationController
        @herbarium.curator?(@user) ||
        @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
       @herbarium.destroy
-      redirect_to_referrer || redirect_to_herbarium_index
+      redirect_to_referer || redirect_to_herbarium_index
     else
       flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_to_show_herbarium
+      redirect_to_referer || redirect_to_show_herbarium
     end
   end
 
@@ -279,7 +279,7 @@ class HerbariaController < ApplicationController
     return true if in_admin_mode? || @herbarium.can_edit?
 
     flash_error :permission_denied.t
-    redirect_to_referrer || redirect_to_show_herbarium
+    redirect_to_referer || redirect_to_show_herbarium
     false
   end
 
@@ -421,11 +421,11 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
   end
 
-  def keep_track_of_referrer
-    @back = params[:back] || request.referrer
+  def keep_track_of_referer
+    @back = params[:back] || request.referer
   end
 
-  def redirect_to_referrer
+  def redirect_to_referer
     return false if @back.blank?
 
     redirect_to(@back)

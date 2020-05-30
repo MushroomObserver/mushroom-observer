@@ -123,7 +123,7 @@
         assert_flash_text(/uploaded/i)
         assert_flash_text(/created observation/i)
         assert_flash_text(/created proposed name/i)
-        assert_template('location/create_location')
+        assert_template('location/new')
 
         reload_results
         assert_users_equal(@expectations[:observation].user, @new_observation.user)

@@ -407,7 +407,7 @@ class ProjectsController < ApplicationController
         #   action: :show,
         #   id: @project.id
         # )
-        # redirect_to_referrer || redirect_to_project_index
+        # redirect_to_referer || redirect_to_project_index
         redirect_to_project_with_query
       end
     end
@@ -439,7 +439,7 @@ class ProjectsController < ApplicationController
   end
 
   # borrowed from herbaria_controller:
-  def redirect_to_referrer
+  def redirect_to_referer
     return false if @back.blank?
 
     redirect_to(@back)
