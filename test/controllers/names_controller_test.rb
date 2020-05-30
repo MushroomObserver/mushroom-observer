@@ -4332,10 +4332,10 @@ class NamesControllerTest < FunctionalTestCase
     # Make sure have to be logged in. (update_column should avoid callbacks)
     new_val = names(:peltigera).classification
     # disable cop because we're trying to avoid callbacks
-    # rubocop:disable SkipsModelValidations
+    # rubocop:disable Rails/SkipsModelValidations
     child.update_columns(classification: new_val)
     child.description.update_columns(classification: new_val)
-    # rubocop:enable SkipsModelValidations
+    # rubocop:enable Rails/SkipsModelValidations
     logout
     get(:refresh_classification, id: child.id)
     assert_equal(new_val, child.reload.classification)
@@ -4370,9 +4370,9 @@ class NamesControllerTest < FunctionalTestCase
     # Make sure have to be logged in. (update_column should avoid callbacks)
     new_val = names(:peltigera).classification
     # disable cop because we're trying to avoid callbacks
-    # rubocop:disable SkipsModelValidations
+    # rubocop:disable Rails/SkipsModelValidations
     genus.update_columns(classification: new_val)
-    # rubocop:enable SkipsModelValidations
+    # rubocop:enable Rails/SkipsModelValidations
     logout
     get(:propagate_classification, id: genus.id)
     assert_equal(val, child.reload.classification)

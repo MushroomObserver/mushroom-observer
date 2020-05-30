@@ -308,7 +308,7 @@ class CollapsibleMapTest < UnitTestCase
     assert_mapset_is_box(mapset, n, s, e, w)
   end
 
-  # rubocop:disable Metrics/LineLength
+  # rubocop:disable Layout/LineLength
   def test_extending_mapset_with_boxes_over_dateline
     # Neither old nor new box straddling dateline:
     do_box_extension_test(-170, -150, 150, 170, 150, -150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
@@ -342,7 +342,7 @@ class CollapsibleMapTest < UnitTestCase
     do_box_extension_test(150, -150, 170, -170, 150, -150)   # |██▀             ▀██|
     do_box_extension_test(170, -150, 150, -170, 150, -150)   # |██▀             ▄██|
   end
-  # rubocop:enable Metrics/LineLength
+  # rubocop:enable Layout/LineLength
 
   def do_box_extension_test(west1, east1, west2, east2, west3, east3)
     loc = Location.new

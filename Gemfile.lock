@@ -54,13 +54,19 @@ GEM
     autoprefixer-rails (9.7.6)
       execjs
     aws-eventstream (1.1.0)
-    aws-sdk (2.11.489)
-      aws-sdk-resources (= 2.11.489)
-    aws-sdk-core (2.11.489)
-      aws-sigv4 (~> 1.0)
+    aws-partitions (1.298.0)
+    aws-sdk-core (3.94.0)
+      aws-eventstream (~> 1, >= 1.0.2)
+      aws-partitions (~> 1, >= 1.239.0)
+      aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.11.489)
-      aws-sdk-core (= 2.11.489)
+    aws-sdk-kms (1.30.0)
+      aws-sdk-core (~> 3, >= 3.71.0)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-s3 (1.61.2)
+      aws-sdk-core (~> 3, >= 3.83.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.1)
     aws-sigv4 (1.1.2)
       aws-eventstream (~> 1.0, >= 1.0.2)
     babel-source (5.8.35)
@@ -313,7 +319,7 @@ DEPENDENCIES
   RedCloth
   active_link_to
   autoprefixer-rails
-  aws-sdk (~> 2)
+  aws-sdk-s3
   babel-source
   babel-transpiler
   blankslate

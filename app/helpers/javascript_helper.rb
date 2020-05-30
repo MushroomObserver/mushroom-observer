@@ -1,12 +1,29 @@
-module JavascriptHelper
-  # Browser gem's "modern?" criteria has been removed.
-  # We re-added in browser_extensions.rb
-  # browser_helper.rb now inactive
+# frozen_string_literal: true
 
-  # Removed this whole function. Use browser.modern_browser? instead
+# added methods relating to js
+module JavascriptHelper
+  # Note: browser_helper.rb now inactive - NIMMO
+  # Note: Browser gem's "modern?" criteria has been removed. - NIMMO
+  # modern_browser? method currently defined in in browser_extensions.rb - NIMMO
+
+  # FIXME: NIMMO can_do_ajax? calls disabled in views ... check and fix
+  # Note: commented out after trying to get modern_browser? to work - NIMMO
   # def can_do_ajax?
-    # browser.modern? || browser.ie?(8) || Rails.env == "test"
-  #   browser.modern_browser?
+  #   modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
+  # end
+
+  # from https://github.com/fnando/browser/pull/435 2020-04-13
+  # def modern_browser?(browser)
+  #   browser.chrome? && browser.version.to_i >= 65 ||
+  #     browser.safari? && browser.version.to_i >= 10 ||
+  #     browser.firefox? && browser.version.to_i >= 52 ||
+  #     browser.ie? && browser.version.to_i >= 11 &&
+  #       !browser.compatibility_view? ||
+  #     browser.edge? && browser.version.to_i >= 15 ||
+  #     browser.opera? && browser.version.to_i >= 50 ||
+  #     browser.facebook? &&
+  #       browser.safari_webapp_mode? &&
+  #       browser.webkit_full_version.to_i >= 602
   # end
 
   # Use this test to determine if a user can upload multiple images at a time.
@@ -25,7 +42,7 @@ module JavascriptHelper
   #   # Example usage in view template:
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
-    if args.select { |arg| arg.class != String } != []
+    if args.reject { |arg| arg.class == String } != []
       raise ArgumentError.new(
         "javascript_include doesn't take symbols like :default, etc."
       )

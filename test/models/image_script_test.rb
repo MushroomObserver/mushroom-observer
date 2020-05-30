@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class ScriptTest < UnitTestCase
@@ -110,8 +112,7 @@ class ScriptTest < UnitTestCase
       file.puts "#{local_root}/320//#{in_situ_id}.jpg"
       file.puts "#{local_root}/thumb//#{in_situ_id}.jpg"
     end
-    output, status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
-             map do |line|
+    output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
     sizes = output.each_line.map do |line|
       line[local_root.length + 1..-1].chomp
     end
@@ -152,8 +153,8 @@ class ScriptTest < UnitTestCase
     ["960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
      "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"].each do |file|
       file2 = "#{remote_root}2/#{file}"
-      assert(!File.exist?(file2),
-             "Shouldn't have transferred #{file} to server 2.")
+      assert_not(File.exist?(file2),
+                 "Shouldn't have transferred #{file} to server 2.")
     end
   end
 
@@ -248,16 +249,16 @@ class ScriptTest < UnitTestCase
     assert_equal("K", File.read("#{remote_root}2/thumb/#{turned_over_id}.jpg"),
                  "thumb/#{turned_over_id}.jpg wrong for server 2")
 
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.tiff"),
-           "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"),
-           "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/1280/#{in_situ_id}.jpg"),
-           "1280/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/960/#{in_situ_id}.jpg"),
-           "960/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/960/#{turned_over_id}.jpg"),
-           "960/#{turned_over_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.tiff"),
+               "orig/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"),
+               "orig/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/1280/#{in_situ_id}.jpg"),
+               "1280/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/960/#{in_situ_id}.jpg"),
+               "960/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/960/#{turned_over_id}.jpg"),
+               "960/#{turned_over_id}.jpg shouldnt be on server 2")
   end
 
   test "rotate_image" do
@@ -275,7 +276,7 @@ class ScriptTest < UnitTestCase
     assert(File.exist?("#{local_root}/thumb/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}1/orig/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}1/thumb/#{in_situ_id}.jpg"))
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"))
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}2/thumb/#{in_situ_id}.jpg"))
 
     img = images(:in_situ_image)
@@ -379,7 +380,7 @@ class ScriptTest < UnitTestCase
     status = system(cmd)
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
-    assert_equal(<<-END.unindent, errors)
+    assert_equal(<<-ERROR_TEXT.unindent, errors)
       Listing local 1280
       Listing local 320
       Listing local 640
@@ -407,6 +408,6 @@ class ScriptTest < UnitTestCase
       Deleting 640/#{turned_over_id}.jpg
       Deleting 960/#{turned_over_id}.jpg
       Deleting 960/#{commercial_id}.jpg
-    END
+    ERROR_TEXT
   end
 end

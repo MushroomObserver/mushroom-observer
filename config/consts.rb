@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "yaml"
 
 class ImageConfigData
@@ -184,7 +186,7 @@ MushroomObserver::Application.configure do
   # Default number of items for an RSS Log page
   config.default_layout_count = 24
 
-  # TODO: Remove whatever is not listed in sprockets manifest!
+  # TODO: NIMMO Remove whatever is not listed in sprockets manifest!
   # Set of javascript and stylesheet files not included by default and
   # therefore need to be precompiled explicitly.
   if config.assets&.precompile
