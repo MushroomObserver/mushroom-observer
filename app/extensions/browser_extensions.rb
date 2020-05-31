@@ -6,6 +6,7 @@ require "browser/aliases"
 Browser::Base.include(Browser::Aliases)
 
 module Browser
+  # Prevent `browser` gem from saying that mobile DuckDuckGo browsers are bots
   class Base
     # Commenting out to use bot? method already defined in Browser::Base - NIMMO
     # Prevent `browser` gem from saying that mobile DuckDuckGo browsers are bots

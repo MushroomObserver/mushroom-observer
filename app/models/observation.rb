@@ -872,7 +872,7 @@ class Observation < AbstractModel
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    Observation.all.each(&:calc_consensus)
+    Observation.all.find_each(&:calc_consensus)
   end
 
   # Return the review status based on the Vote's on the consensus Name by

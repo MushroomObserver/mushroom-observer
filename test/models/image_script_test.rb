@@ -291,7 +291,6 @@ class ScriptTest < UnitTestCase
     File.open("#{local_root}/orig/#{turned_over_id}.tiff", "w") do |f|
       f.write("A")
     end
-
     File.open("#{local_root}/orig/#{turned_over_id}.jpg", "w") do |f|
       f.write("AB")
     end
