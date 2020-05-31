@@ -41,8 +41,8 @@
 #    </body>
 #
 module GM
-  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js".freeze
-  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
+  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js"
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   # represent a GoogleMaps map object

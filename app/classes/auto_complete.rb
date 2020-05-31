@@ -9,7 +9,7 @@
 #
 ################################################################################
 
-PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'.freeze
+PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 
 class AutoComplete
   attr_accessor :string, :matches
