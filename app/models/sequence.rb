@@ -139,7 +139,7 @@ class Sequence < AbstractModel
 
   # url of a search for accession
   def accession_url
-    WebSequenceArchive.search_prefix(archive) << accession
+    "#{WebSequenceArchive.search_prefix(archive)}#{accession}"
   end
 
   ##############################################################################
