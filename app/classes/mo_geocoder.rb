@@ -3,11 +3,11 @@
 require "net/http"
 require "rexml/document"
 
-#  = Geocoder Class
+#  = MOGeocoder Class
 #
 #  Wraps a call to the Google Geocoding webservice
 #
-class Geocoder < BlankSlate
+class MOGeocoder < BlankSlate
   attr_reader :north
   attr_reader :south
   attr_reader :east

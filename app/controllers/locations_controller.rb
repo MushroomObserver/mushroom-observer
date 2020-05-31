@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "geocoder"
-
 # Locations controller.
 class LocationsController < ApplicationController
 
