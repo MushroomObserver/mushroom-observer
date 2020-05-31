@@ -346,7 +346,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_create_location
     requires_login(:new)
-    assert_form_action(action: :new)
+    assert_form_action(url: "/locations")
   end
 
   # This was causing a crash in live server.

@@ -344,14 +344,16 @@ module ControllerExtensions
   # Assert that a form exists which posts to the given url.
   def assert_form_action(url_opts, msg = nil)
     url_opts[:only_path] = true if url_opts[:only_path].nil?
-    url = @controller.url_for(url_opts)
+    method = url_opts[:method] || "post"
+    url_opts.delete(:method)
+    url = url_opts[:url] || @controller.url_for(url_opts)
     url.force_encoding("UTF-8") if url.respond_to?(:force_encoding)
     url = URI.decode_www_form_component(url)
     # Find each occurrance of <form action="blah" method="post">.
     found_it = false
     found = {}
     @response.body.split(/<form [^<>]*action/).each do |str|
-      next unless str =~ /^="([^"]*)" [^>]*method="post"/
+      next unless str =~ /^="([^"]*)" [^>]*method="#{method}"/i
 
       url2 = URI.decode_www_form_component(Regexp.last_match(1)).gsub("&amp;",
                                                                       "&")

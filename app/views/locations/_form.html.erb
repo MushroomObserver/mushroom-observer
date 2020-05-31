@@ -6,13 +6,15 @@
     #    set_species_list: @set_species_list,
     #    set_user: @set_user,
     #    set_herbarium: @set_herbarium
-    # )) do |form| %>
+    # )) do |form|
+%>
 <%= # form_for(:location, url: add_query_param(
     #   action: :edit,
     #   id: @location.id,
     #   approved_where: @display_name
-    # )) do |form| %>
-<%= form_with model: :location do |f| %>
+    # )) do |form|
+%>
+<%= form_with model: @location do |f| %>
 
   <% if !@location.locked || in_admin_mode? %>
     <% if @dubious_where_reasons.any? %>
