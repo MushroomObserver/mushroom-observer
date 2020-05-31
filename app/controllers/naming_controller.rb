@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
   before_action :login_required

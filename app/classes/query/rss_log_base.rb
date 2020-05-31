@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::RssLogBase < Query::Base
   include Query::Initializers::ContentFilters
 

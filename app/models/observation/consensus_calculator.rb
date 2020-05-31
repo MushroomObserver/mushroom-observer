@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Observation
   class ConsensusCalculator
     def initialize(namings)

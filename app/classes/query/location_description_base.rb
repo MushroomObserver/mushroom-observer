@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::LocationDescriptionBase < Query::Base
   def model
     LocationDescription

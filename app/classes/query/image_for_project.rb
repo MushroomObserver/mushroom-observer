@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ImageForProject < Query::ImageBase
   def parameter_declarations
     super.merge(

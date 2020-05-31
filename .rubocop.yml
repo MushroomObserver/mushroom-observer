@@ -73,9 +73,6 @@ Style/SlicingWithRange:
   Enabled: true
 
 ###################### Global Disables #########################################
-# Disable because enforcement takes up an extra line
-Layout/EmptyLineAfterMagicComment:
-  Enabled: false
 
 # Disable because it casecmp does not work with Unicode in Ruby 2.4
 # Cop supports --auto-correct.
@@ -116,7 +113,7 @@ Style/FrozenStringLiteralComment:
   # Frozen string literals may be default in Ruby 3.0.
   # The comment will be added below a shebang and encoding comment.
   # The frozen string literal comment is only valid in Ruby 2.3+.
-  AutoCorrect: false
+  AutoCorrect: true
 
 ###################### Metrics #################################################
 

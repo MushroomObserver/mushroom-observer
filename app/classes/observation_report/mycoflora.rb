@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Format for export to Mycoflora.
   class Mycoflora < ObservationReport::CSV
-    MYCOFLORA_PROJECT_NAME = "North American Mycoflora Project".freeze
+    MYCOFLORA_PROJECT_NAME = "North American Mycoflora Project"
 
     def labels
       %w[

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pivotal
   class Vote
     attr_accessor :id

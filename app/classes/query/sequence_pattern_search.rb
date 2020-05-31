@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::SequencePatternSearch < Query::SequenceBase
   def parameter_declarations
     super.merge(

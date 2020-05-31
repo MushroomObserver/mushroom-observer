@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::UserInSet < Query::UserBase
   def parameter_declarations
     super.merge(

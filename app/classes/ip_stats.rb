@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class IpStats
   class << self
     STATS_TIME = 10 # minutes

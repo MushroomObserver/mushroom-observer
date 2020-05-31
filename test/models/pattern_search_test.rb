@@ -1,15 +1,18 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class PatternSearchTest < UnitTestCase
   def test_parse_next_term
     parser = PatternSearch::Parser.new("")
-    x = 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
-    assert_equal([:pattern, "test"], parser.parse_next_term!(x))
-    assert_equal([:name, "blah"], parser.parse_next_term!(x))
-    assert_equal([:two, "1,2,3"], parser.parse_next_term!(x))
-    assert_equal([:foo, '"quote"'], parser.parse_next_term!(x))
-    assert_equal([:bar, '\'a\',"b"'], parser.parse_next_term!(x))
-    assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(x))
+    # make str mutable because it is modified by parse_next_term
+    str = + 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
+    assert_equal([:pattern, "test"], parser.parse_next_term!(str))
+    assert_equal([:name, "blah"], parser.parse_next_term!(str))
+    assert_equal([:two, "1,2,3"], parser.parse_next_term!(str))
+    assert_equal([:foo, '"quote"'], parser.parse_next_term!(str))
+    assert_equal([:bar, '\'a\',"b"'], parser.parse_next_term!(str))
+    assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(str))
   end
 
   def test_term

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Let curators know about a herbarium_record added by a non-curator.
 class AddHerbariumRecordEmail < AccountMailer
   def build(sender, receiver, herbarium_record)

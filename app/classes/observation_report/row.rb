@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Row in raw data table.  Initialization values array comes directly from a
   # sequel query (model.connection.select_values).  Columns are:

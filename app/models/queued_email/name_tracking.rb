@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Name Tracking Email
 
 class QueuedEmail::NameTracking < QueuedEmail

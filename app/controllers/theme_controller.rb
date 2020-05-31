@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Theme controller
 # Shows information about available user color themes.
 #

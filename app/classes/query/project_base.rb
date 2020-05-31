@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ProjectBase < Query::Base
   def model
     Project

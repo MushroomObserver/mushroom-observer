@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  = Checklist
 #
 #  This class calculates a checklist of species observed by users,

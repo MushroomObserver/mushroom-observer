@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see ajax_controller.rb
 class AjaxController
   # Return an old TranslationString by version id.

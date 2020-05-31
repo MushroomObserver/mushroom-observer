@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Location Change Email
 class QueuedEmail::LocationChange < QueuedEmail
   def location

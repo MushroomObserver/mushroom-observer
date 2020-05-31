@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MatrixBoxPresenter
   attr_accessor \
     :thumbnail, # thumbnail image tag

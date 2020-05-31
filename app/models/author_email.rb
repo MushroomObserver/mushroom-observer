@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Ask reviewers for authorship credit.
 class AuthorEmail < AccountMailer
   def build(sender, receiver, object, subject, message)

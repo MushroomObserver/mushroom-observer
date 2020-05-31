@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require "digest/md5"
 require "net/http"
@@ -7,9 +8,9 @@ require "uri"
 
 # HOST = 'mushroomobserver.org'
 # PORT = 443
-HOST = "localhost".freeze
+HOST = "localhost"
 PORT = 3000
-KEY = "xxx".freeze
+KEY = "xxx"
 
 ################################################################################
 

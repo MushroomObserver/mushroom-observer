@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require File.expand_path("../config/boot.rb", __dir__)
 require File.expand_path("../config/environment.rb", __dir__)

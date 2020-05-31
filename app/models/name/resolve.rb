@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   # Resolves the name using these heuristics:
   #   First time through:

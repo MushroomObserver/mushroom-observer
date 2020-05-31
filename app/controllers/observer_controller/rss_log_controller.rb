@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: move this into new RssLogController
 class ObserverController
   # Default page.  Just displays latest happenings.  The actual action is

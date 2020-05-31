@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see observer_controller.rb
 class ObserverController
   def show_site_stats # :norobots:

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ExternalSiteBase < Query::Base
   def model
     ExternalSite

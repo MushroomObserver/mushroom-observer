@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # class with information about external websites
 class WebSequenceArchive
   class << self

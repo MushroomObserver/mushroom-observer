@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::NameByRssLog < Query::NameBase
   def initialize_flavor
     add_join(:rss_logs)

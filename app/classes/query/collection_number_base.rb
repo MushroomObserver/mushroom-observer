@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::CollectionNumberBase < Query::Base
   def model
     CollectionNumber

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ObservationForProject < Query::ObservationBase
   def parameter_declarations
     super.merge(

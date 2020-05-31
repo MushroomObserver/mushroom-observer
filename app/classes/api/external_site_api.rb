@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API for ExternalSite
   class ExternalSiteAPI < ModelAPI
