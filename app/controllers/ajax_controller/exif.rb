@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "open3"
 
 GPS_TAGS = /latitude|longitude|gps/i.freeze

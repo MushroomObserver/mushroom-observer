@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::UserBase < Query::Base
   def model
     User

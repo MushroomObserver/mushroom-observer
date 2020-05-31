@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see observer_controller.rb
 class ObserverController
   # Form to create a new observation, naming, vote, and images.

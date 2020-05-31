@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Helper methods for adding date and time conditions to query.
 module Query::Modules::Datetime
   def add_date_condition(col, vals, *joins)

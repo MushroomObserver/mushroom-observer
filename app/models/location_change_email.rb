@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of change in location description.
 class LocationChangeEmail < AccountMailer
   def build(sender, receiver, time, loc_change, desc_change)

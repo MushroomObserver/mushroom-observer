@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module VersionHelper
   # Just shows the current version number and a link to see the previous.
   #

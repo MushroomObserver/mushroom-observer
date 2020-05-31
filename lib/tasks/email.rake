@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :email do
   desc "List queued emails"
   task(list: :environment) do

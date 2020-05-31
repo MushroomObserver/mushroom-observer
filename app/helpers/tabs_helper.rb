@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # html used in tabsets
 module TabsHelper
   # Short-hand to render shared tab_set partial for a given set of links.

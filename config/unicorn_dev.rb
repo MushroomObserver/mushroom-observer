@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 APP_PATH = "/vagrant/mo".freeze
 worker_processes 4
 working_directory APP_PATH

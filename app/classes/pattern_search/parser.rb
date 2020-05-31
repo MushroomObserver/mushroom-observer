@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module PatternSearch
   class Parser
     attr_accessor :incoming_string

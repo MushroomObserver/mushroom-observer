@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # User asking user about an observation.
 class ObservationEmail < AccountMailer
   def build(sender, observation, question)

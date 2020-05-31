@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # helpers for add Sequence view
 module SequenceHelper
   def sequence_accession_link(sequence)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify reviewers that a draft has been published.
 class PublishNameEmail < AccountMailer
   def build(publisher, receiver, name)

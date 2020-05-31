@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VoteController < ApplicationController
   before_action :login_required, except: [:show_votes]
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 APP_PATH = "/var/web/mo".freeze
 worker_processes 3
 working_directory APP_PATH

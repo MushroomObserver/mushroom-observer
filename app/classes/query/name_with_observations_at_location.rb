@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::NameWithObservationsAtLocation < Query::NameWithObservations
   include Query::Initializers::ContentFilters
 

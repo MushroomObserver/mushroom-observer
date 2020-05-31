@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Name Change Email
 
 class QueuedEmail::NameChange < QueuedEmail

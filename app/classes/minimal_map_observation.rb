@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MinimalMapObservation
   attr_accessor :id, :lat, :long, :location_id
 

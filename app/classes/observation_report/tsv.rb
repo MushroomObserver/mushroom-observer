@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Provides rendering ability for TSV-type reports.
   class TSV < ObservationReport::Base

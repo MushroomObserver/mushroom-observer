@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Observation Change Email
 class QueuedEmail::ObservationChange < QueuedEmail
   def observation

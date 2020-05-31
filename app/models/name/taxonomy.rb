@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   def self.all_ranks
     [:Form, :Variety, :Subspecies, :Species,

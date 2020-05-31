@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Name Proposal Email
 class QueuedEmail::NameProposal < QueuedEmail
   def naming

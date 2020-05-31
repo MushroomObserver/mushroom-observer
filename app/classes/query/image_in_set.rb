@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ImageInSet < Query::ImageBase
   def parameter_declarations
     super.merge(

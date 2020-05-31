@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Tell observer someone is interested in their obs.
 class NamingObserverEmail < AccountMailer
   def build(observer, naming, notification)

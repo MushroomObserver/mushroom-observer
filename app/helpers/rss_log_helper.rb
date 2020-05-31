@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Custom View Helpers for Rss_log View (Activity Feed)
 #
 module RssLogHelper

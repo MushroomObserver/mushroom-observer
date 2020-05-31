@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DescriptionHelper
   def is_writer?(desc)
     desc.is_writer?(@user) || in_admin_mode?

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #  Base class for mailers for each type of email
 class AccountMailer < ActionMailer::Base
   private

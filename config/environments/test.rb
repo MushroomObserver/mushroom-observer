@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 MushroomObserver::Application.configure do
   # Settings specified here  take precedence over those in config/application.rb

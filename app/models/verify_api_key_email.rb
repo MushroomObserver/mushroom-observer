@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Email sent to verify and activate a new API key.
 class VerifyAPIKeyEmail < AccountMailer
   def build(user, other_user, api_key)

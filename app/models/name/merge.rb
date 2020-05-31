@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   # Is it safe to merge this Name with another?  If any information will get
   # lost we return false.  In practice only if it has Namings.

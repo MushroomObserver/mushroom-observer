@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # helpers for creating links in views
 module ObjectLinkHelper
   # Dictionary of urls for searches on external sites

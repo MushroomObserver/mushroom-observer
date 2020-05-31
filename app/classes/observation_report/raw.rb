@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Default CSV report.
   class Raw < ObservationReport::CSV

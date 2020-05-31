@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   ALL_LIFEFORMS = %w[
     basidiolichen

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ProjectInSet < Query::ProjectBase
   def parameter_declarations
     super.merge(

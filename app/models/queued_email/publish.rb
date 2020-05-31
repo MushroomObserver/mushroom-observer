@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Name Published Email
 
 class QueuedEmail::Publish < QueuedEmail

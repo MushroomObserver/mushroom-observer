@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #  = Google Maps interface
 #
 #  GM::GMap::      Represents a "google.maps.Map" object.

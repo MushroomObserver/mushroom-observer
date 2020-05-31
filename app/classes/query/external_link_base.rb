@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ExternalLinkBase < Query::Base
   def model
     ExternalLink

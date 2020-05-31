@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   # :string field size limits in characters, based on this algorithm:
   # Theoretical max differences between (text_name + author) and the field

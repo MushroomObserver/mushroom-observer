@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SuggestionsHelper
   def suggestion_confidence(val)
     english = if val > 80

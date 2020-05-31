@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::HerbariumBase < Query::Base
   def model
     Herbarium
