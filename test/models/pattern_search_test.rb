@@ -5,7 +5,7 @@ require "test_helper"
 class PatternSearchTest < UnitTestCase
   def test_parse_next_term
     parser = PatternSearch::Parser.new("")
-    # make str mutuable because it is modified by parse_next_term
+    # make str mutable because it is modified by parse_next_term
     str = + 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
     assert_equal([:pattern, "test"], parser.parse_next_term!(str))
     assert_equal([:name, "blah"], parser.parse_next_term!(str))
