@@ -148,7 +148,7 @@ class LocationsController
 
     # Paginate the defined locations using the usual helper.
     args[:always_index] = @undef_pages&.num_total&.positive?
-    args[:action] = args[:action] || "list_locations"
+    args[:action] = args[:action] || "index"
     show_index_of_objects(query, args)
   end
 

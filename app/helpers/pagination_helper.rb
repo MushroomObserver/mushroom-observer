@@ -79,7 +79,7 @@ module PaginationHelper
   #   <%= pagination_numbers(@pages) %>
   #
   def pagination_numbers(pages, args = {})
-    result = safe_empty
+    result = []
     if pages && pages.num_pages > 1
       params = args[:params] ||= {}
       if pages.letter_arg && pages.letter
