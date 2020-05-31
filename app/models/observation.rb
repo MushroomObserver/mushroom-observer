@@ -499,7 +499,7 @@ class Observation < AbstractModel
 
   # id of view textarea for a Notes heading
   def self.notes_part_id(part)
-    notes_area_id_prefix + part.tr(" ", "_")
+    "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
   def notes_part_id(part)
