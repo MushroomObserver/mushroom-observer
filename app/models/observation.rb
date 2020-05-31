@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  = Observation Model
 #
 #  An Observation is a mushroom seen at a certain Location and time, as
@@ -497,7 +499,7 @@ class Observation < AbstractModel
 
   # id of view textarea for a Notes heading
   def self.notes_part_id(part)
-    notes_area_id_prefix << part.tr(" ", "_")
+    notes_area_id_prefix + part.tr(" ", "_")
   end
 
   def notes_part_id(part)
@@ -575,7 +577,7 @@ class Observation < AbstractModel
     return "" if notes.blank?
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
-    result = notes.each_with_object("") do |(key, value), str|
+    result = notes.each_with_object("".dup) do |(key, value), str|
       str << "#{markup}#{key}#{markup}: #{value}\n"
     end
     result.chomp
