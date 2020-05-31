@@ -7,7 +7,7 @@ class QuerySupplementalTest < IntegrationTestCase
   #               `             and ’
   # as            &#8216        and &#8217;
   # serialized as %26%238216%3B and %26%238217%3B
-  # They are deserialized and displayed as pat of Map Locations title.
+  # They are deserialized and displayed as part of Map Locations title.
   def test_deserialize
     obs = observations(:boletus_edulis_obs)
 

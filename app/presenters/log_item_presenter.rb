@@ -86,7 +86,7 @@ class LogItemPresenter
       self.author = ""
     end
     self.id     = observation.id
-    self.when   = observation.when.web_date
+    self.when   = observation.when.web_date if observation.when
     self.who    = view.user_link(observation.user) if observation.user
     # self.what  = view.link_with_query(name, controller: :observations,
     #                                         action: :show,
@@ -100,19 +100,16 @@ class LogItemPresenter
                      link: { controller: :observations,
                              action: :show,
                              id: observation.id })
-   self.detail = observation.rss_log.detail
-   self.time = observation.rss_log.updated_at
+    return unless observation.rss_log
 
+    self.detail = observation.rss_log.detail
+    self.time = observation.rss_log.updated_at
   end
 
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image, view)
     name = image.unique_format_name.t
-    self.when = begin
-                  image.when.web_date
-                rescue StandardError
-                  nil
-                end
+    self.when = image.when.web_date if image.when
     self.who  = view.user_link(image.user)
     self.what = view.link_with_query(name,
                                      controller: image.show_controller,
