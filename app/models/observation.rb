@@ -577,7 +577,7 @@ class Observation < AbstractModel
     return "" if notes.blank?
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
-    result = notes.each_with_object(+ "") do |(key, value), str|
+    result = notes.each_with_object(+"") do |(key, value), str|
       str << "#{markup}#{key}#{markup}: #{value}\n"
     end
     result.chomp
