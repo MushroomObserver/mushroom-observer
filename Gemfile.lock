@@ -351,7 +351,7 @@ DEPENDENCIES
   rails-controller-testing
   rails_db
   rtf
-  rubocop (= 0.83)
+  rubocop
   rubocop-performance
   rubocop-rails
   sassc-rails
