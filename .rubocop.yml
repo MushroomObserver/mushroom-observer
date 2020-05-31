@@ -2,7 +2,7 @@ require:
   - rubocop-performance
   - rubocop-rails
 
-inherit_from: .rubocop_todo.yml
+# inherit_from: .rubocop_todo.yml
 
 # RuboCop configuration
 # Uses Rubcop's default configuration, except as specified below
@@ -116,7 +116,7 @@ Style/FrozenStringLiteralComment:
   # Frozen string literals may be default in Ruby 3.0.
   # The comment will be added below a shebang and encoding comment.
   # The frozen string literal comment is only valid in Ruby 2.3+.
-  AutoCorrect: false
+  AutoCorrect: true
 
 ###################### Metrics #################################################
 
