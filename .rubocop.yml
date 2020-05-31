@@ -2,7 +2,7 @@ require:
   - rubocop-performance
   - rubocop-rails
 
-# inherit_from: .rubocop_todo.yml
+inherit_from: .rubocop_todo.yml
 
 # RuboCop configuration
 # Uses Rubcop's default configuration, except as specified below
