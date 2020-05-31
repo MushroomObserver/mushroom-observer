@@ -228,14 +228,14 @@ module GM
     end
 
     def overlays_code
-      result = "".dup # create mutable string
+      result = + "" # create mutable string
       overlays.each { |obj| result += obj.create_and_initialize_code + ";\n" }
       result.sub!(/\n\Z/, "")
       result
     end
 
     def events_code
-      result = "".dup # create mutable string
+      result = + "" # create mutable string
       events.each do |obj, event, code|
         result += "G.event.addListener(#{obj.var}, '#{event}', #{code});\n"
       end
