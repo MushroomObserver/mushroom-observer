@@ -3,16 +3,16 @@
 
   tabs = [
     link_to(:bulk_license_link.t,
-            controller: :images,
+            controller: "/images",
             action: :license_updater),
     link_to(:show_user_your_notifications.t,
-            controller: :interests,
+            controller: "/interests",
             action: :index),
     link_to(:prefs_link.t,
-            controller: :account,
+            controller: "/account",
             action: :prefs),
     link_to(:account_api_keys_link.t,
-            controller: :account,
+            controller: "/account",
             action: :api_keys)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
@@ -41,7 +41,7 @@
 
     <div class="form-group mt-3">
       <%= label_tag(:user_upload_image, (@user.image_id ? :profile_image_change.t : :profile_image_create.t) + ":") %> (33%)
-      <%= link_to(:profile_image_reuse.t, controller: :images, action: :reuse_image, mode: :profile) %>
+      <%= link_to(:profile_image_reuse.t, controller: "/images", action: :reuse_image, mode: :profile) %>
       <%= link_to(:profile_image_remove.t, {action: :remove_image},
                   {data: {confirm: :are_you_sure.l}}) if @user.image %>
       <%= custom_file_field(:user, :upload_image) %>

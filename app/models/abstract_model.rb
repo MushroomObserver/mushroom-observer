@@ -348,9 +348,13 @@ class AbstractModel < ApplicationRecord
   def self.show_controller
     case name
       when "Account", "Naming"
-        name.underscore
+        "/#{name.underscore}"
+      when "LocationDescription"
+        "/locations/descriptions"
+      when "NameDescription"
+        "/names/descriptions"
       else
-        name.pluralize.underscore
+        "/#{name.pluralize.underscore}"
     end
   end
 
@@ -408,7 +412,7 @@ class AbstractModel < ApplicationRecord
   #   name.show_link_args     => { controller: :names, action: :show, id: 12 }
   #
   def self.show_link_args(id)
-    { controller: show_controller, action: show_action, id: id }
+    { controller: "/#{show_controller}", action: show_action, id: id }
   end
 
   def show_link_args
@@ -481,7 +485,7 @@ class AbstractModel < ApplicationRecord
   #   name.edit_link_args     => {controller: :names, action: :edit, id: 12}
   #
   def self.edit_link_args(id)
-    { controller: edit_controller, action: edit_action, id: id }
+    { controller: "/#{edit_controller}", action: edit_action, id: id }
   end
 
   def edit_link_args
@@ -540,7 +544,7 @@ class AbstractModel < ApplicationRecord
   #     {controller: :name, action: :destroy, id: 12}
   #
   def self.destroy_link_args(id)
-    { controller: destroy_controller, action: destroy_action, id: id }
+    { controller: "/#{destroy_controller}", action: destroy_action, id: id }
   end
 
   def destroy_link_args
@@ -729,7 +733,7 @@ class AbstractModel < ApplicationRecord
     add_image(image)
     log_reuse_image(image)
     {
-      controller: show_controller,
+      controller: "/#{show_controller}",
       action: show_action,
       id: id,
       q: query_params[:q]

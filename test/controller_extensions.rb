@@ -558,14 +558,14 @@ module ControllerExtensions
         assert_template(arg.to_s, msg)
       elsif arg == :index
         msg += "Expected redirect to <rss_log/index>" + got
-        assert_redirected_to({ controller: :rss_logs,
+        assert_redirected_to({ controller: "/rss_logs",
                                action: :index }, msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>" + got
-        assert_redirected_to({ controller: :account, action: :login }, msg)
+        assert_redirected_to({ controller: "/account", action: :login }, msg)
       elsif arg == :welcome
         msg += "Expected redirect to <account/welcome>" + got
-        assert_redirected_to({ controller: :account, action: :login }, msg)
+        assert_redirected_to({ controller: "/account", action: :login }, msg)
       else
         raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
       end

@@ -25,7 +25,7 @@
 
   tabs = [
     link_to(:show_user_contributors.t,
-            controller: :observations,
+            controller: "/observations",
             action: :users_by_contribution)
   ]
   if @show_user == @user
@@ -35,13 +35,13 @@
       link_to(:show_user_comments_for_you.t,
               links[:comments_for]),
       link_to(:show_user_your_notifications.t,
-              controller: :interests,
+              controller: "/interests",
               action: :index),
       link_to(:show_user_edit_profile.t,
-              controller: :account,
+              controller: "/account",
               action: :profile),
       link_to(:app_preferences.t,
-              controller: :account,
+              controller: "/account",
               action: :prefs),
       link_to(:app_life_list.t,
               links[:life_list])
@@ -53,7 +53,7 @@
       link_to(:show_user_comments_for.t(name: name),
               links[:comments_for]),
       link_to(:show_user_email_to.t(name: name),
-              controller: :email,
+              controller: "/email",
               action: :ask_user_question,
               id: id)
     ]
@@ -61,11 +61,11 @@
   if in_admin_mode?
     tabs += [
       link_to(:change_user_bonuses.t,
-              controller: :users,
+              controller: "/users",
               action: :change_user_bonuses,
               id: @show_user.id),
       link_to(:DESTROY.t,
-              { controller: :account,
+              { controller: "/account",
                 action: :destroy_user,
                 id: @show_user.id},
                 data: { confirm: :are_you_sure.l })

@@ -3,10 +3,10 @@
 
   tabs = [
     link_to(:theme_list.t,
-            controller: :themes,
+            controller: "/themes",
             action: :color_themes),
     link_to(:app_preferences.t,
-            controller: :account,
+            controller: "/account",
             action: :prefs)
   ]
   @tabsets = { right: draw_tab_set(tabs) }

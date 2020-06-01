@@ -1,5 +1,5 @@
 <big>Stats for <%= @ip %>:</big> &nbsp;&nbsp;
-  <%= link_to("[Close]", { controller: :account, action: :blocked_ips }) %><br/>
+  <%= link_to("[Close]", { controller: "/account", action: :blocked_ips }) %><br/>
 <% if user_id = @stats[@ip][:user] %>
   User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
 <% end %>
