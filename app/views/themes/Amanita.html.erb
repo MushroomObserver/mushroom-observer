@@ -3,10 +3,10 @@
 
   tabs = [
     link_to(:theme_list.t,
-            controller: :themes,
+            controller: "/themes",
             action: :color_themes),
     link_to(:app_preferences.t,
-            controller: :account,
+            controller: "/account",
             action: :prefs)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
@@ -15,19 +15,19 @@
 <div class="max-width-text">
   <%= :theme_amanita_pachycolea.tp(link: "XXX").sub("XXX",
       link_to("**__Amanita pachycolea__**".t,
-              controller: :images,
+              controller: "/images",
               action: :show,
               id: 644)).html_safe %>
 
   <%= :theme_amanita_muscaria.tp(link: "XXX").sub("XXX",
       link_to("**__Amanita muscaria__**".t,
-              controller: :images,
+              controller: "/images",
               action: :show,
               id: 651)).html_safe %>
 
   <%= :theme_amanita_velosa.tp(link: "XXX").sub("XXX",
       link_to("**__Amanita velosa__**".t,
-              controller: :images,
+              controller: "/images",
               action: :show,
               id: 623)).html_safe %>
 
@@ -35,7 +35,7 @@
     <span class="ListLine0">
       <%= :theme_amanita_calyptroderma.t(link: "XXX").sub("XXX",
           link_to("The fall form of **__Amanita calyptroderma__**".t,
-                  controller: :images,
+                  controller: "/images",
                   action: :show,
                   id: 669)).html_safe %>
     </span>
@@ -45,7 +45,7 @@
     <span class="ListLine1">
       <%= :theme_amanita_phalloides.t(link: "XXX").sub("XXX",
           link_to("**__Amanita phalloides__**".t,
-                  controller: :images,
+                  controller: "/images",
                   action: :show,
                   id: 636)).html_safe %>
     </span>

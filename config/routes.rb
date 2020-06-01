@@ -114,6 +114,7 @@ ACTIONS = {
     # update: {}
   },
   authors: {
+    author_request: {},
     review_authors: {}
   },
   collection_numbers: {
@@ -317,7 +318,8 @@ ACTIONS = {
     # show: {},
     # update: {}
   },
-  location_descriptions: {
+  "locations/descriptions": {
+    adjust_permissions: {},
     # create_location_description: {}, # aliased only
     # destroy_location_description: {}, # aliased only
     # edit_location_description: {}, # aliased only
@@ -740,16 +742,16 @@ MushroomObserver::Application.routes.draw do
   root :to => "observations#index"
 
   resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
-  :herbarium_records, :images, :namings, :observations, :projects,
-  :publications, :sequences, :species_lists
+    :herbarium_records, :images, :locations, :names, :namings, :observations,
+    :projects, :publications, :sequences, :species_lists
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
-  resources :names do
-    resources :descriptions, module: :names
+  namespace :names do
+    resources :descriptions
   end
 
-  resources :locations do
-    resources :descriptions, module: :locations
+  namespace :locations do
+    resources :descriptions
   end
 
   resources :notifications, only: [:show]

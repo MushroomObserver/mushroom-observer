@@ -22,7 +22,7 @@
 
     <div class="card-body bg-secondary d-flex flex-row justify-content-between">
       <%= link_with_query(:show_comments_add_comment.t,
-                          { controller: :comments,
+                          { controller: "/comments",
                             action: :new,
                             id: object.id,
                             type: object.class.name },
@@ -32,7 +32,7 @@
         <%= tag.span :show_comments_no_comments_yet.t %>
       <% elsif limit && and_more > 0
         link_to(:show_comments_and_more.t(num: and_more),
-                { controller: :comments,
+                { controller: "/comments",
                   action: :show_comments_for_target,
                   id: object.id,
                   type: object.class.name },

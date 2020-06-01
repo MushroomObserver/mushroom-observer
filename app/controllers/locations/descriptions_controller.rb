@@ -222,9 +222,9 @@ class Locations::DescriptionsController < ApplicationController
   def create
     store_location
     pass_query_params
-    # Create new description.
+    @description = LocationDescription.new
     @description.attributes = whitelisted_location_description_params
-    @location = @description.location
+    @description.location = @location = Location.find(params[:id].to_s)
 
     if @description.valid?
       initialize_description_permissions(@description)
@@ -259,6 +259,7 @@ class Locations::DescriptionsController < ApplicationController
 
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
+    end
   end
 
   alias_method :edit_location_description, :edit
@@ -394,12 +395,11 @@ class Locations::DescriptionsController < ApplicationController
   end
 
   def redirect_to_location_description
-    redirect_to location_description_path(@description.location_id,
-                                          @description.id)
+    redirect_to locations_description_path(@description.id)
   end
 
   def redirect_to_location_description_with_query
-    redirect_to location_description_path(@description.location_id,
+    redirect_to locations_description_path(@description.location_id,
       @description.id, q: get_query_param)
   end
 

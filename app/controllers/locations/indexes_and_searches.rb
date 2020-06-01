@@ -107,7 +107,7 @@ class LocationsController
       #              query
       #            )]
       @links << [:show_objects.t(type: :description),
-        location_descriptions_index_location_description_path(
+        locations_description_index_path(
           q: get_query_param
         )]
     end

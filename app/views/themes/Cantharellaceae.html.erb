@@ -3,10 +3,10 @@
 
   tabs = [
     link_to(:theme_list.t,
-            controller: :themes,
+            controller: "/themes",
             action: :color_themes),
     link_to(:app_preferences.t,
-            controller: :account,
+            controller: "/account",
             action: :prefs)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
@@ -15,13 +15,13 @@
 <div class="max-width-text">
   <%= :theme_cantharellaceae_californicus.tp(link: "XXX").sub("XXX",
       link_to("**__Cantharellus californicus__**".t,
-              controller: :images,
+              controller: "/images",
               action: :show,
               id: 557)).html_safe %>
 
   <%= :theme_cantharellaceae_cinnabarinus.tp(link: "XXX").sub("XXX",
       link_to("**__Cantharellus cinnabarinus__**".t,
-              controller: :images,
+              controller: "/images",
               action: :show,
               id: 551)).html_safe %>
 
@@ -29,7 +29,7 @@
     <span class="ListLine1">
       <%= :theme_cantharellaceae_cornucopioides.t(link: "XXX").sub("XXX",
           link_to("**__Craterellus cornucopioides__**".t,
-                  controller: :images,
+                  controller: "/images",
                   action: :show,
                   id: 465)).html_safe %>
     </span>
@@ -39,7 +39,7 @@
     <span class="ListLine0">
       <%= :theme_cantharellaceae_tubaeformis.t(link: "XXX").sub("XXX",
           link_to("**__Craterellus tubaeformis__**".t,
-                  controller: :images,
+                  controller: "/images",
                   action: :show,
                   id: 462)).html_safe %>
     </span>

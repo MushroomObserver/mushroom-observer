@@ -1,6 +1,6 @@
 <%
   tabs = [
-    link_with_query(:list_place_names_map.t, action: :map_locations),
+    link_with_query(:list_place_names_map.t, controller: "/locations", action: :map_locations),
     link_to(:all_objects.t(type: :location), action: :index)
   ]
   tabs += create_links(@links)

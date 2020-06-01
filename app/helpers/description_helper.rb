@@ -34,7 +34,7 @@ module DescriptionHelper
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
-                              controller: type,
+                              controller: "/#{type}s",
                               action: :new,
                               id: desc.parent_id, clone: desc.id,
                               help: :show_description_clone_help.l)
@@ -130,13 +130,13 @@ module DescriptionHelper
         links = []
         if writer
           links << link_with_query(:EDIT.t,
-                                   controller: obj.show_controller,
+                                   controller: desc.show_controller,
                                    action: :edit,
                                    id: desc.id)
         end
         if admin
           links << link_with_query(:DESTROY.t,
-                                   { controller: obj.show_controller,
+                                   { controller: desc.show_controller,
                                      action: :destroy,
                                      id: desc.id },
                                    data: { confirm: :are_you_sure.t })
@@ -149,7 +149,7 @@ module DescriptionHelper
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, controller: obj.show_controller,
+      link = link_with_query(:CREATE.t, controller: "#{obj.show_controller}/descriptions",
                                         action: :new,
                                         id: obj.id)
       str += indent + "[" + link + "]"
@@ -183,8 +183,8 @@ module DescriptionHelper
     # Show existing drafts, with link to create new one.
     head = content_tag(:b, :show_name_descriptions.t) + ": "
     head += link_with_query(:show_name_create_description.t,
-                            controller: obj.show_controller,
-                            action: "create_#{type}_description",
+                            controller: "#{obj.show_controller}/descriptions",
+                            action: :create,
                             id: obj.id)
     any = false
 
@@ -260,7 +260,7 @@ module DescriptionHelper
   def name_section_link(title, data, query)
     if data && data != 0
       action = {
-        controller: :observations,
+        controller: "/observations",
         action: :index_observation
       }
       url = add_query_param(action, query)
