@@ -4,7 +4,7 @@
 
 <div class="row">
   <div class="col-6 max-width-text">
-    <p><%= link_to("Refresh Stats", {controller: :account,
+    <p><%= link_to("Refresh Stats", {controller: "/account",
                    action: :blocked_ips}) %></p>
 
     <div class="p-3 m-3" style="background:#f7f">
@@ -13,7 +13,7 @@
           <big>Okay IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_okay, "", size: 20, data: {autofocus: true}, class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
-          [<%= link_to("Clear List", {controller: :account,
+          [<%= link_to("Clear List", {controller: "/account",
                        action: :blocked_ips, clear_okay: 1}) %>]
         </div>
       <% end %>
@@ -21,7 +21,7 @@
         <% @okay_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
-            <td>[<%= link_to(:REMOVE.t, {controller: :account,
+            <td>[<%= link_to(:REMOVE.t, {controller: "/account",
                              action: :blocked_ips, remove_okay: ip}) %>]</td>
         <% end %>
       </table>
@@ -33,7 +33,7 @@
           <big>Blocked IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_bad, "", size: 20, data: {autofocus: true}, class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn ml-3") %>
-          [<%= link_to("Clear List", {controller: :account,
+          [<%= link_to("Clear List", {controller: "/account",
                        action: :blocked_ips, clear_bad: 1}) %>]
         </div>
       <% end %>
@@ -41,7 +41,7 @@
         <% @blocked_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
-            <td>[<%= link_to(:REMOVE.t, {controller: :account,
+            <td>[<%= link_to(:REMOVE.t, {controller: "/account",
                              action: :blocked_ips, remove_bad: ip}) %>]</td>
         <% end %>
       </table>

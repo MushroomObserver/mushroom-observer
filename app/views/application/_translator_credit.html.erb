@@ -17,8 +17,8 @@
     <% end %>
     <% if Language.tracking_usage %>
       <% file = Language.save_tags %>
-      <%= link_to(:app_edit_translations_on_page.t, controller: :translations, action: :edit_translations, page: file) %> |
-      <%= link_to(:app_edit_translations.t, controller: :translations, action: :edit_translations) %>
+      <%= link_to(:app_edit_translations_on_page.t, controller: "/translations", action: :edit_translations, page: file) %> |
+      <%= link_to(:app_edit_translations.t, controller: "/translations", action: :edit_translations) %>
     <% end %>
   </div>
 <% end %>

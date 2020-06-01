@@ -192,7 +192,7 @@ class ApplicationController < ActionController::Base
     return true if @user&.is_successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :rss_logs, action: :index)
+    redirect_back_or_default(controller: "/rss_logs", action: :index)
     false
   end
 
@@ -1050,8 +1050,8 @@ class ApplicationController < ActionController::Base
 
     [
       :show_objects.t(type: model.type_tag),
-      add_query_param({ controller: model.show_controller,
-                        action: model.index_action }, query)
+      add_query_param({ controller: "/#{model.show_controller}",
+                        action: :index }, query)
     ]
   end
   helper_method :coerced_query_link

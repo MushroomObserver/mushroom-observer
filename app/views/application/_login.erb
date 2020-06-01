@@ -17,7 +17,7 @@
     <% if @user.admin %>
       <li class="nav-item">
         <%= link_to "",
-                    { controller: :account,
+                    { controller: "/account",
                       action: in_admin_mode? ? :turn_admin_off : :turn_admin_on },
                     { class: "glyphicon glyphicon-text-background",
                       title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
@@ -26,7 +26,7 @@
     <% end %>
     <li class="nav-item">
       <%= link_to "",
-                  { controller: :comments,
+                  { controller: "/comments",
                     action: :show_comments_for_user,
                     id: @user.id },
                   { class: "glyphicon glyphicon-inbox",
@@ -35,7 +35,7 @@
     </li>
     <li class="nav-item">
       <%= link_to "",
-                  { controller: :interests,
+                  { controller: "/interests",
                     action: :list_interests },
                   { class: "glyphicon glyphicon-bullhorn",
                     title: :app_your_interests.t,
@@ -43,7 +43,7 @@
     </li>
     <li class="nav-item">
       <%= link_to "",
-                  { controller: :account,
+                  { controller: "/account",
                     action: :prefs },
                   { class: "glyphicon glyphicon-cog",
                     title: :app_preferences.t,
@@ -61,37 +61,37 @@
            role="menu"
            aria-labelledby="user_dropdown">
         <%= link_to :app_your_observations.t,
-                    { controller: :observations,
+                    { controller: "/observations",
                       action: :observations_by_user,
                       id: @user.id },
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_lists.t,
-                    { controller: :species_lists,
+                    { controller: "/species_lists",
                       action: :species_lists_by_user,
                       id: @user.id},
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_interests.t,
-                    { controller: :interests,
+                    { controller: "/interests",
                       action: :list_interests},
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_summary.t,
-                    { controller: :users,
+                    { controller: "/users",
                       action: :show,
                       id: @user.id},
                     { class: "dropdown-item" } %>
         <%= link_to :app_preferences.t,
-                    { controller: :account,
+                    { controller: "/account",
                       action: :prefs},
                     { class: "dropdown-item" } %>
         <%= link_to :app_logout.t,
-                    { controller: :account,
+                    { controller: "/account",
                       action: :logout_user},
                     { class: "dropdown-item" } %>
       </div>
     </li>
     <li>
       <%= link_to "",
-                  { controller: :account,
+                  { controller: "/account",
                     action: :logout_user },
                   { class: "glyphicon glyphicon-log-out pr-3",
                     title: :app_logout.t,

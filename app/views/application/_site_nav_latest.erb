@@ -1,46 +1,46 @@
 <div class="mo-toc-item">
   <%= link_to(:app_latest.t,
-              { controller: :rss_logs, action: :index },
+              { controller: "/rss_logs", action: :index },
               { class: "mo-toc-link" }) %>
   <ul class="nav mo-sidenav">
     <li>
       <%= link_to(:app_latest_changes.t,
-                  { controller: :rss_logs, action: :index},
+                  { controller: "/rss_logs", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:app_newest_images.t,
-                  { controller: :images, action: :index},
+                  { controller: "/images", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:app_comments.t,
-                  { controller: :comments, action: :index},
+                  { controller: "/comments", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:HERBARIA.t,
-                  { controller: :herbaria, action: :index},
+                  { controller: "/herbaria", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:LOCATIONS.t,
-                  { controller: :locations, action: :index},
+                  { controller: "/locations", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:NAMES.t,
-                  { controller: :names, action: :observation_index},
+                  { controller: "/names", action: :observation_index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:NEWS.t, 
-                  { controller: :articles, action: :index},
+                  { controller: "/articles", action: :index},
                   {class: ""}) %>
     </li>
     <li>
       <%= link_to(:PROJECTS.t,
-                  { controller: :projects, action: :index},
+                  { controller: "/projects", action: :index},
                   {class: ""}) %>
     </li>
   </ul>
