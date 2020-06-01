@@ -2,15 +2,15 @@
 
 require "test_helper"
 
-class GeocoderTest < UnitTestCase
+class MOGeocoderTest < UnitTestCase
   def test_unknown_place_name
-    obj = Geocoder.new("Somewhere Out There")
+    obj = MOGeocoder.new("Somewhere Out There")
     assert_not(obj.valid)
     assert_nil(obj.north)
   end
 
   def test_falmouth
-    obj = Geocoder.new("North Falmouth, Massachusetts, USA")
+    obj = MOGeocoder.new("North Falmouth, Massachusetts, USA")
     assert(obj.valid)
     assert(obj.north)
     assert(obj.south)
