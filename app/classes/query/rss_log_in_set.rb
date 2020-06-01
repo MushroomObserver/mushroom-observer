@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::RssLogInSet < Query::RssLogBase
   def parameter_declarations
     super.merge(

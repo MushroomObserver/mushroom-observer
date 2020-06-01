@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  = General Test Helpers
 #
 #  Methods in this class are available to all the unit, functional and

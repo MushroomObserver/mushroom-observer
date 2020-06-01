@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Comment Email
 class QueuedEmail::CommentAdd < QueuedEmail
   def comment

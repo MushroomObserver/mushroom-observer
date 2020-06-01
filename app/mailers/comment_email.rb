@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of comment on their object.
 class CommentEmail < AccountMailer
   def build(sender, receiver, target, comment)

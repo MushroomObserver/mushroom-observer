@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Species List Model
 #
@@ -408,7 +410,7 @@ class SpeciesList < AbstractModel
 
   # id of view textarea for a member notes heading
   def self.notes_part_id(part)
-    notes_area_id_prefix << part.tr(" ", "_")
+    "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
   def notes_part_id(part)

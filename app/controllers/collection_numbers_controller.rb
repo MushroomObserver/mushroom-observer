@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Controls viewing and modifying collection numbers.
 class CollectionNumbersController < ApplicationController
   before_action :login_required, except: [

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ArticleBase < Query::Base
   def model
     Article

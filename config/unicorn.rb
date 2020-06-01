@@ -1,4 +1,6 @@
-APP_PATH = "/var/web/mo".freeze
+# frozen_string_literal: true
+
+APP_PATH = "/var/web/mo"
 worker_processes 3
 working_directory APP_PATH
 listen APP_PATH + "/tmp/sockets/unicorn.sock", backlog: 64

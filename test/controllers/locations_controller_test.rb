@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # TODO: NIMMO split out loca_descriptions tests

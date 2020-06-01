@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Encapsulates parameters needed for NamingController pages
 class NamingParams
   attr_accessor :naming

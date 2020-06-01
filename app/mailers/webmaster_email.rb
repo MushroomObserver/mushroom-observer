@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # User asking webmaster a question.
 class WebmasterEmail < AccountMailer
   def build(sender, question, subject = nil)

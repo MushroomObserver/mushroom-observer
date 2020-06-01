@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MinimalMapLocation
   attr_accessor :id, :name, :north, :south, :east, :west
 

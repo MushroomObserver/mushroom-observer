@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ObservationAdvancedSearch < Query::ObservationBase
   include Query::Initializers::AdvancedSearch
 

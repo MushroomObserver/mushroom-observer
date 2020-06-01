@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::LocationInSet < Query::LocationBase
   def parameter_declarations
     super.merge(

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Darwin format.
   class Darwin < ObservationReport::CSV

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Tracking Usage of Translations
 #

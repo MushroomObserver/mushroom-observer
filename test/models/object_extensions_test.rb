@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # test MO extensions to Ruby's Object class

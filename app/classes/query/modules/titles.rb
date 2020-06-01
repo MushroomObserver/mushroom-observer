@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Modules
     # Deal with titles.

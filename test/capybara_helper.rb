@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CapybaraHelper
   ### locators ###
   # Xpath for 1st link in each feed item,

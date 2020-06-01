@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Modules
     # Turn a query into a string and vice versa.

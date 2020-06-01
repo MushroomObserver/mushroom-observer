@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = License Model
 #
@@ -43,7 +45,7 @@ class License < AbstractModel
   has_many :name_descriptions
   has_many :users
 
-  PREFERRED_LICENSE_FORM_NAME = "ccbysa30".freeze
+  PREFERRED_LICENSE_FORM_NAME = "ccbysa30"
 
   # Use this license if all else equal.
   def self.preferred

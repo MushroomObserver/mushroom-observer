@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: NIMMO check actions of pattern "edit_#{type}_description" in case of
 # controllers/concerns refactor for LocationDescription and NameDescription
 # also abstract_model.rb line 345 - define controller name for

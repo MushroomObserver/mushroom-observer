@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ImageAdvancedSearch < Query::ImageBase
   include Query::Initializers::AdvancedSearch
 

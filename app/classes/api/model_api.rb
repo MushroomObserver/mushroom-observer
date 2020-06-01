@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API subclass for all model-based endpoints
   class ModelAPI < API

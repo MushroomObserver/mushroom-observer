@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Display canned informations about site
 class InfoController < ApplicationController
 

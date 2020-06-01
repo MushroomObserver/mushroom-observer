@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SearchController < ApplicationController
 
   before_action :login_required, except: [

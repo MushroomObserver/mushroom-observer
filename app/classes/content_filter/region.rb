@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContentFilter
   # Content filter to restrict observations and locations to just one region.
   class Region < StringFilter

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Tree
   # Searches the screwy ActiveRecord join- and include-style "trees" for a node.
   #

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see observations_controller.rb
 class ObservationsController
   # Display observation and related namings, comments, votes, images, etc.

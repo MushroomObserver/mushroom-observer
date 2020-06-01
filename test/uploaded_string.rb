@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rack
   module Test
     # Simple extension of Rack::Text::UploadedFile which works with StringIO

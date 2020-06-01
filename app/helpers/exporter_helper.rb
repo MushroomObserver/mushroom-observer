@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ExporterHelper
   # Create button? to export an Image.
   def image_exporter(image_id, exported)

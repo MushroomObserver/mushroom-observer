@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Provides rendering ability for CSV-type reports.
   class CSV < ObservationReport::Base
