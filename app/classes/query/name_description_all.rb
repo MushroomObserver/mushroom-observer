@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::NameDescriptionAll < Query::NameDescriptionBase
   def parameter_declarations
     super.merge(

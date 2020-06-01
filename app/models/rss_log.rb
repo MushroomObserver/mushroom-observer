@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  = RSS Log Model
 #
 #  This model handles the RSS feed.  Every object we care about gets an RssLog

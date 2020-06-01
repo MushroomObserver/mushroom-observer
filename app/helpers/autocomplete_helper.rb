@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AutocompleteHelper
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   require Rails.root.join("app", "classes", "rank_matcher.rb")
 

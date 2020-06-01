@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # User forgot their password.
 class PasswordEmail < AccountMailer
   def build(user, password)

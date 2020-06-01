@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Mass-mailing about new features.
 class FeaturesEmail < AccountMailer
   def build(user, features)

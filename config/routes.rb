@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Nested hash of permissible controllers and actions. Each entry as follows,
 # with missing element meaning use default
 # controller: {    # hash of controller ctions

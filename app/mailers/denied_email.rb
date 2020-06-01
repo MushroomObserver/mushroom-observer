@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Email sent to admins when sign-up is denied.
 class DeniedEmail < AccountMailer
   def build(user_params)

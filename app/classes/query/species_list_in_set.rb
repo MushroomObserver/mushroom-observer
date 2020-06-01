@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::SpeciesListInSet < Query::SpeciesListBase
   def parameter_declarations
     super.merge(

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 

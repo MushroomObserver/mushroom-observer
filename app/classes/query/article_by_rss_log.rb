@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ArticleByRssLog < Query::ArticleBase
   def initialize_flavor
     add_join(:rss_logs)

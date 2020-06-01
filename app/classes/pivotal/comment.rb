@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pivotal
   class Comment
     attr_accessor :id

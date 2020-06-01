@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of name change of their obs.
 class ConsensusChangeEmail < AccountMailer
   def build(email)

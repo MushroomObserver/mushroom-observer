@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PaginationHelper
   # Letters used as text in pagination links
   LETTERS = ("A".."Z").freeze

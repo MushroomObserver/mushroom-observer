@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Special format for Adolf.
   class Adolf < ObservationReport::CSV

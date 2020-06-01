@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::HerbariumRecordInHerbarium < Query::HerbariumRecordBase
   def parameter_declarations
     super.merge(

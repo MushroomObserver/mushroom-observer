@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::CollectionNumberForObservation < Query::CollectionNumberBase
   def parameter_declarations
     super.merge(

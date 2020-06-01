@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # Prime the name auto-completer
 class Name < AbstractModel

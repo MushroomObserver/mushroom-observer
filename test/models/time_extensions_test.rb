@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 # MO time extensions wrap Date, DateTime, and Time
 # So test need to use those Classes in ways which offend RuboCop

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  = Google Maps interface
 #
 #  GM::GMap::      Represents a "google.maps.Map" object.
@@ -39,8 +41,8 @@
 #    </body>
 #
 module GM
-  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js".freeze
-  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
+  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js"
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   # represent a GoogleMaps map object
@@ -204,7 +206,7 @@ module GM
     end
 
     def global_declarations_code
-      result = "var #{name};"
+      result = + "var #{name};" # create mutable string
       overlays.each { |obj| result += "\nvar #{obj.var};" if obj.var }
       result
     end
@@ -227,14 +229,14 @@ module GM
     end
 
     def overlays_code
-      result = ""
+      result = +"" # create mutable string
       overlays.each { |obj| result += obj.create_and_initialize_code + ";\n" }
       result.sub!(/\n\Z/, "")
       result
     end
 
     def events_code
-      result = ""
+      result = +"" # create mutable string
       events.each do |obj, event, code|
         result += "G.event.addListener(#{obj.var}, '#{event}', #{code});\n"
       end

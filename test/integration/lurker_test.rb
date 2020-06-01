@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Test typical sessions of user who never creates an account or contributes.

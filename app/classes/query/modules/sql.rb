@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query::Modules::Sql
   attr_accessor :last_query
 

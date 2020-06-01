@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see ajax_controller.rb
 class AjaxController
   # Upload Image Template. Returns formatted HTML to be injected

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Test the class which communicates with PivotalTracker (MO's issue tracker)

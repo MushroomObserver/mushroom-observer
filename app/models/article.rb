@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Article
 # Simple model used for news about MO, e.g., new releases
 # New articles are added to the Acitivity feed

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Email sent to verify user's email.
 class VerifyEmail < AccountMailer
   def build(user)

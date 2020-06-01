@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApiKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults

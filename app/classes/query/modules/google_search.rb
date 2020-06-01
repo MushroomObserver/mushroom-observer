@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Helper methods for turning Query parameters into SQL conditions.
 module Query::Modules::GoogleSearch
   # Give search string for notes google-like syntax:

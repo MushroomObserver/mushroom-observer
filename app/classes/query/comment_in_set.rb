@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::CommentInSet < Query::CommentBase
   def parameter_declarations
     super.merge(

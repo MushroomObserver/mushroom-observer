@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FooterHelper
   # Show list of authors and editors at the bottom of a show_object page, with
   # the appropriate links for making requests and/or reviewing authors.

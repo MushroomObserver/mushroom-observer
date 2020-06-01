@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # TODO: NIMMO the routing of name description urls has totally changed, fix

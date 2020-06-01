@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Add HerbariumRecord Not Curator Email
 class QueuedEmail
   class AddHerbariumRecordNotCurator < QueuedEmail

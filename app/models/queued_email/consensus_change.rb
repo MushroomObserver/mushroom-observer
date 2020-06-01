@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Consensus Change Email
 class QueuedEmail::ConsensusChange < QueuedEmail
   def observation

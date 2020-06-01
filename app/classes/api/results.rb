@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # API
 class API
   class_attribute :model

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Ask project admins for admin privileges on project.
 class AdminEmail < AccountMailer
   def build(sender, receiver, project, subject, message)
