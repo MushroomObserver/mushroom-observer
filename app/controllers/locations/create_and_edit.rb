@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "mo_geocoder"
-
 # see app/controllers/locations_controller.rb
 class LocationsController
 
