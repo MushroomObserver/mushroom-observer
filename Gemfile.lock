@@ -114,8 +114,6 @@ GEM
     erubi (1.9.0)
     execjs (2.7.0)
     ffi (1.12.2)
-    geocoder (1.6.2)
-    geokit (1.13.1)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.1)
@@ -331,8 +329,6 @@ DEPENDENCIES
   coffee-rails
   coveralls
   cure_acts_as_versioned
-  geocoder
-  geokit
   i18n
   inline_svg
   jbuilder
