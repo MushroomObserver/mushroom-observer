@@ -124,7 +124,6 @@ GEM
     inline_svg (1.7.1)
       activesupport (>= 3.0)
       nokogiri (>= 1.6)
-    jaro_winkler (1.5.4)
     jbuilder (2.10.0)
       activesupport (>= 5.0.0)
     jmespath (1.4.0)
@@ -230,8 +229,7 @@ GEM
     regexp_parser (1.7.0)
     rexml (3.2.4)
     rtf (0.3.3)
-    rubocop (0.81.0)
-      jaro_winkler (~> 1.5.1)
+    rubocop (0.83.0)
       parallel (~> 1.10)
       parser (>= 2.7.0.1)
       rainbow (>= 2.2.2, < 4.0)
@@ -351,7 +349,7 @@ DEPENDENCIES
   rails-controller-testing
   rails_db
   rtf
-  rubocop
+  rubocop (= 0.83)
   rubocop-performance
   rubocop-rails
   sassc-rails
