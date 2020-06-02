@@ -106,22 +106,6 @@ gem "mimemagic"
 # using values from the Can I Use database
 gem "autoprefixer-rails"
 
-
-########## Mapping and Geocoding ###############################################
-
-# Geocoder - Provides object geocoding (by street or IP address),
-# reverse geocoding (coordinates to street address),
-# distance queries for ActiveRecord and Mongoid, result caching
-# https://github.com/alexreisner/geocoder
-gem "geocoder"
-
-# Geokit - Provides ActiveRecord distance-based finders.
-# For example, find all the points in your database within a 50-mile radius.
-# Optional IP-based location lookup utilizing hostip.info
-# http://github.com/geokit/geokit
-gem "geokit"
-
-
 ########## Presentation and Interaction ########################################
 
 # Slick Slider for Image Carousel

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "mo_geocoder"
-
 # see app/controllers/locations_controller.rb
 class LocationsController
 
@@ -45,7 +43,7 @@ class LocationsController
                                dubious_name?(user_name, true)
     end
     @location = Location.new
-    geocoder = MOGeocoder.new(user_name)
+    geocoder = Geocoder.new(user_name)
     if geocoder.valid
       @location.display_name = @display_name
       @location.north = geocoder.north
