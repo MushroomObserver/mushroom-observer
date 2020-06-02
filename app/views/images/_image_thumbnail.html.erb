@@ -47,8 +47,8 @@
             }
   %>
 
-  <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
-    <% if User.current and votes and image %>
+  <% if User.current and votes and image %>
+    <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
       <%= render(partial: "images/image_vote_links", locals: {image: image}) %>
     <% end %>
     <% if original && image && !image.original_name.blank? &&
@@ -56,7 +56,7 @@
       <div class="text-center">
         <span><%= image.original_name %></span>
       </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 
 </div>

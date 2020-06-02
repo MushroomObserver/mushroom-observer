@@ -24,7 +24,7 @@ class SpeciesListsController
   #   params[:checklist_names][name_id]     (Used by view to give a name to each
   #                                         id in checklist_data hash.)
 
-  # TODO NIMMO: Consider breaking this method into shorter methods
+  # TODO NIMMO: Can we break this method into some shorter methods?
   def process_species_list(create_or_update)
     redirected = false
 
@@ -299,6 +299,7 @@ class SpeciesListsController
     init_name_vars_for_create
     @deprecated_names = spl.names.select(&:deprecated)
     @place_name = spl.place_name
+    params[:approved_where] = @place_name
   end
 
   def init_name_vars_for_clone(clone_id)

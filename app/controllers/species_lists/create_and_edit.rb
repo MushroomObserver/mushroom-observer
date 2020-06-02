@@ -20,7 +20,7 @@ class SpeciesListsController
 
   alias_method :create_species_list, :new
 
-  def create
+  def create # :norobots:
     process_species_list(:create)
   end
 
@@ -74,6 +74,7 @@ class SpeciesListsController
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
     end
+    
     init_name_vars_for_edit(@species_list)
     init_member_vars_for_edit(@species_list)
     init_project_vars_for_edit(@species_list)
@@ -82,7 +83,7 @@ class SpeciesListsController
 
   alias_method :edit_species_list, :edit
 
-  def update
+  def update # :norobots:
     process_species_list(:update)
   end
 

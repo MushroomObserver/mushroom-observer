@@ -5,7 +5,7 @@
 
   <div class="row">
     <div class="col-12">
-      <% if @herbarium_record.observations.count > 1 %>
+      <% if @herbarium_record.observations.size > 1 %>
         <div class="alert alert-warning">
           <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
         </div>
