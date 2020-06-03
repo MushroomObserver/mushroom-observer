@@ -3,12 +3,14 @@
 require "test_helper"
 require "textile"
 
+# Enable tests to call Textile
 class Textile
   def send_private(method, *args, &block)
     send(method, *args, &block)
   end
 end
 
+# Test Textile markup
 class TextileTest < UnitTestCase
   def assert_name_link_matches(str, label = nil, name = nil)
     obj = Textile.new(str)

@@ -3,6 +3,7 @@
 require "test_helper"
 require "fileutils"
 
+# test site-use logging, IP-address blocking
 class IpStatsTest < UnitTestCase
   def setup
     fixture_path = "#{::Rails.root}/test/fixtures"
@@ -163,7 +164,7 @@ class IpStatsTest < UnitTestCase
     assert_equal(1, stats[ip2][:activity].length)
     assert_operator(stats[ip2][:activity][0][0], :>=, 2.seconds.ago.to_s)
     assert_operator(stats[ip2][:activity][0][1], :>=, 2.seconds)
-    assert_equal("observation", stats[ip2][:activity][0][2])
+    assert_equal("observations", stats[ip2][:activity][0][2])
     assert_equal("new", stats[ip2][:activity][0][3])
   end
 end
