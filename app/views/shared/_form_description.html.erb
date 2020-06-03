@@ -11,36 +11,36 @@
 <% if new_record || admin || author || owner || root %>
 
   <div class="form-group">
-    <%= label_tag(:description_source, :form_description_source.t + ":") %>
+    <%= form.label :source, :form_description_source.t + ":" %>
 
     <% need_help = false
     if root %>
-      <%= form.select(:source_type, [
+      <%= form.select :source_type, [
         [:form_description_source_public.l,  :public],
         [:form_description_source_foreign.l, :foreign],
         [:form_description_source_project.l, :project],
         [:form_description_source_source.l,  :source],
         [:form_description_source_user.l,    :user],
-      ], class: "form-control") %>
+      ], class: "form-control" %>
     <% elsif new_record && [:public, :source, :user].include?(type) %>
       <% need_help = true %>
-      <%= form.select(:source_type, [
+      <%= form.select :source_type, [
         [:form_description_source_public.l, :public],
         [:form_description_source_source.l, :source],
         [:form_description_source_user.l,   :user],
-      ], class: "form-control") %>
+      ], class: "form-control" %>
     <% else %>
-      <%= form.hidden_field(:source_type, value: type) %>
+      <%= form.hidden_field :source_type, value: type %>
       <%= :"form_description_source_#{type}".l %>
     <% end %>
 
     <% if !root && [:foreign, :project].include?(type) %>
-      <%= form.hidden_field(:source_name) %>
+      <%= form.hidden_field :source_name %>
       <%= @description.source_name.t %>
     <% else %>
-      <%= form.text_field(:source_name, class: "form-control") %>
+      <%= form.text_field :source_name, class: "form-control" %>
     <% end %>
-    <%= form.hidden_field(:project_id) %>
+    <%= form.hidden_field :project_id %>
 
     <% if need_help %>
       <div class="help-block"><%= :form_description_source_help.tpl %></div>
@@ -54,18 +54,18 @@
       args[:disabled] = "disabled"
     end %>
     <div class="form-group form-inline">
-      <%= form.check_box(:public_write, args) %>
-      <%= label_tag(:description_source, :form_description_public_writable.t) %>
+      <%= form.check_box :public_write, args %>
+      <%= form.label :source, :form_description_public_writable.t %>
       <br/>
-      <%= form.check_box(:public, args) %>
-      <%= label_tag(:description_source, :form_description_public_readable.t) %>
+      <%= form.check_box :public, args %>
+      <%= form.label :source, :form_description_public_readable.t %>
       <p class="help-block"><%= :form_description_permissions_help.t %></p>
     </div>
   </p>
 
   <div class="form-group">
-    <%= label_tag(:description_license_id, :License.t + ":") %>
-    <%= form.select(:license_id, @licenses, class: "form-control") %>
+    <%= form.label :license_id, :License.t + ":" %>
+    <%= form.select :license_id, @licenses, class: "form-control" %>
     <p class="help-block"><%= :form_description_license_help.t %></p>
   </div>
 

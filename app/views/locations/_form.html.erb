@@ -33,21 +33,21 @@
 
         <div class="row">
           <div class="col-12">
-            <%= submit_tag(button_name.l, class: "btn mx-auto mt-3") %>
+            <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 
             <% if in_admin_mode? %>
               <div class="form-inline mt-3">
                 <div class="form-group">
                   <%= f.check_box(:locked) %>
-                  <label for="location_locked"><%= :form_locations_locked.t %></label>
+                  <%= f.label :locked, :form_locations_locked.t %>
                 </div>
               </div>
             <% end %>
 
             <div class="form-group mt-3">
-              <%= label_tag(:location_display_name, :WHERE.t + ":") %>
-              <%= f.text_field(:display_name, value: @display_name,
-                                  class: "form-control", data: {autofocus: true}) %>
+              <%= f.label :display_name, :WHERE.t + ":" %>
+              <%= f.text_field :display_name, value: @display_name,
+                               class: "form-control", data: { autofocus: true } %>
               <div class="pull-right">
                 <span id="find_on_map" onclick="findOnMap()" class="btn">
                   <%= :form_locations_find_on_map.t %>
@@ -64,8 +64,8 @@
               <div class="col-4 offset-4">
                 <center>
                   <div class="form-group">
-                    <%= label_tag(:location_north, :NORTH.t + ":") %>
-                    <%= f.text_field(:north, class: "form-control") %>
+                    <%= f.label :north, :NORTH.t + ":" %>
+                    <%= f.text_field :north, class: "form-control"  %>
                     <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
                   </div>
                 </center>
@@ -75,8 +75,8 @@
               <div class="col-4">
                 <center>
                   <div class="form-group">
-                    <%= label_tag(:location_west, :WEST.t + ":") %>
-                    <%= f.text_field(:west, class: "form-control") %>
+                    <%= f.label_tag :west, :WEST.t + ":" %>
+                    <%= f.text_field :west, class: "form-control" %>
                     <% inject_javascript_at_end("jQuery('#location_west').keypress(startKeyPressTimer);") %>
                   </div>
                 </center>
@@ -89,8 +89,8 @@
               <div class="col-4">
                 <center>
                   <div class="form-group">
-                    <%= label_tag(:location_east, :EAST.t + ":") %>
-                    <%= f.text_field(:east, class: "form-control") %>
+                    <%= f.label :east, :EAST.t + ":" %>
+                    <%= f.text_field :east, class: "form-control" %>
                     <% inject_javascript_at_end("jQuery('#location_east').keypress(startKeyPressTimer);") %>
                   </div>
                 </center>
@@ -100,8 +100,8 @@
               <div class="col-4 offset-4">
                 <center>
                   <div class="form-group">
-                    <%= label_tag(:location_south, :SOUTH.t + ":") %>
-                    <%= f.text_field(:south, class: "form-control") %>
+                    <%= f.label :south, :SOUTH.t + ":" %>
+                    <%= f.text_field :south, class: "form-control" %>
                     <% inject_javascript_at_end("jQuery('#location_south').keypress(startKeyPressTimer);") %>
                   </div>
                 </center>
@@ -111,12 +111,12 @@
           <div class="col-sm-4">
             <center>
               <div class="form-group mt-3">
-                <%= label_tag(:location_high, :show_location_highest.t + ":") %>
-                <%= f.text_field(:high, class: "form-control") %>
+                <%= f.label :high, :show_location_highest.t + ":" %>
+                <%= f.text_field :high, class: "form-control" %>
               </div>
               <div class="form-group mt-3">
-                <%= label_tag(:location_low, :show_location_lowest.t + ":") %>
-                <%= f.text_field(:low, class: "form-control") %>
+                <%= f.label :location_low, :show_location_lowest.t + ":" %>
+                <%= f.text_field :low, class: "form-control" %>
                 (<%= :units_meters.t %>)
               </div>
             </center>
@@ -140,23 +140,23 @@
   <% else %>
     <div class="row">
       <div class="col-sm-6 col-md-4 col-lg-3 max-width-text-plus-padding">
-        <%= content_tag(:b, :WHERE.t) %>: <%= @location.display_name.t %><br/>
-        <%= content_tag(:b, :NORTH.t) %>: <%= @location.north %>°<br/>
-        <%= content_tag(:b, :SOUTH.t) %>: <%= @location.south %>°<br/>
-        <%= content_tag(:b, :EAST.t) %>: <%= @location.east %>°<br/>
-        <%= content_tag(:b, :WEST.t) %>: <%= @location.west %>°<br/>
+        <%= tag.b :WHERE.t %>: <%= @location.display_name.t %><br/>
+        <%= tag.b :NORTH.t %>: <%= @location.north %>°<br/>
+        <%= tag.b :SOUTH.t %>: <%= @location.south %>°<br/>
+        <%= tag.b :EAST.t %>: <%= @location.east %>°<br/>
+        <%= tag.b :WEST.t %>: <%= @location.west %>°<br/>
         <% if @location.high.present? && @location.low.present? %>
-          <%= content_tag(:b, show_location_highest.t) %>: <%= @location.high %> m<br/>
-          <%= content_tag(:b, show_location_lowest.t) %>: <%= @location.low %> m<br/>
+          <%= tag.b show_location_highest.t %>: <%= @location.high %> m<br/>
+          <%= tag.b show_location_lowest.t %>: <%= @location.low %> m<br/>
         <% end %>
         <div class="help-block"><%= :show_location_locked.tp %></div>
-        <%= hidden_field(:location, :display_name, value: @display_name) %>
-        <%= hidden_field(:location, :north) %>
-        <%= hidden_field(:location, :south) %>
-        <%= hidden_field(:location, :east) %>
-        <%= hidden_field(:location, :west) %>
-        <%= hidden_field(:location, :high) %>
-        <%= hidden_field(:location, :low) %>
+        <%= f.hidden_field :location, :display_name, value: @display_name %>
+        <%= f.hidden_field :location, :north %>
+        <%= f.hidden_field :location, :south %>
+        <%= f.hidden_field :location, :east %>
+        <%= f.hidden_field :location, :west %>
+        <%= f.hidden_field :location, :high %>
+        <%= f.hidden_field :location, :low %>
       </div>
       <div class="col-sm-6 col-md-8 col-lg-9 mb-3 mt-3">
         <%=
@@ -167,15 +167,15 @@
       </div>
     </div>
   <% end %>
-  
-  <%= submit_tag(button_name.l, class: "btn mx-auto mt-3") %>
+
+  <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 
   <div class="row">
     <div class="col-12 max-width-text">
       <div class="form-group mt-3">
-        <%= label_tag(:location_notes, :NOTES.t + ":") %>
+        <%= f.label :location_notes, :NOTES.t + ":" %>
         <div class="help-block"><%= :form_locations_notes_help.t %></div>
-        <%= f.text_area(:notes, class: "form-control") %>
+        <%= f.text_area :notes, class: "form-control" %>
         <%= render "shared/textilize_help" %>
       </div>
     </div>

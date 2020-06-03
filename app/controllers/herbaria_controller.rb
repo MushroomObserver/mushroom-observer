@@ -143,6 +143,12 @@ class HerbariaController < ApplicationController
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    @herbarium_users = Herbarium.connection.select_rows(%(
+      SELECT u.name, u.login, COUNT(u.id)
+      FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
+      WHERE hr.herbarium_id = #{@herbarium.id}
+      GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
+    ))
   end
 
   alias_method :edit_herbarium, :edit

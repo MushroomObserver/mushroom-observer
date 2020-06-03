@@ -4,14 +4,18 @@
     #                          approved_name: @params.what)) do %>
 <%= form_with model: :naming do |f| %>
 
+  <%= f.hidden_field :id, params.naming.id %>
+  <%= f.hidden_field :approved_name, params.what %>
+  <%= f.hidden_field :q, get_query_param %>
+
   <div class="row">
     <div class="col-12 col-sm-8 max-width-text">
       <div class="mt-3">
-        <%= render(partial: "observations/show",
-                   locals: { observation: @observation }) %>
+        <%= render partial: "observations/show",
+                   locals: { observation: @observation } %>
       </div>
 
-      <%= submit_tag(button_name.t, class: "btn mx-auto mt-4") %>
+      <%= f.submit button_name.t, class: "btn mx-auto mt-4" %>
 
       <div class="mt-3">
         <%
@@ -31,7 +35,7 @@
            focus_on_vote = !unfocused && (button_name == :CREATE.l && what.present?)
         %>
 
-        <%= render(partial: "shared/form_name_feedback",
+        <%= render partial: "shared/form_name_feedback",
                    locals: {
                      button_name: button_name,
                      what: what,
@@ -39,19 +43,21 @@
                      suggest_corrections: suggest_corrections,
                      parent_deprecated: parent_deprecated,
                      names: names
-                   }
-                  ) %>
+                   } %>
 
         <div class="row">
           <div class="col-sm-6">
 
             <div class="form-group">
-              <%= label_tag(:name_name, :WHAT.t + ":") %>
-              <%= text_field(:name, :name, value: what, size: 40, class: "form-control",
-                             data: { autofocus: focus_on_name }) %>
-              <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
+              <%= f.label :name, :WHAT.t + ":" %>
+              <%= f.text_field :name, value: what, size: 40,
+                               class: "form-control",
+                               data: { autofocus: focus_on_name } %>
+              <% turn_into_name_auto_completer(:name_name,
+                                               primer: Name.primer) %>
             </div>
 
+            <% # FIXME: NIMMO figure out if this goes to f. or not %>
             <div class="form-group">
               <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
               <%= select(:vote, :value,
@@ -74,8 +80,8 @@
                 </label>
               </div>
               <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
-                <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
-                              class: "form-control") %>
+                <%= text_area(:reason, :notes, index: r.num, rows: 1,
+                              value: r.notes, class: "form-control") %>
               </div>
             <% end %>
 
@@ -97,7 +103,7 @@
 
         </div>
 
-        <%= hidden_field_tag(:was_js_on, "yes") if browser.modern_browser? %>
+        <%= f.hidden_field :was_js_on, "yes" if browser.modern_browser? %>
         <% inject_javascript_at_end %(
           jQuery(document).ready(function() {
             function collapse_reason() {
@@ -122,9 +128,9 @@
     </div>
 
     <div class="col-12 col-sm-4">
-      <%= render(partial: "observations/show_images",
+      <%= render partial: "observations/show_images",
                  locals: { observation: @observation,
-                           thumb_size_control: false }) %>
+                           thumb_size_control: false } %>
     </div>
   </div>
 
