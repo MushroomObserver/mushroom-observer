@@ -57,14 +57,17 @@
                                                primer: Name.primer) %>
             </div>
 
-            <% # FIXME: NIMMO figure out if this goes to f. or not %>
+            <% # These fields go to a different model, Vote %>
             <div class="form-group">
-              <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
-              <%= select(:vote, :value,
-                         options_for_select(Vote.confidence_menu, vote.value),
-                         { include_blank: (action == :new) } ,
-                         class: "form-control",
-                         data: { autofocus: focus_on_vote }) %>
+              <%= f.fields_for :vote do |vote_fields| %>
+                <%= vote_fields.label :value, :form_naming_confidence.t + ":" %>
+                <br>
+                <%= vote_fields.select :value,
+                      options_for_select(Vote.confidence_menu, vote.value),
+                      { include_blank: (action == :new) } ,
+                      class: "form-control",
+                      data: { autofocus: focus_on_vote } %>
+              <% end %>
             </div>
 
             <% reason.values.sort_by(&:order).each do |r| %>
