@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Log site use; handle blocking of IP addresses
 class IpStats
   class << self
     STATS_TIME = 10 # minutes

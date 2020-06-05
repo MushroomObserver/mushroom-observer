@@ -114,8 +114,6 @@ GEM
     erubi (1.9.0)
     execjs (2.7.0)
     ffi (1.12.2)
-    geocoder (1.6.2)
-    geokit (1.13.1)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.1)
@@ -124,7 +122,6 @@ GEM
     inline_svg (1.7.1)
       activesupport (>= 3.0)
       nokogiri (>= 1.6)
-    jaro_winkler (1.5.4)
     jbuilder (2.10.0)
       activesupport (>= 5.0.0)
     jmespath (1.4.0)
@@ -230,8 +227,7 @@ GEM
     regexp_parser (1.7.0)
     rexml (3.2.4)
     rtf (0.3.3)
-    rubocop (0.81.0)
-      jaro_winkler (~> 1.5.1)
+    rubocop (0.83.0)
       parallel (~> 1.10)
       parser (>= 2.7.0.1)
       rainbow (>= 2.2.2, < 4.0)
@@ -331,8 +327,6 @@ DEPENDENCIES
   coffee-rails
   coveralls
   cure_acts_as_versioned
-  geocoder
-  geokit
   i18n
   inline_svg
   jbuilder
@@ -351,7 +345,7 @@ DEPENDENCIES
   rails-controller-testing
   rails_db
   rtf
-  rubocop
+  rubocop (= 0.83)
   rubocop-performance
   rubocop-rails
   sassc-rails
