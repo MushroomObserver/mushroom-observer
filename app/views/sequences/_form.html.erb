@@ -4,8 +4,8 @@
 <% # Note: Hidden params are passed from the controller %>
 <%= form_with model: :sequence do |f| %>
 
-  <%= f.hidden_field :back, @back %>
-  <%= f.hidden_field :q %>
+  <%= f.hidden_field :back, value: @back %>
+  <%= f.hidden_field :q, value: get_query_param %>
 
   <div class="row mt-3">
     <div class="form-group col-12 col-md-6 max-width-text">

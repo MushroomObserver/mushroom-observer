@@ -1,12 +1,8 @@
 <div class="row mt-3">
   <div class="col-12 max-width-text-times-two">
-    <%= render(partial: "namings/form",
-                locals: {
-                  action:       action,
-                  button_name:  button_name,
-                  show_reasons: false,
-                  unfocused:    true
-                }
-              ) if include_naming? %>
+    <%= render "namings/form",
+               button_name:  local_assigns[:button_name],
+               show_reasons: false,
+               unfocused:    true if local_assigns[:include_naming?] %>
   </div>
 </div>

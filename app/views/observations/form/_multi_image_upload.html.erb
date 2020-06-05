@@ -1,13 +1,14 @@
 <!-- MULTIFILE_UPLOAD_FORM -->
 <% javascript_include("multi_image_upload") %>
 
-<%= hidden_field(:observation, :thumb_image_id) %>
+<%= f.hidden_field :thumb_image_id %>
+
 <div class="row">
   <div class="col-sm-6">
     <input type="file" multiple id="multiple_images_button" accept="image/*" class="mt-3"/>
   </div>
   <div class="col-sm-6">
-    <div class="well well-sm max-width-text">
+    <div class="card max-width-text">
       <div class="arrow-left d-none d-sm-block"></div>
       <p class="help-block">
         <%= :form_observations_upload_help_multi_select.t %>
@@ -18,18 +19,26 @@
 
 
 <!-- Container to show messages relating to the selected images -->
-<div class="row image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+<div class="row image_messages" style="display: none;">
   <div class="col-sm-7">
     <div class="inconsistent_date_options">
       <div class="col-sm-12">
-        <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
+        <div><b><%= :form_observations_set_observation_date_to.t %>:</b></div>
         <div id="image_date_radio_container"></div>
-        <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
+        <div><b><%= :form_observations_set_image_dates_to.t %>:</b></div>
         <div id="observation_date_radio_container"></div>
       </div>
       <div class="col-sm-12 mt-3">
-        <button id="fix_dates" type="button" class="btn"><%= :form_observations_use_date.t %></button>
-        <button id="ignore_dates" type="button" class="btn"><%= :IGNORE.t %></button>
+        <button id="fix_dates"
+                type="button"
+                class="btn btn-primary">
+          <%= :form_observations_use_date.t %>
+        </button>
+        <button id="ignore_dates"
+                type="button"
+                class="btn btn-primary">
+          <%= :IGNORE.t %>
+        </button>
       </div>
     </div>
   </div>
@@ -38,17 +47,25 @@
   </div>
 </div>
 
-<div class="row geocode_messages mt-2" style="background: rgba(211, 211, 211, 0.22); display: none;">
+<div class="row geocode_messages mt-2" style="display: none;">
   <div class="col-sm-7">
       <div class="col-sm-12">
-        <div><strong>Set observation Latitude/Longitude to:</strong></div>
+        <div><b>Set observation Latitude/Longitude to:</b></div>
         <div id="geocode_radio_container">
 
         </div>
       </div>
       <div class="col-sm-12 mt-3">
-        <button id="set_geocode" type="button" class="btn"><%= :UPDATE.t %></button>
-        <button id="ignore_geocode" type="button" class="btn"><%= :IGNORE.t %></button>
+        <button id="set_geocode"
+                type="button"
+                class="btn btn-primary">
+          <%= :UPDATE.t %>
+        </button>
+        <button id="ignore_geocode"
+                type="button"
+                class="btn btn-primary">
+          <%= :IGNORE.t %>
+        </button>
       </div>
   </div>
   <div class="col-sm-4">
@@ -60,7 +77,7 @@
 </div>
 
 <!-- Container for appending images -->
-<div class="images_container margin-top">
+<div class="images_container mt-3">
   <div id="added_images_container">
     <!-- Target for insertion -->
   </div>

@@ -95,7 +95,6 @@ class SequencesController < ApplicationController
     store_location
     pass_query_params
     figure_out_where_to_go_back_to
-    params[:back] = @back
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
   end
@@ -112,7 +111,6 @@ class SequencesController < ApplicationController
     store_location
     pass_query_params
     figure_out_where_to_go_back_to
-    params[:back] = @back
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 

@@ -7,7 +7,7 @@
   <% i = 0 %>
   <% @images.push(@new_image) %>
   <% while i < @images.length %>
-    <%= render "observations/form/mono_image", locals: {index: i}) %>
+    <%= render "observations/form/mono_image", f: f, index: i %>
     <% i += 1 %>
   <% end %>
 </div>

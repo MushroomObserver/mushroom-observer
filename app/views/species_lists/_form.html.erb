@@ -4,8 +4,8 @@
 
 <%= form_for @species_list do |f| %>
 
-  <%= f.hidden_field :id %>
-  <%= f.hidden_field :approved_where %>
+  <%= f.hidden_field :id, value: @species_list.id %>
+  <%= f.hidden_field :approved_where, value: @place_name %>
 
   <div class="row">
     <div class="col-12">

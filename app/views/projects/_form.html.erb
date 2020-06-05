@@ -4,6 +4,9 @@
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
+  <%= f.hidden_field :q, value: get_query_param %>
+  <%= f.hidden_field :id, value: @project.id if action == :edit %>
+
   <div class="form-group mt-3">
     <%= f.label :title, :form_projects_title.t + ":" %>
     <%= f.text_field :title, class: "form-control", data: { autofocus: true } %>
