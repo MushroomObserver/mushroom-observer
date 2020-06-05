@@ -64,7 +64,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   # TODO: NIMMO rename to test_show
   def test_show_collection_number
-    get(:show)
+    assert_raises(ActionController::UrlGenerationError) do
+      get(:show) # show without id
+    end
     get(:show, id: "bogus")
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
