@@ -1,11 +1,10 @@
 <% # form_tag(add_query_param(action: :new, id: @observation.id)) do %>
-<% # Note: Hidden params are passed from the controller %>
 <%= form_with model: :collection_number do |f| %>
 
   <%= f.submit button.t, class: "btn mx-auto mt-3" %>
 
-  <%= f.hidden_field :id %>
-  <%= f.hidden_field :q %>
+  <%= f.hidden_field :id, value: @observation.id %>
+  <%= f.hidden_field :q, value: get_query_param %>
 
   <% if @collection_number.observations.size > 1 %>
     <div class="alert alert-warning mt-3">

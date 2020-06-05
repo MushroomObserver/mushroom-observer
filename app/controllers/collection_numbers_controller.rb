@@ -86,8 +86,6 @@ class CollectionNumbersController < ApplicationController
   def new # :norobots:
     store_location
     pass_query_params
-    params[:id] = @observation.id
-    params[:name]: @user.legal_name
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
