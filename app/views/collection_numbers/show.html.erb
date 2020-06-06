@@ -4,7 +4,9 @@
   tabs = []
   if in_admin_mode? || @collection_number.can_edit?
     tabs << link_with_query(:edit_collection_number.t,
-                            action: :edit, id: @collection_number.id, back: :show)
+                            action: :edit,
+                            id: @collection_number.id,
+                            back: :show)
     tabs << link_with_query(:delete_collection_number.t,
                             {action: :destroy, id: @collection_number.id},
                             data: {confirm: :are_you_sure.t})

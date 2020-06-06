@@ -1,6 +1,6 @@
 <%
    # Requires local variable object: RssLog, Observation, Image, etc. instance.
-   log_item = LogItemPresenter.new(locals[:object], @view)
+   log_item = LogItemPresenter.new(local_assigns[:object], @view)
 %>
 
 <% if log_item %>
