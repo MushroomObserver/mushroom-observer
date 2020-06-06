@@ -25,12 +25,12 @@ class SequencesController < ApplicationController
     :prev_sequence # aliased
   ]
 
-  def index_sequence # :norobots:
+  def index_sequence
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def index # :norobots:
+  def index
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
@@ -39,7 +39,7 @@ class SequencesController < ApplicationController
   alias_method :list_sequences, :index
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search # :norobots:
+  def sequence_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
@@ -53,7 +53,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
@@ -73,7 +73,7 @@ class SequencesController < ApplicationController
     show_selected_sequences(query, always_index: true)
   end
 
-  def show # :norobots:
+  def show
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
@@ -81,19 +81,19 @@ class SequencesController < ApplicationController
 
   alias_method :show_sequence, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
   alias_method :next_sequence, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
   alias_method :prev_sequence, :show_prev
 
-  def new # :norobots:
+  def new
     store_location
     pass_query_params
     figure_out_where_to_go_back_to
@@ -103,13 +103,13 @@ class SequencesController < ApplicationController
 
   alias_method :create_sequence, :new
 
-  def create # :norobots:
+  def create
     store_location
     pass_query_params
     build_sequence
   end
 
-  def edit # :norobots:
+  def edit
     store_location
     pass_query_params
     figure_out_where_to_go_back_to
@@ -126,13 +126,13 @@ class SequencesController < ApplicationController
 
   alias_method :edit_sequence, :edit
 
-  def update # :norobots:
+  def update
     store_location
     pass_query_params
     save_edits
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence

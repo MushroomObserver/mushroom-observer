@@ -11,7 +11,7 @@ class SpeciesListsController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def index_species_list # :norobots:
+  def index_species_list
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
   end
@@ -25,7 +25,7 @@ class SpeciesListsController
   alias_method :list_species_lists, :index
 
   # Display list of user's species_lists, sorted by date.
-  def species_lists_by_user # :norobots:
+  def species_lists_by_user
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -43,14 +43,14 @@ class SpeciesListsController
   end
 
   # Display list of all species_lists, sorted by title.
-  def species_lists_by_title # :norobots:
+  def species_lists_by_title
     query = create_query(:SpeciesList, :all, by: :title)
     show_selected_species_lists(query)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string
   # pattern.
-  def species_list_search # :norobots:
+  def species_list_search
     pattern = params[:pattern].to_s
     @species_list = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if @species_list

@@ -17,14 +17,14 @@ class CollectionNumbersController < ApplicationController
   ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_collection_number # :norobots:
+  def index_collection_number
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
   # Show list of collection_numbers.
-  def index # :norobots:
+  def index
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
@@ -33,7 +33,7 @@ class CollectionNumbersController < ApplicationController
   alias_method :list_collection_numbers, :index
 
   # Display list of CollectionNumbers whose text matches a string pattern.
-  def collection_number_search # :norobots:
+  def collection_number_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@collection_number = CollectionNumber.safe_find(pattern))
@@ -45,7 +45,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
@@ -71,19 +71,19 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :show_collection_number, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
   alias_method :next_collection_number, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
   alias_method :prev_collection_number, :show_prev
 
-  def new # :norobots:
+  def new
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -101,7 +101,7 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :create_collection_number, :new
 
-  def create # :norobots:
+  def create
     store_location
     pass_query_params
     build_collection_number
@@ -109,7 +109,7 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :post_create_collection_number, :create
 
-  def edit # :norobots:
+  def edit
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -122,7 +122,7 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :edit_collection_number, :edit
 
-  def update # :norobots:
+  def update
     store_location
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
@@ -131,7 +131,7 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :post_edit_collection_number, :update
 
-  def remove_observation # :norobots:
+  def remove_observation
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
@@ -145,7 +145,7 @@ class CollectionNumbersController < ApplicationController
     redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number

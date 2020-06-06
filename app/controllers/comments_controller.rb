@@ -70,7 +70,7 @@ class CommentsController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment # :norobots:
+  def index_comment
     query = find_or_create_query(
       :Comment,
       by: params[:by]
@@ -95,7 +95,7 @@ class CommentsController < ApplicationController
   alias_method :list_comments, :index
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def show_comments_by_user # :norobots:
+  def show_comments_by_user
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(
         :Comment,
@@ -107,7 +107,7 @@ class CommentsController < ApplicationController
   end
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
-  def show_comments_for_user # :norobots:
+  def show_comments_for_user
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(
         :Comment,
@@ -120,7 +120,7 @@ class CommentsController < ApplicationController
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_target # :norobots:
+  def show_comments_for_target
     model = begin
               params[:type].to_s.constantize
             rescue StandardError
@@ -144,7 +144,7 @@ class CommentsController < ApplicationController
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search # :norobots:
+  def comment_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
@@ -217,14 +217,14 @@ class CommentsController < ApplicationController
   alias_method :show_comment, :show
 
   # Go to next comment: redirects to show_comment.
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, Comment, params[:id].to_s)
   end
 
   alias_method :next_comment, :show_next
 
   # Go to previous comment: redirects to show_comment.
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
 
@@ -328,7 +328,7 @@ class CommentsController < ApplicationController
   # Redirects to show_object.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     id = params[:id].to_s
     if @comment = find_or_goto_index(Comment, id)

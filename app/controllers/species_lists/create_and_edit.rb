@@ -20,13 +20,13 @@ class SpeciesListsController
 
   alias_method :create_species_list, :new
 
-  def create # :norobots:
+  def create
     process_species_list(:create)
   end
 
   # Specialized javascripty form for creating a list of names, at Darvin's
   # request. Links into "new".
-  def name_lister # :norobots:
+  def name_lister
     # Names are passed in as string, one name per line.
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
@@ -83,12 +83,12 @@ class SpeciesListsController
 
   alias_method :edit_species_list, :edit
 
-  def update # :norobots:
+  def update
     process_species_list(:update)
   end
 
   # Form to let user create/edit species_list from file. Links into "edit".
-  def upload_species_list # :norobots:
+  def upload_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -114,7 +114,7 @@ class SpeciesListsController
     end
   end
 
-  def destroy # :norobots:
+  def destroy
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 

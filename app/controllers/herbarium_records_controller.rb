@@ -18,7 +18,7 @@ class HerbariumRecordsController < ApplicationController
   ]
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record # :norobots:
+  def index_herbarium_record
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
                                            always_index: true)
@@ -34,7 +34,7 @@ class HerbariumRecordsController < ApplicationController
   alias_method :list_herbarium_records, :index
 
   # Display list of HerbariumRecords whose text matches a string pattern.
-  def herbarium_record_search # :norobots:
+  def herbarium_record_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@herbarium_record = HerbariumRecord.safe_find(pattern))
@@ -85,13 +85,13 @@ class HerbariumRecordsController < ApplicationController
 
   alias_method :show_herbarium_record, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, HerbariumRecord, params[:id].to_s)
   end
 
   alias_method :next_herbarium_record, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, HerbariumRecord, params[:id].to_s)
   end
 
@@ -141,7 +141,7 @@ class HerbariumRecordsController < ApplicationController
 
   alias_method :post_create_herbarium_record, :create
 
-  def edit # :norobots:
+  def edit
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -177,7 +177,7 @@ class HerbariumRecordsController < ApplicationController
 
   alias_method :post_edit_herbarium_record, :update
 
-  def remove_observation # :norobots:
+  def remove_observation
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
@@ -191,7 +191,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record

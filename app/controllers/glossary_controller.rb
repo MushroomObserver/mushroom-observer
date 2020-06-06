@@ -91,7 +91,7 @@ class GlossaryController < ApplicationController
     end
   end
 
-  def edit # :norobots:
+  def edit
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
     @glossary_term = GlossaryTerm.find(params[:id].to_s)

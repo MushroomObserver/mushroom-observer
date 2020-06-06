@@ -40,13 +40,13 @@ class SpeciesListsController
 
   alias_method :show_species_list, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
   end
 
   alias_method :next_species_list, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
