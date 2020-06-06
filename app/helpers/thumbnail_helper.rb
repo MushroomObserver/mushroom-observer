@@ -1,7 +1,6 @@
-# frozen_string_literal: true
-
 module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
+  # TODO: NIMMO pull out the repeated attributes into their own private methods
   def thumbnail(image, args = {})
     image_id = image.is_a?(Integer) ? image : image.id
     # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
@@ -24,8 +23,8 @@ module ThumbnailHelper
     img_width = image.width ? BigDecimal(image.width) : 100
     img_height = image.height ? BigDecimal(image.height) : 100
     img_proportion = "%.1f" % ( BigDecimal( img_height / img_width ) * 100 )
-    if img_proportion.to_i > 300
-      img_proportion = "300"
+    if img_proportion.to_i > 200
+      img_proportion = "200"
     end
 
     img_class = "img-fluid w-100 lazyload position-absolute object-fit-cover #{img_class}" if responsive
@@ -107,6 +106,9 @@ module ThumbnailHelper
     img_width = image.width ? BigDecimal(image.width) : 100
     img_height = image.height ? BigDecimal(image.height) : 100
     img_proportion = "%.1f" % ( BigDecimal( img_height / img_width ) * 100 )
+    if img_proportion.to_i > 200
+      img_proportion = "200"
+    end
 
     img_class = "img-fluid w-100 lazyload position-absolute object-fit-contain #{img_class}" if responsive
     img_class = "img-unresponsive lazyload #{img_class}" if !responsive

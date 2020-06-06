@@ -17,14 +17,14 @@ class CollectionNumbersController < ApplicationController
   ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_collection_number # :norobots:
+  def index_collection_number
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
   # Show list of collection_numbers.
-  def index # :norobots:
+  def index
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
@@ -33,7 +33,7 @@ class CollectionNumbersController < ApplicationController
   alias_method :list_collection_numbers, :index
 
   # Display list of CollectionNumbers whose text matches a string pattern.
-  def collection_number_search # :norobots:
+  def collection_number_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@collection_number = CollectionNumber.safe_find(pattern))
@@ -45,7 +45,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
@@ -71,19 +71,19 @@ class CollectionNumbersController < ApplicationController
 
   alias_method :show_collection_number, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
   alias_method :next_collection_number, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
   alias_method :prev_collection_number, :show_prev
 
-  def new # :norobots:
+  def new
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -93,37 +93,23 @@ class CollectionNumbersController < ApplicationController
     @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
-    @collection_number = CollectionNumber.new(name: @user.legal_name)
+    @collection_number =
+      CollectionNumber.new(whitelisted_collection_number_params)
+
     redirect_back_or_default("/") unless @collection_number
   end
 
   alias_method :create_collection_number, :new
 
   def create
-    @collection_number =
-      CollectionNumber.new(whitelisted_collection_number_params)
-    normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
-      return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
-      @collection_number.save
-      @collection_number.add_observation(@observation)
-    else
-      flash_warning(:edit_collection_number_already_used.t) if
-        @other_number.observations.any?
-      @other_number.add_observation(@observation)
-      @collection_number = @other_number
-    end
-    redirect_to_observation_or_collection_number
+    store_location
+    pass_query_params
+    build_collection_number
   end
 
   alias_method :post_create_collection_number, :create
 
-  def edit # :norobots:
+  def edit
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -140,37 +126,12 @@ class CollectionNumbersController < ApplicationController
     store_location
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    old_format_name = @collection_number.format_name
-    @collection_number.attributes = whitelisted_collection_number_params
-    normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
-      return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
-      @collection_number.save
-      @collection_number.change_corresponding_herbarium_records(old_format_name)
-    else
-      flash_warning(
-        :edit_collection_numbers_merged.t(
-          this: old_format_name,
-          that: @other_number.format_name
-        )
-      )
-      @collection_number.change_corresponding_herbarium_records(old_format_name)
-      @other_number.observations += @collection_number.observations -
-                                    @other_number.observations
-      @collection_number.destroy
-      @collection_number = @other_number
-    end
-    redirect_to_observation_or_collection_number
+    save_edits
   end
 
   alias_method :post_edit_collection_number, :update
 
-  def remove_observation # :norobots:
+  def remove_observation
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
@@ -184,7 +145,7 @@ class CollectionNumbersController < ApplicationController
     redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
@@ -223,10 +184,59 @@ class CollectionNumbersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  def build_collection_number
+    normalize_parameters
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return
+    elsif @collection_number.number.blank?
+      flash_error(:create_collection_number_missing_number.t)
+      return
+    elsif name_and_number_free?
+      @collection_number.save
+      @collection_number.add_observation(@observation)
+    else
+      flash_warning(:edit_collection_number_already_used.t) if
+        @other_number.observations.any?
+      @other_number.add_observation(@observation)
+      @collection_number = @other_number
+    end
+    redirect_to_observation_or_collection_number
+  end
+
+  def save_edits
+    old_format_name = @collection_number.format_name
+    @collection_number.attributes = whitelisted_collection_number_params
+    normalize_parameters
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return
+    elsif @collection_number.number.blank?
+      flash_error(:create_collection_number_missing_number.t)
+      return
+    elsif name_and_number_free?
+      @collection_number.save
+      @collection_number.change_corresponding_herbarium_records(old_format_name)
+    else
+      flash_warning(
+        :edit_collection_numbers_merged.t(
+          this: old_format_name,
+          that: @other_number.format_name
+        )
+      )
+      @collection_number.change_corresponding_herbarium_records(old_format_name)
+      @other_number.observations += @collection_number.observations -
+                                    @other_number.observations
+      @collection_number.destroy
+      @collection_number = @other_number
+    end
+    redirect_to_observation_or_collection_number
+  end
+
   def whitelisted_collection_number_params
     return {} unless params[:collection_number]
 
-    params.require(:collection_number).permit(:name, :number)
+    params.require(:collection_number).permit(:name, :number, :id)
   end
 
   def make_sure_can_edit!(obj)

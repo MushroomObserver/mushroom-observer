@@ -14,18 +14,17 @@
 <div class="row">
   <div class="col-12 col-sm-6 max-width-text">
     <div class="form-group">
-      <%= label_tag(:observation_place_name,
-                    "#{:WHERE.t}: (#{:required.t})") %>
-      <%= text_field(:observation,
-                     :place_name,
-                     class: "form-control") %>
+      <%= f.label :place_name,
+                  "#{:WHERE.t}: (#{:required.t})" %>
+      <%= f.text_field :place_name,
+                       class: "form-control" %>
       <% turn_into_location_auto_completer(:observation_place_name,
                                            primer: Location.primer) %>
       <span class="map-locate map-btn">Locate on Map</span>
     </div>
   </div>
   <div class="col-12 col-sm-6">
-    <div class="well well-sm max-width-text help-block">
+    <div class="card max-width-text help-block">
       <div class="arrow-left d-none d-sm-block"></div>
       <%=
         loc1 = "Albion, Mendocino Co., California, USA"
@@ -45,13 +44,12 @@
 <div class="row">
   <div class="col-12 max-width-text">
     <div class="form-inline">
-      <%= check_box(:observation,
-                    :is_collection_location,
-                    class: "form-control-xxx") %>
-      <%= label_tag(:observation_is_collection_location,
-                    :form_observations_is_collection_location.t) %>
+      <%= f.check_box :is_collection_location,
+                      class: "form-control-xxx" %>
+      <%= f.label :is_collection_location,
+                  :form_observations_is_collection_location.t %>
     </div>
-    <div class="well well-sm mt-3 max-width-text help-block">
+    <div class="card mt-3 max-width-text help-block">
       <div class="arrow-up d-none d-sm-block"></div>
       <%= :form_observations_is_collection_location_help.t %>
     </div>

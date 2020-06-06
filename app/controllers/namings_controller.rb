@@ -62,7 +62,7 @@ class NamingsController < ApplicationController
 
   alias_method :edit_post, :update
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     naming = Naming.find(params[:id].to_s)
     if destroy_if_we_can(naming)

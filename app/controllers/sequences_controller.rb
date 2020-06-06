@@ -25,12 +25,12 @@ class SequencesController < ApplicationController
     :prev_sequence # aliased
   ]
 
-  def index_sequence # :norobots:
+  def index_sequence
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def index # :norobots:
+  def index
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
@@ -39,7 +39,7 @@ class SequencesController < ApplicationController
   alias_method :list_sequences, :index
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search # :norobots:
+  def sequence_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
@@ -53,7 +53,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
@@ -81,13 +81,13 @@ class SequencesController < ApplicationController
 
   alias_method :show_sequence, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
   alias_method :next_sequence, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
@@ -96,6 +96,7 @@ class SequencesController < ApplicationController
   def new
     store_location
     pass_query_params
+    figure_out_where_to_go_back_to
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
   end
@@ -103,21 +104,15 @@ class SequencesController < ApplicationController
   alias_method :create_sequence, :new
 
   def create
-    @sequence = @observation.sequences.new
-    @sequence.attributes = whitelisted_sequence_params
-    @sequence.user = @user
-    if @sequence.save
-      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      # redirect_with_query(@observation.show_link_args)
-      redirect_to observation_path(@observation.id, q: get_query_param)
-    else
-      flash_object_errors(@sequence)
-    end
+    store_location
+    pass_query_params
+    build_sequence
   end
 
   def edit
     store_location
     pass_query_params
+    figure_out_where_to_go_back_to
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
@@ -132,14 +127,9 @@ class SequencesController < ApplicationController
   alias_method :edit_sequence, :edit
 
   def update
-    @sequence.attributes = whitelisted_sequence_params
-    figure_out_where_to_go_back_to
-    if @sequence.save
-      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@back_object.show_link_args)
-    else
-      flash_object_errors(@sequence)
-    end
+    store_location
+    pass_query_params
+    save_edits
   end
 
   def destroy
@@ -162,9 +152,8 @@ class SequencesController < ApplicationController
                                                 q: get_query_param)
 
     else
-      #TODO: NIMMO isn't @back_object here always an observation? Check
-      # redirect_with_query(@back_object.show_link_args)
-      redirect_to observation_path(@back_object.id, q: get_query_param)
+      # TODO: NIMMO is @back_object here always an observation? Check
+      redirect_with_query(@back_object.show_link_args)
     end
   end
 
@@ -173,6 +162,28 @@ class SequencesController < ApplicationController
   ##############################################################################
 
   private
+
+  def build_sequence
+    @sequence = @observation.sequences.new
+    @sequence.attributes = whitelisted_sequence_params
+    @sequence.user = @user
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_to observation_path(@observation.id, q: get_query_param)
+    else
+      flash_object_errors(@sequence)
+    end
+  end
+
+  def save_edits
+    @sequence.attributes = whitelisted_sequence_params
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_with_query(@back_object.show_link_args)
+    else
+      flash_object_errors(@sequence)
+    end
+  end
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
@@ -200,6 +211,8 @@ class SequencesController < ApplicationController
   end
 
   def whitelisted_sequence_params
-    params[:sequence].permit(:archive, :accession, :bases, :locus, :notes)
+    params[:sequence].permit(
+      :archive, :accession, :bases, :locus, :notes, :back
+    )
   end
 end

@@ -8,14 +8,17 @@
         </div>
       </div>
       <strong><%= :PROJECTS.t %>:</strong>
-      <% for project in @projects %>
-        <div class="form-inline max-width-text">
-          <%= check_box(:project, "id_#{project.id}",
-                        checked: @project_checks[project.id],
-                        disabled: @observation.user != @user && !project.is_member?(@user),
-                        class: "form-control-xxx") %>
-          <%= link_to_object(project) %>
-        </div>
+      <%= fields_for :project do |p_f| %>
+        <% for project in @projects %>
+          <div class="form-inline max-width-text">
+            <%= p_f.check_box "id_#{project.id}",
+                              checked: @project_checks[project.id],
+                              disabled: @observation.user != @user && \
+                                !project.is_member?(@user),
+                              class: "form-control-xxx" %>
+            <%= link_to_object(project) %>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>

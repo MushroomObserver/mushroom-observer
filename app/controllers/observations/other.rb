@@ -22,7 +22,7 @@ class ObservationsController
   end
 
   # Force javascript on.
-  def turn_javascript_on # :norobots:
+  def turn_javascript_on
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
     redirect_to(:back)
@@ -31,7 +31,7 @@ class ObservationsController
   end
 
   # Force javascript off.
-  def turn_javascript_off # :norobots:
+  def turn_javascript_off
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
     redirect_to(:back)
@@ -40,7 +40,7 @@ class ObservationsController
   end
 
   # Enable auto-detection.
-  def turn_javascript_nil # :norobots:
+  def turn_javascript_nil
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
     redirect_to(:back)
@@ -57,7 +57,7 @@ class ObservationsController
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
   # TODO: NIMMO check this redirect_with_query
-  def set_export_status # :norobots:
+  def set_export_status
     pass_query_params
     id    = params[:id].to_s
     type  = params[:type].to_s

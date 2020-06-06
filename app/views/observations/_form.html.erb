@@ -1,42 +1,52 @@
-<%= # form_tag({ action: :new,
+<% # form_tag({ action: :new,
     #            approved_name: @what,
     #            approved_where: @place_name },
     #          { multipart: true,
     #            name: "observation_form" }) do %>
-<%= # form_tag(add_query_param(action: :edit,
+<% # form_tag(add_query_param(action: :edit,
     #                          id: @observation,
     #                          approved_name: @what,
     #                          approved_where: @place_name),
     #          { multipart: true,
     #            name: "observation_form" }) do %>
+<%= form_with model: @observation, multipart: true do |f| %>
 
-<%= form_with model: :observation html: { multipart: true } do |form| %>
+  <%= f.submit class: "btn mx-auto mt-3" %>
 
-  <%= form.submit button_name, class: "btn mx-auto mt-3" %>
+  <%= f.hidden_field :q, value: get_query_param %>
+  <%= f.hidden_field :approved_name, value: @what %>
+  <%= f.hidden_field :approved_where, value: @place_name %>
 
-  <%= render "/observations/form/when" %>
-  <%= render "/observations/form/where" %>
-  <%= render "/observations/form/lat_long_alt" %>
-  <%= render "/observations/form/naming" %>
-  <%= render "/observations/form/specimen" %>
-  <%= render "/observations/form/notes" %>
+  <%= render "/observations/form/when", f: f %>
+  <%= render "/observations/form/where", f: f %>
+  <%= render "/observations/form/lat_long_alt", f: f %>
+  <%= render "/observations/form/naming", f: f,
+             button_name: local_assigns[:button_name],
+             form_action: local_assigns[:form_action] if \
+             local_assigns[:include_naming?] %>
+  <%= render "/observations/form/specimen", f: f,
+             button_name: local_assigns[:button_name],
+             has_specimen?: local_assigns[:has_specimen?] %>
+  <%= render "/observations/form/notes", f: f %>
+  <%= render "/observations/form/images", f: f,
+             include_images?: local_assigns[:include_images?] %>
 
   <% if @projects.any? || @lists.any? %>
-    <%= render "/observations/form/projects" %>
-    <%= render "/observations/form/lists" %>
+    <%= render "/observations/form/projects", f: f %>
+    <%= render "/observations/form/lists", f: f %>
   <% end %>
 
-  <%= form.submit button_name, class: "btn mx-auto mt-3" %>
+  <%= f.submit class: "btn mx-auto mt-3" %>
 
-  <% if logging_optional? %>
+  <% if local_assigns[:logging_optional?] %>
     <%= tag.div class: "form-inline" do %>
-      <%= form.check_box :log_change,
-                         :checked,
-                         checked: "1",
-                         class: "form-control-xxx",
-                         id: "log_change_checked" -%>
-      <%= form.label :log_change,
-                     :form_observations_log_change.t %>
+      <%= f.check_box :log_change,
+                      :checked,
+                      checked: "1",
+                      class: "form-control-xxx",
+                      id: "log_change_checked" -%>
+      <%= f.label :log_change,
+                  :form_observations_log_change.t %>
     <% end %>
   <% end %>
 

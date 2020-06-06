@@ -53,7 +53,7 @@ module DescriptionControllerHelpers
 
   # Make a description the default one.  Description must be publically
   # readable and writable.
-  def make_description_default # :norobots:
+  def make_description_default
     pass_query_params
     desc = find_description(params[:id].to_s)
     return unless desc
@@ -81,7 +81,7 @@ module DescriptionControllerHelpers
   # (so they can modify it).  If there is a conflict, it dumps the user into
   # the edit_description form and forces them to do the merge and delete the
   # old description afterword.
-  def merge_descriptions # :norobots:
+  def merge_descriptions
     pass_query_params
     if src = find_description(params[:id].to_s)
       @description = src
@@ -252,7 +252,7 @@ module DescriptionControllerHelpers
   # the draft into a public description and make it the default.  If the name
   # has a default description try to merge the draft into it.  If there is a
   # conflict bring up the edit_description form to let the user do the merge.
-  def publish_description # :norobots:
+  def publish_description
     pass_query_params
     if draft = find_description(params[:id].to_s)
       parent = draft.parent
@@ -309,7 +309,7 @@ module DescriptionControllerHelpers
   end
 
   # Adjust permissions on a description.
-  def adjust_permissions # :norobots:
+  def adjust_permissions
     pass_query_params
     if @description = find_description(params[:id].to_s)
       done = false

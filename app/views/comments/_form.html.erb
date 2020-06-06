@@ -5,22 +5,22 @@
     #                          type: @comment.target_type)) do %>
 <%= form_with model: :comment do |f| %>
 
+  <%= f.hidden_field :id, @target.id %>
+  <%= f.hidden_field :type, @target.type %>
+
   <div class="form-group mt-3">
-    <%= label_tag(:comment_summary, :form_comments_summary.t + ":") %>
-    <%= text_field(:comment,
-                   :summary,
-                   size: 80,
-                   data: { autofocus: true },
-                   class: "form-control") %>
+    <%= f.label :summary, :form_comments_summary.t + ":" %>
+    <%= f.text_field :summary, size: 80, data: { autofocus: true },
+                     class: "form-control" %>
   </div>
 
   <div class="form-group mt-3">
-    <%= label_tag(:comment_comment, :form_comments_comment.t + ":") %>
-    <%= text_area(:comment, :comment, rows: 10, class: "form-control") %>
-    <%= render(partial: "shared/textilize_help") %>
+    <%= f.label :comment, :form_comments_comment.t + ":" %>
+    <%= f.text_area :comment, rows: 10, class: "form-control" %>
+    <%= render partial: "shared/textilize_help" %>
   </div>
 
-  <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+  <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
   <hr align="center" width="90%" />
 

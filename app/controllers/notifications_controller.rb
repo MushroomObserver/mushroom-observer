@@ -9,7 +9,7 @@ class NotificationsController < ApplicationController
   # Inputs: params[:naming], params[:observation]
   # Outputs:
   #   @notifications
-  def show # :norobots:
+  def show
     pass_query_params
     data = []
     @observation = find_or_goto_index(Observation, params[:id].to_s)

@@ -34,7 +34,7 @@ class RssLogsController < ApplicationController
   # Maybe this is done so the parameters persist through the session?
 
   # Set a query from POST or given params, and pass to show_selected_rss_logs
-  def index_rss_log # :norobots:
+  def index_rss_log
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
@@ -129,7 +129,7 @@ class RssLogsController < ApplicationController
   alias_method :show_rss_log, :show
 
   # Go to next RssLog: redirects to show_<object>.
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(
       :next,
       RssLog,
@@ -140,7 +140,7 @@ class RssLogsController < ApplicationController
   alias_method :next_rss_log, :show_next
 
   # Go to previous RssLog: redirects to show_<object>.
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(
       :prev,
       RssLog,

@@ -1,13 +1,12 @@
 <div class="row">
   <div class="col-12 mt-3 max-width-text">
     <div class="form-inline">
-      <%= check_box(:observation,
-                    :specimen,
-                    class: "form-control-xxx") %>
-      <%= label_tag(:observation_specimen,
-                    :form_observations_specimen_available.t) %>
+      <%= f.check_box :specimen,
+                      class: "form-control-xxx" %>
+      <%= f.label :specimen,
+                  :form_observations_specimen_available.t %>
     </div>
-    <div class="well well-sm mt-3 max-width-text help-block">
+    <div class="card mt-3 max-width-text help-block">
       <div class="arrow-up"></div>
       <%= :form_observations_specimen_available_help.t %>
     </div>
@@ -15,37 +14,36 @@
 </div>
 
 <!-- no_specimen_fields -->
-<% if button_name == :SAVE_EDITS.l %>
-  <div class="well well-sm max-width-text help-block">
+<% if :form_action == :edit %>
+  <div class="card max-width-text help-block">
     <%= :form_observations_edit_specimens_help.t %>
   </div>
 <% end %>
 <!-- /no_specimen_fields -->
 
 <!-- specimen_fields -->
-<% if button_name == :CREATE.l %>
+<% if :form_action == :new %>
+
   <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
     <div class="row mb-3">
       <div class="col-sm-6 max-width-text">
-        <div class="form-group">
-          <%= label_tag(:collection_number_name,
-                        :collection_number_name.t + ":") %>
-          <%= text_field(:collection_number,
-                         :name,
-                         value: @collectors_name,
-                         class: "form-control") %>
-        </div>
-        <div class="form-group">
-          <%= label_tag(:collection_number_number,
-                        :collection_number_number.t + ":") %>
-          <%= text_field(:collection_number,
-                         :number,
-                         value: @collectors_number,
-                         class: "form-control") %>
-        </div>
+        <%= fields_for :collection_number do |cn_f| %>
+          <div class="form-group">
+            <%= cn_f.label :name, :collection_number_name.t + ":" %>
+            <%= cn_f.text_field :name,
+                                value: @collectors_name,
+                                class: "form-control" %>
+          </div>
+          <div class="form-group">
+            <%= cn_f.label :number, :collection_number_number.t + ":" %>
+            <%= cn_f.text_field :number,
+                                value: @collectors_number,
+                                class: "form-control" %>
+          </div>
+        <% end %>
       </div>
       <div class="col-sm-6">
-        <div class="well well-sm help-block">
+        <div class="card help-block">
           <div class="arrow-left d-none d-sm-block"></div>
           <%= :form_observations_collection_number_help.t %>
         </div>
@@ -53,26 +51,26 @@
     </div>
     <div class="row mb-3">
       <div class="col-sm-6 max-width-text">
-        <div class="form-group">
-          <%= label_tag(:herbarium_record_herbarium_name,
-                        :herbarium_record_herbarium_name.t + ":") %>
-          <%= text_field(:herbarium_record,
-                         :herbarium_name,
-                         value: @herbarium_name,
-                         class: "form-control") %>
-          <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
-        </div>
-        <div class="form-group">
-          <%= label_tag(:herbarium_record_herbarium_id,
-                        :herbarium_record_accession_number.t + ":") %>
-          <%= text_field(:herbarium_record,
-                         :herbarium_id,
-                         value: @herbarium_id,
-                         class: "form-control") %>
-        </div>
+        <%= fields_for :herbarium_record do |hr_f| %>
+          <div class="form-group">
+            <%= hr_f.label :herbarium_name,
+                           :herbarium_record_herbarium_name.t + ":" %>
+            <%= hr_f.text_field :herbarium_name,
+                                value: @herbarium_name,
+                                class: "form-control" %>
+            <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+          </div>
+          <div class="form-group">
+            <%= hr_f.label :herbarium_id,
+                           :herbarium_record_accession_number.t + ":" %>
+            <%= hr_f.text_field :herbarium_id,
+                                value: @herbarium_id,
+                                class: "form-control" %>
+          </div>
+        <% end %>
       </div>
       <div class="col-sm-6">
-        <div class="well well-sm ">
+        <div class="card">
           <div class="arrow-left d-none d-sm-block help-block"></div>
           <%= :form_observations_herbarium_record_help.t %>
         </div>

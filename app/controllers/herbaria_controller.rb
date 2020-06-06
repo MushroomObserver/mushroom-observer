@@ -15,7 +15,7 @@ class HerbariaController < ApplicationController
   ]
 
   # Displays selected Herbarium's (based on current Query).
-  def index_herbarium # :norobots:
+  def index_herbarium
     query = find_or_create_query(
       :Herbarium,
       by: params[:by]
@@ -57,7 +57,7 @@ class HerbariaController < ApplicationController
   alias_method :list_herbaria, :index
 
   # Display list of Herbaria whose text matches a string pattern.
-  def herbarium_search # :norobots:
+  def herbarium_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@herbarium = Herbarium.safe_find(pattern))
@@ -95,19 +95,19 @@ class HerbariaController < ApplicationController
 
   alias_method :show_herbarium, :show
 
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
   alias_method :next_herbarium, :show_next
 
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
   alias_method :prev_herbarium, :show_prev
 
-  def new # :norobots:
+  def new
     store_location
     pass_query_params
     keep_track_of_referer
@@ -132,7 +132,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def edit # :norobots:
+  def edit
     store_location
     pass_query_params
     keep_track_of_referer
@@ -143,6 +143,12 @@ class HerbariaController < ApplicationController
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+    @herbarium_users = Herbarium.connection.select_rows(%(
+      SELECT u.name, u.login, COUNT(u.id)
+      FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
+      WHERE hr.herbarium_id = #{@herbarium.id}
+      GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
+    ))
   end
 
   alias_method :edit_herbarium, :edit
@@ -161,7 +167,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def merge_herbaria # :norobots:
+  def merge_herbaria
     pass_query_params
     keep_track_of_referer
     this = find_or_goto_index(Herbarium, params[:this]) || return
@@ -170,7 +176,7 @@ class HerbariaController < ApplicationController
     redirect_to_herbarium_index(result)
   end
 
-  def delete_curator # :norobots:
+  def delete_curator
     pass_query_params
     keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -185,7 +191,7 @@ class HerbariaController < ApplicationController
     redirect_to_referer || redirect_to_show_herbarium
   end
 
-  def request_to_be_curator # :norobots:
+  def request_to_be_curator
     pass_query_params
     keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -201,7 +207,7 @@ class HerbariaController < ApplicationController
     redirect_to_referer || redirect_to_show_herbarium
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     keep_track_of_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])

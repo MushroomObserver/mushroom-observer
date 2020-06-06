@@ -17,39 +17,27 @@
     <div class="row">
       <div class="col-12 col-sm-4">
         <div class="form-group">
-          <%= label_tag(:observation_lat,
-                        :LATITUDE.t + ":") %>
-          <%= text_field(:observation,
-                         :lat,
-                         class: "form-control") %>
+          <%= f.label :lat, :LATITUDE.t + ":" %>
+          <%= f.text_field :lat, class: "form-control" %>
         </div>
       </div>
       <div class="col-12 col-sm-4">
         <div class="form-group">
-          <%= label_tag("observation_long",
-                        :LONGITUDE.t + ":") %>
-          <%= text_field(:observation,
-                         :long,
-                         class: "form-control") %>
+          <%= f.label :long, :LONGITUDE.t + ":" %>
+          <%= f.text_field :long, class: "form-control" %>
         </div>
       </div>
       <div class="col-12 col-sm-4">
         <div class="form-group">
-          <%= label_tag("observation_alt",
-                        :ALTITUDE.t + ":") %>
-          <%= text_field(:observation,
-                         :alt,
-                         class: "form-control") %>
+          <%= f.label :alt, :ALTITUDE.t + ":" %>
+          <%= f.text_field :alt, class: "form-control" %>
           (<%= :units_meters.t %>)
         </div>
       </div>
       <div class="col-12 col-sm-12">
         <div class="form-inline">
-          <%= check_box(:observation,
-                        :gps_hidden,
-                        class: "form-control-xxx") %>
-          <%= label_tag(:observation_gps_hidden,
-                        :form_observations_gps_hidden.t) %>
+          <%= f.check_box :gps_hidden, class: "form-control-xxx" %>
+          <%= f.label :gps_hidden, :form_observations_gps_hidden.t %>
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ class EmailController < ApplicationController
     end
   end
 
-  def ask_webmaster_question # :norobots:
+  def ask_webmaster_question
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false
@@ -46,7 +46,7 @@ class EmailController < ApplicationController
     end
   end
 
-  def ask_user_question # :norobots:
+  def ask_user_question
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
                   email_question(@user) &&
                   request.method == "POST"
@@ -62,7 +62,7 @@ class EmailController < ApplicationController
     )
   end
 
-  def ask_observation_question # :norobots:
+  def ask_observation_question
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation &&
                   email_question(@observation) &&
@@ -79,7 +79,7 @@ class EmailController < ApplicationController
     redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
-  def commercial_inquiry # :norobots:
+  def commercial_inquiry
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
                   email_question(@image, :email_general_commercial) &&
                   request.method == "POST"

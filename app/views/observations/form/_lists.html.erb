@@ -8,14 +8,16 @@
         </div>
       </div>
       <strong><%= :SPECIES_LISTS.t %>:</strong>
-      <% for list in @lists %>
-        <div class="form-inline max-width-text">
-          <%= check_box(:list, "id_#{list.id}",
-                        checked: @list_checks[list.id],
-                        disabled: !check_permission(list),
-                        class: "form-control-xxx") %>
-          <%= link_to_object(list) %>
-        </div>
+      <%= fields_for :species_list do |spl_f| %>
+        <% for list in @lists %>
+          <div class="form-inline max-width-text">
+            <%= spl_f.check_box "id_#{list.id}",
+                                checked: @list_checks[list.id],
+                                disabled: !check_permission(list),
+                                class: "form-control-xxx" %>
+            <%= link_to_object(list) %>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>

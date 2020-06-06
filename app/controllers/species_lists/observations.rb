@@ -113,7 +113,7 @@ class SpeciesListsController
   end
 
   # Used by manage_species_lists.
-  def remove_observation_from_species_list # :norobots:
+  def remove_observation_from_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless @species_list
 
@@ -132,7 +132,7 @@ class SpeciesListsController
   end
 
   # Used by manage_species_lists.
-  def add_observation_to_species_list # :norobots:
+  def add_observation_to_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless @species_list
 
@@ -152,7 +152,6 @@ class SpeciesListsController
 
   # Bulk-edit observations (at least the ones editable by this user) in a (any)
   # species list.
-  # :norobots:
   def bulk_editor
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list

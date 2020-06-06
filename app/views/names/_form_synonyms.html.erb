@@ -61,7 +61,7 @@
       <label for="synonym_members"><%= :form_synonyms_names.t %>:</label>
       <p class="help-block"><%= :form_synonyms_names_help.t(name: @name.display_name) %></p>
       <%= text_area(:synonym,
-                    :members, 
+                    :members,
                     value: @list_members,
                     class: "form-control",
                     data: { autofocus: true }) %>

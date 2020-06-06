@@ -2,11 +2,14 @@
 <%= # form_tag(action: :edit, id: @species_list.id,
     #          approved_where: @place_name) do %>
 
-<%= form_with model: :species_list do |f| %>
+<%= form_for @species_list do |f| %>
+
+  <%= f.hidden_field :id, value: @species_list.id %>
+  <%= f.hidden_field :approved_where, value: @place_name %>
 
   <div class="row">
     <div class="col-12">
-      <%= submit_tag(button_name.l, class: "btn mx-auto mt-3 mb-3") %>
+      <%= f.submit button_name.l, class: "btn mx-auto mt-3 mb-3" %>
     </div>
 
     <% partial = render "shared/form_list_feedback"
@@ -33,20 +36,18 @@
 
     <div class="col-12 col-md-12 col-lg-12 max-width-text">
       <%= if !@new_names.blank?
-        hidden_field_tag(:approved_names,
-                         @new_names.join("\n"))
+        f.hidden_field :approved_names, @new_names.join("\n")
       end %>
 
       <%= if !@deprecated_names.blank?
-        hidden_field_tag(:approved_deprecated_names,
-                         @deprecated_names.map(&:id).join(" "))
+        f.hidden_field :approved_deprecated_names,
+                       @deprecated_names.map(&:id).join(" ")
       end %>
 
       <div class="form-group mt-3">
         <%= label_tag(:list_members,
                       :form_species_lists_write_in_species.t) %>
-        <%= text_area(:list,
-                      :members,
+        <%= text_area(:list, :members,
                       value: @list_members,
                       rows: 8,
                       class: "form-control") %>
@@ -56,21 +57,15 @@
       </div>
 
       <div class="form-group mt-3">
-        <%= label_tag(:species_list_title,
-                      :form_species_lists_title.t + ":") %> (<%= :required.t %>)
-        <%= text_field(:species_list,
-                       :title,
-                       class: "form-control") %>
+        <%= f.label :title,
+                    :form_species_lists_title.t + ":" %> (<%= :required.t %>)
+        <%= f.text_field :title, class: "form-control" %>
       </div>
 
       <div class="form-group mt-3">
-        <%= label_tag(:species_list_notes,
-                      :form_species_lists_list_notes.t + ":") %>
-        <%= text_area(:species_list,
-                      :notes,
-                      rows: 6,
-                      class: "form-control") %>
-        <%= render(partial: "shared/textilize_help") %>
+        <%= f.label :notes, :form_species_lists_list_notes.t + ":" %>
+        <%= f.text_area :notes, rows: 6, class: "form-control" %>
+        <%= render partial: "shared/textilize_help" %>
       </div>
     </div>
   </div>
@@ -78,12 +73,10 @@
   <div class="row">
     <div class="col-12 col-md-12 col-lg-12 max-width-text">
       <div class="form-group form-inline">
-        <%= label_tag(:species_list_when,
-                      :WHEN.t + ":") %>
-        <%= date_select(:species_list,
-                        :when,
-                        date_select_opts(@species_list),
-                        { class: "form-control" }) %>
+        <%= f.label :when, :WHEN.t + ":" %>
+        <%= f.date_select :when,
+                          date_select_opts(@species_list),
+                          class: "form-control" %>
         <% turn_into_year_auto_completer(:species_list_when_1i) %>
       </div>
 
@@ -97,11 +90,10 @@
       <% end %>
 
       <div class="form-group mt-3">
-        <%= label_tag(:species_list_place_name,
-                      :WHERE.t + ":") %> (<%= :required.t %>)
-        <%= text_field(:species_list,
-                       :place_name,
-                       class: "form-control") %>
+        <%= f.label :place_name, :WHERE.t + ":" %> (<%= :required.t %>)
+        <%= f.text_field :species_list,
+                         :place_name,
+                         class: "form-control" %>
         <% turn_into_location_auto_completer(:species_list_place_name) %>
       </div>
 
@@ -198,7 +190,7 @@
     </div>
 
     <div class="col-12">
-      <%= submit_tag(button_name.l, class: "btn mx-auto mt-3") %>
+      <%= f.submit button_name.l, class: "btn mx-auto mt-3 mb-3" %>
     </div>
   </div>
 

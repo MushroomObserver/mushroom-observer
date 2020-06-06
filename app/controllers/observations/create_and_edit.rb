@@ -189,7 +189,7 @@ class ObservationsController
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
-  def destroy # :norobots:
+  def destroy
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
 

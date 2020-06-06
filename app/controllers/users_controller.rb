@@ -20,7 +20,7 @@ class UsersController < ApplicationController
   ]
 
   # User index, restricted to admins.
-  def index # :norobots:
+  def index
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -35,7 +35,7 @@ class UsersController < ApplicationController
   alias list_users index
 
   # User index, restricted to admins.
-  def users_by_name # :norobots:
+  def users_by_name
     if in_admin_mode?
       query = create_query(
         :User,
@@ -51,7 +51,7 @@ class UsersController < ApplicationController
   end
 
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def user_search # :norobots:
+  def user_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@user = User.safe_find(pattern))
@@ -111,7 +111,7 @@ class UsersController < ApplicationController
   end
 
   # users_by_contribution.rhtml
-  def users_by_contribution # :norobots:
+  def users_by_contribution
     SiteData.new
     @users = User.order("contribution desc, name, login")
   end
@@ -144,7 +144,7 @@ class UsersController < ApplicationController
   end
 
   # Go to next user: redirects to show_user.
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(
       :next,
       User,
@@ -155,7 +155,7 @@ class UsersController < ApplicationController
   alias_method :next_user, :show_next
 
   # Go to previous user: redirects to show_user.
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(
       :prev,
       User,
@@ -167,7 +167,7 @@ class UsersController < ApplicationController
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
-  def checklist # :norobots:
+  def checklist
     store_location
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]

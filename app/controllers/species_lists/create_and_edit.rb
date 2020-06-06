@@ -26,7 +26,7 @@ class SpeciesListsController
 
   # Specialized javascripty form for creating a list of names, at Darvin's
   # request. Links into "new".
-  def name_lister # :norobots:
+  def name_lister
     # Names are passed in as string, one name per line.
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
@@ -74,6 +74,7 @@ class SpeciesListsController
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
     end
+    
     init_name_vars_for_edit(@species_list)
     init_member_vars_for_edit(@species_list)
     init_project_vars_for_edit(@species_list)
@@ -87,7 +88,7 @@ class SpeciesListsController
   end
 
   # Form to let user create/edit species_list from file. Links into "edit".
-  def upload_species_list # :norobots:
+  def upload_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -113,7 +114,7 @@ class SpeciesListsController
     end
   end
 
-  def destroy # :norobots:
+  def destroy
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 

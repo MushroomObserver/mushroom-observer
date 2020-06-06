@@ -1,3 +1,6 @@
+<% provide :context_navbar do
+  render "navbar"
+end %>
 <%
   tabs = [
     link_to_coerced_query(@query, Observation),

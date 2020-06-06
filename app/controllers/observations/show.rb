@@ -43,7 +43,7 @@ class ObservationsController
   end
 
   # Go to next observation: redirects to show_observation.
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(
       :next,
       Observation,
@@ -54,7 +54,7 @@ class ObservationsController
   alias_method :next_observation, :show_next
 
   # Go to previous observation: redirects to show_observation.
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(
       :prev,
       Observation,
@@ -65,7 +65,7 @@ class ObservationsController
   alias_method :prev_observation, :show_prev
 
   # Show map of observation.
-  def map_observation # :norobots:
+  def map_observation
     pass_query_params
     obs = find_or_goto_index(
       Observation,

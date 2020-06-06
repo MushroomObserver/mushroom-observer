@@ -20,7 +20,7 @@ class SearchController < ApplicationController
   #   users/user_search
   #   projects/project_search
   #   species_lists/species_list_search
-  def pattern_search # :norobots:
+  def pattern_search
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
 
@@ -79,7 +79,7 @@ class SearchController < ApplicationController
   #   location/advanced_search
   #   name/advanced_search
   #   observation/advanced_search
-  def advanced_search_form # :norobots:
+  def advanced_search_form
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
 

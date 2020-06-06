@@ -12,7 +12,7 @@ class SpeciesListsController
   # TODO: NIMMO is this another REST controller here?
   # SpeciesList::ProjectsController
 
-  def manage_projects # :norobots:
+  def manage_projects
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless (@species_list)
 

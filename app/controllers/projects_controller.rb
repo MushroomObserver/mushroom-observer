@@ -60,7 +60,7 @@ class ProjectsController < ApplicationController
   ##############################################################################
 
   # Show list of selected projects, based on current Query.
-  def index_project # :norobots:
+  def index_project
     query = find_or_create_query(
       :Project,
       by: params[:by]
@@ -85,7 +85,7 @@ class ProjectsController < ApplicationController
   alias_method :list_projects, :index
 
   # Display list of Project's whose title or notes match a string pattern.
-  def project_search # :norobots:
+  def project_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@project = Project.safe_find(pattern))
@@ -153,14 +153,14 @@ class ProjectsController < ApplicationController
   alias_method :show_project, :show
 
   # Go to next project: redirects to show_project.
-  def show_next # :norobots:
+  def show_next
     redirect_to_next_object(:next, Project, params[:id].to_s)
   end
 
   alias_method :next_project, :show_next
 
   # Go to previous project: redirects to show_project.
-  def show_prev # :norobots:
+  def show_prev
     redirect_to_next_object(:prev, Project, params[:id].to_s)
   end
 
@@ -178,7 +178,7 @@ class ProjectsController < ApplicationController
   #   Renders add_project again.
   #   Outputs: @project
 
-  def new # :norobots:
+  def new
     pass_query_params
     @project = Project.new
   end
@@ -286,7 +286,7 @@ class ProjectsController < ApplicationController
   # Redirects to show_observation.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
@@ -357,7 +357,7 @@ class ProjectsController < ApplicationController
   # Outputs:
   #   @project, @users
   # "Posts" to the same action.  Stays on this view until done.
-  def add_members # :norobots:
+  def add_members
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.where.not(verified: nil).order("login, name").to_a
@@ -382,7 +382,7 @@ class ProjectsController < ApplicationController
   #   params[:commit]
   # Outputs: @project, @candidate
   # Posts to same action.  Redirects to show_project when done.
-  def change_member_status # :norobots:
+  def change_member_status
     pass_query_params
     if (@project = find_or_goto_index(Project, params[:id].to_s)) &&
        (@candidate = find_or_goto_index(User, params[:candidate]))

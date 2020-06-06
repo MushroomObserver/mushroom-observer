@@ -101,7 +101,7 @@ class ObservationsController
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search # :norobots:
+  def advanced_search
     if params[:name] || params[:location] || params[:user] || params[:content]
       search = {}
       search[:name] = params[:name] if params[:name].present?

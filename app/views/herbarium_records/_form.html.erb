@@ -1,11 +1,14 @@
 <%= # form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
 <%= form_with model: :herbarium_record do |f| %>
 
-  <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+  <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
+
+  <%= f.hidden_field :id, @observation.id %>
+  <%= f.hidden_field :q %>
 
   <div class="row">
     <div class="col-12">
-      <% if @herbarium_record.observations.count > 1 %>
+      <% if @herbarium_record.observations.size > 1 %>
         <div class="alert alert-warning">
           <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
         </div>
@@ -16,9 +19,9 @@
   <div class="row">
     <div class="col-12">
       <div class="form-group">
-        <%= label_tag(:herbarium_record_herbarium_name, :NAME.t + ":") %>
+        <%= f.label :herbarium_name, :NAME.t + ":" %>
         <span class="help-note">(<%= :required.t %>)</span>
-        <%= text_field(:herbarium_record, :herbarium_name, class: "form-control") %>
+        <%= f.text_field :herbarium_name, class: "form-control" %>
         <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
       </div>
     </div>
@@ -27,9 +30,9 @@
   <div class="row">
     <div class="col-12">
       <div class="form-group">
-        <%= label_tag(:herbarium_record_initial_det, :herbarium_record_initial_det.t + ":") %>
+        <%= f.label :initial_det, :herbarium_record_initial_det.t + ":" %>
         <span class="help-note">(<%= :optional.t %>)</span>
-        <%= text_field(:herbarium_record, :initial_det, class:"form-control") %>
+        <%= f.text_field :initial_det, class:"form-control" %>
       </div>
     </div>
   </div>
@@ -37,8 +40,8 @@
   <div class="row">
     <div class="col-12">
       <div class="form-inline">
-        <%= label_tag(:herbarium_record_accession_number, :herbarium_record_accession_number.t + ":") %>
-        <%= text_field(:herbarium_record, :accession_number, class:"form-control") %>
+        <%= f.label :accession_number, :herbarium_record_accession_number.t + ":" %>
+        <%= f.text_field :accession_number, class:"form-control" %>
         <span class="help-note">(<%= :required.t %>)</span>
       </div>
       <div class="well well-sm mt-3 help-block">
@@ -51,13 +54,13 @@
   <div class="row">
     <div class="col-12">
       <div class="form-group">
-        <%= label_tag(:herbarium_record_notes, :NOTES.t + ":") %>
+        <%= f.label :notes, :NOTES.t + ":" %>
         <span class="help-note">(<%= :optional.t %>)</span>
-        <%= text_area(:herbarium_record, :notes, class: "form-control", rows: 6) %>
+        <%= f.text_area :notes, class: "form-control", rows: 6 %>
       </div>
     </div>
   </div>
 
-  <%= submit_tag(button_name.t, class: "btn mx-auto mt-3") %>
+  <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
 <% end %>

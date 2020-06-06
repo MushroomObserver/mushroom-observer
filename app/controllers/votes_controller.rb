@@ -23,7 +23,6 @@ class VotesController < ApplicationController
   # Linked from: (nowhere)
   # Inputs: params[]
   # Redirects to show_observation.
-  # :norobots:
   def cast_vote
     pass_query_params
     naming = Naming.find(params[:id].to_s)
@@ -39,7 +38,7 @@ class VotesController < ApplicationController
   end
 
   # This is the new POST method for show_observation.
-  def cast_votes # :norobots:
+  def cast_votes
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation

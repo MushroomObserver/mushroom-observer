@@ -126,7 +126,6 @@ class ArticlesController < ApplicationController
   alias_method :show_article, :show
 
   # Create a new article
-  # :norobots:
   def new
     @article = Article.new
   end
@@ -158,7 +157,6 @@ class ArticlesController < ApplicationController
   end
 
   # Edit existing article
-  # :norobots:
   def edit
     pass_query_params
     @article = find_or_goto_index(Article, params[:id])
@@ -191,7 +189,6 @@ class ArticlesController < ApplicationController
   alias_method :save_edits, :update
 
   # Destroy one article
-  # :norobots:
   def destroy
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
