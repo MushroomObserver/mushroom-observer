@@ -3,8 +3,8 @@
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
-  <%= f.hidden_field :back, @back %>
-  <%= f.hidden_field :q, get_query_param %>
+  <%= f.hidden_field :back, value: @back %>
+  <%= f.hidden_field :q, value: get_query_param %>
 
   <div class="row form-group">
     <div class="col-12">

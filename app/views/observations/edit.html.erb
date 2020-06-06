@@ -1,3 +1,6 @@
+<% provide :context_navbar do
+  render "navbar"
+end %>
 <%
   @title = :edit_observation_title.t(name: @observation.unique_format_name)
 
