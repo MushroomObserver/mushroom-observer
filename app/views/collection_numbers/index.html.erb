@@ -10,7 +10,7 @@
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
-      <% for collection_number in @objects %>
+      <% @objects.each do |collection_number| %>
         <tr>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
@@ -22,12 +22,15 @@
             end %>
           </td>
           <td>
-            <i><%= link_with_query(collection_number.format_name.t,
-                                   collection_number.show_link_args) %></i>
+            <i><%= link_to(
+                     collection_number.format_name.t,
+                     collection_number_path(collection_number,
+                     q: get_query_param)
+                   ) %></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|
-              link_to(obs.unique_format_name.t, obs.show_link_args)
+              link_to(obs.unique_format_name.t, observation_path(obs))
             end.safe_join(", ") %>
           </td>
           <td>
