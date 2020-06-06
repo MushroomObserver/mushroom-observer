@@ -285,10 +285,10 @@ class CollectionNumbersController < ApplicationController
     else
       # redirect_with_query(action: :index_collection_number,
       #                     id: @collection_number.id)
-      redirect_to collection_number_index_collection_number_path(
+      redirect_to(collection_numbers_index_collection_number_path(
         @collection_number.id,
         q: get_query_param
-      )
+      ))
     end
   end
 end

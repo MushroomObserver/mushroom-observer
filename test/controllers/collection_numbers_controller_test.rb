@@ -308,12 +308,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_users_equal(rolf, num2.user)
     assert_obj_list_equal([num1], obs1.collection_numbers)
     assert_obj_list_equal([num2], obs2.collection_numbers)
+
     params = {
       name: num1.name,
       number: num1.number
     }
     login("rolf")
-    post(:edit, id: num2.id, collection_number: params)
+    post(:update, id: num2.id, collection_number: params)
+
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
