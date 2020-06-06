@@ -7,7 +7,7 @@ module ObjectLinkHelper
     Google_Maps: "https://maps.google.com/maps?q=",
     Google_Search: "https://www.google.com/search?q=",
     Wikipedia: "https://en.wikipedia.org/w/index.php?search="
-  }.freeze
+  }
 
   # Wrap location name in span: "<span>where (count)</span>"
   #
@@ -143,6 +143,13 @@ module ObjectLinkHelper
     return nil unless object
 
     link_to(name || object.title.t, object.show_link_args)
+  end
+
+  # Output path helper. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  def object_path(obj, id = obj.id)
+    send("#{obj.class.name.downcase.singularize}_path", id)
   end
 
   # Wrap description title in link to show_description.
