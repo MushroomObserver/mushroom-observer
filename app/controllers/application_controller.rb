@@ -1037,14 +1037,6 @@ class ApplicationController < ActionController::Base
   end
   helper_method :add_query_param
 
-  # Output path helper. Useful when:
-  # - code permits different classes of objects, e.g., @back_object
-  # - can save space: object_path(@project) vs project_path(@project.id)
-  def object_path(obj, id = obj.id)
-    send("#{obj.class.name.downcase.singularize}_path", id)
-  end
-  helper_method :object_path
-
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
   end

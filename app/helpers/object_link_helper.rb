@@ -227,4 +227,13 @@ module ObjectLinkHelper
       :show_observation_specimen_not_available.t
     end
   end
+
+  # Output path helper. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  # - can accept params: object_path(@project, q: get_query_param)
+  def object_path(obj, params = Hash.new)
+    params[:id] = obj.id
+    send("#{obj.class.name.downcase.singularize}_path", params)
+  end
 end

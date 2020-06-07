@@ -71,7 +71,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_object_path
     obj = projects(:bolete_project)
-    assert_equal(project_path(obj.id), object_path(obj, obj.id))
     assert_equal(project_path(obj.id), object_path(obj))
+    assert_equal(project_path(obj.id, q: 12345), object_path(obj, q: 12345))
   end
 end
