@@ -100,6 +100,15 @@ class CollectionNumbersController < ApplicationController
   alias create_collection_number new
 
   def create
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:id])
+    return unless @observation
+
+    @back_object = @observation
+    return unless make_sure_can_edit!(@observation)
+
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters

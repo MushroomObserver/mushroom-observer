@@ -120,25 +120,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  71-1234-c <spam>   "
     }
 
-    post(:new, id: obs.id, collection_number: params)
+    patch(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:new, id: obs.id, collection_number: params)
+    patch(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:new, id: obs.id,
-                                    collection_number: params.except(:name))
+    patch(:create, id: obs.id, collection_number: params.except(:name))
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:new, id: obs.id,
-                                    collection_number: params.except(:number))
+    patch(:create, id: obs.id, collection_number: params.except(:number))
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:new, id: obs.id, collection_number: params)
+    patch(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
