@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # Donations to Mushroom Observer, Inc.
 class Donation < ApplicationRecord
   belongs_to :user

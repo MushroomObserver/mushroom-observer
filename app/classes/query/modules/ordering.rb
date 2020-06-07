@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query::Modules::Ordering
   def initialize_order
     by = params[:by]

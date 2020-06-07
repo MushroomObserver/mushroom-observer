@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BoxMethods
   def is_location?
     true

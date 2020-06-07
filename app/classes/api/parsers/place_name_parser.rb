@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   module Parsers
     # Parse place names for API.

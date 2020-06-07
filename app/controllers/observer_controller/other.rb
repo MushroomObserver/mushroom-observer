@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: where does this stuff belong?
 class ObserverController
   def test_flash_redirection

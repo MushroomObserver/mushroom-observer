@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module PatternSearch
   # base class for Searches for Observations meeting conditions in a Pattern
   class Observation < Base

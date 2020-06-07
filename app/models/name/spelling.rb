@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Name < AbstractModel
   # Is this Name misspelled?
   def is_misspelling?

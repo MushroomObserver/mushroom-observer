@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # User asking user about an image.
 class CommercialEmail < AccountMailer
   def build(sender, image, commercial_inquiry)

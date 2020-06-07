@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Extensions to ActionView::Helpers::FormBuilder
 #

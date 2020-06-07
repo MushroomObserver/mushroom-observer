@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Location Model
 #
@@ -387,7 +389,7 @@ class Location < AbstractModel
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
-  BAD_CHARS            = "({[;:|]})".freeze
+  BAD_CHARS            = "({[;:|]})"
 
   def self.understood_continents
     UNDERSTOOD_CONTINENTS

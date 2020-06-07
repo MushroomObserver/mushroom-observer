@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see ajax_controller.rb
 class AjaxController
   # Add, edit or remove external link associated with an observation.

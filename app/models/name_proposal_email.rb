@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of name proposal for their obs.
 class NameProposalEmail < AccountMailer
   def build(sender, receiver, naming, observation)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # helpers for creating links in views
 module ObjectLinkHelper
   # Dictionary of urls for searches on external sites
@@ -160,7 +162,7 @@ module ObjectLinkHelper
   def search_link_to(site_symbol, search_string)
     return unless (url = LOCATION_SEARCH_URLS[site_symbol])
 
-    link_to(site_symbol.to_s.titlecase, url << search_string)
+    link_to(site_symbol.to_s.titlecase, "#{url}#{search_string}")
   end
 
   def add_sequence_link(obs)

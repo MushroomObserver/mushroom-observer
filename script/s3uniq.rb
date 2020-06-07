@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 

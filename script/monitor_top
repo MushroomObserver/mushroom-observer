@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 #  USAGE::
 #
@@ -12,9 +14,9 @@
 ################################################################################
 
 ROOT = File.expand_path("..", __dir__)
-LOG_FILE = "#{ROOT}/log/top.log".freeze
-UNICORN_FILE = "#{ROOT}/tmp/unicorn.pid".freeze
-PASSENGER_FILE = "#{ROOT}/tmp/restart.txt".freeze
+LOG_FILE = "#{ROOT}/log/top.log"
+UNICORN_FILE = "#{ROOT}/tmp/unicorn.pid"
+PASSENGER_FILE = "#{ROOT}/tmp/restart.txt"
 
 def parse_top(top, prefix)
   match = top.match(/#{prefix}:\D+(\d+)\D+(\d+)/)

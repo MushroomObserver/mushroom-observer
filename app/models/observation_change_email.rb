@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of change in observation.
 class ObservationChangeEmail < AccountMailer
   def build(sender, receiver, obs, note, time)

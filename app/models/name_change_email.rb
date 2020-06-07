@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user of change in name description.
 class NameChangeEmail < AccountMailer
   def build(email)

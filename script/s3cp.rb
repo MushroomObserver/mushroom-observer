@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 app_root = File.expand_path("..", __dir__)
 require "#{app_root}/app/classes/image_s3.rb"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pivotal
   class Story
     attr_accessor :id

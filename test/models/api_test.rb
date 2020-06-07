@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API

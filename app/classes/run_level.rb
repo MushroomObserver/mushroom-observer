@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Class used by "rake location", QueuedEmail and autologger (in AbstractModel)
 # to turn event logging and email notifications off.
 class RunLevel

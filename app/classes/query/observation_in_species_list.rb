@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ObservationInSpeciesList < Query::ObservationBase
   def parameter_declarations
     super.merge(

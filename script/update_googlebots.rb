@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Kludge to allow us to include consts.rb without loading entire Rails app.
 

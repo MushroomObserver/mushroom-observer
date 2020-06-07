@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Controls viewing and modifying herbaria.
 class HerbariumController < ApplicationController
   before_action :login_required, except: [

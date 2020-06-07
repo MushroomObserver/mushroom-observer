@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :cache do
   desc "Refresh all the caches"
   task all: [

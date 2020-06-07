@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-#
+
+# access query records saved in the db
 class QueryRecord < ApplicationRecord
   attr_accessor :query
 

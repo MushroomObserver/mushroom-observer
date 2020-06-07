@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContentFilter
   class BooleanFilter < ContentFilter
     attr_accessor :on_vals
