@@ -118,7 +118,6 @@ class CollectionNumbersController < ApplicationController
       return
     end
 
-    @observation = find_or_goto_index(Observation, params[:id])
     if name_and_number_free?
       @collection_number.save
       @collection_number.add_observation(@observation)
@@ -141,7 +140,7 @@ class CollectionNumbersController < ApplicationController
     return unless @collection_number
 
     figure_out_where_to_go_back_to
-    return unless make_sure_can_edit!(@collection_number)
+    make_sure_can_edit!(@collection_number)
   end
 
   alias edit_collection_number edit
@@ -312,7 +311,6 @@ class CollectionNumbersController < ApplicationController
 
   def redirect_to_observation_or_collection_number
     if @back_object
-      # redirect_with_query(object_path(@back_object))
       redirect_to(helpers.object_path(@back_object), q: get_query_param)
     else
       # redirect_with_query(action: :index_collection_number,
