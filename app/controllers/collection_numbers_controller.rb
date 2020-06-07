@@ -175,6 +175,8 @@ class CollectionNumbersController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
+  alias post_edit_collection_number update
+
   def merge_collection_numbers(old: nil, old_format_name: nil, survivor: nil)
     flash_warning(
       :edit_collection_numbers_merged.t(
@@ -187,8 +189,6 @@ class CollectionNumbersController < ApplicationController
     old.destroy
     old = survivor
   end
-
-  alias post_edit_collection_number update
 
   def remove_observation
     pass_query_params
