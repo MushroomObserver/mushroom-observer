@@ -80,10 +80,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     number2 = query.results[1]
     q = query.record.id.alphabetize
 
-    get(:next_collection_number, id: number1.id, q: q)
+    get(:show_next, id: number1.id, q: q)
     assert_redirected_to(action: :show, id: number2.id, q: q)
 
-    get(:prev_collection_number, id: number2.id, q: q)
+    get(:show_prev, id: number2.id, q: q)
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
