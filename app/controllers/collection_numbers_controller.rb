@@ -149,7 +149,13 @@ class CollectionNumbersController < ApplicationController
   def update
     store_location
     pass_query_params
+    @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
+
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
@@ -157,6 +163,7 @@ class CollectionNumbersController < ApplicationController
     if missing_required_attribute?(@collection_number)
       flash_missing_attribute(@collection_number)
       return
+
 
     elsif name_and_number_free?
       @collection_number.save

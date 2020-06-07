@@ -261,23 +261,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  69-abc <spam>  "
     }
 
-    post(:edit, id: number.id, collection_number: params)
+    post(:update, id: number.id, collection_number: params)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:edit, id: number.id, collection_number: params)
+    post(:update, id: number.id, collection_number: params)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:edit, id: number.id, collection_number: params.merge(name: ""))
+    post(:update, id: number.id, collection_number: params.merge(name: ""))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    post(:edit, id: number.id, collection_number: params.merge(number: ""))
+    post(:update, id: number.id, collection_number: params.merge(number: ""))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    post(:edit, id: number.id, collection_number: params)
+    post(:update, id: number.id, collection_number: params)
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
@@ -288,7 +288,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
-    post(:edit, id: number.id, collection_number: params)
+    post(:update, id: number.id, collection_number: params)
     assert_no_flash
   end
 
@@ -342,15 +342,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
 
     # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(back: obs.id, q: q))
+    post(:update, params.merge(back: obs.id, q: q))
     assert_redirected_to(obs.show_link_args.merge(q: q))
 
     # Prove that POST can return to show with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(num.show_link_args.merge(q: q))
 
     # Prove that POST can return to index_collection_number with query intact.
-    post(:edit, params.merge(back: "index", q: q))
+    post(:update, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_collection_number, id: num.id, q: q)
   end
 
