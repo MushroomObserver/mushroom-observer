@@ -120,23 +120,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  71-1234-c <spam>   "
     }
 
-    patch(:create, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    patch(:create, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    patch(:create, id: obs.id, collection_number: params.except(:name))
+    post(:create, id: obs.id, collection_number: params.except(:name))
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    patch(:create, id: obs.id, collection_number: params.except(:number))
+    post(:create, id: obs.id, collection_number: params.except(:number))
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    patch(:create, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
@@ -269,13 +269,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:edit, id: number.id,
-                                  collection_number: params.merge(name: ""))
+    post(:edit, id: number.id, collection_number: params.merge(name: ""))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    post(:edit, id: number.id,
-                                  collection_number: params.merge(number: ""))
+    post(:edit, id: number.id, collection_number: params.merge(number: ""))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
