@@ -161,13 +161,13 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
     assert_obj_list_equal([number], obs.reload.collection_numbers)
 
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
