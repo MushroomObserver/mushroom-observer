@@ -339,7 +339,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that GET passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
+    assert_select(
+      "form[action *= 'collection_number/#{num.id}?back=foo&q=#{q}']"
+    )
 
     # Prove that POST keeps query param when returning to observation.
     post(:update, params.merge(back: obs.id, q: q))
