@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: Fix thumbnail
 # Name, location, and image all have presentation markup baked in
 # HTML markup should be in the views or partials
@@ -33,10 +35,7 @@ class LogItemPresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
-
-    if !target.respond_to?(:name)
-      target = rss_log
-    end
+    target = rss_log unless target.respond_to?(:name)
 
     # TODO: fix other objects RSS log could target..
     # case target
@@ -48,13 +47,8 @@ class LogItemPresenter
     # get_rss_log_details(rss_log, target)
 
     self.what = target
-    self.name = target.format_name.delete_suffix(observation.name.author).t
-    self.author =
-      if target.name.respond_to?(:author)
-         target.name.author
-      else
-         ""
-      end
+    self.name = target.format_name.delete_suffix(target.name.author).t
+    self.author = target.name.respond_to?(:author) ? target.name.author : ""
     self.id = target.id
 
     self.where = view.location_link(target.place_name, target.location) \
@@ -62,7 +56,8 @@ class LogItemPresenter
     self.when  = target.when.web_date if target&.respond_to?(:when)
     self.who   = view.user_link(target.user) if target&.user
     self.thumbnail =
-      if target&.respond_to?(:thumb_image) && target&.thumb_image && target&.thumb_image.content_type
+      if target&.respond_to?(:thumb_image) && target&.thumb_image &&
+         target&.thumb_image.content_type
         view.thumbnail(target.thumb_image,
                        link: {
                          controller: target.show_controller,

@@ -107,8 +107,10 @@ class CollectionNumbersController < ApplicationController
     if missing_required_attribute?(@collection_number)
       flash_missing_attribute(@collection_number)
       return
+    end
 
-    elsif name_and_number_free?
+    @observation = find_or_goto_index(Observation, params[:id])
+    if name_and_number_free?
       @collection_number.save
       @collection_number.add_observation(@observation)
     else
@@ -269,10 +271,10 @@ class CollectionNumbersController < ApplicationController
   end
 
   def name_and_number_free?
-    @other_number = CollectionNumber.where(
+    @other_number = CollectionNumber.find_by(
       name: @collection_number.name,
       number: @collection_number.number
-    ).first
+    )
     !@other_number || @other_number == @collection_number
   end
 

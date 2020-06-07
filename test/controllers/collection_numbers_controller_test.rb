@@ -189,7 +189,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     login("mary")
-    post(:new, id: obs2.id, collection_number: params)
+    post(:create, id: obs2.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
