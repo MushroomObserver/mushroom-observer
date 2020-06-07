@@ -36,10 +36,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     get(:collection_number_search, pattern: "Singer")
+
     assert_response(:success)
     assert_template(:index)
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", numbers.count)
+    assert_select("tr", numbers.count)
   end
 
   def test_collection_number_search_with_one_collection_number_index
@@ -59,7 +60,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template(:index)
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", query.num_results)
+    assert_select("tr", query.num_results)
   end
 
   # TODO: NIMMO rename to test_show
