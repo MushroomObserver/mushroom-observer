@@ -49,9 +49,12 @@
 #  notify_users::       Notify authors, etc. of changes.
 #
 ############################################################################
+require_relative '../description.rb'
 
-class LocationDescription < Description
+class Location::Description < Description
   require "acts_as_versioned"
+
+  self.table_name = "location_descriptions"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -64,29 +67,29 @@ class LocationDescription < Description
           source: :source_type,
           accessor: :whiny)
 
-  belongs_to :license
-  belongs_to :location
-  belongs_to :project
-  belongs_to :user
+  belongs_to :license, class_name: "Location::Description"
+  belongs_to :location, class_name: "Location::Description", foreign_key: "description_id"
+  belongs_to :project, class_name: "Location::Description"
+  belongs_to :user, class_name: "Location::Description"
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, class_name: "Comment"
+  has_many :interests, as: :target, dependent: :destroy, class_name: "Interest"
 
   has_and_belongs_to_many :admin_groups,
                           class_name: "UserGroup",
                           join_table: "location_descriptions_admins"
-  has_and_belongs_to_many :writer_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_writers"
-  has_and_belongs_to_many :reader_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_readers"
   has_and_belongs_to_many :authors,
                           class_name: "User",
                           join_table: "location_descriptions_authors"
   has_and_belongs_to_many :editors,
                           class_name: "User",
                           join_table: "location_descriptions_editors"
+  has_and_belongs_to_many :reader_groups,
+                          class_name: "UserGroup",
+                          join_table: "location_descriptions_readers"
+  has_and_belongs_to_many :writer_groups,
+                          class_name: "UserGroup",
+                          join_table: "location_descriptions_writers"
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
@@ -111,6 +114,7 @@ class LocationDescription < Description
 
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
+
 
   ##############################################################################
   #

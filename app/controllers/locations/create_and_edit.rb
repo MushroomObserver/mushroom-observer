@@ -199,9 +199,8 @@ class LocationsController
       merge.merge(@location)
       merge.save if merge.changed?
       @location = merge
-      redirect_to(
-        @location.show_link_args
-      )
+      # redirect_to(@location.show_link_args)
+      redirect_to location_path(@location.id)
     else
       redirect_with_query(
         controller: :email,

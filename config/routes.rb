@@ -743,15 +743,15 @@ MushroomObserver::Application.routes.draw do
   root :to => "observations#index"
 
   resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
-    :herbarium_records, :images, :locations, :names, :namings, :observations,
+    :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
-  namespace :names do
+  resources :locations, module: "locations" do
     resources :descriptions
   end
 
-  namespace :locations do
+  namespace :names do
     resources :descriptions
   end
 

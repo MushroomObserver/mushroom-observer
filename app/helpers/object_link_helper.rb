@@ -145,6 +145,15 @@ module ObjectLinkHelper
     link_to(name || object.title.t, object.show_link_args)
   end
 
+  # Output path helper. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  # - can accept params: object_path(@project, q: get_query_param)
+  def object_path(obj, params = Hash.new)
+    params[:id] = obj.id
+    send("#{obj.class.name.downcase.singularize}_path", params)
+  end
+
   # Wrap description title in link to show_description.
   #
   #   Description: <%= description_link(name.description) %>

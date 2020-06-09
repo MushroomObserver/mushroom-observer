@@ -1,5 +1,5 @@
 <% if @user.nil? %>
-  <div class="mo-toc-item">
+  <div class="mo-toc-item mo-toc-user">
     <%= link_to(:app_account.t,
                 { controller: "/account",
                   action: :login },
@@ -9,14 +9,16 @@
                       { controller: "/account",
                         action: :login },
                       { class: "" }) %>
+                    </li>
       <li><%= link_to(:app_create_account.t,
                       { controller: "/account",
                         action: :signup },
                       { class: "" }) %>
+                    </li>
     </ul>
   </div>
 <% else %>
-  <div class="mo-toc-item">
+  <div class="mo-toc-item mo-toc-user">
     <%= link_to(h(@user.login),
                 { controller: "/account",
                   action: :login },
@@ -70,6 +72,9 @@
       <li><%= link_to(:app_logout.t,
                       { controller: "/account",
                         action: :logout_user }) %>
+      </li>
+      <li><%= link_to "new_name_path",
+                      new_name_path() %>
       </li>
     </ul>
   </div>

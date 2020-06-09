@@ -79,12 +79,13 @@
 class Location < AbstractModel
   require "acts_as_versioned"
 
-  belongs_to :description, class_name: "LocationDescription" # (main one)
+  belongs_to :description, foreign_key: "location_id",
+             class_name: "Location" # (main one)
   belongs_to :rss_log
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "LocationDescription"
+           class_name: "Location"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :observations

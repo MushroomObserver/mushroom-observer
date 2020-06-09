@@ -1014,18 +1014,20 @@ class ApplicationController < ActionController::Base
   end
   helper_method :query_params
 
-  # This is split off so now we can add the query param to a RESTful path,
-  # rather than having to specify controller and action the old way.
+  # This is split off from add_query_param so we can add the query param
+  # explicitly to a path helper: object_path(@object, q: get_query_param)
   def get_query_param(query = nil)
     if browser.bot?
-      # do nothing
-    elsif query
+      q = nil
+    elsif query && query != false
       query.save unless query.id
-      q_param = query.id.alphabetize
-    elsif @query_params
-      q_param = @query_params[:q]
+      q = query.id.alphabetize
+    elsif @query_params && @query_params != false
+      q = @query_params[:q]
+    else
+      q = nil
     end
-    q_param
+    q
   end
   helper_method :get_query_param
 

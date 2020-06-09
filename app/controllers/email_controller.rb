@@ -153,6 +153,7 @@ class EmailController < ApplicationController
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:email_merge_request_success.t)
-    redirect_to(@old_obj.show_link_args)
+    # redirect_to(@old_obj.show_link_args)
+    redirect_to object_path(@old_obj)
   end
 end
