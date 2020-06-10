@@ -2,14 +2,14 @@
 # Location description and user associations must be specified by id, not label.
 
 albion_desc_version_1: # 1
-  description_id: <%= ActiveRecord::FixtureSet.identify(:albion_desc) %>
+  location_description_id: <%= ActiveRecord::FixtureSet.identify(:albion_desc) %>
   updated_at: 2007-12-27 06:41:20
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   notes: nil
 
 albion_desc_version_2: # 2
-  description_id: <%= ActiveRecord::FixtureSet.identify(:albion_desc) %>
+  location_description_id: <%= ActiveRecord::FixtureSet.identify(:albion_desc) %>
   updated_at: 2007-12-27 06:41:20
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 2

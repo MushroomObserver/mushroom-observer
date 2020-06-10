@@ -74,13 +74,15 @@ class AbstractModel < ApplicationRecord
   end
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
+  # 061020 - Have to redefine type_tag for namespaced models,
+  # or else we get :"location/description" - AN
   def self.type_tag
-    name.underscore.to_sym
+    name.underscore.sub("/", "_").to_sym
   end
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def type_tag
-    self.class.name.underscore.to_sym
+    self.class.name.underscore.sub("/", "_").to_sym
   end
 
   # Default value (as a symbol) for an enum attribute

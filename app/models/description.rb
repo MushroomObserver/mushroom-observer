@@ -103,7 +103,9 @@ class Description < AbstractModel
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
   def parent_type
-    type_tag.to_s.sub("_description", "")
+    # type_tag.to_s.sub("_description", "")
+    # Note parent will need to be module_parent in Rails 6
+    self.class.parent.to_s.downcase.sub("::", "_")
   end
 
   # Shorthand for "public && public_write"

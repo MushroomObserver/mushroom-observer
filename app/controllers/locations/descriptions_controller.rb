@@ -112,7 +112,7 @@ class Locations::DescriptionsController < ApplicationController
   def show
     store_location
     pass_query_params
-    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+    @description = find_or_goto_index(Location::Description, params[:id].to_s)
     return unless @description
 
     # TODO: NIMMO - check this new url

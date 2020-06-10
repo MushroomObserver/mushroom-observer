@@ -54,8 +54,6 @@ require_relative '../description.rb'
 class Location::Description < Description
   require "acts_as_versioned"
 
-  self.table_name = "location_descriptions"
-
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:source_type,
@@ -67,34 +65,40 @@ class Location::Description < Description
           source: :source_type,
           accessor: :whiny)
 
-  belongs_to :license, class_name: "Location::Description"
-  belongs_to :location, class_name: "Location::Description", foreign_key: "description_id"
-  belongs_to :project, class_name: "Location::Description"
-  belongs_to :user, class_name: "Location::Description"
+  belongs_to :license
+  belongs_to :location
+  belongs_to :project
+  belongs_to :user
 
-  has_many :comments,  as: :target, dependent: :destroy, class_name: "Comment"
-  has_many :interests, as: :target, dependent: :destroy, class_name: "Interest"
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
 
   has_and_belongs_to_many :admin_groups,
                           class_name: "UserGroup",
-                          join_table: "location_descriptions_admins"
+                          join_table: "location_descriptions_admins",
+                          foreign_key: "location_description_id"
   has_and_belongs_to_many :authors,
                           class_name: "User",
-                          join_table: "location_descriptions_authors"
+                          join_table: "location_descriptions_authors",
+                          foreign_key: "location_description_id"
   has_and_belongs_to_many :editors,
                           class_name: "User",
-                          join_table: "location_descriptions_editors"
+                          join_table: "location_descriptions_editors",
+                          foreign_key: "location_description_id"
   has_and_belongs_to_many :reader_groups,
                           class_name: "UserGroup",
-                          join_table: "location_descriptions_readers"
+                          join_table: "location_descriptions_readers",
+                          foreign_key: "location_description_id"
   has_and_belongs_to_many :writer_groups,
                           class_name: "UserGroup",
-                          join_table: "location_descriptions_writers"
+                          join_table: "location_descriptions_writers",
+                          foreign_key: "location_description_id"
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(
     table_name: "location_descriptions_versions",
+    foreign_key: "location_description_id",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )
@@ -114,6 +118,8 @@ class Location::Description < Description
 
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
+
+  self.table_name = "location_descriptions"
 
 
   ##############################################################################

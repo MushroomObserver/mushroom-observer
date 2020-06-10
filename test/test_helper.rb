@@ -107,7 +107,8 @@ module ActiveSupport
     #
     # Note: You'll currently still have to declare fixtures explicitly
     # in integration tests -- they do not yet inherit this setting
-    set_fixture_class 'locations/descriptions' => Location::Description
+    self.set_fixture_class locations: Location
+    self.set_fixture_class 'locations/descriptions' => Location::Description
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
