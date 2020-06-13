@@ -5,7 +5,7 @@
 <% even = true
 any = false
 desc = location_description
-for f in LocationDescription.all_note_fields
+for f in Location::Description.all_note_fields
   value = desc.send(f).to_s
   if value != ""
     even = !even

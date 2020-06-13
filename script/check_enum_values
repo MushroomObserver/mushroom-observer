@@ -4,8 +4,8 @@
 require File.expand_path("../config/boot.rb", __dir__)
 require File.expand_path("../config/environment.rb", __dir__)
 
-LocationDescription.all.
-  each { |x| puts "LocationDescription #{x.id} #{x.source_type.inspect}" }
+Location::Description.all.
+  each { |x| puts "Location::Description #{x.id} #{x.source_type.inspect}" }
 NameDescription.all.
   each { |x| puts "NameDescription #{x.id} #{x.review_status.inspect}" }
 NameDescription.all.

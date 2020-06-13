@@ -71,12 +71,8 @@ module ShowNameHelper
     return nil if count.zero?
 
     query.save
-    link_to(
-      title,
-      add_query_param(
-        { controller: :observations, action: :index_observation }, query
-      )
-    ) + " (#{count})"
+    link_to(title, observations_index_observation_path(q: query)) \
+    + " (#{count})"
   end
 
   # link to a search for species of name's genus. Sample text:
@@ -91,7 +87,7 @@ module ShowNameHelper
 
     link_to(
       :show_consensus_species.t(name: genus.display_name_brief_authors.t),
-      add_query_param({ controller: :names, action: :index_name }, query)
+      names_index_name_path(q: query)
     ) + " (#{count})"
   end
 

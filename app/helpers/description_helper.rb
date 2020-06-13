@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: NIMMO check actions of pattern "edit_#{type}_description" in case of
-# controllers/concerns refactor for LocationDescription and NameDescription
+# controllers/concerns refactor for Location::Description and NameDescription
 # also abstract_model.rb line 345 - define controller name for
 # namespaced controllers?
 module DescriptionHelper
@@ -19,27 +19,23 @@ module DescriptionHelper
     admin = is_admin?(desc)
     tabs = []
     if true
-      tabs << link_with_query(:show_object.t(type: type),
-                              action: :show,
-                              id: desc.parent_id)
+      tabs << link_to(:show_object.t(type: type),
+                      object_path(id: desc.parent_id, q: get_query_param))
     end
     if is_writer?(desc)
-      tabs << link_with_query(:show_description_edit.t,
-                              action: :edit,
-                              id: desc.id)
+      tabs << link_to(:show_description_edit.t,
+                      edit_object_path(desc.parent_id, desc.id, q: get_query_param))
     end
     if admin
-      tabs << link_with_query(:show_description_destroy.t,
-                              { action: :destroy,
-                                id: desc.id },
-                              data: { confirm: :are_you_sure.l })
+      tabs << link_to(:show_description_destroy.t,
+                      object_path(desc.parent_id, desc.id, q: get_query_param,
+                        method: "DELETE")),
+                      data: { confirm: :are_you_sure.l })
     end
     if true
-      tabs << link_with_query(:show_description_clone.t,
-                              controller: "/#{type}s",
-                              action: :new,
-                              id: desc.parent_id, clone: desc.id,
-                              help: :show_description_clone_help.l)
+      tabs << link_to(:show_description_clone.t,
+                new_object_path(desc.parent_id, clone: desc.id,
+                  q: get_query_param, help: :show_description_clone_help.l))
     end
     if admin
       tabs << link_with_query(:show_description_merge.t,

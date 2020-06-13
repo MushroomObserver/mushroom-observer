@@ -9,13 +9,13 @@ class LocationsController
   #
   ##############################################################################
 
-  # Show a Location and one of its LocationDescription's, including a map.
+  # Show a Location and one of its Location::Description's, including a map.
   def show
     store_location
     pass_query_params
     clear_query_in_session
 
-    # Load Location and LocationDescription along with a bunch of associated
+    # Load Location and Location::Description along with a bunch of associated
     # objects.
     loc_id = params[:id].to_s
     desc_id = params[:desc]
@@ -28,7 +28,7 @@ class LocationsController
     desc_id = @location.description_id if desc_id.blank?
     if desc_id.blank?
       @description = nil
-    elsif (@description = LocationDescription.safe_find(desc_id))
+    elsif (@description = Location::Description.safe_find(desc_id))
       @description = nil unless in_admin_mode? || @description.is_reader?(@user)
     else
       flash_error(:runtime_object_not_found.t(type: :description,

@@ -21,14 +21,11 @@
 
   <div class="card">
 
-    <%= render partial: "namings/large",
-               locals: locals %>
+    <%= render partial: "namings/large", locals: locals %>
 
-    <%= render partial: "namings/mobile",
-              locals: locals %>
+    <%= render partial: "namings/mobile", locals: locals %>
 
-    <%= render partial: "namings/vote_popups",
-              locals: { observation: @observation } %>
+    <%= render "namings/vote_popups", observation: @observation %>
 
   </div><!-- .card -->
 

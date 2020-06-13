@@ -5,7 +5,7 @@
   )
 
   tabs = [
-    link_to(:show_name.t(name: @name.display_name), @name.show_link_args)
+    link_to(:show_name.t(name: @name.display_name), name_path(@name.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -14,7 +14,7 @@
   <div class="col-sm-7 col-lg-9">
     <div class="list-group">
       <div class="list-group-item name-section">
-        <%= render(partial: "name", object: @name, locals: {synonyms: false}) %>
+        <%= render "names/name", object: @name, synonyms: false %>
       </div>
     </div>
   </div>

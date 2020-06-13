@@ -3,15 +3,14 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :name),
-            action: :show,
-            id: @name.id)
+            name_path(@name.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= :email_tracking_help.tp %>
 
-<%= form_tag(action: :email_tracking, id: @name.id) do %>
+<%= form_with url: names_email_tracking_path(id: @name.id) do %>
   <br/><center>
     <%= if @notification
       submit_tag(:UPDATE.t, class: "btn") + " " + submit_tag(:DISABLE.t, class: "btn")

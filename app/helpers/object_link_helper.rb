@@ -154,6 +154,16 @@ module ObjectLinkHelper
     send("#{obj.class.name.downcase.singularize}_path", params)
   end
 
+  def edit_object_path(obj, params = Hash.new)
+    params[:id] = obj.id
+    send("edit_#{obj.class.name.downcase.singularize}_path", params)
+  end
+
+  def new_object_path(obj, params = Hash.new)
+    params[:id] = obj.id
+    send("new_#{obj.class.name.downcase.singularize}_path", params)
+  end
+
   # Wrap description title in link to show_description.
   #
   #   Description: <%= description_link(name.description) %>

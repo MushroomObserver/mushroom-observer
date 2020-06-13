@@ -4,28 +4,29 @@
     <% parents.reverse.each do |n| %>
       <p>
         <%= rank_as_string(n.rank) %>:
-        <i><%= link_with_query(n.text_name.t, n.show_link_args) %></i>
+        <i><%= link_to(n.text_name.t, name_path(n.id)) %></i>
       </p>
     <% end %>
   </div>
 <% end %>
 
 <% if @first_child %>
-  <p><%= link_to(:show_object.t(type: @name.at_or_below_genus? && !@name.at_or_below_species? ? :rank_species : :show_subtaxa_obss),
-                 add_query_param({ action: :index_name }, @children_query)) %></p>
+  <p><%= link_to :show_object.t(type: @name.at_or_below_genus? && \
+            !@name.at_or_below_species? ? :rank_species : :show_subtaxa_obss),
+            names_index_name_path(q: @children_query) %></p>
 <% end %>
 <% if @name.below_genus? && @name.genus.try(&:classification) != @name.classification %>
-  <p><%= link_with_query(:show_name_refresh_classification.t,
-                         controller: :names, action: :refresh_classification,
-                         id: @name.id) %></p>
+  <p><%= link_to :show_name_refresh_classification.t,
+            names_refresh_classification_path(id: @name.id,
+                                              q: get_query_param) %></p>
 <% end %>
 <% if @name.rank == :Genus && @first_child && @name.classification.present? %>
-  <p><%= link_with_query(:show_name_propagate_classification.t,
-                         controller: :names, action: :propagate_classification,
-                         id: @name.id) %></p>
+  <p><%= link_to :show_name_propagate_classification.t,
+            names_propagate_classification_path(id: @name.id,
+                                                q: get_query_param)) %></p>
 <% end %>
 <% if !@name.below_genus? && @name.classification.blank? %>
-  <p><%= link_with_query(:show_name_inherit_classification.t,
-                         controller: :names, action: :inherit_classification,
-                         id: @name.id) %></p>
+  <p><%= link_to :show_name_inherit_classification.t,
+            names_inherit_classification_path(id: @name.id,
+                                              q: get_query_param)) %></p>
 <% end %>

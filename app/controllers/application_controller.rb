@@ -1019,10 +1019,10 @@ class ApplicationController < ActionController::Base
   def get_query_param(query = nil)
     if browser.bot?
       q = nil
-    elsif query && query != false
+    elsif query
       query.save unless query.id
       q = query.id.alphabetize
-    elsif @query_params && @query_params != false
+    elsif @query_params
       q = @query_params[:q]
     else
       q = nil

@@ -351,7 +351,7 @@ class AbstractModel < ApplicationRecord
     case name
       when "Account", "Naming"
         "/#{name.underscore}"
-      when "LocationDescription"
+      when "Location::Description"
         "/locations/descriptions"
       when "NameDescription"
         "/names/descriptions"

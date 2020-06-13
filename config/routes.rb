@@ -763,51 +763,51 @@ MushroomObserver::Application.routes.draw do
 
   resources :users, only: [:index, :show]
 
-  # get "policy/privacy"
-  #
-  # # Route /123 to /observations/show_observation/123.
-  # get ":id" => "observations#show", id: /\d+/
-  # # get "observations/:id" => "observations#show", id: /\d+/
-  #
-  # # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  # # New routing - peel the controller name out of the string "lookup_#{action}"
-  # LOOKUP_XXX_ID_ACTIONS.each do |action|
-  #   # get(
-  #   #   "observations/#{action}/:id",
-  #   #   controller: action[7,action.length].pluralize.to_sym,
-  #   #   action: action,
-  #   #   id: /.*/
-  #   # )
-  #   get "observations/#{action}/:id" =>
-  #     redirect("/#{action[7,action.length].pluralize}/%{id}")
-  # end
-  #
-  # # Short-hand notation for AJAX methods.
-  # # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  # AJAX_ACTIONS.each do |action|
-  #   get(
-  #     "ajax/#{action}/:type/:id",
-  #     controller: :ajax,
-  #     action: action,
-  #     id: /\S.*/
-  #   )
-  # end
-  #
-  # ACTIONS.each do |controller, actions|
-  #   # Default action for any controller is "index".
-  #   get controller.to_s => "#{controller}#index"
-  #
-  #   # Standard routes
-  #   actions.each_key do |action|
-  #     get "#{controller}/#{action}", controller: controller, action: action
-  #     match "#{controller}(/#{action}(/:id))",
-  #           controller: controller,
-  #           action: action,
-  #           via: [:get, :post],
-  #           id: /\d+/
-  #   end
-  # end
-  #
-  # # routes for actions that Rails automatically creates from view templates
-  # MO.themes.each { |scheme| get "theme/#{scheme}" }
+  get "policy/privacy"
+
+  # Route /123 to /observations/show_observation/123.
+  get ":id" => "observations#show", id: /\d+/
+  # get "observations/:id" => "observations#show", id: /\d+/
+
+  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # New routing - peel the controller name out of the string "lookup_#{action}"
+  LOOKUP_XXX_ID_ACTIONS.each do |action|
+    # get(
+    #   "observations/#{action}/:id",
+    #   controller: action[7,action.length].pluralize.to_sym,
+    #   action: action,
+    #   id: /.*/
+    # )
+    get "observations/#{action}/:id" =>
+      redirect("/#{action[7,action.length].pluralize}/%{id}")
+  end
+
+  # Short-hand notation for AJAX methods.
+  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
+  AJAX_ACTIONS.each do |action|
+    get(
+      "ajax/#{action}/:type/:id",
+      controller: :ajax,
+      action: action,
+      id: /\S.*/
+    )
+  end
+
+  ACTIONS.each do |controller, actions|
+    # Default action for any controller is "index".
+    get controller.to_s => "#{controller}#index"
+
+    # Standard routes
+    actions.each_key do |action|
+      get "#{controller}/#{action}", controller: controller, action: action
+      match "#{controller}(/#{action}(/:id))",
+            controller: controller,
+            action: action,
+            via: [:get, :post],
+            id: /\d+/
+    end
+  end
+
+  # routes for actions that Rails automatically creates from view templates
+  MO.themes.each { |scheme| get "theme/#{scheme}" }
 end

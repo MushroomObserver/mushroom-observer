@@ -1900,7 +1900,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions
-    assert_query(LocationDescription.all.map(&:location_id).uniq,
+    assert_query(Location::Description.all.map(&:location_id).uniq,
                  :Location, :with_descriptions)
   end
 
@@ -2179,7 +2179,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_all
-    all = LocationDescription.all.to_a
+    all = Location::Description.all.to_a
     assert_query(all, :LocationDescription, :all, by: :id)
   end
 
@@ -2192,17 +2192,17 @@ class QueryTest < UnitTestCase
   def test_location_description_by_author
     loc1, loc2, loc3 = Location.all
     desc1 =
-      loc1.description ||= LocationDescription.create!(location_id: loc1.id)
+      loc1.description ||= Location::Description.create!(location_id: loc1.id)
     desc2 =
-      loc2.description ||= LocationDescription.create!(location_id: loc2.id)
+      loc2.description ||= Location::Description.create!(location_id: loc2.id)
     desc3 =
-      loc3.description ||= LocationDescription.create!(location_id: loc3.id)
+      loc3.description ||= Location::Description.create!(location_id: loc3.id)
     desc1.add_author(rolf)
     desc2.add_author(mary)
     desc3.add_author(rolf)
 
     # Using Rails instead of db; don't know how to do it with .joins & .where
-    descs = LocationDescription.all
+    descs = Location::Description.all
     assert_query(descs.find_all { |d| d.authors.include?(rolf) },
                  :LocationDescription, :by_author, user: rolf, by: :id)
     assert_query(descs.find_all { |d| d.authors.include?(mary) },
@@ -2213,17 +2213,17 @@ class QueryTest < UnitTestCase
   def test_location_description_by_editor
     loc1, loc2, loc3 = Location.all
     desc1 =
-      loc1.description ||= LocationDescription.create!(location_id: loc1.id)
+      loc1.description ||= Location::Description.create!(location_id: loc1.id)
     desc2 =
-      loc2.description ||= LocationDescription.create!(location_id: loc2.id)
+      loc2.description ||= Location::Description.create!(location_id: loc2.id)
     desc3 =
-      loc3.description ||= LocationDescription.create!(location_id: loc3.id)
+      loc3.description ||= Location::Description.create!(location_id: loc3.id)
     desc1.add_editor(rolf) # Fails since he's already an author!
     desc2.add_editor(mary)
     desc3.add_editor(rolf)
 
     # Using Rails instead of db; don't know how to do it with .joins & .where
-    descs = LocationDescription.all
+    descs = Location::Description.all
     assert_query(descs.find_all { |d| d.editors.include?(rolf) },
                  :LocationDescription, :by_editor, user: rolf, by: :id)
     assert_query(descs.find_all { |d| d.editors.include?(mary) },
@@ -2235,9 +2235,9 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :LocationDescription, :in_set,
                  ids: rolf.id)
-    assert_query(LocationDescription.all,
+    assert_query(Location::Description.all,
                  :LocationDescription, :in_set,
-                 ids: LocationDescription.select(:id).to_a)
+                 ids: Location::Description.select(:id).to_a)
     assert_query([location_descriptions(:albion_desc).id],
                  :LocationDescription, :in_set,
                  ids: [rolf.id, location_descriptions(:albion_desc).id])

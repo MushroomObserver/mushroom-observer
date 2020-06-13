@@ -18,7 +18,7 @@
 
   <hr/>
 
-  <% for field in LocationDescription.all_note_fields %>
+  <% for field in Location::Description.all_note_fields %>
     <div class="form-group">
       <%= f.label field, "form_locations_#{field}".to_sym.t + ":",
                   class: "mb-0" %>

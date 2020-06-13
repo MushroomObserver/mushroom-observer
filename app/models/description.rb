@@ -4,7 +4,7 @@
 #  = Base Class for Models with Authored Descriptions
 #
 #  This class provides the common functionality between NameDescription and
-#  LocationDescription.
+#  Location::Description.
 #
 #  == Class Methods
 #

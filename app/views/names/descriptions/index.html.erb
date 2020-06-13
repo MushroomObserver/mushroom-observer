@@ -12,10 +12,10 @@
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>
         <tr>
-          <td><%= link_with_query(
+          <td><%= link_to(
                     desc.format_name.t,
-                    action: :show,
-                    id: desc.id
+                    name_description_path(name_id: desc.name_id,
+                      id: desc.id, q: get_query_param)
                   ) %><td>
         </tr>
       <% end %>

@@ -44,7 +44,7 @@ module Query::Modules::Ordering
         else
           "locations.name ASC"
         end
-      elsif model == LocationDescription
+      elsif model == Location::Description
         add_join(:locations)
         "locations.name ASC, location_descriptions.created_at ASC"
       elsif model == Name

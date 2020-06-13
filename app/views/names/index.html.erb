@@ -1,7 +1,7 @@
 <%
   tabs = [
-    link_to(:name_index_add_name.t, action: :new),
-    link_to(:name_index_bulk_edit.t, action: :bulk_name_edit)
+    link_to(:name_index_add_name.t, new_name_path),
+    link_to(:name_index_bulk_edit.t, names_bulk_name_edit_path)
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
@@ -16,7 +16,7 @@
           <%= :list_observations_alternate_spellings.t %><br/>
           <ul class="list-unstyled">
             <% names.sort_by(&:sort_name).each do |name| %>
-              <%= link_to(name.display_name.t, name.show_link_args) %><br/>
+              <%= link_to(name.display_name.t, name_path(name.id)) %><br/>
             <% end %>
           </ul>
         </div>
@@ -34,8 +34,8 @@
           <% @objects.each do |name| %>
               <tr>
                 <td>
-                  <%= link_with_query(name.display_name.html_safe.t,
-                                      name.show_link_args) + " [#{counts[name.id]}]" %>
+                  <%= link_to(name.display_name.html_safe.t,
+                              name_path(name.id)) + " [#{counts[name.id]}]" %>
                 </td>
                 <% if @extra_data %>
                     <% data = @extra_data[name.id]
