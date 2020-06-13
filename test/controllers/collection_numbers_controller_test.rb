@@ -3,7 +3,7 @@
 require "test_helper"
 
 class CollectionNumbersControllerTest < FunctionalTestCase
-  def test_collection_index
+  def test_index
     get_with_dump(:index)
     assert_template(:index)
   end
@@ -32,7 +32,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_collection_number_search
+  def test_search
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     get(:collection_number_search, pattern: "Singer")
@@ -42,7 +42,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select(".results tr", numbers.count)
   end
 
-  def test_collection_number_search_with_one_collection_number_index
+  def test_search_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
     get_with_dump(:collection_number_search, pattern: "neighbor")
@@ -52,7 +52,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index_collection_number
+  def test_index_with_query
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
     get(:index_collection_number, q: query.record.id.alphabetize)
@@ -62,8 +62,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select(".results tr", query.num_results)
   end
 
-  # TODO: NIMMO rename to test_show
-  def test_show_collection_number
+  def test_show
     get(:show)
     get(:show, id: "bogus")
 
@@ -71,7 +70,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get_with_dump(:show, id: number.id)
   end
 
-  def test_next_and_prev_collection_number
+  def test_next_and_prev
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
@@ -85,7 +84,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
-  def test_create_collection_number
+  def test_new
     get(:new)
     get(:new, id: "bogus")
 
@@ -108,7 +107,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_collection_number_post
+  def test_create
     collection_number_count = CollectionNumber.count
     obs = observations(:strobilurus_diminutivus_obs)
     assert_false(obs.specimen)
@@ -151,7 +150,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_includes(obs.collection_numbers, number)
   end
 
-  def test_create_collection_number_post_twice
+  def test_create_twice
     collection_number_count = CollectionNumber.count
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
@@ -173,7 +172,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_list_equal([number], obs.reload.collection_numbers)
   end
 
-  def test_create_collection_number_post_already_used
+  def test_create_already_used
     collection_number_count = CollectionNumber.count
     obs1 = observations(:coprinus_comatus_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -197,7 +196,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_includes(number.observations, obs2)
   end
 
-  def test_create_collection_number_redirect
+  def test_make_redirect
     obs = observations(:coprinus_comatus_obs)
     query = Query.lookup_and_save(:CollectionNumber, :all)
     q = query.id.alphabetize
@@ -217,7 +216,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(obs.show_link_args.merge(q: q))
   end
 
-  def test_edit_collection_number
+  def test_edit
     get(:edit)
     get(:edit, id: "bogus")
 
@@ -240,7 +239,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_collection_number_post
+  def test_update
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
     record1 = herbarium_records(:coprinus_comatus_rolf_spec)
@@ -295,7 +294,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_edit_collection_number_post_merge
+  def test_update_merge
     collection_number_count = CollectionNumber.count
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
@@ -327,7 +326,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_collection_number_redirect
+  def test_change_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
     query = Query.lookup_and_save(:CollectionNumber, :all)
@@ -416,7 +415,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(obs.show_link_args.merge(q: q))
   end
 
-  def test_destroy_collection_number
+  def test_destroy
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
@@ -454,7 +453,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_nil(CollectionNumber.safe_find(num2.id))
   end
 
-  def test_destroy_collection_number_redirect
+  def test_destroy_redirect
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
     query = Query.lookup_and_save(:CollectionNumber, :all)
