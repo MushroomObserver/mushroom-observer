@@ -3,7 +3,7 @@
 require "test_helper"
 
 class CollectionNumbersControllerTest < FunctionalTestCase
-  def test_collection_index
+  def test_index
     get_with_dump(:index)
     assert_template(:index)
   end
