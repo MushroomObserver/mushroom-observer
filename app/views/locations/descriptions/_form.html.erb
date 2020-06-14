@@ -12,7 +12,7 @@
 
 <%= form_with model: [:locations, @description] do |f| %>
 
-  <%= render partial: "shared/form_description", locals: {form: f} %>
+  <%= render "shared/form_description", form: f %>
 
   <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 
@@ -29,7 +29,7 @@
     </div>
   <% end %>
 
-  <%= render partial: "shared/textilize_help"  %>
+  <%= render "shared/textilize_help"  %>
 
   <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 

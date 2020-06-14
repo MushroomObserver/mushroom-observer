@@ -20,6 +20,6 @@ for f in Location::Description.all_note_fields
 <center>
   <%= show_authors_and_editors(desc) %>
   <% if desc.license %>
-    <%= render(partial: "shared/form_#{desc.license.form_name}") %>
+    <%= render "shared/form_#{desc.license.form_name}" %>
   <% end %>
 </center>

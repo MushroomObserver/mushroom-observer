@@ -288,7 +288,6 @@ ACTIONS = {
   },
   locations: {
     add_to_location: {},
-    adjust_permissions: {},
     advanced_search: {},
     # create_location: {}, # aliased only
     # destroy_location: {}, # aliased only
@@ -308,33 +307,6 @@ ACTIONS = {
     reverse_name_order: {},
     # show_location: {}, # aliased only
     show_past_location: {},
-    show_next: {},
-    show_prev: {}
-    # resources
-    # create: {},
-    # destroy: {},
-    # edit: {},
-    # index: {},
-    # new: {},
-    # show: {},
-    # update: {}
-  },
-  "locations/descriptions": {
-    adjust_permissions: {},
-    # create_location_description: {}, # aliased only
-    # destroy_location_description: {}, # aliased only
-    # edit_location_description: {}, # aliased only
-    index_location_description: {},
-    # list_location_descriptions: {}, # aliased only
-    location_descriptions_by_author: {},
-    location_descriptions_by_editor: {},
-    make_description_default: {},
-    merge_descriptions: {}, # ?
-    # next_location_description: {}, # aliased only
-    # prev_location_description: {}, # aliased only
-    publish_description: {}, # ?
-    # show_location_description: {}, # aliased only
-    show_past_location_description: {},
     show_next: {},
     show_prev: {}
     # resources
@@ -751,6 +723,38 @@ MushroomObserver::Application.routes.draw do
     resources :descriptions, module: :locations
   end
 
+
+  LD_GET_POST_ACTIONS = {
+    adjust_permissions: {},
+    make_description_default: {},
+    merge_descriptions: {}, # ?
+    publish_description: {}, # ?
+  }
+
+  LD_GET_ACTIONS = {
+    index_location_description: {},
+    location_descriptions_by_author: {},
+    location_descriptions_by_editor: {},
+    show_past_location_description: {},
+    show_next: {},
+    show_prev: {}
+  }
+
+  LD_GET_POST_ACTIONS.each_key do |action|
+    match "locations/:location_id/descriptions(/:id)/#{action}",
+          controller: "locations/descriptions",
+          action: action,
+          via: [:get, :post],
+          id: /\d+/
+  end
+
+  LD_GET_ACTIONS.each_key do |action|
+    get "locations/:location_id/descriptions(/:id)/#{action}",
+        controller: "locations/descriptions",
+        action: action,
+        id: /\d+/
+  end
+
   namespace :names do
     resources :descriptions
   end
@@ -793,11 +797,13 @@ MushroomObserver::Application.routes.draw do
     )
   end
 
+  # FIXME: NIMMO do separate location and name description routing here
   ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
-    get controller.to_s => "#{controller}#index"
+    # Removing, this is a duplicate of resources above - AN
+    # get controller.to_s => "#{controller}#index"
 
-    # Standard routes
+    # Non-standard routes
     actions.each_key do |action|
       get "#{controller}/#{action}", controller: controller, action: action
       match "#{controller}(/#{action}(/:id))",
