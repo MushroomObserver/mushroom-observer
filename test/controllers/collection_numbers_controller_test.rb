@@ -126,12 +126,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:create, id: obs.id,
-                                    collection_number: params.except(:name))
+    post(:create, id: obs.id, collection_number: params.except(:name))
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:create, id: obs.id,
-                                    collection_number: params.except(:number))
+    post(:create, id: obs.id, collection_number: params.except(:number))
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create, id: obs.id, collection_number: params)
