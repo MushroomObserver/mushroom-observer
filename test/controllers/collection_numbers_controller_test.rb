@@ -39,7 +39,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template(:index)
     # In results, expect 1 row per collection_number.
-    assert_select(".results tr", numbers.count)
+    assert_select("tr", numbers.count)
   end
 
   def test_search_with_one_collection_number_index
