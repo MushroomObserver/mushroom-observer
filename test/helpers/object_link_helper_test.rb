@@ -68,4 +68,10 @@ class ObjectLinkHelperTest < ActionView::TestCase
   def expected_link(path, obj, link_text)
     '<a href="' + path + obj.id.to_s + '">' + link_text + "</a>"
   end
+
+  def test_object_path
+    obj = projects(:bolete_project)
+    assert_equal(project_path(obj.id), object_path(obj))
+    assert_equal(project_path(obj.id, q: 12345), object_path(obj, q: 12345))
+  end
 end
