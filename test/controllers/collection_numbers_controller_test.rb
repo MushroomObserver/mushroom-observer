@@ -69,17 +69,17 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get_with_dump(:show, id: number.id)
   end
 
-  def test_next_and_prev
+  def test_show_next_and_prev
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
     q = query.record.id.alphabetize
 
-    get(:next_collection_number, id: number1.id, q: q)
+    get(:show_next, id: number1.id, q: q)
     assert_redirected_to(action: :show, id: number2.id, q: q)
 
-    get(:prev_collection_number, id: number2.id, q: q)
+    get(:show_prev, id: number2.id, q: q)
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
