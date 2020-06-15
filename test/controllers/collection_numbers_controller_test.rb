@@ -206,11 +206,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='number/#{obs.id}?q=#{q}']")
+    assert_select("form[action*='numbers/#{obs.id}?q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to("#{observations_path}/#{obs.id}?q=#{q}")
   end
 
   def test_edit

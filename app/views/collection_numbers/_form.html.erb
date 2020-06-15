@@ -1,4 +1,7 @@
-<%= form_with model: @collection_number do |f| %>
+<% url =
+     "#{collection_numbers_path}/#{@observation.id}?q=#{get_query_param}" %>
+<%= form_with(model: @collection_number,
+              url: url) do |f| %>
 
   <%= submit_tag(local_assigns[:button].t, class: "btn mx-auto mt-3") %>
 
