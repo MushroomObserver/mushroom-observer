@@ -116,25 +116,25 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  71-1234-c <spam>   "
     }
 
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:new, id: obs.id,
+    post(:create, id: obs.id,
                                     collection_number: params.except(:name))
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:new, id: obs.id,
+    post(:create, id: obs.id,
                                     collection_number: params.except(:number))
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
@@ -159,13 +159,13 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
     assert_obj_list_equal([number], obs.reload.collection_numbers)
 
-    post(:new, id: obs.id, collection_number: params)
+    post(:create, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
@@ -185,7 +185,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     login("mary")
-    post(:new, id: obs2.id, collection_number: params)
+    post(:create, id: obs2.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
@@ -211,7 +211,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("form[action*='number/#{obs.id}?q=#{q}']")
 
     # Prove that post keeps query params intact.
-    post(:new, params)
+    post(:create, params)
     assert_redirected_to(obs.show_link_args.merge(q: q))
   end
 
