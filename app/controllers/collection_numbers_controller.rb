@@ -289,7 +289,7 @@ class CollectionNumbersController < ApplicationController
 
   def redirect_to_observation_or_collection_number
     if @back_object
-      redirect_with_query(@back_object.show_link_args)
+      redirect_to(helpers.object_path(@back_object), q: get_query_param)
     else
       # redirect_with_query(action: :index_collection_number,
       #                     id: @collection_number.id)
