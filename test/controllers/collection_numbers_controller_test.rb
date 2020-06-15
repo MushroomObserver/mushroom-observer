@@ -63,7 +63,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_show
-    get(:show)
     get(:show, id: "bogus")
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
