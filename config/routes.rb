@@ -740,18 +740,24 @@ MushroomObserver::Application.routes.draw do
     show_prev: {}
   }
 
+  # FIXME: NIMMO make the path be like "location_descriptions_action_path",
+  # otherwise the controller name gives "locations_descriptions_action_path"
+  # which does not match the nested resources paths
+  # FIXME: NIMMO simplify action names in controllers!
   LD_GET_POST_ACTIONS.each_key do |action|
-    match "locations/:location_id/descriptions(/:id)/#{action}",
+    match "locations(/:location_id)/descriptions(/:id)/#{action}",
           controller: "locations/descriptions",
           action: action,
           via: [:get, :post],
+          as: "location_descriptions_#{action}",
           id: /\d+/
   end
 
   LD_GET_ACTIONS.each_key do |action|
-    get "locations/:location_id/descriptions(/:id)/#{action}",
+    get "locations(/:location_id)/descriptions(/:id)/#{action}",
         controller: "locations/descriptions",
         action: action,
+        as: "location_descriptions_#{action}",
         id: /\d+/
   end
 

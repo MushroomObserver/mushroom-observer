@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO: NIMMO check actions of pattern "edit_#{type}_description" in case of
+# FIXME: NIMMO check actions of pattern "edit_#{type}_description" in case of
 # controllers/concerns refactor for Location::Description and NameDescription
 # also abstract_model.rb line 345 - define controller name for
 # namespaced controllers?
@@ -29,42 +29,44 @@ module DescriptionHelper
     if admin
       tabs << link_to(:show_description_destroy.t,
                       object_path(desc.parent_id, desc.id, q: get_query_param,
-                        method: "DELETE")),
+                        method: "DELETE"),
                       data: { confirm: :are_you_sure.l })
     end
     if true
       tabs << link_to(:show_description_clone.t,
-                new_object_path(desc.parent_id, clone: desc.id,
-                  q: get_query_param, help: :show_description_clone_help.l))
+                      new_object_path(desc.parent_id, clone: desc.id,
+                        q: get_query_param),
+                      help: :show_description_clone_help.l)
+    end
+    # TODO NIMMO fix these with send like object_path
+    if admin
+      tabs << link_to(:show_description_merge.t,
+                      object_action_path(desc, :merge_descriptions,
+                        q: get_query_param),
+                      help: :show_description_merge_help.l)
     end
     if admin
-      tabs << link_with_query(:show_description_merge.t,
-                              action: :merge_descriptions,
-                              id: desc.id,
-                              help: :show_description_merge_help.l)
-    end
-    if admin
-      tabs << link_with_query(:show_description_adjust_permissions.t,
-                              action: :adjust_permissions,
-                              id: @description.id,
-                              help: :show_description_adjust_permissions_help.l)
+      tabs << link_to(:show_description_adjust_permissions.t,
+                      object_action_path(@description,
+                        :adjust_permissions, q: get_query_param),
+                      help: :show_description_adjust_permissions_help.l)
     end
     if desc.public && @user && (desc.parent.description_id != desc.id)
-      tabs << link_with_query(:show_description_make_default.t,
-                              action: :make_description_default,
-                              id: desc.id,
-                              help: :show_description_make_default_help.l)
+      tabs << link_to(:show_description_make_default.t,
+                      object_action_path(desc,
+                        :make_description_default, q: get_query_param),
+                      help: :show_description_make_default_help.l)
     end
     if (desc.source_type == :project) &&
        (project = desc.source_object)
-      tabs << link_with_query(:show_object.t(type: :project),
-                              project.show_link_args)
+      tabs << link_to(:show_object.t(type: :project),
+                      project_path(project.id))
     end
     if admin && (desc.source_type != :public)
-      tabs << link_with_query(:show_description_publish.t,
-                              action: :publish_description,
-                              id: desc.id,
-                              help: :show_description_publish_help.l)
+      tabs << link_to(:show_description_publish.t,
+                      object_action_path(desc, :publish_description,
+                        q: get_query_param),
+                      help: :show_description_publish_help.l)
     end
     tabs
   end
@@ -81,9 +83,8 @@ module DescriptionHelper
     title = description_title(desc)
     links = []
     if is_writer?(desc)
-      links << link_with_query(:EDIT.t,
-                               action: :edit,
-                               id: desc.id)
+      links << link_to(:EDIT.t,
+                       edit_object_path(desc, q: get_query_param))
     end
     if is_admin?(desc)
       links << link_with_query(:DESTROY.t,

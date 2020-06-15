@@ -105,7 +105,9 @@ class Description < AbstractModel
   def parent_type
     # type_tag.to_s.sub("_description", "")
     # Note parent will need to be module_parent in Rails 6
-    self.class.parent.to_s.downcase.sub("::", "_")
+    # Could use self.class.model_name.singular, probably better!
+    # self.class.parent.to_s.downcase.sub("::", "_")
+    self.class.model_name.singular
   end
 
   # Shorthand for "public && public_write"

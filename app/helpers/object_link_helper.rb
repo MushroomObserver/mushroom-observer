@@ -149,20 +149,45 @@ module ObjectLinkHelper
   # - code permits different classes of objects, e.g., @back_object
   # - can save space: object_path(@project) vs project_path(@project.id)
   # - can accept params: object_path(@project, q: get_query_param)
+  def object_route_s(obj)
+    obj.model_name.singular_route_key
+  end
+
+  def object_route_p(obj)
+    obj.model_name.route_key
+  end
+
   def object_path(obj, params = Hash.new)
+    objroute = object_route_s(obj)
     params[:id] = obj.id
-    send("#{obj.class.name.downcase.singularize}_path", params)
+    send("#{objroute}_path", params)
   end
 
   def edit_object_path(obj, params = Hash.new)
+    objroute = object_route_s(obj)
     params[:id] = obj.id
-    send("edit_#{obj.class.name.downcase.singularize}_path", params)
+    send("edit_#{objroute}_path", params)
   end
 
   def new_object_path(obj, params = Hash.new)
+    objroute = object_route_s(obj)
     params[:id] = obj.id
-    send("new_#{obj.class.name.downcase.singularize}_path", params)
+    send("new_#{objroute}_path", params)
   end
+
+  def object_action_path(obj, action, params = Hash.new)
+    objroute = object_route_p(obj)
+    params[:id] = obj.id
+    send("#{route}_#{action.to_s}_path", params)
+  end
+
+  # Unnecessary, route is already namespaced.
+  # def namespace_object_action_path(obj, action, params = Hash.new)
+  #   namespace = obj.parent_type
+  #   objroute = object_route_p(obj)
+  #   params[:id] = obj.id
+  #   send("#{namespace}_#{objroute}_#{action.to_s}_path", params)
+  # end
 
   # Wrap description title in link to show_description.
   #
