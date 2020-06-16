@@ -12,15 +12,15 @@ class Locations::DescriptionsController < ApplicationController
     :index,
     :index_location_description,
     :list_location_descriptions, # aliased
-    :location_descriptions_by_author,
-    :location_descriptions_by_editor,
+    :index_by_author,
+    :index_by_editor,
     :next_location_description, # aliased
     :prev_location_description, # aliased
     :show,
     :show_location_description, # aliased
     :show_next,
     :show_prev,
-    :show_past_location_description
+    :show_past
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -30,7 +30,7 @@ class Locations::DescriptionsController < ApplicationController
     :new,
     :show,
     :show_location_description, # aliased
-    :show_past_location_description
+    :show_past
   ]
 
   before_action :require_successful_user, only: [
@@ -61,7 +61,7 @@ class Locations::DescriptionsController < ApplicationController
   alias_method :list_location_descriptions, :index
 
   # Display list of location_descriptions that a given user is author on.
-  def location_descriptions_by_author
+  def index_by_author
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -70,7 +70,7 @@ class Locations::DescriptionsController < ApplicationController
   end
 
   # Display list of location_descriptions that a given user is editor on.
-  def location_descriptions_by_editor
+  def index_by_editor
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -160,7 +160,7 @@ class Locations::DescriptionsController < ApplicationController
 
   # Show past version of LocationDescription.  Accessible only from
   # show_location_description page.
-  def show_past_location_description
+  def show_past
     store_location
     pass_query_params
     @description = find_or_goto_index(Location::Description, params[:id].to_s)

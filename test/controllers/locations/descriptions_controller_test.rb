@@ -4,37 +4,40 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
 
   fixtures 'locations'
 
-  def test_list_location_descriptions
+  def test_index
     login("mary")
     burbank = locations(:burbank)
     burbank.description = Location::Description.create!(
       location_id: burbank.id,
       source_type: "public"
     )
-    get_with_dump(:index)
+    get_with_dump location_descriptions_path
     assert_template("index")
   end
 
-  def test_location_descriptions_by_author
+  def test_index_by_author
     descs = Location::Description.all
     desc = location_descriptions(:albion_desc)
-    get_with_dump(:location_descriptions_by_author, id: rolf.id)
+    get_with_dump location_descriptions_index_by_author_path(
+      id: rolf.id)
     assert_redirected_to(
-      %r{/locations/show_location_description/#{desc.id}}
+      %r{/locations/#{desc.location_id}/descriptions/#{desc.id}}
     )
   end
 
-  def test_location_descriptions_by_editor
-    get_with_dump(:location_descriptions_by_editor, id: rolf.id)
+  def test_index_by_editor
+    get_with_dump location_descriptions_index_by_editor_path(
+      id: rolf.id)
     assert_template(:index)
   end
 
-  def test_show_location_description
+  def test_show
     # happy path
     desc = location_descriptions(:albion_desc)
-    get_with_dump location_description_path(location_id: desc.location_id, id: desc.id)
+    get_with_dump location_description_path(location_id: desc.location_id,
+      id: desc.id)
     assert_template "show"
-    # assert_template partial: "locations/descriptions/_location_description"
+    assert_template partial: "locations/descriptions/_location_description"
     # assert_response :success
 
     # Unhappy paths
@@ -42,31 +45,28 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
 
     # description is private and belongs to a project
     desc = location_descriptions(:bolete_project_private_location_desc)
-    get_with_dump(:show, location_id: desc.location_id, id: desc.id)
+    get_with_dump location_description_path(location_id: desc.location_id,
+      id: desc.id)
     assert_flash_error
-    assert_redirected_to(
-      controller: "/projects",
-      action: :show,
-      id: desc.project.id
-    )
+    assert_redirected_to(project_path(id: desc.project.id))
 
     # description is private, for a project, project doesn't exist
     # but project doesn't exist
     desc = location_descriptions(:non_ex_project_private_location_desc)
-    get_with_dump(:show, location_id: desc.location_id, id: desc.id)
+    get_with_dump location_description_path(location_id: desc.location_id,
+      id: desc.id)
     assert_flash_error
-    assert_redirected_to(controller: "/locations", action: :show,
-                         id: desc.location_id)
+    assert_redirected_to(location_path(id: desc.location_id))
 
     # description is private, not for a project
     desc = location_descriptions(:user_private_location_desc)
-    get_with_dump(:show, location_id: desc.location_id, id: desc.id)
+    get_with_dump location_description_path(location_id: desc.location_id,
+      id: desc.id)
     assert_flash_error
-    assert_redirected_to(controller: "/locations", action: :show,
-                         id: desc.location_id)
+    assert_redirected_to(location_path(id: desc.location_id))
   end
 
-  def test_show_past_location_description
+  def test_show_past
     login("dick")
     desc = location_descriptions(:albion_desc)
     old_versions = desc.versions.length
@@ -74,15 +74,14 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
     desc.reload
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
-    get_with_dump(:show_past_location_description, location_id: desc.location_id, id: desc.id)
-    assert_template(:show_past_location_description,
-                    partial: "_location_description")
+    get_with_dump location_descriptions_show_past_path(
+      location_id: desc.location_id, id: desc.id),
+    assert_template(:show_past, partial: "_location_description")
   end
 
-  # TODO model needs to be moved into subdirectory
   def test_create_location_description
     loc = locations(:albion)
-    requires_login(:new, id: loc.id)
+    requires_login new_location_description_path(id: loc.id)
     assert_form_action(action: :create, id: loc.id)
   end
 
@@ -105,7 +104,8 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
 
     post_requires_login(:create, params)
 
-    assert_redirected_to(action: :show, location_id: loc.id, id: loc.descriptions.last.id)
+    assert_redirected_to(location_description_path(location_id: loc.id,
+      id: loc.descriptions.last.id))
     assert_not_empty(loc.descriptions)
     assert_equal(params[:description][:notes], loc.descriptions.last.notes)
   end
@@ -114,14 +114,15 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
     loc = locations(:albion)
     user = login(users(:spammer).name)
     assert_false(user.is_successful_contributor?)
-    get_with_dump(:new, id: loc.id)
+    get_with_dump new_location_description_path(id: loc.id)
     assert_response(:redirect)
   end
 
   # TODO model needs to be moved into subdirectory
   def test_edit_location_description
     desc = location_descriptions(:albion_desc)
-    requires_login(:edit, location_id: desc.location_id, id: desc.id)
+    requires_login(edit_location_description_path(location_id: desc.location_id,
+      id: desc.id))
     assert_form_action(action: :edit, id: desc.id)
   end
 
@@ -145,9 +146,7 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
 
     post_requires_login(:edit, params)
 
-    assert_redirected_to(controller: :locations,
-                         action: :show,
-                         id: loc.descriptions.last.id)
+    assert_redirected_to(location_path(id: loc.descriptions.last.id))
     assert_not_empty(loc.descriptions)
     assert_equal(params[:description][:notes], loc.descriptions.last.notes)
   end

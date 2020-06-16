@@ -735,9 +735,9 @@ MushroomObserver::Application.routes.draw do
 
   LD_GET_ACTIONS = {
     index_location_description: {},
-    location_descriptions_by_author: {},
-    location_descriptions_by_editor: {},
-    show_past_location_description: {},
+    index_by_author: {},
+    index_by_editor: {},
+    show_past: {},
     show_next: {},
     show_prev: {}
   }
