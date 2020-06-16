@@ -210,7 +210,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that post keeps query params intact.
     post(:create, params)
-    assert_redirected_to("#{observations_path}/#{obs.id}?q=#{q}")
+    assert_redirected_to(observation_path(obs.id, q: q))
   end
 
   def test_edit
