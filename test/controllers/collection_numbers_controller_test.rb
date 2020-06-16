@@ -257,25 +257,25 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  69-abc <spam>  "
     }
 
-    post(:edit, id: number.id, collection_number: params)
+    patch(:update, id: number.id, collection_number: params)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:edit, id: number.id, collection_number: params)
+    patch(:update, id: number.id, collection_number: params)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:edit, id: number.id,
+    patch(:update, id: number.id,
                                   collection_number: params.merge(name: ""))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    post(:edit, id: number.id,
+    patch(:update, id: number.id,
                                   collection_number: params.merge(number: ""))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    post(:edit, id: number.id, collection_number: params)
+    patch(:update, id: number.id, collection_number: params)
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
@@ -286,7 +286,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
-    post(:edit, id: number.id, collection_number: params)
+    patch(:update, id: number.id, collection_number: params)
     assert_no_flash
   end
 
@@ -306,7 +306,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: num1.number
     }
     login("rolf")
-    post(:edit, id: num2.id, collection_number: params)
+    patch(:update, id: num2.id, collection_number: params)
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
@@ -333,20 +333,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       collection_number: { name: num.name, number: num.number }
     }
 
-    # Prove that GET passes "back" and query param through to form.
+    # Prove that edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
     assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
 
-    # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(back: obs.id, q: q))
+    # Prove that update keeps query param when returning to observation.
+    patch(:update, params.merge(back: obs.id, q: q))
     assert_redirected_to(obs.show_link_args.merge(q: q))
 
-    # Prove that POST can return to show with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    # Prove that update can return to show with query intact.
+    patch(:update, params.merge(back: "show", q: q))
     assert_redirected_to(num.show_link_args.merge(q: q))
 
-    # Prove that POST can return to index_collection_number with query intact.
-    post(:edit, params.merge(back: "index", q: q))
+    # Prove that update can return to index_collection_number with query intact.
+    patch(:update, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_collection_number, id: num.id, q: q)
   end
 
