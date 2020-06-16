@@ -265,7 +265,7 @@ class CollectionNumbersController < ApplicationController
     return true if collection_number.can_edit? || in_admin_mode?
 
     flash_error(:permission_denied.t)
-    redirect_to(collection_number.show_link_args)
+    redirect_to(collection_number_path(collection_number.id))
     false
   end
 

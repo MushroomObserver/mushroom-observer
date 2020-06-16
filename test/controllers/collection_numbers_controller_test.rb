@@ -366,7 +366,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:remove_observation, id: num1.id, obs: obs1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
-    # Make sure only owner obs can remove num from it.
+    # Make sure only obs's owner can remove num from it.
     login("mary")
     get(:remove_observation, id: num1.id, obs: obs1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
