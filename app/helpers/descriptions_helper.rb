@@ -11,59 +11,59 @@ module DescriptionsHelper
 
   # Create tabs for show_description page.
   def show_description_tab_set(desc)
-    type = desc.type_tag.to_s.sub(/_description/, "").to_sym
-    admin = is_admin?(desc)
-    tabs = []
-    if true
-      tabs << link_to(:show_object.t(type: type),
-                      object_path(id: desc.parent_id, q: get_query_param))
-    end
-    if is_writer?(desc)
-      tabs << link_to(:show_description_edit.t,
-                      edit_object_path(desc.parent_id, desc.id, q: get_query_param))
-    end
-    if admin
-      tabs << link_to(:show_description_destroy.t,
-                      object_path(desc.parent_id, desc.id, q: get_query_param,
-                        method: "DELETE"),
-                      data: { confirm: :are_you_sure.l })
-    end
-    if true
-      tabs << link_to(:show_description_clone.t,
-                      new_object_path(desc.parent_id, clone: desc.id,
-                        q: get_query_param),
-                      help: :show_description_clone_help.l)
-    end
-    if admin
-      tabs << link_to(:show_description_merge.t,
-                      object_action_path(desc, :merge_descriptions,
-                        q: get_query_param),
-                      help: :show_description_merge_help.l)
-    end
-    if admin
-      tabs << link_to(:show_description_adjust_permissions.t,
-                      object_action_path(@description,
-                        :adjust_permissions, q: get_query_param),
-                      help: :show_description_adjust_permissions_help.l)
-    end
-    if desc.public && @user && (desc.parent.description_id != desc.id)
-      tabs << link_to(:show_description_make_default.t,
-                      object_action_path(desc,
-                        :make_description_default, q: get_query_param),
-                      help: :show_description_make_default_help.l)
-    end
-    if (desc.source_type == :project) &&
-       (project = desc.source_object)
-      tabs << link_to(:show_object.t(type: :project),
-                      project_path(project.id))
-    end
-    if admin && (desc.source_type != :public)
-      tabs << link_to(:show_description_publish.t,
-                      object_action_path(desc, :publish_description,
-                        q: get_query_param),
-                      help: :show_description_publish_help.l)
-    end
-    tabs
+    # type = desc.type_tag.to_s.sub(/_description/, "").to_sym
+    # admin = is_admin?(desc)
+    # tabs = []
+    # if true
+    #   tabs << link_to(:show_object.t(type: type),
+    #                   object_path(id: desc.parent_id, q: get_query_param))
+    # end
+    # if is_writer?(desc)
+    #   tabs << link_to(:show_description_edit.t,
+    #                   edit_object_path(desc.parent_id, desc.id, q: get_query_param))
+    # end
+    # if admin
+    #   tabs << link_to(:show_description_destroy.t,
+    #                   object_path(desc.parent_id, desc.id, q: get_query_param,
+    #                     method: "DELETE"),
+    #                   data: { confirm: :are_you_sure.l })
+    # end
+    # if true
+    #   tabs << link_to(:show_description_clone.t,
+    #                   new_object_path(desc.parent_id, clone: desc.id,
+    #                     q: get_query_param),
+    #                   help: :show_description_clone_help.l)
+    # end
+    # if admin
+    #   tabs << link_to(:show_description_merge.t,
+    #                   object_action_path(desc, :merge_descriptions,
+    #                     q: get_query_param),
+    #                   help: :show_description_merge_help.l)
+    # end
+    # if admin
+    #   tabs << link_to(:show_description_adjust_permissions.t,
+    #                   object_action_path(@description,
+    #                     :adjust_permissions, q: get_query_param),
+    #                   help: :show_description_adjust_permissions_help.l)
+    # end
+    # if desc.public && @user && (desc.parent.description_id != desc.id)
+    #   tabs << link_to(:show_description_make_default.t,
+    #                   object_action_path(desc,
+    #                     :make_description_default, q: get_query_param),
+    #                   help: :show_description_make_default_help.l)
+    # end
+    # if (desc.source_type == :project) &&
+    #    (project = desc.source_object)
+    #   tabs << link_to(:show_object.t(type: :project),
+    #                   project_path(project.id))
+    # end
+    # if admin && (desc.source_type != :public)
+    #   tabs << link_to(:show_description_publish.t,
+    #                   object_action_path(desc, :publish_description,
+    #                     q: get_query_param),
+    #                   help: :show_description_publish_help.l)
+    # end
+    # tabs
   end
 
   # Header of the embedded description within a show_object page.
@@ -86,7 +86,7 @@ module DescriptionsHelper
                        object_path(desc, q: get_query_param, method: "DELETE"),
                        data: { confirm: :are_you_sure.l })
     end
-    tag.p tag.big title + links.safe_join(" | "))
+    tag.p tag.big title + links.safe_join(" | ")
   end
 
   # Show list of name/location descriptions.

@@ -32,9 +32,10 @@ class Locations::DescriptionsControllerTest < FunctionalTestCase
   def test_show_location_description
     # happy path
     desc = location_descriptions(:albion_desc)
-    get_with_dump(:show, location_id: desc.location_id, id: desc.id)
-    assert_template partial: "_show_description"
-    assert_template partial: "_location_description"
+    get_with_dump location_description_path(location_id: desc.location_id, id: desc.id)
+    assert_template "show"
+    # assert_template partial: "locations/descriptions/_location_description"
+    # assert_response :success
 
     # Unhappy paths
     # Prove they flash an error and redirect to the appropriate page

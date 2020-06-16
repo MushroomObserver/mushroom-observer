@@ -12,7 +12,7 @@
 #
 ################################################################################
 
-class FunctionalTestCase < ActionController::TestCase
+class FunctionalTestCase < ActionDispatch::IntegrationTest
   include GeneralExtensions
   include FlashExtensions
   include ControllerExtensions
@@ -46,11 +46,11 @@ class FunctionalTestCase < ActionController::TestCase
   #   check_for_unsafe_html!
   # end
 
-  def check_for_params(args)
-    return args if (args.length < 2) || args[1][:params]
-
-    [args[0], { params: args[1] }] + args[2..]
-  end
+  # def check_for_params(args)
+  #   return args if (args.length < 2) || args[1][:params]
+  #
+  #   [args[0], { params: args[1] }] + args[2..]
+  # end
 
   def extract_body(args)
     if args.length >= 2
