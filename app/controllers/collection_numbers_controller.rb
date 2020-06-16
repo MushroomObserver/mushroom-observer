@@ -135,6 +135,11 @@ class CollectionNumbersController < ApplicationController
     store_location
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
+
     save_edits
   end
 
@@ -300,7 +305,7 @@ class CollectionNumbersController < ApplicationController
     if @back_object
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
-      redirect_to collection_number_index_collection_number_path(
+      redirect_to collection_numbers_index_collection_number_path(
         @collection_number.id,
         q: get_query_param
       )

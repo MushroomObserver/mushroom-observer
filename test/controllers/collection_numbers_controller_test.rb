@@ -257,25 +257,26 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: "  69-abc <spam>  "
     }
 
-    patch(:update, id: number.id, collection_number: params)
+    patch(:update, params: { id: number.id, collection_number: params })
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    patch(:update, id: number.id, collection_number: params)
+    patch(:update, params: { id: number.id, collection_number: params })
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    patch(:update, id: number.id,
-                                  collection_number: params.merge(name: ""))
+    patch(:update,
+          params: { id: number.id, collection_number: params.merge(name: "") })
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    patch(:update, id: number.id,
-                                  collection_number: params.merge(number: ""))
+    patch(:update,
+          params: { id: number.id,
+                    collection_number: params.merge(number: "") })
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    patch(:update, id: number.id, collection_number: params)
+    patch(:update, params: { id: number.id, collection_number: params })
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
@@ -286,7 +287,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
-    patch(:update, id: number.id, collection_number: params)
+    patch(:update, params: { id: number.id, collection_number: params })
     assert_no_flash
   end
 
@@ -306,7 +307,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: num1.number
     }
     login("rolf")
-    patch(:update, id: num2.id, collection_number: params)
+    patch(:update, params: { id: number.id, collection_number: params })
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
