@@ -450,28 +450,28 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_obj_list_equal([num1, num2], obs2.reload.collection_numbers, :sort)
 
     # Make sure user must be logged in.
-    get(:destroy, id: num1.id)
+    delete(:destroy, id: num1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure only owner obs can destroy num from it.
     login("mary")
-    get(:destroy, id: num1.id)
+    delete(:destroy, id: num1.id)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
-    get(:destroy, id: "bogus")
+    delete(:destroy, id: "bogus")
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
     # Owner can destroy it.
-    get(:destroy, id: num1.id)
+    delete(:destroy, id: num1.id)
     assert_empty(obs1.reload.collection_numbers)
     assert_obj_list_equal([num2], obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
 
     # Admin can destroy it.
     make_admin("mary")
-    get(:destroy, id: num2.id)
+    delete(:destroy, id: num2.id)
     assert_empty(obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num2.id))
@@ -486,11 +486,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(nums.length, :>, 1)
 
     # Prove by default it goes back to index.
-    post(:destroy, id: nums[0].id)
+    delete(:destroy, id: nums[0].id)
     assert_redirected_to(action: :index_collection_number)
 
     # Prove that it keeps query param intact when returning to index.
-    post(:destroy, id: nums[1].id, q: q)
+    delete(:destroy, id: nums[1].id, q: q)
     assert_redirected_to(action: :index_collection_number, q: q)
   end
 end
