@@ -2,12 +2,11 @@
   @title ||= :edit_name_description_title.t(name: @description.format_name)
 
   tabs = [
-    link_with_query(:show_object.t(type: :name),
-                    action: :show,
-                    id: @description.name_id),
-    link_with_query(:cancel_and_show.t(type: :name_description),
-                    action: :show,
-                    id: @description.id)
+    link_to(:show_object.t(type: :name),
+            name_path(@description.name_id, q: get_query_param)),
+    link_to(:cancel_and_show.t(type: :name_description),
+            name_description_path(name_id: @description.name_id,
+              id: @description.id, q: get_query_param))
   ]
   if @description.is_admin?(@user) || in_admin_mode?
     tabs += [
@@ -20,4 +19,4 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "form", locals: { button_name: :SAVE_EDITS.l } %>
+<%= render "names/form", button_name: :SAVE_EDITS.l %>

@@ -4,7 +4,8 @@
 #  = Description Controller Helpers
 #
 #  This is a module that is included by all controllers that deal with
-#  descriptions.  (Just LocationController and NameController right now.)
+#  descriptions.  (Just Locations::DescriptionsController and
+#  Names::DescriptionsController right now.)
 #
 #  == Actions
 #   L = login required
@@ -41,7 +42,7 @@
 #
 ################################################################################
 
-module DescriptionControllerHelpers
+module Descriptions
 
   extend ActiveSupport::Concern
 

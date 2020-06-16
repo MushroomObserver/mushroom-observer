@@ -19,16 +19,16 @@
   end
 
   tabs = [
-    link_with_query(:comment_show_show.t(type: target_type),
-                    @target.show_link_args)
+    link_to(:comment_show_show.t(type: target_type),
+            object_path(@target, q: get_query_param))
   ]
   if check_permission(@comment)
     tabs += [
-      link_with_query(:comment_show_edit.t, controller: :comments,
-                            action: :edit, id: @comment.id),
-      link_with_query(:comment_show_destroy.t, {controller: :comments,
-                            action: :destroy, id: @comment.id},
-                            data: {confirm: :are_you_sure.l})
+      link_to(:comment_show_edit.t,
+              edit_comment_path(@comment.id, q: get_query_param)),
+      link_to(:comment_show_destroy.t,
+              comment_path(@comment.id, q: get_query_param, method: "DELETE"),
+              data: { confirm: :are_you_sure.l })
     ]
   end
   @tabsets = {

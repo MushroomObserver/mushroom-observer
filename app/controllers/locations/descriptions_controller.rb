@@ -6,7 +6,7 @@
 # Location controller.
 class Locations::DescriptionsController < ApplicationController
 
-  include DescriptionControllerHelpers
+  include Descriptions
 
   before_action :login_required, except: [
     :index,

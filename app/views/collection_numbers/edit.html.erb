@@ -3,11 +3,12 @@
 
   tabs = []
   if @back == "index"
-    tabs << link_with_query(:edit_collection_number_back_to_index.t,
-                            action: :index_collection_number)
+    tabs << link_to(:edit_collection_number_back_to_index.t,
+                    collection_numbers_index_collection_number_path(
+                      q: get_query_param))
   else
-    tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
-                            @back_object.show_link_args)
+    tabs << link_to(:cancel_and_show.t(type: @back_object.type_tag),
+                    object_path(@back_object, q: get_query_param))
   end
 
   @tabsets = { right: draw_tab_set(tabs) }
@@ -15,12 +16,12 @@
 
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
-    <%= render "form", locals: { button: :SAVE } %>
+    <%= render "collection_numbers/form", button: :SAVE %>
   </div>
 
   <div class="col-12 col-sm-5 max-width-text">
     <% @collection_number.observations.each do |obs| %>
-      <%= render "shared/log_item", locals: { object: obs.rss_log } %>
+      <%= render "shared/log_item", object: obs.rss_log %>
     <% end %>
   </div>
 </div>

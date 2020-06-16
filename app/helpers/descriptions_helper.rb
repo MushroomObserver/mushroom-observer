@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-# FIXME: NIMMO check actions of pattern "edit_#{type}_description" in case of
-# controllers/concerns refactor for Location::Description and NameDescription
-# also abstract_model.rb line 345 - define controller name for
-# namespaced controllers?
-module DescriptionHelper
+module DescriptionsHelper
   def is_writer?(desc)
     desc.is_writer?(@user) || in_admin_mode?
   end
@@ -38,7 +34,6 @@ module DescriptionHelper
                         q: get_query_param),
                       help: :show_description_clone_help.l)
     end
-    # TODO NIMMO fix these with send like object_path
     if admin
       tabs << link_to(:show_description_merge.t,
                       object_action_path(desc, :merge_descriptions,
@@ -87,12 +82,11 @@ module DescriptionHelper
                        edit_object_path(desc, q: get_query_param))
     end
     if is_admin?(desc)
-      links << link_with_query(:DESTROY.t,
-                               { action: :destroy,
-                                 id: desc.id },
-                               data: { confirm: :are_you_sure.l })
+      links << link_to(:DESTROY.t,
+                       object_path(desc, q: get_query_param, method: "DELETE"),
+                       data: { confirm: :are_you_sure.l })
     end
-    content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
+    tag.p tag.big title + links.safe_join(" | "))
   end
 
   # Show list of name/location descriptions.
@@ -128,17 +122,14 @@ module DescriptionHelper
       if writer || admin
         links = []
         if writer
-          links << link_with_query(:EDIT.t,
-                                   controller: desc.show_controller,
-                                   action: :edit,
-                                   id: desc.id)
+          links << link_to(:EDIT.t,
+                           edit_object_path(desc, q: get_query_param))
         end
         if admin
-          links << link_with_query(:DESTROY.t,
-                                   { controller: desc.show_controller,
-                                     action: :destroy,
-                                     id: desc.id },
-                                   data: { confirm: :are_you_sure.t })
+          links << link_to(:DESTROY.t,
+                           object_path(desc, q: get_query_param,
+                             method: "DELETE"),
+                           data: { confirm: :are_you_sure.l })
         end
         item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
       end
@@ -148,9 +139,7 @@ module DescriptionHelper
     # Add "fake" default public description if there aren't any public ones.
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
-      link = link_with_query(:CREATE.t, controller: "#{obj.show_controller}/descriptions",
-                                        action: :new,
-                                        id: obj.id)
+      link = link_to(:CREATE.t, new_object_path(obj, q: get_query_param))
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
@@ -180,11 +169,9 @@ module DescriptionHelper
     type = obj.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = content_tag(:b, :show_name_descriptions.t) + ": "
-    head += link_with_query(:show_name_create_description.t,
-                            controller: "#{obj.show_controller}/descriptions",
-                            action: :create,
-                            id: obj.id)
+    head = tag.b :show_name_descriptions.t + ": "
+    head += link_to(:show_name_create_description.t,
+                    new_object_path(obj, q: get_query_param))
     any = false
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
@@ -193,21 +180,19 @@ module DescriptionHelper
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t unless any
     html = list.safe_join(safe_br)
-    html = content_tag(:p, html)
+    html = tag.p html
 
     # Show list of projects user is a member of.
     if projects.present?
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
-        item = link_with_query(project.title,
-                               action: "create_#{type}_description",
-                               id: obj.id,
-                               project: project.id,
-                               source: "project")
+        item = link_to(project.title,
+                       new_object_path(obj, q: get_query_param,
+                         project: project.id, source: "project"))
         indent + item
       end
       html2 = list.safe_join(safe_br)
-      html += content_tag(:p, html2)
+      html += tag.p html2
     end
     html
   end
@@ -228,7 +213,7 @@ module DescriptionHelper
       "p-2",
       "border-all"
     ].join(" ")
-    result = content_tag(:div, msg, class: klass)
+    result = tag.div msg, class: klass
     if block_given?
       concat(result)
     else
@@ -258,12 +243,7 @@ module DescriptionHelper
 
   def name_section_link(title, data, query)
     if data && data != 0
-      action = {
-        controller: "/observations",
-        action: :index_observation
-      }
-      url = add_query_param(action, query)
-      content_tag(:p, link_to(title, url))
+      tag.p link_to(title, observations_path(q: query))
     end
   end
 end

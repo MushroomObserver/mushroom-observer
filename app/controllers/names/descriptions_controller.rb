@@ -32,7 +32,7 @@
 
 class Names::DescriptionsController < ApplicationController
 
-  include DescriptionControllerHelpers
+  include Descriptions
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another

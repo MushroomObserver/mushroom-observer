@@ -714,9 +714,11 @@ MushroomObserver::Application.routes.draw do
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"
 
-  resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
+  resources :articles, :collection_numbers, :comments, :herbaria,
     :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
+
+  resources :glossary, as: "glossary_terms"
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
   resources :locations do
@@ -740,10 +742,10 @@ MushroomObserver::Application.routes.draw do
     show_prev: {}
   }
 
-  # FIXME: NIMMO make the path be like "location_descriptions_action_path",
+  # Note: this makes the path be like "location_descriptions_action_path",
   # otherwise the controller name gives "locations_descriptions_action_path"
   # which does not match the nested resources paths
-  # FIXME: NIMMO simplify action names in controllers!
+  # TODO: NIMMO simplify action names in controllers!
   LD_GET_POST_ACTIONS.each_key do |action|
     match "locations(/:location_id)/descriptions(/:id)/#{action}",
           controller: "locations/descriptions",
