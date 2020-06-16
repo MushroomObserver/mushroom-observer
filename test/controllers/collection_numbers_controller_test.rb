@@ -336,19 +336,22 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
+    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
+    assert_select("form:match('action', ?)", /\?.*back=foo/)
 
     # Prove that update keeps query param when returning to observation.
-    patch(:update, params.merge(back: obs.id, q: q))
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    patch(:update, params: params.merge(back: obs.id, q: q))
+    assert_redirected_to(observation_path(obs.id, q: q))
 
     # Prove that update can return to show with query intact.
-    patch(:update, params.merge(back: "show", q: q))
-    assert_redirected_to(num.show_link_args.merge(q: q))
+    patch(:update, params: params.merge(back: "show", q: q))
+    assert_redirected_to(collection_number_path(num.id, q: q))
 
     # Prove that update can return to index_collection_number with query intact.
-    patch(:update, params.merge(back: "index", q: q))
-    assert_redirected_to(action: :index_collection_number, id: num.id, q: q)
+    patch(:update, params: params.merge(back: "index", q: q))
+    assert_redirected_to(
+      collection_numbers_index_collection_number_path(id: num.id, q: q)
+    )
   end
 
   def test_remove_observation

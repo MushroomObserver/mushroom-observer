@@ -306,7 +306,7 @@ class CollectionNumbersController < ApplicationController
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
       redirect_to collection_numbers_index_collection_number_path(
-        @collection_number.id,
+        id: @collection_number.id,
         q: get_query_param
       )
     end
