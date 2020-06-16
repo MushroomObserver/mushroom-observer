@@ -69,7 +69,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get_with_dump(:show, id: number.id)
   end
 
-  def test_show_next_and_prev
+  def test_show_next
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
@@ -78,6 +78,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     get(:show_next, id: number1.id, q: q)
     assert_redirected_to(action: :show, id: number2.id, q: q)
+  end
+
+  def test_show_prev
+    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
 
     get(:show_prev, id: number2.id, q: q)
     assert_redirected_to(action: :show, id: number1.id, q: q)
