@@ -412,7 +412,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Prove that it keeps query param intact when returning to observation.
     post(:remove_observation, id: nums[1].id, obs: obs.id, q: q)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs.id, q: q))
   end
 
   def test_destroy
