@@ -206,7 +206,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='numbers/#{obs.id}?q=#{q}']")
+    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
 
     # Prove that post keeps query params intact.
     post(:create, params)
