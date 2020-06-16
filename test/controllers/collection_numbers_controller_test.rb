@@ -104,6 +104,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     make_admin("mary")
     get(:new, id: obs.id)
     assert_response(:success)
+
+  end
+
+  def test_new_redirect
+    obs = observations(:coprinus_comatus_obs)
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q = query.id.alphabetize
+    params = {
+      id: obs.id,
+      collection_number: { name: "John Doe", number: "31415" },
+      q: q
+    }
+
+    # Prove that query params are added to form action.
+    login(obs.user.login)
+    get(:new, params)
+    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
   end
 
   def test_create
@@ -193,7 +210,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_includes(number.observations, obs2)
   end
 
-  def test_make_redirect
+  def test_create_redirect
     obs = observations(:coprinus_comatus_obs)
     query = Query.lookup_and_save(:CollectionNumber, :all)
     q = query.id.alphabetize
@@ -203,12 +220,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       q: q
     }
 
-    # Prove that query params are added to form action.
-    login(obs.user.login)
-    get(:new, params)
-    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
-
     # Prove that post keeps query params intact.
+    login(obs.user.login)
     post(:create, params)
     assert_redirected_to(observation_path(obs.id, q: q))
   end
