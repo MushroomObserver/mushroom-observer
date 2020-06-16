@@ -307,7 +307,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       number: num1.number
     }
     login("rolf")
-    patch(:update, params: { id: number.id, collection_number: params })
+    patch(:update, params: { id: num2.id, collection_number: params })
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
