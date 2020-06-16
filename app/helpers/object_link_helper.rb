@@ -228,12 +228,33 @@ module ObjectLinkHelper
     end
   end
 
-  # Output path helper. Useful when:
+  # Output path helpers. Useful when:
   # - code permits different classes of objects, e.g., @back_object
   # - can save space: object_path(@project) vs project_path(@project.id)
   # - can accept params: object_path(@project, q: get_query_param)
   def object_path(obj, params = {})
+    objroute = object_route_s(obj)
     params[:id] = obj.id
-    send("#{obj.class.name.downcase.singularize}_path", params)
+    send("#{objroute}_path", params)
+  end
+
+  def edit_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("edit_#{objroute}_path", params)
+  end
+
+  def new_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("new_#{objroute}_path", params)
+  end
+
+  def object_route_s(obj)
+    obj.model_name.singular_route_key
+  end
+
+  def object_route_p(obj)
+    obj.model_name.route_key
   end
 end
