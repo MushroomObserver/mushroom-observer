@@ -248,6 +248,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_edit_redirect
+    obs   = observations(:detailed_unknown_obs)
+    num   = obs.collection_numbers.first
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    params = {
+      id: num.id,
+      collection_number: { name: num.name, number: num.number }
+    }
+
+    # Prove that edit passes "back" and query param through to form.
+    get(:edit, params.merge(back: "foo", q: q))
+    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
+    assert_select("form:match('action', ?)", /\?.*back=foo/)
+  end
+
   def test_update
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
@@ -336,7 +353,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     )
   end
 
-  def test_change_redirect
+  def test_update_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
     query = Query.lookup_and_save(:CollectionNumber, :all)
@@ -346,11 +363,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
       id: num.id,
       collection_number: { name: num.name, number: num.number }
     }
-
-    # Prove that edit passes "back" and query param through to form.
-    get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
-    assert_select("form:match('action', ?)", /\?.*back=foo/)
 
     # Prove that update keeps query param when returning to observation.
     patch(:update, params: params.merge(back: obs.id, q: q))
