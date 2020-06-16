@@ -32,7 +32,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_search
+  def test_collection_number_search
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
     get(:collection_number_search, pattern: "Singer")
@@ -42,7 +42,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_select("tr", numbers.count)
   end
 
-  def test_search_with_one_collection_number_index
+  def test_collection_number_search_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
     get_with_dump(:collection_number_search, pattern: "neighbor")
@@ -52,7 +52,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index_with_query
+  def test_index_collection_number_with_query
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
     get(:index_collection_number, q: query.record.id.alphabetize)
