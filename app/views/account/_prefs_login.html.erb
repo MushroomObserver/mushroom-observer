@@ -1,23 +1,23 @@
  <!-- Login Settings for Account Preferences Form -->
 <div class="form-group mt-3">
-  <%= label_tag(:user_login, :prefs_login.t + ":") %>
-  <%= form.text_field(:login, class: "form-control") %>
+  <%= form.label_tag :login, :prefs_login.t + ":" %>
+  <%= form.text_field :login, class: "form-control" %>
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_email, :prefs_email.t + ":") %>
-  <%= form.text_field(:email, class: "form-control") %>
+  <%= form.label :email, :prefs_email.t + ":" %>
+  <%= form.text_field :email, class: "form-control" %>
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_password, :prefs_password_new.t + ":") %>
-  <%= form.password_field(:password, value: "", class: "form-control") %>
+  <%= form.label :password, :prefs_password_new.t + ":" %>
+  <%= form.password_field :password, value: "", class: "form-control" %>
 </div>
 
 <div class="form-group mt-3">
-  <%= label_tag(:user_password_confirmation, :prefs_password_confirm.t + ":") %>
-  <%= form.password_field(:password_confirmation, value: "",
-                          class: "form-control") %>
+  <%= form.label :password_confirmation, :prefs_password_confirm.t + ":" %>
+  <%= form.password_field :password_confirmation, value: "",
+                          class: "form-control" %>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+<%= form.submit :SAVE_EDITS.l, class: "btn mx-auto mt-3" %>

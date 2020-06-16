@@ -4,86 +4,77 @@
 </div>
 
 <div class="form-group form-inline">
-  <%= form.check_box(:email_html, class: "form-control") %>
-  <%= label_tag(:user_email_html, :prefs_email_html.t) %>
+  <%= form.check_box :email_html, class: "form-control" %>
+  <%= form.label :email_html, :prefs_email_html.t %>
 </div>
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_comments.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
-  <%= form.check_box(:email_comments_owner, class: "form-control") %>
-  <%= label_tag(:user_email_comments_owner,
-                :prefs_email_comments_owner.t) %><br/>
-  <%= form.check_box(:email_comments_response,
-                     class: "form-control") %>
-  <%= label_tag(:user_email_comments_response,
-                :prefs_email_comments_response.t) %><br/>
-  <%= form.check_box(:email_comments_all, class: "form-control") %>
-  <%= label_tag(:user_email_comments_all,
-                :prefs_email_comments_all.t) %><br/>
+  <%= form.check_box :email_comments_owner, class: "form-control" %>
+  <%= form.label :email_comments_owner, :prefs_email_comments_owner.t %><br/>
+  <%= form.check_box :email_comments_response, class: "form-control" %>
+  <%= form.label :email_comments_response,
+                 :prefs_email_comments_response.t %><br/>
+  <%= form.check_box :email_comments_all, class: "form-control" %>
+  <%= form.label :email_comments_all, :prefs_email_comments_all.t %><br/>
 </div>
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_observations.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
-  <%= form.check_box(:email_observations_consensus, class: "form-control") %>
-  <%= label_tag(:user_email_observations_consensus,
-                :prefs_email_observations_consensus.t) %><br/>
-  <%= form.check_box(:email_observations_naming, class: "form-control") %>
-  <%= label_tag(:user_email_observations_naming,
-                :prefs_email_observations_naming.t) %><br/>
-  <%= form.check_box(:email_observations_all, class: "form-control") %>
-  <%= label_tag(:user_email_observations_all,
-                :prefs_email_observations_all.t) %><br/>
+  <%= form.check_box :email_observations_consensus, class: "form-control" %>
+  <%= form.label :email_observations_consensus,
+                 :prefs_email_observations_consensus.t %><br/>
+  <%= form.check_box :email_observations_naming, class: "form-control" %>
+  <%= form.label :email_observations_naming,
+                 :prefs_email_observations_naming.t %><br/>
+  <%= form.check_box :email_observations_all, class: "form-control" %>
+  <%= form.label :email_observations_all,
+                 :prefs_email_observations_all.t %><br/>
 </div>
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_names.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
-  <%= form.check_box(:email_names_admin, class: "form-control") %>
-  <%= label_tag(:user_email_names_admin, :prefs_email_names_admin.t) %><br/>
-  <%= form.check_box(:email_names_author, class: "form-control") %>
-  <%= label_tag(:user_email_names_author,
-                :prefs_email_names_author.t) %><br/>
-  <%= form.check_box(:email_names_editor, class: "form-control") %>
-  <%= label_tag(:user_email_names_editor,
-                :prefs_email_names_editor.t) %><br/>
-  <%= form.check_box(:email_names_reviewer, class: "form-control") %>
-  <%= label_tag(:user_email_names_reviewer,
-                :prefs_email_names_reviewer.t) %><br/>
-  <%= form.check_box(:email_names_all, class: "form-control") %>
-  <%= label_tag(:user_email_names_all, :prefs_email_names_all.t) %><br/>
+  <%= form.check_box :email_names_admin, class: "form-control" %>
+  <%= form.label :email_names_admin, :prefs_email_names_admin.t %><br/>
+  <%= form.check_box :email_names_author, class: "form-control" %>
+  <%= form.label :email_names_author, :prefs_email_names_author.t %><br/>
+  <%= form.check_box :email_names_editor, class: "form-control" %>
+  <%= form.label :email_names_editor, :prefs_email_names_editor.t %><br/>
+  <%= form.check_box :email_names_reviewer, class: "form-control" %>
+  <%= form.label :email_names_reviewer, :prefs_email_names_reviewer.t %><br/>
+  <%= form.check_box :email_names_all, class: "form-control" %>
+  <%= form.label :email_names_all, :prefs_email_names_all.t %><br/>
 </div>
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_locations.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
-  <%= form.check_box(:email_locations_admin, class: "form-control") %>
-  <%= label_tag(:user_email_locations_admin,
-                :prefs_email_locations_admin.t) %><br/>
-  <%= form.check_box(:email_locations_author, class: "form-control") %>
-  <%= label_tag(:user_email_locations_author,
-                :prefs_email_locations_author.t) %><br/>
-  <%= form.check_box(:email_locations_editor, class: "form-control") %>
-  <%= label_tag(:user_email_locations_editor,
-                :prefs_email_locations_editor.t) %><br/>
-  <%= form.check_box(:email_locations_all, class: "form-control") %>
-  <%= label_tag(:user_email_locations_all,
-                :prefs_email_locations_all.t) %><br/>
+  <%= form.check_box :email_locations_admin, class: "form-control" %>
+  <%= form.label :email_locations_admin, :prefs_email_locations_admin.t %><br/>
+  <%= form.check_box :email_locations_author, class: "form-control" %>
+  <%= form.label :email_locations_author,
+                 :prefs_email_locations_author.t %><br/>
+  <%= form.check_box :email_locations_editor, class: "form-control" %>
+  <%= form.label :email_locations_editor,
+                 :prefs_email_locations_editor.t %><br/>
+  <%= form.check_box :email_locations_all, class: "form-control" %>
+  <%= form.label :email_locations_all, :prefs_email_locations_all.t %><br/>
 </div>
 
 <div class="form-group mt-3 form-inline">
   <%= :prefs_email_general.t %>:
   <span class="help-note">(<%= :prefs_email_please_notify.t %>)</span><br/>
-  <%= form.check_box(:email_general_feature, class: "form-control") %>
-  <%= label_tag(:user_email_general_feature,
-                :prefs_email_general_features.t) %><br/>
-  <%= form.check_box(:email_general_commercial, class: "form-control") %>
-  <%= label_tag(:user_email_general_commercial,
-                :prefs_email_general_commercial.t) %><br/>
-  <%= form.check_box(:email_general_question, class: "form-control") %>
-  <%= label_tag(:user_email_general_question,
-                :prefs_email_general_questions.t) %><br/>
+  <%= form.check_box :email_general_feature, class: "form-control" %>
+  <%= form.label :email_general_feature, :prefs_email_general_features.t %><br/>
+  <%= form.check_box :email_general_commercial, class: "form-control" %>
+  <%= form.label :email_general_commercial,
+                 :prefs_email_general_commercial.t %><br/>
+  <%= form.check_box :email_general_question, class: "form-control" %>
+  <%= form.label :email_general_question,
+                 :prefs_email_general_questions.t %><br/>
 </div>
 
 <div class="form-group mt-3 form-inline">
@@ -92,4 +83,4 @@
   </div>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+<%= form.submit :SAVE_EDITS.l, class: "btn mx-auto mt-3" %>

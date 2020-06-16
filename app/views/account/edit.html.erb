@@ -16,30 +16,30 @@
     <%= f.submit :profile_button.l, class: "btn mx-auto mt-3" %>
 
     <div class="form-group mt-3">
-      <%= f.label :user_name, :profile_name.t + ":" %>
+      <%= f.label :name, :profile_name.t + ":" %>
       <%= f.text_field :name, class: "form-control" %>
     </div>
 
     <div class="form-group mt-3">
-      <%= f.label :user_place_name, :profile_location.t + ":" %> (33%)
-      <%= f.text_field :user, :place_name, value: @place_name,
+      <%= f.label :place_name, :profile_location.t + ":" %> (33%)
+      <%= f.text_field :place_name, value: @place_name,
             class: "form-control" %>
       <% turn_into_location_auto_completer("user_place_name") %>
     </div>
 
     <div class="form-group mt-3">
-      <%= f.label :user_notes, :profile_notes.t + ":" %> (33%)
+      <%= f.label :notes, :profile_notes.t + ":" %> (33%)
       <%= f.text_area :notes, rows: 10, class: "form-control" %>
     </div>
 
     <div class="form-group mt-3">
-      <%= f.label(:user_upload_image, (@user.image_id ? \
+      <%= f.label(:upload_image, (@user.image_id ? \
             :profile_image_change.t : :profile_image_create.t)) + ":" %> (33%)
       <%= link_to :profile_image_reuse.t,
                   images_reuse_image_path(mode: :profile) %>
       <%= link_to(:profile_image_remove.t, account_remove_image_path,
                   data: { confirm: :are_you_sure.l }) if @user.image %>
-      <%= f.custom_file_field(:user, :upload_image) %>
+      <%= f.custom_file_field(:upload_image) %>
     </div>
 
     <div class="form-group mt-3">
@@ -66,7 +66,7 @@
     </div>
 
     <div class="form-group mt-3">
-      <%= f.label :user_mailing_address, :profile_mailing_address.t + ":" %>
+      <%= f.label :mailing_address, :profile_mailing_address.t + ":" %>
       <%= f.text_area :mailing_address, rows: 5, class: "form-control" %>
     </div>
 

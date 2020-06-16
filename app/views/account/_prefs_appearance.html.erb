@@ -4,47 +4,46 @@
 </div>
 
 <div class="form-group mt-3 form-inline">
-  <%= label_tag(:user_hide_authors, :prefs_hide_authors.t + ":") %>
-  <%= form.select(:hide_authors,
+  <%= form.label :hide_authors, :prefs_hide_authors.t + ":" %>
+  <%= form.select :hide_authors,
                   [[:prefs_hide_authors_none.l, :none],
                    [:prefs_hide_authors_above_species.l, :above_species]],
-                  class: "form-control") %><br/>
+                  class: "form-control" %><br/>
 
-  <%= label_tag(:user_location_format, :prefs_location_format.t + ":") %>
-  <%= form.select(:location_format,
+  <%= form.label :location_format, :prefs_location_format.t + ":" %>
+  <%= form.select :location_format,
                   [[:prefs_location_format_postal.l, :postal],
                    [:prefs_location_format_scientific.l, :scientific]],
-                  class: "form-control") %><br/>
+                  class: "form-control" %><br/>
 
-  <%= label_tag(:user_theme, :prefs_theme.t + ":") %>
-  <%= form.select(:theme,
+  <%= form.label :theme, :prefs_theme.t + ":") %>
+  <%= form.select :theme,
                   [
                    [:theme_random.l, "NULL"]
                   ] + MO.themes.map { |t| [t.to_sym.l, t] },
-                  class: "form-control") %>
-  <%= link_to(:prefs_themes_about.t, controller: :themes,
-                                     action: :color_themes) %><br/>
+                  class: "form-control" %>
+  <%= link_to :prefs_themes_about.t, themes_color_themes_path %><br/>
 
-  <%= label_tag(:user_locale, :prefs_locale.t + ":") %>
+  <%= form.label :locale, :prefs_locale.t + ":" %>
   <%= locales = Language.all.map do |lang|
                   name = lang.name
                   name += " (beta)" if lang.beta
                   [name, lang.locale]
                 end
-      form.select(:locale, locales, class: "form-control") %><br/>
+      form.select :locale, locales, class: "form-control" %><br/>
 
-  <%= form.check_box(:thumbnail_maps, class: "form-control") %>
+  <%= form.check_box :thumbnail_maps, class: "form-control" %>
 
-  <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
+  <%= form.label :thumbnail_maps, :prefs_thumbnail_maps.t %><br/>
 
   <div>
-    <%= form.check_box(:view_owner_id, class: "form-control") %>
-    <%= add_context_help(label_tag(:user_view_owner_id, :prefs_view_owner_id.t),
+    <%= form.check_box :view_owner_id, class: "form-control" %>
+    <%= add_context_help(form.label(:view_owner_id, :prefs_view_owner_id.t),
                         :prefs_view_owner_id_help.t) %>
   </div>
 
-  <%= label_tag(:layout_count, :prefs_layout_count.t + ":") %>
-  <%= form.number_field(:layout_count, class: "form-control", min: 1) %>
+  <%= form.label :layout_count, :prefs_layout_count.t + ":" %>
+  <%= form.number_field :layout_count, class: "form-control", min: 1 %>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+<%= form.submit :SAVE_EDITS.l, class: "btn mx-auto mt-3" %>
