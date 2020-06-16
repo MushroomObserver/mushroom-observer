@@ -1,5 +1,6 @@
-<% url =
-     "#{collection_numbers_path}/#{@observation.id}?q=#{get_query_param}" %>
+<% id = @observation ? "/#{@observation.id}" : nil
+   url = "#{collection_numbers_path}#{id}?q=#{get_query_param}" %>
+
 <%= form_with(model: @collection_number,
               url: url) do |f| %>
 

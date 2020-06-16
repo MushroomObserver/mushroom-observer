@@ -214,7 +214,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_edit
-    get(:edit)
     get(:edit, id: "bogus")
 
     number = collection_numbers(:coprinus_comatus_coll_num)
