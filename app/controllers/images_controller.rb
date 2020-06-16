@@ -690,7 +690,7 @@ class ImagesController < ApplicationController
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: observer/show_observation and account/profile
+  # Linked from: observer/show_observation and account/edit (profile)
   # Inputs:
   #   params[:mode]       "observation" or "profile"
   #   params[:obs_id]     (observation)

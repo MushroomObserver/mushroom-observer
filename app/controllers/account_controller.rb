@@ -23,7 +23,8 @@
 #
 #  ==== Preferences
 #  prefs::              <tt>(L V P)</tt>
-#  profile::            <tt>(L V P)</tt>
+#  edit::               <tt>(L V P)</tt>
+#  update::             <tt>(L V P)</tt>
 #  remove_image::       <tt>(L . .)</tt>
 #  no_email::           <tt>(L V .)</tt>
 #  api_keys::           <tt>(L V .)</tt>
@@ -33,7 +34,7 @@
 #  turn_admin_off::     <tt>(R . .)</tt>
 #  add_user_to_group::  <tt>(R V .)</tt>
 #  create_alert::       <tt>(R V .)</tt>
-#  destroy_user::       <tt>(R . .)</tt>
+#  destroy::            <tt>(R . .)</tt>
 #  blocked_ips::        <tt>(R V .)</tt>
 #
 #  ==== Testing
@@ -60,7 +61,7 @@ class AccountController < ApplicationController
     :login,
     :signup,
     :prefs,
-    :profile
+    :edit
   ]
 
   ##############################################################################
@@ -70,10 +71,11 @@ class AccountController < ApplicationController
   ##############################################################################
 
   # :prefetch:
-  def signup
+  def new
     @new_user = User.new(theme: MO.default_theme)
-    return if request.method != "POST"
+  end
 
+  def create
     initialize_new_user
     return if block_evil_signups!
     return unless make_sure_theme_is_valid!
@@ -384,97 +386,99 @@ class AccountController < ApplicationController
     result
   end
 
+  # NOTE: Splitting and renaming "profile" as "edit" and "update" actions
+
   # :prefetch:
-  def profile
+  def edit
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method != "POST"
-      @place_name        = @user.location ? @user.location.display_name : ""
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license.id
+    @place_name        = @user.location ? @user.location.display_name : ""
+    @copyright_holder  = @user.legal_name
+    @copyright_year    = Time.zone.now.year
+    @upload_license_id = @user.license.id
+  end
 
+  def update
+    @licenses = License.current_names_and_ids(@user.license)
+    [:name, :notes, :mailing_address].each do |arg|
+      val = params[:user][arg].to_s
+      @user.send("#{arg}=", val) if @user.send(arg) != val
+    end
+
+    # Make sure the given location exists before accepting it.
+    @place_name = params["user"]["place_name"].to_s
+    if @place_name.present?
+      location = Location.find_by_name_or_reverse_name(@place_name)
+      if !location
+        need_to_create_location = true
+      elsif @user.location != location
+        @user.location = location
+        @place_name = location.display_name
+      end
+    elsif @user.location
+      @user.location = nil
+    end
+
+    # Check if we need to upload an image.
+    upload = params["user"]["upload_image"]
+    if upload.present?
+      date = Date.parse(params["date"]["copyright_year"].to_s + "0101")
+      license = License.safe_find(params["upload"]["license_id"])
+      holder = params["copyright_holder"]
+      image = Image.new(
+        image: upload,
+        user: @user,
+        when: date,
+        copyright_holder: holder,
+        license: license
+      )
+      if !image.save
+        flash_object_errors(image)
+      elsif !image.process_image
+        logger.error("Unable to upload image")
+        name = image.original_name
+        name = "???" if name.empty?
+        flash_error(:runtime_profile_invalid_image.t(name: name))
+        flash_object_errors(image)
+      else
+        @user.image = image
+        name = image.original_name
+        name = "##{image.id}" if name.empty?
+        flash_notice(:runtime_profile_uploaded_image.t(name: name))
+      end
+    end
+
+    legal_name_change = @user.legal_name_change
+    if !@user.changed
+      flash_notice(:runtime_no_changes.t)
+      # redirect_to(
+      #   controller: :users,
+      #   action: :show,
+      #   id: @user.id
+      # )
+      redirect_to user_path(@user.id)
+    elsif !@user.save
+      flash_object_errors(@user)
     else
-      [:name, :notes, :mailing_address].each do |arg|
-        val = params[:user][arg].to_s
-        @user.send("#{arg}=", val) if @user.send(arg) != val
+      if legal_name_change
+        Image.update_copyright_holder(*legal_name_change, @user)
       end
-
-      # Make sure the given location exists before accepting it.
-      @place_name = params["user"]["place_name"].to_s
-      if @place_name.present?
-        location = Location.find_by_name_or_reverse_name(@place_name)
-        if !location
-          need_to_create_location = true
-        elsif @user.location != location
-          @user.location = location
-          @place_name = location.display_name
-        end
-      elsif @user.location
-        @user.location = nil
-      end
-
-      # Check if we need to upload an image.
-      upload = params["user"]["upload_image"]
-      if upload.present?
-        date = Date.parse(params["date"]["copyright_year"].to_s + "0101")
-        license = License.safe_find(params["upload"]["license_id"])
-        holder = params["copyright_holder"]
-        image = Image.new(
-          image: upload,
-          user: @user,
-          when: date,
-          copyright_holder: holder,
-          license: license
-        )
-        if !image.save
-          flash_object_errors(image)
-        elsif !image.process_image
-          logger.error("Unable to upload image")
-          name = image.original_name
-          name = "???" if name.empty?
-          flash_error(:runtime_profile_invalid_image.t(name: name))
-          flash_object_errors(image)
-        else
-          @user.image = image
-          name = image.original_name
-          name = "##{image.id}" if name.empty?
-          flash_notice(:runtime_profile_uploaded_image.t(name: name))
-        end
-      end
-
-      legal_name_change = @user.legal_name_change
-      if !@user.changed
-        flash_notice(:runtime_no_changes.t)
+      if need_to_create_location
+        flash_notice(:runtime_profile_must_define.t)
+        # redirect_to(
+        #   controller: :locations,
+        #   action: :new,
+        #   where: @place_name,
+        #   set_user: @user.id
+        # )
+        redirect_to new_location_path(where: @place_name, set_user: @user.id)
+      else
+        flash_notice(:runtime_profile_success.t)
         # redirect_to(
         #   controller: :users,
         #   action: :show,
         #   id: @user.id
         # )
         redirect_to user_path(@user.id)
-      elsif !@user.save
-        flash_object_errors(@user)
-      else
-        if legal_name_change
-          Image.update_copyright_holder(*legal_name_change, @user)
-        end
-        if need_to_create_location
-          flash_notice(:runtime_profile_must_define.t)
-          # redirect_to(
-          #   controller: :locations,
-          #   action: :new,
-          #   where: @place_name,
-          #   set_user: @user.id
-          # )
-          redirect_to new_location_path(where: @place_name, set_user: @user.id)
-        else
-          flash_notice(:runtime_profile_success.t)
-          # redirect_to(
-          #   controller: :users,
-          #   action: :show,
-          #   id: @user.id
-          # )
-          redirect_to user_path(@user.id)
-        end
       end
     end
   end
@@ -697,7 +701,7 @@ class AccountController < ApplicationController
 
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
-  def destroy_user # :root:
+  def destroy # :root:
     if in_admin_mode?
       id = params["id"]
       if id.present?

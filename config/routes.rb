@@ -53,12 +53,12 @@ ACTIONS = {
     no_name_proposal_email: {},
     no_question_email: {},
     prefs: {},
-    profile: {},
+    # profile: {},
     remove_api_keys: {},
     remove_image: {},
     reverify: {},
     send_verify: {},
-    signup: {},
+    # signup: {},
     test_autologin: {},
     test_flash: {},
     turn_admin_off: {},
@@ -772,6 +772,8 @@ MushroomObserver::Application.routes.draw do
   resources :pivotal, only: [:index]
 
   resources :rss_logs, only: [:index, :show]
+
+  resources :account, only: [:new, :create, :edit, :update, :destroy]
 
   resources :users, only: [:index, :show]
 
