@@ -167,7 +167,7 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.destroy
     # redirect_with_query(action: :index_collection_number)
-    redirect_to collection_number_index_collection_number_path(
+    redirect_to collection_numbers_index_collection_number_path(
       q: get_query_param
     )
   end

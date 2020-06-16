@@ -435,7 +435,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     # Make sure badly-formed queries don't crash.
     login("rolf")
-    get(:destroy)
     get(:destroy, id: "bogus")
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
 
