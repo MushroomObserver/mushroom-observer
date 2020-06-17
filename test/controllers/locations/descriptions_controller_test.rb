@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Locations::DescriptionsControllerTest < FunctionalTestCase
+class Locations::DescriptionsControllerTest < IntegrationControllerTest
 
   fixtures 'locations'
 
