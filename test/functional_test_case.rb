@@ -12,7 +12,7 @@
 #
 ################################################################################
 
-class FunctionalTestCase < ActionDispatch::IntegrationTest
+class FunctionalTestCase < ActionController::TestCase
   include GeneralExtensions
   include FlashExtensions
   include ControllerExtensions
@@ -21,36 +21,35 @@ class FunctionalTestCase < ActionDispatch::IntegrationTest
   # temporarily silence deprecation warnings
   # ActiveSupport::Deprecation.silenced = true
 
-  # Commented out on purpose, retiring these modifications of base methods - AN
-  # def get(*args, &block)
-  #   args = check_for_params(args)
-  #   super(*args, &block)
-  #   check_for_unsafe_html!
-  # end
-  #
-  # def post(*args, &block)
-  #   args = extract_body(check_for_params(args))
-  #   super(*args, &block)
-  #   check_for_unsafe_html!
-  # end
-  #
-  # def put(*args, &block)
-  #   args = check_for_params(args)
-  #   super(*args, &block)
-  #   check_for_unsafe_html!
-  # end
-  #
-  # def delete(*args, &block)
-  #   args = check_for_params(args)
-  #   super(*args, &block)
-  #   check_for_unsafe_html!
-  # end
+  def get(*args, &block)
+    args = check_for_params(args)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
 
-  # def check_for_params(args)
-  #   return args if (args.length < 2) || args[1][:params]
-  #
-  #   [args[0], { params: args[1] }] + args[2..]
-  # end
+  def post(*args, &block)
+    args = extract_body(check_for_params(args))
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def put(*args, &block)
+    args = check_for_params(args)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def delete(*args, &block)
+    args = check_for_params(args)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def check_for_params(args)
+    return args if (args.length < 2) || args[1][:params]
+
+    [args[0], { params: args[1] }] + args[2..]
+  end
 
   def extract_body(args)
     if args.length >= 2
