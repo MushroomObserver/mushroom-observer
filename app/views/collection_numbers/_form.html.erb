@@ -1,29 +1,32 @@
-<% id = @observation ? "/#{@observation.id}" : nil
-   url = "#{collection_numbers_path}#{id}?back=#{@back}&q=#{get_query_param}" %>
+<% id = @observation&.id
+   id_path_segment = id ? "/#{id}" : nil
+   url = "#{collection_numbers_path}#{id_path_segment}" +
+         "?back=#{@back}&q=#{get_query_param}" %>
 
 <%= form_with model: @collection_number, url: url do |f| %>
+  <%= f.submit button.t, class: "btn mx-auto mt-3" %>
 
-  <%= submit_tag(local_assigns[:button].t, class: "btn mx-auto mt-3") %>
+  <%= f.hidden_field :id, value: id %>
+  <%= f.hidden_field :q, value: get_query_param %>
 
-  <% if @collection_number.observations.count > 1 %>
+  <% if @collection_number.observations.size > 1 %>
     <div class="alert alert-warning mt-3">
       <%= :edit_affects_multiple_observations.t(type: :collection_number) %>
     </div>
   <% end %>
 
   <div class="form-group mt-3">
-    <%= label_tag :collection_number_name, :collection_number_name.t + ":" %>
+    <%= f.label :name, :collection_number_name.t + ":" %>
     <span class="help-note">(<%= :required.t %>)</span>
-    <%= text_field :collection_number, :name, class: "form-control" %>
+    <%= f.text_field :name, class: "form-control" %>
   </div>
 
   <div class="form-group mt-3">
-    <%= label_tag :collection_number_number,
-                  :collection_number_number.t + ":" %>
+    <%= f.label :number, :collection_number_number.t + ":" %>
     <span class="help-note">(<%= :required.t %>)</span>
-    <%= text_field :collection_number, :number, class: "form-control" %>
+    <%= f.text_field :number, class:"form-control" %>
   </div>
 
-  <%= submit_tag local_assigns[:button].t, class: "btn mx-auto mt-3" %>
+  <%= f.submit button.t, class: "btn mx-auto mt-3" %>
 
 <% end %>
