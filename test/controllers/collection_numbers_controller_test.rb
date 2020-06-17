@@ -112,7 +112,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     make_admin("mary")
     get(:new, id: obs.id)
     assert_response(:success)
-
   end
 
   def test_new_redirect
