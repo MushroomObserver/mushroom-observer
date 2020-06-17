@@ -3,8 +3,8 @@
 #
 #  = Integration Controller Test
 #
-#  A new test class that Integration-style controller tests can derive from.
-#  
+#  A new test class that "integration-style" controller tests can derive from.
+#
 #  Includes:
 #
 #  1. Some general-purpose helpers and assertions from GeneralExtensions.
