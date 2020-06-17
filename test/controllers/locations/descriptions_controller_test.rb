@@ -20,9 +20,8 @@ class Locations::DescriptionsControllerTest < IntegrationControllerTest
     desc = location_descriptions(:albion_desc)
     get_with_dump location_descriptions_index_by_author_path(
       id: rolf.id)
-    assert_redirected_to(
-      %r{/locations/#{desc.location_id}/descriptions/#{desc.id}}
-    )
+    assert_redirected_to location_description_path(location_id:
+      desc.location_id, id: desc.id)
   end
 
   def test_index_by_editor
