@@ -37,7 +37,6 @@ class CollectionNumbersController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@collection_number = CollectionNumber.safe_find(pattern))
-      # redirect_to(action: :show, id: @collection_number.id)
       redirect_to collection_number_path(@collection_number.id)
     else
       query = create_query(:CollectionNumber, :pattern_search, pattern: pattern)
@@ -50,14 +49,8 @@ class CollectionNumbersController < ApplicationController
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
     @links = [
-      # [:show_object.l(type: :observation),
-      #  Observation.show_link_args(params[:id])],
-      # [:create_collection_number.l,
-      #  { action: :create_collection_number, id: params[:id] }]
-      [ :show_object.l(type: :observation),
-                observation_path(id: params[:id])],
-      [ :create_collection_number.l,
-                new_collection_number_path(id: params[:id])]
+      [:show_object.l(type: :observation), observation_path(id: params[:id])],
+      [:create_collection_number.l, new_collection_number_path(id: params[:id])]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
@@ -126,7 +119,7 @@ class CollectionNumbersController < ApplicationController
     return unless @collection_number
 
     figure_out_where_to_go_back_to
-    return unless make_sure_can_edit!(@collection_number)
+    make_sure_can_edit!(@collection_number)
   end
 
   alias_method :edit_collection_number, :edit
