@@ -51,7 +51,7 @@ class AccountController < ApplicationController
     :logout_user,
     :reverify,
     :send_verify,
-    :signup,
+    :new,
     :test_flash,
     :verify,
     :welcome
@@ -59,7 +59,7 @@ class AccountController < ApplicationController
 
   before_action :disable_link_prefetching, except: [
     :login,
-    :signup,
+    :new,
     :prefs,
     :edit
   ]
