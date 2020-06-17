@@ -30,7 +30,7 @@ class CollectionNumbersController < ApplicationController
     show_selected_collection_numbers(query)
   end
 
-  alias_method :list_collection_numbers, :index
+  alias list_collection_numbers index
 
   # Display list of CollectionNumbers whose text matches a string pattern.
   def collection_number_search
@@ -62,19 +62,19 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
-  alias_method :show_collection_number, :show
+  alias show_collection_number show
 
   def show_next
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
-  alias_method :next_collection_number, :show_next
+  alias next_collection_number show_next
 
   def show_prev
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
-  alias_method :prev_collection_number, :show_prev
+  alias prev_collection_number show_prev
 
   def new
     store_location
@@ -92,7 +92,7 @@ class CollectionNumbersController < ApplicationController
     redirect_back_or_default("/") unless @collection_number
   end
 
-  alias_method :create_collection_number, :new
+  alias create_collection_number new
 
   def create
     store_location
@@ -109,7 +109,7 @@ class CollectionNumbersController < ApplicationController
     build_collection_number
   end
 
-  alias_method :post_create_collection_number, :create
+  alias post_create_collection_number create
 
   def edit
     store_location
@@ -122,7 +122,7 @@ class CollectionNumbersController < ApplicationController
     make_sure_can_edit!(@collection_number)
   end
 
-  alias_method :edit_collection_number, :edit
+  alias edit_collection_number edit
 
   def update
     store_location
@@ -136,7 +136,7 @@ class CollectionNumbersController < ApplicationController
     save_edits
   end
 
-  alias_method :post_edit_collection_number, :update
+  alias post_edit_collection_number update
 
   def remove_observation
     pass_query_params
@@ -165,7 +165,7 @@ class CollectionNumbersController < ApplicationController
     )
   end
 
-  alias_method :destroy_collection_number, :destroy
+  alias destroy_collection_number destroy
 
   ##############################################################################
 
@@ -193,20 +193,17 @@ class CollectionNumbersController < ApplicationController
 
   def build_collection_number
     normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
+    if @collection_number.name.blank? || @collection_number.number.blank?
+      flash_error(missing_attribute_msg.t)
       return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
-      @collection_number.save
-      @collection_number.add_observation(@observation)
-    else
+    elsif name_and_number_used?
       flash_warning(:edit_collection_number_already_used.t) if
         @other_number.observations.any?
       @other_number.add_observation(@observation)
       @collection_number = @other_number
+    else
+      @collection_number.save
+      @collection_number.add_observation(@observation)
     end
     redirect_to_observation_or_collection_number
   end
@@ -215,29 +212,39 @@ class CollectionNumbersController < ApplicationController
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
-    if @collection_number.name.blank?
-      flash_error(:create_collection_number_missing_name.t)
+
+    if @collection_number.name.blank? || @collection_number.number.blank?
+      flash_error(missing_attribute_msg.t)
       return
-    elsif @collection_number.number.blank?
-      flash_error(:create_collection_number_missing_number.t)
-      return
-    elsif name_and_number_free?
+    elsif name_and_number_used?
+      merge_collection_numbers(old_format_name)
+    else
       @collection_number.save
       @collection_number.change_corresponding_herbarium_records(old_format_name)
-    else
-      flash_warning(
-        :edit_collection_numbers_merged.t(
-          this: old_format_name,
-          that: @other_number.format_name
-        )
-      )
-      @collection_number.change_corresponding_herbarium_records(old_format_name)
-      @other_number.observations += @collection_number.observations -
-                                    @other_number.observations
-      @collection_number.destroy
-      @collection_number = @other_number
     end
     redirect_to_observation_or_collection_number
+  end
+
+  def missing_attribute_msg
+    if @collection_number.name.blank?
+      :create_collection_number_missing_name
+    else
+      :create_collection_number_missing_number
+    end
+  end
+
+  def merge_collection_numbers(old_format_name)
+    flash_warning(
+      :edit_collection_numbers_merged.t(
+        this: old_format_name,
+        that: @other_number.format_name
+      )
+    )
+    @collection_number.change_corresponding_herbarium_records(old_format_name)
+    @other_number.observations += @collection_number.observations -
+                                  @other_number.observations
+    @collection_number.destroy
+    @collection_number = @other_number
   end
 
   def whitelisted_collection_number_params
@@ -269,12 +276,12 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  def name_and_number_free?
+  def name_and_number_used?
     @other_number = CollectionNumber.where(
       name: @collection_number.name,
       number: @collection_number.number
     ).first
-    !@other_number || @other_number == @collection_number
+    @other_number && @other_number != @collection_number
   end
 
   def figure_out_where_to_go_back_to
