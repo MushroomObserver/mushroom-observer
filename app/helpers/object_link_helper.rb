@@ -174,10 +174,10 @@ module ObjectLinkHelper
     #
     # (type returns name or location -- type.to_s)
     # (or namespace as symbol: type.to_s.pluralize.to_sym)
-    if type.to_s === "name"
+    if type.to_s == "name"
       link_to(result,
               names_descriptions_path(obj.id, desc.id, q: get_query_param))
-    elsif type.to_s === "location"
+    elsif type.to_s == "location"
       link_to(result,
               locations_descriptions_path(obj.id, desc.id, q: get_query_param))
     end
