@@ -3,7 +3,7 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :observation),
-            @observation.show_link_args)
+            observation_path(@observation))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 

@@ -3,7 +3,7 @@
 
   tabs = [
     link_with_query(:cancel_and_show.t(type: :observation),
-                    @observation.show_link_args),
+                    observation_path(@observation)),
     link_with_query(:image_add_edit.t,
                     controller: :observations,
                     action: :edit,
