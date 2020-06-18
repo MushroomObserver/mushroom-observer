@@ -199,7 +199,7 @@ end %>
         <% @image.all_glossary_terms.each do |glossary_term| %>
           <div>
             <%= :GLOSSARY_TERM.t %>:
-            <%= link_with_query(glossary_term.format_name.t, glossary_term.show_link_args) %>
+            <%= link_with_query(glossary_term.format_name.t, glossary_term_path(glossary_term)) %>
           </div>
         <% end %>
         <% if !@image.notes.blank? %>
