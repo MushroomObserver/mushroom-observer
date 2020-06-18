@@ -30,7 +30,7 @@
           </td>
           <td>
             <%= herbarium_record.observations.map do |obs|
-              link_to(obs.unique_format_name.t, obs.show_link_args)
+              link_to(obs.unique_format_name.t, observation_path(obs))
             end.safe_join(", ") %>
           </td>
           <td>

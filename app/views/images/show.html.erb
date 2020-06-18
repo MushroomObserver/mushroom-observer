@@ -187,7 +187,7 @@ end %>
         <% @image.observations.each do |obs| %>
           <div>
             <%= :OBSERVATION.t %>:
-            <%= link_with_query(obs.unique_format_name.t, obs.show_link_args) %>
+            <%= link_with_query(obs.unique_format_name.t, observation_path(obs)) %>
           </div>
         <% end %>
         <% @image.subjects.each do |user| %>
