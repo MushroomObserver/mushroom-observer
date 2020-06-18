@@ -285,7 +285,7 @@ class CollectionNumbersController < ApplicationController
       name: @collection_number.name,
       number: @collection_number.number
     ).first
-    @other_number && @other_number != @collection_number
+    @other_number&. != @collection_number
   end
 
   def figure_out_where_to_go_back_to
