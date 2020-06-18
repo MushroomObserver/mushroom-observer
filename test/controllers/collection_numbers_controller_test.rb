@@ -96,6 +96,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:new, id: "bogus")
 
     obs = observations(:coprinus_comatus_obs)
+
     get(:new, id: obs.id)
     assert_response(:redirect)
 
@@ -237,6 +238,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:edit, id: "bogus")
 
     number = collection_numbers(:coprinus_comatus_coll_num)
+
     get(:edit, id: number.id)
     assert_response(:redirect)
 

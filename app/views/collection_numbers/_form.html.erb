@@ -1,12 +1,8 @@
-<% id = @observation&.id
-   id_path_segment = id ? "/#{id}" : nil
-   url = "#{collection_numbers_path}#{id_path_segment}" +
-         "?back=#{@back}&q=#{get_query_param}" %>
+<%= form_with model: @collection_number do |f| %>
 
-<%= form_with model: @collection_number, url: url do |f| %>
   <%= f.submit button.t, class: "btn mx-auto mt-3" %>
 
-  <%= f.hidden_field :id, value: id %>
+  <%= f.hidden_field :id, value: @observation.id %>
   <%= f.hidden_field :q, value: get_query_param %>
 
   <% if @collection_number.observations.size > 1 %>

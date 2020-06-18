@@ -115,6 +115,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
 
+    @observation = @collection_number.observations.first
     figure_out_where_to_go_back_to
     make_sure_can_edit!(@collection_number)
   end
