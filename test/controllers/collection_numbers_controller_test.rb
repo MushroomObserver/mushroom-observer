@@ -4,14 +4,14 @@ require "test_helper"
 
 class CollectionNumbersControllerTest < FunctionalTestCase
   def test_index
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 
   def test_observation_index_with_one_collection_number
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, id: obs.id)
     assert_template(:index)
     assert_no_flash
   end
@@ -19,7 +19,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_observation_index_with_multiple_collection_numbers
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, id: obs.id)
     assert_template(:index)
     assert_no_flash
   end
@@ -27,7 +27,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_observation_index_with_no_collection_numbers
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
-    get_with_dump(:observation_index, id: obs.id)
+    get(:observation_index, id: obs.id)
     assert_template(:index)
     assert_flash_text(/no matching collection numbers found/i)
   end
@@ -45,7 +45,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_collection_number_search_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
-    get_with_dump(:collection_number_search, pattern: "neighbor")
+    get(:collection_number_search, pattern: "neighbor")
     query_record = QueryRecord.last
     assert_redirected_to(action: :show,
                          id: numbers.first.id, q: query_record.id.alphabetize)
@@ -66,7 +66,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:show, id: "bogus")
 
     number = collection_numbers(:detailed_unknown_coll_num_two)
-    get_with_dump(:show, id: number.id)
+    get(:show, id: number.id)
   end
 
   def test_show_next
@@ -105,7 +105,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:new, id: obs.id)
+    get(:new, id: obs.id)
     assert_response(:success)
     assert_template("new", partial: "shared/log_item")
     assert(assigns(:collection_number))
@@ -247,7 +247,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit, id: number.id)
+    get(:edit, id: number.id)
     assert_response(:success)
     assert_template("edit", partial: "shared/log_item")
     assert_objs_equal(number, assigns(:collection_number))
