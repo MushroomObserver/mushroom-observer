@@ -2,10 +2,11 @@
   @title ||= :create_location_title.t
 
   tabs = [
-    link_to(:all_objects.t(type: :location), action: :index)
+    link_to(:all_objects.t(type: :location),
+            locations_path(q: get_query_param)),
   ]
   tabs += location_search_links(@location.name)
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render partial: "form", locals: { button_name: :CREATE } %>
+<%= render "locations/form", button_name: :CREATE %>

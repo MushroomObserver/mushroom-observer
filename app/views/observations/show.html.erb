@@ -19,13 +19,11 @@ end %>
 <div class="row navbar h-auto p-0 mt-3">
 
   <div class="left-column col-12 col-sm-8">
-    <%= render "observations/show/title",
-               locals: { observation: @observation } %>
+    <%= render "observations/show/title", observation: @observation %>
   </div><!-- .left-column -->
 
   <div class="right-column col-12 col-sm-4 pl-md-5">
-    <%= render "observations/show/prev_next_nav",
-               locals: { observation: @observation } %>
+    <%= render "observations/show/prev_next_nav", observation: @observation %>
   </div><!-- .right-column -->
 
 </div><!-- .row -->
@@ -34,12 +32,10 @@ end %>
   <div class="row no-gutters">
 
     <div class="left-column col-12 col-sm-8">
-      <%= render "observations/show/carousel",
-                locals: { observation: @observation } %>
+      <%= render "observations/show/carousel", observation: @observation %>
     </div><!-- .left-column -->
     <div class="right-column col-12 col-sm-4">
-      <%= render "observations/show/observation",
-                 locals: { observation: @observation } %>
+      <%= render "observations/show/observation", observation: @observation %>
     </div><!-- .right-column -->
 
   </div><!-- .row -->
@@ -49,29 +45,23 @@ end %>
 <div class="row">
 
   <div class="left-column col-12 col-sm-8">
-    <%= render partial: "namings/show",
-               locals: { observation: @observation } %>
-    <%= render partial: "comments/comments",
-               locals: { object: @observation, controls: true, limit: nil } %>
+    <%= render "namings/show", observation: @observation %>
+    <%= render "comments/comments", object: @observation,
+                controls: true, limit: nil %>
   </div><!-- .left-column -->
 
   <div class="right-column col-12 col-sm-4 pl-md-5">
-    <%= render partial: "observations/show/name_info",
-               locals: { observation: @observation } %>
+    <% render "observations/show/name_info", observation: @observation %>
     <% if show_lists %>
-      <%= render partial: "observations/show/lists",
-                 locals: {observation: @observation} %>
+      <%= render "observations/show/lists", observation: @observation %>
     <% end %>
     <% if show_links %>
-      <%= render partial: "observations/show/links",
-                 locals: {observation: @observation} %>
+      <%= render "observations/show/links", observation: @observation %>
     <% end %>
     <% if show_map %>
-      <%= render partial: "observations/show/thumbnail_map",
-                 locals: { observation: @observation } %>
+      <%= render "observations/show/thumbnail_map", observation: @observation %>
     <% end %>
-    <%= render partial: "observations/show/images",
-               locals: { observation: @observation } %>
+    <%= render "observations/show/images", observation: @observation %>
   </div><!-- .right-column -->
 
 </div><!-- .row -->

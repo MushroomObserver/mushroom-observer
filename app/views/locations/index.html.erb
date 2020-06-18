@@ -1,8 +1,11 @@
 <%
   tabs = [
-    link_with_query(:show_location_create.t, action: :new),
-    link_with_query(:list_place_names_map.t, action: :map_locations),
-    link_to(:list_countries.t, action: :list_countries)
+    link_to(:show_location_create.t,
+            new_location_path(q: get_query_param)),
+    link_to(:list_place_names_map.t,
+            locations_map_locations_path(q: get_query_param)),
+    link_to(:list_countries.t,
+            locations_list_countries_path(q: get_query_param))
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
@@ -31,8 +34,8 @@
         <div class="card">
           <% @known_data.each do |location| %>
             <div class="card-body">
-              <%= link_with_query(location.display_name.t,
-                                  location.show_link_args) %>
+              <%= link_to(location.display_name.t,
+                          location_path(location.id, q: get_query_param)) %>
               (<%= observation_counts[location.id].to_i %>)
             </div>
           <% end %>
@@ -56,8 +59,7 @@
             <div class="card-body">
               <%= location_link(location, nil, count) %>
               <%= link_to(:list_place_names_merge.t,
-                          action: :list_merge_options,
-                          where: location) %>
+                          location_list_merge_options_path(where: location)) %>
             </div>
           <% end %>
         </div>

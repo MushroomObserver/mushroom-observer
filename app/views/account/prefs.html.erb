@@ -4,7 +4,7 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:user, url: {action: :prefs}) do |form| %>
+  <%= form_with url: account_prefs_path, scope: :user do |form| %>
     <%= render partial: "prefs_login", locals: { form: form } %>
     <%= render partial: "prefs_privacy", locals: { form: form } %>
     <%= render partial: "prefs_appearance", locals: { form: form } %>

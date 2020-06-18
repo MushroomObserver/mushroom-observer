@@ -6,21 +6,21 @@
 # Location controller.
 class Locations::DescriptionsController < ApplicationController
 
-  include DescriptionControllerHelpers
+  include Descriptions
 
   before_action :login_required, except: [
     :index,
     :index_location_description,
     :list_location_descriptions, # aliased
-    :location_descriptions_by_author,
-    :location_descriptions_by_editor,
+    :index_by_author,
+    :index_by_editor,
     :next_location_description, # aliased
     :prev_location_description, # aliased
     :show,
     :show_location_description, # aliased
     :show_next,
     :show_prev,
-    :show_past_location_description
+    :show_past
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -30,7 +30,7 @@ class Locations::DescriptionsController < ApplicationController
     :new,
     :show,
     :show_location_description, # aliased
-    :show_past_location_description
+    :show_past
   ]
 
   before_action :require_successful_user, only: [
@@ -61,7 +61,7 @@ class Locations::DescriptionsController < ApplicationController
   alias_method :list_location_descriptions, :index
 
   # Display list of location_descriptions that a given user is author on.
-  def location_descriptions_by_author
+  def index_by_author
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -70,7 +70,7 @@ class Locations::DescriptionsController < ApplicationController
   end
 
   # Display list of location_descriptions that a given user is editor on.
-  def location_descriptions_by_editor
+  def index_by_editor
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -108,11 +108,11 @@ class Locations::DescriptionsController < ApplicationController
   #
   ##############################################################################
 
-  # Show just a LocationDescription.
+  # Show just a Location::Description.
   def show
     store_location
     pass_query_params
-    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+    @description = find_or_goto_index(Location::Description, params[:id].to_s)
     return unless @description
 
     # TODO: NIMMO - check this new url
@@ -160,10 +160,10 @@ class Locations::DescriptionsController < ApplicationController
 
   # Show past version of LocationDescription.  Accessible only from
   # show_location_description page.
-  def show_past_location_description
+  def show_past
     store_location
     pass_query_params
-    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+    @description = find_or_goto_index(Location::Description, params[:id].to_s)
     return unless @description
 
     @location = @description.location
@@ -171,12 +171,12 @@ class Locations::DescriptionsController < ApplicationController
       @description.revert_to(params[:version].to_i)
     else
       @merge_source_id = params[:merge_source_id]
-      version = LocationDescription::Version.find(@merge_source_id)
+      version = Location::Description::Version.find(@merge_source_id)
       @old_parent_id = version.location_description_id
       subversion = params[:version]
       if subversion.present? &&
          (version.version != subversion.to_i)
-        version = LocationDescription::Version.
+        version = Location::Description::Version.
                   find_by_version_and_location_description_id(
                     params[:version], @old_parent_id
                   )
@@ -187,14 +187,14 @@ class Locations::DescriptionsController < ApplicationController
 
   # Go to next location: redirects to show_location.
   def show_next
-    redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
+    redirect_to_next_object(:next, Location::Description, params[:id].to_s)
   end
 
   alias_method :next_location_description, :show_next
 
   # Go to previous location: redirects to show_location.
   def show_prev
-    redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
+    redirect_to_next_object(:prev, Location::Description, params[:id].to_s)
   end
 
   alias_method :prev_location_description, :show_prev
@@ -210,7 +210,7 @@ class Locations::DescriptionsController < ApplicationController
     pass_query_params
     @location = Location.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
-    @description = LocationDescription.new
+    @description = Location::Description.new
     @description.location = @location
 
     # Render a blank form.
@@ -222,7 +222,7 @@ class Locations::DescriptionsController < ApplicationController
   def create
     store_location
     pass_query_params
-    @description = LocationDescription.new
+    @description = Location::Description.new
     @description.attributes = whitelisted_location_description_params
     @description.location = @location = Location.find(params[:id].to_s)
 
@@ -254,7 +254,7 @@ class Locations::DescriptionsController < ApplicationController
   def edit
     store_location
     pass_query_params
-    @description = LocationDescription.find(params[:id].to_s)
+    @description = Location::Description.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     if !check_description_edit_permission(@description, params[:description])
@@ -267,7 +267,7 @@ class Locations::DescriptionsController < ApplicationController
   def update
     store_location
     pass_query_params
-    @description = LocationDescription.find(params[:id].to_s)
+    @description = Location::Description.find(params[:id].to_s)
     @location = @description.location
     @licenses = License.current_names_and_ids
     @description.attributes = whitelisted_location_description_params
@@ -304,7 +304,7 @@ class Locations::DescriptionsController < ApplicationController
 
       # Delete old description after resolving conflicts of merge.
       if (params[:delete_after] == "true") &&
-         (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
+         (old_desc = Location::Description.safe_find(params[:old_desc_id]))
         v = @description.versions.latest
         v.merge_source_id = old_desc.versions.latest.id
         v.save
@@ -336,7 +336,7 @@ class Locations::DescriptionsController < ApplicationController
 
   def destroy
     pass_query_params
-    @description = LocationDescription.find(params[:id].to_s)
+    @description = Location::Description.find(params[:id].to_s)
     @location = @description.location
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)

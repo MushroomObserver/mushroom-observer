@@ -3,5 +3,5 @@
 %>
 <div class="max-width-text">
   <%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
-  <%= link_to(:reverify_link.t, action: :send_verify, id: @unverified_user.id) %>
+  <%= link_to :reverify_link.t, account_send_verify_path(@unverified_user.id) %>
 </div>

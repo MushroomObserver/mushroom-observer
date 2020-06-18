@@ -2,8 +2,8 @@
   @title = :account_api_keys_title.t
 
   tabs = [
-    link_to(:prefs_link.t,   action: :prefs),
-    link_to(:profile_link.t, action: :profile)
+    link_to(:prefs_link.t, account_prefs_path),
+    link_to(:profile_link.t, edit_account_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -11,7 +11,7 @@
 <div class="max-width-text">
   <%= :account_api_keys_help.tp %>
 
-  <%= form_for(:key, url: {id: @key.id}) do |form| %>
+  <%= form_for(:key, url: {id: @key.id}) do |f| %>
     <table>
       <tr>
         <td><%= :CREATED.t %>:&nbsp;</td>
@@ -32,14 +32,14 @@
     </table>
 
     <div class="form-group mt-3">
-      <%= label_tag(:user_notes, :NOTES.t + ":") %>
-      <%= form.text_field(:notes, class: "form-control") %>
+      <%= f.label :user_notes, :NOTES.t + ":" %>
+      <%= f.text_field :notes, class: "form-control" %>
     </div>
 
     <center class="mt-3">
-      <%= submit_tag(:UPDATE.l, class: "btn") %>
+      <%= f.submit :UPDATE.l, class: "btn" %>
       <span style="margin-left:5em"></span>
-      <%= submit_tag(:CANCEL.l, class: "btn") %>
+      <%= f.submit :CANCEL.l, class: "btn" %>
     </center>
   <% end %>
 </div>

@@ -22,60 +22,58 @@
                     name_path(@name.id) %>
       </p>
       <p class="mb-1">
-        <%= link_to("MyCoPortal",
+        <%= link_to "MyCoPortal",
                     mycoportal_url(@name),
-                    target: :_blank) %>
+                    target: :_blank  %>
       </p>
       <p class="mb-1">
-        <%= link_to("Mycobank",
+        <%= link_to "Mycobank",
                     mycobank_url(@name),
-                    target: :_blank) %>
+                    target: :_blank  %>
       </p>
 
       <%= # links to approved MO synonyms
           if (synonym_links = approved_syn_links(@name))
-            content_tag(:p, synonym_links, class: "mb-1")
+            tag.p synonym_links, class: "mb-1"
           end %>
 
       <%
         if !@name.unknown? && !browser.bot?
         # links to observations %>
-        <%= content_tag(:p, :show_observations_of.t, class: "mb-0") %>
+        <%= tag.p :show_observations_of.t, class: "mb-0" %>
         <div class="pl-3">
           <%= # Observations of this name
-          content_tag(:p, obss_of_name(@name), class: "mb-1") %>
+            tag.p obss_of_name(@name), class: "mb-1" %>
 
           <% # Observations of each synonym
           links = obss_by_syn_links(@name)
           if links.present? && links.size > 0
-            links.each { |link| content_tag(:p, link, class: "mb-1") } %>
+            links.each { |link| tag.p link, class: "mb-1" } %>
           <% end %>
 
           <%= # Observations of taxon (under any name)
-          content_tag(:p, taxon_observations(@name), class: "mb-1") %>
+            tag.p taxon_observations(@name), class: "mb-1" %>
 
           <%= # Observations of other taxa where this taxon was proposed
-            content_tag(:p,
-              taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)",
-              class: "mb-1") %>
+            tag.p taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)",
+                  class: "mb-1" %>
 
           <%= # Observations where this Name was proposed
-            content_tag(:p,
-              name_proposed(@name) || "#{:obss_name_proposed.t} (0)",
-              class: "mb-1") %>
+            tag.p name_proposed(@name) || "#{:obss_name_proposed.t} (0)",
+                  class: "mb-1" %>
         </div>
 
           <%= # List of species in the genus.
               #   List of species in Amanita Pers. (1433)
           if (link = show_obs_genera(@name)).present?
-            content_tag(:p, link, class: "mb-1")
+            tag.p link, class: "mb-1"
           end %>
       <% end %>
 
       <% # Descriptions of this name
         links = list_descriptions(@name)
         if links.present?
-          links.each { |link| content_tag(:p, link, class: "mb-1") } %>
+          links.each { |link| tag.p link, class: "mb-1" } %>
         <% end %>
 
     </div><!-- .card-body -->

@@ -9,7 +9,7 @@
 
 module ApplicationHelper
   include AutocompleteHelper
-  include DescriptionHelper
+  include DescriptionsHelper
   include ExporterHelper
   include FooterHelper
   include JavascriptHelper

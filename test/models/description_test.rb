@@ -32,9 +32,9 @@ class DescriptionTest < UnitTestCase
   # ------------------------------------------------------------------
 
   def test_authors_and_editors
-    [LocationDescription, NameDescription].each do |model|
+    [Location::Description, NameDescription].each do |model|
       case model.name
-      when "LocationDescription"
+      when "Location::Description"
         obj = model.new(location_id: locations(:albion).id,
                         license_id: licenses(:ccnc25).id)
         a = 50
@@ -128,7 +128,7 @@ class DescriptionTest < UnitTestCase
 
   def test_parent_setters
     albion = locations(:albion)
-    obj = LocationDescription.new(location_id: albion.id,
+    obj = Location::Description.new(location_id: albion.id,
                                   license_id: licenses(:ccnc25).id)
     burbank = locations(:burbank)
     obj.parent = burbank

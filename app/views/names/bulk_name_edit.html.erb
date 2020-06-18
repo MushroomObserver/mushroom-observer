@@ -1,6 +1,6 @@
 <% @title = :name_bulk_title.t %>
 
-<%= form_tag(action: :bulk_name_edit) do %>
+<%= form_with url: names_bulk_name_edit_path do %>
   <% if @new_names
     val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
     <input id="approved_names" name="approved_names" type="hidden" value="<%= val.html_safe %>"/>
@@ -8,7 +8,7 @@
 
   <br/><center><%= submit_tag(:SAVE.l, class: "btn") %></center>
 
-  <%= render(partial: "shared/form_list_feedback") %>
+  <%= render "shared/form_list_feedback" %>
 
   <p><label for="list_members"><%= :name_bulk_label.t %>:</label><br/>
   <%= text_area(:list, :members, value: @list_members, cols: 80,
@@ -16,4 +16,3 @@
 
   <div class="help-note"><%= :name_bulk_help.tp %></div>
 <% end %>
-

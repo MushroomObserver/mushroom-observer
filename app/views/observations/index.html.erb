@@ -30,12 +30,10 @@ end %>
                   ) + " (0)"
                 else
                   :list_observation_observations.t + " " +
-                  link_to(
-                    name.display_name.t,
-                    controller: :observations,
-                    action: :observation_search,
-                    pattern: name.text_name
-                  ) + " (#{count})"
+                  link_to(name.display_name.t,
+                          observations_observation_search_path(
+                           pattern: name.text_name
+                          )) + " (#{count})"
                 end %>
           </div>
         <% end %>
@@ -46,9 +44,9 @@ end %>
 <%= paginate_block(@pages) do %>
 
   <ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
-    <%= render(partial: "shared/log_item",
+    <%= render "shared/log_item",
                collection: @objects,
-               as: :object) %>
+               as: :object %>
     <div class="clearfix"></div>
   </ul>
 

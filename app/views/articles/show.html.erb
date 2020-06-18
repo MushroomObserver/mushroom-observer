@@ -4,7 +4,7 @@
 %>
 <div>
  <%= :BY.t %> <%= user_link(@article.user) %>,
- <%= content_tag(:small, @article.created_at.fancy_time) %>
+ <%= tag.small @article.created_at.fancy_time %>
 </div>
 <div class="row mt-3">
   <div class="col-sm-12">

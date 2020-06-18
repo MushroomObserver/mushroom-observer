@@ -4,7 +4,7 @@
 #  = Base Class for Models with Authored Descriptions
 #
 #  This class provides the common functionality between NameDescription and
-#  LocationDescription.
+#  Location::Description.
 #
 #  == Class Methods
 #
@@ -103,7 +103,11 @@ class Description < AbstractModel
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
   def parent_type
-    type_tag.to_s.sub("_description", "")
+    # type_tag.to_s.sub("_description", "")
+    # Note parent will need to be module_parent in Rails 6
+    # Could use self.class.model_name.singular, probably better!
+    self.class.parent.to_s.downcase.sub("::", "_")
+    # self.class.model_name.singular
   end
 
   # Shorthand for "public && public_write"

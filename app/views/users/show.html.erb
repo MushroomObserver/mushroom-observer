@@ -4,71 +4,56 @@
   @title = :show_user_title.t(user: name)
 
   links = {}
-  for key, controller, action in [
-    [ :comments,                      :comment,      :show_comments_by_user           ],
-    [ :comments_for,                  :comment,      :show_comments_for_user          ],
-    [ :images,                        :image,        :images_by_user                  ],
-    [ :location_descriptions_authors, :location,     :location_descriptions_by_author ],
-    [ :location_descriptions_editors, :location,     :location_descriptions_by_editor ],
-    [ :locations,                     :location,     :locations_by_user               ],
-    [ :locations_versions,            :location,     :locations_by_editor             ],
-    [ :name_descriptions_authors,     :name,         :name_descriptions_by_author     ],
-    [ :name_descriptions_editors,     :name,         :name_descriptions_by_editor     ],
-    [ :names,                         :name,         :names_by_user                   ],
-    [ :names_versions,                :name,         :names_by_editor                 ],
-    [ :observations,                  :observation,  :observations_by_user            ],
-    [ :species_lists,                 :species_list, :species_lists_by_user           ],
-    [ :life_list,                     :observation,  :checklist                       ]
+  for key, pathname in [
+    [ :comments,                      "comments_show_comments_by_user_path"   ],
+    [ :comments_for,                  "comments_show_comments_for_user_path"  ],
+    [ :images,                        "images_images_by_user_path"            ],
+    [ :location_descriptions_authors, "location_descriptions_index_by_author_path"  ],
+    [ :location_descriptions_editors, "location_descriptions_index_by_editor_path"  ],
+    [ :locations,                     "locations_locations_by_user_path"      ],
+    [ :locations_versions,            "locations_locations_by_editor_path"    ],
+    [ :name_descriptions_authors,     "name_descriptions_by_author_path"      ],
+    [ :name_descriptions_editors,     "name_descriptions_by_editor_path"      ],
+    [ :names,                         "names_names_by_user_path"              ],
+    [ :names_versions,                'names_names_by_editor_path'            ],
+    [ :observations,                  "observations_observations_by_user_path"],
+    [ :species_lists,                 "species_lists_species_lists_by_user_path"],
+    [ :life_list,                     "users_checklist_path"                  ]
   ]
-    links[key] = url_for(controller: controller, action: action, id: id)
+    links[key] = send(pathname, id: id)
   end
 
   tabs = [
-    link_to(:show_user_contributors.t,
-            controller: "/observations",
-            action: :users_by_contribution)
+    link_to(:show_user_contributors.t, users_users_by_contribution_path)
   ]
   if @show_user == @user
     tabs += [
       link_to(:show_user_your_observations.t,
-              links[:observations]),
+              observations_observations_by_user_path(id: id)),
       link_to(:show_user_comments_for_you.t,
-              links[:comments_for]),
-      link_to(:show_user_your_notifications.t,
-              controller: "/interests",
-              action: :index),
-      link_to(:show_user_edit_profile.t,
-              controller: "/account",
-              action: :profile),
-      link_to(:app_preferences.t,
-              controller: "/account",
-              action: :prefs),
-      link_to(:app_life_list.t,
-              links[:life_list])
+              comments_show_comments_for_user_path(id: id)),
+      link_to(:show_user_your_notifications.t, interests_path),
+      link_to(:show_user_edit_profile.t, edit_account_path),
+      link_to(:app_preferences.t, account_prefs_path),
+      link_to(:app_life_list.t, users_checklist_path(id: id))
     ]
   else
     tabs += [
       link_to(:show_user_observations_by.t(name: name),
-              links[:observations]),
+              observations_observations_by_user_path(id: id)),
       link_to(:show_user_comments_for.t(name: name),
-              links[:comments_for]),
+              comments_show_comments_for_user_path(id: id)),
       link_to(:show_user_email_to.t(name: name),
-              controller: "/email",
-              action: :ask_user_question,
-              id: id)
+              email_ask_user_question_path(id: id))
     ]
   end
   if in_admin_mode?
     tabs += [
       link_to(:change_user_bonuses.t,
-              controller: "/users",
-              action: :change_user_bonuses,
-              id: @show_user.id),
+              users_change_user_bonuses_path(id: @show_user.id)),
       link_to(:DESTROY.t,
-              { controller: "/account",
-                action: :destroy_user,
-                id: @show_user.id},
-                data: { confirm: :are_you_sure.l })
+              account_path(id: @show_user.id, method: "DELETE"),
+              data: { confirm: :are_you_sure.l })
     ]
   end
   @tabsets = {
@@ -128,8 +113,8 @@
     <% if !@show_user.personal_herbarium.blank? %>
       <p>
         <strong><%= :show_user_personal_herbarium.t %>:</strong>
-        <%= link_to(@show_user.personal_herbarium.name.t,
-                    @show_user.personal_herbarium.show_link_args) %>
+        <%= link_to @show_user.personal_herbarium.name.t,
+                    herbarium_path(@show_user.personal_herbarium.id) %>
       </p>
     <% end %>
     <% if !@show_user.notes.blank? %>
@@ -151,10 +136,7 @@
       <div class="col-sm-3">
         <% if @observations %>
           <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
-            <%= thumbnail(obs.thumb_image,
-                          link: { controller: obs.show_controller,
-                                  action: obs.show_action,
-                                  id: obs.id },
+            <%= thumbnail(obs.thumb_image, observation_path(obs.id),
                           votes: true) %>
           <% end %>
         <% end %>
@@ -204,7 +186,7 @@
           <%= if @life_list.num_species > 0
             :show_user_life_list.t(genera: @life_list.num_genera,
                                    species: @life_list.num_species,
-                                   url: links[:life_list])
+                                   url: users_checklist_path(id: id))
           end %>
         </center>
       </div>
@@ -212,10 +194,7 @@
       <div class="col-sm-3">
         <% if @observations %>
           <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
-            <%= thumbnail(obs.thumb_image,
-                          link: { controller: obs.show_controller,
-                                  action: obs.show_action,
-                                  id: obs.id },
+            <%= thumbnail(obs.thumb_image, observation_path(obs.id),
                           votes: true) %>
           <% end %>
         <% end %>

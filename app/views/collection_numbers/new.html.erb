@@ -3,17 +3,17 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :observation),
-            observation_path(@observation, q: get_query_param))
+      observation_path(@observation.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
-    <%= render("form", button: :ADD) %>
+    <% render "collection_numbers/form" button: :ADD %>
   </div>
 
   <div class="col-12 col-sm-5 max-width-text">
-    <%= render "shared/log_item", locals: { object: @observation.rss_log } %>
+    <%= render "shared/log_item", object: @observation.rss_log %>
   </div>
 </div>

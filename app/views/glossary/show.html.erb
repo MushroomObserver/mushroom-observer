@@ -2,13 +2,9 @@
   @title = :show_glossary_term_title.t(name: @glossary_term.name)
 
   tabs = [
-    link_to(:glossary_term_index.t,
-            action: :index),
-    link_to(:create_glossary_term.t,
-            action: :new),
-    link_to(:edit_glossary_term.t,
-            action: :edit,
-            id: @glossary_term.id)
+    link_to(:glossary_term_index.t, glossary_terms_path),
+    link_to(:create_glossary_term.t, new_glossary_term_path),
+    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -28,14 +24,12 @@
   <% end %>
 
   <div class="col-12 max-width-text mb-3">
-    <%= link_with_query(:show_glossary_term_reuse_image.t,
-                        controller: :images,
-                        action: :reuse_image_for_glossary_term,
-                        id: @glossary_term.id) %><br/>
-    <%= link_with_query(:show_glossary_term_remove_image.t,
-                        controller: :images,
-                        action: :remove_images_for_glossary_term,
-                        id: @glossary_term.id) %><br/>
+    <%= link_to(:show_glossary_term_reuse_image.t,
+                images_reuse_image_for_glossary_term_path(@glossary_term.id,
+                  q: get_query_param)) %><br/>
+    <%= link_to(:show_glossary_term_remove_image.t,
+                images_remove_images_for_glossary_term_path(@glossary_term.id,
+                  q: get_query_param)) %><br/>
   </div>
 
   <% @objects.each do |image|  %>

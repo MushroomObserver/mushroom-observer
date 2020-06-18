@@ -2,14 +2,15 @@
   @title = :edit_lifeform_title.t(name: @name.display_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
+    link_to(:cancel_and_show.t(type: :name),
+            name_path(@name.id, q: get_query_param)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row mt-3">
   <div class="col-12">
-    <%= form_tag(add_query_param(action: :edit_lifeform, id: @name.id)) do %>
+    <%= form_with url: names_edit_lifeform_path(id: @name.id) do %>
       <p><%= :edit_lifeform_help.t %></p>
       <table class="table-lifeform">
         <% Name.all_lifeforms.each do |word| %>

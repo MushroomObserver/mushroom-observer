@@ -2,18 +2,23 @@
   @title = :account_manager_title.t
 %>
 
-<%= form_tag(action: :manager) do %>
-  <label for="ids"><%= :account_manager_ids.t %></label>
-    <%= text_field_tag(:ids, @users.map(&:id).map(&:to_s).join(", "), size: 40) %><br/>
-  <label for="login"><%= :account_manager_login.t %></label>
-    <%= text_field_tag(:login, "", size: 40) %><br/>
-  <label for="name"><%= :account_manager_name.t %></label>
-    <%= text_field_tag(:name, "", size: 40) %><br/>
-  <label for="email"><%= :account_manager_email.t %></label>
-    <%= text_field_tag(:email, "", size: 40) %><br/>
+<%= form_with url: account_manager_path do |f| %>
+  <%= f.label :ids, :account_manager_ids.t %>
+  <%= f.text_field :ids,
+        @users.map(&:id).map(&:to_s).join(", "), size: 40,
+        class: "form-control" %>
+  <%= f.label :login, :account_manager_login.t %>
+  <%= f.text_field :login, "", size: 40,
+        class: "form-control" %>
+  <%= f.label :name, :account_manager_name.t %>
+  <%= f.text_field :name, "", size: 40,
+        class: "form-control" %>
+  <%= f.label :email, :account_manager_name.t %>
+  <%= f.text_field :email, "", size: 40,
+        class: "form-control" %>
 
   <br/>
-  <input type="submit" value="<%= :SUBMIT.l %>" class="btn" /><br/>
+  <%= f.submit :SUBMIT.l, class: "btn" %>
   <br/>
 
   <% if !@users.empty? %>
@@ -36,18 +41,25 @@
           <td><%= user.id %></td>
           <td><%= h(user.login) %></td>
           <td><%= h(user.name) %></td>
-          <td><%= text_field_tag("email_#{user.id}", user.email, size: 20) %></td>
-          <td><%= text_field_tag("password_#{user.id}", "", size: 20) %></td>
+          <td><%= f.text_field "email_#{user.id}", user.email,
+                    size: 20, class: "form-control" %></td>
+          <td><%= f.text_field "password_#{user.id}", "",
+                    size: 20, class: "form-control" %></td>
           <td><%= if user.verified
               user.verified.web_date
             else
-              check_box_tag("verified_#{user.id}", checked: !!user.verified)
-            end %>
-          <td><%= user.last_login ? user.last_login.web_date : "" %></td>
+              f.check_box("verified_#{user.id}",
+                  checked: !!user.verified)
+            end %></td>
+          <td><%= user.last_login ? \
+                    user.last_login.web_date : "" %></td>
           <td>
-            <%= link_to(:account_manager_alert.t, action: :create_alert, id: user.id) %> |
-            <%= link_to(:account_manager_bonus.t, controller: :users,
-                        action: :change_user_bonuses, id: user.id) %>
+            <%= link_to(:account_manager_alert.t,
+                        account_create_alert_path(
+                          id: user.id)) %> |
+            <%= link_to(:account_manager_bonus.t,
+                        users_change_user_bonuses_path(
+                          id: user.id)) %>
           </td>
         </tr>
       <% end %>
@@ -55,7 +67,7 @@
     </table>
 
     <br/>
-    <input type="submit" value="<%= :SUBMIT.l %>" class="btn" /><br/>
+    <%= f.submit :SUBMIT.l, class: "btn" %>
     <br/>
   <% end %>
 <% end %>

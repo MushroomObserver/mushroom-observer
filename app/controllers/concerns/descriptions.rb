@@ -4,7 +4,8 @@
 #  = Description Controller Helpers
 #
 #  This is a module that is included by all controllers that deal with
-#  descriptions.  (Just LocationController and NameController right now.)
+#  descriptions.  (Just Locations::DescriptionsController and
+#  Names::DescriptionsController right now.)
 #
 #  == Actions
 #   L = login required
@@ -41,7 +42,7 @@
 #
 ################################################################################
 
-module DescriptionControllerHelpers
+module Descriptions
 
   extend ActiveSupport::Concern
 
@@ -443,7 +444,7 @@ module DescriptionControllerHelpers
     if self.class.name == "NameController"
       find_or_goto_index(NameDescription, id)
     else
-      find_or_goto_index(LocationDescription, id)
+      find_or_goto_index(Location::Description, id)
     end
   end
 
@@ -792,7 +793,7 @@ module DescriptionControllerHelpers
         redirect_to name_description_path(desc.parent_id, desc.id,
                                           q: get_query_param)
       elsif desc.parent.is_a?(Location)
-        redirect_to locations_description_path(desc.parent_id, desc.id,
+        redirect_to location_description_path(desc.parent_id, desc.id,
                                               q: get_query_param)
       end
     end

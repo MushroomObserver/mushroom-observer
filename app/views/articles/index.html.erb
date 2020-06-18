@@ -9,6 +9,6 @@
 <!-- list the projects -->
 <%= paginate_block(@pages) do %>
   <div class="list-group")>
-    <%= render partial: "object", collection: @objects %>
+    <%= render "articles/object", collection: @objects %>
   </div>
 <% end %>
