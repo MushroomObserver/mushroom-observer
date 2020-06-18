@@ -452,7 +452,7 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
-    # redirect_with_query(herbarium.show_link_args)
+    # redirect_with_query(herbarium_path(herbarium))
     redirect_to herbarium_path(
       herbarium.id,
       q: get_query_param
