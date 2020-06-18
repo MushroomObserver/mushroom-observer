@@ -109,14 +109,14 @@
                   <div class="col-sm-4 col-md-3 col-lg-2">
                     <%= if observation.thumb_image_id
                       thumbnail(observation.thumb_image,
-                                link: observation.show_link_args,
+                                link: observation_path(observation),
                                 votes: true)
                     end %>
                   </div>
                   <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="bold">
                       <%= link_with_query(observation.unique_format_name.t,
-                                          observation.show_link_args) %>
+                                          observation_path(observation)) %>
                     </div>
                     <div>
                       <b><%= location_link(observation.place_name,
