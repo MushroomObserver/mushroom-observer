@@ -193,10 +193,9 @@ class CollectionNumbersController < ApplicationController
 
   def build_collection_number
     normalize_parameters
-    if @collection_number.name.blank? || @collection_number.number.blank?
-      flash_error(missing_attribute_msg.t)
-      return
-    elsif name_and_number_used?
+    return if missing_attribute
+
+    if name_and_number_used?
       flash_warning(:edit_collection_number_already_used.t) if
         @other_number.observations.any?
       @other_number.add_observation(@observation)
@@ -212,11 +211,9 @@ class CollectionNumbersController < ApplicationController
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
+    return if missing_attribute
 
-    if @collection_number.name.blank? || @collection_number.number.blank?
-      flash_error(missing_attribute_msg.t)
-      return
-    elsif name_and_number_used?
+    if name_and_number_used?
       merge_collection_numbers(old_format_name)
     else
       @collection_number.save
@@ -225,11 +222,20 @@ class CollectionNumbersController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
-  def missing_attribute_msg
+  def missing_attribute
+    error_message = missing_attribute_error_message
+    return false unless error_message
+    flash_error(error_message.t)
+    true
+  end
+
+  def missing_attribute_error_message
     if @collection_number.name.blank?
       :create_collection_number_missing_name
-    else
+    elsif @collection_number.number.blank?
       :create_collection_number_missing_number
+    else
+      nil
     end
   end
 
