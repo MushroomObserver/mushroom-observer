@@ -72,6 +72,11 @@ class ObjectLinkHelperTest < ActionView::TestCase
   def test_object_path
     obj = projects(:bolete_project)
     assert_equal(project_path(obj.id), object_path(obj))
-    assert_equal(project_path(obj.id, q: "qeb9"), object_path(obj, q: "qeb9"))
+    assert_equal(project_path(obj.id, q: 12_345), object_path(obj, q: 12_345))
+
+    obj = collection_numbers(:coprinus_comatus_coll_num)
+    assert_equal(collection_number_path(obj.id), object_path(obj))
+    assert_equal(collection_number_path(obj.id, q: 12_345),
+                 object_path(obj, q: 12_345))
   end
 end

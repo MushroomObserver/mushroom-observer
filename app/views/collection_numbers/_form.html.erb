@@ -1,5 +1,4 @@
-<% # form_tag(add_query_param(action: :new, id: @observation.id)) do %>
-<%= form_with model: :collection_number do |f| %>
+<%= form_with model: @collection_number do |f| %>
 
   <%= f.submit button.t, class: "btn mx-auto mt-3" %>
 
@@ -13,7 +12,7 @@
   <% end %>
 
   <div class="form-group mt-3">
-    <%= f.label :name, :collection_number_name.t + ":") %>
+    <%= f.label :name, :collection_number_name.t + ":" %>
     <span class="help-note">(<%= :required.t %>)</span>
     <%= f.text_field :name, class: "form-control" %>
   </div>
