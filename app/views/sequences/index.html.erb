@@ -11,7 +11,7 @@
   <div class="card")>
     <% @objects.each do |object| %>
       <div class="card-body">
-        <%= link_with_query(object.unique_format_name, object.show_link_args) %><br/>
+        <%= link_with_query(object.unique_format_name, object_path(object)) %><br/>
         <%= link_with_query(object.observation.unique_format_name.t,
                             object.observation.show_link_args) %><br/>
         <% if object.deposit? %>
