@@ -234,7 +234,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that post keeps query params intact.
     post(:new, params)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
   end
 
   def test_edit_sequence_get
@@ -418,7 +418,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that POST keeps query param when returning to observation.
     post(:edit, params.merge(q: q))
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that POST can return to show, too, with query intact.
     post(:edit, params.merge(back: "show", q: q))
@@ -481,7 +481,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that it keeps query param intact when returning to observation.
     post(:destroy, id: seqs[1].id, q: q)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that it can return to index, too, with query intact.
     post(:destroy, id: seqs[2].id, q: q, back: "index")
