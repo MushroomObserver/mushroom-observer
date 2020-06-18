@@ -48,7 +48,7 @@ class LogItemPresenter
     # get_rss_log_details(rss_log, target)
 
     self.what = target
-    self.name = target.format_name.delete_suffix(observation.name.author).t
+    self.name = target.format_name.delete_suffix(target.name.author).t
     self.author =
       if target.name.respond_to?(:author)
          target.name.author
