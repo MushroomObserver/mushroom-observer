@@ -200,7 +200,7 @@ class NamesController
     deprecate_others
     approve_this_one
     post_approval_comment
-    redirect_with_query(@name.show_link_args)
+    redirect_to(name_path(@name))
   end
 
   def abort_if_name_locked!(name)
