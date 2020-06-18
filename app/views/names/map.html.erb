@@ -3,7 +3,7 @@
 
   tabs = [
     link_to(:name_map_about.t(name: @name.display_name),
-            name_path(@name.show_link_args, q: get_query_param),
+            name_path(@name, q: get_query_param),
     link_to_coerced_query(@query, Location),
     link_to_coerced_query(@query, Observation)
   ]
