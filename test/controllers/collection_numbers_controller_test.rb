@@ -128,7 +128,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form:match('action', ?)", /\?.*q=#{q}/)
+    assert_select("form input", { type: "hidden", value: q })
   end
 
   def test_create
