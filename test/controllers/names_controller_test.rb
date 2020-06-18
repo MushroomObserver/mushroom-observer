@@ -4488,7 +4488,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_no_flash
     assert_name_list_equal([], assigns(:options))
     assert_blank(assigns(:message))
-    assert_redirected_to(name.show_link_args)
+    assert_redirected_to(name_path(name))
     new_str = "#{parent1.classification}\r\nFamily: _Agaricaceae_\r\n"
     assert_equal(new_str, name.reload.classification)
     assert_equal(new_str, names(:boletus_edulis).classification)
@@ -4548,7 +4548,7 @@ class NamesControllerTest < FunctionalTestCase
     new_str = "Kingdom: _Fungi_"
     post(:edit_classification, id: name.id, classification: new_str)
     assert_no_flash
-    assert_redirected_to(name.show_link_args)
+    assert_redirected_to(name_path(name))
     assert_equal(new_str, name.reload.classification)
 
     # Make sure we can do complex case.
@@ -4556,7 +4556,7 @@ class NamesControllerTest < FunctionalTestCase
     new_str = "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
     post(:edit_classification, id: name.id, classification: new_str)
     assert_no_flash
-    assert_redirected_to(name.show_link_args)
+    assert_redirected_to(name_path(name))
     assert_equal(new_str, name.reload.classification)
     assert_equal(new_str, names(:agaricus).classification)
     assert_equal(new_str,
@@ -4607,7 +4607,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Make sure we can add "lichen" to all children.
     post(:propagate_lifeform, id: name.id, add_lichen: "1")
-    assert_redirected_to(name.show_link_args)
+    assert_redirected_to(name_path(name))
     children.each do |child|
       assert(child.reload.lifeform.include?(" lichen "),
              "Child, #{child.search_name}, is missing 'lichen'.")
@@ -4615,7 +4615,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Make sure we can remove "lichen" from all children, too.
     post(:propagate_lifeform, id: name.id, remove_lichen: "1")
-    assert_redirected_to(name.show_link_args)
+    assert_redirected_to(name_path(name))
     children.each do |child|
       assert_not(child.reload.lifeform.include?(" lichen "),
                  "Child, #{child.search_name}, still has 'lichen'.")
