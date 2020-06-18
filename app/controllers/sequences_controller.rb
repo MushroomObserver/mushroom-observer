@@ -153,7 +153,7 @@ class SequencesController < ApplicationController
 
     else
       # TODO: NIMMO is @back_object here always an observation? Check
-      redirect_with_query(@back_object.show_link_args)
+      redirect_to(helpers.object_path(@back_object, q: get_query_param))
     end
   end
 
@@ -179,7 +179,7 @@ class SequencesController < ApplicationController
     @sequence.attributes = whitelisted_sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@back_object.show_link_args)
+      redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
       flash_object_errors(@sequence)
     end
