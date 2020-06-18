@@ -79,7 +79,6 @@ class CollectionNumbersController < ApplicationController
   def new
     store_location
     pass_query_params
-    @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
 
@@ -97,7 +96,6 @@ class CollectionNumbersController < ApplicationController
   def create
     store_location
     pass_query_params
-    @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
 
@@ -114,7 +112,6 @@ class CollectionNumbersController < ApplicationController
   def edit
     store_location
     pass_query_params
-    @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
 
