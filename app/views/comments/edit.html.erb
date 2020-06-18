@@ -2,20 +2,19 @@
   @title = :comment_edit_title.t(name: @target.unique_format_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :comment),
-                    @comment.show_link_args)
+    link_to(:cancel_and_show.t(type: :comment), comment_path(@comment.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-12 max-width-text">
-    <%= render "form" locals: { button_name: :SAVE_EDITS.l } %>
+    <%= render "comments/form" button_name: :SAVE_EDITS.l %>
   </div>
 </div>
 
 <div class="row">
   <div class="col-12 max-width-text">
-    <%= render(partial: "object", object: @target) %>
+    <%= render "comments/object", object: @target %>
   </div>
 </div>

@@ -1,11 +1,11 @@
 <% if reviewer? %>
-  <p><%= set_export_status_controls(location_description) %></p>
+  <p><%= set_export_status_controls(@description) %></p>
 <% end %>
 
 <% even = true
 any = false
-desc = location_description
-for f in LocationDescription.all_note_fields
+desc = @description
+for f in Location::Description.all_note_fields
   value = desc.send(f).to_s
   if value != ""
     even = !even
@@ -20,6 +20,10 @@ for f in LocationDescription.all_note_fields
 <center>
   <%= show_authors_and_editors(desc) %>
   <% if desc.license %>
-    <%= render(partial: "shared/form_#{desc.license.form_name}") %>
+    <%= render "shared/form_#{desc.license.form_name}" %>
   <% end %>
 </center>
+
+<div class="d-none" id="test">
+  Location_Description
+</div>

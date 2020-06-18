@@ -3,17 +3,17 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(action: :add_user_to_group) do %>
+  <%= form_with url: account_add_user_to_group_path do |f| %>
     <div class="form-group mt-3">
-      <%= label_tag(:user_name, :add_user_to_group_user.t + ":") %>
-      <%= text_field_tag(:user_name, "", class: "form-control") %>
+      <%= f.label :user_name, :add_user_to_group_user.t + ":" %>
+      <%= f.text_field :user_name, "", class: "form-control" %>
     </div>
 
     <div class="form-group mt-3">
-      <%= label_tag(:group_name, :add_user_to_group_group.t + ":") %>
-      <%= text_field_tag(:group_name, "", class: "form-control") %>
+      <%= f.label :group_name, :add_user_to_group_group.t + ":" %>
+      <%= f.text_field :group_name, "", class: "form-control" %>
     </div>
 
-    <%= submit_tag(:ADD.t, class: "btn mt-3 mx-auto") %>
+    <%= f.submit :ADD.t, class: "btn mt-3 mx-auto" %>
   <% end %>
 </div>

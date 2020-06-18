@@ -145,6 +145,56 @@ module ObjectLinkHelper
     link_to(name || object.title.t, object.show_link_args)
   end
 
+  # Output path helper. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  # - can accept params: object_path(@project, q: get_query_param)
+  # obj.class.name.downcase.singularize.sub("::", "_")
+  # obj.class.model_name.singular_route_key
+  # obj.class.model_name.route_key
+
+  def object_route_s(obj)
+    # obj.class.name.downcase.singularize.sub("::", "_")
+    obj.class.model_name.singular_route_key
+  end
+
+  def object_route_p(obj)
+    # obj.class.name.downcase.pluralize.sub("::", "_")
+    obj.class.model_name.route_key
+  end
+
+  def object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("#{objroute}_path", params)
+  end
+
+  def edit_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("edit_#{objroute}_path", params)
+  end
+
+  def new_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("new_#{objroute}_path", params)
+  end
+
+  def object_action_path(obj, action, params = {})
+    objroute = object_route_p(obj)
+    params[:id] = obj.id
+    send("#{route}_#{action.to_s}_path", params)
+  end
+
+  # Unnecessary, route is already namespaced.
+  # def namespace_object_action_path(obj, action, params = Hash.new)
+  #   namespace = obj.parent_type
+  #   objroute = object_route_p(obj)
+  #   params[:id] = obj.id
+  #   send("#{namespace}_#{objroute}_#{action.to_s}_path", params)
+  # end
+
   # Wrap description title in link to show_description.
   #
   #   Description: <%= description_link(name.description) %>
@@ -178,8 +228,9 @@ module ObjectLinkHelper
       link_to(result,
               names_descriptions_path(obj.id, desc.id, q: get_query_param))
     elsif type.to_s === "location"
-      link_to(result,
-              locations_descriptions_path(obj.id, desc.id, q: get_query_param))
+      link_to result,
+              location_description_path(location_id: obj.id, id: desc.id,
+                q: get_query_param)
     end
   end
 

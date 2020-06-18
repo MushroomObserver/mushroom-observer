@@ -239,8 +239,8 @@ class Project < AbstractModel
   def orphan_drafts
     drafts = NameDescription.where(
       source_type: NameDescription.source_types[:project], project_id: id
-    ) + LocationDescription.where(
-      source_type: LocationDescription.source_types[:project], project_id: id
+    ) + Location::Description.where(
+      source_type: Location::Description.source_types[:project], project_id: id
     )
     orphan_each_draft(drafts)
     user_group&.destroy

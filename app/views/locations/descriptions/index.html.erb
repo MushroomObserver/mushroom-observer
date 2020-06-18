@@ -1,7 +1,9 @@
 <%
   tabs = [
-    link_with_query(:list_place_names_map.t, controller: "/locations", action: :map_locations),
-    link_to(:all_objects.t(type: :location), action: :index)
+    link_to(:list_place_names_map.t,
+            locations_map_locations_path(q: get_query_param)),
+    link_to(:all_objects.t(type: :location),
+            locations_path(q: get_query_param))
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
@@ -14,7 +16,9 @@
     <div class="card">
       <% for desc in @objects %>
         <div class="card-body">
-          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
+          <%= link_to desc.format_name.t,
+                location_description_path(desc.location_id, desc.id,
+                  q: get_query_param) %>
         </div>
       <% end %>
     </div>

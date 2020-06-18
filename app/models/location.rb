@@ -63,8 +63,8 @@
 #
 #  ==== Attachments
 #  versions::           Old versions.
-#  description::        Main LocationDescription.
-#  descriptions::       Alternate LocationDescription's.
+#  description::        Main Location::Description.
+#  descriptions::       Alternate Location::Description's.
 #  interests::          Interests in this Location.
 #  observations::       Observations using this Location as consensus.
 #  mergable?::          Is it safe to merge this Location into another.
@@ -79,12 +79,12 @@
 class Location < AbstractModel
   require "acts_as_versioned"
 
-  belongs_to :description, class_name: "LocationDescription" # (main one)
+  belongs_to :description, class_name: "Location::Description" # (main one).
   belongs_to :rss_log
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "LocationDescription"
+           class_name: "Location::Description"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :observations

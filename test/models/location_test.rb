@@ -90,7 +90,7 @@ class LocationTest < UnitTestCase
     assert_equal(mary.id, loc.versions.first.user_id)
 
     User.current = dick
-    desc = LocationDescription.create!(
+    desc = Location::Description.create!(
       location: loc,
       notes: "Something."
     )

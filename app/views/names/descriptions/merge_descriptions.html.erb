@@ -2,15 +2,13 @@
   @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
   tabs = [
-    link_with_query(:show_object.t(type: :name),
-                    action: :show,
-                    id: @description.parent_id),
-    link_with_query(:show_object.t(type: :name_description),
-                    action: :show,
-                    id: @description.id)
+    link_to(:show_object.t(type: :name),
+            name_path(id: @description.parent_id, q: get_query_param),
+    link_to(:show_object.t(type: :name_description),
+            name_description_path(name_id: @description.name_id,
+              id: @description.id, q: get_query_param))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render(partial: "shared/merge_descriptions",
-           locals: { description: @description }) %>
+<%= render "shared/merge_descriptions", description: @description %>

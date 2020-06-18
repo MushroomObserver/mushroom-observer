@@ -1,0 +1,50 @@
+<%
+  @title = :signup_title.t
+%>
+
+<div class="max-width-text">
+  <%= form_with model: @new_user do |f| %>
+    <div class="form-group mt-3">
+      <%= f.label :login, :signup_login.t + ":" %>
+      <%= f.text_field :login, data: { autofocus: true },
+            class: "form-control" %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label :password, :signup_choose_password.t + ":" %>
+      <%= f.password_field :password, value: @new_user.password,
+            class: "form-control" %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label :password_confirmation,
+            :signup_confirm_password.t + ":" %>
+      <%= f.password_field :password_confirmation,
+            class: "form-control" %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label :email, :signup_email_address.t + ":" %>
+      <%= f.text_field :email, class: "form-control" %>
+      <%= f.label :email_confirmation,
+            :signup_email_confirmation.t + ":" %>
+      <%= f.text_field :email_confirmation, class: "form-control" %>
+      <div class="help-note">
+        <%= :signup_email_help.tp + :email_spam_notice.tp %>
+      </div>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label :name, :signup_name.t + ":" %>
+      <%= f.text_field :name, class: "form-control" %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= f.label :theme, :signup_preferred_theme.t + ":" %>
+      <%= f.select :theme, [[:theme_random.l, "NULL"]] + MO.themes,
+            class: "form-control" %>
+    </div>
+
+    <%= f.submit :signup_button.l, class: "btn mx-auto mt-3" %>
+  <% end %>
+</div>

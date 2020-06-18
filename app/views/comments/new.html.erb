@@ -3,27 +3,27 @@
 
   target_type = @comment.target_type.underscore.upcase.to_sym
   tabs = [
-    link_with_query(:cancel_and_show.t(type: target_type),
-                    @target.show_link_args)
+    link_to(:cancel_and_show.t(type: target_type),
+            object_path(@target, q: get_query_param))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-12 col-sm-8 max-width-text">
-    <%= render "form" locals: { button_name: :comment_add_create.l } %>
+    <%= render "comments/form", button_name: :comment_add_create.l %>
   </div>
 
   <% if @target.is_a?(Observation) %>
     <div class="d-none d-sm-block col-sm-4">
       <%= render "observations/show_images",
-                 locals: { observation: @target, thumb_size_control: false } %>
+                 observation: @target, thumb_size_control: false %>
     </div>
   <% end %>
 </div>
 
 <div class="row">
   <div class="col-12 max-width-text">
-    <%= render "object", object: @target %>
+    <%= render "comments/object", object: @target %>
   </div>
 </div>

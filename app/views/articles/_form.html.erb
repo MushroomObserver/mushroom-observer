@@ -2,20 +2,20 @@
 <%= form_with model: :article do |f| %>
 
   <div class="form-group mt-3">
-    <%= label_tag(:article_title, :article_title.t + ":") %>
-    <%= f.text_field(:title, class: "form-control") %>
+    <%= f.label :article_title, :article_title.t + ":" %>
+    <%= f.text_field :title, class: "form-control" %>
     <div class="help-block">
       <%= :form_article_title_help.t %>
       <%= :field_textile_link.t %>
     </div>
   </div>
-  
+
   <div class="form-group mt-3">
-    <%= label_tag(:article_body, :article_body.t + ":") %>
-    <%= f.text_area(:body, rows: 10, class: "form-control") %>
+    <%= f.label :article_body, :article_body.t + ":" %>
+    <%= f.text_area :body, rows: 10, class: "form-control" %>
     <p class="help-block"><%= :field_textile_link.t %></p>
   </div>
 
-  <%= submit_tag(:SUBMIT.t, class: "btn mx-auto mt-3") %>
+  <%= f.submit :SUBMIT.t, class: "btn mx-auto mt-3" %>
 
 <% end %>

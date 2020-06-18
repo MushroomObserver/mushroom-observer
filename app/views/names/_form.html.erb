@@ -79,7 +79,7 @@
   <p>
     <label for="notes"><%= :form_names_taxonomic_notes.t %>:</label><br/>
     <%= f.text_area :notes, rows: 6, class: "form-control" %>
-    <%= render partial: "shared/textilize_help" %>
+    <%= render "shared/textilize_help" %>
   </p>
 
   <br/><center><%= f.submit button_name.t, class: "btn" %></center>

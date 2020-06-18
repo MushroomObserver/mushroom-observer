@@ -53,12 +53,12 @@ ACTIONS = {
     no_name_proposal_email: {},
     no_question_email: {},
     prefs: {},
-    profile: {},
+    # profile: {},
     remove_api_keys: {},
     remove_image: {},
     reverify: {},
     send_verify: {},
-    signup: {},
+    # signup: {},
     test_autologin: {},
     test_flash: {},
     turn_admin_off: {},
@@ -288,7 +288,6 @@ ACTIONS = {
   },
   locations: {
     add_to_location: {},
-    adjust_permissions: {},
     advanced_search: {},
     # create_location: {}, # aliased only
     # destroy_location: {}, # aliased only
@@ -308,33 +307,6 @@ ACTIONS = {
     reverse_name_order: {},
     # show_location: {}, # aliased only
     show_past_location: {},
-    show_next: {},
-    show_prev: {}
-    # resources
-    # create: {},
-    # destroy: {},
-    # edit: {},
-    # index: {},
-    # new: {},
-    # show: {},
-    # update: {}
-  },
-  "locations/descriptions": {
-    adjust_permissions: {},
-    # create_location_description: {}, # aliased only
-    # destroy_location_description: {}, # aliased only
-    # edit_location_description: {}, # aliased only
-    index_location_description: {},
-    # list_location_descriptions: {}, # aliased only
-    location_descriptions_by_author: {},
-    location_descriptions_by_editor: {},
-    make_description_default: {},
-    merge_descriptions: {}, # ?
-    # next_location_description: {}, # aliased only
-    # prev_location_description: {}, # aliased only
-    publish_description: {}, # ?
-    # show_location_description: {}, # aliased only
-    show_past_location_description: {},
     show_next: {},
     show_prev: {}
     # resources
@@ -742,16 +714,56 @@ MushroomObserver::Application.routes.draw do
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"
 
-  resources :articles, :collection_numbers, :comments, :glossary, :herbaria,
-    :herbarium_records, :images, :locations, :names, :namings, :observations,
+  resources :articles, :collection_numbers, :comments, :herbaria,
+    :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
 
+  resources :glossary, as: "glossary_terms"
+
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
-  namespace :names do
-    resources :descriptions
+  resources :locations do
+    resources :descriptions, module: :locations
   end
 
-  namespace :locations do
+
+  LD_GET_POST_ACTIONS = {
+    adjust_permissions: {},
+    make_description_default: {},
+    merge_descriptions: {}, # ?
+    publish_description: {}, # ?
+  }
+
+  LD_GET_ACTIONS = {
+    index_location_description: {},
+    index_by_author: {},
+    index_by_editor: {},
+    show_past: {},
+    show_next: {},
+    show_prev: {}
+  }
+
+  # Note: this makes the path be like "location_descriptions_action_path",
+  # otherwise the controller name gives "locations_descriptions_action_path"
+  # which does not match the nested resources paths
+  # TODO: NIMMO simplify action names in controllers!
+  LD_GET_POST_ACTIONS.each_key do |action|
+    match "locations(/:location_id)/descriptions(/:id)/#{action}",
+          controller: "locations/descriptions",
+          action: action,
+          via: [:get, :post],
+          as: "location_descriptions_#{action}",
+          id: /\d+/
+  end
+
+  LD_GET_ACTIONS.each_key do |action|
+    get "locations(/:location_id)/descriptions(/:id)/#{action}",
+        controller: "locations/descriptions",
+        action: action,
+        as: "location_descriptions_#{action}",
+        id: /\d+/
+  end
+
+  namespace :names do
     resources :descriptions
   end
 
@@ -760,6 +772,8 @@ MushroomObserver::Application.routes.draw do
   resources :pivotal, only: [:index]
 
   resources :rss_logs, only: [:index, :show]
+
+  resources :account, only: [:new, :create, :edit, :update, :destroy]
 
   resources :users, only: [:index, :show]
 
@@ -793,11 +807,13 @@ MushroomObserver::Application.routes.draw do
     )
   end
 
+  # FIXME: NIMMO do separate location and name description routing here
   ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
-    get controller.to_s => "#{controller}#index"
+    # Removing, this is a duplicate of resources above - AN
+    # get controller.to_s => "#{controller}#index"
 
-    # Standard routes
+    # Non-standard routes
     actions.each_key do |action|
       get "#{controller}/#{action}", controller: controller, action: action
       match "#{controller}(/#{action}(/:id))",

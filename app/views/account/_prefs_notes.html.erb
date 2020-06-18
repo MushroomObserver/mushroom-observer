@@ -1,7 +1,7 @@
 <% # Notes Settings of Account Preferences Form %>
 <div class="form-group mt-3">
-  <%= content_tag(:span, :prefs_notes_template.t, class: "bold") %>
-  <%= content_tag(:p, :prefs_notes_template_explanation.t) %>
-  <%= form.text_area(:notes_template, rows: 1, class: "form-control") %>
+  <%= tag.b :prefs_notes_template.t %>
+  <%= tag.p :prefs_notes_template_explanation.t %>
+  <%= form.text_area :notes_template, rows: 1, class: "form-control" %>
 </div>
-<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+<%= form.submit :SAVE_EDITS.l, class: "btn mx-auto mt-3" %>

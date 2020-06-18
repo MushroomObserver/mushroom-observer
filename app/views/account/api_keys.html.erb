@@ -2,8 +2,8 @@
   @title = :account_api_keys_title.t
 
   tabs = [
-    link_to(:prefs_link.t,   action: :prefs),
-    link_to(:profile_link.t, action: :profile)
+    link_to(:prefs_link.t, account_prefs_path),
+    link_to(:profile_link.t, edit_account_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 

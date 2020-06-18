@@ -2,8 +2,7 @@
   @title = :glossary_term_index_title.t
 
   tabs = [
-    link_to(:create_glossary_term.t,
-            action: :new)
+    link_to(:create_glossary_term.t, new_glossary_term_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -18,9 +17,8 @@
   <% @glossary_terms.each do |glossary_term| %>
     <tr>
       <td class="max-width-text">
-        <h4><%= link_to(glossary_term.name,
-                        action: :show,
-                        id: glossary_term.id) %>:</h4>
+        <h4><%= link_to glossary_term.name,
+                        glossary_term_path(glossary_term.id) %>:</h4>
         <%= glossary_term.description.tpl %>
       </td>
       <td>

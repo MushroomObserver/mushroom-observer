@@ -10,33 +10,34 @@
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
-      <% for collection_number in @objects %>
+      <% @objects.each do |collection_number| %>
         <tr>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
-              link_with_query(:EDIT.t,
-                              { action: :edit,
-                                id: collection_number.id,
-                                back: :index },
-                              class: "btn btn-xs")
+              link_to :EDIT.t,
+                      edit_collection_number_path(collection_number.id,
+                        q: get_query_param),
+                      back: collection_numbers_path,
+                      class: "btn btn-xs"
             end %>
           </td>
           <td>
-            <i><%= link_with_query(collection_number.format_name.t,
-                                   collection_number.show_link_args) %></i>
+            <i><%= link_to collection_number.format_name.t,
+                           collection_number_path(collection_number.id,
+                              q: get_query_param)%></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|
-              link_to(obs.unique_format_name.t, obs.show_link_args)
+              link_to obs.unique_format_name.t, observation_path(obs.id)
             end.safe_join(", ") %>
           </td>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
-              link_with_query(:DESTROY.t,
-                              { action: :destroy,
-                                id: collection_number.id },
-                              data: { confirm: :are_you_sure.t },
-                              class: "btn btn-xs")
+              link_to :DESTROY.t,
+                      collection_number_path(collection_number.id,
+                        q: get_query_param, method: "DELETE"),
+                      data: { confirm: :are_you_sure.t },
+                      class: "btn btn-xs"
             end %>
           </td>
         </tr>

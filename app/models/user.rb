@@ -259,7 +259,7 @@ class User < AbstractModel
   has_many :images
   has_many :interests
   has_many :locations
-  has_many :location_descriptions
+  has_many :location_descriptions, class_name: "Location::Description"
   has_many :names
   has_many :name_descriptions
   has_many :namings
@@ -289,10 +289,10 @@ class User < AbstractModel
                           class_name: "NameDescription",
                           join_table: "name_descriptions_editors"
   has_and_belongs_to_many :authored_locations,
-                          class_name: "LocationDescription",
+                          class_name: "Location::Description",
                           join_table: "location_descriptions_authors"
   has_and_belongs_to_many :edited_locations,
-                          class_name: "LocationDescription",
+                          class_name: "Location::Description",
                           join_table: "location_descriptions_editors"
   has_and_belongs_to_many :curated_herbaria,
                           class_name: "Herbarium",

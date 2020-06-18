@@ -4,10 +4,8 @@
   num_images = @observation.images.length
 
   tabs = [
-    link_with_query(:show_object.t(type: :observation),
-                    controller: :observations,
-                    action: :show,
-                    id: @observation.id)
+    link_to :show_object.t(type: :observation),
+            observation_path(id: @observation.id, q: get_query_param)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -24,8 +22,8 @@
         <table class="table-namings">
           <thead>
             <tr>
-              <th><%= content_tag(:h3, sugg.confident? ?
-                :suggestions_title.t : :suggestions_title_others.t) %></th>
+              <th><%= tag.h3 sugg.confident? ?
+                :suggestions_title.t : :suggestions_title_others.t %></th>
               <th></th>
             </tr>
           </thead>
@@ -34,21 +32,18 @@
       <% last_level = sugg.confident? %>
       <tr>
         <td>
-          <%= link_with_query(sugg.name.display_name_brief_authors.t,
-                              controller: :names,
-                              action: :show,
-                              id: sugg.name.id) %><br/>
+          <%= link_to sugg.name.display_name_brief_authors.t,
+                      name_path(id: sugg.name.id, q: get_query_param) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
             (<%= :suggestions_already_proposed.t %>)
           <% else %>
-            <%= link_with_query(:suggestions_propose_name.t,
-                                { controller: :naming,
-                                  action: :new,
-                                  id: @observation.id,
-                                  name: sugg.name.search_name,
-                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence" },
-                                { class: "btn mt-3" }) %>
+            <%= link_to :suggestions_propose_name.t,
+                  new_naming_path(id: @observation.id,
+                    name: sugg.name.search_name,
+                    q: get_query_param,
+                    ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"),
+                  class: "btn mt-3" %>
             <% end %>
             <br/><br/>
             <b><%= :suggestions_confidence.t %>:</b><br/>
@@ -63,9 +58,7 @@
           </td>
           <td>
             <%= thumbnail(sugg.image_obs.thumb_image,
-                          link: {controller: sugg.image_obs.show_controller,
-                                 action: sugg.image_obs.show_action,
-                                 id: sugg.image_obs.id}) \
+                          link: object_path(sugg.image_obs)) \
                           if sugg.image_obs.present? %>
         </td>
       </tr>
@@ -74,7 +67,6 @@
 
   </div>
   <div class="col-sm-4 float-sm-right">
-    <%= render(partial: "show_images",
-               locals: { observation: @observation }) %>
+    <%= render "show_images", observation: @observation %>
   </div>
 </div>

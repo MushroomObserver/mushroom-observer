@@ -6,8 +6,8 @@
 <table cellpadding="5" width="100%">
   <tr>
     <td valign="top" width="50%">
-      <%= render( partial: "shared/show_description",
-                  locals: { description: @description }) %>
+      <%= render "shared/show_description",
+                 description: @description %>
     </td>
 
     <td valign="top" width="50%">
@@ -16,10 +16,9 @@
   </tr>
 </table>
 
-<%= render(partial: "name_description", object: @description,
-           locals: { review: true }) %>
-<%= render(partial: "comments/comments",
-           locals: { object: @description, controls: true, limit: 10 }
-          ) if false%>
+<%= render "names/descriptions/name_description",
+           object: @description, review: true %>
+<%= render "comments/comments",
+           object: @description, controls: true, limit: 10 if false%>
 <br/>
 <%= show_object_footer(@description) %>

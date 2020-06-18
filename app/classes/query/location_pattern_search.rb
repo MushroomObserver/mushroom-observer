@@ -15,7 +15,7 @@ class Query::LocationPatternSearch < Query::LocationBase
 
   def search_fields
     "CONCAT(locations.name," +
-      LocationDescription.all_note_fields.map do |x|
+      Location::Description.all_note_fields.map do |x|
         "COALESCE(location_descriptions.#{x},'')"
       end.join(",") +
       ")"

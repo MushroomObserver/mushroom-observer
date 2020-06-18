@@ -2,7 +2,7 @@
 
 class Query::LocationDescriptionBase < Query::Base
   def model
-    LocationDescription
+    Location::Description
   end
 
   def parameter_declarations

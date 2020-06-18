@@ -2,10 +2,11 @@
   @title ||= :edit_name_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:all_objects.t(type: :name), action: :index),
-    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
+    link_to(:all_objects.t(type: :name), names_path),
+    link_to(:cancel_and_show.t(type: :name),
+            name_path(@name.id, q: get_query_param)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "form", locals: { button_name: :SAVE_EDITS.l } %>
+<%= render "names/form", button_name: :SAVE_EDITS.l %>

@@ -1,7 +1,6 @@
 <%
   tabs = [
-    link_to(:all_objects.t(type: :location),
-            controller: :locations, action: :index),
+    link_to(:all_objects.t(type: :location), locations_path),
     link_to_coerced_query(@query, Observation),
     link_to_coerced_query(@query, Location)
   ]

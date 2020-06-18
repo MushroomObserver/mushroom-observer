@@ -251,7 +251,8 @@ class CollectionNumbersController < ApplicationController
     return true if collection_number.can_edit? || in_admin_mode?
 
     flash_error(:permission_denied.t)
-    redirect_to(collection_number.show_link_args)
+    # redirect_to(collection_number.show_link_args)
+    redirect_to collection_number_path(collection_number.id)
     false
   end
 
@@ -289,7 +290,8 @@ class CollectionNumbersController < ApplicationController
 
   def redirect_to_observation_or_collection_number
     if @back_object
-      redirect_with_query(@back_object.show_link_args)
+      # redirect_with_query(@back_object.show_link_args)
+      redirect_to object_path(@back_object, q: get_query_param)
     else
       # redirect_with_query(action: :index_collection_number,
       #                     id: @collection_number.id)

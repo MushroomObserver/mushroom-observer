@@ -10,9 +10,7 @@
 
   <% for datum in @data %>
     <%= link_to(datum[:name].t,
-                controller: :names,
-                action: :show,
-                id: datum[:id]) %>
+                name_path(id: datum[:id])) %>
     <%= datum[:login] %><br/>
   <% end %>
 <% end %>
