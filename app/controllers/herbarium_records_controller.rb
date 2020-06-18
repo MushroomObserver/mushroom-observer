@@ -346,7 +346,7 @@ class HerbariumRecordsController < ApplicationController
 
   def redirect_to_observation_or_herbarium_record
     if @back_object
-      redirect_with_query(@back_object.show_link_args)
+      redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
       # redirect_with_query(
       #   action: :index_herbarium_record,
