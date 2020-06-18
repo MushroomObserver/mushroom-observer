@@ -2,27 +2,24 @@
   @title = :show_location_title.t(name: @location.display_name)
 
   tabs = [
-    link_with_query(show_obs_link_title_with_count(@location),
-                    controller: :observations,
-                    action: :observations_at_location,
-                    id: @location.id),
+    link_to(show_obs_link_title_with_count(@location),
+            observations_observations_at_location_path(id: @location.id,
+              q: get_query_param)),
     link_to(:all_objects.t(type: :location),
-            action: :index),
-    link_with_query(:show_location_create.t,
-                    action: :new),
-    link_with_query(:show_location_edit.t,
-                    action: :edit,
-                    id: @location.id)
+            locations_path(q: get_query_param)),
+    link_to(:show_location_create.t,
+            new_location_path(q: get_query_param)),
+    link_to(:show_location_edit.t,
+            edit_location_path(id: @location.id, q: get_query_param))
   ]
   if in_admin_mode?
     tabs += [
-      link_with_query(:show_location_destroy.t,
-                      { action: :destroy,
-                        id: @location.id },
-                      data: { confirm: :are_you_sure.l }),
-      link_with_query(:show_location_reverse.t,
-                      action: :reverse_name_order,
-                      id: @location.id)
+      link_to(:show_location_destroy.t,
+              location_path(id: @location.id, method: "DELETE"),
+              data: { confirm: :are_you_sure.l }),
+      link_to(:show_location_reverse.t,
+              locations_reverse_name_order_path(id: @location.id,
+                q: get_query_param))
     ]
   end
   tabs << draw_interest_icons(@location)
@@ -43,21 +40,22 @@
   </div>
 
   <div class="col-12">
-    <%= render(partial: "location", object: @location) %>
+    <%= render "locations/location", object: @location %>
   </div>
 
   <div class="col-12">
-    <%= render(partial: "comments/comments",
-               locals: {object: @location, controls: true, limit: 2}) %>
+    <%= render "comments/comments",
+               object: @location, controls: true, limit: 2 %>
   </div>
 
   <div class="col-12 max-width-text-plus-padding">
     <% if @description && @description.has_any_notes? %>
       <hr/>
       <%= show_embedded_description_title(@description, @location) %>
-      <%= render(partial: "location_description", object: @description) %>
-      <%= render(partial: "comments/comments",
-                 locals: {object: @description, controls: true, limit: 2}) %>
+      <%= render "locations/descriptions/location_description",
+                 object: @description %>
+      <%= render "comments/comments",
+                 object: @description, controls: true, limit: 2 %>
       <hr/>
     <% end %>
 

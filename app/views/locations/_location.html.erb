@@ -56,6 +56,7 @@
   </div>
 
   <div class="col-12 max-width-text">
-    <%= ("*" + :NOTES.l + "*: " + location.notes.to_s.html_safe).tpl unless location.notes.blank? %>
+    <%= ("*" + :NOTES.l + "*: " + location.notes.to_s.html_safe).tpl \
+      unless location.notes.blank? %>
   </div>
 </div>

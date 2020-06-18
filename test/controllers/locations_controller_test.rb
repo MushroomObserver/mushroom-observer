@@ -48,14 +48,14 @@ class LocationsControllerTest < FunctionalTestCase
   def location_error(page, params)
     loc_count = Location.count
     past_loc_count = Location::Version.count
-    desc_count = LocationDescription.count
-    past_desc_count = LocationDescription::Version.count
+    desc_count = Location::Description.count
+    past_desc_count = Location::Description::Version.count
     post_requires_login(page, params)
     assert_action_partials(page.to_s, %w[_form_location _textilize_help])
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
-    assert_equal(desc_count, LocationDescription.count)
-    assert_equal(past_desc_count, LocationDescription::Version.count)
+    assert_equal(desc_count, Location::Description.count)
+    assert_equal(past_desc_count, Location::Description::Version.count)
   end
 
   # Post "create_location" with errors.
@@ -334,7 +334,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_update_location
     count = Location::Version.count
-    count2 = LocationDescription::Version.count
+    count2 = Location::Description::Version.count
     contrib = rolf.contribution
 
     # Turn Albion into Barton Flats.
@@ -356,7 +356,7 @@ class LocationsControllerTest < FunctionalTestCase
 
     # Should have created a new version of location only.
     assert_equal(count + 1, Location::Version.count)
-    assert_equal(count2, LocationDescription::Version.count)
+    assert_equal(count2, Location::Description::Version.count)
 
     # Should now look like Barton Flats.
     loc = Location.find(loc.id)
@@ -446,9 +446,9 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
     loc_count = Location.count
-    desc_count = LocationDescription.count
+    desc_count = Location::Description.count
     past_loc_count = Location::Version.count
-    past_desc_count = LocationDescription::Version.count
+    past_desc_count = Location::Description::Version.count
     post_requires_login(:edit, params)
     assert_redirected_to(
       controller: :locations,
@@ -456,9 +456,9 @@ class LocationsControllerTest < FunctionalTestCase
       id: to_go.id
     )
     assert_equal(loc_count - 1, Location.count)
-    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(desc_count, Location::Description.count)
     assert_equal(past_loc_count - 1, Location::Version.count)
-    assert_equal(past_desc_count, LocationDescription::Version.count)
+    assert_equal(past_desc_count, Location::Description::Version.count)
     assert_equal(10 - @new_pts, rolf.reload.contribution)
   end
 
@@ -469,9 +469,9 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = to_stay.display_name
 
     loc_count = Location.count
-    desc_count = LocationDescription.count
+    desc_count = Location::Description.count
     past_loc_count = Location::Version.count
-    past_desc_count = LocationDescription::Version.count
+    past_desc_count = Location::Description::Version.count
     past_locs_to_go = to_go.versions.length
     past_descs_to_go = 0
 
@@ -481,10 +481,10 @@ class LocationsControllerTest < FunctionalTestCase
     # assert_template(action: :show)
     assert_redirected_to(action: :show, id: to_stay.id)
     assert_equal(loc_count - 1, Location.count)
-    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(desc_count, Location::Description.count)
     assert_equal(past_loc_count + 1 - past_locs_to_go, Location::Version.count)
     assert_equal(past_desc_count - past_descs_to_go,
-                 LocationDescription::Version.count)
+                 Location::Description::Version.count)
   end
 
   def test_post_edit_location_locked

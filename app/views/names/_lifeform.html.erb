@@ -7,7 +7,7 @@
 <% end %>
 
 <% if @first_child %>
-  <p><%= link_with_query(:show_name_propagate_lifeform.t,
-                         controller: :names, action: :propagate_lifeform,
-                         id: @name.id) %></p>
+  <p><%= link_to :show_name_propagate_lifeform.t,
+                 names_propagate_lifeform_path(id: @name.id,
+                   q: get_query_param) %></p>
 <% end %>

@@ -3,13 +3,13 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :glossary_term),
-            action: :show, id: @glossary_term.id),
-    link_to(:glossary_term_index.t, action: :index)
+            glossary_term_path(@glossary_term.id)),
+    link_to(:glossary_term_index.t, glossary_terms_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text">
-  <%= render "form" locals: { button_name: :edit_glossary_term_save,
-                              action: :edit } %>
+  <%= render "glossary/form" button_name: :edit_glossary_term_save,
+                             action: :edit %>
 </div>

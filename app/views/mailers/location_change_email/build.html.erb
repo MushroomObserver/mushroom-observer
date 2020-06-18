@@ -7,8 +7,8 @@
   is_now = :email_field_is_now.l
 
   # Why is this user being notified?  If the base Location changed, then look
-  # at all the LocationDescriptions, else only need to look at the
-  # LocationDescription that actually changed.  If notifiable for multiple
+  # at all the Location::Descriptions, else only need to look at the
+  # Location::Description that actually changed.  If notifiable for multiple
   # reasons, choose the least restrictive -- i.e. 'all' first, then admin,
   # editor and lastly author.
   email_type = if @user.email_locations_all
@@ -50,7 +50,7 @@
 
   many_liners = []
   if new_desc
-    for field in LocationDescription.all_note_fields
+    for field in Location::Description.all_note_fields
       old_val = old_desc.send(field) rescue nil
       new_val = new_desc.send(field)
       many_liners.push([("form_locations_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
@@ -65,7 +65,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :location),
-    "#{MO.http_domain}/locations/show_location/#{new_loc.id}"])
+    "#{MO.http_domain}/locations/#{new_loc.id}"])
   links.push([:email_links_not_interested.t(type: :location),
     "#{MO.http_domain}/interests/set_interest?id=#{new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"

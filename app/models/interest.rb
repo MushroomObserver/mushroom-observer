@@ -15,7 +15,7 @@
 #  Currently this functionality is implemented for:
 #
 #  * Location
-#  * LocationDescription
+#  * Location::Description
 #  * Name
 #  * NameDescription
 #  * Observation

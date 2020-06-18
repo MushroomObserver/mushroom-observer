@@ -82,7 +82,7 @@ module ThumbnailHelper
       notes: notes
     }.merge(args)
 
-    render(partial: "images/image_thumbnail", locals: locals)
+    render "images/image_thumbnail", locals: locals
   end
 
   def carousel_image(image, args = {})
@@ -164,7 +164,7 @@ module ThumbnailHelper
       notes: notes
     }.merge(args)
 
-    render(partial: "images/carousel_image", locals: locals)
+    render "images/carousel_image", locals: locals
   end
 
   def carousel_thumbnail(image, args = {})
@@ -199,7 +199,7 @@ module ThumbnailHelper
       html_options: html_options
     }.merge(args)
 
-    render(partial: "images/carousel_thumbnail", locals: locals)
+    render "images/carousel_thumbnail", locals: locals
   end
 
   def show_best_image(obs)
@@ -236,7 +236,7 @@ module ThumbnailHelper
                    title: image_vote_as_help_string(vote),
                    data: { role: "image_vote", id: image.id, val: vote })
     if current_vote == vote
-      link = content_tag(:span, image_vote_as_short_string(vote))
+      link = tag.span image_vote_as_short_string(vote)
     end
     link
   end

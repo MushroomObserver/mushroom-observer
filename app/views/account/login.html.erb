@@ -3,23 +3,29 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(action: :login) do %>
-    <div class="form-group mt-3">
-      <%= label_tag(:user_login, :login_user.t + ":") %>
-      <%= text_field(:user, :login, value: @login, data: {autofocus: @login.blank?}, class: "form-control") %>
-    </div>
+  <%= form_with url: account_login_path do |f| %>
+    <%= f.fields_for :user do |fields| %>
 
-    <div class="form-group mt-3">
-      <%= label_tag(:user_password, :login_password.t + ":") %>
-      <%= password_field(:user, :password, value: "", data: {autofocus: !@login.blank?}, class: "form-control") %>
-    </div>
+      <div class="form-group mt-3">
+        <%= fields.label :login, :login_user.t + ":" %>
+        <%= fields.text_field :login, value: @login,
+              data: { autofocus: @login.blank? }, class: "form-control" %>
+      </div>
 
-    <div class="form-group mt-3 form-inline">
-      <%= check_box(:user, :remember_me, checked: @remember) %>
-      <%= label_tag(:user_remember_me, :login_remember_me.t) %>
-    </div>
+      <div class="form-group mt-3">
+        <%= fields.label :password, :login_password.t + ":" %>
+        <%= fields.password_field :password, value: "",
+              data: { autofocus: !@login.blank? }, class: "form-control" %>
+      </div>
 
-    <%= submit_tag(:login_login.l, class: "btn mx-auto mt-3") %>
+      <div class="form-group mt-3 form-inline">
+        <%= fields.check_box :user, :remember_me, checked: @remember %>
+        <%= fields.label :user_remember_me, :login_remember_me.t %>
+      </div>
+
+    <% end %>
+
+    <%= f.submit :login_login.l, class: "btn mx-auto mt-3" %>
 
     <div class="form-group mt-3">
       <%= :login_forgot_password.tp %>

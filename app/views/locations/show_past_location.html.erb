@@ -6,14 +6,14 @@
 
   tabs = [
     link_to(:show_location.t(location: @location.display_name),
-            @location.show_link_args)
+            location_path(@location.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text-plus-padding">
   <%= show_past_versions(@location) %>
-  <%= render(partial: "location", object: @location) %>
+  <%= render "locations/location", object: @location %>
   <div class="mt-3">
     <%= show_object_footer(@location) %>
   </div>

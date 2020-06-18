@@ -59,6 +59,7 @@ require "mocha/minitest"
   unit_test_case
   functional_test_case
   integration_test_case
+  integration_controller_test
 ].each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
@@ -107,6 +108,8 @@ module ActiveSupport
     #
     # Note: You'll currently still have to declare fixtures explicitly
     # in integration tests -- they do not yet inherit this setting
+    self.set_fixture_class locations: Location
+    self.set_fixture_class 'locations/descriptions' => Location::Description
     fixtures :all
 
     # Add more helper methods to be used by all tests here...

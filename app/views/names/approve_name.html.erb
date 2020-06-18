@@ -2,12 +2,13 @@
   @title = :name_approve_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
+    link_to(:cancel_and_show.t(type: :name),
+            name_path(@name.id, q: get_query_param)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(action: :approve_name, id: @name.id) do %>
+<%= form_with url: names_approve_name_path(id: @name.id) do %>
   <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 
   <% if @approved_names %>
@@ -27,4 +28,3 @@
 
   <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 <% end %>
-

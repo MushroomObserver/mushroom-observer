@@ -6,15 +6,15 @@
 
 <% ContentFilter.all.each do |filter| %>
   <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
-    <%= render partial: "prefs_filter_checkbox",
+    <%= render partial: "account/prefs_filter_checkbox",
                locals: { filter: filter, form: form } %>
   <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
-    <%= render partial: "prefs_filter_radiobox",
+    <%= render partial: "account/prefs_filter_radiobox",
                locals: { filter: filter, form: form } %>
   <% elsif filter.type == :string %>
-    <%= render partial: "prefs_filter_text_field",
+    <%= render partial: "account/prefs_filter_text_field",
                locals: { filter: filter, form: form } %>
   <% end %>
 <% end %>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
+<%= form.submit :SAVE_EDITS.l, class: "btn mx-auto mt-3" %>

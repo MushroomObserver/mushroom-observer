@@ -1,7 +1,7 @@
 <%
   target = comment.target
   user = comment.user
-  user_url = url_for(controller: :users, action: :show, id: user.id)
+  user_url = user_path(id: user.id)
 %>
 
 <div class="comment card-body">
@@ -16,10 +16,7 @@
 
   <% if local_assigns[:show_name] && show_name %>
     <strong class="">
-      <%= link_to(target.unique_format_name.t,
-                  controller: target.show_controller,
-                  action: target.show_action,
-                  id: target.id) \
+      <%= link_to(target.unique_format_name.t, object_path(target)) \
                   rescue :comment_list_deleted.t %>
       <small>(<%= target.class.name.to_sym.t rescue :runtime_object_deleted %>)</small>
     </strong>
@@ -33,15 +30,12 @@
     <%= :BY.t %>: <%= user_link(user) %>
     <% if check_permission(comment) %>
       <span class="text-nowrap">
-        [<%= link_with_query(:EDIT.t,
-                             controller: :comments,
-                             action: :edit,
-                             id: comment.id) %> |
-        <%= link_with_query(:DESTROY.t,
-                            { controller: :comments,
-                              action: :destroy,
-                              id: comment.id },
-                            { data: { confirm: :are_you_sure.l } }) %>]
+        [<%= link_to(:EDIT.t,
+                     edit_comment_path(id: comment.id, q: get_query_param)) %> |
+        <%= link_to(:DESTROY.t,
+                    comment_path(id: comment.id, q: get_query_param,
+                                  method: "DELETE"),
+                    data: { confirm: :are_you_sure.l } ) %>]
       </span>
     <% end %>
     <div class="float-right text-nowrap small my-0 mx-3">

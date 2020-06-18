@@ -43,7 +43,7 @@
 #    :image                 Image's
 #    :image_vote            Vote's on image quality
 #    :location              Location's
-#    :location_description  LocationDescription's
+#    :location_description  Location::Description's
 #    :name                  Scientific Name's
 #    :name_description      NameDescription's
 #    :naming                Name proposals for observations

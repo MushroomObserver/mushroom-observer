@@ -2,9 +2,10 @@
   @title ||= :edit_location_title.t(name: @location.display_name)
 
   tabs = [
-    link_to(:all_objects.t(type: :location), action: :index),
-    link_with_query(:cancel_and_show.t(type: :location),
-                    @location.show_link_args)
+    link_to(:all_objects.t(type: :location),
+            locations_path(q: get_query_param)),
+    link_to(:cancel_and_show.t(type: :location),
+            location_path(@location.id, q: get_query_param))
   ]
   tabs += location_search_links(@location.name)
   @tabsets = {
@@ -13,4 +14,4 @@
   }
 %>
 
-<%= render partial: "form", locals: { button_name: :UPDATE } %>
+<%= render "locations/form", button_name: :UPDATE %>

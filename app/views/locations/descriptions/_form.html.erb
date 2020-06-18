@@ -12,13 +12,13 @@
 
 <%= form_with model: [:locations, @description] do |f| %>
 
-  <%= render partial: "shared/form_description", locals: {form: f} %>
+  <%= render "shared/form_description", form: f %>
 
   <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 
   <hr/>
 
-  <% for field in LocationDescription.all_note_fields %>
+  <% for field in Location::Description.all_note_fields %>
     <div class="form-group">
       <%= f.label field, "form_locations_#{field}".to_sym.t + ":",
                   class: "mb-0" %>
@@ -29,7 +29,7 @@
     </div>
   <% end %>
 
-  <%= render partial: "shared/textilize_help"  %>
+  <%= render "shared/textilize_help"  %>
 
   <%= f.submit button_name.l, class: "btn mx-auto mt-3" %>
 

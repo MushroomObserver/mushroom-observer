@@ -1,0 +1,15 @@
+<%
+  @title ||= @description.format_name.t
+
+  tabs = [
+    link_to(:show_object.t(type: :location),
+            location_path(@description.location_id, q: get_query_param)),
+    link_to(:show_object.t(type: :location_description),
+            location_description_path(@description.location_id, @description.id, 
+              q: get_query_param))
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= render "shared/adjust_permissions",
+           description: @description, groups: @groups, data: @data %>

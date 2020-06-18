@@ -111,7 +111,7 @@ module ControllerExtensions
   #
   def get_with_dump(page, params = {})
     get(page, params: params)
-    html_dump(page, @response.body, params)
+    # html_dump(page, @response.body, params)
   end
 
   # Send a POST request, and save the result in a file for w3c validation.
@@ -124,7 +124,7 @@ module ControllerExtensions
   #
   def post_with_dump(page, params = {})
     post(page, params: params)
-    html_dump(page, @response.body, params)
+    # html_dump(page, @response.body, params)
   end
 
   # Send GET request to a page that should require login.

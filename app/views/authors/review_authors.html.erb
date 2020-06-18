@@ -5,12 +5,8 @@
   parent_type = parent.type_tag
 
   tabs = [
-    link_to(:show_object.t(type: parent_type),
-            controller: parent.show_controller,
-            action: parent.show_action, id: parent.id),
-    link_to(:show_object.t(type: type),
-            controller: @object.show_controller,
-            action: @object.show_action, id: @object.id)
+    link_to(:show_object.t(type: parent_type), object_path(parent)),
+    link_to(:show_object.t(type: type), object_path(@object))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -22,9 +18,10 @@
     <%= :review_authors_authors.t %><br/>
     <% for u in @authors %>
       <%= user_link(u) %>
-      | <%= link_to(:review_authors_remove_author.t, {action: :review_authors,
-                                                      id: @object.id, type: type, remove: u.id},
-                    { data: { confirm: :are_you_sure.l } }) %>
+      | <%= link_to(:review_authors_remove_author.t,
+                    authors_review_authors_path(id: @object.id, type: type,
+                      remove: u.id),
+                    data: { confirm: :are_you_sure.l }) %>
       <br/>
     <% end %>
   </p>
@@ -34,8 +31,9 @@
     <% for u in @users
       unless @authors.member?(u) %>
         <%= user_link(u) %>
-        | <%= link_to(:review_authors_add_author.t, action: :review_authors,
-                      id: @object.id, type: type, add: u.id) %>
+        | <%= link_to(:review_authors_add_author.t,
+                      authors_review_authors_path(id: @object.id, type: type,
+                        add: u.id)) %>
         <br/>
       <% end %>
     <% end %>

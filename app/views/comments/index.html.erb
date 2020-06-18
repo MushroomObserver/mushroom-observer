@@ -11,7 +11,7 @@
   <%= paginate_block(@pages) do %>
     <% if @objects.any? %>
       <% for comment in @objects %>
-        <%= render(partial: "comment", object: comment, locals: {show_name: true}) %>
+        <%= render "comments/comment", object: comment, show_name: true %>
       <% end %>
     <% end %>
   <% end %>

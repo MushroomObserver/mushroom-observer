@@ -10,33 +10,28 @@
 
   <div class="card">
     <div class="card-header bg-secondary text-secondary-text">
-      <%= tag.strong :COMMENTS.t,
-                     class: "d-inline-block" %>
+      <%= tag.strong :COMMENTS.t, class: "d-inline-block" %>
     </div><!-- .card-header -->
 
     <% if !comments.empty? %>
       <% comments.each do |comment| %>
-        <%= render(partial: "comments/comment", object: comment) %>
+        <%= render "comments/comment", object: comment %>
       <% end %>
     <% end %>
 
     <div class="card-body bg-secondary d-flex flex-row justify-content-between">
-      <%= link_with_query(:show_comments_add_comment.t,
-                          { controller: "/comments",
-                            action: :new,
-                            id: object.id,
-                            type: object.class.name },
-                          { class: "btn btn-sm btn-accent" }) if controls %>
+      <%= link_to(:show_comments_add_comment.t,
+                  new_comment_path(id: object.id, type: object.class.name,
+                    q: get_query_param),
+                  class: "btn btn-sm btn-accent") if controls %>
 
       <% if comments.empty? %>
         <%= tag.span :show_comments_no_comments_yet.t %>
       <% elsif limit && and_more > 0
-        link_to(:show_comments_and_more.t(num: and_more),
-                { controller: "/comments",
-                  action: :show_comments_for_target,
-                  id: object.id,
-                  type: object.class.name },
-                { class: "btn btn-sm btn-accent" })
+        link_to :show_comments_and_more.t(num: and_more),
+                comments_show_comments_for_target_path(id: object.id,
+                  type: object.class.name, q: get_query_param),
+                class: "btn btn-sm btn-accent"
       end %>
     </div><!-- .card-body -->
 

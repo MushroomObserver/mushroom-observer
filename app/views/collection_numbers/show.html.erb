@@ -3,11 +3,14 @@
 
   tabs = []
   if in_admin_mode? || @collection_number.can_edit?
-    tabs << link_with_query(:edit_collection_number.t,
-                            action: :edit, id: @collection_number.id, back: :show)
-    tabs << link_with_query(:delete_collection_number.t,
-                            {action: :destroy, id: @collection_number.id},
-                            data: {confirm: :are_you_sure.t})
+    tabs << link_to(:edit_collection_number.t,
+                    edit_collection_number_path(@collection_number.id,
+                      q: get_query_param),
+                    back: collection_number_path(@collection_number.id))
+    tabs << link_to(:delete_collection_number.t,
+                    collection_number_path(@collection_number.id,
+                      q: get_query_param, method: "DELETE"),
+                    data: {confirm: :are_you_sure.t})
   end
 
   @tabsets = {
@@ -20,11 +23,13 @@
   <p>
     <%= :collection_number_name.t %>: <%= @collection_number.name %><br/>
     <%= :collection_number_number.t %>: <%= @collection_number.number %><br/>
-    <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %><br/>
+    <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %>\
+      <br/>
   </p>
 
   <div class="mt-3">
-    <%= render(partial: "shared/log_item", collection: @collection_number.observations, as: :object) %>
+    <%= render "shared/log_item",
+               collection: @collection_number.observations, as: :object %>
   </div>
 
   <div class="text-center">

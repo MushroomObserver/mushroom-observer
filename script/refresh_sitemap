@@ -68,7 +68,7 @@ OBJECT_TYPES = [
    "NameDescription",
    "names/show_name_description/ID"],
   ["location_descriptions",
-   "LocationDescription",
+   "Location::Description",
    "locations/show_location_description/ID"]
 ].freeze
 

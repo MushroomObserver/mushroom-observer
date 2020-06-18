@@ -3,7 +3,7 @@
 class Query::LocationDescriptionInSet < Query::LocationDescriptionBase
   def parameter_declarations
     super.merge(
-      ids: [LocationDescription],
+      ids: [Location::Description],
       old_by?: :string
     )
   end

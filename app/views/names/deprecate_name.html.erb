@@ -2,12 +2,14 @@
   @title = :name_deprecate_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
+    link_to(:cancel_and_show.t(type: :name),
+            name_path(@name.id, q: get_query_param)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(action: :deprecate_name, id: @name.id, approved_name: @what) do %>
+<%= form_with url: names_deprecate_name_path(id: @name.id,
+                                             approved_name: @what) do %>
   <br/><center><%= submit_tag(:name_deprecate_submit.l, class: "btn") %></center><br/>
 
   <%= render(partial: "shared/form_name_feedback",

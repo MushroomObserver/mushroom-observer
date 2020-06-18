@@ -51,7 +51,7 @@ class AuthorControllerTest < FunctionalTestCase
 
   def test_review_authors_locations
     desc = location_descriptions(:albion_desc)
-    params = { id: desc.id, type: "LocationDescription" }
+    params = { id: desc.id, type: "Location::Description" }
     desc.authors.clear
     assert_user_list_equal([], desc.reload.authors)
 

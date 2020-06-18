@@ -127,7 +127,7 @@ class AbstractModelTest < UnitTestCase
     num_past_names = Name.versioned_class.count
     num_past_name_descs = NameDescription.versioned_class.count
     num_past_locations = Location.versioned_class.count
-    num_past_loc_descs = LocationDescription.versioned_class.count
+    num_past_loc_descs = Location::Description.versioned_class.count
 
     [
       [obs_attrs,      obs],
@@ -148,7 +148,7 @@ class AbstractModelTest < UnitTestCase
     assert_equal(num_past_name_descs + 0, NameDescription.versioned_class.count)
     assert_equal(num_past_locations + 0, Location.versioned_class.count)
     assert_equal(num_past_loc_descs + 0,
-                 LocationDescription.versioned_class.count)
+                 Location::Description.versioned_class.count)
   end
 
   # -------------------------------------------------------------------

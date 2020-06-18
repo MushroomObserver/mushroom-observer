@@ -14,8 +14,8 @@ xml.response(
 ) do
   for taxon in @data.names
     xml.taxon do
-      xml.dc(:identifier, "#{MO.http_domain}/names/show_name/#{taxon.id}")
-      xml.dc(:source, "#{MO.http_domain}/names/show_name/#{taxon.id}")
+      xml.dc(:identifier, "#{MO.http_domain}/names/#{taxon.id}")
+      xml.dc(:source, "#{MO.http_domain}/names/#{taxon.id}")
       for (rank, name) in Name.parse_classification(taxon.classification)
         xml.dwc(rank, name) if MO.eol_ranks.member?(rank)
       end
@@ -77,7 +77,7 @@ xml.response(
           xml.license(@data.license_url(image.license_id))
           xml.dcterms(:rightsHolder, user)
           xml.audience("General public")
-          xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
+          xml.dc(:source, "#{MO.http_domain}/images/#{image.id}")
           xml.dc(:description,
                  "Mushroom Observer Image #{image.id}: "\
                  "#{@data.image_to_names(image.id)}",
