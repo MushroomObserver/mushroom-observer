@@ -6,7 +6,7 @@
 
   tabs = [
     link_to(:app_list_projects.t, action: :index),
-    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+    link_with_query(:cancel_and_show.t(type: :project), project_path(@project))
   ]
   if check_permission(@project)
     tabs << link_with_query(:change_member_status_edit.t, action: :edit,
