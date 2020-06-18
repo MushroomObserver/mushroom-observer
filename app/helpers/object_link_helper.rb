@@ -112,7 +112,7 @@ module ObjectLinkHelper
       link_to(name, user_path(user))
     elsif user
       name ||= user.unique_text_name
-      # link_to(name, user.show_link_args)
+      # link_to(name, user_path(user))
       link_to(name, user_path(user.id))
     else
       "?"
