@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: Fix thumbnail
 # Name, location, and image all have presentation markup baked in
 # HTML markup should be in the views or partials
@@ -19,24 +21,21 @@ class LogItemPresenter
 
   def initialize(object, view)
     case object
-      when RssLog
-        rss_log_to_presenter(object, view)
-      when Image
-        image_to_presenter(object, view)
-      when Observation
-        observation_to_presenter(object, view)
-      when User
-        user_to_presenter(object, view)
+    when RssLog
+      rss_log_to_presenter(object, view)
+    when Image
+      image_to_presenter(object, view)
+    when Observation
+      observation_to_presenter(object, view)
+    when User
+      user_to_presenter(object, view)
     end
   end
 
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
-
-    if !target.respond_to?(:name)
-      target = rss_log
-    end
+    target = rss_log unless target.respond_to?(:name)
 
     # TODO: fix other objects RSS log could target..
     # case target
@@ -51,9 +50,9 @@ class LogItemPresenter
     self.name = target.format_name.delete_suffix(target.name.author).t
     self.author =
       if target.name.respond_to?(:author)
-         target.name.author
+        target.name.author
       else
-         ""
+        ""
       end
     self.id = target.id
 
@@ -62,7 +61,9 @@ class LogItemPresenter
     self.when  = target.when.web_date if target&.respond_to?(:when)
     self.who   = view.user_link(target.user) if target&.user
     self.thumbnail =
-      if target&.respond_to?(:thumb_image) && target&.thumb_image && target&.thumb_image.content_type
+      if target&.respond_to?(:thumb_image) &&
+         target&.thumb_image &&
+         target&.thumb_image&.content_type
         view.thumbnail(target.thumb_image,
                        link: {
                          controller: target.show_controller,
@@ -76,10 +77,10 @@ class LogItemPresenter
 
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation, view)
-
-    self.what   = observation
+    self.what = observation
     if observation.name.respond_to?(:author)
-      self.name   = observation.format_name.delete_suffix(observation.name.author).t
+      self.name   = observation.format_name.
+                    delete_suffix(observation.name.author).t
       self.author = observation.name.author
     else
       self.name = observation.format_name
@@ -92,7 +93,7 @@ class LogItemPresenter
     #                                         action: :show,
     #                                         id: observation.id)
     self.where  = view.location_link(observation.place_name,
-                                    observation.location)
+                                     observation.location)
     return unless observation.thumb_image
 
     self.thumbnail =

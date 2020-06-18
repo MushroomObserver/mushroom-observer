@@ -223,6 +223,7 @@ class CollectionNumbersController < ApplicationController
   def missing_attribute
     error_message = missing_attribute_error_message
     return false unless error_message
+
     flash_error(error_message.t)
     true
   end
@@ -232,8 +233,6 @@ class CollectionNumbersController < ApplicationController
       :create_collection_number_missing_name
     elsif @collection_number.number.blank?
       :create_collection_number_missing_number
-    else
-      nil
     end
   end
 
@@ -285,7 +284,7 @@ class CollectionNumbersController < ApplicationController
       name: @collection_number.name,
       number: @collection_number.number
     ).first
-    @other_number&. != @collection_number
+    @other_number&.!= @collection_number
   end
 
   def figure_out_where_to_go_back_to
