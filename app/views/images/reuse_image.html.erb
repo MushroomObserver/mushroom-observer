@@ -7,7 +7,7 @@
     obs_id = @observation.id
     tabs = [
       link_with_query(:show_object.t(type: :observation),
-                      Observation.show_link_args(obs_id)),
+                      observation_path(obs_id)),
       link_with_query(:image_reuse_edit.t,
                       controller: :observations,
                       action: :edit,
