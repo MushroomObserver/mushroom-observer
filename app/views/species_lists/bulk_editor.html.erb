@@ -128,7 +128,7 @@
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
     <%=
-      args = Observation.show_link_args("XXX")
+      args = observation_path("XXX")
       url = url_for(add_query_param(args, @query))
       link_to(:SHOW.l,
               "javascript:row_button(#{j url})")
