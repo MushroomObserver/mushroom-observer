@@ -3,7 +3,7 @@
 
   tabs = [
     link_with_query(:cancel_and_show.t(type: :species_list),
-                    @species_list.show_link_args),
+                    species_list_path(@species_list)),
     link_with_query(:species_list_upload_title.t,
                     action: :upload_species_list, id: @species_list.id)
   ]
