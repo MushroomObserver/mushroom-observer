@@ -22,7 +22,7 @@
             end %>
           </td>
           <td>
-            <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
+            <%= link_to(herbarium.name.t, herbarium_path(herbarium)) %>
           </td>
           <td>
             <%= link_with_query(herbarium_record.herbarium_label.t,

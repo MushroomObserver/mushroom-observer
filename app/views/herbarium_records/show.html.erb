@@ -21,7 +21,7 @@
 
 <div class="max-width-text mt-3">
   <p>
-    <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium.show_link_args) %><br/>
+    <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium_path(herbarium)) %><br/>
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
     <%= :herbarium_record_accession_number.t %>: <%= @herbarium_record.accession_number %><br/>
     <%= :herbarium_record_user.t %>: <%= user_link(@herbarium_record.user) %><br/>
