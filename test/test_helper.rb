@@ -59,6 +59,7 @@ require "mocha/minitest"
   unit_test_case
   functional_test_case
   integration_test_case
+  integration_controller_test
 ].each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
