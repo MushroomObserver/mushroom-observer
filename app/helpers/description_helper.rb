@@ -61,8 +61,8 @@ module DescriptionHelper
     end
     if (desc.source_type == :project) &&
        (project = desc.source_object)
-      tabs << link_with_query(:show_object.t(type: :project),
-                              project.show_link_args)
+      tabs << link_to(:show_object.t(type: :project),
+                      project_path(project, q: get_query_param))
     end
     if admin && (desc.source_type != :public)
       tabs << link_with_query(:show_description_publish.t,
