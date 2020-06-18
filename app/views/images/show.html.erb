@@ -187,7 +187,8 @@ end %>
         <% @image.observations.each do |obs| %>
           <div>
             <%= :OBSERVATION.t %>:
-            <%= link_with_query(obs.unique_format_name.t, observation_path(obs)) %>
+            <%= link_with_query(obs.unique_format_name.t,
+                                observation_path(obs)) %>
           </div>
         <% end %>
         <% @image.subjects.each do |user| %>
@@ -199,7 +200,8 @@ end %>
         <% @image.all_glossary_terms.each do |glossary_term| %>
           <div>
             <%= :GLOSSARY_TERM.t %>:
-            <%= link_with_query(glossary_term.format_name.t, glossary_term_path(glossary_term)) %>
+            <%= link_with_query(glossary_term.format_name.t,
+                                glossary_term_path(glossary_term)) %>
           </div>
         <% end %>
         <% if !@image.notes.blank? %>
