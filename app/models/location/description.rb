@@ -41,8 +41,8 @@
 #  == Instance Methods
 #
 #  versions::            Old versions.
-#  comments::            Comments about this NameDescription. (not used yet)
-#  interests::           Interest in this NameDescription
+#  comments::            Comments about this Location::Description. (none yet)
+#  interests::           Interest in this Location::Description
 #
 #  == Callbacks
 #

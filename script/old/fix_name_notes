@@ -38,8 +38,8 @@ def delete_desc(desc, notes)
 end
 
 i = 0
-num = NameDescription.count
-for desc in NameDescription.all
+num = Name::Description.count
+for desc in Name::Description.all
   i += 1
   $stderr.print "%.1f%%...\r" % (i.to_f / num * 100)
   $stderr.flush

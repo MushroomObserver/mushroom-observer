@@ -174,10 +174,10 @@ module ObjectLinkHelper
     # (or namespace as symbol: type.to_s.pluralize.to_sym)
     if type.to_s == "name"
       link_to(result,
-              names_descriptions_path(obj.id, desc.id, q: get_query_param))
+              name_description_path(obj.id, desc.id, q: get_query_param))
     elsif type.to_s == "location"
       link_to(result,
-              locations_descriptions_path(obj.id, desc.id, q: get_query_param))
+              location_description_path(obj.id, desc.id, q: get_query_param))
     end
   end
 
@@ -226,6 +226,15 @@ module ObjectLinkHelper
     end
   end
 
+  # Wrap object's name in link to the object, return nil if no object
+  #   Project: <%= project_link(draft_name.project) %>
+  #   Species List: <%= species_list_link(observation.species_lists.first) %>
+  def link_to_object(object, name = nil)
+    return nil unless object
+
+    link_to(name || object.title.t, object_path(object.id))
+  end
+
   # Output path helpers. Useful when:
   # - code permits different classes of objects, e.g., @back_object
   # - can save space: object_path(@project) vs project_path(@project.id)
@@ -246,6 +255,12 @@ module ObjectLinkHelper
     objroute = object_route_s(obj)
     params[:id] = obj.id
     send("new_#{objroute}_path", params)
+  end
+
+  def object_action_path(obj, action, params = {})
+    objroute = object_route_p(obj)
+    params[:id] = obj.id
+    send("#{route}_#{action.to_s}_path", params)
   end
 
   def object_route_s(obj)

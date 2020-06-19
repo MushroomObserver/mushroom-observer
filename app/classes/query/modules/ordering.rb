@@ -49,7 +49,7 @@ module Query::Modules::Ordering
         "locations.name ASC, location_descriptions.created_at ASC"
       elsif model == Name
         "names.sort_name ASC"
-      elsif model == NameDescription
+      elsif model == Name::Description
         add_join(:names)
         "names.sort_name ASC, name_descriptions.created_at ASC"
       elsif model == Observation

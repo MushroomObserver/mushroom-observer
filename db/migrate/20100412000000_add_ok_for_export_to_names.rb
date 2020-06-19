@@ -7,7 +7,7 @@ class AddOkForExportToNames < ActiveRecord::Migration[4.2]
     add_column :name_descriptions, :project_id, :integer
     add_column :location_descriptions, :project_id, :integer
 
-    for desc in NameDescription.where(source_type: :project)
+    for desc in Name::Description.where(source_type: :project)
       project = Project.find_by_title(desc.source_name)
       Name.connection.update %(
         UPDATE name_descriptions SET project_id = #{project.id}

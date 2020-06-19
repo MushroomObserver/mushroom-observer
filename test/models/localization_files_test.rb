@@ -188,7 +188,7 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_review_status_translations
-    tags = NameDescription.all_review_statuses.map do |status|
+    tags = Name::Description.all_review_statuses.map do |status|
       "review_#{status}".to_sym
     end
     assert_no_missing_translations(tags, "review status")

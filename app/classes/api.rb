@@ -45,7 +45,7 @@
 #    :location              Location's
 #    :location_description  Location::Description's
 #    :name                  Scientific Name's
-#    :name_description      NameDescription's
+#    :name_description      Name::Description's
 #    :naming                Name proposals for observations
 #    :observation           Observation's
 #    :project               Project's

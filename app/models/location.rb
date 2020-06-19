@@ -71,7 +71,7 @@
 #
 #  == Callbacks
 #
-#  create_description:: After create: create (empty) official NameDescription.
+#  create_description:: After create: new (empty) official Location::Description.
 #  notify_users::       After save: send email notification.
 #
 ################################################################################

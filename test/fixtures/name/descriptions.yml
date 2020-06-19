@@ -7,8 +7,8 @@ DEFAULTS: &DEFAULTS
   admin_groups:  reviewers
   public:        1
   reader_groups: all_users
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type:   <%= NameDescription.source_types[:public] %>
+  review_status: <%= Name::Description.review_statuses[:unreviewed] %>
+  source_type:   <%= Name::Description.source_types[:public] %>
   user:          rolf
   version:       1
   writer_groups: all_users
@@ -48,7 +48,7 @@ peltigera_desc: # 6
   user: dick
   version: 2
   reviewer: rolf
-  review_status: <%= NameDescription.review_statuses[:vetted] %>
+  review_status: <%= Name::Description.review_statuses[:vetted] %>
   review_status: 3
   ok_for_export: 1
   last_review: 2009-01-02 02:01:01
@@ -73,7 +73,7 @@ draft_coprinus_comatus: # 8
   name: coprinus_comatus
   user: katrina
   gen_desc: This is a general description of __C. comatus__.
-  source_type: <%= NameDescription.source_types[:project] %>
+  source_type: <%= Name::Description.source_types[:project] %>
   source_name: EOL Project
   project: eol_project
   public: 0
@@ -87,7 +87,7 @@ draft_agaricus_campestris: # 9
   <<: *DEFAULTS
   name: agaricus_campestris
   user: mary
-  source_type: <%= NameDescription.source_types[:project] %>
+  source_type: <%= Name::Description.source_types[:project] %>
   source_name: EOL Project
   project: eol_project
   admin_groups: eol_admins, mary_only
@@ -101,7 +101,7 @@ draft_boletus_edulis: # 10
   <<: *DEFAULTS
   name: boletus_edulis
   user: dick
-  source_type: <%= NameDescription.source_types[:project] %>
+  source_type: <%= Name::Description.source_types[:project] %>
   source_name: Bolete Project
   project: bolete_project
   public: 0
@@ -116,7 +116,7 @@ draft_lactarius_alpinus: # 11
   name: lactarius_alpinus
   user: katrina
   classification: "**Domain**: Eukarya"
-  source_type: <%= NameDescription.source_types[:project] %>
+  source_type: <%= Name::Description.source_types[:project] %>
   source_name: EOL Project
   project: eol_project
   public: 0
@@ -138,7 +138,7 @@ peltigera_user_desc: # 13
   user: mary
   ok_for_export: 1
   gen_desc: "Mary's general description of _Peltigera_."
-  source_type: <%= NameDescription.source_types[:user] %>
+  source_type: <%= Name::Description.source_types[:user] %>
   public: 0
   admin_groups: mary_only
   authors: mary
@@ -151,7 +151,7 @@ peltigera_source_desc: # 14
   user: katrina
   ok_for_export: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
-  source_type: <%= NameDescription.source_types[:source] %>
+  source_type: <%= Name::Description.source_types[:source] %>
   source_name: Lichens of North America
   admin_groups: katrina_only
   authors: katrina
@@ -203,7 +203,7 @@ boletus_edulis_desc: # 20
   ok_for_export:    1
   public:           1
   review_status:    1
-  source_type:      <%= NameDescription.source_types[:public] %>
+  source_type:      <%= Name::Description.source_types[:public] %>
   updated_at:       2012-07-12 06:32:18
   user:             roy # this was admin, but we don't have an admin in test
   version:          1

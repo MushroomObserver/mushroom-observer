@@ -12,7 +12,7 @@ class NamesController
   # Show the data getting sent to EOL
   def eol_preview
     @timer_start = Time.current
-    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
+    eol_data(Name::Description.review_statuses.values_at(:unvetted, :vetted))
     @timer_end = Time.current
   end
 
@@ -28,13 +28,13 @@ class NamesController
   # Gather data for EOL feed.
   def eol_data(review_status_list)
     @names      = []
-    @descs      = {} # name.id    -> [NameDescription, NmeDescription, ...]
+    @descs      = {} # name.id    -> [Name::Description, NmeDescription, ...]
     @image_data = {} # name.id    -> [img.id, obs.id, user.id, lic.id, date]
     @users      = {} # user.id    -> user.legal_name
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    descs = NameDescription.where(
+    descs = Name::Description.where(
       eol_description_conditions(review_status_list)
     )
 
@@ -92,7 +92,7 @@ class NamesController
     @timer_start = Time.current
     @data = EolData.new
   end
-  
+
   # TODO: Add ability to preview synonyms?
   # TODO: List stuff that's almost ready.
   # TODO: Add EOL logo on pages getting exported

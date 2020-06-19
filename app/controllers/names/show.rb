@@ -9,14 +9,14 @@ class NamesController
   #
   ##############################################################################
 
-  # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
+  # Show a Name, one of its Name::Description's, associated taxa, and a bunch of
   # relevant Observations.
   def show
     pass_query_params
     store_location
     clear_query_in_session
 
-    # Load Name and NameDescription along with a bunch of associated objects.
+    # Load Name and Name::Description along with a bunch of associated objects.
     name_id = params[:id].to_s
     @name = find_or_goto_index(Name, name_id)
     return unless @name
@@ -24,7 +24,7 @@ class NamesController
     update_view_stats(@name)
 
     # Tell robots the proper URL to use to index this content.
-    @canonical_url = "#{MO.http_domain}/names/show_name/#{@name.id}"
+    @canonical_url = "#{MO.http_domain}/names/#{@name.id}"
 
     # Get a list of projects the user can create drafts for.
     @projects = @user&.projects_member&.select do |project|
@@ -101,7 +101,7 @@ class NamesController
   def set_review_status
     pass_query_params
     id = params[:id].to_s
-    desc = NameDescription.find(id)
+    desc = Name::Description.find(id)
     desc.update_review_status(params[:value]) if reviewer?
     # redirect_with_query(
     #   action: :show,

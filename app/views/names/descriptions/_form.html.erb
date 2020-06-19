@@ -18,7 +18,7 @@
     <%= render partial: "shared/textilize_help" %>
 
     <% rank = rank_as_lower_string(@description.parent.rank) %>
-    <% for field in NameDescription.all_note_fields %>
+    <% for field in Name::Description.all_note_fields %>
       <div class="form-group">
         <%= f.label field, "form_names_#{field}".to_sym.t + ":" %>
         <p class="help-block mt-0">

@@ -6,10 +6,10 @@ require File.expand_path("../config/environment.rb", __dir__)
 
 Location::Description.all.
   each { |x| puts "Location::Description #{x.id} #{x.source_type.inspect}" }
-NameDescription.all.
-  each { |x| puts "NameDescription #{x.id} #{x.review_status.inspect}" }
-NameDescription.all.
-  each { |x| puts "NameDescription #{x.id} #{x.source_type.inspect}" }
+Name::Description.all.
+  each { |x| puts "Name::Description #{x.id} #{x.review_status.inspect}" }
+Name::Description.all.
+  each { |x| puts "Name::Description #{x.id} #{x.source_type.inspect}" }
 Name.all.each { |x| puts "Name #{x.id} #{x.rank.inspect}" }
 Name::Version.all.each { |x| puts "Name::Version #{x.id} #{x.rank.inspect}" }
 Notification.all.each { |x| puts "Notification #{x.id} #{x.flavor.inspect}" }

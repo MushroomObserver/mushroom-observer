@@ -32,7 +32,7 @@ class DescriptionTest < UnitTestCase
   # ------------------------------------------------------------------
 
   def test_authors_and_editors
-    [Location::Description, NameDescription].each do |model|
+    [Location::Description, Name::Description].each do |model|
       case model.name
       when "Location::Description"
         obj = model.new(location_id: locations(:albion).id,
@@ -40,7 +40,7 @@ class DescriptionTest < UnitTestCase
         a = 50
         e = 5
         set_nontrivial = "notes="
-      when "NameDescription"
+      when "Name::Description"
         obj = model.new(name_id: names(:fungi).id,
                         license_id: licenses(:ccnc25).id)
         a = 100

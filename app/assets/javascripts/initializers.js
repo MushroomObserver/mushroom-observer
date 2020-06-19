@@ -4,7 +4,7 @@
 
 // With Turbolinks, jQuery(document).on('ready' doesn't fire after first load
 // because new content is loaded asynchronously and added to the existing page.
-// To achieve the same effect, we bind to jQuery(document).on('ready page:load'
+// To achieve the same effect, we bind to jQuery(document).on('turbolinks:load'
 // https://github.com/turbolinks/turbolinks#installing-javascript-behavior
 
 // TODO: check these listeners
@@ -25,7 +25,7 @@ var lazyLoadInstance = new LazyLoad({
   // ... more custom settings?
 });
 
-$(document).on('ready page:load', function () {
+$(document).on('turbolinks:load', function () {
 
   // This works better than straight autofocus attribute in firefox.
   // Normal autofocus causes it to scroll window hiding title etc.

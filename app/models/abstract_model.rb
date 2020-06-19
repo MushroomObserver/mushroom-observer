@@ -335,6 +335,9 @@ class AbstractModel < ApplicationRecord
   # a controller or action may be called by string/symbol interpolation,
   # making the methods tricky to search/replace. (Watch for #{:type}!)
 
+  # TODO: Most of these can all be safely deleted when replaced everywhere,
+  # except maybe EOL action. Check via grep - 6/18/20
+
   ##############################################################################
   #
   #  :section: Show Controller / Action
@@ -353,7 +356,7 @@ class AbstractModel < ApplicationRecord
         "/#{name.underscore}"
       when "Location::Description"
         "/locations/descriptions"
-      when "NameDescription"
+      when "Name::Description"
         "/names/descriptions"
       else
         "/#{name.pluralize.underscore}"
