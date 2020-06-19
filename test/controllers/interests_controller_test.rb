@@ -11,7 +11,7 @@ class InterestsControllerTest < FunctionalTestCase
                     user: rolf, state: true)
     Interest.create(target: names(:agaricus_campestris), user: rolf,
                     state: true)
-    get_with_dump(:list_interests)
+    get(:list_interests)
     assert_template("list_interests")
   end
 

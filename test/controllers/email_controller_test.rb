@@ -148,7 +148,7 @@ class EmailControllerTest < FunctionalTestCase
     get(:email_merge_request, params: params.merge(new_id: -456))
     assert_response(:redirect)
 
-    get_with_dump(:email_merge_request, params)
+    get(:email_merge_request, params)
     assert_response(:success)
     assert_names_equal(name1, assigns(:old_obj))
     assert_names_equal(name2, assigns(:new_obj))

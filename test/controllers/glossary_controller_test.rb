@@ -37,18 +37,17 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   # ***** show *****
   def test_show_glossary_term
     glossary_term = glossary_terms(:plane_glossary_term)
-    get_with_dump(:show, id: glossary_term.id)
+    get(:show, id: glossary_term.id)
     assert_template("show")
   end
 
   def test_show_past_glossary_term
-    get_with_dump(:show_past_glossary_term, id: conic.id,
-                                            version: conic.version - 1)
+    get(:show_past_glossary_term, id: conic.id, version: conic.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 
   def test_show_past_glossary_term_no_version
-    get_with_dump(:show_past_glossary_term, id: conic.id)
+    get(:show_past_glossary_term, id: conic.id)
     assert_response(:redirect)
   end
 
@@ -61,7 +60,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
 
   # ***** index *****
   def test_index
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 end
@@ -100,7 +99,7 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
 
   def test_create_glossary_term_logged_in
     login
-    get_with_dump(:new)
+    get(:new)
     assert_template(:new)
   end
 
@@ -151,13 +150,13 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
   ##### tests #####
   def test_edit_glossary_term_no_login
-    get_with_dump(:edit, id: conic.id)
+    get(:edit, id: conic.id)
     assert_response(:redirect)
   end
 
   def test_edit_glossary_term_logged_in
     login
-    get_with_dump(:edit, id: conic.id)
+    get(:edit, id: conic.id)
     assert_template(:edit)
   end
 
@@ -186,7 +185,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
     assert_equal(old_count + 1, glossary_term.versions.length)
 
-    get_with_dump(:show_past_glossary_term, id: glossary_term.id,
+    get(:show_past_glossary_term, id: glossary_term.id,
                                             version: glossary_term.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end

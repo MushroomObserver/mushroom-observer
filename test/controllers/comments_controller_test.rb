@@ -4,23 +4,22 @@ require "test_helper"
 
 class CommentsControllerTest < FunctionalTestCase
   def test_list_comments
-    get_with_dump(:index)
+    get(:index)
     assert_template("index")
   end
 
   def test_show_comment
-    get_with_dump(:show,
-                  id: comments(:minimal_unknown_obs_comment_1).id)
+    get(:show, id: comments(:minimal_unknown_obs_comment_1).id)
     assert_template("show")
   end
 
   def test_show_comments_for_user
-    get_with_dump(:show_comments_for_user, id: rolf.id)
+    get(:show_comments_for_user, id: rolf.id)
     assert_template("index")
   end
 
   def test_show_comments_by_user
-    get_with_dump(:show_comments_by_user, id: rolf.id)
+    get(:show_comments_by_user, id: rolf.id)
     assert_redirected_to(action: :show,
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
