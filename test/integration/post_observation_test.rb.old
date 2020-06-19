@@ -103,18 +103,18 @@
 
       def sess.evaluate_destruction
         assert_flash_text(/destroyed/i)
-        assert_template('observation/list_observations')
+        assert_template('observations/index')
       end
 
       def sess.evaluate_orphan
         assert_select("a[href^=/#{@new_observation.id}?]", 0)
-        assert_select('a[href*=show_rss_log]') do |elems|
+        assert_select('a[href*=rss_logs]') do |elems|
           assert(elems.any? {|e| e.to_s.match(/deleted.*item/mi)} )
         end
       end
 
       def sess.evaluate_no_location
-        assert_template('observation/create_observation')
+        assert_template('observations/new')
         assert_flash_text(/where|location/i)
       end
 
@@ -148,7 +148,7 @@
       def sess.evaluate_new_location
         assert_flash_text(/success/i)
         assert_flash_text(/created location/i)
-        assert_template('observation/show_observation')
+        assert_template('observations/show')
 
         reload_results
         assert_equal(@expectations[:observation].where, @new_location.name)
@@ -169,9 +169,9 @@
         assert_match(/specimen available/, response.body)
         assert_match(@new_observation.notes, response.body)
         assert_match(@new_image.notes, response.body)
-        assert_select('a[href*=observations_at_where]', 0)
-        assert_select('a[href*=show_location]', 1)
-        assert_select('a[href*=show_image]')
+        assert_select('a[href*=observations]', 0)
+        assert_select('a[href*=locations]', 1)
+        assert_select('a[href*=images]')
       end
 
       def sess.evaluate_change_location
@@ -181,8 +181,8 @@
         reload_results
         assert_objs_equal(@expectations[:location], @new_observation.location)
         assert_equal(@expectations[:location].display_name, @new_observation.place_name)
-        assert_select('a[href*=observations_at_where]', 0)
-        assert_select('a[href*=show_location]', 1)
+        assert_select('a[href*=observations]', 0)
+        assert_select('a[href*=locations]', 1)
       end
     end
   end

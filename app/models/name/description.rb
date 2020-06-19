@@ -53,8 +53,8 @@
 #
 #  ==== Attachments
 #  versions::            Old versions.
-#  comments::            Comments about this NameDescription. (not used yet)
-#  interests::           Interest in this NameDescription
+#  comments::            Comments about this Name::Description. (not used yet)
+#  interests::           Interest in this Name::Description
 #
 #  ==== Review Status
 #  update_review_status:: Change review status.
@@ -64,8 +64,9 @@
 #  notify_users::       Notify authors, etc. of changes.
 #
 ############################################################################
+require_relative '../description.rb'
 
-class NameDescription < Description
+class Name::Description < Description
   require "acts_as_versioned"
 
   # enum definitions for use by simple_enum gem
@@ -97,19 +98,24 @@ class NameDescription < Description
 
   has_and_belongs_to_many :admin_groups,
                           class_name: "UserGroup",
-                          join_table: "name_descriptions_admins"
+                          join_table: "name_descriptions_admins",
+                          foreign_key: "name_description_id"
   has_and_belongs_to_many :writer_groups,
                           class_name: "UserGroup",
-                          join_table: "name_descriptions_writers"
+                          join_table: "name_descriptions_writers",
+                          foreign_key: "name_description_id"
   has_and_belongs_to_many :reader_groups,
                           class_name: "UserGroup",
-                          join_table: "name_descriptions_readers"
+                          join_table: "name_descriptions_readers",
+                          foreign_key: "name_description_id"
   has_and_belongs_to_many :authors,
                           class_name: "User",
-                          join_table: "name_descriptions_authors"
+                          join_table: "name_descriptions_authors",
+                          foreign_key: "name_description_id"
   has_and_belongs_to_many :editors,
                           class_name: "User",
-                          join_table: "name_descriptions_editors"
+                          join_table: "name_descriptions_editors",
+                          foreign_key: "name_description_id"
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
@@ -120,6 +126,7 @@ class NameDescription < Description
 
   acts_as_versioned(
     table_name: "name_descriptions_versions",
+    foreign_key: "name_description_id",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )
@@ -143,6 +150,8 @@ class NameDescription < Description
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
   after_save :update_classification_cache
+
+  self.table_name = "name_descriptions"
 
   # Override the default show_controller
   def self.show_controller

@@ -237,8 +237,8 @@ class Project < AbstractModel
   # When deleting a project, "orphan" its unpublished drafts and remove the
   # user groups.
   def orphan_drafts
-    drafts = NameDescription.where(
-      source_type: NameDescription.source_types[:project], project_id: id
+    drafts = Name::Description.where(
+      source_type: Name::Description.source_types[:project], project_id: id
     ) + Location::Description.where(
       source_type: Location::Description.source_types[:project], project_id: id
     )

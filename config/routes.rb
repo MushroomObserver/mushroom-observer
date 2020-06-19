@@ -378,29 +378,6 @@ ACTIONS = {
     # show: {},
     # update: {}
   },
-  name_descriptions: {
-    # create_name_description: {}, # aliased only
-    # destroy_name_description: {}, # aliased only
-    # edit_name_description: {}, # aliased only
-    index_name_description: {},
-    # list_name_descriptions: {}, # aliased only
-    name_descriptions_by_author: {},
-    name_descriptions_by_editor: {},
-    # next_name_description: {}, # aliased only
-    # prev_name_description: {}, # aliased only
-    # show_name_description: {}, # aliased only
-    show_past_name_description: {},
-    show_next: {},
-    show_prev: {}
-    # resources
-    # create: {},
-    # destroy: {},
-    # edit: {},
-    # index: {},
-    # new: {},
-    # show: {},
-    # update: {}
-  },
   # namings: {
   #   create_post: {}, # alias for create
   #   edit_post: {}, # alias for update
@@ -767,6 +744,23 @@ MushroomObserver::Application.routes.draw do
     resources :descriptions
   end
 
+  ND_GET_ACTIONS = {
+    index_name_description: {},
+    index_by_author: {},
+    index_by_editor: {},
+    show_past: {},
+    show_next: {},
+    show_prev: {}
+  }
+
+  ND_GET_ACTIONS.each_key do |action|
+    get "names(/:name_id)/descriptions(/:id)/#{action}",
+        controller: "names/descriptions",
+        action: action,
+        as: "name_descriptions_#{action}",
+        id: /\d+/
+  end
+  
   resources :notifications, only: [:show]
 
   resources :pivotal, only: [:index]

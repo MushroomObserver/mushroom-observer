@@ -31,7 +31,7 @@
 <% even = true
 any = false
 notes = desc.all_notes
-for field in NameDescription.all_note_fields
+for field in Name::Description.all_note_fields
   value = notes[field].to_s
   if value.match(/\S/)
     even = !even

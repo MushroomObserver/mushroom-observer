@@ -184,11 +184,11 @@ class AmateurTest < IntegrationTestCase
     end
 
     # I grow weary of this comment.
-    click(label: /destroy/i, href: /destroy/)
+    click(label: /destroy/i, href: /destroy/) # FIXME
     assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
-    assert_select("a[href*=edit], a[href*=destroy]", false)
+    assert_select("a[href*=edit], a[href*=destroy]", false) # FIXME
     assert_nil(Comment.safe_find(com.id))
   end
 
@@ -417,13 +417,13 @@ class AmateurTest < IntegrationTestCase
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*='namings/edit/#{naming.id}']", 2)
-      assert_select("a[href*='namings/destroy/#{naming.id}']", 2)
+      assert_select("a[href*='namings/#{naming.id}/edit']", 2)
+      assert_select("a[href*='namings/#{naming.id}']", 2) # FIXME
 
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click(label: /edit/i, href: %r{namings/edit})
+      click(label: /edit/i, href: %r{namings}) # FIXME
       assert_template("namings/edit")
       open_form do |form|
         form.assert_value("name", text_name)
@@ -450,7 +450,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click(label: /edit/i, href: %r{namings/edit})
+      click(label: /edit/i, href: %r{namings}) # FIXME
       assert_template("namings/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
@@ -466,12 +466,12 @@ class AmateurTest < IntegrationTestCase
     end
 
     def failed_delete(_obs)
-      click(label: /destroy/i, href: %r{namings/destroy})
+      click(label: /destroy/i, href: %r{namings}) # FIXME
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click(label: /destroy/i, href: %r{namings/destroy})
+      click(label: /destroy/i, href: %r{namings}) # FIXME
       assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)

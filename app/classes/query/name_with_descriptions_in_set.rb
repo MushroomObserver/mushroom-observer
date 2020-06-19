@@ -3,7 +3,7 @@
 class Query::NameWithDescriptionsInSet < Query::NameBase
   def parameter_declarations
     super.merge(
-      ids: [NameDescription],
+      ids: [Name::Description],
       old_title?: :string,
       old_by?: :string
     )

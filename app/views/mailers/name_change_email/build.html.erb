@@ -8,7 +8,7 @@
   is_now = :email_field_is_now.l
 
   # Why is this user being notified?  If the base Name changed, then look at
-  # all the NameDescriptions, else only need to look at the NameDescription
+  # all the Name::Descriptions, else only need to look at the Name::Description
   # that actually changed.  If notifiable for multiple reasons, choose the
   # least restrictive -- i.e. 'all' first, then admin, editor, author, and
   # lastly reviewer.
@@ -58,7 +58,7 @@
     one_liners += "*#{:Correct_spelling.l} #{is_now}:* #{new_spell} (#{new_name.correct_spelling_id}, #{old_name.correct_spelling_id})\n" if new_name.correct_spelling_id != old_name.correct_spelling_id
 
     if new_desc
-      for field in NameDescription.all_note_fields
+      for field in Name::Description.all_note_fields
         old_val = old_desc.send(field) rescue nil
         new_val = new_desc.send(field)
         many_liners.push([("form_names_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
@@ -79,7 +79,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :name),
-    "#{MO.http_domain}/names/show_name/#{new_name.id}"])
+    "#{MO.http_domain}/names/#{new_name.id}"])
   links.push([:email_links_not_interested.t(type: :name),
     "#{MO.http_domain}/interests/set_interest?id=#{new_name.id}&type=Name&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"

@@ -222,7 +222,7 @@ module Query
     end
 
     def initialize_desc_content_parameter
-      fields = NameDescription.all_note_fields
+      fields = Name::Description.all_note_fields
       fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
       fields = "CONCAT(#{fields.join(",")})"
       add_search_condition(fields, params[:desc_content])
