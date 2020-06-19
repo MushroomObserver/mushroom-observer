@@ -37,10 +37,10 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index_sequence, q: q, id: results[2].id)
     assert_response(:success)
 
-    get(:next_sequence, q: q, id: results[1].id)
+    get(:show_next, q: q, id: results[1].id)
     assert_redirected_to(sequence_path(results[2], q: q))
 
-    get(:prev_sequence, q: q, id: results[2].id)
+    get(:show_prev, q: q, id: results[2].id)
     assert_redirected_to(sequence_path(results[1], q: q))
   end
 
