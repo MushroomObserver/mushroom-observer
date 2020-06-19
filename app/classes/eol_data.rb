@@ -134,8 +134,8 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
     AND name_descriptions.review_status in (
-      #{NameDescription.review_statuses[:vetted]},
-      #{NameDescription.review_statuses[:unvetted]}
+      #{Name::Description.review_statuses[:vetted]},
+      #{Name::Description.review_statuses[:unvetted]}
     )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
@@ -157,7 +157,7 @@ class EolData
 
   def id_to_description
     make_id_hash(
-      NameDescription.find_by_sql(
+      Name::Description.find_by_sql(
         "SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"
       )
     )

@@ -20,9 +20,9 @@
 #  index_name_description::      List of results of index/search.
 #  list_name_descriptions::      Alphabetical list of all name_descriptions,
 #                                used or otherwise.
-#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored
+#  index_by_author::             Alphabetical list of name_descriptions authored
 #                                by given user.
-#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited
+#  index_by_editor::             Alphabetical list of name_descriptions edited
 #                                by given user.
 #  show::                        Show info about name.
 #  show_past_name::              Show past versions of name info.

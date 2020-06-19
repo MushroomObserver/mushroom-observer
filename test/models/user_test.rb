@@ -220,14 +220,14 @@ class UserTest < UnitTestCase
     num_comments = Comment.count
     assert_equal(1, user.comments.length)
     comment_id = user.comments.first.id
-    num_name_descriptions = NameDescription.count
+    num_name_descriptions = Name::Description.count
     assert(user.name_descriptions.length > 1)
     sample_name_description_id = user.name_descriptions.first.id
     User.erase_user(user.id)
     assert_equal(num_comments - 1, Comment.count)
     assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
-    assert_equal(num_name_descriptions, NameDescription.count)
-    desc = NameDescription.find(sample_name_description_id)
+    assert_equal(num_name_descriptions, Name::Description.count)
+    desc = Name::Description.find(sample_name_description_id)
     assert_equal(0, desc.user_id)
   end
 

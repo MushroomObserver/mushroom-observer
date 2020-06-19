@@ -35,13 +35,13 @@ xml.response(
       end
       refs.uniq.each { |ref| xml.reference(ref.t) }
       for desc in @data.descriptions(taxon.id)
-        for f in NameDescription.eol_note_fields
+        for f in Name::Description.eol_note_fields
           value = desc.send(f)
           next if value.blank?
 
           xml.dataObject do
             lang = desc.locale || MO.default_locale
-            xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
+            xml.dc(:identifier, "Name::Description-#{desc.id}-#{f}")
             xml.dataType("http://purl.org/dc/dcmitype/Text")
             xml.mimeType("text/html")
             xml.agent(@data.authors(desc.id), role: "author")

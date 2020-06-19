@@ -2,8 +2,8 @@
 
 require "test_helper"
 
-# test the helpers for ObserverController
-class ObserverHelperTest < ActionView::TestCase
+# test the helpers for ObservationsController
+class ObservationsHelperTest < ActionView::TestCase
   def test_show_observation_name
     user = users(:rolf)
     location = locations(:albion)
@@ -15,8 +15,7 @@ class ObserverHelperTest < ActionView::TestCase
     )
     assert_match(
       link_to(current_name.display_name_brief_authors.t,
-              controller: :names,
-              action: :show, id: current_name.id),
+              names_path(id: current_name.id)),
       obs_title_consensus_id(current_name),
       "Observation of a current Name should link to that Name"
     )

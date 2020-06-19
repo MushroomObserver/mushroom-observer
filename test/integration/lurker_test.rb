@@ -7,23 +7,24 @@ class LurkerTest < IntegrationTestCase
   def test_poke_around
     # Start at index.
     get("/")
-    assert_template("rss_logs/list_rss_logs")
+    assert_template("rss_logs/index")
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
 
+    # FIXME: NIMMO This is not the markup anymore! Use filter_test select ptrn
     # Click on prev/next
     click(label: "« Prev", in: :title)
     click(label: "Next »", in: :title)
 
     # Click on the first image.
-    click(label: :image, href: /show_image/)
+    click(label: :image, href: /images/)
 
     # Go back to observation and click on "About...".
     click(label: "Show Observation")
-    click(href: /show_name/)
-    assert_template("names/show_name")
+    click(href: /names/)
+    assert_template("names/show")
 
     # Take a look at the occurrence map.
     click(label: "Occurrence Map")
@@ -58,17 +59,17 @@ class LurkerTest < IntegrationTestCase
     # Mary has done several things to it (observation itself, naming, comment).
     assert_select("a[href^='/users/show_user/#{mary.id}']", minimum: 3)
     click(label: "Mary Newbie")
-    assert_template("users/show_user")
+    assert_template("users/show")
 
     # Check out location.
     get("/#{obs}")
     click(label: "Burbank, California") # Don't include USA due to <span>
-    assert_template("locations/show_location")
+    assert_template("locations/show")
 
     # Check out species list.
     get("/#{obs}")
     click(label: "List of mysteries")
-    assert_template("species_lists/show_species_list")
+    assert_template("species_lists/show")
     # (Make sure detailed_unknown_obs is shown somewhere.)
     assert_select("a[href^='/#{obs}?']")
 
@@ -79,13 +80,13 @@ class LurkerTest < IntegrationTestCase
     click(label: /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
     assert_select(
-      "a[href^='/names/create_name_description/#{names(:fungi).id}']"
+      "a[href^='/names/#{names(:fungi).id}/descriptions/new']"
     )
 
     # And lastly there are some images.
     get("/#{obs}")
-    assert_select("a[href^='/images/show_image']", minimum: 2)
-    click(label: :image, href: /show_image/)
+    assert_select("a[href^='/images/']", minimum: 2)
+    click(label: :image, href: /show/)
     # (Make sure detailed_unknown_obs is shown somewhere.)
     assert_select("a[href^='/#{obs}']")
   end
@@ -98,7 +99,7 @@ class LurkerTest < IntegrationTestCase
     form.change("pattern", "Coprinus comatus")
     form.select("type", "Names")
     form.submit("Search")
-    assert_match(%r{^/names/show_name/#{names(:coprinus_comatus).id}},
+    assert_match(%r{^/names/#{names(:coprinus_comatus).id}},
                  @request.fullpath)
 
     # Search for observations of that name.  (Only one.)
@@ -111,14 +112,14 @@ class LurkerTest < IntegrationTestCase
     form.select("type", "Images")
     form.submit("Search")
     assert_match(
-      %r{^/images/show_image/#{images(:connected_coprinus_comatus_image).id}},
+      %r{^/images/#{images(:connected_coprinus_comatus_image).id}},
       @request.fullpath
     )
 
     # There should be no locations of that name, though.
     form.select("type", "Locations")
     form.submit("Search")
-    assert_template("locations/list_locations")
+    assert_template("locations/index")
     assert_flash_text(/no.*found/i)
     assert_select("div.results a[href]", false)
 
@@ -157,16 +158,16 @@ class LurkerTest < IntegrationTestCase
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     click(label: "Show Locations", in: :right_tabs)
-    assert_template("locations/list_locations")
+    assert_template("locations/index")
 
     # Click on the defined location.
 
     click(label: /Burbank/)
-    assert_template("locations/show_location")
+    assert_template("locations/show")
 
     # Get a list of observations from there.  (Several so goes to index.)
     click(label: "Observations at this Location", in: :right_tabs)
-    assert_template("observations/list_observations")
+    assert_template("observations/index")
     save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
 
     observations = @controller.instance_variable_get("@objects")

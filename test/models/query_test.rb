@@ -2355,7 +2355,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_descriptions
-    expect = NameDescription.distinct(:name_id).order(:name_id).pluck(:name_id)
+    expect = Name::Description.distinct(:name_id).order(:name_id).pluck(:name_id)
     assert_query(expect, :Name, :with_descriptions, by: :id)
   end
 
@@ -2585,7 +2585,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_all
-    all = NameDescription.all.to_a
+    all = Name::Description.all.to_a
     assert_query(all, :NameDescription, :all, by: :id)
   end
 
@@ -2622,12 +2622,12 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :NameDescription, :in_set,
                  ids: rolf.id)
-    assert_query(NameDescription.all,
+    assert_query(Name::Description.all,
                  :NameDescription, :in_set,
-                 ids: NameDescription.select(:id).to_a)
-    assert_query([NameDescription.first.id],
+                 ids: Name::Description.select(:id).to_a)
+    assert_query([Name::Description.first.id],
                  :NameDescription, :in_set,
-                 ids: [rolf.id, NameDescription.first.id])
+                 ids: [rolf.id, Name::Description.first.id])
   end
 
   def test_observation_advanced_search

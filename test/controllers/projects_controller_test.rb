@@ -29,7 +29,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def destroy_project_helper(project, changer)
     assert(project)
-    drafts = NameDescription.where(source_name: project.title)
+    drafts = Name::Description.where(source_name: project.title)
     assert_not(drafts.empty?)
     params = { id: project.id.to_s }
     requires_user(:destroy, :show, params, changer.login)
@@ -38,7 +38,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
     assert_obj_list_equal(drafts,
-                          NameDescription.where(source_name: project.title))
+                          Name::Description.where(source_name: project.title))
   end
 
   def change_member_status_helper(changer, target_user, commit, admin_before,
@@ -74,9 +74,9 @@ class ProjectsControllerTest < FunctionalTestCase
     get_with_dump(:show, id: p_id)
     assert_template("show_project")
     assert_select("a[href*='admin_request/#{p_id}']")
-    assert_select("a[href*='edit_project/#{p_id}']", count: 0)
+    assert_select("a[href*='projects/#{p_id}/edit']", count: 0)
     assert_select("a[href*='add_members/#{p_id}']", count: 0)
-    assert_select("a[href*='destroy_project/#{p_id}']", count: 0)
+    assert_select("a[href*='projects/#{p_id}']", count: 0) # FIXME
   end
 
   def test_show_project_logged_in
@@ -85,9 +85,9 @@ class ProjectsControllerTest < FunctionalTestCase
     get_with_dump(:show, id: p_id)
     assert_template("show_project")
     assert_select("a[href*='admin_request/']")
-    assert_select("a[href*='edit_project/#{p_id}']")
+    assert_select("a[href*='projects/#{p_id}/edit']")
     assert_select("a[href*='add_members/#{p_id}']")
-    assert_select("a[href*='destroy_project/#{p_id}']")
+    assert_select("a[href*='projects/#{p_id}']") # FIXME
   end
 
   def test_list_projects
@@ -181,7 +181,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(user_group)
     admin_group = project.admin_group
     assert(admin_group)
-    drafts = NameDescription.where(source_name: project.title)
+    drafts = Name::Description.where(source_name: project.title)
     project_draft_count = drafts.length
     assert(project_draft_count.positive?)
     params = { id: project.id.to_s }
@@ -226,7 +226,7 @@ class ProjectsControllerTest < FunctionalTestCase
     drafts.each do |draft|
       assert_not_equal(
         :project, draft.reload.source_type,
-        "Project destruction failed to reset NameDescription's source_type"
+        "Project destruction failed to reset Name::Description's source_type"
       )
     end
   end

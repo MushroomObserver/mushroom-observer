@@ -17,7 +17,7 @@
 #  * Location
 #  * Location::Description
 #  * Name
-#  * NameDescription
+#  * Name::Description
 #  * Observation
 #  * Project
 #

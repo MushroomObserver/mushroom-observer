@@ -92,10 +92,10 @@
 #  classification, its parents must _also_ supply their entire classification.
 #
 #  *NOTE*: The classification string is sort of shared between the Name and
-#  NameDescription instances.  It is structural, so it sort of belongs here,
+#  Name::Description instances.  It is structural, so it sort of belongs here,
 #  however, at the same time, we want to allow draft descriptions to own a
 #  copy.  Thus it is stored in both.  The one in Name is set whenever the
-#  official NameDescription's copy changes.  Think of the one in Name as
+#  official Name::Description's copy changes.  Think of the one in Name as
 #  caching the official version.
 #
 #  == Version
@@ -238,8 +238,8 @@
 #
 #  ==== Attachments
 #  versions::                Old versions.
-#  description::             Main NameDescription.
-#  descriptions::            Alternate NameDescription's.
+#  description::             Main Name::Description.
+#  descriptions::            Alternate Name::Description's.
 #  comments::                Comments on this Name.
 #  interests::               Interests in this Name.
 #  observations::            Observations using this Name as consensus.
@@ -253,7 +253,7 @@
 #  == Callbacks
 #
 #  create_description::      After create: create (empty) official
-#                              NameDescription.
+#                              Name::Description.
 #  notify_users::            After save: notify interested User's of changes.
 #
 ################################################################################
@@ -302,7 +302,7 @@ class Name < AbstractModel
   belongs_to :correct_spelling,
              class_name: "Name",
              foreign_key: "correct_spelling_id"
-  belongs_to :description, class_name: "NameDescription",
+  belongs_to :description, class_name: "Name::Description",
                            inverse_of: :name # (main one)
   belongs_to :rss_log
   belongs_to :synonym
@@ -310,7 +310,7 @@ class Name < AbstractModel
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "NameDescription",
+           class_name: "Name::Description",
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target

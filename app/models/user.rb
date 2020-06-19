@@ -261,7 +261,7 @@ class User < AbstractModel
   has_many :locations
   has_many :location_descriptions, class_name: "Location::Description"
   has_many :names
-  has_many :name_descriptions
+  has_many :name_descriptions, class_name: "Name::Description"
   has_many :namings
   has_many :notifications
   has_many :observations
@@ -275,7 +275,7 @@ class User < AbstractModel
   has_many :votes
 
   has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
-  has_many :reviewed_name_descriptions, class_name: "NameDescription",
+  has_many :reviewed_name_descriptions, class_name: "Name::Description",
                                         foreign_key: "reviewer_id"
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
@@ -283,10 +283,10 @@ class User < AbstractModel
                           class_name: "UserGroup",
                           join_table: "user_groups_users"
   has_and_belongs_to_many :authored_names,
-                          class_name: "NameDescription",
+                          class_name: "Name::Description",
                           join_table: "name_descriptions_authors"
   has_and_belongs_to_many :edited_names,
-                          class_name: "NameDescription",
+                          class_name: "Name::Description",
                           join_table: "name_descriptions_editors"
   has_and_belongs_to_many :authored_locations,
                           class_name: "Location::Description",

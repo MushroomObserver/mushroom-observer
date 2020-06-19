@@ -6,11 +6,11 @@ require "test_helper"
 # Show is "observations/:id", "observations/:id/edit"
 class PostObservationTest < IntegrationTestCase
   LOGIN_PAGE = "account/login"
-  SHOW_OBSERVATION_PAGE = "observer/show_observation"
-  CREATE_OBSERVATION_PAGE = "observer/create_observation"
-  EDIT_OBSERVATION_PAGE = "observer/edit_observation"
-  CREATE_LOCATION_PAGE = "location/create_location"
-  OBSERVATION_INDEX_PAGE = "observer/list_observations"
+  SHOW_OBSERVATION_PAGE = "observations/show"
+  CREATE_OBSERVATION_PAGE = "observations/new"
+  EDIT_OBSERVATION_PAGE = "observations/edit"
+  CREATE_LOCATION_PAGE = "locations/new"
+  OBSERVATION_INDEX_PAGE = "observations/index"
 
   PASADENA_EXTENTS = {
     north: 34.251905,
@@ -203,15 +203,15 @@ class PostObservationTest < IntegrationTestCase
       assert_match(:show_observation_seen_at.l, response.body)
     end
     if new_obs.specimen
-      assert_match(/show_herbarium_record/, response.body)
+      assert_match(/herbarium_records/, response.body)
     else
       assert_no_match(/No specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations_at_where")
-    assert_link_exists_containing("show_location/#{new_loc.id}")
-    assert_link_exists_containing("show_image/#{new_img.id}")
+    assert_link_exists_containing("locations/#{new_loc.id}")
+    assert_link_exists_containing("images/#{new_img.id}")
   end
 
   def review_flash(patterns)
@@ -245,7 +245,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_exists_deleted_item_log
     found = false
-    assert_select("a[href*=rss_logs]") do |elems|
+    assert_select("a[href*=rss_logs]") do |elems| # Use filter_test select ptrn
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
     assert(found,

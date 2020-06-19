@@ -442,7 +442,7 @@ module Descriptions
   # to decide which kind.
   def find_description(id)
     if self.class.name == "NameController"
-      find_or_goto_index(NameDescription, id)
+      find_or_goto_index(Name::Description, id)
     else
       find_or_goto_index(Location::Description, id)
     end

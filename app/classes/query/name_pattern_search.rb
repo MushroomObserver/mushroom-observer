@@ -18,7 +18,7 @@ class Query::NamePatternSearch < Query::NameBase
       "names.search_name",
       "COALESCE(names.citation,'')",
       "COALESCE(names.notes,'')"
-    ] + NameDescription.all_note_fields.map do |x|
+    ] + Name::Description.all_note_fields.map do |x|
       "COALESCE(name_descriptions.#{x},'')"
     end
     "CONCAT(#{fields.join(",")})"

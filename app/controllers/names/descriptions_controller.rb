@@ -12,14 +12,14 @@
 #  index_name_description::      List of results of index/search.
 #  index::                       Alphabetical list of all name_descriptions,
 #                                used or otherwise.
-#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored
+#  index_by_author::             Alphabetical list of name_descriptions authored
 #                                by given user.
-#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited
+#  index_by_editor::             Alphabetical list of name_descriptions edited
 #                                by given user.
 #  show::                        Show info about name_description.
 #  show_prev::                   Show previous name_description in index.
 #  show_next::                   Show next name_description in index.
-#  show_past_name_description::  Show past versions of name_description info.
+#  show_past::                   Show past versions of name_description info.
 #  new::                         Create new name_description.
 #  edit::                        Edit name_description.
 #  make_description_default::    Make a description the default one.
@@ -41,16 +41,19 @@ class Names::DescriptionsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_name_description,
+    :index_by_author,
+    :index_by_editor,
     :list_name_descriptions, # aliased
-    :name_descriptions_by_author,
-    :name_descriptions_by_editor,
+    :name_descriptions_by_author, # aliased
+    :name_descriptions_by_editor, # aliased
     :next_name_description, # aliased
     :prev_name_description, # aliased
     :show,
     :show_next,
     :show_prev,
     :show_name_description, # aliased
-    :show_past_name_description
+    :show_past,
+    :show_past_name_description # aliased
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -60,7 +63,8 @@ class Names::DescriptionsController < ApplicationController
     :edit_name_description, # aliased
     :show,
     :show_name_description, # aliased
-    :show_past_name_description
+    :show_past,
+    :show_past_name_description # aliased
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -93,7 +97,7 @@ class Names::DescriptionsController < ApplicationController
   alias_method :list_name_descriptions, :index
 
   # Display list of name_descriptions that a given user is author on.
-  def name_descriptions_by_author
+  def index_by_author
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -105,8 +109,10 @@ class Names::DescriptionsController < ApplicationController
     show_selected_name_descriptions(query)
   end
 
+  alias_method :name_descriptions_by_author, :index_by_author
+
   # Display list of name_descriptions that a given user is editor on.
-  def name_descriptions_by_editor
+  def index_by_editor
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -117,6 +123,8 @@ class Names::DescriptionsController < ApplicationController
     )
     show_selected_name_descriptions(query)
   end
+
+  alias_method :name_descriptions_by_editor, :index_by_editor
 
   # Show selected search results as a list with 'list_names' template.
   def show_selected_name_descriptions(query, args = {})
@@ -151,7 +159,7 @@ class Names::DescriptionsController < ApplicationController
   def show
     store_location
     pass_query_params
-    @description = find_or_goto_index(NameDescription, params[:id].to_s)
+    @description = find_or_goto_index(Name::Description, params[:id].to_s)
     return unless @description
 
     @name = @description.name
@@ -219,12 +227,12 @@ class Names::DescriptionsController < ApplicationController
     end
   end
 
-  # Show past version of NameDescription.  Accessible only from
+  # Show past version of Name::Description.  Accessible only from
   # show_name_description page.
-  def show_past_name_description
+  def show_past
     pass_query_params
     store_location
-    @description = find_or_goto_index(NameDescription, params[:id].to_s)
+    @description = find_or_goto_index(Name::Description, params[:id].to_s)
     return unless @description
 
     @name = @description.name
@@ -232,12 +240,12 @@ class Names::DescriptionsController < ApplicationController
       @description.revert_to(params[:version].to_i)
     else
       @merge_source_id = params[:merge_source_id]
-      version = NameDescription::Version.find(@merge_source_id)
+      version = Name::Description::Version.find(@merge_source_id)
       @old_parent_id = version.name_description_id
       subversion = params[:version]
       if subversion.present? &&
          (version.version != subversion.to_i)
-        version = NameDescription::Version.
+        version = Name::Description::Version.
                   find_by_version_and_name_description_id(params[:version],
                                                           @old_parent_id)
       end
@@ -245,16 +253,18 @@ class Names::DescriptionsController < ApplicationController
     end
   end
 
+  alias_method :show_past_name_description, :show_past
+
   # Go to next name: redirects to show_name.
   def show_next
-    redirect_to_next_object(:next, NameDescription, params[:id].to_s)
+    redirect_to_next_object(:next, Name::Description, params[:id].to_s)
   end
 
   alias_method :next_name_description, :show_next
 
   # Go to previous name_description: redirects to show_name_description.
   def show_prev
-    redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
+    redirect_to_next_object(:prev, Name::Description, params[:id].to_s)
   end
 
   alias_method :prev_name_description, :show_prev
@@ -264,7 +274,7 @@ class Names::DescriptionsController < ApplicationController
   def set_review_status
     pass_query_params
     id = params[:id].to_s
-    desc = NameDescription.find(id)
+    desc = Name::Description.find(id)
     desc.update_review_status(params[:value]) if reviewer?
     # redirect_with_query(
     #   controller: :names,
@@ -285,7 +295,7 @@ class Names::DescriptionsController < ApplicationController
     pass_query_params
     @name = Name.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
-    @description = NameDescription.new
+    @description = Name::Description.new
     @description.name = @name
 
     # Render a blank form.
@@ -338,7 +348,7 @@ class Names::DescriptionsController < ApplicationController
   def edit
     store_location
     pass_query_params
-    @description = NameDescription.find(params[:id].to_s)
+    @description = Name::Description.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     if !check_description_edit_permission(@description, params[:description])
@@ -396,7 +406,7 @@ class Names::DescriptionsController < ApplicationController
 
       # Delete old description after resolving conflicts of merge.
       if (params[:delete_after] == "true") &&
-         (old_desc = NameDescription.safe_find(params[:old_desc_id]))
+         (old_desc = Name::Description.safe_find(params[:old_desc_id]))
         v = @description.versions.latest
         v.merge_source_id = old_desc.versions.latest.id
         v.save
@@ -423,7 +433,7 @@ class Names::DescriptionsController < ApplicationController
 
   def destroy
     pass_query_params
-    @description = NameDescription.find(params[:id].to_s)
+    @description = Name::Description.find(params[:id].to_s)
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,

@@ -2,7 +2,7 @@
 
 class Query::NameDescriptionBase < Query::Base
   def model
-    NameDescription
+    Name::Description
   end
 
   def parameter_declarations

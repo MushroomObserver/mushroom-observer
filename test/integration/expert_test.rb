@@ -5,7 +5,7 @@ require "test_helper"
 # Test a few representative sessions of a power-user.
 class ExpertTest < IntegrationTestCase
   def empty_notes
-    NameDescription.all_note_fields.each_with_object({}) { |f, h| h[f] = nil }
+    Name::Description.all_note_fields.each_with_object({}) { |f, h| h[f] = nil }
   end
 
   # --------------------------------------------------------
@@ -263,7 +263,7 @@ class ExpertTest < IntegrationTestCase
     assert_flash_success
     assert_template("species_lists/show")
     assert_select("div#title", text: /#{spl.title}/)
-    assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
+    assert_select("a[href*='species_lists/#{spl.id}/edit']", text: /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
@@ -280,7 +280,7 @@ class ExpertTest < IntegrationTestCase
     click(href: /new/)
     assert_template("comments/new")
     assert_select("div#title", text: /#{spl.title}/)
-    assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
+    assert_select("a[href*='species_lists/#{spl.id}']", text: /cancel/i)
     open_form do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")

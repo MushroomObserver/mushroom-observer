@@ -255,32 +255,34 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def name_description
-      @name_description ||= NameDescription.last
+      @name_description ||= Name::Description.last
     end
 
     def show_name_uri
       name = name_we_are_working_on
-      "/names/show_name/#{name.id}"
+      "/names/#{name.id}"
     end
 
     def show_name_description_uri
       desc = name_description
-      "/names/show_name_description/#{desc.id}"
+      "/names/#{name.id}/descriptions/#{desc.id}"
     end
 
     def edit_name_description_uri
       desc = name_description
-      "/names/edit_name_description/#{desc.id}"
+      "/names/#{name.id}/descriptions/#{desc.id}/edit"
     end
 
     def destroy_name_description_uri
       desc = name_description
-      "/names/destroy_name_description/#{desc.id}"
+      "/names/#{name.id}/descriptions/#{desc.id}"
     end
 
     def create_name_description
       get(show_name_uri)
-      click(href: /create_name_description/)
+      # FIXME: NIMMO Create link cannot be identified by href anymore?
+      # Maybe needs an ID from the view - AN 6/18/20 Use filter_test select ptrn
+      click(href: /new/)
       # assert_template("names/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)
