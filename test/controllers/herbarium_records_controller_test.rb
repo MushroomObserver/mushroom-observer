@@ -16,25 +16,24 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_index
-    get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
+    get(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_template(:index)
   end
 
   def test_herbarium_with_no_herbarium_records_index
-    get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
+    get(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
   end
 
   def test_observation_index
-    get_with_dump(:observation_index,
+    get(:observation_index,
                   id: observations(:coprinus_comatus_obs).id)
     assert_template(:index)
   end
 
   def test_observation_with_no_herbarium_records_index
-    get_with_dump(:observation_index,
-                  id: observations(:strobilurus_diminutivus_obs).id)
+    get(:observation_index, id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
   end
@@ -50,8 +49,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_record_search_with_one_herbarium_record_index
-    get_with_dump(:herbarium_record_search,
-                  pattern: herbarium_records(:interesting_unknown).id)
+    get(:herbarium_record_search,
+        pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
     assert_no_flash
   end
@@ -67,14 +66,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
-    get_with_dump(:show, id: herbarium_record.id)
+    get(:show, id: herbarium_record.id)
     assert_template(:show, partial: "shared/log_item")
   end
 
   def test_show_herbarium_record_with_notes
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
-    get_with_dump(:show, id: herbarium_record.id)
+    get(:show, id: herbarium_record.id)
     assert_template(:show, partial: "shared/log_item")
   end
 
@@ -97,7 +96,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:new,
+    get(:new,
                   id: observations(:coprinus_comatus_obs).id)
     assert_template("create_herbarium_record", partial: "shared/log_item")
     assert(assigns(:herbarium_record))
@@ -201,20 +200,20 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_record
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_response(:redirect)
 
     login("mary") # Non-curator
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_flash_text(/permission denied/i)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template(:edit)
 
     make_admin("mary") # Non-curator, but an admin
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template(:edit)
   end
 

@@ -11,30 +11,27 @@ class Locations::DescriptionsControllerTest < IntegrationControllerTest
       location_id: burbank.id,
       source_type: "public"
     )
-    get_with_dump location_descriptions_path
+    get location_descriptions_path
     assert_template("index")
   end
 
   def test_index_by_author
     descs = Location::Description.all
     desc = location_descriptions(:albion_desc)
-    get_with_dump location_descriptions_index_by_author_path(
-      id: rolf.id)
+    get location_descriptions_index_by_author_path(id: rolf.id)
     assert_redirected_to location_description_path(location_id:
       desc.location_id, id: desc.id)
   end
 
   def test_index_by_editor
-    get_with_dump location_descriptions_index_by_editor_path(
-      id: rolf.id)
+    get location_descriptions_index_by_editor_path(id: rolf.id)
     assert_template(:index)
   end
 
   def test_show
     # happy path
     desc = location_descriptions(:albion_desc)
-    get_with_dump location_description_path(location_id: desc.location_id,
-      id: desc.id)
+    get location_description_path(location_id: desc.location_id, id: desc.id)
     assert_template "show"
     assert_template partial: "locations/descriptions/_location_description"
     # assert_response :success
@@ -44,23 +41,20 @@ class Locations::DescriptionsControllerTest < IntegrationControllerTest
 
     # description is private and belongs to a project
     desc = location_descriptions(:bolete_project_private_location_desc)
-    get_with_dump location_description_path(location_id: desc.location_id,
-      id: desc.id)
+    get location_description_path(location_id: desc.location_id, id: desc.id)
     assert_flash_error
     assert_redirected_to(project_path(id: desc.project.id))
 
     # description is private, for a project, project doesn't exist
     # but project doesn't exist
     desc = location_descriptions(:non_ex_project_private_location_desc)
-    get_with_dump location_description_path(location_id: desc.location_id,
-      id: desc.id)
+    get location_description_path(location_id: desc.location_id, id: desc.id)
     assert_flash_error
     assert_redirected_to(location_path(id: desc.location_id))
 
     # description is private, not for a project
     desc = location_descriptions(:user_private_location_desc)
-    get_with_dump location_description_path(location_id: desc.location_id,
-      id: desc.id)
+    get location_description_path(location_id: desc.location_id, id: desc.id)
     assert_flash_error
     assert_redirected_to(location_path(id: desc.location_id))
   end
@@ -73,8 +67,8 @@ class Locations::DescriptionsControllerTest < IntegrationControllerTest
     desc.reload
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
-    get_with_dump location_descriptions_show_past_path(
-      location_id: desc.location_id, id: desc.id),
+    get location_descriptions_show_past_path(location_id: desc.location_id,
+                                             id: desc.id),
     assert_template(:show_past, partial: "_location_description")
   end
 
@@ -113,7 +107,7 @@ class Locations::DescriptionsControllerTest < IntegrationControllerTest
     loc = locations(:albion)
     user = login(users(:spammer).name)
     assert_false(user.is_successful_contributor?)
-    get_with_dump new_location_description_path(id: loc.id)
+    get new_location_description_path(id: loc.id)
     assert_response(:redirect)
   end
 

@@ -201,17 +201,17 @@ class Names::DescriptionsControllerTest < IntegrationControllerTest
   end
 
   def test_index_description_index
-    get_with_dump(:index_name_description)
+    get(:index_name_description)
     assert_template(:index)
   end
 
   def test_observation_index
-    get_with_dump(:observation_index)
+    get(:observation_index)
     assert_template(:index)
   end
 
   def test_observation_index_by_letter
-    get_with_dump(:observation_index, letter: "A")
+    get(:observation_index, letter: "A")
     assert_template(:index)
   end
 

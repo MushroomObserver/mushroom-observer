@@ -71,7 +71,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_show_project
     p_id = projects(:eol_project).id
-    get_with_dump(:show, id: p_id)
+    get(:show, id: p_id)
     assert_template("show_project")
     assert_select("a[href*='admin_request/#{p_id}']")
     assert_select("a[href*='projects/#{p_id}/edit']", count: 0)
@@ -82,7 +82,7 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_show_project_logged_in
     p_id = projects(:eol_project).id
     requires_login(:new)
-    get_with_dump(:show, id: p_id)
+    get(:show, id: p_id)
     assert_template("show_project")
     assert_select("a[href*='admin_request/']")
     assert_select("a[href*='projects/#{p_id}/edit']")
@@ -91,7 +91,7 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_list_projects
-    get_with_dump(:index)
+    get(:index)
     assert_template("list_projects")
   end
 

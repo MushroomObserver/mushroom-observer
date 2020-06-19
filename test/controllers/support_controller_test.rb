@@ -14,13 +14,13 @@ class SupportControllerTest < FunctionalTestCase
       :wrapup_2012
     ].each do |template|
       assert_template_with_dump(template)
-      get_with_dump(template)
+      get(template)
       assert_template(template)
     end
   end
 
   def assert_template_with_dump(template)
-    get_with_dump(template)
+    get(template)
     assert_template(template)
   end
 

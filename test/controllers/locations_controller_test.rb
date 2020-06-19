@@ -71,14 +71,14 @@ class LocationsControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_location_help
-    get_with_dump(:help)
+    get(:help)
   end
 
   def test_show_location
     location = locations(:albion)
     updated_at = location.updated_at
     log_updated_at = location.rss_log.updated_at
-    get_with_dump(:show, id: location.id)
+    get(:show, id: location.id)
     assert_template(partial: "_location")
     assert_template(partial: "_location_description")
     assert_template(partial: "_show_comments")
@@ -91,24 +91,24 @@ class LocationsControllerTest < FunctionalTestCase
     login("mary")
     make_admin("mary")
     location = locations(:albion)
-    get_with_dump(:show, id: location.id)
+    get(:show, id: location.id)
   end
 
   def test_show_past_location
     location = locations(:albion)
-    get_with_dump(:show_past_location, id: location.id,
+    get(:show_past_location, id: location.id,
                                        version: location.version - 1)
     assert_template("show_past_location", partial: "_location")
   end
 
   def test_show_past_location_no_version
     location = locations(:albion)
-    get_with_dump(:show_past_location, id: location.id)
+    get(:show_past_location, id: location.id)
     assert_response(:redirect)
   end
 
   def test_list_locations
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 
@@ -137,17 +137,17 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_list_countries
-    get_with_dump(:list_countries)
+    get(:list_countries)
     assert_template("list_countries")
   end
 
   def test_list_by_country
-    get_with_dump(:list_by_country, country: "USA")
+    get(:list_by_country, country: "USA")
     assert_template(:index)
   end
 
   def test_list_by_country_with_quote
-    get_with_dump(:list_by_country, country: "Cote d'Ivoire")
+    get(:list_by_country, country: "Cote d'Ivoire")
     assert_template(:index)
   end
 
@@ -192,12 +192,12 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_locations_by_user
-    get_with_dump(:locations_by_user, id: rolf.id)
+    get(:locations_by_user, id: rolf.id)
     assert_template(:index)
   end
 
   def test_locations_by_editor
-    get_with_dump(:locations_by_editor, id: rolf.id)
+    get(:locations_by_editor, id: rolf.id)
     assert_template(:index)
   end
 
@@ -612,15 +612,15 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_map_locations
     # test_map_locations - map everything
-    get_with_dump(:map_locations)
+    get(:map_locations)
     assert_template(:map_locations)
 
     # test_map_locations_empty - map nothing
-    get_with_dump(:map_locations, pattern: "Never Never Land")
+    get(:map_locations, pattern: "Never Never Land")
     assert_template(:map_locations)
 
     # test_map_locations_some - map something
-    get_with_dump(:map_locations, pattern: "California")
+    get(:map_locations, pattern: "California")
     assert_template(:map_locations)
   end
 

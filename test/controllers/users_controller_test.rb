@@ -8,7 +8,7 @@ class UsersControllerTest < FunctionalTestCase
   # ------------------------------------------------------------
 
   def test_show_user_no_id
-    get_with_dump(:show)
+    get(:show)
     assert_redirected_to(action: :index_user)
   end
 
@@ -27,7 +27,7 @@ class UsersControllerTest < FunctionalTestCase
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
-      get_with_dump(page, params)
+      get(page, params)
       assert_template(response) # 1
     end
   end
