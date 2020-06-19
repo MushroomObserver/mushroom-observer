@@ -422,7 +422,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that POST can return to show, too, with query intact.
     post(:edit, params.merge(back: "show", q: q))
-    assert_redirected_to(sequence.show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(sequence, q: q))
   end
 
   def test_destroy_sequence
