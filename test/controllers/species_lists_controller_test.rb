@@ -218,7 +218,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_not(sp.observations.member?(obs))
     params = { species_list: sp.id, observation: obs.id }
     requires_login(:add_observation_to_species_list, params)
-    assert_redirected_to(action: :manage_species_lists, id: obs.id)
+    assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
     assert(sp.reload.observations.member?(obs))
   end
 
@@ -238,7 +238,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login owner
     get_with_dump(:remove_observation_from_species_list, params)
-    assert_redirected_to(action: :manage_species_lists, id: obs.id)
+    assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
     assert_not(spl.reload.observations.member?(obs))
   end
 
@@ -265,13 +265,13 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_users_equal(rolf, spl3.user)
 
     login("dick")
-    get(:manage_species_lists, params: { id: obs1.id })
+    get(species_lists_manage_species_lists_path( params: { id: obs1.id }))
     assert_select("a[href*='species_list=#{spl1.id}']",
                   text: :REMOVE.t, count: 1)
     assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
 
-    get(:manage_species_lists, params: { id: obs2.id })
+    get(species_lists_manage_species_lists_path( params: { id: obs2.id }))
     assert_select("a[href*='species_list=#{spl1.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
@@ -279,13 +279,13 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:add_observation_to_species_list,
          params: { observation: obs2.id,
                    species_list: spl1.id })
-    assert_redirected_to(action: :manage_species_lists, id: obs2.id)
+    assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
     assert_true(spl1.reload.observations.include?(obs2))
 
     post(:remove_observation_from_species_list,
          params: { observation: obs2.id,
                    species_list: spl1.id })
-    assert_redirected_to(action: :manage_species_lists, id: obs2.id)
+    assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
     assert_false(spl1.reload.observations.include?(obs2))
   end
 
@@ -345,7 +345,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     post_requires_login(:new, params)
     spl = SpeciesList.last
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert_equal(list_title, spl.title)
@@ -377,7 +377,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     post_requires_login(:new, params)
     spl = SpeciesList.last
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     assert_objs_equal(Location.unknown, spl.location)
   end
 
@@ -401,7 +401,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(agaricus))
@@ -431,7 +431,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     # Creates Lecideaceae, spl, and obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -515,7 +515,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     # Creating L. rubidus (and spl and obs/splentry/naming).
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -549,7 +549,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     # Creates Lecideaceae, spl, obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -619,7 +619,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     # Creates "New" and "New name", spl, and five obs/naming/splentries.
     assert_equal(10 + v_nam * 2 + v_spl + v_obs * 5, rolf.reload.contribution)
     assert(spl.name_included(deprecated_name))
@@ -679,7 +679,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:new, params: params)
     spl = SpeciesList.last
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
     assert(spl.name_included(bugs_names.second))
   end
@@ -710,7 +710,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post_requires_login(:new, params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(action: :show, id: spl.id)
+    assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(names(:coprinus_comatus)))
