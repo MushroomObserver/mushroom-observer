@@ -272,7 +272,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Prove that POST can return to show_herbarium_record with query intact.
     post(:edit, params.merge(back: "show", q: q))
-    assert_redirected_to(rec.show_link_args.merge(q: q))
+    assert_redirected_to(herbarium_record_path(rec, q: q))
 
     # Prove that POST can return to index_herbarium_record with query intact.
     post(:edit, params.merge(back: "index", q: q))
