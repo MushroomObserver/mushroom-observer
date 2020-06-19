@@ -140,7 +140,7 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    link_to(name || object.title.t, helpers.object_path(object)
+    link_to(name || object.title.t, helpers.object_path(object))
   end
 
   # Wrap description title in link to show_description.
