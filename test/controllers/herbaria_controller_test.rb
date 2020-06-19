@@ -17,16 +17,16 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 
   def test_list_herbaria
-    get_with_dump(:index)
+    get(:index)
   end
 
   def test_herbarium_search
-    get_with_dump(:herbarium_search, pattern: "Personal Herbarium")
+    get(:herbarium_search, pattern: "Personal Herbarium")
   end
 
   def test_list_herbaria_merge_source
@@ -157,7 +157,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_show_herbarium
     nybg = herbaria(:nybg_herbarium)
-    get_with_dump(:show, id: nybg.id)
+    get(:show, id: nybg.id)
     assert_template(:show)
   end
 
@@ -187,7 +187,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:new)
+    get(:new)
     assert_template(:new)
   end
 
@@ -314,7 +314,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("mary")
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template("edit_herbarium")
   end
 
@@ -330,7 +330,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template("edit_herbarium")
 
     make_admin("mary")
@@ -533,7 +533,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:request_to_be_curator)
     assert_response(:redirect)
 
-    get_with_dump(:request_to_be_curator, id: nybg.id)
+    get(:request_to_be_curator, id: nybg.id)
     assert_response(:success)
   end
 

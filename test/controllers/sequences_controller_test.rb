@@ -5,7 +5,7 @@ require "test_helper"
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
   def test_list_sequences
-    get_with_dump(:index)
+    get(:index)
     assert(:success)
   end
 
@@ -47,7 +47,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_show_sequence
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
-    get_with_dump(:show, id: sequence.id)
+    get(:show, id: sequence.id)
     assert_response(:success)
 
     # Prove index displayed if called with id of sequence not in db
@@ -70,7 +70,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove Observation owner can add Sequence
     login(owner.login)
-    get_with_dump(:new, id: obs.id)
+    get(:new, id: obs.id)
     assert_response(:success)
 
     # Prove admin can add Sequence

@@ -54,33 +54,33 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_name
-    get_with_dump(:index_name)
+    get(:index_name)
     assert_template(:index)
   end
 
   def test_name_index
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 
   def test_observation_index
-    get_with_dump(:observation_index)
+    get(:observation_index)
     assert_template(:index)
   end
 
   def test_observation_index_by_letter
-    get_with_dump(:observation_index, letter: "A")
+    get(:observation_index, letter: "A")
     assert_template(:index)
   end
 
   def test_authored_names
-    get_with_dump(:authored_names)
+    get(:authored_names)
     assert_template(:index)
   end
 
   def test_show_name
     assert_equal(0, QueryRecord.count)
-    get_with_dump(:show, id: names(:coprinus_comatus).id)
+    get(:show, id: names(:coprinus_comatus).id)
     assert_template(:show, partial: "_name")
     # Creates three for children and all four observations sections,
     # but one never used.
@@ -126,46 +126,46 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_show_name_locked
     name = Name.where(locked: true).first
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 0)
     assert_select("a[href*=change_synonyms]", count: 0)
     login("rolf")
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 0)
     assert_select("a[href*=change_synonyms]", count: 0)
     make_admin("mary")
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 1)
     assert_select("a[href*=change_synonyms]", count: 1)
 
     Name.update(name.id, deprecated: true)
     logout
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 0)
     assert_select("a[href*=change_synonyms]", count: 0)
     login("rolf")
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 0)
     assert_select("a[href*=change_synonyms]", count: 0)
     make_admin("mary")
-    get_with_dump(:show, id: name.id)
+    get(:show, id: name.id)
     assert_select("a[href*=approve_name]", count: 1)
     assert_select("a[href*=deprecate_name]", count: 0)
     assert_select("a[href*=change_synonyms]", count: 1)
   end
 
   def test_show_past_name
-    get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
+    get(:show_past_name, id: names(:coprinus_comatus).id)
     assert_template(:show_past_name, partial: "_name")
   end
 
   def test_show_past_name_with_misspelling
-    get_with_dump(:show_past_name, id: names(:petigera).id)
+    get(:show_past_name, id: names(:petigera).id)
     assert_template(:show_past_name, partial: "_name")
   end
 
@@ -212,23 +212,23 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_names_by_user
-    get_with_dump(:names_by_user, id: rolf.id)
+    get(:names_by_user, id: rolf.id)
     assert_template(:index)
   end
 
   def test_names_by_editor
-    get_with_dump(:names_by_editor, id: rolf.id)
+    get(:names_by_editor, id: rolf.id)
     assert_template(:index)
   end
 
   def test_needed_descriptions
-    get_with_dump(:needed_descriptions)
+    get(:needed_descriptions)
     assert_template(:index)
   end
 
   def test_name_search
     id = names(:agaricus).id
-    get_with_dump(:name_search, pattern: id)
+    get(:name_search, pattern: id)
     assert_redirected_to(
       action: :show,
       id: id
@@ -236,12 +236,12 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_name_search_help
-    get_with_dump(:name_search, pattern: "help:me")
+    get(:name_search, pattern: "help:me")
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_name_search_with_spelling_correction
-    get_with_dump(:name_search, pattern: "agaricis campestrus")
+    get(:name_search, pattern: "agaricis campestrus")
     assert_template(:index)
     assert_select("div.alert-warning", 1)
     assert_select("a[href*='show_name/#{names(:agaricus_campestrus).id}']",
@@ -336,7 +336,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_eol_preview
-    get_with_dump("eol_preview")
+    get("eol_preview")
   end
 
   def ids_from_links(links)
@@ -527,19 +527,19 @@ class NamesControllerTest < FunctionalTestCase
 
   # name with Observations that have Locations
   def test_map
-    get_with_dump(:map, id: names(:agaricus_campestris).id)
+    get(:map, id: names(:agaricus_campestris).id)
     assert_template(:map)
   end
 
   # name with Observations that don't have Locations
   def test_map_no_loc
-    get_with_dump(:map, id: names(:coprinus_comatus).id)
+    get(:map, id: names(:coprinus_comatus).id)
     assert_template(:map)
   end
 
   # name with no Observations
   def test_map_no_obs
-    get_with_dump(:map, id: names(:conocybe_filaris).id)
+    get(:map, id: names(:conocybe_filaris).id)
     assert_template(:map)
   end
 
@@ -3585,7 +3585,7 @@ class NamesControllerTest < FunctionalTestCase
     login("rolf")
 
     # No interest in this name yet.
-    get_with_dump(:show, id: peltigera.id)
+    get(:show, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/watch\d*.png/,
                               controller: :interests,
@@ -3602,7 +3602,7 @@ class NamesControllerTest < FunctionalTestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: peltigera, user: rolf, state: true)
-    get_with_dump(:show, id: peltigera.id)
+    get(:show, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: :interests,
@@ -3620,7 +3620,7 @@ class NamesControllerTest < FunctionalTestCase
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: peltigera, user: rolf, state: false)
-    get_with_dump(:show, id: peltigera.id)
+    get(:show, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: :interests,
@@ -3740,7 +3740,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     # Make sure it doesn't crash if id is bogus.
-    get_with_dump(:inherit_classification, id: name.id)
+    get(:inherit_classification, id: name.id)
     assert_no_flash
     assert_response(:success)
     assert_template("inherit_classification")
@@ -3852,7 +3852,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_textarea_value(:classification, "")
 
     name = names(:agaricus_campestris)
-    get_with_dump(:edit_classification, id: name.id)
+    get(:edit_classification, id: name.id)
     assert_response(:success)
     assert_template(:edit_classification)
     assert_textarea_value(:classification, name.classification)

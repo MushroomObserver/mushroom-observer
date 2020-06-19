@@ -176,17 +176,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_by_title
-    get_with_dump(:species_lists_by_title)
+    get(:species_lists_by_title)
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_by_user
-    get_with_dump(:species_lists_by_user, id: rolf.id)
+    get(:species_lists_by_user, id: rolf.id)
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_for_project
-    get_with_dump(:species_lists_for_project,
+    get(:species_lists_for_project,
                   id: projects(:bolete_project).id)
     assert_template(:list_species_lists)
   end
@@ -237,7 +237,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert(spl.reload.observations.member?(obs))
 
     login owner
-    get_with_dump(:remove_observation_from_species_list, params)
+    get(:remove_observation_from_species_list, params)
     assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
     assert_not(spl.reload.observations.member?(obs))
   end
@@ -324,7 +324,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_unsuccessful_create_location_description
     user = login("spamspamspam")
     assert_false(user.is_successful_contributor?)
-    get_with_dump(:new)
+    get(:new)
     assert_response(:redirect)
   end
 
@@ -1308,7 +1308,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_template(:bulk_editor)
 
     login("mary")
-    get_with_dump(:bulk_editor, params)
+    get(:bulk_editor, params)
     assert_template(:bulk_editor)
 
     # No changes.
@@ -1573,7 +1573,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # Owner of list always can.
     login("mary")
-    get_with_dump(:manage_projects, id: list.id)
+    get(:manage_projects, id: list.id)
     assert_response(:success)
   end
 

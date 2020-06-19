@@ -107,12 +107,12 @@ class ObservationsControllerTest < FunctionalTestCase
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
     assert(obs.images.member?(img))
-    get_with_dump(:show, id: obs.id)
+    get(:show, id: obs.id)
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
-    get_with_dump(:show, id: obs.id)
+    get(:show, id: obs.id)
   end
 
   def test_show_observation_change_thumbnail_size
@@ -147,7 +147,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_page_loads
-    get_with_dump(:index)
+    get(:index)
     assert_template(
       :index,
       partial: :_rss_log
@@ -163,23 +163,23 @@ class ObservationsControllerTest < FunctionalTestCase
       action: :signup
     )
 
-    get_with_dump(:ask_webmaster_question)
+    get(:ask_webmaster_question)
     assert_template(:ask_webmaster_question)
     assert_form_action(action: :ask_webmaster_question)
 
-    get_with_dump(:how_to_help)
+    get(:how_to_help)
     assert_template(:how_to_help)
 
-    get_with_dump(:how_to_use)
+    get(:how_to_use)
     assert_template(:how_to_use)
 
-    get_with_dump(:intro)
+    get(:intro)
     assert_template(:intro)
 
     get(:search_bar_help)
     assert_response(:success)
 
-    get_with_dump(:index)
+    get(:index)
     assert_template(
       :index,
       partial: :_rss_log
@@ -201,16 +201,16 @@ class ObservationsControllerTest < FunctionalTestCase
     )
 
     # TODO: NIMMO move to rss_logs_controller_test
-    get_with_dump(:list_rss_logs)
+    get(:list_rss_logs)
     assert_template(
       :index,
       partial: :_rss_log
     )
 
-    get_with_dump(:news)
+    get(:news)
     assert_template(:news)
 
-    get_with_dump(:observations_by_name)
+    get(:observations_by_name)
     assert_template(
       :index,
       partial: :_rss_log
@@ -224,24 +224,24 @@ class ObservationsControllerTest < FunctionalTestCase
     )
 
     # TODO: NIMMO move to rss_logs_controller_test
-    get_with_dump(:rss)
+    get(:rss)
     assert_template(:rss)
 
-    get_with_dump(:show, id: rss_logs(:observation_rss_log).id)
+    get(:show, id: rss_logs(:observation_rss_log).id)
     assert_template(:show)
 
     # TODO: NIMMO move to users_controller_test
-    get_with_dump(:users_by_contribution)
+    get(:users_by_contribution)
     assert_template(:users_by_contribution)
 
-    get_with_dump(:show, id: rolf.id)
+    get(:show, id: rolf.id)
     assert_template(:show)
 
     # TODO: NIMMO move to info_controller_test
-    get_with_dump(:show_site_stats)
+    get(:show_site_stats)
     assert_template(:show_site_stats)
 
-    get_with_dump(:observations_by_user, id: rolf.id)
+    get(:observations_by_user, id: rolf.id)
     assert_template(
       :index,
       partial: :_rss_log
@@ -250,10 +250,10 @@ class ObservationsControllerTest < FunctionalTestCase
     # get_with_dump(:login)
     # assert_redirected_to(controller: :account, action: :login)
 
-    get_with_dump(:textile)
+    get(:textile)
     assert_template(:textile_sandbox)
 
-    get_with_dump(:textile_sandbox)
+    get(:textile_sandbox)
     assert_template(:textile_sandbox)
   end
 
@@ -266,7 +266,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_page_load_user_by_contribution
-    get_with_dump(:users_by_contribution)
+    get(:users_by_contribution)
     assert_template(:users_by_contribution)
   end
 
@@ -554,13 +554,13 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_observation_search_help
-    get_with_dump(:observation_search, pattern: "help:me")
+    get(:observation_search, pattern: "help:me")
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_observation_search
     pattern = "Boletus edulis"
-    get_with_dump(:observation_search, pattern: pattern)
+    get(:observation_search, pattern: pattern)
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -568,7 +568,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
-    get_with_dump(:observation_search, pattern: pattern, page: 2)
+    get(:observation_search, pattern: pattern, page: 2)
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
@@ -579,7 +579,7 @@ class ObservationsControllerTest < FunctionalTestCase
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
     pattern = "no hits"
-    get_with_dump(:observation_search, pattern: pattern)
+    get(:observation_search, pattern: pattern)
     assert_template(:index)
     assert_empty(@controller.instance_variable_get("@title"))
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
@@ -589,7 +589,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
-    get_with_dump(:observation_search, pattern: obs.id)
+    get(:observation_search, pattern: obs.id)
     assert_redirected_to(action: :show, id: Observation.first.id)
   end
 
@@ -669,21 +669,21 @@ class ObservationsControllerTest < FunctionalTestCase
   # Created in response to a bug seen in the wild
   def test_where_search_next_page
     params = { place_name: "Burbank", page: 2 }
-    get_with_dump(:observations_at_where, params)
+    get(:observations_at_where, params)
     assert_template(:index)
   end
 
   # Created in response to a bug seen in the wild
   def test_where_search_pattern
     params = { place_name: "Burbank" }
-    get_with_dump(:observations_at_where, params)
+    get(:observations_at_where, params)
     assert_template(:index, partial: :_rss_log)
   end
 
   def test_observations_of_name
     params = { species_list_id: species_lists(:unknown_species_list).id,
                name: observations(:minimal_unknown_obs).name }
-    get_with_dump(:observations_of_name, params)
+    get(:observations_of_name, params)
     # Needs an assertion. Was
     # assert_select("title", /Observations of Synonyms of/)
     # but that broken by PR 497.
@@ -692,7 +692,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # Prove that lichen content_filter works on observations
   def test_observations_with_lichen_filter
     login(users(:lichenologist).name)
-    get_with_dump(:index)
+    get(:index)
     results = @controller.instance_variable_get("@objects")
 
     assert(results.count.positive?)
@@ -700,7 +700,7 @@ class ObservationsControllerTest < FunctionalTestCase
            "All results should be lichen-ish")
 
     login(users(:antilichenologist).name)
-    get_with_dump(:index)
+    get(:index)
     results = @controller.instance_variable_get("@objects")
 
     assert(results.count.positive?)
@@ -719,7 +719,7 @@ class ObservationsControllerTest < FunctionalTestCase
     num_views = obs.num_views
     last_view = obs.last_view
     # obs.update_view_stats
-    get_with_dump(:show, id: obs.id)
+    get(:show, id: obs.id)
     obs.reload
     assert_equal(num_views + 1, obs.num_views)
     assert_not_equal(last_view, obs.last_view)
@@ -742,27 +742,27 @@ class ObservationsControllerTest < FunctionalTestCase
 
     # Test it on obs with no namings first.
     obs_id = observations(:unknown_with_no_naming).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, id: obs_id)
     assert_show_observation
     assert_form_action(controller: :votes, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, id: obs_id)
     assert_show_observation
     assert_form_action(controller: :votes, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, id: obs_id)
     assert_show_observation
     assert_form_action(controller: :votes, action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, id: obs_id)
     assert_show_observation
     assert_form_action(controller: :votes, action: :cast_votes, id: obs_id)
 
@@ -782,11 +782,11 @@ class ObservationsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     user = login(users(:public_voter).name)
 
-    get_with_dump(:show, id: obs.id, go_private: 1)
+    get(:show, id: obs.id, go_private: 1)
     user.reload
     assert_equal(:yes, user.votes_anonymous)
 
-    get_with_dump(:show, id: obs.id, go_public: 1)
+    get(:show, id: obs.id, go_public: 1)
     user.reload
     assert_equal(:no, user.votes_anonymous)
   end
@@ -794,13 +794,13 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_owner_id
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
-    get_with_dump(:show, id: obs.id)
+    get(:show, id: obs.id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
 
-    get_with_dump(:show,
+    get(:show,
                   id: observations(:owner_multiple_favorites).id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{:show_observation_no_clear_preference.t}/,
@@ -810,7 +810,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_show_owner_id_view_owner_id_false
     login(user_with_view_owner_id_false)
-    get_with_dump(:show,
+    get(:show,
                   id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when user has not opted for it")
@@ -818,7 +818,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_show_owner_id_noone_logged_in
     logout
-    get_with_dump(:show,
+    get(:show,
                   id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
@@ -834,7 +834,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_observation_external_links_exist
     obs_id = observations(:coprinus_comatus_obs).id
-    get_with_dump(:show, id: obs_id)
+    get(:show, id: obs_id)
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
