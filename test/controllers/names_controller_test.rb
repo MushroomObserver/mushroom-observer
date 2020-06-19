@@ -388,19 +388,19 @@ class NamesControllerTest < FunctionalTestCase
     name4 = query.results[-1]
 
     get(:show_next, q.merge(id: name1.id))
-    assert_redirected_to(name2.show_link_args.merge(q))
+    assert_redirected_to(name_path(name2, q: q))
     get(:show_next, q.merge(id: name3.id))
-    assert_redirected_to(name4.show_link_args.merge(q))
+    assert_redirected_to(name_path(name4, q: q))
     get(:show_next, q.merge(id: name4.id))
-    assert_redirected_to(name4.show_link_args.merge(q))
+    assert_redirected_to(name_path(name4, q: q))
     assert_flash_text(/no more/i)
 
     get(:show_prev, q.merge(id: name4.id))
-    assert_redirected_to(name3.show_link_args.merge(q))
+    assert_redirected_to(name_path(name3, q: q))
     get(:show_prev, q.merge(id: name2.id))
-    assert_redirected_to(name1.show_link_args.merge(q))
+    assert_redirected_to(name_path(name1, q: q))
     get(:show_prev, q.merge(id: name1.id))
-    assert_redirected_to(name1.show_link_args.merge(q))
+    assert_redirected_to(name_path(name1, q: q))
     assert_flash_text(/no more/i)
   end
 
