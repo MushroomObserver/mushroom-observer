@@ -38,10 +38,10 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
 
     get(:next_sequence, q: q, id: results[1].id)
-    assert_redirected_to(results[2].show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(results[2], q: q))
 
     get(:prev_sequence, q: q, id: results[2].id)
-    assert_redirected_to(results[1].show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(results[1], q: q))
   end
 
   def test_show_sequence
