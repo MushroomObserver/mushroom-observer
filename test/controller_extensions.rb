@@ -10,10 +10,8 @@
 #  login::                      Login a user.
 #  logout::                     Logout current user.
 #  make_admin::                 Make current user an admin & turn on admin mode.
-#  get_with_dump::              Send GET, no login required.
 #  requires_login::             Send GET, login required.
 #  requires_user::              Send GET, certain user must be logged in.
-#  post_with_dump::             Send POST, no login required.
 #  post_requires_login::        Send POST, login required.
 #  post_requires_user::         Send POST, certain user must be logged in.
 #  html_dump::                  Dump response body to file for W3C validation.
@@ -99,19 +97,6 @@ module ControllerExtensions
       user.save
     end
     user
-  end
-
-  # Send a POST request, and save the result in a file for w3c validation.
-  #
-  #   # Send request, but ignore response.
-  #   post(:action, params)
-  #
-  #   # Send request, and save response in ../html/action_0.html.
-  #   post_with_dump(:action, params)
-  #
-  def post_with_dump(page, params = {})
-    post(page, params: params)
-    # html_dump(page, @response.body, params)
   end
 
   # Send GET request to a page that should require login.
