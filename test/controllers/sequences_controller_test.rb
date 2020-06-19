@@ -4,12 +4,12 @@ require "test_helper"
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
-  def test_list_sequences
+  def test_index=-078
     get_with_dump(:index)
     assert(:success)
   end
 
-  def test_sequence_search
+  def test_search
     get(:sequence_search, pattern: Sequence.last.id)
     assert_redirected_to(sequence_path(Sequence.last))
 
@@ -27,7 +27,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
-  def test_index_sequence
+  def test_index_prev_and_next
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     results = query.results
@@ -44,7 +44,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(sequence_path(results[1], q: q))
   end
 
-  def test_show_sequence
+  def test_show
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
     get_with_dump(:show, id: sequence.id)
@@ -55,7 +55,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_sequence)
   end
 
-  def test_create_sequence_get
+  def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs   = observations(:minimal_unknown_obs)
     owner = obs.user
@@ -79,7 +79,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_sequence_post
+  def test_create
     old_count = Sequence.count
     obs   = observations(:detailed_unknown_obs)
     owner = obs.user
@@ -169,7 +169,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs))
   end
 
-  def test_create_sequence_post_wrong_parameters
+  def test_create_wrong_parameters
     old_count = Sequence.count
     obs = observations(:coprinus_comatus_obs)
     login(obs.user.login)
@@ -217,7 +217,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_create_sequence_redirect
+  def test_make_redirect
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
@@ -237,7 +237,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_edit_sequence_get
+  def test_edit
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
     observer = obs.user
@@ -263,7 +263,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_sequence_post
+  def test_update
     sequence  = sequences(:local_sequence)
     obs       = sequence.observation
     observer  = obs.user
@@ -393,7 +393,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_edit_sequence_redirect
+  def test_change_redirect
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
@@ -425,7 +425,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(sequence_path(sequence, q: q))
   end
 
-  def test_destroy_sequence
+  def test_destroy
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -452,7 +452,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_admin
+  def test_destroy_admin
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -468,7 +468,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_redirect
+  def test_destroy_redirect
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
