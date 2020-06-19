@@ -11,7 +11,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_sequence_search
     get(:sequence_search, pattern: Sequence.last.id)
-    assert_redirected_to(Sequence.last.show_link_args)
+    assert_redirected_to(sequence_path(Sequence.last))
 
     get(:sequence_search, pattern: "ITS")
     assert(:success)
