@@ -456,7 +456,7 @@ module ControllerExtensions
 
     # Finally, login correct user and let it do its thing.
     login(user, password)
-    send("#{method}_with_dump", action, params)
+    send("#{method}", action, params)
     assert_response(args[:result])
   end
 
