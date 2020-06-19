@@ -3,7 +3,7 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :observation),
-            @sequence.observation.show_link_args)
+            observation_path(@sequence.observation))
   ]
   if check_permission(@sequence)
     tabs << link_with_query(:edit_object.t(type: :sequence),

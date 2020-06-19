@@ -3,7 +3,7 @@
 
   tabs = [
     link_with_query(:show_object.t(type: @object.type_tag),
-                    @object.show_link_args),
+                    object_path(@object)),
     link_with_query(:edit_object.t(type: @object.type_tag),
                     controller: @object.show_controller,
                     action: @object.edit_action, id: @object.id)

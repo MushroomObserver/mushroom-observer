@@ -3,7 +3,7 @@
 
   tabs = [
     link_with_query(:cancel_and_show.t(type: :species_list),
-                    @species_list.show_link_args),
+                    species_list_path(@species_list)),
     link_with_query(:species_list_show_edit.t,
                     action: :edit,
                     id: @species_list.id)
@@ -114,7 +114,7 @@
               <%= img_tag = image_tag(img.thumbnail_url, class: "tiny")
               link_to(
                 img_tag,
-                img.show_link_args,
+                image_path(img),
                 target: "_blank",
                 rel:"noopener"
               ) %>
@@ -128,7 +128,7 @@
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
     <%=
-      args = Observation.show_link_args("XXX")
+      args = observation_path("XXX")
       url = url_for(add_query_param(args, @query))
       link_to(:SHOW.l,
               "javascript:row_button(#{j url})")

@@ -26,7 +26,7 @@ end %>
                   :list_observation_name.t + ": " +
                   link_to(
                     name.display_name.t,
-                    name.show_link_args
+                    name_path(name)
                   ) + " (0)"
                 else
                   :list_observation_observations.t + " " +

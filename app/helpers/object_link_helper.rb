@@ -108,11 +108,9 @@ module ObjectLinkHelper
   def user_link(user, name = nil)
     if user.is_a?(Integer)
       name ||= :USER.t + " #" + user.to_s
-      # link_to(name, User.show_link_args(user))
       link_to(name, user_path(user))
     elsif user
       name ||= user.unique_text_name
-      # link_to(name, user.show_link_args)
       link_to(name, user_path(user.id))
     else
       "?"
@@ -134,6 +132,15 @@ module ObjectLinkHelper
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
     title + ": " + links.safe_join(", ")
+  end
+
+  # Wrap object's name in link to the object, return nil if no object
+  #   Project: <%= project_link(draft_name.project) %>
+  #   Species List: <%= species_list_link(observation.species_lists.first) %>
+  def link_to_object(object, name = nil)
+    return nil unless object
+
+    link_to(name || object.title.t, helpers.object_path(object))
   end
 
   # Wrap description title in link to show_description.

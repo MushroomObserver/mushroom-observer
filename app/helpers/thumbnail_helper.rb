@@ -71,7 +71,7 @@ module ThumbnailHelper
       large_url: large_url,
       orig_url: orig_url,
       srcset: data_srcset,
-      link: Image.show_link_args(image_id),
+      link: image_path(image_id),
       size: :small,
       img_proportion: img_proportion,
       votes: true,
@@ -153,7 +153,7 @@ module ThumbnailHelper
       thumb_url: thumb_url,
       large_url: large_url,
       orig_url: orig_url,
-      link: Image.show_link_args(image_id),
+      link: image_path(image_id),
       size: :small,
       img_proportion: img_proportion,
       votes: true,
@@ -193,7 +193,7 @@ module ThumbnailHelper
     locals = {
       image: image,
       thumb_url: thumb_url,
-      link: Image.show_link_args(image_id),
+      link: image_path(image_id),
       size: :thumb,
       theater_on_click: false,
       html_options: html_options
@@ -205,7 +205,7 @@ module ThumbnailHelper
   def show_best_image(obs)
     if obs&.thumb_image
       thumbnail(obs.thumb_image,
-                link: obs.show_link_args,
+                link: observation_path(obs),
                 size: :thumbnail,
                 votes: true,
                 responsive: false) + image_copyright(obs.thumb_image)
@@ -318,7 +318,7 @@ module ThumbnailHelper
       thumb_url: thumb_url,
       large_url: large_url,
       orig_url: orig_url,
-      link: Image.show_link_args(image_id),
+      link: image_path(image_id),
       size: :small,
       img_proportion: img_proportion,
       votes: true,

@@ -11,9 +11,9 @@
   <div class="card")>
     <% @objects.each do |object| %>
       <div class="card-body">
-        <%= link_with_query(object.unique_format_name, object.show_link_args) %><br/>
+        <%= link_with_query(object.unique_format_name, object_path(object)) %><br/>
         <%= link_with_query(object.observation.unique_format_name.t,
-                            object.observation.show_link_args) %><br/>
+                            observation_path(object.observation)) %><br/>
         <% if object.deposit? %>
           <%= sequence_archive_link(object) %>: <%= sequence_accession_link(object) %><br/>
         <% end %>

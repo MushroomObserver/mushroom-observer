@@ -61,5 +61,9 @@ class ExternalLink < AbstractModel
   def self.index_action; end
   def self.show_url(id); end
   def self.show_link_args(id); end
+  def self.external_link_path(*args); end
+  def external_link_path(*args)
+    self.class.external_link_path(*args)
+  end
   # rubocop:enable Layout/EmptyLineBetweenDefs
 end

@@ -16,7 +16,7 @@
             <%=
               when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")
               what_span = content_tag(:span, species_list.unique_text_name.t, class: "ListWhat")
-              link_to(when_span + ": " + what_span, species_list.show_link_args)
+              link_to(when_span + ": " + what_span, species_list_path(species_list))
             %>
           </big><br/>
           <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |

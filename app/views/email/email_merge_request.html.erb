@@ -2,7 +2,7 @@
   @title = :email_merge_request_title.t(type: @model.type_tag)
 
   tabs = [
-    link_to(:cancel_and_show.t(type: @model.type_tag), @old_obj.show_link_args)
+    link_to(:cancel_and_show.t(type: @model.type_tag), obj_path(@old_obj))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

@@ -11,7 +11,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_sequence_search
     get(:sequence_search, pattern: Sequence.last.id)
-    assert_redirected_to(Sequence.last.show_link_args)
+    assert_redirected_to(sequence_path(Sequence.last))
 
     get(:sequence_search, pattern: "ITS")
     assert(:success)
@@ -38,10 +38,10 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
 
     get(:next_sequence, q: q, id: results[1].id)
-    assert_redirected_to(results[2].show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(results[2], q: q))
 
     get(:prev_sequence, q: q, id: results[2].id)
-    assert_redirected_to(results[1].show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(results[1], q: q))
   end
 
   def test_show_sequence
@@ -117,7 +117,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_equal(bases, sequence.bases)
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_added"),
            "Failed to include Sequence added in RssLog for Observation")
@@ -142,7 +142,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_equal(bases, sequence.bases)
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_added"),
            "Failed to include Sequence added in RssLog for Observation")
@@ -166,7 +166,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_empty(sequence.bases)
     assert_equal(archive, sequence.archive)
     assert_equal(accession, sequence.accession)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
   end
 
   def test_create_sequence_post_wrong_parameters
@@ -234,7 +234,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that post keeps query params intact.
     post(:new, params)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
   end
 
   def test_edit_sequence_get
@@ -250,7 +250,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove user cannot edit Sequence he didn't create for Obs he doesn't own
     login("zero")
     get(:edit, id: sequence.id)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
 
     # Prove Observation owner can edit Sequence
     login(observer.login)
@@ -307,7 +307,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_equal(bases, sequence.bases)
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_updated"),
            "Failed to include Sequence updated in RssLog for Observation")
@@ -414,15 +414,15 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove by default POST goes back to observation.
     post(:edit, params)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
 
     # Prove that POST keeps query param when returning to observation.
     post(:edit, params.merge(q: q))
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that POST can return to show, too, with query intact.
     post(:edit, params.merge(back: "show", q: q))
-    assert_redirected_to(sequence.show_link_args.merge(q: q))
+    assert_redirected_to(sequence_path(sequence, q: q))
   end
 
   def test_destroy_sequence
@@ -439,14 +439,14 @@ class SequencesControllerTest < FunctionalTestCase
     login("zero")
     post(:destroy, id: sequence.id)
     assert_equal(old_count, Sequence.count)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
     post(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
            "Failed to include Sequence destroyed in RssLog for Observation")
@@ -462,7 +462,7 @@ class SequencesControllerTest < FunctionalTestCase
     make_admin("zero")
     post(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
            "Failed to include Sequence destroyed in RssLog for Observation")
@@ -477,11 +477,11 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove by default it goes back to observation.
     post(:destroy, id: seqs[0].id)
-    assert_redirected_to(obs.show_link_args)
+    assert_redirected_to(observation_path(obs))
 
     # Prove that it keeps query param intact when returning to observation.
     post(:destroy, id: seqs[1].id, q: q)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that it can return to index, too, with query intact.
     post(:destroy, id: seqs[2].id, q: q, back: "index")

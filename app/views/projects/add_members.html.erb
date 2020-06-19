@@ -2,7 +2,7 @@
   @title = :add_members_title.t(title: @project.title)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+    link_with_query(:cancel_and_show.t(type: :project), project_path(@project))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

@@ -2,7 +2,7 @@
   @title = :create_herbarium_record_title.l
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation), @observation.show_link_args),
+    link_with_query(:cancel_and_show.t(type: :observation), observation_path(@observation)),
     link_with_query(:create_herbarium.t, controller: :herbaria, action: :create_herbarium),
     link_with_query(:herbarium_index.t, controller: :herbaria, action: :index)
   ]

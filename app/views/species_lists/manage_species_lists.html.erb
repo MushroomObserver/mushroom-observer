@@ -3,7 +3,7 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :observation),
-            @observation.show_link_args)
+            observation_path(@observation))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
@@ -33,7 +33,7 @@
                                     species_list.unique_text_name,
                                     class: :ListWhat)
             link_to(when_span + ": " + what_span,
-                    species_list.show_link_args)
+                    species_list_path(species_list))
           %><br/>
           <span class="ListWhere"><%= species_list.place_name.t %></span> |
           <span class="ListWho"><%= user_link(species_list.user) %></span>
@@ -69,7 +69,7 @@
                                     species_list.unique_text_name,
                                     class: :ListWhat)
             link_to(when_span + ": " + what_span,
-                    species_list.show_link_args)
+                    species_list_path(species_list))
           %><br/>
           <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
           <span class="ListWho"><%= user_link(species_list.user) %></span>
