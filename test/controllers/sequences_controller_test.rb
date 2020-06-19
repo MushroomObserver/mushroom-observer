@@ -4,7 +4,7 @@ require "test_helper"
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
-  def test_index=-078
+  def test_index
     get_with_dump(:index)
     assert(:success)
   end
