@@ -3926,7 +3926,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(project.is_member?(dick))
     login(dick.login)
     get_with_dump(:show_name_description, id: draft.id)
-    assert_redirected_to(project.show_link_args)
+    assert_redirected_to(project_path(project))
   end
 
   def test_create_draft_member
