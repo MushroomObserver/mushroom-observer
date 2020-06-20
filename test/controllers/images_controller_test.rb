@@ -601,7 +601,7 @@ class ImagesControllerTest < FunctionalTestCase
     }
     File.stub(:rename, false) do
       login("rolf", "testpassword")
-      post_with_dump(:add_image, params)
+      post(:add_image, params)
     end
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))

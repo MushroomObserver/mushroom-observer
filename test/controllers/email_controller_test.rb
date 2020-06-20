@@ -79,7 +79,7 @@ class EmailControllerTest < FunctionalTestCase
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
-    post_with_dump(page, params)
+    post(page, params)
     assert_redirected_to(controller: :users, action: :users_by_name)
   end
 
