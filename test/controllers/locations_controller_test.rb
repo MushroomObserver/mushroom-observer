@@ -476,7 +476,7 @@ class LocationsControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     make_admin("rolf")
-    post_with_dump(:edit, params)
+    post(:edit, params)
 
     # assert_template(action: :show)
     assert_redirected_to(action: :show, id: to_stay.id)

@@ -776,7 +776,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal(sp_count, spl.reload.observations.size)
 
     login owner
-    post_with_dump(:edit, params)
+    post(:edit, params)
     assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
@@ -827,7 +827,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert(spl.reload.observations.size == sp_count)
 
     login owner
-    post_with_dump(:edit, params)
+    post(:edit, params)
     # assert_redirected_to(controller: :locations, action: :new)
     assert_redirected_to(new_location_path)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
@@ -1057,7 +1057,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post_with_dump(:upload_species_list, params)
+    post(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit
@@ -1078,7 +1078,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post_with_dump(:upload_species_list, params)
+    post(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     new_data = @controller.instance_variable_get("@list_members")
