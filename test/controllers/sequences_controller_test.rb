@@ -432,19 +432,19 @@ class SequencesControllerTest < FunctionalTestCase
     observer = obs.user
 
     # Prove user must be logged in to destroy Sequence.
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count, Sequence.count)
 
     # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
     login("zero")
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_success
@@ -460,7 +460,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove admin can destroy Sequence
     make_admin("zero")
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_success
@@ -476,15 +476,15 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     # Prove by default it goes back to observation.
-    post(:destroy, id: seqs[0].id)
+    delete(:destroy, id: seqs[0].id)
     assert_redirected_to(observation_path(obs))
 
     # Prove that it keeps query param intact when returning to observation.
-    post(:destroy, id: seqs[1].id, q: q)
+    delete(:destroy, id: seqs[1].id, q: q)
     assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that it can return to index, too, with query intact.
-    post(:destroy, id: seqs[2].id, q: q, back: "index")
+    delete(:destroy, id: seqs[2].id, q: q, back: "index")
     assert_redirected_to(action: :index_sequence, q: q)
   end
 end
