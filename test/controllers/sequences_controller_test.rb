@@ -102,13 +102,13 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     # Prove user must be logged in to create Sequence
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
 
     # Prove logged-in user can add sequence to someone else's Observation
     user = users(:zero_user)
     login(user.login)
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -133,7 +133,7 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     login(owner.login)
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -159,7 +159,7 @@ class SequencesControllerTest < FunctionalTestCase
     }
     old_count = Sequence.count
     make_admin("zero")
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(locus, sequence.locus)

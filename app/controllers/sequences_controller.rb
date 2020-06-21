@@ -108,6 +108,9 @@ class SequencesController < ApplicationController
   def create
     store_location
     pass_query_params
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless @observation
+
     build_sequence
   end
 
