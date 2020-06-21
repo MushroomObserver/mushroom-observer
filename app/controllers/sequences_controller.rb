@@ -97,8 +97,10 @@ class SequencesController < ApplicationController
     store_location
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
-    @back |= "show"
-    @back_object |= @observation
+    return unless @observation
+
+    @back_object = @observation
+    @sequence = Sequence.new(observation: @observation)
   end
 
   alias_method :create_sequence, :new

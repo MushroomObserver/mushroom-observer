@@ -56,16 +56,10 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_new
-    # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs   = observations(:minimal_unknown_obs)
     owner = obs.user
 
     # Prove method requires login
-    # TODO: jdc consider reverting this
-    # Simplified for debugging purposes:
-    #  `requires_login` calls get without login, then with Rolf logged in
-    #  Calling it with use Rolf is redundant in light of "zero" stuff below
-    # requires_login(:new, id: obs.id)
     get(:new, id: obs.id)
     assert_redirected_to(controller: :account, action: :login)
 
