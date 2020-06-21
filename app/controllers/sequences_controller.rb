@@ -117,13 +117,12 @@ class SequencesController < ApplicationController
   def edit
     store_location
     pass_query_params
-    figure_out_where_to_go_back_to
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
+    figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
-      # redirect_with_query(@sequence.observation.show_link_args)
       redirect_to observation_path(@sequence.observation_id,
                                    q: get_query_param)
     end
