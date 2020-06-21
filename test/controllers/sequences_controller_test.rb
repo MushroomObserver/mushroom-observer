@@ -180,9 +180,9 @@ class SequencesControllerTest < FunctionalTestCase
       sequence: { locus: "",
                   bases: "actgct" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
-    # response is 200 because it just reloads the form
+    # response is :success because it just reloads the form
     assert_response(:success)
     assert_flash_error
 
@@ -191,7 +191,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -201,7 +201,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", archive: "GenBank" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -211,7 +211,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", accession: "KY133294.1" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -230,10 +230,10 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='sequence/#{obs.id}?q=#{q}']")
+    assert_select("form input", { type: "hidden", value: q })
 
     # Prove that post keeps query params intact.
-    post(:new, params)
+    post(:create, params)
     assert_redirected_to(observation_path(obs, q: q))
   end
 
