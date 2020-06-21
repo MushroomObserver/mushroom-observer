@@ -287,18 +287,18 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     # Prove user must be logged in to edit Sequence.
-    post(:edit, params)
+    post(:update, params)
     assert_not_equal(locus, sequence.reload.locus)
 
     # Prove user must be owner to edit Sequence.
     login("zero")
-    post(:edit, params)
+    post(:update, params)
     assert_not_equal(locus, sequence.reload.locus)
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
-    post(:edit, params)
+    post(:update, params)
     sequence.reload
     obs.rss_log.reload
     assert_objs_equal(obs, sequence.observation)
@@ -323,7 +323,7 @@ class SequencesControllerTest < FunctionalTestCase
                   accession: accession }
     }
     make_admin("zero")
-    post(:edit, params)
+    post(:update, params)
     sequence.reload
     obs.rss_log.reload
     assert_equal(archive, sequence.archive)
@@ -340,7 +340,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_equal(locus, sequence.reload.locus)
 
     # Prove locus required.
@@ -351,7 +351,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     # response is 200 because it just reloads the form
     assert_response(:success)
     assert_flash_error
@@ -364,7 +364,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: "",
                   accession: "" }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
 
@@ -376,7 +376,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: "" }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
 
@@ -388,7 +388,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: "",
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
   end

@@ -133,7 +133,16 @@ class SequencesController < ApplicationController
   def update
     store_location
     pass_query_params
-    save_edits
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    return unless @sequence
+
+    figure_out_where_to_go_back_to
+    if check_permission(@sequence)
+      save_updates
+    else
+      flash_warning(:permission_denied.t)
+      redirect_to(observation_path(@sequence.observation, q: params[:q]))
+    end
   end
 
   def destroy
@@ -179,7 +188,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  def save_edits
+  def save_updates
     @sequence.attributes = whitelisted_sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
