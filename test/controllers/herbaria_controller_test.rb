@@ -313,7 +313,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("mary")
     get(:edit, id: nybg.id)
-    assert_template("edit_herbarium")
+    assert_template("edit")
   end
 
   def test_edit_herbarium_with_curators
