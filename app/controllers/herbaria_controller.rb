@@ -133,6 +133,7 @@ class HerbariaController < ApplicationController
   end
 
   def edit
+  # TODO: jdc DRY the following
     store_location
     pass_query_params
     keep_track_of_referer
@@ -154,6 +155,13 @@ class HerbariaController < ApplicationController
   alias_method :edit_herbarium, :edit
 
   def update
+    store_location
+    pass_query_params
+    keep_track_of_referer
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium
+    return unless make_sure_can_edit!
+
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
     if validate_name! &&
@@ -429,6 +437,7 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
   end
 
+  # TODO: jdc - shorten name of method
   def keep_track_of_referer
     @back = params[:back] || request.referer
   end
