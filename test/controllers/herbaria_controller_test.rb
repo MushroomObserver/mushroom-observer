@@ -249,7 +249,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("1", herbarium.personal)
   end
 
-  def test_create with_nonexisting_place_name
+  def test_create_with_nonexisting_place_name
     herbarium_count = Herbarium.count
     login("rolf")
     params = herbarium_params.merge(
