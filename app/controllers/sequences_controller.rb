@@ -165,6 +165,7 @@ class SequencesController < ApplicationController
 
     else
       # TODO: NIMMO is @back_object here always an observation? Check
+      # Answer: Currently yes. JDC 2020-06-21
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     end
   end
