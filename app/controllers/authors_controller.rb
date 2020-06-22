@@ -18,14 +18,7 @@ class AuthorsController < ApplicationController
       AuthorEmail.build(@user, receiver, @object, subject, content).deliver_now
     end
     flash_notice(:request_success.t)
-    # TODO: NIMMO i don't know how to refactor this with a path helper.
-    # otherwise if it's a description, this will need module/namespace
-    # Second one below in review_authors
-    redirect_with_query(
-      controller: @object.show_controller,
-      action: @object.show_action,
-      id: @object.id
-    )
+    redirect_to(object_path(@object))
   end
 
   # Form to adjust permissions for a user with respect to a project.
@@ -61,11 +54,7 @@ class AuthorsController < ApplicationController
       end
     else
       flash_error(:review_authors_denied.t)
-      redirect_with_query(
-        controller: parent.show_controller,
-        action: parent.show_action,
-        id: parent.id
-      )
+      redirect_to(object_path(parent))
     end
   end
 end
