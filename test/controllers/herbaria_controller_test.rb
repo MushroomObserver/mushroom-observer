@@ -25,7 +25,9 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:herbarium_search, pattern: "Personal Herbarium")
   end
 
-  def test_index_merge_source
+  # Prove index shows edit/merge links only for herbaria which
+  # user can edit, merge from
+  def test_index_links_to_merge_source
     herb1 = herbaria(:nybg_herbarium)
     herb2 = herbaria(:mycoflora_herbarium)
     herb3 = herbaria(:dick_herbarium)
@@ -39,36 +41,37 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("dick")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 0)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 0)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb1.id)}']", count: 0)
+    assert_select("a[href*='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb1.id)}']", count: 0)
+    assert_select("a[href*='#{herbaria_path(merge: herb2.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb3.id)}']", count: 1)
     assert_select("a[href*=merge_herbaria]", count: 0)
 
     login("rolf")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 0)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 0)
+    assert_select("a[href*='#{edit_herbarium_path(herb1.id)}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb3.id)}']", count: 0)
+    assert_select("a[href*='#{herbaria_path(merge: herb1.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb2.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb3.id)}']", count: 0)
     assert_select("a[href*=merge_herbaria]", count: 0)
 
     make_admin("zero")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb1.id)}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href*='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb1.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb2.id)}']", count: 1)
+    assert_select("a[href*='#{herbaria_path(merge: herb3.id)}']", count: 1)
     assert_select("a[href*=merge_herbaria]", count: 0)
   end
 
-  def test_index_merge_target
+  # Prove index showsmerge links only for herbaria which user can merge into
+  def test_index_links_to_merge_target
     source = herbaria(:field_museum)
     herb1  = herbaria(:nybg_herbarium)
     herb2  = herbaria(:mycoflora_herbarium)
