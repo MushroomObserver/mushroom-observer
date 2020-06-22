@@ -27,7 +27,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
-  def test_index_prev_and_next
+  def test_index_sequence
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     results = query.results
@@ -36,12 +36,6 @@ class SequencesControllerTest < FunctionalTestCase
 
     get(:index_sequence, q: q, id: results[2].id)
     assert_response(:success)
-
-    get(:show_next, q: q, id: results[1].id)
-    assert_redirected_to(sequence_path(results[2], q: q))
-
-    get(:show_prev, q: q, id: results[2].id)
-    assert_redirected_to(sequence_path(results[1], q: q))
   end
 
   def test_show
@@ -53,6 +47,26 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove index displayed if called with id of sequence not in db
     get(:show, id: 666)
     assert_redirected_to(action: :index_sequence)
+  end
+
+  def test_show_next
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    results = query.results
+    q = query.id.alphabetize
+
+    get(:show_next, q: q, id: results[1].id)
+    assert_redirected_to(sequence_path(results[2], q: q))
+  end
+
+  def test_show_prev
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    results = query.results
+    q = query.id.alphabetize
+
+    get(:show_prev, q: q, id: results[2].id)
+    assert_redirected_to(sequence_path(results[1], q: q))
   end
 
   def test_new
