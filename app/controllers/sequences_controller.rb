@@ -36,7 +36,7 @@ class SequencesController < ApplicationController
     show_selected_sequences(query)
   end
 
-  alias_method :list_sequences, :index
+  alias list_sequences index
 
   # Display list of Sequences whose text matches a string pattern.
   def sequence_search
@@ -66,19 +66,19 @@ class SequencesController < ApplicationController
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  alias_method :show_sequence, :show
+  alias show_sequence show
 
   def show_next
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  alias_method :next_sequence, :show_next
+  alias next_sequence show_next
 
   def show_prev
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
-  alias_method :prev_sequence, :show_prev
+  alias prev_sequence show_prev
 
   def new
     store_location
@@ -90,7 +90,7 @@ class SequencesController < ApplicationController
     @sequence = Sequence.new(observation: @observation)
   end
 
-  alias_method :create_sequence, :new
+  alias create_sequence new
 
   def create
     store_location
@@ -108,13 +108,13 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    unless check_permission(@sequence)
-      flash_warning(:permission_denied.t)
-      redirect_to observation_path(@sequence.observation_id, q: get_query_param)
-    end
+    return if check_permission(@sequence) # happy path; render the view
+
+    flash_warning(:permission_denied.t)
+    redirect_to observation_path(@sequence.observation_id, q: get_query_param)
   end
 
-  alias_method :edit_sequence, :edit
+  alias edit_sequence edit
 
   def update
     store_location
@@ -156,7 +156,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  alias_method :destroy_sequence, :destroy
+  alias destroy_sequence destroy
 
   ##############################################################################
 
