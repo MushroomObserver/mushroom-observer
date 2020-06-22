@@ -41,12 +41,8 @@ class SequencesController < ApplicationController
   # Display list of Sequences whose text matches a string pattern.
   def sequence_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (sequence = Sequence.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: sequence.id
-      )
+    if pattern.match(/^\d+$/) && (sequence = Sequence.safe_find(pattern))
+      redirect_to(sequence_path(sequence.id))
     else
       query = create_query(:Sequence, :pattern_search, pattern: pattern)
       show_selected_sequences(query)
@@ -57,19 +53,10 @@ class SequencesController < ApplicationController
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
-    # @links = [
-    #   [:show_object.l(type: :observation),
-    #    Observation.show_link_args(params[:id])],
-    #   [:show_observation_add_sequence.l,
-    #    { action: :new,
-    #      id: params[:id] }
-    #   ]
-    # ]
-    @links = []
-    @links << [:show_object.l(type: :observation),
-              observation_path(params[:id])]
-    @links << [:show_observation_add_sequence.l,
-              new_sequence_path(id: params[:id])]
+    @links = [
+      [:show_object.l(type: :observation), observation_path(params[:id])],
+      [:show_observation_add_sequence.l, new_sequence_path(id: params[:id])]
+    ]
     show_selected_sequences(query, always_index: true)
   end
 
@@ -121,10 +108,9 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if !check_permission(@sequence)
+    unless check_permission(@sequence)
       flash_warning(:permission_denied.t)
-      redirect_to observation_path(@sequence.observation_id,
-                                   q: get_query_param)
+      redirect_to observation_path(@sequence.observation_id, q: get_query_param)
     end
   end
 
