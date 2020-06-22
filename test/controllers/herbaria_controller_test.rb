@@ -346,17 +346,17 @@ class HerbariaControllerTest < FunctionalTestCase
       description: " And  more  stuff. "
     )
 
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_redirected_to(action: :show, id: nybg.id)
     assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_redirected_to(action: :show, id: nybg.id)
     assert_no_flash
     assert_not_equal(last_update, nybg.reload.updated_at)
@@ -377,14 +377,14 @@ class HerbariaControllerTest < FunctionalTestCase
 
     # Roy can edit but does not own all the records.
     login("roy")
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_equal(last_update, nybg.reload.updated_at)
     assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
 
     # Rolf can both edit and does own all the records.  Should merge.
     login("rolf")
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_nil(Herbarium.safe_find(other.id))
     assert_not_nil(Herbarium.safe_find(nybg.id))
   end
@@ -393,7 +393,7 @@ class HerbariaControllerTest < FunctionalTestCase
     nybg = herbaria(:nybg_herbarium)
     params = herbarium_params.merge(place_name: "New Location")
     login("rolf")
-    patch(:update, herbarium: params, id: nybg.id)
+    post(:update, herbarium: params, id: nybg.id)
     assert_nil(nybg.reload.location)
     assert_redirected_to(controller: :locations, action: :new,
                          where: "New Location", set_herbarium: nybg.id)
@@ -411,7 +411,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     # Rolf doesn't own all the records, so can't make it his.
     login("rolf")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.reload.curators)
 
@@ -419,13 +419,13 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     other = herbaria(:dick_herbarium)
     other.update_columns(personal_user_id: mary.id)
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.reload.curators)
 
     # But if she owns all the records and doesn't have one, then she can.
     other.update_columns(personal_user_id: dick.id)
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.reload.curators)
   end
@@ -436,13 +436,13 @@ class HerbariaControllerTest < FunctionalTestCase
       name: herbarium.name,
       personal_user_name: "mary"
     )
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     login("mary")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     make_admin("rolf")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.curators)
   end
@@ -453,16 +453,16 @@ class HerbariaControllerTest < FunctionalTestCase
       name: herbarium.name,
       personal_user_name: "mary"
     )
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("mary")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("dick")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     make_admin("rolf")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.curators)
   end
@@ -473,16 +473,16 @@ class HerbariaControllerTest < FunctionalTestCase
       name: herbarium.name,
       personal_user_name: ""
     )
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("mary")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("dick")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_users_equal(dick, herbarium.reload.personal_user)
     make_admin("rolf")
-    patch(:update, id: herbarium.id, herbarium: params)
+    post(:update, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.curators)
   end
