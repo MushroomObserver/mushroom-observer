@@ -157,12 +157,11 @@ class SequencesController < ApplicationController
     else
       flash_warning(:permission_denied.t)
     end
+
     if @back == "index"
-      # redirect_with_query(
-      #   action: :index_sequence
-      # )
-      redirect_to sequences_index_sequence_path(@sequence.id,
-                                                q: get_query_param)
+      redirect_with_query(action: :index_sequence)
+      # redirect_to sequences_index_sequence_path(@sequence.id,
+      #                                           q: get_query_param)
 
     else
       # TODO: NIMMO is @back_object here always an observation? Check
