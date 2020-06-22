@@ -145,13 +145,12 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:merge_herbaria, this: id1, that: id2)
     assert_flash_success
     # Mycoflora ends up being the destination because it is older.
-    assert_redirected_to(action: :index_herbarium, id: mycoflora.id)
+    assert_redirected_to(herbaria_index_herbarium_path(id: mycoflora.id))
 
     make_admin("mary")
     get(:merge_herbaria, this: id3, that: id4)
     assert_flash_success
-    assert_redirected_to(action: :index_herbarium,
-                         id: herbaria(:nybg_herbarium).id)
+    assert_redirected_to(herbaria_index_herbarium_path(id: id3))
   end
 
   def test_show
