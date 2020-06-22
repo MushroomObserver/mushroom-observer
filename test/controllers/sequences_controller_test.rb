@@ -408,20 +408,21 @@ class SequencesControllerTest < FunctionalTestCase
                   accession: sequence.accession }
     }
 
-    # Prove that GET passes "back" and query param through to form.
+    # Prove that :edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='sequence/#{sequence.id}?back=foo&q=#{q}']")
+    assert_select("form input", { type: "hidden", name: "back", value: "foo" })
+    assert_select("form input", { type: "hidden", name: "q", value: q })
 
-    # Prove by default POST goes back to observation.
-    post(:edit, params)
+    # Prove by default :update goes back to observation.
+    post(:update, params)
     assert_redirected_to(observation_path(obs))
 
-    # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(q: q))
+    # Prove that :update keeps query param when returning to observation.
+    post(:update, params.merge(q: q))
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that POST can return to show, too, with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    # Prove that :update can return to show, too, with query intact.
+    post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(sequence_path(sequence, q: q))
   end
 
