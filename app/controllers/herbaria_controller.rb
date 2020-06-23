@@ -54,7 +54,7 @@ class HerbariaController < ApplicationController
     )
   end
 
-  alias_method :list_herbaria, :index
+  alias list_herbaria index
 
   # Display list of Herbaria whose text matches a string pattern.
   def herbarium_search
@@ -89,19 +89,19 @@ class HerbariaController < ApplicationController
     end
   end
 
-  alias_method :show_herbarium, :show
+  alias show_herbarium show
 
   def show_next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  alias_method :next_herbarium, :show_next
+  alias next_herbarium show_next
 
   def show_prev
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
-  alias_method :prev_herbarium, :show_prev
+  alias prev_herbarium show_prev
 
   def new
     store_location
@@ -110,19 +110,19 @@ class HerbariaController < ApplicationController
     @herbarium = Herbarium.new
   end
 
-  alias_method :create_herbarium, :new
+  alias create_herbarium new
 
   def create
     @herbarium = Herbarium.new(whitelisted_herbarium_params)
     normalize_parameters
-    if attributes_validated!
-      @herbarium.save
-      @herbarium.add_curator(@user) if @herbarium.personal_user
-      notify_admins_of_new_herbarium unless @herbarium.personal_user
-      redirect_to_create_location ||
-        redirect_to_referer ||
-        redirect_to_show_herbarium
-    end
+    return unless attributes_validated!
+
+    @herbarium.save
+    @herbarium.add_curator(@user) if @herbarium.personal_user
+    notify_admins_of_new_herbarium unless @herbarium.personal_user
+    redirect_to_create_location ||
+      redirect_to_referer ||
+      redirect_to_show_herbarium
   end
 
   def edit
@@ -134,7 +134,7 @@ class HerbariaController < ApplicationController
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
   end
 
-  alias_method :edit_herbarium, :edit
+  alias edit_herbarium edit
 
   def update
     return unless (@herbarium = prep_herbarium_for_change)
@@ -142,12 +142,12 @@ class HerbariaController < ApplicationController
 
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
-    if attributes_validated!
-      @herbarium.save
-      redirect_to_create_location ||
-        redirect_to_referer ||
-        redirect_to_show_herbarium
-    end
+    return unless attributes_validated!
+
+    @herbarium.save
+    redirect_to_create_location ||
+      redirect_to_referer ||
+      redirect_to_show_herbarium
   end
 
   def merge_herbaria
@@ -207,7 +207,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  alias_method :destroy_herbarium, :destroy
+  alias destroy_herbarium destroy
 
   ##############################################################################
 
@@ -227,7 +227,7 @@ class HerbariaController < ApplicationController
     end
     if query.flavor != :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                  herbaria_index_nonpersonal_herbarium_path]
+                 herbaria_index_nonpersonal_herbarium_path]
     end
     @links << [:create_herbarium.l, new_herbarium_path]
 
@@ -280,9 +280,9 @@ class HerbariaController < ApplicationController
 
   def attributes_validated!
     validate_name! &&
-    validate_location! &&
-    validate_personal_herbarium! &&
-    validate_admin_personal_user!
+      validate_location! &&
+      validate_personal_herbarium! &&
+      validate_admin_personal_user!
   end
 
   def validate_name!
