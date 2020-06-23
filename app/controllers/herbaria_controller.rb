@@ -106,7 +106,7 @@ class HerbariaController < ApplicationController
   def new
     store_location
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = Herbarium.new
   end
 
@@ -152,7 +152,7 @@ class HerbariaController < ApplicationController
 
   def merge_herbaria
     pass_query_params
-    keep_track_of_referer
+    track_referer
     this = find_or_goto_index(Herbarium, params[:this]) || return
     that = find_or_goto_index(Herbarium, params[:that]) || return
     result = perform_or_request_merge(this, that) || return
@@ -161,7 +161,7 @@ class HerbariaController < ApplicationController
 
   def delete_curator
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -176,7 +176,7 @@ class HerbariaController < ApplicationController
 
   def request_to_be_curator
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
 
@@ -192,7 +192,7 @@ class HerbariaController < ApplicationController
 
   def destroy
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -257,7 +257,7 @@ class HerbariaController < ApplicationController
   def prep_herbarium_for_change
     store_location
     pass_query_params
-    keep_track_of_referer
+    track_referer
     find_or_goto_index(Herbarium, params[:id])
   end
 
@@ -407,8 +407,7 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
   end
 
-  # TODO: jdc - shorten name of method
-  def keep_track_of_referer
+  def track_referer
     @back = params[:back] || request.referer
   end
 
