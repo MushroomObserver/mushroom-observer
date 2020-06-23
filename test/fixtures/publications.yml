@@ -3,21 +3,21 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one_pub:
+one_pub: # 1
   user: rolf
   full: MyText
   how_helped: MyText
   mo_mentioned: false
   peer_reviewed: false
 
-two_pub:
+two_pub: # 2
   user: rolf
   full: MyText
   how_helped: MyText
   mo_mentioned: false
   peer_reviewed: false
 
-spam_pub:
+spam_pub: # 3
   user: spammer
   full: This is spam
   how_helped: Spam spam spam

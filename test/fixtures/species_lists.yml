@@ -10,7 +10,7 @@ DEFAULTS: &DEFAULTS
   title:    $LABEL
 
 # has no obs
-first_species_list:
+first_species_list: # 1
   <<: *DEFAULTS
   created_at: 2006-03-01 21:14:00
   updated_at: 2006-03-01 21:14:00
@@ -21,7 +21,7 @@ first_species_list:
   rss_log: species_list_rss_log
 
 # has no obs
-another_species_list:
+another_species_list: # 2
   <<: *DEFAULTS
   created_at: 2006-03-02 21:14:00
   updated_at: 2006-03-02 21:14:00
@@ -31,7 +31,7 @@ another_species_list:
   notes: Got Skunked Again!
 
 # has: minimal_unknown_obs (1) and detailed_unknown_obs (2)
-unknown_species_list:
+unknown_species_list: # 3
   <<: *DEFAULTS
   created_at: 2006-03-09 21:14:00
   updated_at: 2006-03-09 21:14:00
@@ -40,14 +40,14 @@ unknown_species_list:
   notes: Things I don't know
 
 # used by QueryTest
-query_first_list:
+query_first_list: # 4
   <<: *DEFAULTS
   created_at: 2007-03-01 21:14:00
   updated_at: 2007-03-01 21:14:00
   when: 2006-03-09
 
 # used by QueryTest
-query_second_list:
+query_second_list: # 5
   <<: *DEFAULTS
   created_at: 2007-03-02 21:14:00
   updated_at: 2007-03-02 21:14:00
@@ -55,7 +55,7 @@ query_second_list:
 
 # used by QueryTest
 # has 1-word notes which is unique for SpeciesList
-query_notes_list:
+query_notes_list: # 6
   <<: *DEFAULTS
   created_at: 2008-04-03 21:14:00
   updated_at: 2008-04-03 21:14:00
@@ -63,7 +63,7 @@ query_notes_list:
   notes: amazingraremushroom
 
 # used by QueryTest
-where_no_mushrooms_list:
+where_no_mushrooms_list: # 7
   <<: *DEFAULTS
   created_at: 2008-05-03 21:14:00
   updated_at: 2008-05-03 21:14:00
@@ -72,7 +72,7 @@ where_no_mushrooms_list:
   location: no_mushrooms_location
 
 # used by QueryTest
-where_list:
+where_list: # 8
   <<: *DEFAULTS
   created_at: 2012-07-06 21:14:00
   updated_at: 2012-07-06 21:14:00
@@ -80,7 +80,7 @@ where_list:
   where: wherenolocation  # 1-word where, unique for SpeciesList
   location: nil
 
-one_genus_three_species_list:
+one_genus_three_species_list: # 9
   <<: *DEFAULTS
   created_at: 2012-07-06 22:14:00
   updated_at: 2012-07-06 22:14:00

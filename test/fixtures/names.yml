@@ -30,7 +30,7 @@ DEFAULTS: &DEFAULTS
   version:        1
   locked:         false
 
-fungi:
+fungi: # 1
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Kingdom] %>
@@ -44,7 +44,7 @@ fungi:
   updated_at: 2007-02-26 17:20:00
   locked: true
 
-coprinus:
+coprinus: # 2
   <<: *DEFAULTS
   description: coprinus_desc
   user: rolf
@@ -57,7 +57,7 @@ coprinus:
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-coprinus_comatus:
+coprinus_comatus: # 3
   <<: *DEFAULTS
   description: coprinus_comatus_desc
   user: rolf
@@ -71,7 +71,7 @@ coprinus_comatus:
   updated_at: 2007-02-27 20:48:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-stereum:
+stereum: # 4
   <<: *DEFAULTS
   text_name: Stereum
   display_name: '**__Stereum__**'
@@ -81,7 +81,7 @@ stereum:
   updated_at: 2007-06-23 20:00:00
   rank: <%= Name.ranks[:Genus] %>
 
-stereum_hirsutum:
+stereum_hirsutum: # 5
   <<: *DEFAULTS
   text_name: Stereum hirsutum
   author: '(Willd.) Pers.'
@@ -91,7 +91,7 @@ stereum_hirsutum:
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
 
-tubaria:
+tubaria: # 6
   <<: *DEFAULTS
   text_name: Tubaria
   display_name: '**__Tubaria__**'
@@ -101,7 +101,7 @@ tubaria:
   updated_at: 2007-06-23 20:00:00
   rank: <%= Name.ranks[:Genus] %>
 
-tubaria_furfuracea:
+tubaria_furfuracea: # 7
   <<: *DEFAULTS
   text_name: Tubaria furfuracea
   author: '(Pers.) Gillet'
@@ -111,7 +111,7 @@ tubaria_furfuracea:
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
 
-agaricus:
+agaricus: # 8
   <<: *DEFAULTS
   user: rolf
   text_name: Agaricus
@@ -123,7 +123,7 @@ agaricus:
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-agaricus_campestris:
+agaricus_campestris: # 9
   <<: *DEFAULTS
   user: rolf
   text_name: Agaricus campestris
@@ -135,7 +135,7 @@ agaricus_campestris:
   updated_at: 2007-03-19 17:20:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-conocybe:
+conocybe: # 10
   <<: *DEFAULTS
   user: rolf
   text_name: Conocybe
@@ -146,7 +146,7 @@ conocybe:
   updated_at: 2007-03-19 15:51:00
   rank: <%= Name.ranks[:Genus] %>
 
-conocybe_filaris:
+conocybe_filaris: # 11
   <<: *DEFAULTS
   user: rolf
   text_name: Conocybe filaris
@@ -157,7 +157,7 @@ conocybe_filaris:
   created_at: 2007-03-19 15:51:00
   updated_at: 2007-03-19 15:51:00
 
-amanita:
+amanita: # 12
   <<: *DEFAULTS
   user: rolf
   text_name: Amanita
@@ -168,7 +168,7 @@ amanita:
   updated_at: 2007-04-09 08:53:30
   rank: <%= Name.ranks[:Genus] %>
 
-amanita_baccata_arora:
+amanita_baccata_arora: # 13
   <<: *DEFAULTS
   user: rolf
   text_name: Amanita baccata
@@ -179,7 +179,7 @@ amanita_baccata_arora:
   created_at: 2007-04-09 08:53:30
   updated_at: 2007-04-09 08:53:30
 
-amanita_baccata_borealis:
+amanita_baccata_borealis: # 14
   <<: *DEFAULTS
   user: rolf
   text_name: Amanita baccata
@@ -190,7 +190,7 @@ amanita_baccata_borealis:
   created_at: 2007-04-09 08:54:30
   updated_at: 2007-04-09 08:54:30
 
-lepiota:
+lepiota: # 15
   <<: *DEFAULTS
   user: rolf
   text_name: Lepiota
@@ -202,7 +202,7 @@ lepiota:
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-lepiota_rachodes:
+lepiota_rachodes: # 16
   <<: *DEFAULTS
   user: rolf
   text_name: Lepiota rachodes
@@ -214,7 +214,7 @@ lepiota_rachodes:
   updated_at: 2007-04-30 21:34:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-lepiota_rhacodes:
+lepiota_rhacodes: # 17
   <<: *DEFAULTS
   user: rolf
   text_name: Lepiota rhacodes
@@ -226,7 +226,7 @@ lepiota_rhacodes:
   updated_at: 2007-04-30 21:34:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-macrolepiota:
+macrolepiota: # 18
   <<: *DEFAULTS
   user: rolf
   text_name: Macrolepiota
@@ -237,7 +237,7 @@ macrolepiota:
   updated_at: 2007-04-30 21:34:00
   rank: <%= Name.ranks[:Genus] %>
 
-macrolepiota_rachodes:
+macrolepiota_rachodes: # 19
   <<: *DEFAULTS
   user: rolf
   text_name: Macrolepiota rachodes
@@ -250,7 +250,7 @@ macrolepiota_rachodes:
   # later than rhacodes; used in test for best synonym
   updated_at: 2007-04-30 21:34:01
 
-macrolepiota_rhacodes:
+macrolepiota_rhacodes: # 20
   <<: *DEFAULTS
   user: mary
   text_name: Macrolepiota rhacodes
@@ -262,7 +262,7 @@ macrolepiota_rhacodes:
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
 
-chlorophyllum:
+chlorophyllum: # 21
   <<: *DEFAULTS
   user: rolf
   text_name: Chlorophyllum
@@ -274,7 +274,7 @@ chlorophyllum:
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-chlorophyllum_rachodes:
+chlorophyllum_rachodes: # 22
   <<: *DEFAULTS
   user: rolf
   text_name: Chlorophyllum rachodes
@@ -287,7 +287,7 @@ chlorophyllum_rachodes:
   updated_at: 2007-04-30 21:34:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-chlorophyllum_rhacodes:
+chlorophyllum_rhacodes: # 23
   <<: *DEFAULTS
   user: mary
   text_name: Chlorophyllum rhacodes
@@ -301,7 +301,7 @@ chlorophyllum_rhacodes:
   updated_at: 2007-04-30 21:34:01
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-lactarius:
+lactarius: # 24
   <<: *DEFAULTS
   user: rolf
   text_name: Lactarius
@@ -312,7 +312,7 @@ lactarius:
   updated_at: 2007-04-30 15:14:10
   rank: <%= Name.ranks[:Genus] %>
 
-lactarius_alpinus:
+lactarius_alpinus: # 25
   <<: *DEFAULTS
   user: rolf
   text_name: Lactarius alpinus
@@ -324,7 +324,7 @@ lactarius_alpinus:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
 
-lactarius_alpigenes:
+lactarius_alpigenes: # 26
   <<: *DEFAULTS
   user: rolf
   text_name: Lactarius alpigenes
@@ -337,7 +337,7 @@ lactarius_alpigenes:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
 
-lactarius_kuehneri:
+lactarius_kuehneri: # 27
   <<: *DEFAULTS
   user: rolf
   text_name: Lactarius kuehneri
@@ -350,7 +350,7 @@ lactarius_kuehneri:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
 
-lactarius_subalpinus:
+lactarius_subalpinus: # 28
   <<: *DEFAULTS
   user: rolf
   text_name: Lactarius subalpinus
@@ -363,7 +363,7 @@ lactarius_subalpinus:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
 
-psalliota:
+psalliota: # 29
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Genus] %>
@@ -374,7 +374,7 @@ psalliota:
   created_at: 2007-06-09 08:06:40
   updated_at: 2007-06-09 08:06:40
 
-agaricus_campestrus:
+agaricus_campestrus: # 30
   <<: *DEFAULTS
   user: rolf
   text_name: Agaricus campestrus
@@ -386,7 +386,7 @@ agaricus_campestrus:
   updated_at: 2007-06-23 20:04:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-agaricus_campestras:
+agaricus_campestras: # 31
   <<: *DEFAULTS
   description: agaricus_campestras_desc
   user: rolf
@@ -399,7 +399,7 @@ agaricus_campestras:
   updated_at: 2007-06-23 20:04:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-agaricus_campestros:
+agaricus_campestros: # 32
   <<: *DEFAULTS
   description: agaricus_campestros_desc
   user: rolf
@@ -412,7 +412,7 @@ agaricus_campestros:
   updated_at: 2007-06-23 20:04:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-coprinellus:
+coprinellus: # 33
   <<: *DEFAULTS
   user: rolf
   text_name: Coprinellus
@@ -423,7 +423,7 @@ coprinellus:
   updated_at: 2007-06-24 12:45:55
   rank: <%= Name.ranks[:Genus] %>
 
-coprinellus_micaceus:
+coprinellus_micaceus: # 34
   <<: *DEFAULTS
   user: rolf
   version: 2
@@ -435,7 +435,7 @@ coprinellus_micaceus:
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
 
-coprinellus_micaceus_no_author:
+coprinellus_micaceus_no_author: # 35
   <<: *DEFAULTS
   user: rolf
   text_name: Coprinellus micaceus
@@ -445,7 +445,7 @@ coprinellus_micaceus_no_author:
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
 
-strobilurus:
+strobilurus: # 36
   <<: *DEFAULTS
   user: rolf
   text_name: Strobilurus
@@ -457,7 +457,7 @@ strobilurus:
   rank: <%= Name.ranks[:Genus] %>
 
 # For testing when the author is added to a name that has an observation
-strobilurus_diminutivus_no_author:
+strobilurus_diminutivus_no_author: # 37
   <<: *DEFAULTS
   user: rolf
   text_name: Strobilurus diminutivus
@@ -467,7 +467,7 @@ strobilurus_diminutivus_no_author:
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
 
-pluteus:
+pluteus: # 38
   <<: *DEFAULTS
   user: rolf
   text_name: Pluteus
@@ -479,7 +479,7 @@ pluteus:
   rank: <%= Name.ranks[:Genus] %>
 
 # For testing when there are both an approved and deprecated name with the same text name
-pluteus_petasatus_approved:
+pluteus_petasatus_approved: # 39
   <<: *DEFAULTS
   user: rolf
   text_name: Pluteus petasatus
@@ -491,7 +491,7 @@ pluteus_petasatus_approved:
   updated_at: 2007-07-20 20:54:45
 
 # For testing the where the author is added when a name has an observation
-pluteus_petasatus_deprecated:
+pluteus_petasatus_deprecated: # 40
   <<: *DEFAULTS
   user: rolf
   text_name: Pluteus petasatus
@@ -503,7 +503,7 @@ pluteus_petasatus_deprecated:
   created_at: 2007-07-20 21:12:45
   updated_at: 2007-07-20 21:12:45
 
-warnerbros:
+warnerbros: # 41
   <<: *DEFAULTS
   user: rolf
   text_name: Warnerbros
@@ -515,7 +515,7 @@ warnerbros:
   rank: <%= Name.ranks[:Genus] %>
 
 # Two fake names with non-alphanumerics for severe stress-testing species lists.
-bugs_bunny_one:
+bugs_bunny_one: # 42
   <<: *DEFAULTS
   user: rolf
   author: One
@@ -526,7 +526,7 @@ bugs_bunny_one:
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
 
-bugs_bunny_two:
+bugs_bunny_two: # 43
   <<: *DEFAULTS
   user: rolf
   author: Two
@@ -537,7 +537,7 @@ bugs_bunny_two:
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
 
-russula:
+russula: # 44
   <<: *DEFAULTS
   user: rolf
   text_name: Russula
@@ -548,7 +548,7 @@ russula:
   updated_at: 2008-03-10 22:31:27
   rank: <%= Name.ranks[:Genus] %>
 
-russula_brevipes_no_author:
+russula_brevipes_no_author: # 45
   <<: *DEFAULTS
   user: rolf
   text_name: Russula brevipes
@@ -558,7 +558,7 @@ russula_brevipes_no_author:
   created_at: 2008-03-10 22:31:27
   updated_at: 2008-03-10 22:31:27
 
-russula_brevipes_author_notes:
+russula_brevipes_author_notes: # 46
   <<: *DEFAULTS
   description: russula_brevipes_author_notes_desc
   user: rolf
@@ -572,7 +572,7 @@ russula_brevipes_author_notes:
   created_at: 2008-03-10 22:33:05
   updated_at: 2008-03-10 22:33:05
 
-russula_cremoricolor_no_author_notes:
+russula_cremoricolor_no_author_notes: # 47
   <<: *DEFAULTS
   description: russula_cremoricolor_no_author_notes_desc
   user: rolf
@@ -583,7 +583,7 @@ russula_cremoricolor_no_author_notes:
   created_at: 2008-03-12 20:53:18
   updated_at: 2008-03-12 20:53:18
 
-russula_cremoricolor_author_notes:
+russula_cremoricolor_author_notes: # 48
   <<: *DEFAULTS
   description: russula_cremoricolor_author_notes_desc
   user: rolf
@@ -595,7 +595,7 @@ russula_cremoricolor_author_notes:
   created_at: 2008-03-12 20:53:40
   updated_at: 2008-03-12 20:53:40
 
-lentinellus:
+lentinellus: # 49
   <<: *DEFAULTS
   user: rolf
   text_name: Lentinellus
@@ -606,7 +606,7 @@ lentinellus:
   updated_at: 2008-03-19 08:35:37
   rank: <%= Name.ranks[:Genus] %>
 
-lentinellus_ursinus_author1:
+lentinellus_ursinus_author1: # 50
   <<: *DEFAULTS
   user: rolf
   text_name: Lentinellus ursinus
@@ -617,7 +617,7 @@ lentinellus_ursinus_author1:
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
 
-lentinellus_ursinus_author2:
+lentinellus_ursinus_author2: # 51
   <<: *DEFAULTS
   user: rolf
   text_name: Lentinellus ursinus
@@ -628,7 +628,7 @@ lentinellus_ursinus_author2:
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
 
-macrocybe:
+macrocybe: # 52
   <<: *DEFAULTS
   user: rolf
   text_name: Macrocybe
@@ -640,7 +640,7 @@ macrocybe:
   rank: <%= Name.ranks[:Genus] %>
 
 # Genus with correct author
-macrocybe_pegler:
+macrocybe_pegler: # 53
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Genus] %>
@@ -653,7 +653,7 @@ macrocybe_pegler:
   updated_at: 2008-09-05 22:30:00
 
 # Genus with incorrect author
-macrocybe_titans:
+macrocybe_titans: # 54
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Genus] %>
@@ -665,7 +665,7 @@ macrocybe_titans:
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
 
-boletus:
+boletus: # 55
   <<: *DEFAULTS
   text_name: Boletus
   display_name: '**__Boletus__**'
@@ -675,7 +675,7 @@ boletus:
   updated_at: 2008-10-05 16:17:08
   rank: <%= Name.ranks[:Genus] %>
 
-boletus_edulis:
+boletus_edulis: # 56
   <<: *DEFAULTS
   text_name: Boletus edulis
   author: Bull.
@@ -686,7 +686,7 @@ boletus_edulis:
   updated_at: 2008-10-05 16:17:08
   description: boletus_edulis_desc
 
-peltigera:
+peltigera: # 57
   <<: *DEFAULTS
   description: peltigera_desc
   user: rolf
@@ -704,7 +704,7 @@ peltigera:
   updated_at: 2009-01-02 01:01:01
   lifeform: " lichen "
 
-petigera:
+petigera: # 58
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Petigera
@@ -718,7 +718,7 @@ petigera:
   updated_at: 2009-01-02 01:01:01
   lifeform: " lichen "
 
-suillus:
+suillus: # 59
   <<: *DEFAULTS
   description: suillus_desc
   rank: <%= Name.ranks[:Genus] %>
@@ -730,7 +730,7 @@ suillus:
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
 
-suillus_by_white:
+suillus_by_white: # 60
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Suillus
@@ -742,7 +742,7 @@ suillus_by_white:
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
 
-suilus:
+suilus: # 61
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Suilus
@@ -756,7 +756,7 @@ suilus:
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
 
-tremella:
+tremella: # 62
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Genus] %>
@@ -769,7 +769,7 @@ tremella:
   updated_at: 2010-10-18 21:30:01
   lifeform: " lichenicolous "
 
-tremella_mesenterica:
+tremella_mesenterica: # 63
   <<: *DEFAULTS
   user: rolf
   text_name: Tremella mesenterica
@@ -781,7 +781,7 @@ tremella_mesenterica:
   updated_at: 2010-10-12 21:30:01
   lifeform: " lichenicolous "
 
-tremella_justpublished:
+tremella_justpublished: # 64
   <<: *DEFAULTS
   user: rolf
   text_name: Tremella justpublished
@@ -794,7 +794,7 @@ tremella_justpublished:
   updated_at: 2010-12-18 21:30:01
   lifeform: " lichenicolous "
 
-hygrocybe:
+hygrocybe: # 65
   <<: *DEFAULTS
   user: rolf
   text_name: Hygrocybe
@@ -805,7 +805,7 @@ hygrocybe:
   updated_at: 2011-02-18 21:30:01
   rank: <%= Name.ranks[:Genus] %>
 
-hygrocybe_russocoriacea_bad_author:
+hygrocybe_russocoriacea_bad_author: # 66
   <<: *DEFAULTS
   user: rolf
   text_name: Hygrocybe russocoriacea
@@ -817,7 +817,7 @@ hygrocybe_russocoriacea_bad_author:
   created_at: 2011-02-18 21:30:01
   updated_at: 2011-02-18 21:30:01
 
-hygrocybe_russocoriacea_good_author:
+hygrocybe_russocoriacea_good_author: # 67
   <<: *DEFAULTS
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
@@ -827,7 +827,7 @@ hygrocybe_russocoriacea_good_author:
   created_at: 2011-07-11 21:30:01
   updated_at: 2011-07-11 21:30:01
 
-lichen:
+lichen: # 68
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Kingdom] %>
@@ -840,7 +840,7 @@ lichen:
   updated_at: 2012-09-21 21:30:01
   lifeform: " lichen "
 
-abortiporus:
+abortiporus: # 69
   <<: *DEFAULTS
   text_name: Abortiporus
   display_name: '**__Abortiporus__**'
@@ -850,7 +850,7 @@ abortiporus:
   updated_at: 2015-07-05 21:41:10
   rank: <%= Name.ranks[:Genus] %>
 
-abortiporus_biennis_for_eol:
+abortiporus_biennis_for_eol: # 70
   <<: *DEFAULTS
   text_name: Abortiporus biennis
   search_name: Abortiporus biennis (Bull.) Singer
@@ -860,7 +860,7 @@ abortiporus_biennis_for_eol:
   created_at: 2015-07-05 21:41:10
   updated_at: 2015-07-05 21:41:10
 
-amanita_subgenus_lepidella:
+amanita_subgenus_lepidella: # 71
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Subgenus] %>
   text_name: Amanita subgenus Lepidella
@@ -871,7 +871,7 @@ amanita_subgenus_lepidella:
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
 
-amanita_boudieri:
+amanita_boudieri: # 72
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Species] %>
   text_name: Amanita boudieri
@@ -881,7 +881,7 @@ amanita_boudieri:
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
 
-amanita_boudieri_var_beillei:
+amanita_boudieri_var_beillei: # 73
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Variety] %>
   text_name: Amanita boudieri var. beillei
@@ -891,7 +891,7 @@ amanita_boudieri_var_beillei:
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
 
-boletus_edulis_group:
+boletus_edulis_group: # 74
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Group] %>
   text_name:         Boletus edulis group
@@ -901,7 +901,7 @@ boletus_edulis_group:
   created_at: 2015-10-03 21:30:01
   updated_at: 2015-10-03 21:30:01
 
-imageless:
+imageless: # 75
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Imageless
@@ -915,7 +915,7 @@ imageless:
 # They are spellings suggested by lookup_name("Verpa").
 # NOTE: Verpa must not be used for any name, else the test will fail
 # because the lookup will find a match and not look for suggestions.
-suggested_by_verpa_authored:
+suggested_by_verpa_authored: # 76
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Verpaa
@@ -926,7 +926,7 @@ suggested_by_verpa_authored:
   created_at: 2016-08-23 21:30:01
   updated_at: 2016-08-23 21:30:01
 
-suggested_by_verpa_authorless:
+suggested_by_verpa_authorless: # 77
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Verpaa
@@ -936,7 +936,7 @@ suggested_by_verpa_authorless:
   created_at: 2016-09-01 21:30:01
   updated_at: 2016-09-01 21:30:01
 
-notification_but_no_observation:
+notification_but_no_observation: # 78
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Mushroom
@@ -946,7 +946,7 @@ notification_but_no_observation:
   created_at: 2016-09-03 21:30:01
   updated_at: 2016-09-03 21:30:01
 
-xa_genus:
+xa_genus: # 79
   <<: *DEFAULTS
   text_name:    Xa
   display_name: "**__Xa__**"
@@ -958,7 +958,7 @@ xa_genus:
 
 # Next three Names for constructing an Observation with all Namings (and Votes)
 # for deprecated Names which are synonyms of same current Name
-namings_deprecated:
+namings_deprecated: # 80
   <<: *DEFAULTS
   text_name:    Xa current
   display_name: "**__Xa current__**"
@@ -968,7 +968,7 @@ namings_deprecated:
   created_at:   2016-09-05 21:30:01
   updated_at:   2016-09-05 21:30:01
 
-namings_deprecated_1:
+namings_deprecated_1: # 81
   <<: *DEFAULTS
   text_name:    Xa deprecatedone
   display_name: "**__Xa deprecatedone__**"
@@ -979,7 +979,7 @@ namings_deprecated_1:
   created_at:   2016-09-07 21:30:01
   updated_at:   2016-09-07 21:30:01
 
-namings_deprecated_2:
+namings_deprecated_2: # 82
   <<: *DEFAULTS
   text_name:    Xa deprecatedtwo
   display_name: "**__Xa deprecatedtwo__**"
@@ -991,7 +991,7 @@ namings_deprecated_2:
   updated_at:   2016-09-09 21:30:01
 
 # For test of edit forcing creating of two ancestors
-two_ancestors:
+two_ancestors: # 83
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Variety] %>
   text_name:         Coprinellus micaceus var. phony
@@ -1001,7 +1001,7 @@ two_ancestors:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-mergeable_genus:
+mergeable_genus: # 84
   <<: *DEFAULTS
   text_name:         Mergeable
   search_name:       Mergeable
@@ -1011,7 +1011,7 @@ mergeable_genus:
   updated_at:        2016-09-11 21:30:01
   rank:          <%= Name.ranks[:Genus] %>
 
-mergeable_no_notes:
+mergeable_no_notes: # 85
   <<: *DEFAULTS
   text_name:         Mergeable noteless
   search_name:       Mergeable noteless
@@ -1020,7 +1020,7 @@ mergeable_no_notes:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-mergeable_description_notes:
+mergeable_description_notes: # 86
   <<: *DEFAULTS
   text_name:         Mergeable description-notes
   search_name:       Mergeable description-notes
@@ -1030,7 +1030,7 @@ mergeable_description_notes:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-mergeable_second_description_notes:
+mergeable_second_description_notes: # 87
   <<: *DEFAULTS
   text_name:         Mergeable second-description-notes
   search_name:       Mergeable second-description-notes
@@ -1040,7 +1040,7 @@ mergeable_second_description_notes:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-mergeable_epithet_unauthored:
+mergeable_epithet_unauthored: # 88
   <<: *DEFAULTS
   text_name:         Mergeable epithet
   search_name:       Mergeable epithet
@@ -1049,7 +1049,7 @@ mergeable_epithet_unauthored:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-mergeable_epithet_authored:
+mergeable_epithet_authored: # 89
   <<: *DEFAULTS
   author:            Authored
   text_name:         Mergeable epithet
@@ -1059,7 +1059,7 @@ mergeable_epithet_authored:
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
-authored_with_naming:
+authored_with_naming: # 90
   <<: *DEFAULTS
   text_name:         Psalliota naming
   search_name:       Psalliota naming Authored
@@ -1068,7 +1068,7 @@ authored_with_naming:
   created_at:        2017-01-11 21:30:01
   updated_at:        2017-01-11 21:30:01
 
-unauthored_with_naming:
+unauthored_with_naming: # 91
   <<: *DEFAULTS
   text_name:         Psalliota naming
   search_name:       Psalliota naming
@@ -1078,7 +1078,7 @@ unauthored_with_naming:
   updated_at:        2017-01-11 21:30:01
 
 # dick owns the Name and Observation, but mary owns a Naming
-other_user_owns_naming_name:
+other_user_owns_naming_name: # 92
   <<: *DEFAULTS
   text_name:         Otheruserownsnaming
   search_name:       Otheruserownsnaming
@@ -1090,7 +1090,7 @@ other_user_owns_naming_name:
   updated_at:        2017-03-11 21:30:01
 
 # dick owns the Name and Naming, but mary owns an Observation
-other_user_owns_observation:
+other_user_owns_observation: # 93
   <<: *DEFAULTS
   text_name:         Otheruserownsobs
   search_name:       Otheruserownsobs
@@ -1102,7 +1102,7 @@ other_user_owns_observation:
   updated_at:        2017-03-11 21:30:01
 
 # dick owns the Name and the only Observation and Naming
-same_user_owns_naming_and_observation:
+same_user_owns_naming_and_observation: # 94
   <<: *DEFAULTS
   text_name:         Sameuserownsnamingandobservation
   search_name:       Sameuserownsnamingandobservation
@@ -1113,7 +1113,7 @@ same_user_owns_naming_and_observation:
   created_at:        2017-04-03 21:30:01
   updated_at:        2017-04-03 21:30:01
 
-authored_group:
+authored_group: # 95
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Group] %>
   text_name:         Groupauthored group
@@ -1124,7 +1124,7 @@ authored_group:
   created_at:        2017-05-03 21:30:01
   updated_at:        2017-05-03 21:30:01
 
-unauthored_group:
+unauthored_group: # 96
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Group] %>
   text_name:         Groupunauthored group
@@ -1134,7 +1134,7 @@ unauthored_group:
   created_at:        2017-05-03 21:30:02
   updated_at:        2017-05-03 21:30:02
 
-basidiomycota:
+basidiomycota: # 97
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Phylum] %>
@@ -1146,7 +1146,7 @@ basidiomycota:
   updated_at: 2017-12-07 16:09:02
   classification: "Kingdom: _Fungi_"
 
-basidiomycetes:
+basidiomycetes: # 98
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Class] %>
@@ -1158,7 +1158,7 @@ basidiomycetes:
   updated_at: 2017-12-07 16:09:03
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
 
-agaricales:
+agaricales: # 99
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Order] %>
@@ -1170,7 +1170,7 @@ agaricales:
   updated_at: 2017-12-07 16:09:04
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_"
 
-agaricaceae:
+agaricaceae: # 100
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Family] %>
@@ -1182,7 +1182,7 @@ agaricaceae:
   updated_at: 2017-12-07 16:09:05
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
 
-ascomycota:
+ascomycota: # 101
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Phylum] %>
@@ -1194,7 +1194,7 @@ ascomycota:
   updated_at: 2017-12-07 16:09:06
   classification: "Kingdom: _Fungi_"
 
-ascomycetes:
+ascomycetes: # 102
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Class] %>
@@ -1206,7 +1206,7 @@ ascomycetes:
   updated_at: 2017-12-07 16:09:07
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
 
-lecanorales:
+lecanorales: # 103
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Order] %>
@@ -1219,7 +1219,7 @@ lecanorales:
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_"
   lifeform: " lichen "
 
-peltigeraceae:
+peltigeraceae: # 104
   <<: *DEFAULTS
   user: rolf
   rank: <%= Name.ranks[:Family] %>

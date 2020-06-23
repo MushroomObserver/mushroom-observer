@@ -3,7 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-ccnc25:
+ccnc25: # 1
   # Do not autogenerate id
   # This is the default license for images.
   # That id is defined and hard-coded in the schema, in the image table.
@@ -15,19 +15,19 @@ ccnc25:
   deprecated: true
   form_name: ccbyncsa25
 
-ccnc30:
+ccnc30: # 2
   display_name: Creative Commons Non-commercial v3.0
   url: http://creativecommons.org/licenses/by-nc-sa/3.0/
   deprecated: false
   form_name: ccbyncsa30
 
-ccwiki30:
+ccwiki30: # 3
   display_name: Creative Commons Wikipedia Compatible v3.0
   url: http://creativecommons.org/licenses/by-sa/3.0/
   deprecated: false
   form_name: ccbysa30
 
-publicdomain:
+publicdomain: # 4
   display_name: Public Domain
   url: http://wiki.creativecommons.org/Public_domain/
   deprecated: false

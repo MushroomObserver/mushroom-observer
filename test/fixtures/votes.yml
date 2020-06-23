@@ -9,7 +9,7 @@ DEFAULTS: &DEFAULTS
   value:    <%= Vote.maximum_vote %>
 
 # Rolf is pretty confident of his naming.
-coprinus_comatus_owner_vote:
+coprinus_comatus_owner_vote: # 1
   <<: *DEFAULTS
   user: rolf
   naming: coprinus_comatus_naming
@@ -17,7 +17,7 @@ coprinus_comatus_owner_vote:
   observation: coprinus_comatus_obs
 
 # Mary is not so much.
-coprinus_comatus_other_vote:
+coprinus_comatus_other_vote: # 2
   <<: *DEFAULTS
   user: mary
   naming: coprinus_comatus_naming
@@ -25,7 +25,7 @@ coprinus_comatus_other_vote:
   observation: coprinus_comatus_obs
 
 # Rolf hates Mary's naming.
-coprinus_comatus_other_naming_rolf_vote:
+coprinus_comatus_other_naming_rolf_vote: # 3
   <<: *DEFAULTS
   user: rolf
   naming: coprinus_comatus_other_naming
@@ -34,14 +34,14 @@ coprinus_comatus_other_naming_rolf_vote:
   observation: coprinus_comatus_obs
 
 # Mary's absolutely positive, though.
-coprinus_comatus_other_naming_mary_vote:
+coprinus_comatus_other_naming_mary_vote: # 4
   <<: *DEFAULTS
   user: mary
   naming: coprinus_comatus_other_naming
   observation: coprinus_comatus_obs
 
 # Rolf has no opinion about his own naming.
-strobilurus_diminutivus_no_opinion_vote:
+strobilurus_diminutivus_no_opinion_vote: # 5
   <<: *DEFAULTS
   user: rolf
   naming: strobilurus_diminutivus_naming
@@ -49,50 +49,50 @@ strobilurus_diminutivus_no_opinion_vote:
   favorite: false
   observation: strobilurus_diminutivus_obs
 
-amateur_vote:
+amateur_vote: # 6
   <<: *DEFAULTS
   user: katrina
   naming: detailed_unknown_naming
   value: <%= Vote.next_best_vote %>
   observation: amateur_obs
 
-owner_only_favorite_eq_fungi:
+owner_only_favorite_eq_fungi: # 7
   <<: *DEFAULTS
   naming: detailed_unknown_naming # Fungi
   observation: owner_only_favorite_eq_fungi # Boletus edulis
 
-owner_only_favorite_eq_consensus:
+owner_only_favorite_eq_consensus: # 8
   <<: *DEFAULTS
   naming: boletus_edulis_naming
   observation: owner_only_favorite_eq_consensus # Boletus edulis
 
-owner_only_favorite_ne_consensus:
+owner_only_favorite_ne_consensus: # 9
   <<: *DEFAULTS
   naming: tremella_mesenterica_naming
   observation: owner_only_favorite_ne_consensus # Tremella
 
-owner_multiple_favorites_first_vote:
+owner_multiple_favorites_first_vote: # 10
   <<: *DEFAULTS
   naming: owner_multiple_favorites_first_naming # Tremella
   observation: owner_multiple_favorites # Boletus edulis
 
-owner_multiple_favorites_second_vote:
+owner_multiple_favorites_second_vote: # 11
   <<: *DEFAULTS
   naming: owner_multiple_favorites_second_naming # Tremella mesenterica
   observation: owner_multiple_favorites # Boletus edulis
 
-owner_uncertain_favorite_vote:
+owner_uncertain_favorite_vote: # 12
   <<: *DEFAULTS
   naming: owner_uncertain_favorite_naming # Tremella mesenterica
   value: <%= Vote.min_neg_vote %>
   observation: owner_uncertain_favorite # Boletus edulis
 
-unequal_positive_namings_obs_top_vote:
+unequal_positive_namings_obs_top_vote: # 13
   <<: *DEFAULTS
   observation: unequal_positive_namings_obs
   naming:      unequal_positive_namings_top_naming
 
-unequal_positive_namings_obs_2nd_vote:
+unequal_positive_namings_obs_2nd_vote: # 14
   <<: *DEFAULTS
   favorite:    false
   observation: unequal_positive_namings_obs

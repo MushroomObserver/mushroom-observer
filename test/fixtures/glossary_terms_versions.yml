@@ -1,42 +1,42 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 # glossary term association must be referenced by id
 
-plane_glossary_term_v1:
+plane_glossary_term_v1: # 1
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:plane_glossary_term) %>
   version: 1
   updated_at: 2013-08-17 06:33:50
   name: Plane
   description:
 
-plane_glossary_term_v2:
+plane_glossary_term_v2: # 2
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:plane_glossary_term) %>
   version: 2
   updated_at: 2013-08-17 06:35:20
   name: Plane
   description: Three points define a plane
 
-conic_glossary_term_v1:
+conic_glossary_term_v1: # 3
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:conic_glossary_term) %>
   version: 1
   updated_at: 2013-08-04 07:49:12
   name: Conic
   description: Cute little cone head
 
-square_glossary_term_v1:
+square_glossary_term_v1: # 4
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:square_glossary_term) %>
   version: 1
   updated_at: 2013-08-04 07:49:12
   name: Square
   description:
 
-square_glossary_term_v2:
+square_glossary_term_v2: # 5
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:square_glossary_term) %>
   version: 2
   updated_at: 2013-08-04 07:49:12
   name: Square
   description: quadrilateral
 
-square_glossary_term_v3:
+square_glossary_term_v3: # 6
   glossary_term_id: <%= ActiveRecord::FixtureSet.identify(:square_glossary_term) %>
   version: 3
   updated_at: 2013-08-04 07:49:12

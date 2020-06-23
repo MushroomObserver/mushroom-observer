@@ -3,7 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-detailed_unknown_obs_interest:
+detailed_unknown_obs_interest: # 1
   updated_at: 2008-03-02 21:14:00
   user: junk
   target_type: Observation

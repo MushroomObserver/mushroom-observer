@@ -3,47 +3,47 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-reviewers:
+reviewers: # 1
   name: reviewers
 
-eol_users:
+eol_users: # 2
   name: EOL Project
 
-eol_admins:
+eol_admins: # 3
   name: EOL Project.admin
 
-bolete_users:
+bolete_users: # 4
   name: Bolete Project
 
-bolete_admins:
+bolete_admins: # 5
   name: Bolete Project.admin
 
-all_users:
+all_users: # 6
   name: all users
 
-rolf_only:
+rolf_only: # 7
   name: user <%= ActiveRecord::FixtureSet.identify(:rolf) %>
 
-mary_only:
+mary_only: # 8
   name: user <%= ActiveRecord::FixtureSet.identify(:mary) %>
 
-junk_only:
+junk_only: # 9
   name: user <%= ActiveRecord::FixtureSet.identify(:junk) %>
 
-dick_only:
+dick_only: # 10
   name: user <%= ActiveRecord::FixtureSet.identify(:dick) %>
 
-katrina_only:
+katrina_only: # 11
   name: user <%= ActiveRecord::FixtureSet.identify(:katrina) %>
 
-roy_only:
+roy_only: # 12
   name: user <%= ActiveRecord::FixtureSet.identify(:roy) %>
 
-spammer_only:
+spammer_only: # 13
   name: user <%= ActiveRecord::FixtureSet.identify(:spammer) %>
 
-article_writers:
+article_writers: # 14
   name: article writers
 
-thorsten_only:
+thorsten_only: # 15
   name: user <%= ActiveRecord::FixtureSet.identify(:thorsten) %>

@@ -1,7 +1,7 @@
 # Read about fixtures at http_version_1://ar.rubyonrails.org/classes/Fixtures.html
 # location and user associations must be specified by id, not label
 
-albion_version_1:
+albion_version_1: # 1
   location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
   updated_at: 2007-12-27 06:41:20
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -15,7 +15,7 @@ albion_version_1:
   high: 100.0
   low: 0.0
 
-albion_version_2:
+albion_version_2: # 2
   location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
   updated_at: 2007-12-27 06:41:20
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -29,7 +29,7 @@ albion_version_2:
   high: 100.0
   low: 0.0
 
-burbank_version_1:
+burbank_version_1: # 3
   location_id: <%= ActiveRecord::FixtureSet.identify(:burbank) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -43,7 +43,7 @@ burbank_version_1:
   high: 294.0
   low: 148.0
 
-mitrula_marsh_version_1:
+mitrula_marsh_version_1: # 4
   location_id: <%= ActiveRecord::FixtureSet.identify(:mitrula_marsh) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -55,7 +55,7 @@ mitrula_marsh_version_1:
   east: -120.487
   south: 39.5184
 
-salt_point_version_1:
+salt_point_version_1: # 5
   location_id: <%= ActiveRecord::FixtureSet.identify(:salt_point) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -69,7 +69,7 @@ salt_point_version_1:
   high: 100.0
   low: 0.0
 
-gualala_version_1:
+gualala_version_1: # 6
   location_id: <%= ActiveRecord::FixtureSet.identify(:gualala) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -83,7 +83,7 @@ gualala_version_1:
   high: 100.0
   low: 0.0
 
-elgin_co_version_1:
+elgin_co_version_1: # 7
   location_id: <%= ActiveRecord::FixtureSet.identify(:elgin_co) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -95,7 +95,7 @@ elgin_co_version_1:
   east: -80.8044
   south: 42.4701
 
-brett_woods_version_1:
+brett_woods_version_1: # 8
   location_id: <%= ActiveRecord::FixtureSet.identify(:bretton_woods) %>
   updated_at: 2007-12-27 06:47:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -107,7 +107,7 @@ brett_woods_version_1:
   east: -73.3215
   south: 41.1939
 
-point_reyes_version_1:
+point_reyes_version_1: # 9
   location_id: <%= ActiveRecord::FixtureSet.identify(:point_reyes) %>
   updated_at: 2008-01-01 11:50:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -119,7 +119,7 @@ point_reyes_version_1:
   east: -122.7092
   south: 37.9255
 
-howarth_park_version_1:
+howarth_park_version_1: # 10
   location_id: <%= ActiveRecord::FixtureSet.identify(:howarth_park) %>
   updated_at: 2008-01-01 15:24:18
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>

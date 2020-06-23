@@ -1,7 +1,7 @@
 # For some reason we need to keep the ids in these fixtures.  Otherwise the
 # AJAX controller breaks.  Haven't looked into it in any depth. -JPH 20171117
 
-greek_one_version1:
+greek_one_version1: # 1
   id: 1
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
@@ -9,7 +9,7 @@ greek_one_version1:
   updated_at: 2012-03-31
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
 
-greek_one_version2:
+greek_one_version2: # 2
   id: 2
   version: 2
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
@@ -17,7 +17,7 @@ greek_one_version2:
   updated_at: 2012-04-30
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
 
-version_wizard_version1:
+version_wizard_version1: # 3
   id: 3
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.

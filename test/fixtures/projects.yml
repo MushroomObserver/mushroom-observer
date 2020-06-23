@@ -11,7 +11,7 @@ DEFAULTS: &DEFAULTS
 
 # admins: rolf (1), mary (2)
 # members: rolf (1), mary (2), katrina (5)
-eol_project:
+eol_project: # 1
   <<: *DEFAULTS
   user: rolf
   user_group: eol_users
@@ -26,7 +26,7 @@ eol_project:
 # observations: 2 (detailed_unknown_obs - owned by mary)
 # images: 1 and 2 (detailed_unknown_obs's images - owned by mary)
 # species_lists: 3 (unknown_species_list - owned by mary)
-bolete_project:
+bolete_project: # 2
   <<: *DEFAULTS
   user_group: bolete_users
   admin_group: bolete_admins
@@ -38,7 +38,7 @@ bolete_project:
   observations: detailed_unknown_obs
   species_lists: unknown_species_list
 
-empty_project:
+empty_project: # 3
   <<: *DEFAULTS
   user: mary
   user_group: mary_only
@@ -46,30 +46,30 @@ empty_project:
   summary: No Images Observations or Lists
 
 # 2 lists, 0 observations, 0 images
-two_list_project:
+two_list_project: # 4
   <<: *DEFAULTS
   user: mary
   user_group: mary_only
   admin_group: mary_only
   species_lists: query_first_list, query_second_list
 
-obs_collected_and_displayed_project:
+obs_collected_and_displayed_project: # 5
   <<: *DEFAULTS
   observations: collected_at_obs, displayed_at_obs
 
-two_img_obs_project:
+two_img_obs_project: # 6
   <<: *DEFAULTS
   observations: two_img_obs
 
-rss_log_project:
+rss_log_project: # 7
   <<: *DEFAULTS
   rss_log: project_rss_log
 
-one_genus_two_species_project:
+one_genus_two_species_project: # 8
   <<: *DEFAULTS
   observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
 
-news_articles_project:
+news_articles_project: # 9
   <<: *DEFAULTS
   title:       News Articles
   admin_group: article_writers
