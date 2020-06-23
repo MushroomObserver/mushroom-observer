@@ -1,12 +1,12 @@
 <%
   @title = :sequence_add_title.t
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    observation_path(@observation))
+    link_to(:cancel_and_show.t(type: :observation),
+            observation_path(@observation, q: get_query_param))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "observation_title", locals: { observation: @observation } %>
+<%= render "observation_title", observation: @observation %>
 
 <%= render "form" %>

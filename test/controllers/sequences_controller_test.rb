@@ -4,12 +4,12 @@ require "test_helper"
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
-  def test_list_sequences
+  def test_index
     get(:index)
     assert(:success)
   end
 
-  def test_sequence_search
+  def test_search
     get(:sequence_search, pattern: Sequence.last.id)
     assert_redirected_to(sequence_path(Sequence.last))
 
@@ -36,15 +36,9 @@ class SequencesControllerTest < FunctionalTestCase
 
     get(:index_sequence, q: q, id: results[2].id)
     assert_response(:success)
-
-    get(:next_sequence, q: q, id: results[1].id)
-    assert_redirected_to(sequence_path(results[2], q: q))
-
-    get(:prev_sequence, q: q, id: results[2].id)
-    assert_redirected_to(sequence_path(results[1], q: q))
   end
 
-  def test_show_sequence
+  def test_show
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
     get(:show, id: sequence.id)
@@ -52,16 +46,36 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove index displayed if called with id of sequence not in db
     get(:show, id: 666)
-    assert_redirected_to(action: :index_sequence)
+    assert_redirected_to(sequences_index_sequence_path)
   end
 
-  def test_create_sequence_get
-    # choose an obs not owned by Rolf (`requires_login` will login Rolf)
+  def test_show_next
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    results = query.results
+    q = query.id.alphabetize
+
+    get(:show_next, q: q, id: results[1].id)
+    assert_redirected_to(sequence_path(results[2], q: q))
+  end
+
+  def test_show_prev
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    results = query.results
+    q = query.id.alphabetize
+
+    get(:show_prev, q: q, id: results[2].id)
+    assert_redirected_to(sequence_path(results[1], q: q))
+  end
+
+  def test_new
     obs   = observations(:minimal_unknown_obs)
     owner = obs.user
 
     # Prove method requires login
-    requires_login(:new, id: obs.id)
+    get(:new, id: obs.id)
+    assert_redirected_to(accounts_login_path)
 
     # Prove logged-in user can add Sequence to someone else's Observation
     login("zero")
@@ -79,7 +93,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_sequence_post
+  def test_create
     old_count = Sequence.count
     obs   = observations(:detailed_unknown_obs)
     owner = obs.user
@@ -102,13 +116,13 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     # Prove user must be logged in to create Sequence
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
 
     # Prove logged-in user can add sequence to someone else's Observation
     user = users(:zero_user)
     login(user.login)
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -133,7 +147,7 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     login(owner.login)
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -159,7 +173,7 @@ class SequencesControllerTest < FunctionalTestCase
     }
     old_count = Sequence.count
     make_admin("zero")
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(locus, sequence.locus)
@@ -169,7 +183,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs))
   end
 
-  def test_create_sequence_post_wrong_parameters
+  def test_create_wrong_parameters
     old_count = Sequence.count
     obs = observations(:coprinus_comatus_obs)
     login(obs.user.login)
@@ -180,9 +194,9 @@ class SequencesControllerTest < FunctionalTestCase
       sequence: { locus: "",
                   bases: "actgct" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
-    # response is 200 because it just reloads the form
+    # response is :success because it just reloads the form
     assert_response(:success)
     assert_flash_error
 
@@ -191,7 +205,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -201,7 +215,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", archive: "GenBank" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -211,13 +225,13 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", accession: "KY133294.1" }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
   end
 
-  def test_create_sequence_redirect
+  def test_make_redirect
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
@@ -230,14 +244,14 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='sequence/#{obs.id}?q=#{q}']")
+    assert_select("form input", { type: "hidden", name: "q", value: q })
 
     # Prove that post keeps query params intact.
-    post(:new, params)
+    post(:create, params)
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_edit_sequence_get
+  def test_edit
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
     observer = obs.user
@@ -263,7 +277,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_sequence_post
+  def test_update
     sequence  = sequences(:local_sequence)
     obs       = sequence.observation
     observer  = obs.user
@@ -287,18 +301,18 @@ class SequencesControllerTest < FunctionalTestCase
     }
 
     # Prove user must be logged in to edit Sequence.
-    post(:edit, params)
+    post(:update, params)
     assert_not_equal(locus, sequence.reload.locus)
 
     # Prove user must be owner to edit Sequence.
     login("zero")
-    post(:edit, params)
+    post(:update, params)
     assert_not_equal(locus, sequence.reload.locus)
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
-    post(:edit, params)
+    post(:update, params)
     sequence.reload
     obs.rss_log.reload
     assert_objs_equal(obs, sequence.observation)
@@ -323,7 +337,7 @@ class SequencesControllerTest < FunctionalTestCase
                   accession: accession }
     }
     make_admin("zero")
-    post(:edit, params)
+    post(:update, params)
     sequence.reload
     obs.rss_log.reload
     assert_equal(archive, sequence.archive)
@@ -340,7 +354,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_equal(locus, sequence.reload.locus)
 
     # Prove locus required.
@@ -351,7 +365,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     # response is 200 because it just reloads the form
     assert_response(:success)
     assert_flash_error
@@ -364,7 +378,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: "",
                   accession: "" }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
 
@@ -376,7 +390,7 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: "" }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
 
@@ -388,12 +402,12 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: "",
                   accession: accession }
     }
-    post(:edit, params)
+    post(:update, params)
     assert_response(:success)
     assert_flash_error
   end
 
-  def test_edit_sequence_redirect
+  def test_change_redirect
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
@@ -408,43 +422,44 @@ class SequencesControllerTest < FunctionalTestCase
                   accession: sequence.accession }
     }
 
-    # Prove that GET passes "back" and query param through to form.
+    # Prove that :edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='sequence/#{sequence.id}?back=foo&q=#{q}']")
+    assert_select("form input", { type: "hidden", name: "back", value: "foo" })
+    assert_select("form input", { type: "hidden", name: "q", value: q })
 
-    # Prove by default POST goes back to observation.
-    post(:edit, params)
+    # Prove by default :update goes back to observation.
+    post(:update, params)
     assert_redirected_to(observation_path(obs))
 
-    # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(q: q))
+    # Prove that :update keeps query param when returning to observation.
+    post(:update, params.merge(q: q))
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that POST can return to show, too, with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    # Prove that :update can return to show, too, with query intact.
+    post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(sequence_path(sequence, q: q))
   end
 
-  def test_destroy_sequence
+  def test_destroy
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
     observer = obs.user
 
     # Prove user must be logged in to destroy Sequence.
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count, Sequence.count)
 
     # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
     login("zero")
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_success
@@ -452,7 +467,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_admin
+  def test_destroy_admin
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -460,7 +475,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove admin can destroy Sequence
     make_admin("zero")
-    post(:destroy, id: sequence.id)
+    delete(:destroy, id: sequence.id)
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(observation_path(obs))
     assert_flash_success
@@ -468,7 +483,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_redirect
+  def test_destroy_redirect
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
@@ -476,15 +491,15 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     # Prove by default it goes back to observation.
-    post(:destroy, id: seqs[0].id)
+    delete(:destroy, id: seqs[0].id)
     assert_redirected_to(observation_path(obs))
 
     # Prove that it keeps query param intact when returning to observation.
-    post(:destroy, id: seqs[1].id, q: q)
+    delete(:destroy, id: seqs[1].id, q: q)
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that it can return to index, too, with query intact.
-    post(:destroy, id: seqs[2].id, q: q, back: "index")
-    assert_redirected_to(action: :index_sequence, q: q)
+    # Prove that it can return to index_sequence, too, with query intact.
+    delete(:destroy, id: seqs[2].id, q: q, back: "index")
+    assert_redirected_to(sequences_index_sequence_path(q: q))
   end
 end
