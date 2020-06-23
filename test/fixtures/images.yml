@@ -15,7 +15,7 @@ DEFAULTS: &DEFAULTS
   height:           320
   ok_for_export:    true
 
-in_situ_image: # 1
+in_situ_image:
   <<: *DEFAULTS
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
@@ -28,7 +28,7 @@ in_situ_image: # 1
   original_name: DSCN8835.JPG
   transferred: false
 
-turned_over_image: # 2
+turned_over_image:
   <<: *DEFAULTS
   created_at: 2006-05-22 21:20:00
   updated_at: 2006-05-22 21:21:00
@@ -39,35 +39,35 @@ turned_over_image: # 2
   original_name: 1.jpg
   transferred: false
 
-commercial_inquiry_image: # 3
+commercial_inquiry_image:
   <<: *DEFAULTS
   when: 2007-02-25
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Location 2007-02-25 b.jpg
 
-disconnected_coprinus_comatus_image: # 4
+disconnected_coprinus_comatus_image:
   <<: *DEFAULTS
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus.tiff
 
-connected_coprinus_comatus_image: # 5
+connected_coprinus_comatus_image:
   <<: *DEFAULTS
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus close-up.tiff
 
-agaricus_campestris_image: # 6
+agaricus_campestris_image:
   <<: *DEFAULTS
   when: 2007-03-19
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Name with áč€εиts.gif
 
-amateur_image: # 7
+amateur_image:
   <<: *DEFAULTS
   user: katrina
   when: 2010-12-30
@@ -75,7 +75,7 @@ amateur_image: # 7
   copyright_holder: Nathan Wilson
   license: publicdomain
 
-peltigera_image: # 8
+peltigera_image:
   <<: *DEFAULTS
   when: 2012-06-07
   notes: 'Pretty lichen'
@@ -83,27 +83,27 @@ peltigera_image: # 8
   copyright_holder: Nathan Wilson
   license: publicdomain
 
-conic_image: # 9
+conic_image:
   <<: *DEFAULTS
   when: 2013-08-04
   notes: 'A scientific illustration of Conic Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
 
-convex_image: # 10
+convex_image:
   <<: *DEFAULTS
   when: 2013-08-13
   notes: 'A scientific illustration of Convex Pileus'
   copyright_holder: Insil Choi
 
-plane_image_thumb: # 11
+plane_image_thumb:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: 'A scientific illustration of Plane Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
 
-plane_image_example: # 12
+plane_image_example:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: 'Example image of of Plane Pileus'
@@ -111,17 +111,17 @@ plane_image_example: # 12
   vote_cache: 3
   license: publicdomain
 
-rolf_profile_image: # 13
+rolf_profile_image:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: NULL        # used in test_noteless_image
   copyright_holder: Rolf Singer
 
-query_first_image: # 14
+query_first_image:
   <<: *DEFAULTS
 
-query_second_image: # 15
+query_second_image:
   <<: *DEFAULTS
 
-locally_sequenced_obs_image: # 16
+locally_sequenced_obs_image:
   <<: *DEFAULTS

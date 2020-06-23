@@ -10,7 +10,7 @@ DEFAULTS: &DEFAULTS
   accession:   $LABEL # Don't duplicate accessions for an Observation
   notes:       Notes about Sequence $LABEL
 
-local_sequence: # 1
+local_sequence:
   <<: *DEFAULTS
   observation: locally_sequenced_obs
   archive:     ""
@@ -18,32 +18,32 @@ local_sequence: # 1
   created_at:  2017-01-01 16:00:00
   updated_at:  2017-01-01 16:00:00
 
-deposited_sequence: # 2
+deposited_sequence:
   <<: *DEFAULTS
   accession:   KT968605
   bases:       ""
   created_at:  2017-01-01 17:00:00
   updated_at:  2017-01-01 17:00:00
 
-missing_archive_sequence: # 3
+missing_archive_sequence:
   <<: *DEFAULTS
   archive:     ""
   created_at:  2017-02-01 16:00:00
   updated_at:  2017-02-01 16:00:00
 
-missing_accession_sequence: # 4
+missing_accession_sequence:
   <<: *DEFAULTS
   accession:   ""
   created_at:  2017-02-02 16:00:00
   updated_at:  2017-02-02 16:00:00
 
-alternate_archive: # 5
+alternate_archive:
   <<: *DEFAULTS
   archive:     UNITE
   created_at:  2017-02-03 16:00:00
   updated_at:  2017-02-03 16:00:00
 
-fasta_formatted_sequence: # 6
+fasta_formatted_sequence:
   <<: *DEFAULTS
   # Use YAML literal style to retain newline characters
   # See http://www.yaml.org/spec/1.2/spec.html#id2760844
@@ -65,7 +65,7 @@ fasta_formatted_sequence: # 6
     TCTGTTTGTCCGCGAGGCGTTCCCGCCCACCGAACCCAATAAACCTTTCTCCTAGTTGACCTCGAATCAG
     GTGGGG
 
-bare_formatted_sequence: # 7
+bare_formatted_sequence:
   <<: *DEFAULTS
   # Differs from above by one letter
   # Use YAML literal style to retain newline characters
@@ -86,7 +86,7 @@ bare_formatted_sequence: # 7
     GTGGGG
     A
 
-bare_with_numbers_sequence: # 8
+bare_with_numbers_sequence:
   <<: *DEFAULTS
   # Differs from above by one letter
   # Use YAML literal style to retain newline chancters

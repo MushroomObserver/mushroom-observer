@@ -7,7 +7,7 @@ DEFAULTS: &DEFAULTS
   locked: false
 
 # no observations, 1 descsription and 2 versions all by rolf
-albion: # 1
+albion:
   <<: *DEFAULTS
   description: albion_desc
   created_at: 2007-12-27 06:41:20
@@ -25,7 +25,7 @@ albion: # 1
   rss_log: albion_rss_log
   notes: some notes & stuff... to test "unsafe" html
 
-burbank: # 2
+burbank:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -40,7 +40,7 @@ burbank: # 2
   high: 294.0
   low: 148.0
 
-mitrula_marsh: # 3
+mitrula_marsh:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -54,7 +54,7 @@ mitrula_marsh: # 3
   south: 39.5184
   rss_log: location_rss_log
 
-salt_point: # 4
+salt_point:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -70,7 +70,7 @@ salt_point: # 4
   low: 0.0
   notes: It's legal to collect in Salt Point (at least in 2010). Let's hope it stays that way!
 
-gualala: # 5
+gualala:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -85,7 +85,7 @@ gualala: # 5
   high: 100.0
   low: 0.0
 
-elgin_co: # 6
+elgin_co:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -98,7 +98,7 @@ elgin_co: # 6
   east: -80.8044
   south: 42.4701
 
-brett_woods: # 7
+brett_woods:
   <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
@@ -111,7 +111,7 @@ brett_woods: # 7
   east: -73.3215
   south: 41.1939
 
-point_reyes: # 8
+point_reyes:
   <<: *DEFAULTS
   created_at: 2008-01-01 11:50:00
   updated_at: 2008-01-01 11:50:00
@@ -125,7 +125,7 @@ point_reyes: # 8
   south: 37.9255
   notes: Is it legal to collect in Point Reyes without a permit?
 
-howarth_park: # 9
+howarth_park:
   <<: *DEFAULTS
   created_at: 2008-01-01 15:24:18
   updated_at: 2008-01-01 15:24:18
@@ -138,7 +138,7 @@ howarth_park: # 9
   east: -122.6632
   south: 38.4496
 
-unknown_location: # 10
+unknown_location:
   <<: *DEFAULTS
   created_at: 2012-01-01 15:24:18
   updated_at: 2012-01-01 15:24:18
@@ -152,7 +152,7 @@ unknown_location: # 10
   south: -90
   locked: true
 
-nybg_location: # 11
+nybg_location:
   <<: *DEFAULTS
   created_at: 2012-10-21 06:50:00
   updated_at: 2012-10-21 06:50:00
@@ -167,7 +167,7 @@ nybg_location: # 11
 
 # Do not use this location for any object
   <<: *DEFAULTS
-unused_location: # 12
+unused_location:
   user_id: 0
   version: 1
   name: $LABEL
@@ -177,7 +177,7 @@ unused_location: # 12
   east: 180
   south: -90
 
-no_mushrooms_location: # 13
+no_mushrooms_location:
   <<: *DEFAULTS
   user_id: 0
   version: 1
@@ -188,7 +188,7 @@ no_mushrooms_location: # 13
   east: 180
   south: -90
 
-collection_location: # 14
+collection_location:
   <<: *DEFAULTS
   user_id: 0
   version: 1
@@ -199,7 +199,7 @@ collection_location: # 14
   east: 180
   south: -90
 
-display_location: # 15
+display_location:
   <<: *DEFAULTS
   user_id: 0
   version: 1
@@ -210,7 +210,7 @@ display_location: # 15
   east: 180
   south: -90
 
-sortable_observation_user_location: # 16
+sortable_observation_user_location:
   <<: *DEFAULTS
   user: sortable_observation_user
   version: 1
@@ -220,7 +220,7 @@ sortable_observation_user_location: # 16
   east: -73.878
   south: 40.866
 
-obs_default_location: # 17
+obs_default_location:
   <<: *DEFAULTS
   user: obs_default_location_user
   version: 1
@@ -230,7 +230,7 @@ obs_default_location: # 17
   east: -70.761
   south: 41.645
 
-california: # 18
+california:
   <<: *DEFAULTS
   created_at: 2017-12-18 14:39:23
   updated_at: 2017-12-18 14:39:23
