@@ -75,7 +75,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove method requires login
     get(:new, id: obs.id)
-    assert_redirected_to(accounts_login_path)
+    assert_redirected_to(account_login_path)
 
     # Prove logged-in user can add Sequence to someone else's Observation
     login("zero")
