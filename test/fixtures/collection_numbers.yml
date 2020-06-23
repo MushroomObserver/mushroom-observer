@@ -3,35 +3,35 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-minimal_unknown_coll_num: # 1
+minimal_unknown_coll_num:
   created_at: 2005-05-12 17:20:00
   updated_at: 2005-05-12 17:21:00
   user:       mary
   name:       "Mary Newbie"
   number:     "173"
 
-detailed_unknown_coll_num_one: # 2
+detailed_unknown_coll_num_one:
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   user:       mary
   name:       "Mary Newbie"
   number:     "174"
 
-detailed_unknown_coll_num_two: # 3
+detailed_unknown_coll_num_two:
   created_at: 2006-05-12 18:20:00
   updated_at: 2006-05-12 18:21:00
   user:       mary
   name:       "Random Neighbor"
   number:     "s/n"
 
-coprinus_comatus_coll_num: # 4
+coprinus_comatus_coll_num:
   created_at: 2012-12-08 14:23:00
   updated_at: 2012-12-08 14:23:00
   user:       rolf
   name:       "Rolf Singer"
   number:     "1"
 
-agaricus_campestris_coll_num: # 5
+agaricus_campestris_coll_num:
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
   user:       rolf
