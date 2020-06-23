@@ -115,10 +115,7 @@ class HerbariaController < ApplicationController
   def create
     @herbarium = Herbarium.new(whitelisted_herbarium_params)
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
+    if attributes_validated!
       @herbarium.save
       @herbarium.add_curator(@user) if @herbarium.personal_user
       notify_admins_of_new_herbarium unless @herbarium.personal_user
@@ -145,10 +142,7 @@ class HerbariaController < ApplicationController
 
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
+    if attributes_validated!
       @herbarium.save
       redirect_to_create_location ||
         redirect_to_referer ||
@@ -282,6 +276,13 @@ class HerbariaController < ApplicationController
     end
     @herbarium.description = @herbarium.description.to_s.strip
     @herbarium.code = "" if @herbarium.personal_user_id
+  end
+
+  def attributes_validated!
+    validate_name! &&
+    validate_location! &&
+    validate_personal_herbarium! &&
+    validate_admin_personal_user!
   end
 
   def validate_name!
