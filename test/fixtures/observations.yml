@@ -23,7 +23,7 @@ DEFAULTS: &DEFAULTS
   text_name: Boletus edulis
   classification: ""
 
-minimal_unknown_obs: # 1
+minimal_unknown_obs:
   <<: *DEFAULTS
   created_at: 2005-05-12 17:20:00
   updated_at: 2005-05-12 17:21:00
@@ -37,7 +37,7 @@ minimal_unknown_obs: # 1
   herbarium_records: interesting_unknown
   collection_numbers: minimal_unknown_coll_num
 
-detailed_unknown_obs: # 2
+detailed_unknown_obs:
   <<: *DEFAULTS
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
@@ -57,7 +57,7 @@ detailed_unknown_obs: # 2
   herbarium_records: interesting_unknown, mycoflora_record
   collection_numbers: detailed_unknown_coll_num_one, detailed_unknown_coll_num_two
 
-coprinus_comatus_obs: # 3
+coprinus_comatus_obs:
   <<: *DEFAULTS
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
@@ -78,7 +78,7 @@ coprinus_comatus_obs: # 3
   herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
   collection_numbers: coprinus_comatus_coll_num
 
-agaricus_campestris_obs: # 4
+agaricus_campestris_obs:
   <<: *DEFAULTS
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
@@ -97,7 +97,7 @@ agaricus_campestris_obs: # 4
   herbarium_records: agaricus_campestris_spec
   collection_numbers: agaricus_campestris_coll_num
 
-agaricus_campestrus_obs: # 5
+agaricus_campestrus_obs:
   <<: *DEFAULTS
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
@@ -111,7 +111,7 @@ agaricus_campestrus_obs: # 5
   notes:
     :Other: From somewhere else
 
-agaricus_campestras_obs: # 6
+agaricus_campestras_obs:
   <<: *DEFAULTS
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
@@ -125,7 +125,7 @@ agaricus_campestras_obs: # 6
   notes:
     :Other: From somewhere else
 
-agaricus_campestros_obs: # 7
+agaricus_campestros_obs:
   <<: *DEFAULTS
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
@@ -139,7 +139,7 @@ agaricus_campestros_obs: # 7
   notes:
     :Other: From somewhere else
 
-strobilurus_diminutivus_obs: # 8
+strobilurus_diminutivus_obs:
   <<: *DEFAULTS
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
@@ -152,7 +152,7 @@ strobilurus_diminutivus_obs: # 8
   notes:
     :Other: From somewhere else
 
-stereum_hirsutum_1: # 9
+stereum_hirsutum_1:
   <<: *DEFAULTS
   when: 2017-06-23
   location: burbank
@@ -161,7 +161,7 @@ stereum_hirsutum_1: # 9
   name: stereum_hirsutum
   text_name: Stereum hirsutum
 
-stereum_hirsutum_2: # 10
+stereum_hirsutum_2:
   <<: *DEFAULTS
   when: 2017-06-24
   location: burbank
@@ -170,7 +170,7 @@ stereum_hirsutum_2: # 10
   name: stereum_hirsutum
   text_name: Stereum hirsutum
 
-tubaria_furfuracea_1: # 11
+tubaria_furfuracea_1:
   <<: *DEFAULTS
   when: 2017-06-23
   location: burbank
@@ -179,7 +179,7 @@ tubaria_furfuracea_1: # 11
   name: tubaria_furfuracea
   text_name: Tubaria furfuracea
 
-tubaria_furfuracea_2: # 12
+tubaria_furfuracea_2:
   <<: *DEFAULTS
   when: 2017-06-24
   location: burbank
@@ -188,7 +188,7 @@ tubaria_furfuracea_2: # 12
   name: tubaria_furfuracea
   text_name: Tubaria furfuracea
 
-unknown_with_no_naming: # 13
+unknown_with_no_naming:
   <<: *DEFAULTS
   when: 2008-09-23
   user: mary
@@ -197,7 +197,7 @@ unknown_with_no_naming: # 13
   name: fungi
   text_name: Fungi
 
-unknown_with_lat_long: # 14
+unknown_with_lat_long:
   <<: *DEFAULTS
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
@@ -213,7 +213,7 @@ unknown_with_lat_long: # 14
   notes:
     :Other: 'unknown_with_lat_long'
 
-amateur_obs: # 15
+amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00
   when: 2010-12-30
@@ -229,7 +229,7 @@ amateur_obs: # 15
   lat: 34.1622
   long: -118.3521
 
-peltigera_obs: # 16
+peltigera_obs:
   <<: *DEFAULTS
   when: 2012-06-07
   user: rolf
@@ -250,7 +250,7 @@ peltigera_obs: # 16
   updated_at: 2014-04-04 04:04:03
   herbarium_records: field_museum_record
 
-peltigera_rolf_obs: # 17
+peltigera_rolf_obs:
   <<: *DEFAULTS
   when: 2013-09-08
   user: mary
@@ -269,7 +269,7 @@ peltigera_rolf_obs: # 17
   created_at: 2014-04-04 04:04:04
   updated_at: 2014-04-04 04:04:04
 
-fungi_obs: # 18
+fungi_obs:
   <<: *DEFAULTS
   when: 2013-09-15
   user: rolf
@@ -284,7 +284,7 @@ fungi_obs: # 18
   thumb_image: conic_image
   images: conic_image, plane_image_example
 
-boletus_edulis_obs: # 19
+boletus_edulis_obs:
   <<: *DEFAULTS
   when: 2014-04-21
   location:
@@ -297,44 +297,44 @@ boletus_edulis_obs: # 19
   vote_cache: 3
   species_lists: one_genus_three_species_list
 
-owner_only_favorite_eq_fungi: # 20
+owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
 
-owner_only_favorite_eq_consensus: # 21
+owner_only_favorite_eq_consensus:
   <<: *DEFAULTS
 
-owner_only_favorite_ne_consensus: # 22
+owner_only_favorite_ne_consensus:
   <<: *DEFAULTS
   name: tremella
   text_name: Tremella
   lifeform: " lichenicolous "
 
-owner_multiple_favorites: # 23
+owner_multiple_favorites:
   <<: *DEFAULTS
 
-owner_uncertain_favorite: # 24
+owner_uncertain_favorite:
   <<: *DEFAULTS
 
-owner_accepts_general_questions: # 25
+owner_accepts_general_questions:
   <<: *DEFAULTS
   user: roy                      # roy has email_general_questions == true
 
-owner_refuses_general_questions: # 26
+owner_refuses_general_questions:
   <<: *DEFAULTS
   user: dick                     # dick has email_general_questions == false
 
-collected_at_obs: # 27
+collected_at_obs:
   <<: *DEFAULTS
   location: collection_location
   where: Collection Location
 
-displayed_at_obs: # 28
+displayed_at_obs:
   <<: *DEFAULTS
   location: display_location
   where: Display Location
   is_collection_location: false
 
-two_img_obs: # 29
+two_img_obs:
   <<: *DEFAULTS
   location: display_location
   where: Display Location
@@ -342,33 +342,33 @@ two_img_obs: # 29
   images: query_first_image, query_second_image
   thumb_image: query_first_image
 
-imageless_unvouchered_obs: # 30
+imageless_unvouchered_obs:
   <<: *DEFAULTS
   user: ignore_imageless_user
 
 # need >=2 imaged B edulis Obs's for filter tests
-imged_unvouchered_obs: # 31
+imged_unvouchered_obs:
   <<: *DEFAULTS
   images: query_first_image
   thumb_image: query_first_image
 
-vouchered_obs: # 32
+vouchered_obs:
   <<: *DEFAULTS
   specimen: 1
 
-vouchered_imged_obs: # 33
+vouchered_imged_obs:
   <<: *DEFAULTS
   specimen: 1
   images: query_first_image
   thumb_image: query_first_image
 
-updated_2013_obs: # 34
+updated_2013_obs:
   <<: *DEFAULTS
   when: 2013-09-08
   updated_at: 2013-09-08 17:21:00
 
 # Two Observations sortable by Name, Date, Date Posted, Time Last Modified
-sortable_obs_users_first_obs: # 35
+sortable_obs_users_first_obs:
   <<: *DEFAULTS
   created_at: 2016-01-10 17:20:00
   updated_at: 2016-01-11 17:20:00
@@ -380,7 +380,7 @@ sortable_obs_users_first_obs: # 35
   where: Sortable Observation User, New York, USA
   lifeform: " lichenicolous "
 
-sortable_obs_users_second_obs: # 36
+sortable_obs_users_second_obs:
   <<: *DEFAULTS
   created_at: 2017-01-10 17:20:00
   updated_at: 2017-01-11 17:20:00
@@ -392,7 +392,7 @@ sortable_obs_users_second_obs: # 36
   where: Sortable Observation User, New York, USA
   lifeform: " lichenicolous "
 
-unlisted_rolf_obs: # 37
+unlisted_rolf_obs:
   <<: *DEFAULTS
   location: point_reyes
   where: Point Reyes National Seashore, Marin Co., California, USA
@@ -400,102 +400,102 @@ unlisted_rolf_obs: # 37
 
 # default user (dick) has unequal positive namings
 # used for testing change vote
-unequal_positive_namings_obs: # 38
+unequal_positive_namings_obs:
   <<: *DEFAULTS
 
 # used for testing calc_consensus
-all_namings_deprecated_obs: # 39
+all_namings_deprecated_obs:
   <<: *DEFAULTS
   name: namings_deprecated
   text_name: Namings deprecated
 
 # Has 2 namings
 # Has two namings, which (under current rules) makes the Names unmergeable
-authored_with_naming_obs: # 40
+authored_with_naming_obs:
   <<: *DEFAULTS
   name: authored_with_naming
   text_name: Psalliota naming
 
 # dick owns the Name and Observation, but mary owns a Naming
-other_user_owns_naming_obs: # 41
+other_user_owns_naming_obs:
   <<: *DEFAULTS
   name: other_user_owns_naming_name
   text_name: Otheruserownsnaming
   user: dick
 
 # dick owns the Name and Naming, but mary owns an Observation
-other_user_owns_obs: # 42
+other_user_owns_obs:
   <<: *DEFAULTS
   name: other_user_owns_observation
   text_name: Otheruserownsobs
   user: mary
 
 # dick owns the Name and the only Observation and Naming
-same_user_owns_name_and_naming_obs: # 43
+same_user_owns_name_and_naming_obs:
   <<: *DEFAULTS
   name: same_user_owns_naming_and_observation
   text_name: Sameuserownsnamingandobservation
   user: dick
 
 # has Sequence which has not been deposited in an Archive
-locally_sequenced_obs: # 44
+locally_sequenced_obs:
   <<: *DEFAULTS
   rss_log: $LABEL_rss_log
   images: locally_sequenced_obs_image
   thumb_image: locally_sequenced_obs_image
 
 # has Sequence which is in GenBank
-genbanked_obs: # 45
+genbanked_obs:
   <<: *DEFAULTS
 
-substrate_notes_obs: # 46
+substrate_notes_obs:
   <<: *DEFAULTS
   notes:
     :substrate: soil
 
-substrate_and_other_notes_obs: # 47
+substrate_and_other_notes_obs:
   <<: *DEFAULTS
   notes:
     :substrate: soil
     :Other: slimy
 
-templater_noteless_obs: # 48
+templater_noteless_obs:
   <<: *DEFAULTS
   user: notes_templater
 
-templater_other_notes_obs: # 49
+templater_other_notes_obs:
   <<: *DEFAULTS
   notes:
     :Other: some notes
   user: notes_templater
 
-templater_orphaned_notes_obs: # 50
+templater_orphaned_notes_obs:
   <<: *DEFAULTS
   notes:
     :orphaned_caption: orphaned notes
   user: notes_templater
 
-template_only_obs: # 51
+template_only_obs:
   <<: *DEFAULTS
   notes:
     :Cap: red
   user: notes_templater
 
-template_and_other_notes_obs: # 52
+template_and_other_notes_obs:
   <<: *DEFAULTS
   notes:
     :Cap: red
     :Other: some notes
   user: notes_templater
 
-template_and_orphaned_notes_obs: # 53
+template_and_orphaned_notes_obs:
   <<: *DEFAULTS
   notes:
     :Cap: red
     :orphaned_caption: orphaned notes
   user: notes_templater
 
-template_and_orphaned_notes_scrambled_obs: # 54
+template_and_orphaned_notes_scrambled_obs:
   <<: *DEFAULTS
   notes:
     :Nearby_trees: pine
@@ -505,7 +505,7 @@ template_and_orphaned_notes_scrambled_obs: # 54
     :Cap: red
   user: notes_templater
 
-california_obs: # 55
+california_obs:
   <<: *DEFAULTS
   location: california
   where: California, USA

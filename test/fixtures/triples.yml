@@ -3,37 +3,37 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-peltigera_is_a_lichen_triple: # 1
+peltigera_is_a_lichen_triple:
   subject: <%= "':name/" +
     ActiveRecord::FixtureSet.identify(:peltigera).to_s + "'"%>
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
-petigera_is_a_lichen_triple: # 2
+petigera_is_a_lichen_triple:
   subject: <%= "':name/" +
     ActiveRecord::FixtureSet.identify(:petigera).to_s + "'"%>
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
-tremella_mesenterica_is_a_lichen_triple: # 3
+tremella_mesenterica_is_a_lichen_triple:
   subject: <%= "':name/" +
     ActiveRecord::FixtureSet.identify(:tremella_mesenterica).to_s + "'"%>
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
-tremella_is_a_lichen_triple: # 4
+tremella_is_a_lichen_triple:
   subject: <%= "':name/" +
     ActiveRecord::FixtureSet.identify(:tremella).to_s + "'"%>
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
-tremella_justpublished_is_a_lichen_triple: # 5
+tremella_justpublished_is_a_lichen_triple:
   subject: <%= "':name/" +
     ActiveRecord::FixtureSet.identify(:tremella_justpublished).to_s + "'"%>
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
-aboritporus_biennis_eol_triple: # 6
+aboritporus_biennis_eol_triple:
   subject: <%= 'http://mushroomobserver.org/name/show_name/' +
     ActiveRecord::FixtureSet.identify(:abortiporus_biennis_for_eol).to_s %>
   predicate: ':eolName'

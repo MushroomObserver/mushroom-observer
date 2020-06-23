@@ -3,20 +3,20 @@
 # if "id:" is included but left blank, the id is nil.
 # So use ActiveRecord to get the hashed id.
 
-macrolepiota_rachodes_synonym: # 1
+macrolepiota_rachodes_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:macrolepiota_rachodes_synonym) %>
 
-chlorophyllum_rachodes_synonym: # 2
+chlorophyllum_rachodes_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum_rachodes_synonym) %>
 
-lactarius_alpinus_synonym: # 3
+lactarius_alpinus_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:lactarius_alpinus_synonym) %>
 
-peltigera_synonym: # 4
+peltigera_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:peltigera_synonym) %>
 
-namings_deprecated_synonym: # 5
+namings_deprecated_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:namings_deprecated_synonym) %>
 
-suillus_synonym: # 6
+suillus_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:suillus_synonym) %>
