@@ -3,7 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-unreviewed: # 1
+unreviewed:
   amount: 100.00
   who: Lily White Truffle
   email: lily@mushroomobserver.org

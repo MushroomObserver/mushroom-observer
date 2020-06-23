@@ -3,42 +3,42 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-english: # 1
+english:
   locale: en
   name: English
   order: English
   official: true
   beta: false
 
-french: # 2
+french:
   locale: fr
   name: Français
   order: Francais
   official: false
   beta: false
 
-greek: # 3
+greek:
   locale: el
   name: Ελληνικά
   order: Ellenika
   official: false
   beta: true
 
-russian: # 4
+russian:
   locale: ru
   name: Русский
   order: Russkii
   official: false
   beta: true
 
-spanish: # 5
+spanish:
   locale: es
   name: Español
   order: Espanol
   official: false
   beta: true
 
-portuguese: # 6
+portuguese:
   locale: pt
   name: Português
   order: Português
