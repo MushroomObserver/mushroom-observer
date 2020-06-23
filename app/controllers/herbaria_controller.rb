@@ -129,12 +129,7 @@ class HerbariaController < ApplicationController
   end
 
   def edit
-  # TODO: jdc DRY the following
-    store_location
-    pass_query_params
-    keep_track_of_referer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    return unless (@herbarium = prep_herbarium_for_change)
     return unless make_sure_can_edit!
 
     @herbarium.place_name         = @herbarium.location.try(&:name)
@@ -151,11 +146,7 @@ class HerbariaController < ApplicationController
   alias_method :edit_herbarium, :edit
 
   def update
-    store_location
-    pass_query_params
-    keep_track_of_referer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    return unless (@herbarium = prep_herbarium_for_change)
     return unless make_sure_can_edit!
 
     @herbarium.attributes = whitelisted_herbarium_params
@@ -273,6 +264,13 @@ class HerbariaController < ApplicationController
     end
 
     show_index_of_objects(query, args)
+  end
+
+  def prep_herbarium_for_change
+    store_location
+    pass_query_params
+    keep_track_of_referer
+    find_or_goto_index(Herbarium, params[:id])
   end
 
   def make_sure_can_edit!
