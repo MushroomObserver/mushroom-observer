@@ -14,7 +14,7 @@ class HerbariaController < ApplicationController
     :show_herbarium # aliased
   ]
 
-  # Displays selected Herbarium's (based on current Query).
+  # Display list of herbaria selected by current Query
   def index_herbarium
     query = find_or_create_query(
       :Herbarium,
@@ -40,7 +40,7 @@ class HerbariaController < ApplicationController
     )
   end
 
-  # Show list of herbaria.
+  # Display list of Herbaria.
   def index
     store_location
     query = create_query(
