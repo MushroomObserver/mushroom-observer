@@ -26,11 +26,13 @@
         <% if button_name != :CREATE %>
           <div class="well well-sm mt-3 help-block">
             <div class="arrow-up mt-2"></div>
-            <% @herbarium_users.each do |name, login, count| %>
-              <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
-                                                 num: count) %><br/>
+            <% top_users = herbarium_top_users
+               top_users.each do |name, login, count| %>
+             <%= :edit_herbarium_user_records.t(
+                   name: "#{name} (#{login})", num: count
+                 ) %><br/>
             <% end %>
-            <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
+            <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
           </div>
         <% end %>
       </div>
