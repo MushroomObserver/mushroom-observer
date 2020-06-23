@@ -303,7 +303,27 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_user_list_equal([mary], herbarium.curators)
   end
 
-  def test_edit_herbarium_without_curators
+  def test_edit
+    nybg = herbaria(:nybg_herbarium)
+    get(:edit, id: nybg.id)
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:edit, id: nybg.id)
+    assert_template("edit")
+
+    login("mary")
+    assert_not(nybg.curator?(mary))
+    get(:edit, id: nybg.id)
+    assert_flash_text(/Permission denied/i)
+    assert_response(:redirect)
+
+    make_admin("mary")
+    get(:edit, id: nybg.id)
+    assert_template("edit")
+  end
+
+  def test_edit_without_curators
     nybg = herbaria(:nybg_herbarium)
     nybg.curators.delete(rolf)
     nybg.curators.delete(roy)
@@ -312,26 +332,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("mary")
-    get(:edit, id: nybg.id)
-    assert_template("edit")
-  end
-
-  def test_edit_herbarium_with_curators
-    nybg = herbaria(:nybg_herbarium)
-    get(:edit, id: nybg.id)
-    assert_response(:redirect)
-
-    login("mary")
-    assert_not(nybg.curator?(mary))
-    get(:edit, id: nybg.id)
-    assert_flash_text(/Permission denied/i)
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:edit, id: nybg.id)
-    assert_template("edit")
-
-    make_admin("mary")
     get(:edit, id: nybg.id)
     assert_template("edit")
   end
