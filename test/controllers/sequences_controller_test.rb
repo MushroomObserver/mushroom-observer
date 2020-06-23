@@ -46,7 +46,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove index displayed if called with id of sequence not in db
     get(:show, id: 666)
-    assert_redirected_to(action: :index_sequence)
+    assert_redirected_to(sequences_index_sequence_path)
   end
 
   def test_show_next
@@ -75,7 +75,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove method requires login
     get(:new, id: obs.id)
-    assert_redirected_to(controller: :account, action: :login)
+    assert_redirected_to(accounts_login_path)
 
     # Prove logged-in user can add Sequence to someone else's Observation
     login("zero")
@@ -498,8 +498,8 @@ class SequencesControllerTest < FunctionalTestCase
     delete(:destroy, id: seqs[1].id, q: q)
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that it can return to index, too, with query intact.
+    # Prove that it can return to index_sequence, too, with query intact.
     delete(:destroy, id: seqs[2].id, q: q, back: "index")
-    assert_redirected_to(action: :index_sequence, q: q)
+    assert_redirected_to(sequences_index_sequence_path(q: q))
   end
 end
