@@ -3,7 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-coprinus_comatus_obs_mycoportal_link: # 1
+coprinus_comatus_obs_mycoportal_link:
   user:          mary
   created_at:    2016-12-29 15:21:00
   updated_at:    2016-12-29 15:21:00
@@ -11,7 +11,7 @@ coprinus_comatus_obs_mycoportal_link: # 1
   external_site: mycoportal
   url:           "http://mycoportal.org/portal/collections/individual/index.php?occid=1950183"
 
-coprinus_comatus_obs_inaturalist_link: # 2
+coprinus_comatus_obs_inaturalist_link:
   user:          mary
   created_at:    2017-11-11 14:14:00
   updated_at:    2017-11-11 14:14:00

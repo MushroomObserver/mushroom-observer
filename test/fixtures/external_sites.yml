@@ -3,10 +3,10 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-mycoportal: # 1
+mycoportal:
   name:    MycoPortal
   project: empty_project # mary is only member and admin
 
-inaturalist: # 2
+inaturalist:
   name:    iNaturalist
   project: empty_project # mary is only member and admin
