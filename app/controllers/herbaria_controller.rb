@@ -61,10 +61,6 @@ class HerbariaController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@herbarium = Herbarium.safe_find(pattern))
-      # redirect_to(
-      #   action: :show,
-      #   id: @herbarium.id
-      # )
       redirect_to herbarium_path(@herbarium.id)
     else
       query = create_query(
@@ -248,24 +244,12 @@ class HerbariaController < ApplicationController
 
     @links ||= []
     if query.flavor != :all
-      # @links << [:herbarium_index_list_all_herbaria.l,
-      #            { controller: :herbarium,
-      #              action: :list_herbaria }
-      #           ]
       @links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
     end
     if query.flavor != :nonpersonal
-      # @links << [:herbarium_index_nonpersonal_herbaria.l,
-      #            { controller: :herbarium,
-      #              action: :index }
-      #           ]
       @links << [:herbarium_index_nonpersonal_herbaria.l,
                   herbaria_index_nonpersonal_herbarium_path]
     end
-    # @links << [:create_herbarium.l,
-    #            { controller: :herbarium,
-    #              action: :new }
-    #           ]
     @links << [:create_herbarium.l, new_herbarium_path]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
@@ -412,13 +396,6 @@ class HerbariaController < ApplicationController
   end
 
   def request_merge(this, that)
-    # redirect_with_query(
-    #   controller: :observer,
-    #   action: :email_merge_request,
-    #   type: :Herbarium,
-    #   old_id: this.id,
-    #   new_id: that.id
-    # )
     redirect_to email_email_merge_request_path(
       type: :Herbarium,
       old_id: this.id,
@@ -457,7 +434,6 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
-    # redirect_with_query(herbarium_path(herbarium))
     redirect_to herbarium_path(
       herbarium.id,
       q: get_query_param
@@ -468,13 +444,6 @@ class HerbariaController < ApplicationController
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    # redirect_to(
-    #   controller: :location,
-    #   action: :new,
-    #   back: @back,
-    #   where: @herbarium.place_name,
-    #   set_herbarium: @herbarium.id
-    # )
     redirect_to new_location_path(
       back: @back,
       where: @herbarium.place_name,
