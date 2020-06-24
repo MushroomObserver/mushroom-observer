@@ -31,7 +31,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_herbarium_with_no_herbarium_records_index
+  def test_herbarium_index_with_no_records
     get(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
@@ -43,7 +43,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_observation_with_no_herbarium_records_index
+  def test_observation_index_with_no_records
     get(:observation_index, id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
@@ -54,12 +54,12 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     pattern = "Coprinus comatus"
     get(:herbarium_record_search, pattern: pattern)
     assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", 2)
+    assert_template("herbarium_records/index")
+    assert_select("table tr", HerbariumRecord.where(initial_det: pattern).size,
+                  "There should be 1 row/record")
   end
 
-  def test_search_with_one_herbarium_record_index
+  def test_search_with_one_record
     get(:herbarium_record_search,
         pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
