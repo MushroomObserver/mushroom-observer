@@ -2,6 +2,7 @@
 
 require "test_helper"
 
+# Test HerbariumRecordsController and Views
 class HerbariumRecordsControllerTest < FunctionalTestCase
   def herbarium_record_params
     {
@@ -13,6 +14,16 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
         notes: "Some notes about this herbarium record"
       }
     }
+  end
+
+##### Read indices: test actions that list multiple records
+
+  def test_index
+    get(:index_herbarium_record)
+    assert_response(:success)
+    assert_template("list_herbarium_records")
+    # In results, expect 1 row per herbarium_record
+    assert_select(".results tr", HerbariumRecord.all.size)
   end
 
   def test_herbarium_index
@@ -55,13 +66,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_index
-    get(:index_herbarium_record)
-    assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", HerbariumRecord.all.size)
-  end
+##### Read show - test actions that display one record
 
   def test_show_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
@@ -90,6 +95,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:show_prev, id: number2.id, q: q)
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
+
+##### Create - test actions that create a record
 
   def test_new
     get(:new, id: observations(:coprinus_comatus_obs).id)
@@ -197,6 +204,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:new, params)
     assert_redirected_to(observation_path(obs, q: q))
   end
+
+##### Update - test actions that modify a record
 
   def test_edit
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
@@ -338,6 +347,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:remove_observation, id: recs[1].id, obs: obs.id, q: q)
     assert_redirected_to(observation_path(obs, q: q))
   end
+
+#### Destroy - test actions that destroy a records
 
   def test_destroy
     login("rolf")
