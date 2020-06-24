@@ -107,13 +107,7 @@ class HerbariumRecordsController < ApplicationController
     return unless @observation
 
     @back_object = @observation
-    if request.method == "GET"
-      @herbarium_record = default_herbarium_record
-    # elsif request.method == "POST"
-    #   post_create_herbarium_record
-    else
-      redirect_back_or_default("/")
-    end
+    @herbarium_record = default_herbarium_record
   end
 
   alias_method :create_herbarium_record, :new

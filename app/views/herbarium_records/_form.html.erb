@@ -1,10 +1,9 @@
-<%= # form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
-<%= form_with model: :herbarium_record do |f| %>
+<%# form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
+<%= form_with model: @herbarium_record do |f| %>
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
-  <%= f.hidden_field :id, @observation.id %>
-  <%= f.hidden_field :q %>
+  <%= f.hidden_field :id, value: @observation.id %>
 
   <div class="row">
     <div class="col-12">

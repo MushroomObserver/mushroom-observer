@@ -99,9 +99,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get(:new,
-                  id: observations(:coprinus_comatus_obs).id)
-    assert_template("create_herbarium_record", partial: "shared/log_item")
+    get(:new, id: observations(:coprinus_comatus_obs).id)
+    assert_template(:new, partial: "shared/log_item")
     assert(assigns(:herbarium_record))
   end
 
