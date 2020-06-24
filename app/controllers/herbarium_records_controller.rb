@@ -161,6 +161,7 @@ class HerbariumRecordsController < ApplicationController
     store_location
     pass_query_params
     @layout = calc_layout_params
+
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
 
@@ -170,15 +171,16 @@ class HerbariumRecordsController < ApplicationController
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = whitelisted_herbarium_record_params
     normalize_parameters
-    return if !validate_herbarium_name! || !can_add_record_to_herbarium?
 
-    if herbarium_label_free?
+    if !validate_herbarium_name! || !can_add_record_to_herbarium?
+      render "edit" and return
+    elsif herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.notify_curators if
         @herbarium_record.herbarium != old_herbarium
     else
       flash_warning(:edit_herbarium_record_already_used.t)
-      return
+      render "edit" and return
     end
 
     redirect_to_observation_or_herbarium_record
