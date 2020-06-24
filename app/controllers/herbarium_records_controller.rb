@@ -158,13 +158,21 @@ class HerbariumRecordsController < ApplicationController
   alias_method :edit_herbarium_record, :edit
 
   def update
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    return unless @herbarium_record
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!
+
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = whitelisted_herbarium_record_params
     normalize_parameters
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      return
-    elsif herbarium_label_free?
+    return if !validate_herbarium_name! || !can_add_record_to_herbarium?
+
+    if herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.notify_curators if
         @herbarium_record.herbarium != old_herbarium
