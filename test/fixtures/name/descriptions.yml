@@ -14,35 +14,35 @@ DEFAULTS: &DEFAULTS
   writer_groups: all_users
 
 # Name with notes (not mergeable)
-agaricus_campestras_desc: # 1
+agaricus_campestras_desc:
   <<: *DEFAULTS
   name: agaricus_campestras
   notes: This should... ¡prevent me from merging!
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 # Another name with notes (not mergeable)
-agaricus_campestros_desc: # 2
+agaricus_campestros_desc:
   <<: *DEFAULTS
   name: agaricus_campestros
   notes: Need two to get an error
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-russula_brevipes_author_notes_desc: # 3
+russula_brevipes_author_notes_desc:
   <<: *DEFAULTS
   name: russula_brevipes_author_notes
   notes: Here are some notes
 
-russula_cremoricolor_no_author_notes_desc: # 4
+russula_cremoricolor_no_author_notes_desc:
   <<: *DEFAULTS
   name: russula_cremoricolor_no_author_notes
   notes: Here are some notes
 
-russula_cremoricolor_author_notes_desc: # 5
+russula_cremoricolor_author_notes_desc:
   <<: *DEFAULTS
   name: russula_cremoricolor_author_notes
   notes: Some different notes
 
-peltigera_desc: # 6
+peltigera_desc:
   <<: *DEFAULTS
   name: peltigera
   user: dick
@@ -61,14 +61,14 @@ peltigera_desc: # 6
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
 
-suillus_desc: # 7
+suillus_desc:
   <<: *DEFAULTS
   name: suillus
   user: dick
   gen_desc: A __Suillus__ by any other name would smell as sweet...
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
-draft_coprinus_comatus: # 8
+draft_coprinus_comatus:
   <<: *DEFAULTS
   name: coprinus_comatus
   user: katrina
@@ -83,7 +83,7 @@ draft_coprinus_comatus: # 8
   writer_groups: eol_admins, katrina_only
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
-draft_agaricus_campestris: # 9
+draft_agaricus_campestris:
   <<: *DEFAULTS
   name: agaricus_campestris
   user: mary
@@ -97,7 +97,7 @@ draft_agaricus_campestris: # 9
   public: 0
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
-draft_boletus_edulis: # 10
+draft_boletus_edulis:
   <<: *DEFAULTS
   name: boletus_edulis
   user: dick
@@ -111,7 +111,7 @@ draft_boletus_edulis: # 10
   writer_groups: bolete_admins, dick_only
 
 # A draft of Lactarius alpinus with a bad classification field
-draft_lactarius_alpinus: # 11
+draft_lactarius_alpinus:
   <<: *DEFAULTS
   name: lactarius_alpinus
   user: katrina
@@ -125,14 +125,14 @@ draft_lactarius_alpinus: # 11
   reader_groups: eol_users, katrina_only
   writer_groups: eol_admins, katrina_only
 
-peltigera_alt_desc: # 12
+peltigera_alt_desc:
   <<: *DEFAULTS
   name: peltigera
   ok_for_export: 1
   gen_desc: "Another general description of _Peltigera_."
   authors: rolf
 
-peltigera_user_desc: # 13
+peltigera_user_desc:
   <<: *DEFAULTS
   name: peltigera
   user: mary
@@ -145,7 +145,7 @@ peltigera_user_desc: # 13
   reader_groups: mary_only, dick_only
   writer_groups: mary_only, dick_only
 
-peltigera_source_desc: # 14
+peltigera_source_desc:
   <<: *DEFAULTS
   name: peltigera
   user: katrina
@@ -157,7 +157,7 @@ peltigera_source_desc: # 14
   authors: katrina
   writer_groups: katrina_only
 
-coprinus_desc: # 15
+coprinus_desc:
   <<: *DEFAULTS
   name: coprinus
   authors: katrina
@@ -166,7 +166,7 @@ coprinus_desc: # 15
   created_at: 2007-02-26 20:48:00
   updated_at: 2007-02-27 20:48:00
 
-coprinus_comatus_desc: # 16
+coprinus_comatus_desc:
   <<: *DEFAULTS
   name: coprinus_comatus
   authors: rolf
@@ -175,24 +175,24 @@ coprinus_comatus_desc: # 16
   created_at: 2007-02-26 20:48:00
   updated_at: 2007-02-27 20:48:00
 
-mergeable_description_notes_desc: # 17
+mergeable_description_notes_desc:
   <<: *DEFAULTS
   name:  mergeable_description_notes
   notes: Notes for $LABEL
 
-mergeable_second_description_notes_desc: # 18
+mergeable_second_description_notes_desc:
   <<: *DEFAULTS
   name:  mergeable_second_description_notes
   notes: Notes for $LABEL
 
-agaricus_desc: # 19
+agaricus_desc:
   <<: *DEFAULTS
   name: agaricus
   gen_desc: Medium to large mushroom with ring and gills darkening from pink to brown.
   notes: Used in API test.
 
 # There was an identical case in the wild which Danny could not edit.
-boletus_edulis_desc: # 20
+boletus_edulis_desc:
   classification:   "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
   created_at:       2012-07-12 06:32:18
   last_view:        2017-12-09 03:38:34
