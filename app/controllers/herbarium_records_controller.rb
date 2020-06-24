@@ -113,13 +113,18 @@ class HerbariumRecordsController < ApplicationController
   alias_method :create_herbarium_record, :new
 
   def create
+    store_location
+    pass_query_params
+    @layout      = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:id])
+    return unless @observation
+
     @herbarium_record =
       HerbariumRecord.new(whitelisted_herbarium_record_params)
     normalize_parameters
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      return
-    elsif herbarium_label_free?
+    return if !validate_herbarium_name! || !can_add_record_to_herbarium?
+
+    if herbarium_label_free?
       @herbarium_record.save
       @herbarium_record.add_observation(@observation)
     elsif @other_record.can_edit?
@@ -344,11 +349,7 @@ class HerbariumRecordsController < ApplicationController
     if @back_object
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
-      # redirect_with_query(
-      #   action: :index_herbarium_record,
-      #   id: @herbarium_record.id
-      # )
-      redirect_to herbarium_record_index_herbarium_record_path(
+      redirect_to herbarium_records_index_herbarium_record_path(
         q: get_query_param
       )
     end

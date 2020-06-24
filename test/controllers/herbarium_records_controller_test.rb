@@ -110,7 +110,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params = herbarium_record_params
     obs = Observation.find(params[:id])
     assert_not(obs.specimen)
-    post(:new, params)
+    post(:create, params)
+
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     herbarium_record = HerbariumRecord.last
     assert_equal("The New York Botanical Garden",
@@ -130,7 +131,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_count = mary.curated_herbaria.count
     params = herbarium_record_params
     params[:herbarium_record][:herbarium_name] = mary.personal_herbarium_name
-    post(:new, params)
+    post(:create, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
     herbarium = Herbarium.all.order("created_at DESC")[0]
@@ -145,7 +146,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:herbarium_record][:herbarium_name]   = existing.herbarium.name
     params[:herbarium_record][:initial_det]      = existing.initial_det
     params[:herbarium_record][:accession_number] = existing.accession_number
-    post(:new, params)
+    post(:create, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_flash_text(/already exists/i)
     assert_response(:redirect)
@@ -165,7 +166,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("mary")
     assert_not(nybg.curators.member?(mary))
     assert_not(obs.can_edit?(mary))
-    post(:create_herbarium_record, params)
+    post(:create, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
     assert_flash_text(/only curators can/i)
@@ -173,7 +174,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("dick")
     assert_not(nybg.curators.member?(dick))
     assert(obs.can_edit?(dick))
-    post(:create_herbarium_record, params)
+    post(:create, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     assert_response(:redirect)
     assert_no_flash
@@ -193,10 +194,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='create_herbarium_record/#{obs.id}?q=#{q}']")
+    assert_select("form input", { type: "hidden", name: q, value: q })
 
     # Prove that post keeps query params intact.
-    post(:new, params)
+    post(:create, params)
     assert_redirected_to(observation_path(obs, q: q))
   end
 
