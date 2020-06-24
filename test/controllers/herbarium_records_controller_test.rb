@@ -231,7 +231,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:id] = nybg_rec.id
     params[:herbarium_record][:herbarium_name] = rolf_herb.name
     assert_not_equal(rolf_herb, nybg_rec.herbarium)
-    post(:edit, params)
+    post(:update, params)
     nybg_rec.reload
     assert_equal(rolf_herb, nybg_rec.herbarium)
     assert_equal(nybg_user, nybg_rec.user)
@@ -246,7 +246,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_update_no_specimen
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    post(:edit, id: nybg.id)
+    post(:update, id: nybg.id)
     assert_template(:edit)
   end
 
@@ -271,15 +271,15 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_select("form[action*='herbarium_record/#{rec.id}?back=foo&q=#{q}']")
 
     # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(back: obs.id, q: q))
+    post(:update, params.merge(back: obs.id, q: q))
     assert_redirected_to(observation_path(obs, q: q))
 
     # Prove that POST can return to show_herbarium_record with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(herbarium_record_path(rec, q: q))
 
     # Prove that POST can return to index_herbarium_record with query intact.
-    post(:edit, params.merge(back: "index", q: q))
+    post(:update, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_herbarium_record, id: rec.id, q: q)
   end
 
