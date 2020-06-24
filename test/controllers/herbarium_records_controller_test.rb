@@ -68,17 +68,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
 ##### Read show - test actions that display one record
 
-  def test_show_without_notes
-    herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
-    assert(herbarium_record)
-    get(:show, id: herbarium_record.id)
+  def test_show
+    # record without notes
+    get(:show, id: herbarium_records(:coprinus_comatus_nybg_spec).id)
     assert_template(:show, partial: "shared/log_item")
-  end
 
-  def test_show_with_notes
-    herbarium_record = herbarium_records(:interesting_unknown)
-    assert(herbarium_record)
-    get(:show, id: herbarium_record.id)
+    # record with notes
+    get(:show, id: herbarium_records(:interesting_unknown).id)
     assert_template(:show, partial: "shared/log_item")
   end
 
