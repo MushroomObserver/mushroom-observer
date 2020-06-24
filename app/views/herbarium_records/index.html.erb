@@ -11,13 +11,14 @@
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
-      <% for herbarium_record in @objects
+      <% @objects.each do |herbarium_record|
 				herbarium = herbarium_record.herbarium %>
         <tr>
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
               link_with_query(:EDIT.t,
-                              {action: :edit, id: herbarium_record.id, back: :index},
+                              { action: :edit, id: herbarium_record.id,
+                                back: :index },
                               class: "btn btn-xs")
             end %>
           </td>
@@ -25,8 +26,9 @@
             <%= link_to(herbarium.name.t, herbarium_path(herbarium)) %>
           </td>
           <td>
-            <%= link_with_query(herbarium_record.herbarium_label.t,
-                                herbarium_record_path(herbarium_record)) %>
+            <%= link_to(herbarium_record.herbarium_label.t,
+                        herbarium_record_path(herbarium_record,
+                        q: get_query_param)) %>
           </td>
           <td>
             <%= herbarium_record.observations.map do |obs|
@@ -36,8 +38,9 @@
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
               link_with_query(:DESTROY.t,
-                              {action: :destroy, id: herbarium_record.id},
-                              data: { confirm: :are_you_sure.t }, class: "btn btn-xs")
+                              { action: :destroy, id: herbarium_record.id },
+                              data: { confirm: :are_you_sure.t },
+                              class: "btn btn-xs")
             end %>
           </td>
         </tr>

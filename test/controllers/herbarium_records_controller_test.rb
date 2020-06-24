@@ -19,11 +19,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 ##### Read indices: test actions that list multiple records
 
   def test_index
-    get(:index_herbarium_record)
+    get(:index)
     assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", HerbariumRecord.all.size)
+    assert_template("herbarium_records/index")
+    assert_select("table tr", HerbariumRecord.count,
+                  "There should be 1 row/record")
   end
 
   def test_herbarium_index

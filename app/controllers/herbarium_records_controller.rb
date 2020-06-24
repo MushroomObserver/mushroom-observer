@@ -17,13 +17,6 @@ class HerbariumRecordsController < ApplicationController
     :prev_herbarium_record # aliased
   ]
 
-  # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record
-    query = find_or_create_query(:HerbariumRecord, by: params[:by])
-    show_selected_herbarium_records(query, id: params[:id].to_s,
-                                           always_index: true)
-  end
-
   # Show list of herbarium_records.
   def index
     store_location
@@ -32,6 +25,13 @@ class HerbariumRecordsController < ApplicationController
   end
 
   alias_method :list_herbarium_records, :index
+
+  # Displays matrix of selected HerbariumRecord's (based on current Query).
+  def index_herbarium_record
+    query = find_or_create_query(:HerbariumRecord, by: params[:by])
+    show_selected_herbarium_records(query, id: params[:id].to_s,
+                                           always_index: true)
+  end
 
   # Display list of HerbariumRecords whose text matches a string pattern.
   def herbarium_record_search
@@ -227,7 +227,7 @@ class HerbariumRecordsController < ApplicationController
     #            { controller: :herbaria,
     #              action: :new }
     #           ]
-    @links << [ link_to :create_herbarium.l, new_herbarium_path ]
+    @links << [:create_herbarium.l, new_herbarium_path]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
