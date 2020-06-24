@@ -49,7 +49,7 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
-  # Display list of HerbariumTecords in one Herbarium
+  # Display list of HerbariumRecords in one Herbarium
   def herbarium_index
     store_location
     query = create_query(:HerbariumRecord, :in_herbarium,
@@ -57,7 +57,7 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  # Display list of HerbariumTecords for an Observation
+  # Display list of HerbariumRecords for an Observation
   def observation_index
     store_location
     query = create_query(:HerbariumRecord, :for_observation,
