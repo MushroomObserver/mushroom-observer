@@ -2,7 +2,7 @@
 # Specify name_description and user associations by id, not label.
 
 # Name with notes (not mergeable)
-agaricus_campestras_desc_version_1: # 1
+agaricus_campestras_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
     identify(:agaricus_campestras_desc) %>
   updated_at: 2007-06-23 20:04:00
@@ -12,7 +12,7 @@ agaricus_campestras_desc_version_1: # 1
   classification: ''
 
 # Another name with notes (not mergeable)
-agaricus_campestros_desc_version_1: # 2
+agaricus_campestros_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:agaricus_campestros_desc) %>
   updated_at: 2007-06-23 20:04:00
@@ -21,7 +21,7 @@ agaricus_campestros_desc_version_1: # 2
   notes: Need two to get an error
   classification: ''
 
-russula_brevipes_author_notes_desc_version_1: # 3
+russula_brevipes_author_notes_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:russula_brevipes_author_notes_desc) %>
   updated_at: 2008-03-10 22:33:05
@@ -30,7 +30,7 @@ russula_brevipes_author_notes_desc_version_1: # 3
   notes: Here are some notes
   classification: ''
 
-russula_cremoricolor_no_author_notes_desc_version_1: # 4
+russula_cremoricolor_no_author_notes_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:russula_cremoricolor_no_author_notes_desc) %>
   updated_at: 2008-03-12 20:53:18
@@ -39,7 +39,7 @@ russula_cremoricolor_no_author_notes_desc_version_1: # 4
   notes: Here are some notes
   classification: ''
 
-russula_cremoricolor_author_notes_desc_version_1: # 5
+russula_cremoricolor_author_notes_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:russula_cremoricolor_author_notes_desc) %>
   updated_at: 2008-03-12 20:53:40
@@ -48,7 +48,7 @@ russula_cremoricolor_author_notes_desc_version_1: # 5
   notes: Some different notes
   classification: ''
 
-peltigera_desc_version_1: # 6
+peltigera_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_desc) %>
   updated_at: 2009-01-01 01:01:01
@@ -57,7 +57,7 @@ peltigera_desc_version_1: # 6
   license_id: <%= ActiveRecord::FixtureSet.identify(:ccnc25) %>
   classification: ''
 
-peltigera_desc_version_2: # 7
+peltigera_desc_version_2:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_desc) %>
   updated_at: 2009-01-02 01:01:01
@@ -72,7 +72,7 @@ peltigera_desc_version_2: # 7
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
 
-suillus_desc_version_1: # 8
+suillus_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:suillus_desc) %>
   updated_at: 2009-10-12 21:30:01
@@ -82,7 +82,7 @@ suillus_desc_version_1: # 8
   classification: ''
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
-draft_coprinus_comatus_version_1: # 9
+draft_coprinus_comatus_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:draft_coprinus_comatus) %>
   user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
@@ -91,7 +91,7 @@ draft_coprinus_comatus_version_1: # 9
   updated_at: 2008-10-05 12:31:12
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
-draft_agaricus_campestris_version_1: # 10
+draft_agaricus_campestris_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:draft_agaricus_campestris) %>
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
@@ -99,7 +99,7 @@ draft_agaricus_campestris_version_1: # 10
   updated_at: 2008-10-05 12:37:35
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
-draft_boletus_edulis_version_1: # 11
+draft_boletus_edulis_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:draft_boletus_edulis) %>
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -107,7 +107,7 @@ draft_boletus_edulis_version_1: # 11
   updated_at: 2008-10-05 16:19:45
 
 # A draft of Lactarius alpinus with a bad classification field
-draft_lactarius_alpinus_version_1: # 12
+draft_lactarius_alpinus_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:draft_lactarius_alpinus) %>
   user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
@@ -115,7 +115,7 @@ draft_lactarius_alpinus_version_1: # 12
   updated_at: 2009-05-04 19:56:25
   classification: "**Domain**: Eukarya"
 
-peltigera_alt_desc_version_1: # 13
+peltigera_alt_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_alt_desc) %>
   updated_at: 2010-01-01 01:01:01
@@ -123,7 +123,7 @@ peltigera_alt_desc_version_1: # 13
   version: 1
   gen_desc: "Another general description of _Peltigera_."
 
-peltigera_user_desc_version_1: # 14
+peltigera_user_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_user_desc) %>
   updated_at: 2010-01-02 01:01:01
@@ -131,7 +131,7 @@ peltigera_user_desc_version_1: # 14
   version: 1
   gen_desc: "Mary's general description of _Peltigera_."
 
-peltigera_source_desc_version_1: # 15
+peltigera_source_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_source_desc) %>
   updated_at: 2010-01-03 01:01:01
@@ -139,7 +139,7 @@ peltigera_source_desc_version_1: # 15
   version: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
 
-boletus_edulis_desc_version_1: # 16
+boletus_edulis_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:boletus_edulis_desc) %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
