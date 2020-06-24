@@ -38,7 +38,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_flash_text(/No matching herbarium records found/)
   end
 
-  def test_herbarium_record_search
+  def test_search
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
     get(:herbarium_record_search, pattern: pattern)
@@ -48,14 +48,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_select(".results tr", 2)
   end
 
-  def test_herbarium_record_search_with_one_herbarium_record_index
+  def test_search_with_one_herbarium_record_index
     get(:herbarium_record_search,
         pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
-  def test_index_herbarium_record
+  def test_index
     get(:index_herbarium_record)
     assert_response(:success)
     assert_template("list_herbarium_records")
@@ -63,21 +63,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_select(".results tr", HerbariumRecord.all.size)
   end
 
-  def test_show_herbarium_record_without_notes
+  def test_show_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
     get(:show, id: herbarium_record.id)
     assert_template(:show, partial: "shared/log_item")
   end
 
-  def test_show_herbarium_record_with_notes
+  def test_show_with_notes
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
     get(:show, id: herbarium_record.id)
     assert_template(:show, partial: "shared/log_item")
   end
 
-  def test_next_and_prev_herbarium_record
+  def test_next_and_prev
     query = Query.lookup_and_save(:HerbariumRecord, :all)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
@@ -91,7 +91,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
-  def test_create_herbarium_record
+  def test_new
     get(:new, id: observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
 
@@ -102,7 +102,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert(assigns(:herbarium_record))
   end
 
-  def test_create_herbarium_record_post
+  def test_create
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
@@ -123,7 +123,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_create_herbarium_record_post_new_herbarium
+  def test_create_new_herbarium
     mary = login("mary")
     herbarium_count = mary.curated_herbaria.count
     params = herbarium_record_params
@@ -135,7 +135,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert(herbarium.curators.member?(mary))
   end
 
-  def test_create_herbarium_record_post_duplicate
+  def test_create_duplicate
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
@@ -151,7 +151,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   # I keep thinking only curators should be able to add herbarium_records.
   # However, for now anyone can.
-  def test_create_herbarium_record_post_not_curator
+  def test_create_not_curator
     nybg = herbaria(:nybg_herbarium)
     obs  = observations(:strobilurus_diminutivus_obs)
     obs.update(user: dick)
@@ -177,7 +177,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_create_herbarium_record_redirect
+  def test_create_redirect
     obs = observations(:coprinus_comatus_obs)
     query = Query.lookup_and_save(:HerbariumRecord, :all)
     q = query.id.alphabetize
@@ -198,7 +198,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_edit_herbarium_record
+  def test_edit
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     get(:edit, id: nybg.id)
     assert_response(:redirect)
@@ -217,7 +217,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:edit)
   end
 
-  def test_edit_herbarium_record_post
+  def test_update
     login("rolf")
     nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
     nybg_user   = nybg_rec.user
@@ -238,14 +238,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_edit_herbarium_record_post_no_specimen
+  def test_update_no_specimen
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:edit, id: nybg.id)
     assert_template(:edit)
   end
 
-  def test_edit_herbarium_record_redirect
+  def test_change_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
     query = Query.lookup_and_save(:HerbariumRecord, :all)
@@ -339,7 +339,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_destroy_herbarium_record
+  def test_destroy
     login("rolf")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
@@ -356,7 +356,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_destroy_herbarium_record_not_curator
+  def test_destroy_not_curator
     login("mary")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
@@ -366,7 +366,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_destroy_herbarium_record_admin
+  def test_destroy_admin
     make_admin("mary")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
@@ -376,7 +376,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_destroy_herbarium_record_redirect
+  def test_destroy_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
     query = Query.lookup_and_save(:HerbariumRecord, :all)
