@@ -38,8 +38,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_observation_index
-    get(:observation_index,
-                  id: observations(:coprinus_comatus_obs).id)
+    get(:observation_index, id: observations(:coprinus_comatus_obs).id)
     assert_template(:index)
   end
 
@@ -296,7 +295,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:remove_observation, id: rec1.id, obs: obs1.id)
     assert_true(obs1.reload.herbarium_records.include?(rec1))
 
-    # Make sure only owner obs can remove rec from it.
+    # Make sure only obs owner can remove rec from it.
     login("mary")
     get(:remove_observation, id: rec1.id, obs: obs1.id)
     assert_true(obs1.reload.herbarium_records.include?(rec1))
@@ -362,8 +361,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_true(obs_rec_count > observations.
                 map { |o| o.herbarium_records.count }.
                 reduce { |a, b| a + b })
-    assert_response(:redirect)
-    # assert_redirected_to(action: :index_herbarium_record)
     assert_redirected_to(herbarium_records_index_herbarium_record_path())
   end
 
@@ -372,7 +369,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
   end
@@ -382,7 +379,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     assert_response(:redirect)
   end
@@ -397,10 +394,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Prove by default it goes back to index.
     post(:destroy, id: recs[0].id)
-    assert_redirected_to(action: :index_herbarium_record)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path)
 
     # Prove that it keeps query param intact when returning to index.
     post(:destroy, id: recs[1].id, q: q)
-    assert_redirected_to(action: :index_herbarium_record, q: q)
+    # assert_redirected_to(action: :index_herbarium_record, q: q)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path(q: q))
   end
 end
