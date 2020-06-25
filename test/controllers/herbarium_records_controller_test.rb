@@ -16,7 +16,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
   end
 
-##### Read indices: test actions that list multiple records
+  ##### Read indices: test actions that list multiple records
 
   def test_index
     get(:index)
@@ -65,7 +65,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-##### Read show - test actions that display one record
+  ##### Read show - test actions that display one record
 
   def test_show
     # record without notes
@@ -91,7 +91,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
-##### Create - test actions that create a record
+  ##### Create - test actions that create a record
 
   def test_new
     get(:new, id: observations(:coprinus_comatus_obs).id)
@@ -200,7 +200,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-##### Update - test actions that modify a record
+  ##### Update - test actions that modify a record
 
   def test_edit
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
@@ -344,7 +344,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-#### Destroy - test actions that destroy a records
+  #### Destroy - test actions that destroy a records
 
   def test_destroy
     login("rolf")
@@ -361,7 +361,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_true(obs_rec_count > observations.
                 map { |o| o.herbarium_records.count }.
                 reduce { |a, b| a + b })
-    assert_redirected_to(herbarium_records_index_herbarium_record_path())
+    assert_redirected_to(herbarium_records_index_herbarium_record_path)
   end
 
   def test_destroy_not_curator
