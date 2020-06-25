@@ -12,14 +12,13 @@
   <% if @objects.any? %>
     <table class="table table-striped">
       <% @objects.each do |herbarium_record|
-				herbarium = herbarium_record.herbarium %>
+				   herbarium = herbarium_record.herbarium %>
         <tr>
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
-              link_with_query(:EDIT.t,
-                              { action: :edit, id: herbarium_record.id,
-                                back: :index },
-                              class: "btn btn-xs")
+              link_to(:EDIT.t, edit_herbarium_record_path(herbarium_record.id,
+                                                          back: :index),
+                      class: "btn btn-xs")
             end %>
           </td>
           <td>
@@ -37,10 +36,10 @@
           </td>
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
-              link_with_query(:DESTROY.t,
-                              { action: :destroy, id: herbarium_record.id },
-                              data: { confirm: :are_you_sure.t },
-                              class: "btn btn-xs")
+              link_to(:DESTROY.t,
+                      destroy_herbarium_record_path(herbarium_record.id),
+                      data: { confirm: :are_you_sure.t },
+                      class: "btn btn-xs")
             end %>
           </td>
         </tr>

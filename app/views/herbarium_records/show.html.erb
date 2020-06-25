@@ -1,15 +1,17 @@
 <%
-  @title = :HERBARIUM_RECORD.t + " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
+  @title = :HERBARIUM_RECORD.t +
+           " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
 
   tabs = []
   if in_admin_mode? || @herbarium_record.can_edit?
-    tabs << link_with_query(:edit_herbarium_record.t,
-                            action: :edit, id: @herbarium_record.id, back: :show)
-    tabs << link_with_query(:delete_herbarium_record.t,
-                            {action: :destroy, id: @herbarium_record.id},
-                            data: {confirm: :are_you_sure.t})
+    tabs << link_to(:edit_herbarium_record.t,
+                    edit_herbarium_record_path(@herbarium_record.id,
+                                               back: :show))
+    tabs << link_to(:delete_herbarium_record.t,
+                    delete_herbarium_record_path(@herbarium_record.id),
+                    data: {confirm: :are_you_sure.t})
   end
-  tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
+  tabs << link_to(:herbarium_index.t, herbarium_records_path)
 
   @tabsets = {
     pager_for: @herbarium_record,
@@ -32,7 +34,8 @@
   <% end %>
 
   <div class="mt-3">
-    <%= render(partial: "shared/log_item", collection: @herbarium_record.observations, as: :object) %>
+    <%= render(partial: "shared/log_item",
+               collection: @herbarium_record.observations, as: :object) %>
   </div>
 
   <center>
