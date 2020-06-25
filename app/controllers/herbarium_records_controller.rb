@@ -104,20 +104,16 @@ class HerbariumRecordsController < ApplicationController
     normalize_parameters
     return if !validate_herbarium_name! || !can_add_record_to_herbarium?
 
-    if herbarium_label_free?
-      @herbarium_record.save
-      @herbarium_record.add_observation(@observation)
-    elsif @other_record.can_edit?
-      flash_warning(:create_herbarium_record_already_used.t) if
-        @other_record.observations.any?
-      @other_record.add_observation(@observation)
+    if observation_addable?
+      add_observation_to_new_or_other_record
+      redirect_to_observation_or_herbarium_record
     else
-      flash_error(:create_herbarium_record_already_used_by_someone_else.
-        t(herbarium_name: @herbarium_record.herbarium.name))
-      return
+      flash_error(
+        :create_herbarium_record_already_used_by_someone_else.t(
+          herbarium_name: @herbarium_record.herbarium.name
+        )
+      )
     end
-
-    redirect_to_observation_or_herbarium_record
   end
 
   alias post_create_herbarium_record create
@@ -153,17 +149,16 @@ class HerbariumRecordsController < ApplicationController
     normalize_parameters
 
     if !validate_herbarium_name! || !can_add_record_to_herbarium?
-      render "edit" and return
-    elsif herbarium_label_free?
+      render :edit
+    elsif herbarium_label_free? # happy path
       @herbarium_record.save
       @herbarium_record.notify_curators if
         @herbarium_record.herbarium != old_herbarium
+      redirect_to_observation_or_herbarium_record
     else
       flash_warning(:edit_herbarium_record_already_used.t)
-      render "edit" and return
+      render :edit
     end
-
-    redirect_to_observation_or_herbarium_record
   end
 
   alias post_edit_herbarium_record update
@@ -256,6 +251,46 @@ class HerbariumRecordsController < ApplicationController
       permit(:herbarium_name, :initial_det, :accession_number, :notes)
   end
 
+  def observation_addable?
+    herbarium_label_free? || @other_record.can_edit?
+  end
+
+  def herbarium_label_free?
+    @other_record = HerbariumRecord.where(
+      herbarium: @herbarium_record.herbarium,
+      accession_number: @herbarium_record.accession_number
+    ).first
+    !@other_record || @other_record == @herbarium_record
+  end
+
+  def add_observation_to_new_or_other_record
+    if herbarium_label_free?
+      @herbarium_record.save
+      @herbarium_record.add_observation(@observation)
+    else
+      flash_warning(:create_herbarium_record_already_used.t) if
+        @other_record.observations.any?
+      @other_record.add_observation(@observation)
+    end
+  end
+
+  def figure_out_where_to_go_back_to
+    @back = params[:back].to_s
+    @back_object = nil
+    if @back == "show"
+      @back_object = @herbarium_record
+    elsif @back != "index"
+      @back_object = Observation.safe_find(@back)
+      return if @back_object
+
+      @back_object = if @herbarium_record.observations.count == 1
+                       @herbarium_record.observations.first
+                     else
+                       @herbarium_record
+                     end
+    end
+  end
+
   def make_sure_can_edit!
     return true if record_modifiable?(@herbarium_record)
 
@@ -313,31 +348,6 @@ class HerbariumRecordsController < ApplicationController
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
     redirect_to_observation_or_herbarium_record
     false
-  end
-
-  def herbarium_label_free?
-    @other_record = HerbariumRecord.where(
-      herbarium: @herbarium_record.herbarium,
-      accession_number: @herbarium_record.accession_number
-    ).first
-    !@other_record || @other_record == @herbarium_record
-  end
-
-  def figure_out_where_to_go_back_to
-    @back = params[:back].to_s
-    @back_object = nil
-    if @back == "show"
-      @back_object = @herbarium_record
-    elsif @back != "index"
-      @back_object = Observation.safe_find(@back)
-      return if @back_object
-
-      @back_object = if @herbarium_record.observations.count == 1
-                       @herbarium_record.observations.first
-                     else
-                       @herbarium_record
-                     end
-    end
   end
 
   def redirect_to_observation_or_herbarium_record
