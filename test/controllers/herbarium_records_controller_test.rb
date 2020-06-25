@@ -355,13 +355,16 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     observations = herbarium_record.observations
     obs_rec_count = observations.map { |o| o.herbarium_records.count }.
                     reduce { |a, b| a + b }
-    get(:destroy, params)
+    delete(:destroy, params)
+
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
     assert_true(obs_rec_count > observations.
                 map { |o| o.herbarium_records.count }.
                 reduce { |a, b| a + b })
     assert_response(:redirect)
+    # assert_redirected_to(action: :index_herbarium_record)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path())
   end
 
   def test_destroy_not_curator

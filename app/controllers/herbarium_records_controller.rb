@@ -210,12 +210,9 @@ class HerbariumRecordsController < ApplicationController
 
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    # redirect_with_query(
-    #   action: :index_herbarium_record
-    # )
-    redirect_to herbarium_record_index_herbarium_record_path(
+    redirect_to(herbarium_records_index_herbarium_record_path(
       q: get_query_param
-    )
+    ))
   end
 
   alias_method :destroy_herbarium_record, :destroy
@@ -286,7 +283,6 @@ class HerbariumRecordsController < ApplicationController
     return true if herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    # redirect_to(herbarium_record.show_link_args)
     redirect_to herbarium_record_path(herbarium_record.id)
     false
   end
@@ -359,9 +355,11 @@ class HerbariumRecordsController < ApplicationController
     if @back_object
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
-      redirect_to herbarium_records_index_herbarium_record_path(
-        q: get_query_param
-      )
+     # redirect_to(herbarium_records_index_herbarium_record_path(
+     #   id: @herbarium_record.id, q: get_query_param
+     # ))
+      redirect_with_query(action: :index_herbarium_record,
+                          id: @herbarium_record.id)
     end
   end
 end
