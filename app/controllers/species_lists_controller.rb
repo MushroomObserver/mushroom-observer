@@ -77,5 +77,4 @@ class SpeciesListsController < ApplicationController
     :create_species_list, # aliased
     :name_lister
   ]
-
 end
