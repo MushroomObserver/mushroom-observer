@@ -266,19 +266,20 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
       }
     }
 
-    # Prove that GET passes "back" and query param through to form.
+    # Prove that :edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='herbarium_record/#{rec.id}?back=foo&q=#{q}']")
+    assert_select("form input", { type: "hidden", name: "back", value: "foo" })
+    assert_select("form input", { type: "hidden", name: "q", value: q })
 
-    # Prove that POST keeps query param when returning to observation.
+    # Prove that :update keeps query param when returning to observation.
     post(:update, params.merge(back: obs.id, q: q))
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that POST can return to show_herbarium_record with query intact.
+    # Prove that :update can return to :show with query intact.
     post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(herbarium_record_path(rec, q: q))
 
-    # Prove that POST can return to index_herbarium_record with query intact.
+    # Prove that :update can return to :index with query intact.
     post(:update, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_herbarium_record, id: rec.id, q: q)
   end
