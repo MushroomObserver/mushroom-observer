@@ -24,7 +24,7 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query)
   end
 
-  alias_method :list_herbarium_records, :index
+  alias list_herbarium_records index
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record
@@ -73,19 +73,19 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
-  alias_method :show_herbarium_record, :show
+  alias show_herbarium_record show
 
   def show_next
     redirect_to_next_object(:next, HerbariumRecord, params[:id].to_s)
   end
 
-  alias_method :next_herbarium_record, :show_next
+  alias next_herbarium_record show_next
 
   def show_prev
     redirect_to_next_object(:prev, HerbariumRecord, params[:id].to_s)
   end
 
-  alias_method :prev_herbarium_record, :show_prev
+  alias prev_herbarium_record show_prev
 
   def new
     return unless prepared_to_make_record!
@@ -94,7 +94,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record = default_herbarium_record
   end
 
-  alias_method :create_herbarium_record, :new
+  alias create_herbarium_record new
 
   def create
     return unless prepared_to_make_record!
@@ -120,7 +120,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_to_observation_or_herbarium_record
   end
 
-  alias_method :post_create_herbarium_record, :create
+  alias post_create_herbarium_record create
 
   def edit
     store_location
@@ -135,7 +135,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
   end
 
-  alias_method :edit_herbarium_record, :edit
+  alias edit_herbarium_record edit
 
   def update
     store_location
@@ -166,7 +166,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_to_observation_or_herbarium_record
   end
 
-  alias_method :post_edit_herbarium_record, :update
+  alias post_edit_herbarium_record update
 
   def remove_observation
     pass_query_params
@@ -191,11 +191,11 @@ class HerbariumRecordsController < ApplicationController
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
     redirect_to(herbarium_records_index_herbarium_record_path(
-      q: get_query_param
-    ))
+                  q: get_query_param
+                ))
   end
 
-  alias_method :destroy_herbarium_record, :destroy
+  alias destroy_herbarium_record destroy
 
   ##############################################################################
 
