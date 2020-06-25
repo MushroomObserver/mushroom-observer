@@ -173,7 +173,6 @@ class HerbariumRecordsController < ApplicationController
     return unless make_sure_can_delete!(@herbarium_record)
 
     @herbarium_record.remove_observation(@observation)
-    # redirect_with_query(@observation.show_link_args)
     redirect_to observation_path(@observation.id, q: get_query_param)
   end
 
@@ -197,17 +196,11 @@ class HerbariumRecordsController < ApplicationController
   private
 
   def show_selected_herbarium_records(query, args = {})
-    args = {
-      action: :index,
-      letters: "herbarium_records.initial_det",
-      num_per_page: 100
-    }.merge(args)
+    args = { action: :index,
+             letters: "herbarium_records.initial_det",
+             num_per_page: 100 }.merge(args)
 
     @links ||= []
-    # @links << [:create_herbarium.l,
-    #            { controller: :herbaria,
-    #              action: :new }
-    #           ]
     @links << [:create_herbarium.l, new_herbarium_path]
 
     # Add some alternate sorting criteria.
