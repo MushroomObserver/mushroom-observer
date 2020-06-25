@@ -38,11 +38,7 @@ class HerbariumRecordsController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (@herbarium_record = HerbariumRecord.safe_find(pattern))
-      # redirect_to(
-      #   action: :show_herbarium_record,
-      #   id: @herbarium_record.id
-      # )
-      redirect_to herbarium_record_path(@herbarium_record.id)
+      redirect_to(herbarium_record_path(@herbarium_record.id))
     else
       query = create_query(:HerbariumRecord, :pattern_search, pattern: pattern)
       show_selected_herbarium_records(query)
@@ -63,16 +59,8 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:id].to_s, by: :herbarium_label)
     @links = [
-      # [:show_object.l(type: :observation),
-      #  Observation.show_link_args(params[:id])],
-      [:show_object.l(type: :observation),
-       observation_path(id: params[:id])],
-      # [:create_herbarium_record.l,
-      #  { action: :new,
-      #    id: params[:id] }
-      # ]
-      [:create_herbarium_record.l,
-        new_herbarium_record_path(id: params[:id])]
+      [:show_object.l(type: :observation), observation_path(id: params[:id])],
+      [:create_herbarium_record.l, new_herbarium_record_path(id: params[:id])]
     ]
     show_selected_herbarium_records(query, always_index: true)
   end
@@ -100,11 +88,7 @@ class HerbariumRecordsController < ApplicationController
   alias_method :prev_herbarium_record, :show_prev
 
   def new
-    store_location
-    pass_query_params
-    @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
-    return unless @observation
+    return unless prepared_to_make_record!
 
     @back_object = @observation
     @herbarium_record = default_herbarium_record
@@ -113,11 +97,7 @@ class HerbariumRecordsController < ApplicationController
   alias_method :create_herbarium_record, :new
 
   def create
-    store_location
-    pass_query_params
-    @layout      = calc_layout_params
-    @observation = find_or_goto_index(Observation, params[:id])
-    return unless @observation
+    return unless prepared_to_make_record!
 
     @herbarium_record =
       HerbariumRecord.new(whitelisted_herbarium_record_params)
@@ -246,6 +226,13 @@ class HerbariumRecordsController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  def prepared_to_make_record!
+    store_location
+    pass_query_params
+    @layout      = calc_layout_params
+    @observation = find_or_goto_index(Observation, params[:id])
+  end
+
   def default_herbarium_record
     HerbariumRecord.new(
       herbarium_name: @user.preferred_herbarium_name,
@@ -270,8 +257,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def make_sure_can_edit!
-    return true if in_admin_mode? || @herbarium_record.can_edit?
-    return true if @herbarium_record.herbarium.curator?(@user)
+    return true if record_modifiable?(@herbarium_record)
 
     flash_error :permission_denied.t
     redirect_to_observation_or_herbarium_record
@@ -279,12 +265,15 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def make_sure_can_delete!(herbarium_record)
-    return true if in_admin_mode? || herbarium_record.can_edit?
-    return true if herbarium_record.herbarium.curator?(@user)
+    return true if record_modifiable?(@herbarium_record)
 
     flash_error(:permission_denied.t)
     redirect_to herbarium_record_path(herbarium_record.id)
     false
+  end
+
+  def record_modifiable?(record)
+    in_admin_mode? || record.can_edit? || record.herbarium.curator?(@user)
   end
 
   def normalize_parameters
@@ -355,9 +344,6 @@ class HerbariumRecordsController < ApplicationController
     if @back_object
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     else
-     # redirect_to(herbarium_records_index_herbarium_record_path(
-     #   id: @herbarium_record.id, q: get_query_param
-     # ))
       redirect_with_query(action: :index_herbarium_record,
                           id: @herbarium_record.id)
     end
