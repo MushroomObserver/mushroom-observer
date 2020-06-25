@@ -91,16 +91,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
+  def test_index
+    # get species_lists_path
+    # Above causes ActionController::UrlGenerationError:
+    # No route matches {:action=>"/species_lists", :controller=>"species_lists"}
+    get :index
+    assert_template(:index)
+  end
+
   def test_index_species_list_by_past_bys
     get(:index_species_list, params: { by: :modified })
     assert_response(:success)
     get(:index_species_list, params: { by: :created })
     assert_response(:success)
-  end
-
-  def test_index
-    get species_lists_path
-    assert_template(:index)
   end
 
   def test_show
