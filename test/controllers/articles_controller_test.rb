@@ -4,14 +4,16 @@ require "test_helper"
 
 # Controller tests for news articles
 class ArticlesControllerTest < FunctionalTestCase
-  # Prove any user can see article index without
+  # Prove anyone can see (complete) article index
   def test_index
     get(:index)
     assert(:success)
+    # Prove index (or redirect) includes link to first article
+    assert_select("a[href *= '#{Article.first.id.to_s}']")
   end
 
   def test_index_article
-    # Prove any user can see article index
+    # Prove any user can see article index (based on current query)
     get(:index_article)
     assert(:success)
 
