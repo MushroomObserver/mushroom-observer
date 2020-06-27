@@ -43,7 +43,7 @@
 #
 #  :all_norobots:
 #
-################################################################################
+# Control account creation, login, and administration
 class AccountController < ApplicationController
   before_action :login_required, except: [
     :email_new_password,
@@ -52,6 +52,7 @@ class AccountController < ApplicationController
     :reverify,
     :send_verify,
     :new,
+    :signup, # aliased
     :test_flash,
     :verify,
     :welcome
@@ -74,6 +75,8 @@ class AccountController < ApplicationController
   def new
     @new_user = User.new(theme: MO.default_theme)
   end
+
+  alias signup new
 
   def create
     initialize_new_user

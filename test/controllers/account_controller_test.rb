@@ -4,9 +4,9 @@ require "test_helper"
 
 # Test user AccountControllerTest
 # signup, verification, prefs, profile, api
-class AccountControllerTest < FunctionalTestCase
+class AccountControllerTest < IntegrationTestCase
   def setup
-    @request.host = "localhost"
+    @request.host = "localhost" if @request
     super
   end
 
@@ -15,6 +15,7 @@ class AccountControllerTest < FunctionalTestCase
   def test_new
     get(new_account_path)
     assert(:success)
+    assert_select("title").text.include?(:signup_title.t)
   end
 
   def test_create
