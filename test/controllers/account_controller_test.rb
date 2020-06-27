@@ -12,18 +12,12 @@ class AccountControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_auth_rolf
-    @request.session["return-to"] = "http://localhost/bogus/location"
-    post(:login, user: { login: "rolf", password: "testpassword" })
-    assert_response("http://localhost/bogus/location")
-    assert_flash_text(:runtime_login_success.t)
-    assert(@request.session[:user_id],
-           "Didn't store user in session after successful login!")
-    assert_equal(rolf.id, @request.session[:user_id],
-                 "Wrong user stored in session after successful login!")
+  def test_new
+    get(new_account_path)
+    assert(:success)
   end
 
-  def test_signup
+  def test_create
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
     post(:signup, new_user: {
@@ -35,6 +29,7 @@ class AccountControllerTest < FunctionalTestCase
            name: "needs a name!",
            theme: "NULL"
          })
+
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
     assert_equal(num_users + 1, User.count)
     user = User.last
@@ -50,7 +45,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_user_list_equal([user], group.users)
   end
 
-  def test_bad_signup
+  def test_create_bad
     @request.session["return-to"] = "http://localhost/bogus/location"
 
     params = {
@@ -96,7 +91,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_not_nil(User.find_by_login("newbob"))
   end
 
-  def test_signup_theme_errors
+  def test_create_theme_errors
     referer = "http://localhost/bogus/location"
 
     params = {
@@ -123,7 +118,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referer)
   end
 
-  def test_block_known_evil_signups
+  def test_create_block_known_evil_signups
     params = {
       login: "newbob",
       password: "topsykritt",
@@ -150,7 +145,18 @@ class AccountControllerTest < FunctionalTestCase
            "Signup response should be 4xx")
   end
 
-  def test_invalid_login
+  def test_login_existing_user
+    @request.session["return-to"] = "http://localhost/bogus/location"
+    post(:login, user: { login: "rolf", password: "testpassword" })
+    assert_response("http://localhost/bogus/location")
+    assert_flash_text(:runtime_login_success.t)
+    assert(@request.session[:user_id],
+           "Didn't store user in session after successful login!")
+    assert_equal(rolf.id, @request.session[:user_id],
+                 "Wrong user stored in session after successful login!")
+  end
+
+  def test_login_invalid
     post(:login, user: { login: "rolf", password: "not_correct" })
     assert_nil(@request.session["user_id"])
     assert_template("login")
@@ -226,7 +232,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_normal_verify
+  def test_verify_normal
     user = User.create!(
       login: "micky",
       password: "mouse",
