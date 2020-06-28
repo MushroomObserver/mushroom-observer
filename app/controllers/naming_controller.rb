@@ -84,7 +84,7 @@ class NamingController < ApplicationController
     unproposed_name(:runtime_create_naming_already_proposed) &&
       valid_use_of_imageless(@params.name, @params.observation) &&
       validate_object(@params.naming) &&
-      validate_object(@params.vote)
+      (@params.vote.value.nil? || validate_object(@params.vote))
   end
 
   def unproposed_name(warning)
@@ -144,7 +144,7 @@ class NamingController < ApplicationController
   def save_changes
     @params.update_naming(params[:reason], params[:was_js_on] == "yes")
     save_with_log(@params.naming)
-    @params.save_vote
+    @params.save_vote unless @params.vote.value.nil?
   end
 
   def resolve_name(given_name, chosen_name)
