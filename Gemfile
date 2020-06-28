@@ -101,11 +101,6 @@ gem "mail", "= 2.7.0"
 # for detecting file type of uploaded images
 gem "mimemagic"
 
-# Autoprefixer (Required dependency for Bootstrap 4)
-# Parse CSS and add vendor prefixes to CSS rules
-# using values from the Can I Use database
-gem "autoprefixer-rails"
-
 ########## Presentation and Interaction ########################################
 
 # Slick Slider for Image Carousel
@@ -113,15 +108,11 @@ gem "autoprefixer-rails"
 #     https://github.com/bodrovis/jquery-slick-rails
 # gem "jquery-slick-rails"
 
-# PopperJS tooltip positioner (Required dependency for Bootstrap 4)
-gem "popper_js", "~> 1.16"
-
 # Use Bootstrap for SCSS and JS
 gem "bootstrap", "~> 4.4.1"
 
 # Use Bootstrap Lightbox for lightbox
 gem "lightbox-bootstrap-rails", "~> 5.1", ">= 5.1.0.1"
-
 
 ########## Development, Testing, and Analysis ##################################
 
