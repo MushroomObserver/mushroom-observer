@@ -1,8 +1,8 @@
 <div class="list-group-item">
-  <%= tag.span class: "text-lg", link_to(object.title.t,
-                  object_path(object, q: get_query_param)) %>
+  <%= tag.span link_to(object.title.t, object_path(object, q: get_query_param)),
+               class: "text-lg" %>
   <br>
-  <%= tag.span class: "small", object.created_at.web_time %>:
+  <%= tag.span object.created_at.web_time, class: "small" %>:
   <%= user_link(object.user) %>
   <br>
   <%= truncate(strip_tags(object.body), length: 80).tpl %>
