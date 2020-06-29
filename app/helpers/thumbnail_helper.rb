@@ -82,7 +82,7 @@ module ThumbnailHelper
       notes: notes
     }.merge(args)
 
-    render "images/image_thumbnail", locals: locals
+    render "images/image_thumbnail", locals
   end
 
   def carousel_image(image, args = {})
