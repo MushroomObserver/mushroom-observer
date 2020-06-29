@@ -92,7 +92,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   ##############################################################################
 
   # ----------------------------
-  #  Index and Searches
+  #  Index and Search
   # ----------------------------
 
   def test_index
@@ -111,18 +111,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_species_lists_by_title
     get(:species_lists_by_title)
-    assert_template(:list_species_lists)
+    assert_template(:index)
   end
 
   def test_species_lists_by_user
     get(:species_lists_by_user, id: rolf.id)
-    assert_template(:list_species_lists)
+    assert_template(:index)
   end
 
   def test_species_lists_for_project
-    get(:species_lists_for_project,
-                  id: projects(:bolete_project).id)
-    assert_template(:list_species_lists)
+    get(:species_lists_for_project, id: projects(:bolete_project).id)
+    assert_template(:index)
   end
 
   # ----------------------------
