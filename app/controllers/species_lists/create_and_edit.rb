@@ -74,7 +74,7 @@ class SpeciesListsController
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
     end
-    
+
     init_name_vars_for_edit(@species_list)
     init_member_vars_for_edit(@species_list)
     init_project_vars_for_edit(@species_list)
@@ -85,6 +85,25 @@ class SpeciesListsController
 
   def update
     process_species_list(:update)
+  end
+
+  # Used by show_species_list.
+  def make_report
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless @species_list
+
+    names = @species_list.names
+    case params[:type]
+    when "txt"
+      render_name_list_as_txt(names)
+    when "rtf"
+      render_name_list_as_rtf(names)
+    when "csv"
+      render_name_list_as_csv(names)
+    else
+      flash_error(:make_report_not_supported.t(type: params[:type]))
+      redirect_to(action: "show_species_list", id: params[:id].to_s)
+    end
   end
 
   # Form to let user create/edit species_list from file. Links into "edit".
@@ -130,4 +149,54 @@ class SpeciesListsController
 
   alias_method :destroy_species_list, :destroy
 
+  ##############################################################################
+
+  private
+
+  def render_name_list_as_txt(names)
+    charset = "UTF-8"
+    str = "\xEF\xBB\xBF" + names.map(&:real_search_name).join("\r\n")
+    send_data(str, type: "text/plain",
+                   charset: charset,
+                   disposition: "attachment",
+                   filename: "report.txt")
+  end
+
+  def render_name_list_as_csv(names)
+    charset = "ISO-8859-1"
+    str = CSV.generate do |csv|
+      csv << %w[scientific_name authority citation accepted]
+      names.each do |name|
+        csv << [name.real_text_name, name.author, name.citation,
+                name.deprecated ? "" : "1"].map(&:presence)
+      end
+    end
+    str = str.iconv(charset)
+    send_data(str, type: "text/csv",
+                   charset: charset,
+                   header: "present",
+                   disposition: "attachment",
+                   filename: "report.csv")
+  end
+
+  def render_name_list_as_rtf(names)
+    charset = "UTF-8"
+    doc = RTF::Document.new(RTF::Font::SWISS)
+    names.each do |name|
+      rank      = name.rank
+      text_name = name.real_text_name
+      author    = name.author
+      node = name.deprecated ? doc : doc.bold
+      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
+        node = node.italic
+      end
+      node << text_name
+      doc << " " + author if author.present?
+      doc.line_break
+    end
+    send_data(doc.to_rtf, type: "text/rtf",
+                          charset: charset,
+                          disposition: "attachment",
+                          filename: "report.rtf")
+  end
 end
