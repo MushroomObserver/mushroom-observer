@@ -132,16 +132,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sl_id = species_lists(:first_species_list).id
 
     # Show empty list with no one logged in.
-    get species_list_path(id: sl_id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: sl_id)
+    get(:show, id: sl_id)
     assert_template(:show, partial: "_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
-    get species_list_path(id: sl_id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: sl_id)
+    get(:show, id: sl_id)
     assert_template(:show, partial: "_comments")
 
     # Show non-empty list with owner logged in.
-    get species_list_path(id: species_lists(:unknown_species_list).id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: species_lists(:unknown_species_list).id)
+    get(:show, id: species_lists(:unknown_species_list).id)
     assert_template(:show, partial: "_comments")
   end
 
@@ -151,17 +157,20 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_list_equal([], spl.projects)
 
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
     assert_no_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj1.add_species_list(spl)
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
     assert_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj2.add_species_list(spl)
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
     assert_match(proj1.title.t, @response.body)
     assert_match(proj2.title.t, @response.body)
   end
