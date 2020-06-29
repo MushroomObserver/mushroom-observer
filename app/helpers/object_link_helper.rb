@@ -232,7 +232,7 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    link_to(name || object.title.t, object_path(object.id))
+    link_to(name || object.title.t, object_path(object))
   end
 
   # Output path helpers. Useful when:
