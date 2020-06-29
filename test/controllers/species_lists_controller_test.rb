@@ -91,6 +91,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
+  # ----------------------------
+  #  Index and Show
+  # ----------------------------
+
   def test_index
     # TODO: use following path instead of action once helper paths are available
     # get species_lists_path
@@ -98,7 +102,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_index_species_list_by_past_bys
+  def test_index_by_past_bys
     get(:index_species_list, params: { by: :modified })
     assert_response(:success)
     get(:index_species_list, params: { by: :created })
@@ -143,7 +147,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_match(proj2.title.t, @response.body)
   end
 
-  def test_show_species_list_edit_links
+  def test_show_edit_links
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
