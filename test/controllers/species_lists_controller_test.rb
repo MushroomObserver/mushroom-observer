@@ -92,10 +92,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_index
+    # TODO: use following path instead of action once helper paths are available
     # get species_lists_path
-    # Above causes ActionController::UrlGenerationError:
-    # No route matches {:action=>"/species_lists", :controller=>"species_lists"}
-    get :index
+    get(:index)
     assert_template(:index)
   end
 
