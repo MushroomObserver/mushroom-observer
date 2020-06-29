@@ -159,18 +159,21 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_no_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj1.add_species_list(spl)
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj2.add_species_list(spl)
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_match(proj1.title.t, @response.body)
     assert_match(proj2.title.t, @response.body)
   end
