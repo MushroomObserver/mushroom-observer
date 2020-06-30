@@ -21,6 +21,7 @@ class SpeciesListsController
   alias_method :create_species_list, :new
 
   def create
+    @species_list = SpeciesList.new
     process_species_list(:create)
   end
 

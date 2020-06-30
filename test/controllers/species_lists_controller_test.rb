@@ -258,13 +258,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_new_unsuccessful_create_location_description
-    user = login("spamspamspam")
-    assert_false(user.is_successful_contributor?)
-    get(:new)
-    assert_response(:redirect)
-  end
-
   # Test constructing species lists in various ways.
   def test_create
     list_title = "List Title"
@@ -317,6 +310,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = SpeciesList.last
     assert_redirected_to(species_list_path(id: spl.id))
     assert_objs_equal(Location.unknown, spl.location)
+  end
+
+  def test_new_unsuccessful_create_location_description
+    user = login("spamspamspam")
+    assert_false(user.is_successful_contributor?)
+    post(:create)
+
+    assert_response(:redirect)
   end
 
   def test_create_existing_genus
