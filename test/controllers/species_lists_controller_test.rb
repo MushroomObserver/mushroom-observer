@@ -700,6 +700,29 @@ class SpeciesListsControllerTest < FunctionalTestCase
   #    Edit and Update
   # ............................
 
+  def test_edit
+    spl = species_lists(:first_species_list)
+    params = { id: spl.id.to_s }
+    assert_equal("rolf", spl.user.login)
+
+    requires_user(:edit, "#{spl.id}", params)
+    assert_edit_species_list
+    # assert_form_action(
+    #   action: :edit,
+    #   id: spl.id.to_s,
+    #   species_list_approved_where: "Burbank, California, USA"
+    # )
+    assert_select("form", { action: species_list_path,
+                            method: "post" }) do
+      assert_select("form input", { type: "hidden",
+                                    name: "id",
+                                    value: spl.id.to_s })
+      assert_select("form input", { type: "hidden",
+                                    name: "species_list_approved_where",
+                                    value: "Burbank, California, USA" })
+    end
+  end
+
   def test_edit_links
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
@@ -731,23 +754,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:success)
     get species_list_path(params: { id: spl.id, method: "delete" })
     assert_flash_success
-  end
-
-  def test_edit
-    spl = species_lists(:first_species_list)
-    params = { id: spl.id.to_s }
-    assert_equal("rolf", spl.user.login)
-    requires_user(
-      :edit,
-      :show,
-      params
-    )
-    assert_edit_species_list
-    assert_form_action(
-      action: :edit,
-      id: spl.id.to_s,
-      approved_where: "Burbank, California, USA"
-    )
   end
 
   def test_update_nochange
