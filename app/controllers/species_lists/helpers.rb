@@ -149,12 +149,14 @@ class SpeciesListsController
       end
     end
 
-    return if redirected
+    return true if redirected
 
     # Failed to create due to synonyms, unrecognized names, etc.
     init_name_vars_from_sorter(@species_list, sorter)
     init_member_vars_for_reload
     init_project_vars_for_reload(@species_list)
+
+    return false
   end
 
   # Creates observations for names written in and/or selected from checklist.

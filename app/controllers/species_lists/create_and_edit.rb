@@ -22,7 +22,9 @@ class SpeciesListsController
 
   def create
     @species_list = SpeciesList.new
-    process_species_list(:create)
+    return if process_species_list(:create)
+
+    render "new"
   end
 
   # Specialized javascripty form for creating a list of names, at Darvin's
