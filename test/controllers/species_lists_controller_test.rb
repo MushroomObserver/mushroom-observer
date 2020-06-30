@@ -682,16 +682,16 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:new)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:new,
+    post(:create,
          params: { project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
-    # should have different default if recently create list attached to project
+    # should have different default if recently created list attached to project
     obs = Observation.create!
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:new,
+    post(:create,
          params: { project: { "id_#{@proj1.id}" => "0" } })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end

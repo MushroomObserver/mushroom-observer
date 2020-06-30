@@ -170,10 +170,11 @@
             <span class="help-note"><%= :form_species_lists_project_help.t %></span>
           </p>
           <p>
-            <% for project in @projects %>
+            <% @projects.each do |project| %>
               <%= check_box(:project, "id_#{project.id}",
                             checked: @project_checks[project.id],
-                            disabled: @species_list.user != @user && !project.is_member?(@user)) %>
+                            disabled: @species_list.user != @user &&
+                                      !project.is_member?(@user)) %>
               <%= label_tag("project_id_#{project.id}",
                             link_to_object(project)) %>
               <br/>
