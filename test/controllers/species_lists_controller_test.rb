@@ -648,10 +648,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
         notes: "List Notes"
       }
     }
-    post_requires_login(:new, params)
+    post_requires_login(:create, params)
     spl = SpeciesList.find_by(title: list_title)
 
-    assert_redirected_to(species_list_path(id: spl.id))
+    # TODO: use following path instead of action once helper paths are available
+    # assert_redirected_to(species_list_path(id: spl.id))
+    assert_redirected_to(action: :show, id: spl.id)
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert(spl.name_included(names(:coprinus_comatus)))
