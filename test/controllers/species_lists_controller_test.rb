@@ -428,8 +428,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
       approved_names: new_name_str
     }
     login("rolf")
-
     post(:create, params: params)
+
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert_nil(Name.find_by(text_name: new_name_str))

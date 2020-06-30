@@ -31,13 +31,13 @@
     <% end %>
 
     <div class="col-12 col-md-12 col-lg-12 max-width-text">
-      <%= if !@new_names.blank?
-        f.hidden_field :approved_names, @new_names.join("\n")
+      <%= if @new_names.present?
+        f.hidden_field :approved_names, value: @new_names.join("\n")
       end %>
 
-      <%= if !@deprecated_names.blank?
+      <%= if @deprecated_names.present?
         f.hidden_field :approved_deprecated_names,
-                       @deprecated_names.map(&:id).join(" ")
+                       value: @deprecated_names.map(&:id).join(" ")
       end %>
 
       <div class="form-group mt-3">
