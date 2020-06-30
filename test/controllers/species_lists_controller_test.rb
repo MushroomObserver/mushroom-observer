@@ -231,7 +231,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_new
     requires_login(:new)
-    assert_form_action(action: :new)
+    # assert_form_action(action: :new)
+    assert_select("form", { action: "species_lists", method: "post"})
   end
 
   def test_new_member_notes_areas
