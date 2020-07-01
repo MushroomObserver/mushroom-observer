@@ -853,7 +853,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login owner
     post(:update, params)
     # assert_redirected_to(controller: :locations, action: :new)
-    assert_redirected_to(new_location_path)
+    assert_redirected_to /#{new_location_path}/
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
