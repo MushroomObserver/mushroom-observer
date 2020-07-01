@@ -1276,6 +1276,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     login("rolf", "testpassword")
     post(:upload_species_list, params)
+
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     new_data = @controller.instance_variable_get("@list_members")
@@ -1293,7 +1294,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     id = spl.id
     params = { id: id.to_s }
     assert_equal("rolf", spl.user.login)
-    requires_user(:destroy, [:show], params)
+    # requires_user(:destroy, [:show], params)
+    requires_user(:destroy, [spl.id], params)
 
     assert_redirected_to(action: :index)
     assert_raises(ActiveRecord::RecordNotFound) do
