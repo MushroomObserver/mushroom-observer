@@ -76,18 +76,25 @@ class SpeciesListsController
 
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
+    else
+      init_name_vars_for_edit(@species_list)
+      init_member_vars_for_edit(@species_list)
+      init_project_vars_for_edit(@species_list)
+      @checklist ||= calc_checklist
     end
-
-    init_name_vars_for_edit(@species_list)
-    init_member_vars_for_edit(@species_list)
-    init_project_vars_for_edit(@species_list)
-    @checklist ||= calc_checklist
   end
 
   alias_method :edit_species_list, :edit
 
   def update
-    process_species_list(:update)
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless @species_list
+
+    if !check_permission!(@species_list)
+      redirect_to species_list_path(@species_list.id)
+    else
+      process_species_list(:update)
+    end
   end
 
   # Used by show_species_list.

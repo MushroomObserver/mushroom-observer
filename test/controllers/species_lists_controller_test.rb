@@ -780,12 +780,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
-    post_requires_user(
-      :edit,
-      :show,
-      params,
-      spl.user.login
-    )
+    post_requires_user(:update, spl.id.to_s, params, spl.user.login)
     assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
