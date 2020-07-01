@@ -107,7 +107,7 @@ class SpeciesListsController
   end
 
   # Form to let user add/remove an observation from one of their species lists.
-  def manage_species_lists # :prefetch: :norobots:
+  def manage_species_lists
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     @all_lists = @user.all_editable_species_lists
   end
