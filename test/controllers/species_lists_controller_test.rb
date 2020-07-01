@@ -1227,7 +1227,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     requires_user(
       :upload_species_list,
-      :show,
+      # :show,
+      spl.id.to_s,
       params
     )
     assert_form_action(
