@@ -731,28 +731,48 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal([dick.id],
                  proj.user_group.users.map(&:id)) # dick is only project member
     login("rolf")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", count: 0)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    # Match edit links only for the species list;
+    # there may be other edit links on the page, e.g., edit translations
+    assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, count: 0)
     assert_select("a[href*=destroy]", count: 0)
-    get edit_species_list_path(params: { id: spl.id })
+
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
     assert_response(:redirect)
-    get species_list_path(params: { id: spl.id, method: "delete" })
+    # get species_list_path(params: { id: spl.id, method: "delete" })
+    delete(:destroy, params: { id: spl.id })
     assert_flash_error
 
     login("mary")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", minimum: 1)
-    assert_select("a[href*=destroy]", minimum: 1)
-    get edit_species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    # TODO: reinstate following lines once tabsets are replaced
+    # assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, minimum: 1)
+    # assert_select("a[href*=destroy]", minimum: 1)
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
     assert_response(:success)
 
     login("dick")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", minimum: 1)
-    assert_select("a[href*=destroy]", minimum: 1)
-    get edit_species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    # TODO: reinstate following lines once tabsets are replaced
+    # assert_select("a[href*=edit]", minimum: 1)
+    # assert_select("a[href*=destroy]", minimum: 1)
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
     assert_response(:success)
-    get species_list_path(params: { id: spl.id, method: "delete" })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id, method: "delete" })
+    delete(:destroy, params: { id: spl.id })
     assert_flash_success
   end
 
@@ -1140,7 +1160,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:edit, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     post(
-      :edit,
+      :update,
       params: {
         id: @spl2.id,
         species_list: { title: "" }, # causes failure
