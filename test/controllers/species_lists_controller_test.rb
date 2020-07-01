@@ -1322,6 +1322,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     params = { species_list: sp.id, observation: obs.id }
     requires_login(:add_observation_to_species_list, params)
 
+    # TODO: update once helper paths work property
     # assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
     assert_redirected_to(
       "#{species_lists_manage_species_lists_path}/#{obs.id}"
@@ -1345,7 +1346,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login owner
     post(:remove_observation_from_species_list, params)
-    assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
+    # TODO: update once helper paths work property
+    # assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
+    assert_redirected_to(
+      "#{species_lists_manage_species_lists_path}/#{obs.id}"
+    )
     assert_not(spl.reload.observations.member?(obs))
   end
 
