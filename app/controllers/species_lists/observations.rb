@@ -144,7 +144,10 @@ class SpeciesListsController
       flash_notice(:runtime_species_list_add_observation_success.
         t(name: @species_list.unique_format_name, id: @observation.id))
       # redirect_to action: :manage_species_lists, id: @observation.id
-      redirect_to species_lists_manage_species_lists_path(@observation.id)
+      # TODO: update once helper paths work property
+      # redirect_to(species_lists_manage_species_lists_path(@observation.id))
+      redirect_to("#{species_lists_manage_species_lists_path}" \
+                  "/#{@observation.id}")
     else
       redirect_to species_list_path(@species_list.id)
     end
