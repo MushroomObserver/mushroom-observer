@@ -723,7 +723,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_edit_links
+  def test_presence_of_links_to_edit_different_objects
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
