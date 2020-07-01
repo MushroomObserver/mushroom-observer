@@ -74,7 +74,7 @@ class SpeciesListsController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    if !check_permission!(@species_list)
+    unless check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
     else
       init_name_vars_for_edit(@species_list)
@@ -90,10 +90,11 @@ class SpeciesListsController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    if !check_permission!(@species_list)
+    unless check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
     else
-      process_species_list(:update)
+      return if process_species_list(:update)
+      render :edit
     end
   end
 

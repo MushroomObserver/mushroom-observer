@@ -9,7 +9,7 @@
     </div>
 
     <% partial = render "shared/form_list_feedback"
-    if !partial.blank? %>
+    if partial.present? %>
       <div class="col-12 col-md-12 col-lg-12 max-width-text">
         <%= partial %>
       </div>

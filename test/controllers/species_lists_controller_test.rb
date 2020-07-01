@@ -813,15 +813,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     new_name = "Agaricus nova"
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    old_contribution = mary.contribution
+    spl_owner = spl.user
+    old_contribution = spl_owner.contribution
     params = spl_params(spl)
     params[:list][:members] = new_name
-    owner = spl.user.login
-    assert_equal("mary", owner)
-    login("mary")
+    login(spl_owner.login)
+
     post(:update, params: params)
     assert_edit_species_list
-
     spl.reload
     assert_equal(sp_count, spl.observations.size)
 
@@ -831,7 +830,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     spl.reload
     assert_equal(sp_count + 1, spl.observations.size)
-    assert_equal(old_contribution + v_nam + v_obs, mary.reload.contribution)
+    assert_equal(old_contribution + v_nam + v_obs, spl_owner.reload.contribution)
   end
 
   def test_update_text_add
