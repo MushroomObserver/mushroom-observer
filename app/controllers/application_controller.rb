@@ -1018,16 +1018,15 @@ class ApplicationController < ActionController::Base
   # explicitly to a path helper: object_path(@object, q: get_query_param)
   def get_query_param(query = nil)
     if browser.bot?
-      q = nil
+      nil
     elsif query
       query.save unless query.id
-      q = query.id.alphabetize
+      query.id.alphabetize
     elsif @query_params
-      q = @query_params[:q]
+      @query_params[:q]
     else
-      q = nil
+      nil
     end
-    q
   end
   helper_method :get_query_param
 
@@ -1037,6 +1036,7 @@ class ApplicationController < ActionController::Base
     end
     params
   end
+
   helper_method :add_query_param
 
   def redirect_with_query(args, query = nil)
