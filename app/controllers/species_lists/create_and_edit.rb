@@ -11,9 +11,7 @@ class SpeciesListsController
 
   def new # :prefetch: :norobots:
     @species_list = SpeciesList.new
-    init_name_vars_for_create
-    init_member_vars_for_create
-    init_project_vars_for_create
+    init_vars_for_create
     init_name_vars_for_clone(params[:clone]) if params[:clone].present?
     @checklist ||= calc_checklist
   end
@@ -52,9 +50,7 @@ class SpeciesListsController
       if @user
         @species_list = SpeciesList.new
         clear_query_in_session
-        init_name_vars_for_create
-        init_member_vars_for_create
-        init_project_vars_for_create
+        init_vars_for_create
         @checklist ||= []
         @list_members = params[:results].tr("|", " ").delete("*")
         render(action: :new)
@@ -70,7 +66,7 @@ class SpeciesListsController
     end
   end
 
-  def edit # :prefetch: :norobots:
+  def edit
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -94,6 +90,7 @@ class SpeciesListsController
       redirect_to species_list_path(@species_list.id)
     else
       return if process_species_list(:update)
+
       render :edit
     end
   end

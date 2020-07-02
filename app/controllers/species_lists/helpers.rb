@@ -287,6 +287,12 @@ class SpeciesListsController
     results
   end
 
+  def init_vars_for_create
+    init_name_vars_for_create
+    init_member_vars_for_create
+    init_project_vars_for_create
+  end
+
   def init_name_vars_for_create
     @checklist_names = {}
     @new_names = []
