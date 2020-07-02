@@ -20,7 +20,8 @@
 #  create::                  Create new list.
 #  edit::                    Edit existing list.
 #  upload_species_list::     Same as edit_species_list but gets list from file.
-#  destroy::                  Destroy list.
+#  destroy::                 Destroy list.
+#
 #  add_remove_observations:: Add/remove query results to/from a list.
 #  manage_species_lists::    Add/remove one observation from a user's lists.
 #  add_observation_to_species_list::      (post method)
