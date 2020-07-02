@@ -2,21 +2,22 @@
 
 # see app/controllers/species_lists_controller.rb
 class SpeciesListsController
-
   ##############################################################################
   #
   #  :section: Create and Modify
   #
   ##############################################################################
-
-  def new # :prefetch: :norobots:
+  def new
     @species_list = SpeciesList.new
     init_vars_for_create
     init_name_vars_for_clone(params[:clone]) if params[:clone].present?
+    # rubocop:disable Naming/MemoizedInstanceVariableName
+    # @checklist conveys intent and is used in many places
     @checklist ||= calc_checklist
+    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  alias_method :create_species_list, :new
+  alias create_species_list new
 
   def create
     @species_list = SpeciesList.new
@@ -31,7 +32,7 @@ class SpeciesListsController
     # Names are passed in as string, one name per line.
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
-    return if request.method != "POST"
+    return unless request.method == "POST"
 
     # (make this an instance var to give unit test access)
     @names = @name_strings.map do |str|
@@ -45,53 +46,35 @@ class SpeciesListsController
       end
     end
     @names.reject!(&:nil?)
-    case params[:commit]
-    when :name_lister_submit_spl.l
-      if @user
-        @species_list = SpeciesList.new
-        clear_query_in_session
-        init_vars_for_create
-        @checklist ||= []
-        @list_members = params[:results].tr("|", " ").delete("*")
-        render(action: :new)
-      end
-    when :name_lister_submit_txt.l
-      render_name_list_as_txt(@names)
-    when :name_lister_submit_rtf.l
-      render_name_list_as_rtf(@names)
-    when :name_lister_submit_csv.l
-      render_name_list_as_csv(@names)
-    else
-      flash_error(:name_lister_bad_submit.t(button: params[:commit]))
-    end
+    render_name_list
   end
 
   def edit
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    unless check_permission!(@species_list)
-      redirect_to species_list_path(@species_list.id)
-    else
+    if check_permission!(@species_list)
       init_name_vars_for_edit(@species_list)
       init_member_vars_for_edit(@species_list)
       init_project_vars_for_edit(@species_list)
       @checklist ||= calc_checklist
+    else
+      redirect_to species_list_path(@species_list.id)
     end
   end
 
-  alias_method :edit_species_list, :edit
+  alias edit_species_list edit
 
   def update
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    unless check_permission!(@species_list)
-      redirect_to species_list_path(@species_list.id)
-    else
+    if check_permission!(@species_list)
       return if process_species_list(:update)
 
       render :edit
+    else
+      redirect_to species_list_path(@species_list.id)
     end
   end
 
@@ -121,23 +104,10 @@ class SpeciesListsController
 
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
-    elsif request.method != "POST"
-      query = create_query(
-        :Observation,
-        :in_species_list,
-        by: :name,
-        species_list: @species_list
-      )
-      @observation_list = query.results
+    elsif request.method == "GET"
+      upload_request_file_name # renders upload view by default
     else
-      sorter = NameSorter.new
-      @species_list.file = params[:species_list][:file]
-      @species_list.process_file_data(sorter)
-      init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_edit(@species_list)
-      init_project_vars_for_edit(@species_list)
-      @checklist ||= calc_checklist
-      render action: :edit
+      upload_edit_uploaded_names # explicitly renders action: :edit
     end
   end
 
@@ -155,11 +125,37 @@ class SpeciesListsController
     end
   end
 
-  alias_method :destroy_species_list, :destroy
+  alias destroy_species_list destroy
 
   ##############################################################################
 
   private
+
+  def render_name_list
+    case params[:commit]
+    when :name_lister_submit_spl.l
+      render_name_list_as_new_species_list
+    when :name_lister_submit_txt.l
+      render_name_list_as_txt(@names)
+    when :name_lister_submit_rtf.l
+      render_name_list_as_rtf(@names)
+    when :name_lister_submit_csv.l
+      render_name_list_as_csv(@names)
+    else
+      flash_error(:name_lister_bad_submit.t(button: params[:commit]))
+    end
+  end
+
+  def render_name_list_as_new_species_list
+    return unless @user
+
+    @species_list = SpeciesList.new
+    clear_query_in_session
+    init_vars_for_create
+    @checklist ||= []
+    @list_members = params[:results].tr("|", " ").delete("*")
+    render(action: :new)
+  end
 
   def render_name_list_as_txt(names)
     charset = "UTF-8"
@@ -206,5 +202,26 @@ class SpeciesListsController
                           charset: charset,
                           disposition: "attachment",
                           filename: "report.rtf")
+  end
+
+  def upload_request_file_name
+    query = create_query(
+      :Observation,
+      :in_species_list,
+      by: :name,
+      species_list: @species_list
+    )
+    @observation_list = query.results
+  end
+
+  def upload_edit_uploaded_names
+    sorter = NameSorter.new
+    @species_list.file = params[:species_list][:file]
+    @species_list.process_file_data(sorter)
+    init_name_vars_from_sorter(@species_list, sorter)
+    init_member_vars_for_edit(@species_list)
+    init_project_vars_for_edit(@species_list)
+    @checklist ||= calc_checklist
+    render action: :edit
   end
 end
