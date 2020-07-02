@@ -11,8 +11,8 @@
 #  species_list_search::     List of lists matching search.
 #
 #  show::                    Display notes/etc. and list of species.
-#  prev_species_list::       Display previous species list in index.
-#  next_species_list::       Display next species list in index.
+#  show_next::               Display next species list in index.
+#  show_prev::               Display previous species list in index.
 #
 #  make_report::             Display contents of species list as report.
 #
