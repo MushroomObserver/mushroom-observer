@@ -128,8 +128,8 @@
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
     <%=
-      # args must be an array, becuase that's expected by add_query_param
-      # We cannot use helper path because they outputs a string here.
+      # `args` must be an array, because that's expected by add_query_param
+      # We cannot use helper paths because they output a string.
       args = { controller: :observations,
                action: :show,
                id: "XXX" }
