@@ -2,8 +2,8 @@
   @title = :species_list_bulk_editor_title.t(name: @species_list.unique_format_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :species_list),
-                    species_list_path(@species_list)),
+    link_to(:cancel_and_show.t(type: :species_list),
+            species_list_path(p: get_query_param)),
     link_with_query(:species_list_show_edit.t,
                     action: :edit,
                     id: @species_list.id)
@@ -128,7 +128,11 @@
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
     <%=
-      args = observation_path("XXX")
+      # args must be an array, becuase that's expected by add_query_param
+      # We cannot use helper path because they outputs a string here.
+      args = { controller: :observations,
+               action: :show,
+               id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:SHOW.l,
               "javascript:row_button(#{j url})")
@@ -154,7 +158,7 @@
 
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
     <%=
-      args = { controller: :naming,
+      args = { controller: :namings,
                action: :edit,
                observation_id: "XXX" }
       url = url_for(add_query_param(args, @query))
@@ -162,7 +166,7 @@
               "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :naming,
+      args = { controller: :namings,
                action: :create,
                id: "XXX" }
       url = url_for(add_query_param(args, @query))
@@ -220,8 +224,7 @@
     %>
   </div>
 
-  <%= submit_tag(:UPDATE.l,
-                 class: "btn mx-auto mt-3 mb-3") %>
+  <%= submit_tag(:UPDATE.l,  class: "btn mx-auto mt-3 mb-3") %>
 <% end %>
 
 <% first_id = @observations.first.id
