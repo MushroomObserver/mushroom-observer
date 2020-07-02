@@ -1087,7 +1087,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Chlorophyllum Author",
       "Lepiota sp Author"
     ].join("\r\n")
-    post(:new, params: params)
+    post(:create, params: params)
     assert_redirected_to(%r{/locations/new})
     assert_equal(
       [
@@ -1119,7 +1119,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     params[:approved_names] = [
       "Psalliota sp."
     ].join("\r\n")
-    post(:new, params: params)
+    post(:create, params: params)
     assert_redirected_to(%r{/locations/new})
     assert_equal(
       [
