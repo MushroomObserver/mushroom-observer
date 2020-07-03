@@ -2,7 +2,6 @@
 
 # see app/controllers/species_lists_controller.rb
 class SpeciesListsController
-
   ##############################################################################
   #
   #  :section: Manage Observations
@@ -12,13 +11,13 @@ class SpeciesListsController
   # TODO: NIMMO is this another REST controller here?
   # SpeciesList::ObservationsController
 
-  def add_remove_observations # :prefetch: :norobots:
+  def add_remove_observations
     pass_query_params
     @id = params[:species_list].to_s
     @query = find_obs_query_or_redirect
   end
 
-  def post_add_remove_observations # :prefetch: :norobots:
+  def post_add_remove_observations
     pass_query_params
     id = params[:species_list].to_s
     @species_list = find_list_or_reload_form(id)
@@ -162,17 +161,48 @@ class SpeciesListsController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
-    @query = create_query(
-      :Observation,
-      :in_species_list,
-      by: :id,
-      species_list: @species_list,
-      where: "observations.user_id = #{@user.id}"
-    )
+    bulk_change_calculate_instance_variables
+
+    if @observation.empty?
+      flash_error(:species_list_bulk_editor_you_own_no_observations.t)
+      redirect_to species_list_path(@species_list.id)
+    end
+
+    return if request.method == "GET"
+
+    create_results = bulk_create
+    return if create_results[:stay_on_page]
+
+    if create_results[:updates].zero?
+      flash_warning(:runtime_no_changes.t)
+    else
+      flash_notice(
+        :species_list_bulk_editor_success.t(n: create_results[:updates])
+      )
+    end
+    redirect_to species_list_path(@species_list.id)
+  end
+
+  ##############################################################################
+
+  private
+
+  def bulk_change_calculate_instance_variables
+    @query = create_query(:Observation,
+                          :in_species_list,
+                          by: :id,
+                          species_list: @species_list,
+                          where: "observations.user_id = #{@user.id}")
     @pages = paginate_numbers(:page, 100)
     @observations = @query.paginate(
       @pages, include: [:comments, :images, :location, namings: :votes]
     )
+    calculate_observation_ids_and_votes
+    @no_vote = Vote.new
+    @no_vote.value = 0
+  end
+
+  def calculate_observation_ids_and_votes
     @observation = {}
     @votes = {}
     @observations.each do |obs|
@@ -184,93 +214,69 @@ class SpeciesListsController
              end
       @votes[obs.id] = vote || Vote.new
     end
-    @no_vote = Vote.new
-    @no_vote.value = 0
-    if @observation.empty?
-      flash_error(:species_list_bulk_editor_you_own_no_observations.t)
-      # redirect_to(
-      #   action: :show,
-      #   id: @species_list.id
-      # )
-      redirect_to species_list_path(@species_list.id)
-    elsif request.method == "POST"
-      updates = 0
-      stay_on_page = false
-      @observations.each do |obs|
-        args = begin
-                 params[:observation][obs.id.to_s] || {}
-               rescue StandardError
-                 {}
-               end
-        any_changes = false
-        old_vote = begin
-                     @votes[obs.id].value
-                   rescue StandardError
-                     0
-                   end
-        if !args[:value].nil? && args[:value].to_s != old_vote.to_s
-          if obs.namings.empty?
-            obs.namings.create!(
-              user: @user,
-              name_id: obs.name_id
-            )
-          end
-          if (naming = obs.consensus_naming)
-            obs.change_vote(
-              naming,
-              args[:value].to_i,
-              @user
-            )
-            any_changes = true
-            @votes[obs.id].value = args[:value]
-          else
-            flash_warning(
-              :species_list_bulk_editor_ambiguous_namings.
-                t(id: obs.id, name: obs.name.display_name.t)
-            )
-          end
-        end
-        [
-          :when_str,
-          :place_name,
-          :other_notes,
-          :lat,
-          :long,
-          :alt,
-          :is_collection_location,
-          :specimen
-        ].each do |method|
-          next if args[method].nil?
-
-          old_val = obs.send(method)
-          old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
-          new_val = bulk_editor_new_val(method, args[method])
-          if old_val != new_val
-            obs.send("#{method}=", new_val)
-            any_changes = true
-          end
-        end
-        if any_changes
-          if obs.save
-            updates += 1
-          else
-            flash_error("") if stay_on_page
-            flash_error("#{:Observation.t} ##{obs.id}:")
-            flash_object_errors(obs)
-            stay_on_page = true
-          end
-        end
-      end
-      return if stay_on_page
-
-      if updates.zero?
-        flash_warning(:runtime_no_changes.t)
-      else
-        flash_notice(:species_list_bulk_editor_success.t(n: updates))
-      end
-
-      redirect_to species_list_path(@species_list.id)
-    end
   end
 
+  def bulk_create
+    updates = 0
+    stay_on_page = false
+    @observations.each do |obs|
+      args = begin
+               params[:observation][obs.id.to_s] || {}
+             rescue StandardError
+               {}
+             end
+      any_changes = false
+      old_vote = begin
+                   @votes[obs.id].value
+                 rescue StandardError
+                   0
+                 end
+      if !args[:value].nil? && args[:value].to_s != old_vote.to_s
+        if obs.namings.empty?
+          obs.namings.create!(user: @user, name_id: obs.name_id)
+        end
+        if (naming = obs.consensus_naming)
+          obs.change_vote(naming, args[:value].to_i, @user)
+          any_changes = true
+          @votes[obs.id].value = args[:value]
+        else
+          flash_warning(
+            :species_list_bulk_editor_ambiguous_namings.
+              t(id: obs.id, name: obs.name.display_name.t)
+          )
+        end
+      end
+      [
+        :when_str,
+        :place_name,
+        :other_notes,
+        :lat,
+        :long,
+        :alt,
+        :is_collection_location,
+        :specimen
+      ].each do |method|
+        next if args[method].nil?
+
+        old_val = obs.send(method)
+        old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
+        new_val = bulk_editor_new_val(method, args[method])
+        if old_val != new_val
+          obs.send("#{method}=", new_val)
+          any_changes = true
+        end
+      end
+      if any_changes
+        if obs.save
+          updates += 1
+        else
+          flash_error("") if stay_on_page
+          flash_error("#{:Observation.t} ##{obs.id}:")
+          flash_object_errors(obs)
+          stay_on_page = true
+        end
+      end
+    end
+    { stay_on_page: stay_on_page, updates: updates }
+  end
 end
