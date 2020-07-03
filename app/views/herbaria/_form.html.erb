@@ -1,5 +1,5 @@
-<%= # form_tag(add_query_param(action: :edit, id: @herbarium, back: @back)) do %>
-<%= form_with model: :herbarium do |f| %>
+<% # form_tag(add_query_param(action: :edit, id: @herbarium, back: @back)) do %>
+<%= form_with model: @herbarium do |f| %>
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
@@ -18,18 +18,21 @@
     <div class="row form-group">
       <div class="col-12">
         <div class="form-inline">
-          <%= f.label :personal_user_name, :edit_herbarium_admin_make_personal.t %>:
+          <%= f.label :personal_user_name,
+                      :edit_herbarium_admin_make_personal.t %>:
           <%= f.text_field :personal_user_name, class: "form-control-xxx" %>
           <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
         </div>
         <% if button_name != :CREATE %>
           <div class="well well-sm mt-3 help-block">
             <div class="arrow-up mt-2"></div>
-            <% @herbarium_users.each do |name, login, count| %>
-              <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
-                                                 num: count) %><br/>
+            <% top_users = herbarium_top_users
+               top_users.each do |name, login, count| %>
+             <%= :edit_herbarium_user_records.t(
+                   name: "#{name} (#{login})", num: count
+                 ) %><br/>
             <% end %>
-            <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
+            <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
           </div>
         <% end %>
       </div>
@@ -53,7 +56,9 @@
           </div>
           <div class="well well-sm mt-3 help-block">
             <div class="arrow-up"></div>
-            <%= :create_herbarium_personal_help.t(name: @user.personal_herbarium_name) %>
+            <%= :create_herbarium_personal_help.t(
+                  name: @user.personal_herbarium_name
+                ) %>
           </div>
         </div>
       </div>

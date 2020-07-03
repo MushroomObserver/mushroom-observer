@@ -14,64 +14,34 @@ class HerbariaController < ApplicationController
     :show_herbarium # aliased
   ]
 
-  # Displays selected Herbarium's (based on current Query).
+  # Display list of herbaria selected by current Query
   def index_herbarium
-    query = find_or_create_query(
-      :Herbarium,
-      by: params[:by]
-    )
-    show_selected_herbaria(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
+    query = find_or_create_query(:Herbarium, by: params[:by])
+    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
   def index_nonpersonal_herbarium
     store_location
-    query = create_query(
-      :Herbarium,
-      :nonpersonal,
-      by: :code_then_name
-    )
-    show_selected_herbaria(
-      query,
-      always_index: true
-    )
+    query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
+    show_selected_herbaria(query, always_index: true)
   end
 
-  # Show list of herbaria.
+  # Display list of Herbaria.
   def index
     store_location
-    query = create_query(
-      :Herbarium,
-      :all,
-      by: :name
-    )
-    show_selected_herbaria(
-      query,
-      always_index: true
-    )
+    query = create_query(:Herbarium, :all, by: :name)
+    show_selected_herbaria(query, always_index: true)
   end
 
-  alias_method :list_herbaria, :index
+  alias list_herbaria index
 
   # Display list of Herbaria whose text matches a string pattern.
   def herbarium_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (@herbarium = Herbarium.safe_find(pattern))
-      # redirect_to(
-      #   action: :show,
-      #   id: @herbarium.id
-      # )
+    if pattern.match(/^\d+$/) && (@herbarium = Herbarium.safe_find(pattern))
       redirect_to herbarium_path(@herbarium.id)
     else
-      query = create_query(
-        :Herbarium,
-        :pattern_search,
-        pattern: pattern
-      )
+      query = create_query(:Herbarium, :pattern_search, pattern: pattern)
       show_selected_herbaria(query)
     end
   end
@@ -93,83 +63,68 @@ class HerbariaController < ApplicationController
     end
   end
 
-  alias_method :show_herbarium, :show
+  alias show_herbarium show
 
   def show_next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  alias_method :next_herbarium, :show_next
+  alias next_herbarium show_next
 
   def show_prev
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
-  alias_method :prev_herbarium, :show_prev
+  alias prev_herbarium show_prev
 
   def new
     store_location
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = Herbarium.new
   end
 
-  alias_method :create_herbarium, :new
+  alias create_herbarium new
 
   def create
     @herbarium = Herbarium.new(whitelisted_herbarium_params)
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      @herbarium.add_curator(@user) if @herbarium.personal_user
-      notify_admins_of_new_herbarium unless @herbarium.personal_user
-      redirect_to_create_location ||
-        redirect_to_referer ||
-        redirect_to_show_herbarium
-    end
+    return unless attributes_validated!
+
+    @herbarium.save
+    @herbarium.add_curator(@user) if @herbarium.personal_user
+    notify_admins_of_new_herbarium unless @herbarium.personal_user
+    redirect_to_create_location || redirect_to_referer ||
+      redirect_to_show_herbarium
   end
 
   def edit
-    store_location
-    pass_query_params
-    keep_track_of_referer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    return unless (@herbarium = prep_herbarium_for_change)
     return unless make_sure_can_edit!
 
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    @herbarium_users = Herbarium.connection.select_rows(%(
-      SELECT u.name, u.login, COUNT(u.id)
-      FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
-      WHERE hr.herbarium_id = #{@herbarium.id}
-      GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
-    ))
   end
 
-  alias_method :edit_herbarium, :edit
+  alias edit_herbarium edit
 
   def update
+    return unless (@herbarium = prep_herbarium_for_change)
+    return unless make_sure_can_edit!
+
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      redirect_to_create_location ||
-        redirect_to_referer ||
-        redirect_to_show_herbarium
-    end
+    return unless attributes_validated!
+
+    @herbarium.save
+    redirect_to_create_location || redirect_to_referer ||
+      redirect_to_show_herbarium
   end
 
   def merge_herbaria
     pass_query_params
-    keep_track_of_referer
+    track_referer
     this = find_or_goto_index(Herbarium, params[:this]) || return
     that = find_or_goto_index(Herbarium, params[:that]) || return
     result = perform_or_request_merge(this, that) || return
@@ -178,9 +133,8 @@ class HerbariaController < ApplicationController
 
   def delete_curator
     pass_query_params
-    keep_track_of_referer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    track_referer
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
 
     user = User.safe_find(params[:user])
     if !@herbarium.curator?(@user) && !in_admin_mode?
@@ -193,7 +147,7 @@ class HerbariaController < ApplicationController
 
   def request_to_be_curator
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
 
@@ -209,13 +163,11 @@ class HerbariaController < ApplicationController
 
   def destroy
     pass_query_params
-    keep_track_of_referer
+    track_referer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
-    if in_admin_mode? ||
-       @herbarium.curator?(@user) ||
-       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
+    if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referer || redirect_to_herbarium_index
     else
@@ -224,7 +176,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  alias_method :destroy_herbarium, :destroy
+  alias destroy_herbarium destroy
 
   ##############################################################################
 
@@ -240,24 +192,12 @@ class HerbariaController < ApplicationController
 
     @links ||= []
     if query.flavor != :all
-      # @links << [:herbarium_index_list_all_herbaria.l,
-      #            { controller: :herbarium,
-      #              action: :list_herbaria }
-      #           ]
       @links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
     end
     if query.flavor != :nonpersonal
-      # @links << [:herbarium_index_nonpersonal_herbaria.l,
-      #            { controller: :herbarium,
-      #              action: :index }
-      #           ]
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                  herbaria_index_nonpersonal_herbarium_path]
+                 herbaria_index_nonpersonal_herbarium_path]
     end
-    # @links << [:create_herbarium.l,
-    #            { controller: :herbarium,
-    #              action: :new }
-    #           ]
     @links << [:create_herbarium.l, new_herbarium_path]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
@@ -283,6 +223,13 @@ class HerbariaController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  def prep_herbarium_for_change
+    store_location
+    pass_query_params
+    track_referer
+    find_or_goto_index(Herbarium, params[:id])
+  end
+
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?
 
@@ -298,6 +245,13 @@ class HerbariaController < ApplicationController
     end
     @herbarium.description = @herbarium.description.to_s.strip
     @herbarium.code = "" if @herbarium.personal_user_id
+  end
+
+  def attributes_validated!
+    validate_name! &&
+      validate_location! &&
+      validate_personal_herbarium! &&
+      validate_admin_personal_user!
   end
 
   def validate_name!
@@ -343,6 +297,7 @@ class HerbariaController < ApplicationController
       @herbarium.curators.clear
       return true
     end
+
     name = @herbarium.personal_user_name
     name.sub!(/\s*<(.*)>$/, "")
     user = User.find_by_login(name)
@@ -404,13 +359,6 @@ class HerbariaController < ApplicationController
   end
 
   def request_merge(this, that)
-    # redirect_with_query(
-    #   controller: :observer,
-    #   action: :email_merge_request,
-    #   type: :Herbarium,
-    #   old_id: this.id,
-    #   new_id: that.id
-    # )
     redirect_to email_email_merge_request_path(
       type: :Herbarium,
       old_id: this.id,
@@ -429,7 +377,7 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
   end
 
-  def keep_track_of_referer
+  def track_referer
     @back = params[:back] || request.referer
   end
 
@@ -441,39 +389,21 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    # redirect_with_query(
-    #   action: :index_herbarium,
-    #   id: herbarium.try(&:id)
-    # )
-    redirect_to herbarium_index_herbarium_path(
-      id: herbarium.try(&:id),
-      q: get_query_param
+    redirect_to herbaria_index_herbarium_path(
+      id: herbarium.try(&:id), q: get_query_param
     )
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
-    # redirect_with_query(herbarium_path(herbarium))
-    redirect_to herbarium_path(
-      herbarium.id,
-      q: get_query_param
-    )
+    redirect_to herbarium_path(herbarium.id, q: get_query_param)
   end
 
   def redirect_to_create_location
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    # redirect_to(
-    #   controller: :location,
-    #   action: :new,
-    #   back: @back,
-    #   where: @herbarium.place_name,
-    #   set_herbarium: @herbarium.id
-    # )
     redirect_to new_location_path(
-      back: @back,
-      where: @herbarium.place_name,
-      set_herbarium: @herbarium.id
+      back: @back, where: @herbarium.place_name, set_herbarium: @herbarium.id
     )
     true
   end
@@ -484,5 +414,10 @@ class HerbariaController < ApplicationController
     params.require(:herbarium).
       permit(:name, :code, :email, :mailing_address, :description,
              :place_name, :personal, :personal_user_name)
+  end
+
+  def user_can_destroy_herbarium?
+    in_admin_mode? || @herbarium.curator?(@user) ||
+      @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
   end
 end
