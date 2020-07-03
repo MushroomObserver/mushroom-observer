@@ -15,13 +15,13 @@
       </div>
     <% end %>
 
-    <% if @checklist && @checklist.any? %>
+    <% if @checklist&.any? %>
       <div class="col-12 col-md-12 col-lg-12 max-width-text">
         <p>
           <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
         </p>
         <p>
-          <% for (name, id) in @checklist.sort_by(&:first) %>
+          <% @checklist.sort_by(&:first).each do |name, id|  %>
             <%= check_box(:checklist_data, id, checked: @checklist_names[id]) %>
             <%= label_tag("checklist_data_#{id}", name.t) %>
             <br/>
@@ -76,7 +76,7 @@
         <% turn_into_year_auto_completer(:species_list_when_1i) %>
       </div>
 
-      <% if @dubious_where_reasons && @dubious_where_reasons.any? %>
+      <% if @dubious_where_reasons&.any? %>
         <div class="alert alert-warning">
           <%= @dubious_where_reasons.safe_join(safe_br) %><br/>
           <span class="help-note">
