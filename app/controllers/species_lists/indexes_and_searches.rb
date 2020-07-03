@@ -2,7 +2,6 @@
 
 # see app/controllers/species_lists_controller.rb
 class SpeciesListsController
-
   ##############################################################################
   #
   #  :section: Indexes and Searches
@@ -22,7 +21,7 @@ class SpeciesListsController
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
   end
 
-  alias_method :list_species_lists, :index
+  alias list_species_lists index
 
   # Display list of user's species_lists, sorted by date.
   def species_lists_by_user
@@ -93,5 +92,4 @@ class SpeciesListsController
 
     show_index_of_objects(query, args)
   end
-
 end
