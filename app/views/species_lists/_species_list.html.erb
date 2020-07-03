@@ -1,8 +1,9 @@
 <div class="ThinBox" style="margin-top:1em">
   <%= :WHEN.t %>: <span class="Data"><%= species_list.when.web_date %></span><br/>
-  <%= :WHERE.t %>: <%= location_link(species_list.place_name, species_list.location, nil, true) %><br/>
+  <%= :WHERE.t %>: <%= location_link(species_list.place_name,
+                                     species_list.location, nil, true) %><br/>
   <%= :WHO.t %>: <span class="Data"><%= user_link(species_list.user) %></span><br/>
-  <% if !species_list.notes.blank? %>
+  <% if species_list.notes.present? %>
     <div style="margin-top:1em; margin-bottom:-1em">
       <%= (:NOTES.l + ": " + species_list.notes.to_s.html_safe).tpl %>
     </div>
