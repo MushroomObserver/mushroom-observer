@@ -85,31 +85,6 @@ class ArticlesController < ApplicationController
 
   alias_method :list_articles, :index
 
-  # Show selected list of articles.
-  def show_selected_articles(query, args = {})
-    args = {
-      action: :index,
-      letters: "articles.title",
-      num_per_page: 50
-    }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = show_article_sorts
-
-    show_index_of_objects(query, args)
-  end
-
-  def show_article_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :sort_by_user.t],
-      ["title",       :sort_by_title.t]
-    ]
-  end
-
   ##############################################################################
   #
   #  :section: Show, Create, Edit, Destroy (a single Article)
@@ -202,6 +177,31 @@ class ArticlesController < ApplicationController
   ##############################################################################
 
   private
+
+  # Show selected list of articles.
+  def show_selected_articles(query, args = {})
+    args = {
+      action: :index,
+      letters: "articles.title",
+      num_per_page: 50
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = show_article_sorts
+
+    show_index_of_objects(query, args)
+  end
+
+  def show_article_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :sort_by_user.t],
+      ["title",       :sort_by_title.t]
+    ]
+  end
 
   def whitelisted_article_params
     params[:article].permit(:body, :title)
