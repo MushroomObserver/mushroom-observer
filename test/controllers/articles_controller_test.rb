@@ -20,10 +20,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged users get link to create an article
     login(users(:article_writer).login)
     get(:index_article)
-
-    puts("\n Warning - Assertion manually commented out #{location}\n")
-    # TODO: reinstate/substitute following lines once tabsets are replaced
-    # assert_select("a", text: :create_article_title.l)
+    assert_select("a", text: :create_article_title.l)
   end
 
   def test_show
@@ -32,17 +29,17 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template(:show)
 
+    # Prove that trying to show non-existent article provokes error & redirect
+    get(:show, id: -1)
+    assert_flash_error
+    assert_response(:redirect)
+
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, id: articles(:premier_article).id)
     assert_select("a", text: :create_article_title.l)
     assert_select("a", text: :EDIT.l)
     assert_select("a", text: :DESTROY.l)
-
-    # Prove that trying to show non-existent article provokes error & redirect
-    get(:show, id: -1)
-    assert_flash_error
-    assert_response(:redirect)
   end
 
   def test_new
