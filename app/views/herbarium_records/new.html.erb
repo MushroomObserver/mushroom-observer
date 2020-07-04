@@ -2,9 +2,10 @@
   @title = :create_herbarium_record_title.l
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation), observation_path(@observation)),
-    link_with_query(:create_herbarium.t, controller: :herbaria, action: :create_herbarium),
-    link_with_query(:herbarium_index.t, controller: :herbaria, action: :index)
+    link_to(:cancel_and_show.t(type: :observation),
+            observation_path(@observation, q: get_query_param)),
+    link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param)),
+    link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -12,8 +13,7 @@
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
     <div class="font-size-lg mb-3"><%= :Observation.t %> #<%= @observation.id %></div>
-
-    <%= render partial: "form", locals: { button_name: :ADD } %>
+      <%= render "form", button_name: :ADD %>
   </div>
 
   <div class="col-12 col-sm-5 max-width-text">

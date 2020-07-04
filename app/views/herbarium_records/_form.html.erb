@@ -1,10 +1,9 @@
-<%= # form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
-<%= form_with model: :herbarium_record do |f| %>
+<%# form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
+<%= form_with model: @herbarium_record do |f| %>
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
-  <%= f.hidden_field :id, @observation.id %>
-  <%= f.hidden_field :q %>
+  <%= f.hidden_field :back, value: @back %>
 
   <div class="row">
     <div class="col-12">
@@ -22,7 +21,9 @@
         <%= f.label :herbarium_name, :NAME.t + ":" %>
         <span class="help-note">(<%= :required.t %>)</span>
         <%= f.text_field :herbarium_name, class: "form-control" %>
-        <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+        <% turn_into_herbarium_auto_completer(
+             :herbarium_record_herbarium_name
+           ) %>
       </div>
     </div>
   </div>
@@ -40,7 +41,8 @@
   <div class="row">
     <div class="col-12">
       <div class="form-inline">
-        <%= f.label :accession_number, :herbarium_record_accession_number.t + ":" %>
+        <%= f.label :accession_number,
+                    :herbarium_record_accession_number.t + ":" %>
         <%= f.text_field :accession_number, class:"form-control" %>
         <span class="help-note">(<%= :required.t %>)</span>
       </div>
