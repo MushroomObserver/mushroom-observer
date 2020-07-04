@@ -232,7 +232,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_new
     requires_login(:new)
     # assert_form_action(action: :new)
-    assert_select("form", { action: "species_lists", method: "post"})
+    assert_select("form", { action: "species_lists", method: "post" })
   end
 
   def test_new_member_notes_areas
@@ -705,7 +705,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     params = { id: spl.id.to_s }
     assert_equal("rolf", spl.user.login)
 
-    requires_user(:edit, "#{spl.id}", params)
+    requires_user(:edit, spl.id.to_s, params)
     assert_edit_species_list
     # assert_form_action(
     #   action: :edit,
@@ -830,7 +830,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     spl.reload
     assert_equal(sp_count + 1, spl.observations.size)
-    assert_equal(old_contribution + v_nam + v_obs, spl_owner.reload.contribution)
+    assert_equal(old_contribution + v_nam + v_obs,
+                 spl_owner.reload.contribution)
   end
 
   def test_update_text_add
@@ -853,7 +854,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login owner
     post(:update, params)
     # assert_redirected_to(controller: :locations, action: :new)
-    assert_redirected_to /#{new_location_path}/
+    assert_redirected_to(/#{new_location_path}/)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
@@ -989,6 +990,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     params[:checklist_data][name.id.to_s] = "1"
     login(spl.user.login)
     post(:update, params: params)
+
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -1005,6 +1007,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
     post(:update, params: params)
+
     assert_redirected_to(species_list_path(id: spl.id))
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -1088,6 +1091,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Lepiota sp Author"
     ].join("\r\n")
     post(:create, params: params)
+
     assert_redirected_to(%r{/locations/new})
     assert_equal(
       [
@@ -1143,6 +1147,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit, params: { id: @spl1.id })
+
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     get(:edit, params: { id: @spl2.id })
     assert_response(:redirect)
@@ -1172,7 +1177,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:edit, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
     @proj1.add_species_list(@spl2)
-    # Disk is not allowed to remove Mary's list from a project he's not on.
+    # Dick is not allowed to remove Mary's list from a project he's not on.
     get(:edit, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
@@ -1339,7 +1344,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_not_equal("rolf", owner)
 
     # Try with non-owner (can't use requires_user since failure is a redirect)
-    # effectively fails and gets redirected to show
+    # effectively fails and gets redirected to :show
     requires_login(:remove_observation_from_species_list, params)
     assert_redirected_to(species_list_path(id: spl.id))
     assert(spl.reload.observations.member?(obs))
@@ -2049,11 +2054,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_post_add_remove_double_observations
     spl = species_lists(:unknown_species_list)
-    old_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    old_obs_list = Observation.joins(:species_lists).
+                   where(species_lists: { id: spl.id }).
+                   pluck(:id)
     dup_obs = spl.observations.first
     new_obs = (Observation.all - spl.observations).first
     ids = [dup_obs.id, new_obs.id]
@@ -2066,11 +2069,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
     assert_flash_success
-    new_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    new_obs_list = Observation.joins(:species_lists).
+                   where(species_lists: { id: spl.id }).
+                   pluck(:id)
     assert_equal(new_obs_list.length, old_obs_list.length + 1)
     assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
   end
