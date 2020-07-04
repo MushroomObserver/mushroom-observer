@@ -314,7 +314,6 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   active_link_to
-  autoprefixer-rails
   aws-sdk-s3
   babel-source
   babel-transpiler
@@ -340,7 +339,6 @@ DEPENDENCIES
   mocha
   mry
   mysql2
-  popper_js (~> 1.16)
   rails (~> 5.2.4)
   rails-controller-testing
   rails_db
