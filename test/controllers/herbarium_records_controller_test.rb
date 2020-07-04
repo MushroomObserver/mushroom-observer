@@ -2,6 +2,7 @@
 
 require "test_helper"
 
+# Test HerbariumRecordsController and Views
 class HerbariumRecordsControllerTest < FunctionalTestCase
   def herbarium_record_params
     {
@@ -15,69 +16,68 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
   end
 
+  ##### Read indices: test actions that list multiple records
+
+  def test_index
+    get(:index)
+    assert_response(:success)
+    assert_template("herbarium_records/index")
+    assert_select("table tr", HerbariumRecord.count,
+                  "There should be 1 row/record")
+  end
+
   def test_herbarium_index
     get(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_template(:index)
   end
 
-  def test_herbarium_with_no_herbarium_records_index
+  def test_herbarium_index_with_no_records
     get(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
   end
 
   def test_observation_index
-    get(:observation_index,
-                  id: observations(:coprinus_comatus_obs).id)
+    get(:observation_index, id: observations(:coprinus_comatus_obs).id)
     assert_template(:index)
   end
 
-  def test_observation_with_no_herbarium_records_index
+  def test_observation_index_with_no_records
     get(:observation_index, id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:index)
     assert_flash_text(/No matching herbarium records found/)
   end
 
-  def test_herbarium_record_search
+  def test_search
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
     get(:herbarium_record_search, pattern: pattern)
     assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", 2)
+    assert_template("herbarium_records/index")
+    assert_select("table tr", HerbariumRecord.where(initial_det: pattern).size,
+                  "There should be 1 row/record")
   end
 
-  def test_herbarium_record_search_with_one_herbarium_record_index
+  def test_search_with_one_record
     get(:herbarium_record_search,
         pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
-  def test_index_herbarium_record
-    get(:index_herbarium_record)
-    assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", HerbariumRecord.all.size)
-  end
+  ##### Read show - test actions that display one record
 
-  def test_show_herbarium_record_without_notes
-    herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
-    assert(herbarium_record)
-    get(:show, id: herbarium_record.id)
+  def test_show
+    # record without notes
+    get(:show, id: herbarium_records(:coprinus_comatus_nybg_spec).id)
+    assert_template(:show, partial: "shared/log_item")
+
+    # record with notes
+    get(:show, id: herbarium_records(:interesting_unknown).id)
     assert_template(:show, partial: "shared/log_item")
   end
 
-  def test_show_herbarium_record_with_notes
-    herbarium_record = herbarium_records(:interesting_unknown)
-    assert(herbarium_record)
-    get(:show, id: herbarium_record.id)
-    assert_template(:show, partial: "shared/log_item")
-  end
-
-  def test_next_and_prev_herbarium_record
+  def test_next_and_prev
     query = Query.lookup_and_save(:HerbariumRecord, :all)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
@@ -91,24 +91,26 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
-  def test_create_herbarium_record
+  ##### Create - test actions that create a record
+
+  def test_new
     get(:new, id: observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
 
     login("rolf")
-    get(:new,
-                  id: observations(:coprinus_comatus_obs).id)
-    assert_template("create_herbarium_record", partial: "shared/log_item")
+    get(:new, id: observations(:coprinus_comatus_obs).id)
+    assert_template(:new, partial: "shared/log_item")
     assert(assigns(:herbarium_record))
   end
 
-  def test_create_herbarium_record_post
+  def test_create
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     obs = Observation.find(params[:id])
     assert_not(obs.specimen)
-    post(:new, params)
+    post(:create, params)
+
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     herbarium_record = HerbariumRecord.last
     assert_equal("The New York Botanical Garden",
@@ -123,19 +125,19 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_create_herbarium_record_post_new_herbarium
+  def test_create_new_herbarium
     mary = login("mary")
     herbarium_count = mary.curated_herbaria.count
     params = herbarium_record_params
     params[:herbarium_record][:herbarium_name] = mary.personal_herbarium_name
-    post(:new, params)
+    post(:create, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
     herbarium = Herbarium.all.order("created_at DESC")[0]
     assert(herbarium.curators.member?(mary))
   end
 
-  def test_create_herbarium_record_post_duplicate
+  def test_create_duplicate
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
@@ -143,7 +145,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:herbarium_record][:herbarium_name]   = existing.herbarium.name
     params[:herbarium_record][:initial_det]      = existing.initial_det
     params[:herbarium_record][:accession_number] = existing.accession_number
-    post(:new, params)
+    post(:create, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_flash_text(/already exists/i)
     assert_response(:redirect)
@@ -151,7 +153,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   # I keep thinking only curators should be able to add herbarium_records.
   # However, for now anyone can.
-  def test_create_herbarium_record_post_not_curator
+  def test_create_not_curator
     nybg = herbaria(:nybg_herbarium)
     obs  = observations(:strobilurus_diminutivus_obs)
     obs.update(user: dick)
@@ -163,7 +165,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("mary")
     assert_not(nybg.curators.member?(mary))
     assert_not(obs.can_edit?(mary))
-    post(:create_herbarium_record, params)
+    post(:create, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
     assert_flash_text(/only curators can/i)
@@ -171,13 +173,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login("dick")
     assert_not(nybg.curators.member?(dick))
     assert(obs.can_edit?(dick))
-    post(:create_herbarium_record, params)
+    post(:create, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     assert_response(:redirect)
     assert_no_flash
   end
 
-  def test_create_herbarium_record_redirect
+  def test_create_redirect
     obs = observations(:coprinus_comatus_obs)
     query = Query.lookup_and_save(:HerbariumRecord, :all)
     q = query.id.alphabetize
@@ -191,14 +193,16 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params)
-    assert_select("form[action*='create_herbarium_record/#{obs.id}?q=#{q}']")
+    assert_select("form input", { type: "hidden", name: q, value: q })
 
     # Prove that post keeps query params intact.
-    post(:new, params)
+    post(:create, params)
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_edit_herbarium_record
+  ##### Update - test actions that modify a record
+
+  def test_edit
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     get(:edit, id: nybg.id)
     assert_response(:redirect)
@@ -217,7 +221,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:edit)
   end
 
-  def test_edit_herbarium_record_post
+  def test_update
     login("rolf")
     nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
     nybg_user   = nybg_rec.user
@@ -226,7 +230,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:id] = nybg_rec.id
     params[:herbarium_record][:herbarium_name] = rolf_herb.name
     assert_not_equal(rolf_herb, nybg_rec.herbarium)
-    post(:edit, params)
+    post(:update, params)
     nybg_rec.reload
     assert_equal(rolf_herb, nybg_rec.herbarium)
     assert_equal(nybg_user, nybg_rec.user)
@@ -238,14 +242,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_edit_herbarium_record_post_no_specimen
+  def test_update_no_specimen
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    post(:edit, id: nybg.id)
+    post(:update, id: nybg.id)
     assert_template(:edit)
   end
 
-  def test_edit_herbarium_record_redirect
+  def test_change_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
     query = Query.lookup_and_save(:HerbariumRecord, :all)
@@ -261,20 +265,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
       }
     }
 
-    # Prove that GET passes "back" and query param through to form.
+    # Prove that :edit passes "back" and query param through to form.
     get(:edit, params.merge(back: "foo", q: q))
-    assert_select("form[action*='herbarium_record/#{rec.id}?back=foo&q=#{q}']")
+    assert_select("form input", { type: "hidden", name: "back", value: "foo" })
+    assert_select("form input", { type: "hidden", name: "q", value: q })
 
-    # Prove that POST keeps query param when returning to observation.
-    post(:edit, params.merge(back: obs.id, q: q))
+    # Prove that :update keeps query param when returning to observation.
+    post(:update, params.merge(back: obs.id, q: q))
     assert_redirected_to(observation_path(obs, q: q))
 
-    # Prove that POST can return to show_herbarium_record with query intact.
-    post(:edit, params.merge(back: "show", q: q))
+    # Prove that :update can return to :show with query intact.
+    post(:update, params.merge(back: "show", q: q))
     assert_redirected_to(herbarium_record_path(rec, q: q))
 
-    # Prove that POST can return to index_herbarium_record with query intact.
-    post(:edit, params.merge(back: "index", q: q))
+    # Prove that :update can return to :index with query intact.
+    post(:update, params.merge(back: "index", q: q))
     assert_redirected_to(action: :index_herbarium_record, id: rec.id, q: q)
   end
 
@@ -290,7 +295,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:remove_observation, id: rec1.id, obs: obs1.id)
     assert_true(obs1.reload.herbarium_records.include?(rec1))
 
-    # Make sure only owner obs can remove rec from it.
+    # Make sure only obs owner can remove rec from it.
     login("mary")
     get(:remove_observation, id: rec1.id, obs: obs1.id)
     assert_true(obs1.reload.herbarium_records.include?(rec1))
@@ -339,7 +344,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(obs, q: q))
   end
 
-  def test_destroy_herbarium_record
+  #### Destroy - test actions that destroy a records
+
+  def test_destroy
     login("rolf")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
@@ -347,36 +354,37 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     observations = herbarium_record.observations
     obs_rec_count = observations.map { |o| o.herbarium_records.count }.
                     reduce { |a, b| a + b }
-    get(:destroy, params)
+    delete(:destroy, params)
+
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
     assert_true(obs_rec_count > observations.
                 map { |o| o.herbarium_records.count }.
                 reduce { |a, b| a + b })
-    assert_response(:redirect)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path)
   end
 
-  def test_destroy_herbarium_record_not_curator
+  def test_destroy_not_curator
     login("mary")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
   end
 
-  def test_destroy_herbarium_record_admin
+  def test_destroy_admin
     make_admin("mary")
     herbarium_record = herbarium_records(:interesting_unknown)
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     assert_response(:redirect)
   end
 
-  def test_destroy_herbarium_record_redirect
+  def test_destroy_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
     query = Query.lookup_and_save(:HerbariumRecord, :all)
@@ -386,10 +394,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     # Prove by default it goes back to index.
     post(:destroy, id: recs[0].id)
-    assert_redirected_to(action: :index_herbarium_record)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path)
 
     # Prove that it keeps query param intact when returning to index.
     post(:destroy, id: recs[1].id, q: q)
-    assert_redirected_to(action: :index_herbarium_record, q: q)
+    # assert_redirected_to(action: :index_herbarium_record, q: q)
+    assert_redirected_to(herbarium_records_index_herbarium_record_path(q: q))
   end
 end
