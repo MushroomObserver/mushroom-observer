@@ -9,7 +9,7 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:index)
     assert(:success)
     # Prove index (or redirect) includes link to first article
-    assert_select("a[href *= '#{Article.first.id.to_s}']")
+    assert_select("a[href *= '#{Article.first.id}']")
   end
 
   def test_index_article
