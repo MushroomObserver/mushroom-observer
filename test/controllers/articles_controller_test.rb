@@ -74,7 +74,7 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove unauthorized user cannot create Article
     login(users(:zero_user).login)
-    post(:new, params)
+    post(:create, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
     assert_redirected_to(action: :index_article)
@@ -85,7 +85,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params = {
       article: { title: "", body: body }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count, Article.count)
     assert_flash_text(:article_title_required.l)
     assert_template(:new)
@@ -94,7 +94,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params = {
       article: { title: title, body: body }
     }
-    post(:new, params)
+    post(:create, params)
     assert_equal(old_count + 1, Article.count)
     article = Article.last
     assert_equal(body, article.body)

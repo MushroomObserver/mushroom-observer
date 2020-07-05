@@ -108,7 +108,7 @@ class ArticlesController < ApplicationController
   alias_method :create_article, :new
 
   def create
-    return if flash_missing_title?
+    return render("new") if flash_missing_title?
 
     @article = Article.new(
       title: params[:article][:title],
@@ -116,19 +116,7 @@ class ArticlesController < ApplicationController
       user_id: @user.id
     )
     @article.save
-    # redirect_to(
-    #   action: :show,
-    #   id: @article.id
-    # )
     redirect_to article_path(@article.id)
-  end
-
-  # add flash message if title missing
-  def flash_missing_title?
-    return if params[:article][:title].present?
-
-    flash_error(:article_title_required.t)
-    true
   end
 
   # Edit existing article
@@ -201,6 +189,14 @@ class ArticlesController < ApplicationController
       ["user",        :sort_by_user.t],
       ["title",       :sort_by_title.t]
     ]
+  end
+
+  # add flash message if title missing
+  def flash_missing_title?
+    return if params[:article][:title].present?
+
+    flash_error(:article_title_required.t)
+    true
   end
 
   def whitelisted_article_params
