@@ -1162,6 +1162,8 @@ class Observation < AbstractModel
                         "Date.today=#{Date.today}")
       errors.add(:when, :validate_observation_future_time.t)
     elsif self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
+      # As of July 5, 2020 this statement appears to be unreachable
+      # because 'when' is a 'date' in the database.
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
                         "Time.now=#{Time.zone.now + 6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
@@ -1190,6 +1192,8 @@ class Observation < AbstractModel
       errors.add(:long, :runtime_lat_long_error.t)
     end
     if alt.present? && !Location.parse_altitude(alt)
+      # As of July 5, 2020 this statement appears to be unreachable
+      # because .to_i returns 0 for unparsable strings.
       errors.add(:alt, :runtime_altitude_error.t)
     end
 
