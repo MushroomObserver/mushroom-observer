@@ -46,77 +46,36 @@ class SequencesController < ApplicationController
 
   alias :list_sequences :index
 
-  # Display list of Sequences whose text matches a string pattern.
-  def sequence_search
-    puts "-" * 80
-    puts "We are in sequence_search"
-    puts "-" * 80
-
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (@sequence = Sequence.safe_find(pattern))
-      puts "-" * 80
-      puts @sequence.inspect
-      puts "-" * 80
-      redirect_to sequence_path(@sequence.id)
-      return
-    else
-      puts "-" * 80
-      puts "I'm sensing a pattern"
-      puts "-" * 80
-      query = create_query(:Sequence, :pattern_search, pattern: pattern)
-      show_selected_sequences(query)
-    end
-  end
-
-  # Note: Does this action now need the param [:obs] instead of [:id]
-  # to differentiate the request from other requests hitting the index?
-  # FIXME: Update new/edit/update actions accordingly?
-  # FIXME: Update tests and views (and maybe other controllers) accordingly?
-  def observation_index
-    store_location
-    # query = create_query(:Sequence, :for_observation,
-    #                      observation: params[:id].to_s)
-    query = create_query(:Sequence, :for_observation,
-                         observation: params[:obs].to_s)
-    # @links = [
-    #   [:show_object.l(type: :observation),
-    #    Observation.show_link_args(params[:id])],
-    #   [:show_observation_add_sequence.l,
-    #    { action: :new,
-    #      id: params[:id] }
-    #   ]
-    # ]
-    @links = []
-    @links << [:show_object.l(type: :observation),
-              observation_path(params[:obs])]
-    @links << [:show_observation_add_sequence.l,
-              new_sequence_path(obs: params[:obs])]
-    show_selected_sequences(query, always_index: true)
-  end
-
   def show
     puts "-" * 80
     puts "We are in :show"
     puts "-" * 80
+
     pass_query_params
     store_location
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+
+    if params[:next]
+      redirect_to_next_object(:next, Sequence, params[:id].to_s)
+    elsif params[:prev]
+      redirect_to_next_object(:prev, Sequence, params[:id].to_s)
+    else
+      @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    end
   end
 
   alias :show_sequence :show
 
-  def show_next
-    redirect_to_next_object(:next, Sequence, params[:id].to_s)
-  end
-
-  alias :next_sequence :show_next
-
-  def show_prev
-    redirect_to_next_object(:prev, Sequence, params[:id].to_s)
-  end
-
-  alias :prev_sequence :show_prev
+  # def show_next
+  #   redirect_to_next_object(:next, Sequence, params[:id].to_s)
+  # end
+  #
+  # alias :next_sequence :show_next
+  #
+  # def show_prev
+  #   redirect_to_next_object(:prev, Sequence, params[:id].to_s)
+  # end
+  #
+  # alias :prev_sequence :show_prev
 
   def new
     store_location
@@ -200,6 +159,43 @@ class SequencesController < ApplicationController
   ##############################################################################
 
   private
+
+  # Display list of Sequences whose text matches a string pattern.
+  def sequence_search
+    puts "-" * 80
+    puts "We are in sequence_search"
+    puts "-" * 80
+
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) &&
+       (@sequence = Sequence.safe_find(pattern))
+      puts "-" * 80
+      puts @sequence.inspect
+      puts "-" * 80
+      redirect_to sequence_path(@sequence.id)
+      return
+    else
+      puts "-" * 80
+      puts "I'm sensing a pattern"
+      puts "-" * 80
+      query = create_query(:Sequence, :pattern_search, pattern: pattern)
+      show_selected_sequences(query)
+    end
+  end
+
+  # Note: This action now needs params[:obs] instead of params[:id]
+  # to differentiate the request from other requests hitting the index - AN
+  def observation_index
+    store_location
+    query = create_query(:Sequence, :for_observation,
+                         observation: params[:obs].to_s)
+    @links = []
+    @links << [:show_object.l(type: :observation),
+              observation_path(params[:obs])]
+    @links << [:show_observation_add_sequence.l,
+              new_sequence_path(obs: params[:obs])]
+    show_selected_sequences(query, always_index: true)
+  end
 
   def build_sequence
     @sequence = @observation.sequences.new
