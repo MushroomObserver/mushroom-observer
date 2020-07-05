@@ -725,91 +725,13 @@ class Observation < AbstractModel
     vote = naming.users_vote(user)
     value = value.to_f
 
-    # This special value means destroy vote.
     if value == Vote.delete_vote
-      if vote
-        naming.votes.delete(vote)
-        result = true
-
-        # If this was one of the old favorites, we might have to elect new.
-        if vote.favorite
-
-          # Get user's max positive vote for this obs
-          max = 0
-          user_votes(user).each do |v|
-            max = v.value if v.value > max
-          end
-
-          # If any, mark all votes at that level "favorite".
-          if max.positive?
-            user_votes(user).each do |v|
-              next if v.value != max || v.favorite
-
-              v.favorite = true
-              v.save
-            end
-          end
-        end
-      end
+      result = delete_vote(naming, vote, user)
 
     # If no existing vote, or if changing value.
     elsif !vote || (vote.value != value)
       result = true
-
-      # First downgrade any existing 100% votes (if casting a 100% vote).
-      v80 = Vote.next_best_vote
-      if value > v80
-        user_votes(user).each do |v|
-          if v.value > v80
-            v.value = v80
-            v.save
-          end
-        end
-      end
-
-      other_votes = (user_votes(user) - [vote])
-      # Is this vote going to become the favorite?
-      favorite = false
-      if value.positive?
-        favorite = true
-        other_votes.each do |v|
-          # If any other vote higher, this is not the favorite.
-          if v.value > value
-            favorite = false
-            break
-          # If any other votes are lower, those will not be favorite.
-          elsif (v.value < value) &&
-                v.favorite
-            v.favorite = false
-            v.save
-          end
-        end
-      end
-
-      # Will another vote become a favorite?
-      max_positive_value = (other_votes.map(&:value) + [value, 0]).max
-      other_votes.each do |v|
-        if (v.value >= max_positive_value) && !v.favorite
-          v.favorite = true
-          v.save
-        end
-      end
-
-      # Create vote if none exists.
-      if !vote
-        naming.votes.create!(
-          user: user,
-          observation: self,
-          value: value,
-          favorite: favorite
-        )
-
-      # Change vote if it exists.
-      else
-        vote.value    = value
-        vote.favorite = favorite
-        vote.save
-      end
+      process_real_vote(naming, vote, value, user)
     end
 
     # Update consensus if anything changed.
@@ -959,6 +881,96 @@ class Observation < AbstractModel
   end
 
   private
+
+  def delete_vote(naming, vote, user)
+    return false unless vote
+
+    naming.votes.delete(vote)
+    find_new_favorite(user) if vote.favorite
+    true
+  end
+
+  def find_new_favorite(user)
+    max = max_positive_vote(user)
+
+    if max.positive?
+      user_votes(user).each do |v|
+        next if v.value != max || v.favorite
+
+        v.favorite = true
+        v.save
+      end
+    end
+  end
+
+  def max_positive_vote(user)
+    max = 0
+    user_votes(user).each do |v|
+      max = v.value if v.value > max
+    end
+    max
+  end
+
+  def process_real_vote(naming, vote, value, user)
+    downgrade_totally_confident_votes(value, user)
+    favorite = adjust_other_favorites(value, other_votes(vote, user))
+    if !vote
+      naming.votes.create!(
+        user: user,
+        observation: self,
+        value: value,
+        favorite: favorite
+      )
+    else
+      vote.value = value
+      vote.favorite = favorite
+      vote.save
+    end
+  end
+
+  def downgrade_totally_confident_votes(value, user)
+    # First downgrade any existing 100% votes (if casting a 100% vote).
+    v80 = Vote.next_best_vote
+    if value > v80
+      user_votes(user).each do |v|
+        if v.value > v80
+          v.value = v80
+          v.save
+        end
+      end
+    end
+  end
+
+  def adjust_other_favorites(value, other_votes)
+    favorite = false
+    if value.positive?
+      favorite = true
+      other_votes.each do |v|
+        if v.value > value
+          favorite = false
+          break
+        end
+        if (v.value < value) && v.favorite
+          v.favorite = false
+          v.save
+        end
+      end
+    end
+
+    # Will any other vote become a favorite?
+    max_positive_value = (other_votes.map(&:value) + [value, 0]).max
+    other_votes.each do |v|
+      if (v.value >= max_positive_value) && !v.favorite
+        v.favorite = true
+        v.save
+      end
+    end
+    favorite
+  end
+
+  def other_votes(vote, user)
+    user_votes(user) - [vote]
+  end
 
   # Does observation.user have a single preferred id for this observation?
   def owner_preference?
