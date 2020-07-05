@@ -885,4 +885,15 @@ class ObservationTest < UnitTestCase
     assert_equal(34.1622, obs.public_lat)
     assert_equal(-118.3521, obs.public_long)
   end
+
+  def test_place_name_and_coordinates_with_values
+    obs = observations(:amateur_obs)
+    assert_equal(obs.place_name_and_coordinates,
+                 "Pasadena, California, USA (34.1622°N 118.3521°W)")
+  end
+
+  def test_place_name_and_coordinates_without_values
+    obs = observations(:unknown_with_no_naming)
+    assert_equal(obs.place_name_and_coordinates, "Who knows where")
+  end
 end
