@@ -54,6 +54,7 @@ class SequencesControllerTest < IntegrationTestCase
     sequence = sequences(:local_sequence)
     get sequence_path(id: sequence.id)
     puts response.body
+    assert_template("sequences/show")
     assert_response :success
 
     # Prove index displayed if called with id of sequence not in db
@@ -69,8 +70,10 @@ class SequencesControllerTest < IntegrationTestCase
     results = query.results
     q = query.id.alphabetize
 
-    get sequence_path(q: q, id: results[1].id)
-    assert_redirected_to(sequence_path(results[2], q: q))
+    get sequence_path(q: q, id: results[1].id, next: 1)
+    # assert_redirected_to(sequence_path(results[2], q: q))
+    puts response.body
+    assert_template("sequences/show")
   end
 
   def test_show_prev

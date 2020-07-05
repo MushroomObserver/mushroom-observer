@@ -13,31 +13,26 @@
 class SequencesController < ApplicationController
   before_action :login_required, except: [
     :index,
-    :index_sequence,
-    :sequence_search,
-    :observation_index,
     :show,
-    :show_next,
-    :show_prev
+    # :index_sequence,
+    # :sequence_search,
+    # :observation_index,
+    # :show_next,
+    # :show_prev
     # :list_sequences, # aliased
     # :show_sequence, # aliased
     # :next_sequence, # aliased
     # :prev_sequence # aliased
   ]
 
-  def index_sequence
-    query = find_or_create_query(:Sequence, by: params[:by])
-    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
-  end
-
   def index
     store_location
-    if params[:by]
-      index_sequence
-    elsif params[:obs]
+    if params[:obs]
       observation_index
     elsif params[:pattern]
       sequence_search
+    elsif params[:q] || params[:by]
+      index_sequence
     else
       query = create_query(:Sequence, :all)
       show_selected_sequences(query)
@@ -65,18 +60,6 @@ class SequencesController < ApplicationController
 
   alias :show_sequence :show
 
-  # def show_next
-  #   redirect_to_next_object(:next, Sequence, params[:id].to_s)
-  # end
-  #
-  # alias :next_sequence :show_next
-  #
-  # def show_prev
-  #   redirect_to_next_object(:prev, Sequence, params[:id].to_s)
-  # end
-  #
-  # alias :prev_sequence :show_prev
-
   def new
     store_location
     pass_query_params
@@ -87,7 +70,7 @@ class SequencesController < ApplicationController
     @sequence = Sequence.new(observation: @observation)
   end
 
-  alias_method :create_sequence, :new
+  alias :create_sequence :new
 
   def create
     store_location
@@ -107,8 +90,7 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
-      redirect_to observation_path(@sequence.observation_id,
-                                   q: get_query_param)
+      redirect_to observation_path(@sequence.observation_id, q: get_query_param)
     end
   end
 
@@ -143,22 +125,23 @@ class SequencesController < ApplicationController
     end
 
     if @back == "index"
-      redirect_with_query(action: :index_sequence)
-      # redirect_to sequences_index_sequence_path(@sequence.id,
-      #                                           q: get_query_param)
-
+      # redirect_with_query(action: :index_sequence)
+      redirect_to sequences_path(@sequence.id, q: get_query_param)
     else
-      # TODO: NIMMO is @back_object here always an observation? Check
-      # Answer: Currently yes. JDC 2020-06-21
       redirect_to(helpers.object_path(@back_object, q: get_query_param))
     end
   end
 
-  alias_method :destroy_sequence, :destroy
+  alias :destroy_sequence :destroy
 
   ##############################################################################
 
   private
+
+  def index_sequence
+    query = find_or_create_query(:Sequence, by: params[:by])
+    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+  end
 
   # Display list of Sequences whose text matches a string pattern.
   def sequence_search
