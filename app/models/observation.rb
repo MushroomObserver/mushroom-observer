@@ -1150,52 +1150,10 @@ class Observation < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    # Clean off leading/trailing whitespace from +where+.
-    self.where = where.strip_squeeze if where
-    self.where = nil if where == ""
-
-    if !self.when
-      self.when ||= Time.zone.now
-      # errors.add(:when, :validate_observation_when_missing.t)
-    elsif self.when.is_a?(Date) && self.when > Date.today + 1.day
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
-                        "Date.today=#{Date.today}")
-      errors.add(:when, :validate_observation_future_time.t)
-    elsif self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
-      # As of July 5, 2020 this statement appears to be unreachable
-      # because 'when' is a 'date' in the database.
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
-                        "Time.now=#{Time.zone.now + 6.hours}")
-      errors.add(:when, :validate_observation_future_time.t)
-    elsif !self.when.respond_to?(:year) || self.when.year < 1500 ||
-          self.when.year > (Time.zone.now + 1.day).year
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when}")
-      errors.add(:when, :validate_observation_invalid_year.t)
-    end
-    if !user && !User.current
-      errors.add(:user, :validate_observation_user_missing.t)
-    end
-
-    if where.to_s.blank? && !location_id
-      self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
-    elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
-    end
-
-    if lat.blank? && long.present? ||
-       lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
-    end
-    if lat.present? && long.blank? ||
-       long.present? && !Location.parse_longitude(long)
-      errors.add(:long, :runtime_lat_long_error.t)
-    end
-    if alt.present? && !Location.parse_altitude(alt)
-      # As of July 5, 2020 this statement appears to be unreachable
-      # because .to_i returns 0 for unparsable strings.
-      errors.add(:alt, :runtime_altitude_error.t)
-    end
+    check_when
+    check_where
+    check_user
+    check_coordinates
 
     return unless @when_str
 
@@ -1207,6 +1165,94 @@ class Observation < AbstractModel
       else
         errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
       end
+    end
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    check_date && check_time && check_year
+  end
+
+  def check_date
+    return true unless self.when.is_a?(Date) && self.when > Date.today + 1.day
+
+    errors.add(:when, when_message("Date.today=#{Date.today}"))
+    errors.add(:when, :validate_observation_future_time.t)
+    false
+  end
+
+  def when_message(details = nil)
+    start = "self.when=#{self.when.class.name}:#{self.when}"
+    return start unless details
+
+    "#{start} #{details}"
+  end
+
+  def check_time
+    unless self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
+      return true
+    end
+
+    # As of July 5, 2020 these statements appear to be unreachable
+    # because 'when' is a 'date' in the database.
+    errors.add(:when, when_message("Time.now=#{Time.zone.now + 6.hours}"))
+    errors.add(:when, :validate_observation_future_time.t)
+    false
+  end
+
+  def check_year
+    return true unless !self.when.respond_to?(:year) || self.when.year < 1500 ||
+                       self.when.year > (Time.zone.now + 1.day).year
+
+    errors.add(:when, when_message)
+    errors.add(:when, :validate_observation_invalid_year.t)
+    false
+  end
+
+  def check_where
+    # Clean off leading/trailing whitespace from +where+.
+    self.where = where.strip_squeeze if where
+    self.where = nil if where == ""
+
+    if where.to_s.blank? && !location_id
+      self.location = Location.unknown
+      # errors.add(:where, :validate_observation_where_missing.t)
+    elsif where.to_s.size > 1024
+      errors.add(:where, :validate_observation_where_too_long.t)
+    end
+  end
+
+  def check_user
+    if !user && !User.current
+      errors.add(:user, :validate_observation_user_missing.t)
+    end
+  end
+
+  def check_coordinates
+    check_latitude
+    check_longitude
+    check_altitude
+  end
+
+  def check_latitude
+    if lat.blank? && long.present? ||
+       lat.present? && !Location.parse_latitude(lat)
+      errors.add(:lat, :runtime_lat_long_error.t)
+    end
+  end
+
+  def check_longitude
+    if lat.present? && long.blank? ||
+       long.present? && !Location.parse_longitude(long)
+      errors.add(:long, :runtime_lat_long_error.t)
+    end
+  end
+
+  def check_altitude
+    if alt.present? && !Location.parse_altitude(alt)
+      # As of July 5, 2020 this statement appears to be unreachable
+      # because .to_i returns 0 for unparsable strings.
+      errors.add(:alt, :runtime_altitude_error.t)
     end
   end
 end
