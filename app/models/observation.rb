@@ -363,9 +363,9 @@ class Observation < AbstractModel
 
   def place_name_and_coordinates
     if lat.present? && long.present?
-      lat2 = lat.negative? ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
-      long2 = long.negative? ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
-      "#{place_name} (#{lat2} #{long2})"
+      lat_string = format_coordinate(lat, "N", "S")
+      long_string = format_coordinate(long, "E", "W")
+      "#{place_name} (#{lat_string} #{long_string})"
     else
       place_name
     end
@@ -881,6 +881,12 @@ class Observation < AbstractModel
   end
 
   private
+
+  def format_coordinate(value, positive_point, negative_point)
+    return "#{-value.round(4)}°#{negative_point}" if value.negative?
+
+    "#{value.round(4)}°#{positive_point}"
+  end
 
   def delete_vote(naming, vote, user)
     return false unless vote
