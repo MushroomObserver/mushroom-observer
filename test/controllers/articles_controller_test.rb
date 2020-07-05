@@ -16,11 +16,14 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove any user can see article index (based on current query)
     get(:index_article)
     assert(:success)
+  end
 
+  def test_index_article_ui
     # Prove privileged users get link to create an article
     login(users(:article_writer).login)
     get(:index_article)
-    assert_select("a", text: :create_article_title.l)
+    assert_select("a", { text: :create_article_title.l },
+                  "Page is missing a link to :create")
   end
 
   def test_show
@@ -33,13 +36,18 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:show, id: -1)
     assert_flash_error
     assert_response(:redirect)
+  end
 
+  def test_show_privileged_user_links
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, id: articles(:premier_article).id)
-    assert_select("a", text: :create_article_title.l)
-    assert_select("a", text: :EDIT.l)
-    assert_select("a", text: :DESTROY.l)
+    assert_select("a", { text: :create_article_title.l },
+                  "Page is missing a link to :create")
+    assert_select("a", { text: :EDIT.l },
+                  "Page is missing a link to :edit")
+    assert_select("a", { text: :DESTROY.l },
+                  "Page is missing a link to :delete")
   end
 
   def test_new
