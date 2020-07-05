@@ -128,9 +128,8 @@ class ArticlesController < ApplicationController
   alias_method :edit_article, :edit
 
   def update
-    pass_query_params
     @article = Article.find(params[:id])
-    return if flash_missing_title?
+    return render("edit") if flash_missing_title?
 
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
@@ -142,10 +141,7 @@ class ArticlesController < ApplicationController
     else
       flash_warning(:runtime_no_changes.t)
     end
-    # redirect_to(
-    #   action: :show,
-    #   id: @article.id
-    # )
+
     redirect_to article_path(@article.id)
   end
 

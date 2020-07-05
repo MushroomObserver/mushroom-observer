@@ -130,7 +130,7 @@ class ArticlesControllerTest < FunctionalTestCase
       article: { title: new_title, body: new_body }
     }
     login(users(:zero_user).login)
-    post(:edit, params)
+    post(:update, params)
 
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
@@ -138,7 +138,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove authorized user can edit article
     login(users(:article_writer).login)
     make_admin
-    post(:edit, params)
+    post(:update, params)
     article.reload
 
     assert_flash_success
@@ -148,14 +148,14 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove that saving without changes provokes warning
     # save it again without changes
-    post(:edit, params)
+    post(:update, params)
     article.reload
     assert_flash_warning
     assert_redirected_to(action: :show, id: article.id)
 
     # Prove removing title provokes warning
     params[:article][:title] = ""
-    post(:edit, params)
+    post(:update, params)
     assert_flash_text(:article_title_required.l)
     assert_template(:edit)
   end
