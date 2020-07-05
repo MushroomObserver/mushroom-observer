@@ -117,7 +117,7 @@ class ArticlesControllerTest < FunctionalTestCase
     login(users(:article_writer).login)
     make_admin
     get(:edit, params)
-    assert_form_action(action: :edit)
+    assert_form_action(action: :update) # "edit" form posts to :create action
   end
 
   def test_update
