@@ -83,7 +83,7 @@ class ArticlesController < ApplicationController
     show_selected_articles(query)
   end
 
-  alias_method :list_articles, :index
+  alias list_articles index
 
   ##############################################################################
   #
@@ -98,14 +98,14 @@ class ArticlesController < ApplicationController
     @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
   end
 
-  alias_method :show_article, :show
+  alias show_article show
 
   # Create a new article
   def new
     @article = Article.new
   end
 
-  alias_method :create_article, :new
+  alias create_article new
 
   def create
     return render("new") if flash_missing_title?
@@ -125,7 +125,7 @@ class ArticlesController < ApplicationController
     @article = find_or_goto_index(Article, params[:id])
   end
 
-  alias_method :edit_article, :edit
+  alias edit_article edit
 
   def update
     @article = Article.find(params[:id])
@@ -145,7 +145,7 @@ class ArticlesController < ApplicationController
     redirect_to article_path(@article.id)
   end
 
-  alias_method :save_edits, :update
+  alias save_edits update
 
   # Destroy one article
   def destroy
@@ -156,7 +156,7 @@ class ArticlesController < ApplicationController
     redirect_to action: :index_article
   end
 
-  alias_method :destroy_article, :destroy
+  alias destroy_article destroy
 
   ##############################################################################
 
