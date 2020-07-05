@@ -750,35 +750,19 @@ class Observation < AbstractModel
   # always return a Naming, no matter how ambiguous, unless there are no
   # namings.
   def consensus_naming
-    result = nil
+    matches = find_matches
+    return nil if matches.empty?
+    return matches.first if matches.length == 1
 
-    # First, get the Naming(s) for this Name, if any exists.
-    matches = namings.select { |n| n.name_id == name_id }
+    best_naming = matches.first
+    best_value = matches.first.vote_cache
+    matches.each do |naming|
+      next unless naming.vote_cache > best_value
 
-    # If not, it means that a deprecated Synonym won.  Look up all Namings
-    # for Synonyms of the consensus Name.
-    if matches == [] && name && name.synonym_id
-      synonyms = name.synonyms
-      matches = namings.select { |n| synonyms.include?(n.name) }
+      best_naming = naming
+      best_value = naming.vote_cache
     end
-
-    # Only one match -- easy!
-    if matches.length == 1
-      result = matches.first
-
-    # More than one match: take the one with the highest vote.
-    elsif best_naming = matches.first
-      best_value = matches.first.vote_cache
-      matches.each do |naming|
-        next unless naming.vote_cache > best_value
-
-        best_naming = naming
-        best_value  = naming.vote_cache
-      end
-      result = best_naming
-    end
-
-    result
+    best_naming
   end
 
   def calc_consensus
@@ -881,6 +865,13 @@ class Observation < AbstractModel
   end
 
   private
+
+  def find_matches
+    matches = namings.select { |n| n.name_id == name_id }
+    return matches unless matches == [] && name && name.synonym_id
+
+    namings.select { |n| name.synonyms.include?(n.name) }
+  end
 
   def format_coordinate(value, positive_point, negative_point)
     return "#{-value.round(4)}°#{negative_point}" if value.negative?
