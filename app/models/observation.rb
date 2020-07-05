@@ -1097,12 +1097,7 @@ class Observation < AbstractModel
   #   obs.announce_consensus_change(old_name, new_name)
   #
   def announce_consensus_change(old_name, new_name)
-    if old_name
-      log(:log_consensus_changed, old: old_name.display_name,
-                                  new: new_name.display_name)
-    else
-      log(:log_consensus_created, name: new_name.display_name)
-    end
+    log_consensus_change(old_name, new_name)
 
     # Change can trigger emails.
     owner  = user
@@ -1126,6 +1121,15 @@ class Observation < AbstractModel
     (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
                                                 old_name, new_name)
+    end
+  end
+
+  def log_consensus_change(old_name, new_name)
+    if old_name
+      log(:log_consensus_changed, old: old_name.display_name,
+                                  new: new_name.display_name)
+    else
+      log(:log_consensus_created, name: new_name.display_name)
     end
   end
 
