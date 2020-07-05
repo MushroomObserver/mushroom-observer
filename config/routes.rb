@@ -760,7 +760,7 @@ MushroomObserver::Application.routes.draw do
         as: "name_descriptions_#{action}",
         id: /\d+/
   end
-  
+
   resources :notifications, only: [:show]
 
   resources :pivotal, only: [:index]
@@ -801,7 +801,6 @@ MushroomObserver::Application.routes.draw do
     )
   end
 
-  # FIXME: NIMMO do separate location and name description routing here
   ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
     # Removing, this is a duplicate of resources above - AN

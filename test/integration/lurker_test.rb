@@ -76,7 +76,7 @@ class LurkerTest < IntegrationTestCase
     # Click on name.
     get("/#{obs}")
     # (Should be at least two links to show the name Fungi.)
-    assert_select("a[href^='/names/show_name/#{names(:fungi).id}']", minimum: 2)
+    assert_select("a[href^='/names/#{names(:fungi).id}']", minimum: 2)
     click(label: /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
     assert_select(

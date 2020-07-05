@@ -89,6 +89,9 @@ module SessionExtensions
 
   # Override all 'get' calls and do a bunch of extra error checking.
   def get(*args)
+    puts "-" * 80
+    puts "We are in session_extensions get"
+    puts "-" * 80
     if !@doing_with_error_checking
       process_with_error_checking("get", *args)
     else

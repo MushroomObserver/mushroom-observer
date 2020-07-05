@@ -232,7 +232,7 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    link_to(name || object.title.t, object_path(object.id))
+    link_to(name || object.title.t, object_path(object))
   end
 
   # Output path helpers. Useful when:
@@ -241,7 +241,9 @@ module ObjectLinkHelper
   # - can accept params: object_path(@project, q: get_query_param)
   def object_path(obj, params = {})
     objroute = object_route_s(obj)
-    params[:id] = obj.id
+    if !params[:id].present?
+      params[:id] = obj.id
+    end
     send("#{objroute}_path", params)
   end
 
@@ -263,6 +265,16 @@ module ObjectLinkHelper
     send("#{route}_#{action.to_s}_path", params)
   end
 
+  # def model_index_path(model, params = {})
+  #   objroute = object_route_p(model)
+  #   send("#{objroute}_path", params)
+  # end
+  #
+  # def model_show_path(model, params = {})
+  #   objroute = object_route_s(model)
+  #   send("#{objroute}_path", params)
+  # end
+  #
   def object_route_s(obj)
     obj.model_name.singular_route_key
   end

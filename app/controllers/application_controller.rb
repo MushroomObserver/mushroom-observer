@@ -98,7 +98,7 @@ class ApplicationController < ActionController::Base
   require "login_system"
   require "csv"
   include LoginSystem
-  include ViewsPath
+  # include ViewsPath - Nimmo experiment, please keep for now
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -1052,8 +1052,9 @@ class ApplicationController < ActionController::Base
 
     [
       :show_objects.t(type: model.type_tag),
-      add_query_param({ controller: "/#{model.show_controller}",
-                        action: :index }, query)
+      # add_query_param({ controller: "/#{model.show_controller}",
+      #                   action: :index }, query)
+      model_index_path(model, q: query)
     ]
   end
   helper_method :coerced_query_link
@@ -1247,9 +1248,10 @@ class ApplicationController < ActionController::Base
     query =  next_params[:query]
 
     # Redirect to the show_object page appropriate for the new object.
-    redirect_to(add_query_param({ controller: object.show_controller,
-                                  action: object.show_action,
-                                  id: id }, query))
+    # redirect_to(add_query_param({ controller: object.show_controller,
+    #                               action: object.show_action,
+    #                               id: id }, query))
+    redirect_to object_path(object.model, id:id, q: query)
   end
 
   def find_query_and_next_object(object, method, id)
@@ -1377,6 +1379,10 @@ class ApplicationController < ActionController::Base
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
+    puts "-" * 80
+    puts query
+    puts "-" * 80
+
     letter_arg   = args[:letter_arg] || :letter
     number_arg   = args[:number_arg] || :page
     num_per_page = args[:num_per_page] || 50
@@ -1475,9 +1481,10 @@ class ApplicationController < ActionController::Base
 
     # If only one result (before pagination), redirect to 'show' action.
     if (@num_results == 1) && !args[:always_index]
-      redirect_with_query(controller: query.model.show_controller,
-                          action: query.model.show_action,
-                          id: query.result_ids.first)
+      # redirect_with_query(controller: query.model.show_controller,
+      #                     action: query.model.show_action,
+      #                     id: query.result_ids.first)
+      redirect_to model_show_path(query.model, id: query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
     else
@@ -1487,7 +1494,7 @@ class ApplicationController < ActionController::Base
                  paginate_numbers(number_arg, num_per_page)
                end
 
-      # Skip to correct place if coming back in to index from show_object.
+      # Skip to correct page if coming back in to index from show_object.
       if args[:id].present? &&
          params[@pages.letter_arg].blank? &&
          params[@pages.number_arg].blank?
@@ -1574,9 +1581,10 @@ class ApplicationController < ActionController::Base
   end
 
   def sort_link(text, query, by)
-    [text, { controller: query.model.show_controller,
-             action: query.model.index_action,
-             by: by }.merge(query_params)]
+    # [text, { controller: query.model.show_controller,
+    #          action: query.model.index_action,
+    #          by: by }.merge(query_params)]
+    [text, model_index_path(query.model, { by: by, q: query_params })]
   end
 
   def reverse_by(query, this_by)
@@ -1596,10 +1604,29 @@ class ApplicationController < ActionController::Base
     unless result
       flash_error(:runtime_object_not_found.t(id: id || "0",
                                               type: model.type_tag))
-      redirect_with_query(controller: model.show_controller,
-                          action: model.index_action)
+      # redirect_with_query(controller: model.show_controller,
+      #                     action: model.index_action)
+      redirect_to model_index_path(model, q: query_params)
     end
     result
+  end
+
+  def model_index_path(model, params = {})
+    objroute = object_route_p(model)
+    send("#{objroute}_path", params)
+  end
+
+  def model_show_path(model, params = {})
+    objroute = object_route_s(model)
+    send("#{objroute}_path", params)
+  end
+
+  def object_route_s(obj)
+    obj.model_name.singular_route_key
+  end
+
+  def object_route_p(obj)
+    obj.model_name.route_key
   end
 
   private ##########
@@ -1614,8 +1641,9 @@ class ApplicationController < ActionController::Base
     to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
     raise "Unsure where to go from #{from}." unless to_model
 
-    redirect_with_query(controller: to_model.show_controller,
-                        action: to_model.index_action)
+    # redirect_with_query(controller: to_model.show_controller,
+    #                     action: to_model.index_action)
+    redirect_to model_index_path(to_model, q: query_params)
   end
 
   # Return string which is the class or controller to fall back from.
@@ -1630,9 +1658,8 @@ class ApplicationController < ActionController::Base
     image: Image,
     location: Location,
     name: Name,
-    naming: Observation,
+    naming: Naming,
     observation: Observation,
-    observer: RssLog,
     project: Project,
     rss_log: RssLog,
     species_list: SpeciesList,

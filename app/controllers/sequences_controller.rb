@@ -14,15 +14,15 @@ class SequencesController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_sequence,
-    :list_sequences, # aliased
     :sequence_search,
     :observation_index,
     :show,
     :show_next,
-    :show_prev,
-    :show_sequence, # aliased
-    :next_sequence, # aliased
-    :prev_sequence # aliased
+    :show_prev
+    # :list_sequences, # aliased
+    # :show_sequence, # aliased
+    # :next_sequence, # aliased
+    # :prev_sequence # aliased
   ]
 
   def index_sequence
@@ -32,31 +32,53 @@ class SequencesController < ApplicationController
 
   def index
     store_location
-    query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
+    if params[:by]
+      index_sequence
+    elsif params[:obs]
+      observation_index
+    elsif params[:pattern]
+      sequence_search
+    else
+      query = create_query(:Sequence, :all)
+      show_selected_sequences(query)
+    end
   end
 
-  alias_method :list_sequences, :index
+  alias :list_sequences :index
 
   # Display list of Sequences whose text matches a string pattern.
   def sequence_search
+    puts "-" * 80
+    puts "We are in sequence_search"
+    puts "-" * 80
+
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (sequence = Sequence.safe_find(pattern))
-      redirect_to(
-        action: :show,
-        id: sequence.id
-      )
+    if pattern.match?(/^\d+$/) &&
+       (@sequence = Sequence.safe_find(pattern))
+      puts "-" * 80
+      puts @sequence.inspect
+      puts "-" * 80
+      redirect_to sequence_path(@sequence.id)
+      return
     else
+      puts "-" * 80
+      puts "I'm sensing a pattern"
+      puts "-" * 80
       query = create_query(:Sequence, :pattern_search, pattern: pattern)
       show_selected_sequences(query)
     end
   end
 
+  # Note: Does this action now need the param [:obs] instead of [:id]
+  # to differentiate the request from other requests hitting the index?
+  # FIXME: Update new/edit/update actions accordingly?
+  # FIXME: Update tests and views (and maybe other controllers) accordingly?
   def observation_index
     store_location
+    # query = create_query(:Sequence, :for_observation,
+    #                      observation: params[:id].to_s)
     query = create_query(:Sequence, :for_observation,
-                         observation: params[:id].to_s)
+                         observation: params[:obs].to_s)
     # @links = [
     #   [:show_object.l(type: :observation),
     #    Observation.show_link_args(params[:id])],
@@ -67,36 +89,39 @@ class SequencesController < ApplicationController
     # ]
     @links = []
     @links << [:show_object.l(type: :observation),
-              observation_path(params[:id])]
+              observation_path(params[:obs])]
     @links << [:show_observation_add_sequence.l,
-              new_sequence_path(id: params[:id])]
+              new_sequence_path(obs: params[:obs])]
     show_selected_sequences(query, always_index: true)
   end
 
   def show
+    puts "-" * 80
+    puts "We are in :show"
+    puts "-" * 80
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  alias_method :show_sequence, :show
+  alias :show_sequence :show
 
   def show_next
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  alias_method :next_sequence, :show_next
+  alias :next_sequence :show_next
 
   def show_prev
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
-  alias_method :prev_sequence, :show_prev
+  alias :prev_sequence :show_prev
 
   def new
     store_location
     pass_query_params
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    @observation = find_or_goto_index(Observation, params[:obs].to_s)
     return unless @observation
 
     @back_object = @observation
@@ -108,7 +133,7 @@ class SequencesController < ApplicationController
   def create
     store_location
     pass_query_params
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    @observation = find_or_goto_index(Observation, params[:obs].to_s)
     return unless @observation
 
     build_sequence
@@ -204,6 +229,9 @@ class SequencesController < ApplicationController
   end
 
   def show_selected_sequences(query, args = {})
+    puts "-" * 80
+    puts "We are in show_selected_sequences"
+    puts "-" * 80
     args = {
       action: :index,
       letters: "sequences.locus",
