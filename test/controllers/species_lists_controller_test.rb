@@ -706,12 +706,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal("rolf", spl.user.login)
 
     requires_user(:edit, spl.id.to_s, params)
+    assert_response(:success)
     assert_edit_species_list
-    # assert_form_action(
-    #   action: :edit,
-    #   id: spl.id.to_s,
-    #   species_list_approved_where: "Burbank, California, USA"
-    # )
     assert_select("form", { action: species_list_path,
                             method: "post" }) do
       assert_select("form input", { type: "hidden",
@@ -721,59 +717,62 @@ class SpeciesListsControllerTest < FunctionalTestCase
                                     name: "species_list_approved_where",
                                     value: "Burbank, California, USA" })
     end
+
+    spl = species_lists(:unknown_species_list)
+    login(users(:zero_user).login)
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
+    assert_response(:redirect,
+                    "List non-member should be redirected upon attempt to edit")
+
+    proj = projects(:bolete_project)
+    assert(spl.projects.include?(proj))           # owned by bolete project
+    assert_not_equal(dick.id, spl.user_id)        # dick id not list owner
+    assert_equal([dick.id],
+                 proj.user_group.users.map(&:id)) # He's just a project member
+    login("dick")
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
+    assert_response(
+      :success, "Any project member should be able to edit a project's lists"
+    )
   end
 
-  def test_presence_of_links_to_edit_different_objects
+  def test_presence_of_links_to_modify_species_list
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
     assert_equal([dick.id],
-                 proj.user_group.users.map(&:id)) # dick is only project member
-    login("rolf")
+                 proj.user_group.users.map(&:id)) # dick is a project member
+
+    # Prove non-member does not get links to edit or destroy list
+    login(users(:zero_user).login)
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
     get(:show, params: { id: spl.id })
-    # Match edit links only for the species list;
-    # there may be other edit links on the page, e.g., edit translations
     assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, count: 0)
     assert_select("a[href*=destroy]", count: 0)
-
-    # TODO: use following path instead of action once helper paths are available
-    # get edit_species_list_path(params: { id: spl.id })
-    get(:edit, params: { id: spl.id })
-    assert_response(:redirect)
-    # get species_list_path(params: { id: spl.id, method: "delete" })
-    delete(:destroy, params: { id: spl.id })
-    assert_flash_error
 
     login("mary")
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
     get(:show, params: { id: spl.id })
-    # TODO: reinstate following lines once tabsets are replaced
-    # assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, minimum: 1)
-    # assert_select("a[href*=destroy]", minimum: 1)
-    # TODO: use following path instead of action once helper paths are available
-    # get edit_species_list_path(params: { id: spl.id })
-    get(:edit, params: { id: spl.id })
-    assert_response(:success)
+    assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, { minimum: 1 },
+                  "List owner should see link to edit list")
+    assert_select("a[href*=destroy]", { minimum: 1 },
+                  "List owner should see link to destroy list")
 
     login("dick")
     # TODO: use following path instead of action once helper paths are available
     # get species_list_path(params: { id: spl.id })
     get(:show, params: { id: spl.id })
-    # TODO: reinstate following lines once tabsets are replaced
-    # assert_select("a[href*=edit]", minimum: 1)
-    # assert_select("a[href*=destroy]", minimum: 1)
-    # TODO: use following path instead of action once helper paths are available
-    # get edit_species_list_path(params: { id: spl.id })
-    get(:edit, params: { id: spl.id })
-    assert_response(:success)
-    # TODO: use following path instead of action once helper paths are available
-    # get species_list_path(params: { id: spl.id, method: "delete" })
-    delete(:destroy, params: { id: spl.id })
-    assert_flash_success
+    assert_select("a[href*=edit]", { minimum: 1 },
+                  "Project member should see link to edit list")
+    assert_select("a[href*=destroy]", { minimum: 1 },
+                  "Project member should see link to destroy list")
   end
 
   def test_update_nochange
@@ -1296,16 +1295,33 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_destroy
     spl = species_lists(:first_species_list)
     assert(spl)
-    id = spl.id
-    params = { id: id.to_s }
-    assert_equal("rolf", spl.user.login)
-    # requires_user(:destroy, [:show], params)
-    requires_user(:destroy, [spl.id], params)
 
+    login(users(:zero_user).login)
+    delete(:destroy, params: { id: spl.id })
+    assert_flash_error(
+      "Non-member should be unable to destroy a project list"
+    )
+
+    login("rolf")
+    assert_equal("rolf", spl.user.login) # rolf owns this list
+    delete(:destroy, params: { id: spl.id })
     assert_redirected_to(action: :index)
     assert_raises(ActiveRecord::RecordNotFound) do
-      SpeciesList.find(id)
+      SpeciesList.find(spl.id)
     end
+
+    spl = species_lists(:unknown_species_list)
+    proj = projects(:bolete_project)
+    assert(spl.projects.include?(proj))           # owned by bolete project
+    assert_not_equal(dick.id, spl.user_id)        # dick does not own the list
+    assert_equal([dick.id],
+                 proj.user_group.users.map(&:id)) # but is a project member
+
+    login(users(:dick).login)
+    delete(:destroy, params: { id: spl.id })
+    assert_flash_success(
+      "Non-owner member should be able to destroy a project list"
+    )
   end
 
   # ----------------------------
