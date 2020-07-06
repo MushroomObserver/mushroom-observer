@@ -55,12 +55,15 @@ module ApplicationHelper
     link_to(*link)
   end
 
-  # TODO: Check this. Maybe delete, these links are moving elsewhere
   # Convert @links in index views into a list of tabs for RHS tab set.
+  # NIMMO Modifying this to output dropdown menu items
   def create_links(links)
     return [] unless links
 
-    links.reject(&:nil?).map { |str, url| link_to(str, url) }
+    links.reject(&:nil?).map {
+      |str, url|
+      link_to str, url, class: "dropdown-item"
+    }
   end
 
   # Create an in-line white-space element approximately the given width in
