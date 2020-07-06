@@ -3,27 +3,27 @@
 %>
 
 <div class="max-width-text">
-  <%= form_with url: account_login_path do |f| %>
-    <%= f.fields_for :user do |fields| %>
+  <%= form_with(model: @user, url: account_login_path) do |f| %>
+    <%# f.fields_for :user do |fields| %>
 
       <div class="form-group mt-3">
-        <%= fields.label :login, :login_user.t + ":" %>
-        <%= fields.text_field :login, value: @login,
+        <%= f.label :login, :login_user.t + ":" %>
+        <%= f.text_field :login, value: @login, id: "account_login",
               data: { autofocus: @login.blank? }, class: "form-control" %>
       </div>
 
       <div class="form-group mt-3">
-        <%= fields.label :password, :login_password.t + ":" %>
-        <%= fields.password_field :password, value: "",
+        <%= f.label :password, :login_password.t + ":" %>
+        <%= f.password_field :password, value: "", id: "account_password",
               data: { autofocus: !@login.blank? }, class: "form-control" %>
       </div>
 
       <div class="form-group mt-3 form-inline">
-        <%= fields.check_box :user, :remember_me, checked: @remember %>
-        <%= fields.label :user_remember_me, :login_remember_me.t %>
+        <%= f.check_box :remember_me, checked: @remember, id: "remember_me" %>
+        <%= f.label :user_remember_me, :login_remember_me.t %>
       </div>
 
-    <% end %>
+    <%# end %>
 
     <%= f.submit :login_login.l, class: "btn mx-auto mt-3" %>
 

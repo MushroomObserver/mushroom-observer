@@ -106,6 +106,10 @@ class SequencesControllerTest < IntegrationTestCase
     assert_template("account/login")
 
     # Prove logged-in user can add Sequence to someone else's Observation
+    # NOTE: check this method, may need adjusting for new form markup
+    get account_login_path
+    puts response.body
+
     login("zero")
     get new_sequence_path(obs: obs.id)
     assert_response :success
