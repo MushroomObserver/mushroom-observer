@@ -19,8 +19,7 @@
   }
 %>
 
-<%= render(partial: "observation_title",
-           locals: { observation: @sequence.observation }) %>
+<%= render "sequences/observation_title", observation: @sequence.observation %>
 
 <div class="row">
   <div class="col-12 max-width-text">

@@ -1,5 +1,7 @@
 <% # Observation title for add/edit/show_sequence pages %>
-<div class="row mt-3">
+<div class="observation-title row mt-3"
+     data-sequence="<%= @sequence.id %>"
+     data-observation="<%= observation.id %>">
   <div class="col-12 max-width-text">
     <span class="bold"><%= :OBSERVATION.t %></span>:
     <%= observation.name.display_name.t %> (<%= observation.id %>)
