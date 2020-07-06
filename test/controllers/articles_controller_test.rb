@@ -9,7 +9,8 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:index)
     assert(:success)
     # Prove index (or redirect) includes link to first article
-    assert_select("a[href *= '#{Article.first.id}']")
+    assert_select("a[href *= '#{Article.first.id}']", true,
+                  "Page is missing a link to an article")
   end
 
   def test_index_article
@@ -19,11 +20,17 @@ class ArticlesControllerTest < FunctionalTestCase
   end
 
   def test_index_article_ui
-    # Prove privileged users get link to create an article
     login(users(:article_writer).login)
     get(:index_article)
-    assert_select("a", { text: :create_article_title.l },
-                  "Page is missing a link to :create")
+    assert_select(
+      "a#create_link[href='#{new_article_path}']", true,
+      "article_writers group member should get link to create article")
+
+    login(users(:zero_user).login)
+    get(:index_article)
+    assert_select(
+      "a#create_link[href='#{new_article_path}']", false,
+      "article_writers group non-member should not get link to create article")
   end
 
   def test_show
@@ -42,13 +49,14 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, id: articles(:premier_article).id)
-    assert_select("a", { text: :create_article_title.l },
+
+    assert_select("a#create_link[href='#{new_article_path}']", true,
                   "Page is missing a link to :create")
-    assert_select("a", { text: :EDIT.l },
+    assert_select("a#edit_link[href='#{edit_article_path}']", true,
                   "Page is missing a link to :edit")
-    assert_select("a", { text: :DESTROY.l },
-                  "Page is missing a link to :delete")
-  end
+    assert_select("a#destroy_link[href='#{destroy_article_path}']", true,
+                  "Page is missing a link to :destroy")
+   end
 
   def test_new
     # Prove unathorized user cannot see new form
