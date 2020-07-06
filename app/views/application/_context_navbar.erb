@@ -1,0 +1,83 @@
+<%# The top navbar. Auto-generated navbar "title" links to the index. %>
+<%# Tabs rendered in dropdown. %>
+
+<%= tag.div class: "navbar-nav w-100" do %>
+
+  <%= link_to controller.controller_name.capitalize,
+              { controller: controller.controller_name,
+                action: :index },
+              { id: "page-title",
+                class: "navbar-brand mr-auto" } %>
+
+  <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
+
+    <%= link_to({ controller: controller.controller_name, action: :new },
+                { class: "mx-4 mr-lg-5 btn nav-item nav-link btn-link",
+                  id: "create_link" }) do -%>
+          <%= tag.span class: "text-nowrap" do -%>
+            <%= tag.span :CREATE.t, class: "mr-2" -%>
+            <%= tag.span class: "fas fa-edit" -%>
+          <% end %>
+    <% end %>
+
+    <%= form_with url: search_pattern_search_path,
+                  scope: :search,
+                  class: "form-inline my-2 my-lg-0" do |form|%>
+
+      <%= tag.div class: "input-group" do %>
+
+        <%= form.text_field :pattern,
+                            value: session[:pattern],
+                            class: "form-control",
+                            aria: {label: "Search".t},
+                            size: 30,
+                            placeholder: "Search for name, location..."  %>
+
+        <%= tag.div class: "input-group-append" do %>
+          <%= form.button class: "btn btn-accent mr-2",
+                          type: "submit",
+                          aria: { label: :app_search.l } do %>
+            <%= tag.i class: "fas fa-search fa-lg" %>
+          <% end %>
+        <% end %>
+
+      <% end %>
+
+      <%= link_to search_advanced_search_form_path,
+                  class: "mx-2 btn btn-link",
+                  id: "advanced_search_link" do %>
+        <%= tag.span :app_advanced_search.t class: "text-nowrap" %>
+      <% end %>
+
+    <% end %>
+
+    <% if @links %>
+
+      <% links = create_links(@links) %>
+      <%= tag.div class: "nav-item dropdown ml-5" do -%>
+        <%= button_tag "Links",
+              class: "btn nav-link dropdown-toggle",
+              type: "button",
+              id: "actions_menu_button",
+              data: {
+                toggle: "dropdown"
+              },
+              aria: {
+                haspopup: "true",
+                expanded: "false"
+              } %>
+        <%= tag.div class: "dropdown-menu",
+              aria: {
+                labelledby: "actions_menu_button"
+              } do -%>
+            <% links.reject(&:nil?).each do |link| %>
+              <%= link %>
+            <% end %>
+        <% end %>
+      <% end %>
+
+    <% end %>
+
+  <% end %>
+
+<% end %>

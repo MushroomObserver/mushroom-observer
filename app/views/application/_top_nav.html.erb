@@ -1,5 +1,5 @@
 <nav id="top_nav"
-     class="navbar-nav navbar navbar-expand navbar-dark flex-column flex-md-row bg-primary px-0 row">
+     class="navbar navbar-expand navbar-dark flex-column flex-md-row bg-primary px-0 row">
 
   <div class="col-md-3 col-xl-2 left-side-navbar">
 
@@ -10,9 +10,9 @@
         <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
         <%= inline_svg_tag(
               "mo_logo.svg",
-              class: 'position-absolute h-100 w-100',
+              class: "position-absolute h-100 w-100",
               title: :app_title.l,
-              preserve_aspect_ratio: 'xMaxYMax meet',
+              preserve_aspect_ratio: "xMaxYMax meet",
               aria: true,
               aria_hidden: true
             ) %>
@@ -33,9 +33,10 @@
 
   <div class="col-md-9 col-lg-10 right-side-content">
 
-    <div class="collapse navbar-collapse d-flex flex-column flex-md-row justify-content-between" id="search_navbar">
+    <div class="collapse navbar-collapse"
+         id="search_navbar">
 
-      <%= yield :context_navbar %>
+      <%= render "application/context_navbar" %>
 
     </div>
 
