@@ -3,7 +3,7 @@
 require "test_helper"
 
 # Controller tests for nucleotide sequences
-class SequencesControllerTest < IntegrationTestCase
+class SequencesControllerTest < IntegrationControllerTestCase
   def test_index
     get sequences_path
     assert_template "sequences/index"
@@ -107,8 +107,8 @@ class SequencesControllerTest < IntegrationTestCase
 
     # Prove logged-in user can add Sequence to someone else's Observation
     # NOTE: check this method, may need adjusting for new form markup
-    get account_login_path
-    puts response.body
+    # get account_login_path
+    # puts response.body
 
     login("zero")
     get new_sequence_path(obs: obs.id)
@@ -148,13 +148,14 @@ class SequencesControllerTest < IntegrationTestCase
     }
 
     # Prove user must be logged in to create Sequence
-    post new_sequence_path(params)
+    # NOTE: new_*_path takes only GET with REST routing - NIMMO 07/20
+    get new_sequence_path(params)
     assert_equal(old_count, Sequence.count)
 
     # Prove logged-in user can add sequence to someone else's Observation
     user = users(:zero_user)
     login(user.login)
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -179,7 +180,7 @@ class SequencesControllerTest < IntegrationTestCase
     }
 
     login(owner.login)
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
@@ -205,7 +206,7 @@ class SequencesControllerTest < IntegrationTestCase
     }
     old_count = Sequence.count
     make_admin("zero")
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(locus, sequence.locus)
@@ -226,7 +227,7 @@ class SequencesControllerTest < IntegrationTestCase
       sequence: { locus: "",
                   bases: "actgct" }
     }
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count, Sequence.count)
     # response is :success because it just reloads the form
     assert_response(:success)
@@ -237,7 +238,7 @@ class SequencesControllerTest < IntegrationTestCase
       id: obs.id,
       sequence: { locus: "ITS" }
     }
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -247,7 +248,7 @@ class SequencesControllerTest < IntegrationTestCase
       id: obs.id,
       sequence: { locus: "ITS", archive: "GenBank" }
     }
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -257,7 +258,7 @@ class SequencesControllerTest < IntegrationTestCase
       id: obs.id,
       sequence: { locus: "ITS", accession: "KY133294.1" }
     }
-    post new_sequence_path(params)
+    post sequences_path(params)
     assert_equal(old_count, Sequence.count)
     assert_response(:success)
     assert_flash_error
@@ -279,7 +280,8 @@ class SequencesControllerTest < IntegrationTestCase
     assert_select("form input", { type: "hidden", name: "q", value: q })
 
     # Prove that post keeps query params intact.
-    post new_sequence_path(params)
+    # FIXME - Check for the q somehow, since assert_redirected_to doesn't work?
+    post sequences_path(params)
     # assert_redirected_to(observation_path(obs, q: q))
     puts response.body
     assert_template("observations/show")
@@ -299,7 +301,7 @@ class SequencesControllerTest < IntegrationTestCase
     login("zero")
     get edit_sequence_path(id: sequence.id)
     # assert_redirected_to(observation_path(obs))
-    puts response.body
+    # puts response.body
     assert_template("observations/show")
 
     # Prove Observation owner can edit Sequence
@@ -337,18 +339,18 @@ class SequencesControllerTest < IntegrationTestCase
     }
 
     # Prove user must be logged in to edit Sequence.
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_not_equal(locus, sequence.reload.locus)
 
     # Prove user must be owner to edit Sequence.
     login("zero")
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_not_equal(locus, sequence.reload.locus)
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     sequence.reload
     obs.rss_log.reload
     assert_objs_equal(obs, sequence.observation)
@@ -375,7 +377,7 @@ class SequencesControllerTest < IntegrationTestCase
                   accession: accession }
     }
     make_admin("zero")
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     sequence.reload
     obs.rss_log.reload
     assert_equal(archive, sequence.archive)
@@ -392,7 +394,7 @@ class SequencesControllerTest < IntegrationTestCase
                   archive: archive,
                   accession: accession }
     }
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_equal(locus, sequence.reload.locus)
 
     # Prove locus required.
@@ -403,7 +405,7 @@ class SequencesControllerTest < IntegrationTestCase
                   archive: archive,
                   accession: accession }
     }
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     # response is 200 because it just reloads the form
     assert_response(:success)
     assert_flash_error
@@ -416,7 +418,7 @@ class SequencesControllerTest < IntegrationTestCase
                   archive: "",
                   accession: "" }
     }
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_response(:success)
     assert_flash_error
 
@@ -428,7 +430,7 @@ class SequencesControllerTest < IntegrationTestCase
                   archive: archive,
                   accession: "" }
     }
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_response(:success)
     assert_flash_error
 
@@ -440,7 +442,7 @@ class SequencesControllerTest < IntegrationTestCase
                   archive: "",
                   accession: accession }
     }
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     assert_response(:success)
     assert_flash_error
   end
@@ -466,19 +468,19 @@ class SequencesControllerTest < IntegrationTestCase
     assert_select("form input", { type: "hidden", name: "q", value: q })
 
     # Prove by default :update goes back to observation.
-    post edit_sequence_path(params)
+    patch sequence_path(params)
     # assert_redirected_to(observation_path(obs))
     puts response.body
     assert_template("observations/show")
 
     # Prove that :update keeps query param when returning to observation.
-    post edit_sequence_path(params.merge(q: q))
+    patch sequence_path(params.merge(q: q))
     # assert_redirected_to(observation_path(obs, q: q))
     puts response.body
     assert_template("observations/show")
 
     # Prove that :update can return to show, too, with query intact.
-    post edit_sequence_path(params.merge(back: "show", q: q))
+    patch sequence_path(params.merge(back: "show", q: q))
     # assert_redirected_to(sequence_path(sequence, q: q))
     puts response.body
     assert_template("sequences/show")
