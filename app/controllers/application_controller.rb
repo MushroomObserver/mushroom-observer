@@ -1251,7 +1251,7 @@ class ApplicationController < ActionController::Base
     # redirect_to(add_query_param({ controller: object.show_controller,
     #                               action: object.show_action,
     #                               id: id }, query))
-    redirect_to object_path(object.model, id:id, q: query)
+    redirect_to object_path(object, id:id, q: query)
   end
 
   def find_query_and_next_object(object, method, id)
@@ -1609,6 +1609,36 @@ class ApplicationController < ActionController::Base
       redirect_to model_index_path(model, q: query_params)
     end
     result
+  end
+
+  # Output path helpers. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  # - can accept params: object_path(@project, q: get_query_param)
+  def object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    if !params[:id].present?
+      params[:id] = obj.id
+    end
+    send("#{objroute}_path", params)
+  end
+
+  def edit_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("edit_#{objroute}_path", params)
+  end
+
+  def new_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    params[:id] = obj.id
+    send("new_#{objroute}_path", params)
+  end
+
+  def object_action_path(obj, action, params = {})
+    objroute = object_route_p(obj)
+    params[:id] = obj.id
+    send("#{route}_#{action.to_s}_path", params)
   end
 
   def model_index_path(model, params = {})

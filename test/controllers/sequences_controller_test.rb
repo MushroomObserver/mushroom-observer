@@ -10,7 +10,7 @@ class SequencesControllerTest < IntegrationTestCase
     assert :success
   end
 
-  def test_sequence_search
+  def test_search
     get sequences_path(pattern: Sequence.last.id)
     # follow_redirect!
     # @controller.instance_variable_get("@sequence")
@@ -30,15 +30,16 @@ class SequencesControllerTest < IntegrationTestCase
   def test_observation_index
     obs = observations(:locally_sequenced_obs)
     get sequences_path(obs: obs.id)
-    puts response.body
+    # puts response.body
     assert :success
-    assert_select "[href='#{observation_path(obs.id)}']"
+    # note this must be a regexp, because there will be a query string after
+    assert_select ":match('href', ?)", Regexp.new(observation_path(obs.id))
 
-    # obs = observations(:genbanked_obs)
-    # get sequences_path(obs: obs.id)
-    # # puts response.body
-    # assert :success
-    # assert_select "[href='#{observation_path(obs.id)}']"
+    obs = observations(:genbanked_obs)
+    get sequences_path(obs: obs.id)
+    # puts response.body
+    assert :success
+    assert_select ":match('href', ?)", Regexp.new(observation_path(obs.id))
   end
 
   def test_index_sequence
@@ -58,14 +59,15 @@ class SequencesControllerTest < IntegrationTestCase
     sequence = sequences(:local_sequence)
     get sequence_path(id: sequence.id)
     puts response.body
-    assert_template("sequences/show")
+    assert_template "sequences/show"
     assert_response :success
+    assert_select "[data-sequence='#{sequence.id}']"
 
     # Prove index displayed if called with id of sequence not in db
     get sequence_path(id: 666)
     # assert_redirected_to(sequences_index_sequence_path)
-    puts response.body
-    assert_template("sequences/index")
+    # puts response.body
+    assert_template "sequences/index"
   end
 
   def test_show_next
@@ -75,9 +77,10 @@ class SequencesControllerTest < IntegrationTestCase
     q = query.id.alphabetize
 
     get sequence_path(q: q, id: results[1].id, next: 1)
-    # assert_redirected_to(sequence_path(results[2], q: q))
-    puts response.body
-    assert_template("sequences/show")
+    # assert_redirected_to sequence_path(results[2], q: q)
+    # puts response.body
+    assert_template "sequences/show"
+    assert_select "[data-sequence='#{results[2].id}']"
   end
 
   def test_show_prev
@@ -86,10 +89,11 @@ class SequencesControllerTest < IntegrationTestCase
     results = query.results
     q = query.id.alphabetize
 
-    get sequence_path(q: q, id: results[2].id)
+    get sequence_path(q: q, id: results[2].id, prev: 1)
     # assert_redirected_to sequence_path(results[1], q: q)
-    puts response.body
+    # puts response.body
     assert_template("sequences/show")
+    assert_select "[data-sequence='#{results[1].id}']"
   end
 
   def test_new
@@ -103,17 +107,17 @@ class SequencesControllerTest < IntegrationTestCase
 
     # Prove logged-in user can add Sequence to someone else's Observation
     login("zero")
-    get new_sequence_path(id: obs.id)
+    get new_sequence_path(obs: obs.id)
     assert_response :success
 
     # Prove Observation owner can add Sequence
     login(owner.login)
-    get new_sequence_path(id: obs.id)
+    get new_sequence_path(obs: obs.id)
     assert_response :success
 
     # Prove admin can add Sequence
     make_admin("zero")
-    get new_sequence_path(id: obs.id)
+    get new_sequence_path(obs: obs.id)
     assert_response :success
   end
 

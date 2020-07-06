@@ -30,7 +30,7 @@ class SequencesController < ApplicationController
     if params[:obs]
       observation_index
     elsif params[:pattern]
-      sequence_search
+      search
     elsif params[:q] || params[:by]
       index_sequence
     else
@@ -144,9 +144,9 @@ class SequencesController < ApplicationController
   end
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search
+  def search
     puts "-" * 80
-    puts "We are in sequence_search"
+    puts "We are in search"
     puts "-" * 80
 
     pattern = params[:pattern].to_s
@@ -232,7 +232,7 @@ class SequencesController < ApplicationController
 
   def whitelisted_sequence_params
     params[:sequence].permit(
-      :archive, :accession, :bases, :locus, :notes, :back
+      :archive, :accession, :bases, :locus, :notes, :back, :obs, :next, :prev
     )
   end
 end

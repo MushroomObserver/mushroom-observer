@@ -494,19 +494,19 @@ ACTIONS = {
     pattern_search: {},
     site_google_search: {}
   },
-  sequences: {
+  # sequences: {
     # create_sequence: {}, # aliased only
     # destroy_sequence: {}, # aliased only
     # edit_sequence: {}, # aliased only
-    index_sequence: {},
+    # index_sequence: {},
     # list_sequences: {}, # aliased only
     # next_sequence: {}, # aliased only
-    observation_index: {},
+    # observation_index: {},
     # prev_sequence: {}, # aliased only
-    sequence_search: {},
+    # sequence_search: {},
     # show_sequence: {}, # aliased only
-    show_next: {},
-    show_prev: {}
+    # show_next: {},
+    # show_prev: {}
     # resources
     # create: {},
     # destroy: {},
@@ -515,7 +515,7 @@ ACTIONS = {
     # new: {},
     # show: {},
     # update: {}
-  },
+  # },
   species_lists: {
     add_observation_to_species_list: {},
     add_remove_observations: {},
