@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-#
 #  = Project Controller
 #
 #  == Actions
@@ -10,18 +9,27 @@
 #   P = prefetching allowed
 #
 #  ==== Index
-#  list_projects::
-#  project_search::
+#  index::
 #  index_project::
+#  project_search::
+#  list_projects:: == index
 #  show_selected_projects::  (helper)
 #
 #  ==== Show, Create, Edit
-#  show_project::
-#  next_project::
-#  prev_project::
-#  add_project::
-#  edit_project::
-#  destroy_project::
+#  show
+#  show_next
+#  show_prev
+#  new
+#  create
+#  edit
+#  update
+#  destroy
+#  show_project:: == show
+#  next_project:: == show_next
+#  prev_project:: == show_prev
+#  add_project:: == new, create
+#  edit_project:: == edit, update
+#  destroy_project:: == destroy
 #
 #  ==== Manage
 #  admin_request::
@@ -29,8 +37,6 @@
 #  change_member_status::
 #  set_status::              (helper)
 #
-################################################################################
-
 class ProjectsController < ApplicationController
   before_action :login_required, except: [
     :index,
