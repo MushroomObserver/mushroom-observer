@@ -33,7 +33,8 @@ class ProjectsControllerTest < FunctionalTestCase
     drafts = Name::Description.where(source_name: project.title)
     assert_not(drafts.empty?)
     params = { id: project.id.to_s }
-    requires_user(:destroy, :show, params, changer.login)
+    # requires_user(:destroy, :show, params, changer.login)
+    requires_user(:destroy, project.id, params, changer.login)
     assert_redirected_to(action: :show, id: project.id)
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
