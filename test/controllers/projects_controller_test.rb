@@ -64,22 +64,24 @@ class ProjectsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_add_project_existing
-    add_project_helper(projects(:eol_project).title,
-                       "The Entoloma On Line Project")
+  def test_index
+    get(:index)
+    assert_template("index")
   end
 
-  def test_show_project
+  def test_show
     p_id = projects(:eol_project).id
+    # TODO: use following path instead of action once helper paths are available
+    # get(project_path(p_id))
     get(:show, id: p_id)
-    assert_template("show_project")
+    assert_template("projects/show")
     assert_select("a[href*='admin_request/#{p_id}']")
     assert_select("a[href*='projects/#{p_id}/edit']", count: 0)
     assert_select("a[href*='add_members/#{p_id}']", count: 0)
     assert_select("a[href*='projects/#{p_id}']", count: 0) # FIXME
   end
 
-  def test_show_project_logged_in
+  def test_show_logged_in
     p_id = projects(:eol_project).id
     requires_login(:new)
     get(:show, id: p_id)
@@ -90,17 +92,12 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*='projects/#{p_id}']") # FIXME
   end
 
-  def test_list_projects
-    get(:index)
-    assert_template("list_projects")
-  end
-
-  def test_add_project
+  def test_new
     requires_login(:new)
     assert_form_action(action: :new)
   end
 
-  def test_add_project_post
+  def test_create
     title = "Amanita Research"
     summary = "The Amanita Research Project"
     project = Project.find_by(title: title)
@@ -115,7 +112,7 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: summary
       }
     }
-    post_requires_login(:new, params)
+    post_requires_login(:create, params)
     project = Project.find_by(title: title)
     assert_redirected_to(action: :show, id: project.id)
     assert(project)
@@ -130,22 +127,27 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal([rolf], admin_group.users)
   end
 
-  def test_add_project_empty_name
+  def test_add_empty_name
     add_project_helper("", "The Empty Project")
   end
 
-  def test_add_project_existing_user_group
+  def test_add_existing
+    add_project_helper(projects(:eol_project).title,
+                       "The Entoloma On Line Project")
+  end
+
+  def test_add_existing_user_group
     add_project_helper("reviewers", "Journal Reviewers")
   end
 
-  def test_edit_project
+  def test_edit
     project = projects(:eol_project)
     params = { id: project.id.to_s }
     requires_user(:edit, :show, params)
     assert_form_action(action: :edit, id: project.id.to_s)
   end
 
-  def test_edit_project_post
+  def test_update
     title = "EOL Project"
     summary = "This has become the Entoloma On Line project"
     project = Project.find_by(title: title)
@@ -158,23 +160,23 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: summary
       }
     }
-    post_requires_user(:edit, :show, params)
+    post_requires_user(:update, :show, params)
     project = Project.find_by(title: title)
     assert_redirected_to(action: :show, id: project.id)
     assert(project)
     assert_equal(summary, project.summary)
   end
 
-  def test_edit_project_empty_name
+  def test_edit_empty_name
     edit_project_helper("", projects(:eol_project))
   end
 
-  def test_edit_project_existing
+  def test_edit_existing
     edit_project_helper(projects(:bolete_project).title,
                         projects(:eol_project))
   end
 
-  def test_destroy_project
+  def test_destroy
     project = projects(:bolete_project)
     assert(project)
     user_group = project.user_group
@@ -231,14 +233,20 @@ class ProjectsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_destroy_project_other
+  def test_destroy_other
     destroy_project_helper(projects(:bolete_project), rolf)
   end
 
-  def test_destroy_project_member
+  def test_destroy_member
     eol_project = projects(:eol_project)
     assert(eol_project.is_member?(katrina))
     destroy_project_helper(eol_project, katrina)
+  end
+
+  def test_admin_request
+    id = projects(:eol_project).id
+    requires_login(:admin_request, id: id)
+    assert_form_action(action: :admin_request, id: id)
   end
 
   def test_post_admin_request
@@ -253,12 +261,6 @@ class ProjectsControllerTest < FunctionalTestCase
     post_requires_login(:admin_request, params)
     assert_redirected_to(action: :show, id: eol_project.id)
     assert_flash_text(:admin_request_success.t(title: eol_project.title))
-  end
-
-  def test_admin_request
-    id = projects(:eol_project).id
-    requires_login(:admin_request, id: id)
-    assert_form_action(action: :admin_request, id: id)
   end
 
   def test_change_member_status
@@ -403,10 +405,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
   end
 
-  def test_changing_project_name
+  def test_change_project_name
     proj = projects(:eol_project)
     login("rolf")
-    post(:edit,
+    post(:update,
          id: projects(:eol_project).id,
          project: { title: "New Project", summary: "New Summary" })
     assert_flash_success
