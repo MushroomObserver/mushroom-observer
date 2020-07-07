@@ -3,7 +3,8 @@
 
   tabs = [
     link_to(:app_list_projects.t, action: :index),
-    link_with_query(:cancel_and_show.t(type: :project), project_path(@project))
+    link_to(:cancel_and_show.t(type: :project),
+            project_path(q: get_query_param))
   ]
   if check_permission(@project)
     tabs << link_with_query(:edit_project_destroy.t, {action: :destroy,
@@ -13,5 +14,5 @@
 %>
 
 <div class="max-width-text">
-  <%= render "form" locals: { button_name: :SAVE_EDITS }%>
+  <%= render "form", button_name: :SAVE_EDITS %>
 </div>

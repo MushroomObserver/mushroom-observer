@@ -154,8 +154,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_edit
     project = projects(:eol_project)
     params = { id: project.id.to_s }
-    requires_user(:edit, :show, params)
-    assert_form_action(action: :edit, id: project.id.to_s)
+    requires_user(:edit, project.id, params)
+    assert_form_action(action: :update, id: project.id.to_s)
   end
 
   def test_update
