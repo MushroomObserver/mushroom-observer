@@ -87,10 +87,12 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_show_logged_in
-    p_id = projects(:eol_project).id
-    requires_login(:new)
+    proj = projects(:eol_project)
+    p_id = proj.id
+    # requires_login(:new)
+    login(proj.user.login)
     get(:show, id: p_id)
-    assert_template("show_project")
+    assert_template("projects/show")
     assert_select("a[href*='admin_request/']", true,
                   "Project page should have link to admin_request")
     assert_select("a[href*='#{edit_project_path}']", true,
