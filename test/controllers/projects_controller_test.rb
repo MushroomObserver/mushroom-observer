@@ -181,7 +181,7 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: summary
       }
     }
-    post_requires_user(:update, :show, params)
+    post_requires_user(:update, project.id, params)
     project = Project.find_by(title: title)
     assert_redirected_to(action: :show, id: project.id)
     assert(project)

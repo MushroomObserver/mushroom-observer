@@ -267,6 +267,10 @@ class ProjectsController < ApplicationController
   alias_method :edit_project, :edit
 
   def update
+    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+
+    return redirect_to_project_with_query unless check_permission!(@project)
+
     @title = params[:project][:title].to_s
     @summary = params[:project][:summary]
     if @title.blank?
