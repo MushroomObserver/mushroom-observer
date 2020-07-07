@@ -74,11 +74,16 @@ class ProjectsControllerTest < FunctionalTestCase
     # TODO: use following path instead of action once helper paths are available
     # get(project_path(p_id))
     get(:show, id: p_id)
+
     assert_template("projects/show")
-    assert_select("a[href*='admin_request/#{p_id}']")
-    assert_select("a[href*='projects/#{p_id}/edit']", count: 0)
-    assert_select("a[href*='add_members/#{p_id}']", count: 0)
-    assert_select("a[href*='projects/#{p_id}']", count: 0) # FIXME
+    assert_select("a[href*='#{edit_project_path}']", false,
+                  "Page should not have link to edit Project")
+    assert_select("a[href*='#{projects_add_members_path}']", false,
+                  "Page should not have link to add project members" )
+    assert_select("a[href*='#{projects_path}'][data-method='delete']", false,
+                  "Page should not have link to destroy project")
+    assert_select("a[href*='#{projects_admin_request_path}']", true,
+                  "Project page should have link to admin_request")
   end
 
   def test_show_logged_in
@@ -86,10 +91,14 @@ class ProjectsControllerTest < FunctionalTestCase
     requires_login(:new)
     get(:show, id: p_id)
     assert_template("show_project")
-    assert_select("a[href*='admin_request/']")
-    assert_select("a[href*='projects/#{p_id}/edit']")
-    assert_select("a[href*='add_members/#{p_id}']")
-    assert_select("a[href*='projects/#{p_id}']") # FIXME
+    assert_select("a[href*='admin_request/']", true,
+                  "Project page should have link to admin_request")
+    assert_select("a[href*='#{edit_project_path}']", true,
+                  "Page should have link to edit Project")
+    assert_select("a[href*='add_members/#{p_id}']", true,
+                  "Page should have link to add project members" )
+    assert_select("a[href*='#{projects_path}'][data-method='delete']", true,
+                  "Page should have link to destroy project")
   end
 
   def test_new
