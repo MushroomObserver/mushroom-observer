@@ -105,7 +105,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_new
     requires_login(:new)
-    assert_form_action(action: :new)
+    assert_form_action(action: :create)
   end
 
   def test_create
