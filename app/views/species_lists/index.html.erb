@@ -10,7 +10,7 @@
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <div class="card">
-      <% for species_list in @objects.each %>
+      <% @objects.each do |species_list|%>
         <div class="card-body">
           <big>
             <%=

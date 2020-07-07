@@ -1,10 +1,7 @@
 <%
-  @title = :species_list_projects_title.t(list: @list.title)
-
-  tabs = [
-    link_to(:cancel_and_show.t(type: :species_list),
-            species_list_path(@list))
-  ]
+  @title = :species_list_projects_title.t(list: @species_list.title)
+  tabs = [link_to(:cancel_and_show.t(type: :species_list),
+                  species_list_path)]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
@@ -13,7 +10,7 @@
     <%= :species_list_projects_help.tp %>
   </div>
 
-  <%= form_tag(id: @list.id) %>
+  <%= form_tag(id: @species_list.id) %>
     <div class="form-group form-inline mt-3">
       <b><%= :species_list_projects_which_objects.t %></b><br/>
       <%= check_box_tag(:objects_list,
@@ -35,7 +32,7 @@
 
     <div class="form-group form-inline mt-3">
       <b><%= :species_list_projects_which_projects.t %></b><br/>
-      <% for proj in @projects.sort_by(&:text_name) %>
+      <% @projects.sort_by(&:text_name).each do |proj| %>
         <%= check_box_tag("projects_#{proj.id}",
                           1,
                           @project_states[proj.id],

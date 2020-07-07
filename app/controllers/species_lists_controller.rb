@@ -11,8 +11,8 @@
 #  species_list_search::     List of lists matching search.
 #
 #  show::                    Display notes/etc. and list of species.
-#  prev_species_list::       Display previous species list in index.
-#  next_species_list::       Display next species list in index.
+#  show_next::               Display next species list in index.
+#  show_prev::               Display previous species list in index.
 #
 #  make_report::             Display contents of species list as report.
 #
@@ -20,7 +20,8 @@
 #  create::                  Create new list.
 #  edit::                    Edit existing list.
 #  upload_species_list::     Same as edit_species_list but gets list from file.
-#  destroy::                  Destroy list.
+#  destroy::                 Destroy list.
+#
 #  add_remove_observations:: Add/remove query results to/from a list.
 #  manage_species_lists::    Add/remove one observation from a user's lists.
 #  add_observation_to_species_list::      (post method)
@@ -77,5 +78,4 @@ class SpeciesListsController < ApplicationController
     :create_species_list, # aliased
     :name_lister
   ]
-
 end

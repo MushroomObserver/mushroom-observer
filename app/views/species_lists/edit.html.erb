@@ -2,12 +2,12 @@
   @title = :species_list_edit_title.t(name: @species_list.unique_format_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :species_list),
-                    species_list_path(@species_list)),
+    link_to(:cancel_and_show.t(type: :species_list),
+            species_list_path(q: get_query_param)),
     link_with_query(:species_list_upload_title.t,
                     action: :upload_species_list, id: @species_list.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "form", locals: { button_name: :UPDATE } %>
+<%= render "form", button_name: :UPDATE %>

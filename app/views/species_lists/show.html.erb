@@ -108,15 +108,15 @@
                 <div class="row">
                   <div class="col-sm-4 col-md-3 col-lg-2">
                     <%= if observation.thumb_image_id
-                      thumbnail(observation.thumb_image,
-                                link: observation_path(observation),
-                                votes: true)
-                    end %>
+                          thumbnail(observation.thumb_image,
+                                    link: observation_path(observation),
+                                    votes: true)
+                        end %>
                   </div>
                   <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="bold">
-                      <%= link_with_query(observation.unique_format_name.t,
-                                          observation_path(observation)) %>
+                      <%= link_to observation_path(observation,
+                                                   q: get_query_param) %>
                     </div>
                     <div>
                       <b><%= location_link(observation.place_name,
