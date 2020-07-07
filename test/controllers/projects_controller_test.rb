@@ -199,8 +199,10 @@ class ProjectsControllerTest < FunctionalTestCase
     project_draft_count = drafts.length
     assert(project_draft_count.positive?)
     params = { id: project.id.to_s }
-    requires_user(:destroy, :show, params, "dick")
-    assert_redirected_to(action: :index_project)
+    # requires_user(:destroy, :show, params, "dick")
+    requires_user(:destroy, project.id, params, "dick")
+
+    assert_redirected_to(action: :index)
     assert_raises(ActiveRecord::RecordNotFound) do
       project = Project.find(project.id)
     end

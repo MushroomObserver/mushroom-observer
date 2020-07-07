@@ -283,10 +283,6 @@ class ProjectsController < ApplicationController
     else
       @project.log_update
       flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      # redirect_with_query(
-      #   action: :show,
-      #   id: @project.id
-      # )
       redirect_to_project_with_query
     end
   end
@@ -466,12 +462,7 @@ class ProjectsController < ApplicationController
     redirect_to project_path(@project.id, q: get_query_param)
   end
 
-  def redirect_to_project_index_with_query(project = @project)
-    # redirect_with_query(
-    #   action: :index,
-    #   id: project.try(&:id)
-    # )
-    redirect_to projects_path(id: project.try(&:id), q: get_query_param)
+  def redirect_to_project_index_with_query
+    redirect_to projects_path(q: get_query_param)
   end
-
 end
