@@ -23,8 +23,9 @@ class ProjectsControllerTest < FunctionalTestCase
         summary: project.summary
       }
     }
-    post_requires_user(:edit, :show, params)
-    assert_form_action(action: :edit, id: project.id) # Failure
+    # post_requires_user(:edit, :show, params)
+    post_requires_user(:edit, project.id, params)
+    assert_form_action(action: :update, id: project.id) # Failure
   end
 
   def destroy_project_helper(project, changer)
@@ -158,6 +159,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_form_action(action: :update, id: project.id.to_s)
   end
 
+  def test_edit_empty_name
+    edit_project_helper("", projects(:eol_project))
+  end
+
+  def test_edit_existing
+    edit_project_helper(projects(:bolete_project).title,
+                        projects(:eol_project))
+  end
+
   def test_update
     title = "EOL Project"
     summary = "This has become the Entoloma On Line project"
@@ -176,15 +186,6 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: project.id)
     assert(project)
     assert_equal(summary, project.summary)
-  end
-
-  def test_edit_empty_name
-    edit_project_helper("", projects(:eol_project))
-  end
-
-  def test_edit_existing
-    edit_project_helper(projects(:bolete_project).title,
-                        projects(:eol_project))
   end
 
   def test_destroy
