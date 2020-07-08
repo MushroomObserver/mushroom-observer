@@ -2,8 +2,7 @@
   @title ||= :show_project_title.t(title: @project.title)
 
   tabs = [
-    link_to(:app_list_projects.t,
-            action: :index),
+    link_to(:app_list_projects.t, action: :index),
     link_with_query(:show_project_admin_request.t,
                     action: :admin_request,
                     id: @project.id)
@@ -18,9 +17,8 @@
                       { action: :destroy,
                         id: @project.id },
                         data: { confirm: :are_you_sure.l }),
-             link_with_query(:show_project_edit.t,
-                             action: :edit,
-                             id: @project.id)]
+             link_to(:show_project_edit.t,
+                     edit_project_path(q: get_query_param))]
   end
   tabs << draw_interest_icons(@project)
   @tabsets = { pager_for: @project, right: draw_tab_set(tabs) }
@@ -40,7 +38,7 @@
         <%= ("*" + :show_project_summary.l + ":* " +
              @project.summary.to_s.html_safe).tpl %>
         <%= if @user && @project.user_group.users.member?(@user)
-          render(partial: "show_groups", locals: {project: @project})
+          render "show_groups", project: @project
         end %>
       </div>
     </div>
@@ -94,9 +92,9 @@
         <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
         <div class="ml-3">
           <% @draft_data.each do |datum| %>
-            <%= link_to(datum["display_name"].t,
+            <%= link_to datum["display_name"].t,
                         names_descriptions_path(datum["id"],
-                                                q: get_query_param)) %>
+                                                q: get_query_param) %>
             (<%= user_link(User.find(datum["user_id"])) %>)<br/>
           <% end %>
         </div>
@@ -107,8 +105,8 @@
 
 <div class="row">
   <div class="col-12">
-    <%= render(partial: "comments/comments",
-               locals: { object: @project, controls: true, limit: nil }) %>
+    <%= render partial: "comments/comments",
+               locals: { object: @project, controls: true, limit: nil } %>
   </div>
 </div>
 

@@ -1,5 +1,6 @@
 <% # form_tag(add_query_param(action: :new)) do %>
 <% # form_tag(add_query_param(action: :edit, id: @project.id)) do %>
+<# used by new/create, edit/update %>
 <%= form_with model: @project do |f| %>
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
