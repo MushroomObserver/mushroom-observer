@@ -42,6 +42,7 @@ class ObserverController < ApplicationController
     :index_observation,
     :index_rss_log,
     :index_user,
+    :interview,
     :intro,
     :list_observations,
     :list_rss_logs,

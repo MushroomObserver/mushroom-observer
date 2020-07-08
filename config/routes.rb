@@ -316,6 +316,7 @@ ACTIONS = {
     index_observation: {},
     index_rss_log: {},
     index_user: {},
+    interview: {},
     intro: {},
     letter_to_community: {},
     list_observations: {},
