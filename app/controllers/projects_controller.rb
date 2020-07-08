@@ -13,7 +13,6 @@
 #  index_project::
 #  project_search::
 #  list_projects:: == index
-#  show_selected_projects::  (helper)
 #
 #  ==== Show, Create, Edit
 #  show
@@ -35,7 +34,10 @@
 #  admin_request::
 #  add_members::
 #  change_member_status::
+#
+#  === Private Helpers
 #  set_status::              (helper)
+#  show_selected_projects::  (helper)
 #
 class ProjectsController < ApplicationController
   before_action :login_required, except: [
@@ -88,23 +90,260 @@ class ProjectsController < ApplicationController
     show_selected_projects(query)
   end
 
-  alias_method :list_projects, :index
+  alias list_projects index
 
   # Display list of Project's whose title or notes match a string pattern.
   def project_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (@project = Project.safe_find(pattern))
-      # redirect_to(
-      #   action: :show,
-      #   id: @project.id
-      # )
+    if pattern.match(/^\d+$/) && (@project = Project.safe_find(pattern))
       redirect_to_project
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
     end
   end
+
+  ##############################################################################
+  #
+  #  :section: Show, Create, Edit
+  #
+  ##############################################################################
+
+  # Display project by itself.
+  # Linked from: show_observation, list_projects
+  # Inputs: params[:id] (project)
+  # Outputs: @project
+  def show
+    store_location
+    pass_query_params
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
+    @is_member = @project.is_member?(@user)
+    @is_admin = @project.is_admin?(@user)
+
+    @draft_data = Project.connection.select_all %(
+      SELECT n.display_name, nd.id, nd.user_id
+      FROM names n, name_descriptions nd, name_descriptions_admins nda
+      WHERE nda.user_group_id = #{@project.admin_group_id}
+        AND nd.id = nda.name_description_id
+        AND n.id = nd.name_id
+      ORDER BY n.sort_name ASC, n.author ASC
+    )
+    @draft_data = @draft_data.to_a
+  end
+
+  alias show_project show
+
+  # Go to next project: redirects to show_project.
+  def show_next
+    redirect_to_next_object(:next, Project, params[:id].to_s)
+  end
+
+  alias next_project show_next
+
+  # Go to previous project: redirects to show_project.
+  def show_prev
+    redirect_to_next_object(:prev, Project, params[:id].to_s)
+  end
+
+  alias prev_project show_prev
+
+  # Form to create a project.
+  # Linked from: list_projects
+  # Inputs:
+  #   params[:id] (project id)
+  #   params[:project][:title]
+  #   params[:project][:summary]
+  # Success:
+  #   Redirects to show_project.
+  # Failure:
+  #   Renders add_project again.
+  #   Outputs: @project
+
+  def new
+    pass_query_params
+    @project = Project.new
+  end
+
+  alias add_project new
+
+  def create
+    title = params[:project][:title].to_s
+    project = Project.find_by_title(title)
+    user_group = UserGroup.find_by_name(title)
+    admin_name = "#{title}.admin"
+    admin_group = UserGroup.find_by_name(admin_name)
+    if title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif project
+      flash_error(:add_project_already_exists.t(title: project.title))
+    elsif user_group
+      flash_error(:add_project_group_exists.t(group: title))
+    elsif admin_group
+      flash_error(:add_project_group_exists.t(group: admin_name))
+    else
+      # Create project.
+      @project = Project.new(whitelisted_project_params)
+      @project.user = @user
+      @project.user_group = init_member_group(title)
+      @project.admin_group = init_admin_group(admin_name)
+      return if cannot_save!
+
+      @project.log_create
+      flash_notice(:add_project_success.t)
+      redirect_to_project_with_query
+    end
+  end
+
+  # Form to edit a project
+  # Linked from: show_project
+  # Inputs:
+  #   params[:id]
+  #   params[:project][:title]
+  #   params[:project][:summary]
+  # Success:
+  #   Redirects to show_project.
+  # Failure:
+  #   Renders edit_project again.
+  #   Outputs: @project
+  def edit
+    pass_query_params
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    return redirect_to_project_with_query unless check_permission!(@project)
+  end
+
+  alias edit_project edit
+
+  def update
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return redirect_to_project_with_query unless check_permission!(@project)
+
+    @title = params[:project][:title].to_s
+    @summary = params[:project][:summary]
+    return if cannot_update?
+
+    @project.log_update
+    flash_notice(:runtime_edit_project_success.t(id: @project.id))
+    redirect_to_project_with_query
+  end
+
+  # Callback to destroy a project.
+  # Linked from: show_project, show_observation
+  # Redirects to show_observation.
+  # Inputs: params[:id]
+  # Outputs: none
+  def destroy
+    pass_query_params
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    if !check_permission!(@project)
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to_project_with_query
+    elsif !@project.destroy
+      flash_error(:destroy_project_failed.t)
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to_project_with_query
+    else
+      @project.log_destroy
+      flash_notice(:destroy_project_success.t)
+      # redirect_with_query(
+      #   action: :index
+      # )
+      redirect_to_project_index_with_query
+    end
+  end
+
+  alias destroy_project destroy
+
+  ##############################################################################
+  #
+  #  :section: Manage
+  #
+  ##############################################################################
+
+  # Form to compose email for the admins
+  # Linked from: show_project
+  # Inputs:
+  #   params[:id]
+  # Outputs:
+  #   @project
+  # Posts to the same action.  Redirects back to show_project.
+  def admin_request
+    pass_query_params
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    return unless request.method == "POST"
+
+    send_admin_email(@user)
+    flash_notice(:admin_request_success.t(title: @project.title))
+    redirect_to_project_with_query
+  end
+
+  def send_admin_email(sender)
+    subject = params[:email][:subject]
+    content = params[:email][:content]
+    @project.admin_group.users.each do |receiver|
+      AdminEmail.build(sender, receiver, @project, subject, content).deliver_now
+    end
+  end
+
+  # View that lists all users with links to add each as a member.
+  # Linked from: show_project (for admins only)
+  # Inputs:
+  #   params[:id]
+  #   params[:candidate]  (when click on user)
+  # Outputs:
+  #   @project, @users
+  # "Posts" to the same action.  Stays on this view until done.
+  def add_members
+    pass_query_params
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    @users = User.where.not(verified: nil).order("login, name").to_a
+    if !@project.is_admin?(@user)
+      # redirect_with_query(
+      #   action: :show,
+      #   id: @project.id
+      # )
+      redirect_to_project_with_query
+    elsif params[:candidate].present?
+      @candidate = User.find(params[:candidate])
+      set_status(@project, :member, @candidate, :add)
+    end
+  end
+
+  # Form to make a given User either a member or an admin.
+  # Linked from: show_project, add_users, admin_request email
+  # Inputs:
+  #   params[:id]
+  #   params[:candidate]
+  #   params[:commit]
+  # Outputs: @project, @candidate
+  # Posts to same action.  Redirects to show_project when done.
+  def change_member_status
+    pass_query_params
+    return unless init_change_member_status
+
+    if !@project.is_admin?(@user)
+      flash_error(:change_member_status_denied.t)
+      redirect_to_project_with_query
+    elsif request.method == "POST"
+      change_member_status_post
+      redirect_to_project_with_query
+    end
+  end
+
+  ##############################################################################
+
+  private
 
   # Show selected list of projects.
   def show_selected_projects(query, args = {})
@@ -126,153 +365,32 @@ class ProjectsController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  ##############################################################################
-  #
-  #  :section: Show, Create, Edit
-  #
-  ##############################################################################
-
-  # Display project by itself.
-  # Linked from: show_observation, list_projects
-  # Inputs: params[:id] (project)
-  # Outputs: @project
-  def show # :prefetch:
-    store_location
-    pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
-      @is_member = @project.is_member?(@user)
-      @is_admin = @project.is_admin?(@user)
-
-      @draft_data = Project.connection.select_all %(
-        SELECT n.display_name, nd.id, nd.user_id
-        FROM names n, name_descriptions nd, name_descriptions_admins nda
-        WHERE nda.user_group_id = #{@project.admin_group_id}
-          AND nd.id = nda.name_description_id
-          AND n.id = nd.name_id
-        ORDER BY n.sort_name ASC, n.author ASC
-      )
-      @draft_data = @draft_data.to_a
-    end
+  def init_member_group(name)
+    member_group = UserGroup.new(name: name)
+    member_group.users << @user
+    member_group
   end
 
-  alias_method :show_project, :show
-
-  # Go to next project: redirects to show_project.
-  def show_next
-    redirect_to_next_object(:next, Project, params[:id].to_s)
+  def init_admin_group(name)
+    admin_group = UserGroup.new(name: name)
+    admin_group.users << @user
+    admin_group
   end
 
-  alias_method :next_project, :show_next
-
-  # Go to previous project: redirects to show_project.
-  def show_prev
-    redirect_to_next_object(:prev, Project, params[:id].to_s)
-  end
-
-  alias_method :prev_project, :show_prev
-
-  # Form to create a project.
-  # Linked from: list_projects
-  # Inputs:
-  #   params[:id] (project id)
-  #   params[:project][:title]
-  #   params[:project][:summary]
-  # Success:
-  #   Redirects to show_project.
-  # Failure:
-  #   Renders add_project again.
-  #   Outputs: @project
-
-  def new
-    pass_query_params
-    @project = Project.new
-  end
-
-  alias_method :add_project, :new
-
-  def create
-    title = params[:project][:title].to_s
-    project = Project.find_by_title(title)
-    user_group = UserGroup.find_by_name(title)
-    admin_name = "#{title}.admin"
-    admin_group = UserGroup.find_by_name(admin_name)
-    if title.blank?
-      flash_error(:add_project_need_title.t)
-    elsif project
-      flash_error(:add_project_already_exists.t(title: project.title))
-    elsif user_group
-      flash_error(:add_project_group_exists.t(group: title))
-    elsif admin_group
-      flash_error(:add_project_group_exists.t(group: admin_name))
+  # used by :create
+  def cannot_save!
+    if !@project.user_group.save
+      flash_object_errors(user_group)
+    elsif !@project.admin_group.save
+      flash_object_errors(admin_group)
+    elsif !@project.save
+      flash_object_errors(@project)
     else
-      # Create members group.
-      user_group = UserGroup.new
-      user_group.name = title
-      user_group.users << @user
-
-      # Create admin group.
-      admin_group = UserGroup.new
-      admin_group.name = admin_name
-      admin_group.users << @user
-
-      # Create project.
-      @project = Project.new(whitelisted_project_params)
-      @project.user = @user
-      @project.user_group = user_group
-      @project.admin_group = admin_group
-
-      if !user_group.save
-        flash_object_errors(user_group)
-      elsif !admin_group.save
-        flash_object_errors(admin_group)
-      elsif !@project.save
-        flash_object_errors(@project)
-      else
-        @project.log_create
-        flash_notice(:add_project_success.t)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      end
+      false # project saved
     end
   end
 
-  # Form to edit a project
-  # Linked from: show_project
-  # Inputs:
-  #   params[:id]
-  #   params[:project][:title]
-  #   params[:project][:summary]
-  # Success:
-  #   Redirects to show_project.
-  # Failure:
-  #   Renders edit_project again.
-  #   Outputs: @project
-  def edit # :prefetch: :norobots:
-    pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
-
-    if !check_permission!(@project)
-      # redirect_with_query(
-      #   action: :show,
-      #   id: @project.id
-      # )
-      redirect_to_project_with_query
-    end
-  end
-
-  alias_method :edit_project, :edit
-
-  def update
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
-
-    return redirect_to_project_with_query unless check_permission!(@project)
-
-    @title = params[:project][:title].to_s
-    @summary = params[:project][:summary]
+  def cannot_update?
     if @title.blank?
       flash_error(:add_project_need_title.t)
     elsif (project2 = Project.find_by_title(@title)) &&
@@ -281,144 +399,27 @@ class ProjectsController < ApplicationController
     elsif !@project.update(whitelisted_project_params)
       flash_object_errors(@project)
     else
-      @project.log_update
-      flash_notice(:runtime_edit_project_success.t(id: @project.id))
-      redirect_to_project_with_query
+      false # project updated
     end
   end
 
-  # Callback to destroy a project.
-  # Linked from: show_project, show_observation
-  # Redirects to show_observation.
-  # Inputs: params[:id]
-  # Outputs: none
-  def destroy
-    pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if !check_permission!(@project)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      elsif !@project.destroy
-        flash_error(:destroy_project_failed.t)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      else
-        @project.log_destroy
-        flash_notice(:destroy_project_success.t)
-        # redirect_with_query(
-        #   action: :index
-        # )
-        redirect_to_project_index_with_query
-      end
-    end
+  def init_change_member_status
+    (@project = find_or_goto_index(Project, params[:id].to_s)) &&
+      (@candidate = find_or_goto_index(User, params[:candidate]))
   end
 
-  alias_method :destroy_project, :destroy
+  def change_member_status_post
+    admin_change = member_change = :remove
 
-  ##############################################################################
-  #
-  #  :section: Manage
-  #
-  ##############################################################################
-
-  # Form to compose email for the admins
-  # Linked from: show_project
-  # Inputs:
-  #   params[:id]
-  # Outputs:
-  #   @project
-  # Posts to the same action.  Redirects back to show_project.
-  def admin_request # :prefetch: :norobots:
-    sender = @user
-    pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if request.method == "POST"
-        subject = params[:email][:subject]
-        content = params[:email][:content]
-        for receiver in @project.admin_group.users
-          AdminEmail.build(sender, receiver, @project,
-                           subject, content).deliver_now
-        end
-        flash_notice(:admin_request_success.t(title: @project.title))
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      end
+    case params[:commit]
+    when :change_member_status_make_admin.l
+      admin_change = member_change = :add
+    when :change_member_status_make_member.l
+      member_change = :add
     end
-  end
 
-  # View that lists all users with links to add each as a member.
-  # Linked from: show_project (for admins only)
-  # Inputs:
-  #   params[:id]
-  #   params[:candidate]  (when click on user)
-  # Outputs:
-  #   @project, @users
-  # "Posts" to the same action.  Stays on this view until done.
-  def add_members
-    pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      @users = User.where.not(verified: nil).order("login, name").to_a
-      if !@project.is_admin?(@user)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      elsif params[:candidate].present?
-        @candidate = User.find(params[:candidate])
-        set_status(@project, :member, @candidate, :add)
-      end
-    end
-  end
-
-  # Form to make a given User either a member or an admin.
-  # Linked from: show_project, add_users, admin_request email
-  # Inputs:
-  #   params[:id]
-  #   params[:candidate]
-  #   params[:commit]
-  # Outputs: @project, @candidate
-  # Posts to same action.  Redirects to show_project when done.
-  def change_member_status
-    pass_query_params
-    if (@project = find_or_goto_index(Project, params[:id].to_s)) &&
-       (@candidate = find_or_goto_index(User, params[:candidate]))
-      if !@project.is_admin?(@user)
-        flash_error(:change_member_status_denied.t)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        redirect_to_project_with_query
-      elsif request.method == "POST"
-        user_group = @project.user_group
-        admin_group = @project.admin_group
-        admin = member = :remove
-        case params[:commit]
-        when :change_member_status_make_admin.l
-          admin = member = :add
-        when :change_member_status_make_member.l
-          member = :add
-        end
-        set_status(@project, :admin, @candidate, admin)
-        set_status(@project, :member, @candidate, member)
-        # redirect_with_query(
-        #   action: :show,
-        #   id: @project.id
-        # )
-        # redirect_to_referer || redirect_to_project_index
-        redirect_to_project_with_query
-      end
-    end
+    set_status(@project, :admin, @candidate, admin_change)
+    set_status(@project, :member, @candidate, member_change)
   end
 
   # Add/remove a given User to/from a given UserGroup.
@@ -426,24 +427,14 @@ class ProjectsController < ApplicationController
   def set_status(project, type, user, mode)
     group = project.send(type == :member ? :user_group : :admin_group)
     if mode == :add
-      unless group.users.include?(user)
-        group.users << user unless group.users.member?(user)
-        project.send("log_add_#{type}", user)
-      end
-    else
-      if group.users.include?(user)
-        group.users.delete(user)
-        project.send("log_remove_#{type}", user)
-      end
+      return if group.users.include?(user)
+
+      group.users << user unless group.users.member?(user)
+      project.send("log_add_#{type}", user)
+    elsif group.users.include?(user)
+      group.users.delete(user)
+      project.send("log_remove_#{type}", user)
     end
-  end
-
-  ##############################################################################
-
-  private
-
-  def whitelisted_project_params
-    params.require(:project).permit(:title, :summary)
   end
 
   # borrowed from herbaria_controller:
@@ -464,5 +455,9 @@ class ProjectsController < ApplicationController
 
   def redirect_to_project_index_with_query
     redirect_to projects_path(q: get_query_param)
+  end
+
+  def whitelisted_project_params
+    params.require(:project).permit(:title, :summary)
   end
 end
