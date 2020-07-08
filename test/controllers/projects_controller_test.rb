@@ -69,6 +69,12 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_index
     get(:index)
     assert_template("index")
+    Project.find_each do |project|
+      assert_select("a[href*='#{projects_path}/#{project.id}']",
+                    { text: project.title },
+                    "Index should link to each project, including " \
+                    "#{project.title} (##{project.id})")
+    end
   end
 
   def test_show
