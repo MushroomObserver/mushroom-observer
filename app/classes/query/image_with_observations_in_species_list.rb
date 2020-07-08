@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ImageWithObservationsInSpeciesList < Query::ImageWithObservations
   include Query::Initializers::ContentFilters
 

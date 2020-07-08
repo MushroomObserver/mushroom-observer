@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pivotal
   require_dependency "pivotal/http"    # Deals with HTTP requests.
   require_dependency "pivotal/story"   # Encapsulates a single story.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Notify user someone has observed a name they are interested in.
 class NamingTrackerEmail < AccountMailer
   def build(tracker, naming)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::LocationAdvancedSearch < Query::LocationBase
   include Query::Initializers::AdvancedSearch
 

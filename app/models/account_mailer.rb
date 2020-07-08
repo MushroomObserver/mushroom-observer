@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #  Base class for mailers for each type of email
 class AccountMailer < ActionMailer::Base
   private
@@ -20,7 +22,7 @@ class AccountMailer < ActionMailer::Base
   end
 
   def debug_log(template, from, to, objects = {})
-    msg = "MAIL #{template}"
+    msg = + "MAIL #{template}" # create mutable string
     msg << " from=#{from.id}" if from
     msg << " to=#{to.id}" if to
     objects.each do |k, v|

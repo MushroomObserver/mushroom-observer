@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ObservationReport
   # Symbiota-style tsv report.
   class Symbiota < ObservationReport::TSV

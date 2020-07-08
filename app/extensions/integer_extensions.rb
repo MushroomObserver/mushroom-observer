@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Extensions to Integer
 #
@@ -23,8 +25,7 @@ class Integer
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
-           freeze
+  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
   def alphabetize(alphabet = BASE62)
     str      = ""

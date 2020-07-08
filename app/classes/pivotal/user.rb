@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pivotal
   class User
     attr_accessor :id

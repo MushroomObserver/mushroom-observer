@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   #

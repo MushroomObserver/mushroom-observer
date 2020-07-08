@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::ApiKeyBase < Query::Base
   def model
     ApiKey

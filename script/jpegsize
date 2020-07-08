@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 #  Read width and height of JPEG image from header.  (ImageMagick loads the
 #  entire image into memory!)

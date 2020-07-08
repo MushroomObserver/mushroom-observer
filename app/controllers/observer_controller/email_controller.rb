@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: move this into a new EmailController
 class ObserverController
   def email_features # :root: :norobots:

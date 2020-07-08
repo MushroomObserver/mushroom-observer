@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # /pivotal
 class Pivotal
   require "fileutils"

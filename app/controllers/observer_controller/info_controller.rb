@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: move this into a new InfoController
 # Display canned informations about site
 class ObserverController

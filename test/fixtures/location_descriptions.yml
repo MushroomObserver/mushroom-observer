@@ -4,7 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # Do not add other decriptions by rolf; it will break tests
-albion_desc: # 1
+albion_desc:
   location: albion
   created_at: 2007-12-27 06:41:20
   updated_at: 2007-12-27 06:41:20
@@ -19,7 +19,7 @@ albion_desc: # 1
   reader_groups: all_users
   writer_groups: all_users
 
-no_mushrooms_location_desc: # 2
+no_mushrooms_location_desc:
   location: no_mushrooms_location
   user: dick
   version: 1

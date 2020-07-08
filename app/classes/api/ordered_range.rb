@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # Encapsulates a range of values of any types of objects that can be compared
   class OrderedRange < Range

@@ -3,51 +3,51 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-minimal_unknown_naming: # 1
+minimal_unknown_naming:
   user: mary
   name: fungi
   observation: minimal_unknown_obs
 
-detailed_unknown_naming: # 2
+detailed_unknown_naming:
   user: mary
   name: fungi
   observation: detailed_unknown_obs
 
-coprinus_comatus_naming: # 3
+coprinus_comatus_naming:
   user: rolf
   name: coprinus_comatus
   observation: coprinus_comatus_obs
   vote_cache: 1
   reasons: "---\n1: Isn't it obvious?\n"
 
-agaricus_campestris_naming: # 4
+agaricus_campestris_naming:
   user: rolf
   name: agaricus_campestris
   observation: agaricus_campestris_obs
 
-agaricus_campestrus_naming: # 5
+agaricus_campestrus_naming:
   user: rolf
   name: agaricus_campestrus
   observation: agaricus_campestrus_obs
 
-agaricus_campestras_naming: # 6
+agaricus_campestras_naming:
   user: rolf
   name: agaricus_campestras
   observation: agaricus_campestras_obs
 
-agaricus_campestros_naming: # 7
+agaricus_campestros_naming:
   user: rolf
   name: agaricus_campestros
   observation: agaricus_campestros_obs
 
-strobilurus_diminutivus_naming: # 8
+strobilurus_diminutivus_naming:
   user: rolf
   name: strobilurus_diminutivus_no_author
   observation: strobilurus_diminutivus_obs
   vote_cache: 0
 
 # dates are hard-coded expects in AccountMailerTest test_name_proposal_email
-coprinus_comatus_other_naming: # 9
+coprinus_comatus_other_naming:
   created_at: 2007-02-28 20:20:00
   updated_at: 2007-02-28 20:21:00
   user: mary
@@ -55,53 +55,53 @@ coprinus_comatus_other_naming: # 9
   observation: coprinus_comatus_obs
   reasons: "---\n1: \"\"\n2: I asked *Uncle Herb*\n"
 
-boletus_edulis_naming: # 10
+boletus_edulis_naming:
   user: dick
   name: boletus_edulis
   observation: owner_only_favorite_eq_consensus
 
-tremella_naming: # 11
+tremella_naming:
   user: junk
   name: tremella
   observation: owner_only_favorite_ne_consensus
 
-tremella_mesenterica_naming: # 12
+tremella_mesenterica_naming:
   user: dick
   name: tremella_mesenterica
   observation: owner_only_favorite_ne_consensus
 
-owner_multiple_favorites_first_naming: # 13
+owner_multiple_favorites_first_naming:
   user: dick
   name: tremella
   observation: owner_multiple_favorites
 
-owner_multiple_favorites_second_naming: # 14
+owner_multiple_favorites_second_naming:
   user: dick
   name: tremella_mesenterica
   observation: owner_multiple_favorites
 
-owner_uncertain_favorite_naming: # 15
+owner_uncertain_favorite_naming:
   user: dick
   name: tremella_mesenterica
   observation: owner_uncertain_favorite
 
-unequal_positive_namings_top_naming: # 16
+unequal_positive_namings_top_naming:
   user: dick
   name: tremella_mesenterica
   observation: unequal_positive_namings_obs
 
-unequal_positive_namings_2nd_naming: # 17
+unequal_positive_namings_2nd_naming:
   user: dick
   name: tremella
   observation: unequal_positive_namings_obs
 
-all_namings_deprecated_winning_naming: # 18
+all_namings_deprecated_winning_naming:
   user:        dick
   observation: all_namings_deprecated_obs
   name:        namings_deprecated_1
   vote_cache:  <%= Vote.maximum_vote %>
 
-all_namings_deprecated_other_naming: # 19
+all_namings_deprecated_other_naming:
   # Manually set id low in order to improve test coverage of consensus_naming.
   # (This avoid Rails' generating the id via hashing the fixture label.)
   # Coverage is improved when this Naming appears before the winning one
@@ -113,34 +113,34 @@ all_namings_deprecated_other_naming: # 19
   name:        namings_deprecated_2
   vote_cache:  <%= Vote.next_best_vote %>
 
-authored_with_naming_obs_authored_naming: # 20
+authored_with_naming_obs_authored_naming:
   user:        rolf
   observation: authored_with_naming_obs
   name:        authored_with_naming
   vote_cache:  <%= Vote.maximum_vote %>
 
-authored_with_naming_obs_unauthored_naming: # 21
+authored_with_naming_obs_unauthored_naming:
   user:        dick
   observation: authored_with_naming_obs
   name:        unauthored_with_naming
   vote_cache:  <%= Vote.next_best_vote %>
 
 # dick owns the Name and Observation, but mary owns a Naming
-other_user_owns_naming: # 22
+other_user_owns_naming:
   user:        mary
   observation: other_user_owns_naming_obs
   name:        other_user_owns_naming_name
   vote_cache:  <%= Vote.next_best_vote %>
 
 # dick owns the Name and Naming, but mary owns an Observation
-other_user_owns_obs_naming: # 23
+other_user_owns_obs_naming:
   user:        dick
   observation: other_user_owns_obs
   name:        other_user_owns_observation
   vote_cache:  <%= Vote.next_best_vote %>
 
 # dick owns the Name and the only Observation and Naming
-same_user_owns_name_and_observation: # 24
+same_user_owns_name_and_observation:
   user:        dick
   observation: same_user_owns_name_and_naming_obs
   name:        same_user_owns_naming_and_observation

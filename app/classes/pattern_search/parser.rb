@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PatternSearch
   class Parser
     attr_accessor :incoming_string
@@ -21,7 +23,8 @@ module PatternSearch
 
     def parse_incoming_string
       hash = {}
-      str = clean_incoming_string
+      # make str mutable because it is modified by parse_next_term
+      str = + clean_incoming_string
       until str.blank?
         (var, val) = parse_next_term!(str)
         term = hash[var] ||= Term.new(var)
@@ -30,6 +33,7 @@ module PatternSearch
       hash.values
     end
 
+    # modifies str
     def parse_next_term!(str)
       str.sub!(TERM_REGEX, "") ||
         raise(SyntaxError.new(string: str))

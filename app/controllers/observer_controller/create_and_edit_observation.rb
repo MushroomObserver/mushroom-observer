@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see observer_controller.rb
 class ObserverController
   # Form to create a new observation, naming, vote, and images.
@@ -86,7 +88,7 @@ class ObserverController
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
     success = false if @name && !validate_object(@naming)
-    success = false if @name && !validate_object(@vote)
+    success = false if @name && !@vote.value.nil? && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
 
@@ -150,12 +152,7 @@ class ObserverController
   end
 
   def save_everything_else(reason)
-    if @name
-      @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_log(@naming)
-      @observation.reload
-      @observation.change_vote(@naming, @vote.value)
-    end
+    update_naming(reason)
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
@@ -774,6 +771,15 @@ class ObserverController
   ##############################################################################
 
   private
+
+  def update_naming(reason)
+    if @name
+      @naming.create_reasons(reason, params[:was_js_on] == "yes")
+      save_with_log(@naming)
+      @observation.reload
+      @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
+    end
+  end
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",

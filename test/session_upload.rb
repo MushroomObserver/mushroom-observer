@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FileUpload
   attr_accessor :filename
   attr_accessor :content_type

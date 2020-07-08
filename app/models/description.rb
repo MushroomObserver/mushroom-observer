@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Base Class for Models with Authored Descriptions
 #

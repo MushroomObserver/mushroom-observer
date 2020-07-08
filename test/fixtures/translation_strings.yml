@@ -10,7 +10,7 @@
 # 4 dick:  Greek:   one, two
 # (English "one" has changed since Mary translated it.)
 
-english_one: # 1
+english_one:
   version: 1
   language: english
   tag: one
@@ -18,7 +18,7 @@ english_one: # 1
   updated_at: 2012-05-30
   user_id: 0
 
-english_two: # 2
+english_two:
   version: 1
   language: english
   tag: two
@@ -26,7 +26,7 @@ english_two: # 2
   updated_at: 2012-05-24
   user_id: 0
 
-english_TWO: # 3
+english_TWO:
   version: 1
   language: english
   tag: TWO
@@ -34,7 +34,7 @@ english_TWO: # 3
   updated_at: 2012-05-24
   user_id: 0
 
-english_twos: # 4
+english_twos:
   version: 1
   language: english
   tag: twos
@@ -42,7 +42,7 @@ english_twos: # 4
   updated_at: 2012-05-24
   user_id: 0
 
-english_TWOS: # 5
+english_TWOS:
   version: 1
   language: english
   tag: TWOS
@@ -50,7 +50,7 @@ english_TWOS: # 5
   updated_at: 2012-05-24
   user_id: 0
 
-english_three: # 6
+english_three:
   version: 1
   language: english
   tag: three
@@ -58,7 +58,7 @@ english_three: # 6
   updated_at: 2012-05-24
   user_id: 0
 
-english_four: # 7
+english_four:
   version: 1
   language: english
   tag: four
@@ -66,7 +66,7 @@ english_four: # 7
   updated_at: 2012-05-24
   user_id: 0
 
-french_one: # 8
+french_one:
   version: 1
   language: french
   tag: one
@@ -74,7 +74,7 @@ french_one: # 8
   updated_at: 2012-05-24
   user: mary
 
-french_two: # 9
+french_two:
   version: 1
   language: french
   tag: two
@@ -82,7 +82,7 @@ french_two: # 9
   updated_at: 2012-05-24
   user: mary
 
-french_TWO: # 10
+french_TWO:
   version: 1
   language: french
   tag: TWO
@@ -90,7 +90,7 @@ french_TWO: # 10
   updated_at: 2012-05-24
   user: mary
 
-french_twos: # 11
+french_twos:
   version: 1
   language: french
   tag: twos
@@ -98,7 +98,7 @@ french_twos: # 11
   updated_at: 2012-05-30
   user: rolf
 
-french_TWOS: # 12
+french_TWOS:
   version: 1
   language: french
   tag: TWOS
@@ -106,7 +106,7 @@ french_TWOS: # 12
   updated_at: 2012-05-30
   user: rolf
 
-greek_one: # 13
+greek_one:
   version: 2
   language: greek
   tag: one
@@ -114,7 +114,7 @@ greek_one: # 13
   updated_at: 2012-05-31
   user: dick
 
-greek_two: # 14
+greek_two:
   version: 1
   language: greek
   tag: two
@@ -122,7 +122,7 @@ greek_two: # 14
   updated_at: 2012-05-31
   user: dick
 
-unknown_locations_string: # 15
+unknown_locations_string:
   version: 1
   language: english
   tag: unknown_locations
@@ -130,7 +130,7 @@ unknown_locations_string: # 15
   updated_at: 2012-05-31
   user_id: 0
 
-english_waiting_for_update: # 16
+english_waiting_for_update:
   version: 1
   language: english
   tag: all
@@ -138,7 +138,7 @@ english_waiting_for_update: # 16
   updated_at: 2012-05-30
   user_id: 0
 
-version_wizard: # 17
+version_wizard:
   version: 1
   language: russian
   tag: wizard
@@ -146,7 +146,7 @@ version_wizard: # 17
   updated_at: 2013-08-22
   user: roy
 
-french_app_contributors: # 18
+french_app_contributors:
   version: 1
   language: french
   tag: app_contributors

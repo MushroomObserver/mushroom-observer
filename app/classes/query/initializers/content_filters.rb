@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Initializers
     # Handles user content filters.

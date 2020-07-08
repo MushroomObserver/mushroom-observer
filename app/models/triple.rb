@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Triple < ApplicationRecord
   def self.delete_predicate_matches(predicate)
     return unless valid_predicate(predicate)

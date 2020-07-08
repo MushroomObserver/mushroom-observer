@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see ajax_controller.rb
 class AjaxController
   # Deal with Pivotal stories.  Renders updated story, vote controls, etc.

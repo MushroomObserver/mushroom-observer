@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Draw the cutesy eye icons in the upper right side of screen.  It does it
 # by creating a "right" tab set.  Thus this must be called in the header of
 # the view and must not actually be rendered.  Typical usage would be:

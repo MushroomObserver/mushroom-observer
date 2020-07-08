@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::LocationByRssLog < Query::LocationBase
   def initialize_flavor
     add_join(:rss_logs)

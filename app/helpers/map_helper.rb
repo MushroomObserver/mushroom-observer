@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MapHelper
   require_dependency "map_collapsible"
   require_dependency "map_set"

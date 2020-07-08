@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Controller for community support including donations
 # and summary letters.
 class SupportController < ApplicationController

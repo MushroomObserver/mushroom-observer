@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # User asking user about anything else.
 class UserEmail < AccountMailer
   def build(sender, user, subject, content)

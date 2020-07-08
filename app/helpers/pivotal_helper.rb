@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PivotalHelper
   # From pivotal_tracker_helper.rb
   def pivotal_vote_controls(story)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Custom View Helpers for Article views
 #
 #   xx_tabs::      List of links to display in xx tabset; include links which

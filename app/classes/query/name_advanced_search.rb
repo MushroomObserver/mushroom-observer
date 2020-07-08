@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Query::NameAdvancedSearch < Query::NameBase
   include Query::Initializers::AdvancedSearch
 
