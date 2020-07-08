@@ -55,6 +55,8 @@
                        controller: :observations,
                        action: :observations_for_project,
                        id: @project.id) %> |
+<%# FIXME This action now in UsersController; should be something like:
+  link_to :app_checklist.t users_checklist_path(params: { project_id: @project.id })%>
           <%= link_to(:app_checklist.t,
                       controller: :observations,
                       action: :checklist,
