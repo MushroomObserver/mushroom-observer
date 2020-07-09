@@ -45,14 +45,8 @@ class UsersControllerTest < FunctionalTestCase
     # matcher includes optional quotation mark (?.)
     assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
                  "Wrong page displayed")
-
-    prove_sorting_links_include_contribution
-  end
-
-  # Prove that sorting links include "Contribution" (when not in admin mode)
-  def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
-    assert_match(/Contribution/, sorting_links.text)
+    assert_select("#sorts", { text: /Contribution/ },
+                  "Page is missing a link to sort Users by Contribution" )
   end
 
   # When pattern has no matches, go to list page with flash message,
