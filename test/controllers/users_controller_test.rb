@@ -1,40 +1,24 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# Test user controller
 class UsersControllerTest < FunctionalTestCase
 
   # ------------------------------------------------------------
-  #  User
-  #  User_controller
+  # indexes / searches
   # ------------------------------------------------------------
 
-  def test_show_user_no_id
-    get(:show)
-    assert_redirected_to(action: :index_user)
+  # Prove that user_index is restricted to admins
+  def test_index_user
+    login("rolf")
+    get(:index_user)
+    assert_redirected_to(:root)
+
+    make_admin
+    get(:index_user)
+    assert_response(:success)
   end
-
-  def test_some_admin_pages
-    [
-      [:users_by_name,  "list_users", {}],
-      [:email_features, "email_features", {}]
-    ].each do |page, response, params|
-      logout
-      get(page, params: params)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(page, params: params)
-      assert_redirected_to(controller: :rss_logs, action: :index)
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get(page, params)
-      assert_template(response) # 1
-    end
-  end
-
-  #   -------------
-  #    user_search
-  #   -------------
 
   # Prove that user-type pattern searches go to correct page
   # When pattern is a user's id, go directly to that user's page
@@ -62,6 +46,12 @@ class UsersControllerTest < FunctionalTestCase
     prove_sorting_links_include_contribution
   end
 
+  # Prove that sorting links include "Contribution" (when not in admin mode)
+  def prove_sorting_links_include_contribution
+    sorting_links = css_select("#sorts")
+    assert_match(/Contribution/, sorting_links.text)
+  end
+
   # When pattern has no matches, go to list page with flash message,
   #  title not displayed and default metadata title
   def test_user_search_unmatched
@@ -82,13 +72,25 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   #   ---------------------
-  #    show_selected_users
+  #    show
   #   ---------------------
 
-  # Prove that sorting links include "Contribution" (when not in admin mode)
-  def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
-    assert_match(/Contribution/, sorting_links.text)
+  def test_show_no_id
+    get(:show)
+    assert_redirected_to(action: :index_user)
+  end
+
+  def test_show_next_user_and_show_prev
+    # users sorted in default order
+    users_alpha = User.order(:name)
+
+    get(:next_user, params: { id: users_alpha.fourth.id })
+    assert_redirected_to(action: :show, id: users_alpha.fifth.id,
+                         params: @controller.query_params(QueryRecord.last))
+
+    get(:prev_user, params: { id: users_alpha.fourth.id })
+    assert_redirected_to(action: :show, id: users_alpha.third.id,
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   #   -----------
@@ -164,33 +166,9 @@ class UsersControllerTest < FunctionalTestCase
     assert(missing_names.empty?, "Species List missing #{missing_names}")
   end
 
-  def test_next_user_and_prev_user
-    # users sorted in default order
-    users_alpha = User.order(:name)
-
-    get(:next_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show, id: users_alpha.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:prev_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show, id: users_alpha.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-
   #   ---------------
   #    admin actions
   #   ---------------
-
-  # Prove that user_index is restricted to admins
-  def test_index_user
-    login("rolf")
-    get(:index_user)
-    assert_redirected_to(:root)
-
-    make_admin
-    get(:index_user)
-    assert_response(:success)
-  end
 
   def test_change_user_bonuses
     user = users(:mary)
@@ -221,6 +199,26 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that admin can get bonuses
     get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
+  end
+
+  def test_some_admin_pages
+    [
+      [:users_by_name,  "list_users", {}],
+      [:email_features, "email_features", {}]
+    ].each do |page, response, params|
+      logout
+      get(page, params: params)
+      assert_redirected_to(controller: :account, action: :login)
+
+      login("rolf")
+      get(page, params: params)
+      assert_redirected_to(controller: :rss_logs, action: :index)
+      assert_flash_text(/denied|only.*admin/i)
+
+      make_admin("rolf")
+      get(page, params)
+      assert_template(response) # 1
+    end
   end
 
 end
