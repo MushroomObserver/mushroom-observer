@@ -55,14 +55,12 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search,
                                params: { pattern: unmatched_pattern })
-    assert_template(:list_users)
-
+    assert_template(:index)
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
-                 "metadata <title> tag incorrect")
-    assert_empty(css_select("#sorts"),
-                 "There should be no sort links")
+    assert_select("head title", { text: "Mushroom Observer: User Search" },
+                  "metadata <title> tag incorrect")
+    assert_select("#sorts", false, "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
