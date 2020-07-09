@@ -275,6 +275,7 @@ ACTIONS = {
     how_to_help: {},
     how_to_use: {},
     intro: {},
+    interview: {},
     show_site_stats: {},
     search_bar_help: {},
     textile: {}, # aliased only
