@@ -3,6 +3,7 @@
 require "test_helper"
 
 # Test user controller
+# extracted from master ObserverControllerTest
 class UsersControllerTest < FunctionalTestCase
 
   # ------------------------------------------------------------
@@ -13,7 +14,9 @@ class UsersControllerTest < FunctionalTestCase
   def test_index_user
     login("rolf")
     get(:index_user)
-    assert_redirected_to(:root)
+
+    # assert_redirected_to(:root)
+    assert_redirected_to(:rss_logs)
 
     make_admin
     get(:index_user)
