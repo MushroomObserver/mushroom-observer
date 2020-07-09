@@ -87,7 +87,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*='#{edit_project_path}']", false,
                   "Page should not have link to edit Project")
     assert_select("a[href*='#{projects_add_members_path}']", false,
-                  "Page should not have link to add project members" )
+                  "Page should not have link to add project members")
     assert_select("a[href*='#{projects_path}'][data-method='delete']", false,
                   "Page should not have link to destroy project")
     assert_select("a[href*='#{projects_admin_request_path}']", true,
@@ -106,7 +106,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*='#{edit_project_path}']", true,
                   "Page should have link to edit Project")
     assert_select("a[href*='add_members/#{p_id}']", true,
-                  "Page should have link to add project members" )
+                  "Page should have link to add project members")
     assert_select("a[href*='#{projects_path}'][data-method='delete']", true,
                   "Page should have link to destroy project")
   end
