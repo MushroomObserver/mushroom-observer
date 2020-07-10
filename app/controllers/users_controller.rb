@@ -20,7 +20,8 @@
 #  checklist
 #
 class UsersController < ApplicationController
-
+# TODO: Review routes, actions: simplify & conform to other controllers,
+# including aliases, e.g.: index, show, search, search_by_contribution, _by_name
   before_action :login_required, except: [
     :checklist,
     # :lookup_user, # in LookupController, redirected to :show
@@ -29,7 +30,7 @@ class UsersController < ApplicationController
     :show,
     :show_next,
     :show_prev,
-    :show_user,
+    :show_user, # aliased
     :user_search,
     :users_by_contribution,
   ]
@@ -39,6 +40,8 @@ class UsersController < ApplicationController
   ]
 
   # User index, restricted to admins.
+  # TODO: Check whether I have the method name and alias reverse
+  # shorten action name, fix routes
   def index
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
@@ -98,7 +101,7 @@ class UsersController < ApplicationController
   end
 
   # show_user.rhtml
-  def show # :prefetch:
+  def show
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
