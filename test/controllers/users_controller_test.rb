@@ -71,8 +71,11 @@ class UsersControllerTest < FunctionalTestCase
   #   ---------------------
 
   def test_show_no_id
-    get(:show)
-    assert_redirected_to(action: :index_user)
+    assert_raises(ActionController::UrlGenerationError) do
+      get(:user)
+    end
+    # assert_redirected_to(users_index_user_path)
+    assert_empty(@response.body)
   end
 
   def test_show_next_user_and_show_prev
