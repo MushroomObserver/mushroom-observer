@@ -212,10 +212,11 @@ class AccountController < ApplicationController
   end
 
   def login_post
-    user_params = params[:user] || {}
-    @login    = user_params[:login].to_s
-    @password = user_params[:password].to_s
-    @remember = user_params[:remember_me] == "1"
+    # Removed this level of nesting, all fields are user fields - AN
+    # user_params = params[:user] || {}
+    @login    = params[:login].to_s  # was user_params
+    @password = params[:password].to_s  # was user_params
+    @remember = params[:remember_me] == "1"  # was user_params
     user = User.authenticate(@login, @password)
     user ||= User.authenticate(@login, @password.strip)
 

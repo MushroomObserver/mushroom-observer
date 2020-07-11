@@ -6,22 +6,23 @@
   <%= form_with(model: @user, url: account_login_path) do |f| %>
     <%# f.fields_for :user do |fields| %>
 
-      <div class="form-group mt-3">
-        <%= f.label :login, :login_user.t + ":" %>
-        <%= f.text_field :login, value: @login, id: "user_login",
-              data: { autofocus: @login.blank? }, class: "form-control" %>
-      </div>
+    <div class="form-group mt-3">
+      <%= f.label :login, :login_user.t + ":" %>
+      <%= f.text_field :login, value: @login, id: "user_login",
+            data: { autofocus: @login.blank? }, class: "form-control" %>
+    </div>
 
-      <div class="form-group mt-3">
-        <%= f.label :password, :login_password.t + ":" %>
-        <%= f.password_field :password, value: "", id: "user_password",
-              data: { autofocus: !@login.blank? }, class: "form-control" %>
-      </div>
+    <div class="form-group mt-3">
+      <%= f.label :password, :login_password.t + ":" %>
+      <%= f.password_field :password, value: "", id: "user_password",
+            data: { autofocus: !@login.blank? }, class: "form-control" %>
+    </div>
 
-      <div class="form-group mt-3 form-inline">
-        <%= f.check_box :remember_me, checked: @remember, id: "user_remember_me" %>
-        <%= f.label :user_remember_me, :login_remember_me.t %>
-      </div>
+    <div class="form-group mt-3 form-inline">
+      <%= f.check_box :remember_me, checked: @remember,
+            id: "user_remember_me" %>
+      <%= f.label :user_remember_me, :login_remember_me.t %>
+    </div>
 
     <%# end %>
 
