@@ -14,9 +14,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_index_user
     login("rolf")
     get(:index_user)
-
-    # assert_redirected_to(:root)
-    assert_redirected_to(:rss_logs)
+    assert_redirected_to(:root)
 
     make_admin
     get(:index_user)
@@ -78,15 +76,15 @@ class UsersControllerTest < FunctionalTestCase
     assert_empty(@response.body)
   end
 
-  def test_show_next_user_and_show_prev
+  def test_show_next_and_prev
     # users sorted in default order
     users_alpha = User.order(:name)
 
-    get(:next_user, params: { id: users_alpha.fourth.id })
+    get(:show_next, params: { id: users_alpha.fourth.id })
     assert_redirected_to(action: :show, id: users_alpha.fifth.id,
                          params: @controller.query_params(QueryRecord.last))
 
-    get(:prev_user, params: { id: users_alpha.fourth.id })
+    get(:show_prev, params: { id: users_alpha.fourth.id })
     assert_redirected_to(action: :show, id: users_alpha.third.id,
                          params: @controller.query_params(QueryRecord.last))
   end
