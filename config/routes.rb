@@ -684,9 +684,9 @@ MushroomObserver::Application.routes.draw do
 
   # Logged in - Default page is /rss_logs#index.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
-  # constraints ->(req) { !req.session[:user_id].blank? } do
-    # root :to => "rss_logs#index"
-  # end
+  constraints ->(req) { !req.session[:user_id].blank? } do
+    root :to => "rss_logs#index"
+  end
 
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"

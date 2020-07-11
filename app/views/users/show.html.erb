@@ -32,9 +32,9 @@
               observations_observations_by_user_path(id: id)),
       link_to(:show_user_comments_for_you.t,
               comments_show_comments_for_user_path(id: id)),
-      link_to(:show_user_your_notifications.t, interests_path),
-      link_to(:show_user_edit_profile.t, edit_account_path),
-      link_to(:app_preferences.t, account_prefs_path),
+      link_to(:show_user_your_notifications.t, interests_path(id: id)),
+      link_to(:show_user_edit_profile.t, edit_account_path(id: id)),
+      link_to(:app_preferences.t, account_prefs_path(id: id)),
       link_to(:app_life_list.t, users_checklist_path(id: id))
     ]
   else

@@ -49,6 +49,7 @@ require "mocha/minitest"
   flash_extensions
   controller_extensions
   integration_extensions
+  integration_controller_extensions
   language_extensions
   session_extensions
   session_form_extensions
