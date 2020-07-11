@@ -197,24 +197,18 @@ class UsersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_some_admin_pages
-    [
-      [:users_by_name,  "list_users", {}],
-      [:email_features, "email_features", {}]
-    ].each do |page, response, params|
+  def test_users_by_name
       logout
-      get(page, params: params)
+      get(:users_by_name)
       assert_redirected_to(controller: :account, action: :login)
 
       login("rolf")
-      get(page, params: params)
-      assert_redirected_to(controller: :rss_logs, action: :index)
+      get(:users_by_name)
+      assert_redirected_to(:root)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
-      get(page, params)
-      assert_template(response) # 1
-    end
+      get(:users_by_name)
+      assert_template("users/index")
   end
-
 end
