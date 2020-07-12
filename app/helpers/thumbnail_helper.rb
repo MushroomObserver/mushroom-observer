@@ -82,7 +82,7 @@ module ThumbnailHelper
       notes: notes
     }.merge(args)
 
-    render "images/image_thumbnail", locals
+    render partial: "images/image_thumbnail", locals: locals
   end
 
   def carousel_image(image, args = {})
@@ -164,7 +164,7 @@ module ThumbnailHelper
       notes: notes
     }.merge(args)
 
-    render "images/carousel_image", locals: locals
+    render partial: "images/carousel_image", locals: locals
   end
 
   def carousel_thumbnail(image, args = {})
@@ -199,7 +199,7 @@ module ThumbnailHelper
       html_options: html_options
     }.merge(args)
 
-    render "images/carousel_thumbnail", locals: locals
+    render partial: "images/carousel_thumbnail", locals: locals
   end
 
   def show_best_image(obs)
