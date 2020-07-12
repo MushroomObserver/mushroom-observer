@@ -741,8 +741,12 @@ MushroomObserver::Application.routes.draw do
         id: /\d+/
   end
 
-  namespace :names do
-    resources :descriptions
+  # namespace :names do
+  #   resources :descriptions
+  # end 
+
+  resources :names do
+    resources :descriptions, module: :names
   end
 
   ND_GET_ACTIONS = {
