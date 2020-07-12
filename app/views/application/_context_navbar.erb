@@ -3,26 +3,16 @@
 
 <%= tag.div class: "navbar-nav w-100" do %>
 
-  <%= link_to controller.controller_name.capitalize,
-              { controller: controller.controller_name,
-                action: :index },
+  <%# FIXME: not all controllers have an :index action, e.g. Account/login %>
+  <%# FIXME: controller.controller_name.humanize is not reliable (Rss logs) %>
+  <%# TODO: figure out how to provide a "controller home" link to view - AN %>
+  <%= link_to controller.controller_name.humanize,
+              { controller: controller.controller_name, # controller to provide
+                action: :index }, # this should be the provided link instead
               { id: "page-title",
                 class: "navbar-brand mr-auto" } %>
 
   <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
-
-    <% if Rails.application.routes.url_helpers.method_defined?(
-            "new_#{controller.controller_name.singularize}_path"
-    ) %>
-      <%= link_to({ controller: controller.controller_name, action: :new },
-                  { class: "mx-4 mr-lg-5 btn nav-item nav-link btn-link",
-                    id: "create_link" }) do -%>
-            <%= tag.span class: "text-nowrap" do -%>
-              <%= tag.span :CREATE.t, class: "mr-2" -%>
-              <%= tag.span class: "fas fa-edit" -%>
-            <% end %>
-      <% end %>
-    <% end %>
 
     <%= form_with url: search_pattern_search_path,
                   scope: :search,
@@ -80,6 +70,19 @@
         <% end %>
       <% end %>
 
+    <% end %>
+
+    <% if Rails.application.routes.url_helpers.method_defined?(
+            "new_#{controller.controller_name.singularize}_path"
+    ) %>
+      <%= link_to({ controller: controller.controller_name, action: :new },
+                  { class: "ml-4 ml-lg-5 btn nav-item nav-link btn-link",
+                    id: "create_link" }) do -%>
+            <%= tag.span class: "text-nowrap" do -%>
+              <%= tag.span :CREATE.t, class: "mr-2" -%>
+              <%= tag.span class: "fas fa-edit" -%>
+            <% end %>
+      <% end %>
     <% end %>
 
   <% end %>

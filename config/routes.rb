@@ -740,8 +740,12 @@ MushroomObserver::Application.routes.draw do
         id: /\d+/
   end
 
-  namespace :names do
-    resources :descriptions
+  # namespace :names do
+  #   resources :descriptions
+  # end 
+
+  resources :names do
+    resources :descriptions, module: :names
   end
 
   ND_GET_ACTIONS = {
@@ -767,7 +771,7 @@ MushroomObserver::Application.routes.draw do
 
   resources :rss_logs, only: [:index, :show]
 
-  resources :account, only: [:new, :create, :edit, :update, :destroy]
+  resources :account, only: [:index, :new, :create, :edit, :update, :destroy]
 
   resources :users, only: [:index, :show]
 

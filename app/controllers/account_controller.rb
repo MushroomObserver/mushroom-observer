@@ -191,6 +191,8 @@ class AccountController < ApplicationController
     request.method == "POST" ? login_post : login_get
   end
 
+  alias :index :login
+
   def email_new_password
     request.method == "POST" ? email_new_password_post : email_new_password_get
   end
@@ -212,10 +214,11 @@ class AccountController < ApplicationController
   end
 
   def login_post
-    user_params = params[:user] || {}
-    @login    = user_params[:login].to_s
-    @password = user_params[:password].to_s
-    @remember = user_params[:remember_me] == "1"
+    # New login form params are not nested under user - AN 07/20
+    # user_params = params[:user] || {}
+    @login    = params[:login].to_s # was user_params
+    @password = params[:password].to_s # was user_params
+    @remember = params[:remember_me] == "1" # was user_params
     user = User.authenticate(@login, @password)
     user ||= User.authenticate(@login, @password.strip)
 
@@ -329,6 +332,8 @@ class AccountController < ApplicationController
     update_prefs_from_form
     update_copyright_holder if prefs_changed_successfully
   end
+
+  # alias :show :prefs # maybe? or should profile be a :show? - AN
 
   def update_password
     return unless (password = params["user"]["password"])
