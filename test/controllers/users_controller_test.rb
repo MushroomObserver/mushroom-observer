@@ -33,7 +33,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_name
     user = users(:uniquely_named_user)
     get(:user_search, params: { pattern: user.name })
-    assert_redirected_to(%r{/show_user/#{user.id}})
+    assert_redirected_to(/#{user_path(user.id)}/)
   end
 
   # When pattern matches multiple users, list them.
@@ -166,6 +166,21 @@ class UsersControllerTest < FunctionalTestCase
   #    admin actions
   #   ---------------
 
+  def test_users_by_name
+      logout
+      get(:users_by_name)
+      assert_redirected_to(controller: :account, action: :login)
+
+      login("rolf")
+      get(:users_by_name)
+      assert_redirected_to(:root)
+      assert_flash_text(/denied|only.*admin/i)
+
+      make_admin("rolf")
+      get(:users_by_name)
+      assert_template("users/index")
+  end
+
   def test_change_user_bonuses
     user = users(:mary)
     old_contribution = mary.contribution
@@ -195,20 +210,5 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that admin can get bonuses
     get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
-  end
-
-  def test_users_by_name
-      logout
-      get(:users_by_name)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(:users_by_name)
-      assert_redirected_to(:root)
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get(:users_by_name)
-      assert_template("users/index")
   end
 end
