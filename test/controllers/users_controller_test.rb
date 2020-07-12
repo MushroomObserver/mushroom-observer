@@ -20,6 +20,10 @@ class UsersControllerTest < FunctionalTestCase
     make_admin
     get(:index)
     assert_response(:success)
+    User.find_each do |user|
+      assert_select("tr a[href='#{user_path(user)}']", true,
+                    "User index should have a row linking to each user")
+    end
   end
 
   # Prove that user-type pattern searches go to correct page
