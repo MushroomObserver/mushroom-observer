@@ -44,7 +44,7 @@ end %>
 <%= paginate_block(@pages) do %>
 
   <ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
-    <%= render "shared/log_item",
+    <%= render partial: "shared/log_item",
                collection: @objects,
                as: :object %>
     <div class="clearfix"></div>
