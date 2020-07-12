@@ -40,8 +40,6 @@ class UsersController < ApplicationController
   ]
 
   # User index, restricted to admins.
-  # TODO: Check whether I have the method name and alias reverse
-  # shorten action name, fix routes
   def index
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
@@ -126,6 +124,8 @@ class UsersController < ApplicationController
     @observations = @query.results(limit: 6)
   end
 
+  alias show_user show
+
   # Go to next user: redirects to show_user.
   def show_next
     redirect_to_next_object(
@@ -172,9 +172,9 @@ class UsersController < ApplicationController
     end
   end
 
-  # Admin util linked from show_user page that lets admin add or change bonuses
-  # for a given user.
-  def change_user_bonuses # :root: :norobots:
+  # Admin util linked from show_user page
+  # Lets admin add or change bonuses for a given user.
+  def change_bonuses
     return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
     if in_admin_mode?
@@ -224,6 +224,8 @@ class UsersController < ApplicationController
       redirect_to user_path(@user2.id)
     end
   end
+
+  alias change_user_bonuses change_bonuses
 
   ##############################################################################
 
