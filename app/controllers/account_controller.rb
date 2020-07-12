@@ -191,6 +191,8 @@ class AccountController < ApplicationController
     request.method == "POST" ? login_post : login_get
   end
 
+  alias :index :login
+
   def email_new_password
     request.method == "POST" ? email_new_password_post : email_new_password_get
   end
@@ -330,6 +332,8 @@ class AccountController < ApplicationController
     update_prefs_from_form
     update_copyright_holder if prefs_changed_successfully
   end
+
+  # alias :show :prefs # maybe? or should profile be a :show? - AN
 
   def update_password
     return unless (password = params["user"]["password"])

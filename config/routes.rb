@@ -768,7 +768,7 @@ MushroomObserver::Application.routes.draw do
 
   resources :rss_logs, only: [:index, :show]
 
-  resources :account, only: [:new, :create, :edit, :update, :destroy]
+  resources :account, only: [:index, :new, :create, :edit, :update, :destroy]
 
   resources :users, only: [:index, :show]
 
