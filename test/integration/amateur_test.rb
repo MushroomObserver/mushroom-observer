@@ -12,6 +12,7 @@ class AmateurTest < IntegrationTestCase
   def test_login
     # Start at index.
     get("/")
+    # puts response.body.readlines.inspect
 
     # Login.
     click(label: "Login", in: :left_panel)
@@ -54,10 +55,10 @@ class AmateurTest < IntegrationTestCase
       puts request.body
     end
     # byebug # Successful til here, but Login unsuccessful.
-    # puts request.body
-    puts response.body
-    # assert_template("rss_logs/index")
-    # assert_flash_text(/success/i)
+    # puts request.body.readlines.inspect
+    # puts response.body
+    assert_template("rss_logs/index")
+    assert_flash_text(/success/i)
 
     # # This should only be accessible if logged in.
     # click(label: "Preferences", in: :left_panel)

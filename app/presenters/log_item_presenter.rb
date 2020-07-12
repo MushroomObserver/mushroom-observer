@@ -4,6 +4,8 @@
 # Name, location, and image all have presentation markup baked in
 # HTML markup should be in the views or partials
 class LogItemPresenter
+  include Routeable # url_helpers not otherwise available in presenter
+
   attr_accessor \
     :thumbnail, # thumbnail image tag
     :what,      # link to object or target
@@ -20,6 +22,8 @@ class LogItemPresenter
     :time       # when object or target was last modified
 
   def initialize(object, view)
+    # byebug
+    # puts pp object
     case object
     when RssLog
       rss_log_to_presenter(object, view)
@@ -47,13 +51,20 @@ class LogItemPresenter
     # get_rss_log_details(rss_log, target)
 
     self.what = target
-    self.name = target.format_name.delete_suffix(target.name.author).t
-    self.author =
-      if target.name.respond_to?(:author)
-        target.name.author
-      else
-        ""
-      end
+    if target.name.respond_to?(:author)
+      self.name   = target.format_name.
+                    delete_suffix(target.name.author).t
+      self.author = target.name.author
+    else
+      self.name = target.format_name
+      self.author = ""
+    end
+    # self.author =
+    #   if target.name.respond_to?(:author)
+    #     target.name.author
+    #   else
+    #     ""
+    #   end
     self.id = target.id
 
     self.where = view.location_link(target.place_name, target.location) \
@@ -64,12 +75,11 @@ class LogItemPresenter
       if target&.respond_to?(:thumb_image) &&
          target&.thumb_image &&
          target&.thumb_image&.content_type
-        view.thumbnail(target.thumb_image,
-                       link: {
-                         controller: target.show_controller,
-                         action: target.show_action,
-                         id: target.id
-                       })
+        view.thumbnail(target.thumb_image, link: object_path(target)) # problem
+                         # controller: target.show_controller,
+                         # action: target.show_action,
+                         # id: target.id
+                         # })
       end
     self.detail = rss_log.detail
     self.time = rss_log.updated_at
@@ -98,9 +108,11 @@ class LogItemPresenter
 
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: :observations,
-                             action: :show,
-                             id: observation.id })
+                     link: url_helpers.observation_path(observation.id))
+                       # controller: :observations,
+                       # action: :show,
+                       # id: observation.id
+                       # })
     return unless observation.rss_log
 
     self.detail = observation.rss_log.detail
@@ -110,37 +122,35 @@ class LogItemPresenter
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image, view)
     name = image.unique_format_name.t
+    self.what = image
     self.when = image.when.web_date if image.when
     self.who  = view.user_link(image.user)
-    self.what = view.link_with_query(name,
-                                     controller: image.show_controller,
-                                     action: image.show_action,
-                                     id: image.id)
+    # self.what = view.link_with_query(name,
+    #                                  controller: image.show_controller,
+    #                                  action: image.show_action,
+    #                                  id: image.id)
     self.thumbnail = view.thumbnail(image,
-                                    link: { controller: image.show_controller,
-                                            action: image.show_action,
-                                            id: image.id },
+                                    link: url_helpers.image_path(image.id),
                                     responsive: true)
   end
 
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user, view)
     name = user.unique_text_name
+    self.what = user
     self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
                    #{:Observations.t}: #{user.observations.count}".html_safe
-    self.what  = view.link_with_query(name,
-                                      controller: :users,
-                                      action: :show,
-                                      id: user.id)
+    # self.what  = view.link_with_query(name,
+    #                                   controller: :users,
+    #                                   action: :show,
+    #                                   id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
 
     self.thumbnail =
-      view.thumbnail(user.image_id,
-                     link: { controller: user.show_controller,
-                             action: user.show_action,
-                             id: user.id }, votes: false)
+      view.thumbnail(user.image_id, link: url_helpers.user_path(user.id),
+                                    votes: false)
   end
 
   def fancy_time
