@@ -115,10 +115,7 @@ class RssLogsController < ApplicationController
   def show
     pass_query_params
     store_location
-    @rss_log = find_or_goto_index(
-      RssLog,
-      params["id"]
-    )
+    @rss_log = find_or_goto_index(RssLog, params["id"])
   end
 
   alias_method :show_rss_log, :show
@@ -155,7 +152,7 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
-  # TODO: NIMMO This goes in ApplicationController
+  # TODO: NIMMO This should maybe go in ApplicationController?
   # Update banner across all translations.
   def change_banner # :root: :norobots:
     if !in_admin_mode?
