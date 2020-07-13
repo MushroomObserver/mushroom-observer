@@ -272,7 +272,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   def test_observations_by_unknown_user
     get(:observations_by_user, params: { id: 1e6 })
-    assert_redirected_to(action: :index_user)
+    assert_redirected_to(users_index_user_path)
   end
 
   def test_altering_types_shown_by_rss_log_index
