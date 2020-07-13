@@ -20,8 +20,6 @@
 #  checklist
 #
 class UsersController < ApplicationController
-# TODO: Review routes, actions: simplify & conform to other controllers,
-# including aliases, e.g.: index, show, search, search_by_contribution, _by_name
   before_action :login_required, except: [
     :checklist,
     # :lookup_user, # in LookupController, redirected to :show
@@ -32,7 +30,7 @@ class UsersController < ApplicationController
     :show_prev,
     :show_user, # aliased
     :user_search,
-    :users_by_contribution,
+    :users_by_contribution
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -135,7 +133,7 @@ class UsersController < ApplicationController
     )
   end
 
-  alias_method :next_user, :show_next
+  alias next_user show_next
 
   # Go to previous user: redirects to show_user.
   def show_prev
@@ -146,7 +144,7 @@ class UsersController < ApplicationController
     )
   end
 
-  alias_method :prev_user, :show_prev
+  alias prev_user show_prev
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
