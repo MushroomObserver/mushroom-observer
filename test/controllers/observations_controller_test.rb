@@ -230,13 +230,6 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:show, id: rss_logs(:observation_rss_log).id)
     assert_template(:show)
 
-    # TODO: NIMMO move to users_controller_test
-    get(:users_by_contribution)
-    assert_template(:users_by_contribution)
-
-    get(:show, id: rolf.id)
-    assert_template(:show)
-
     # TODO: NIMMO move to info_controller_test
     get(:show_site_stats)
     assert_template(:show_site_stats)

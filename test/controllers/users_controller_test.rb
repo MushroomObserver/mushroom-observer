@@ -69,11 +69,20 @@ class UsersControllerTest < FunctionalTestCase
     assert_flash_text(flash_text)
   end
 
+  def test_users_by_contribution
+    get(:users_by_contribution)
+    assert_template(:users_by_contribution)
+  end
+
   #   ---------------------
   #    show
   #   ---------------------
 
-  def test_show_no_id
+  def test_show
+    get(:show, id: rolf.id)
+    assert_template(:show)
+
+    # :show without an ID throws an Error (because the route requires an id)
     assert_raises(ActionController::UrlGenerationError) do
       get(:user)
     end
