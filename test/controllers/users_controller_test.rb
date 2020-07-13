@@ -5,7 +5,6 @@ require "test_helper"
 # Test user controller
 # extracted from master ObserverControllerTest
 class UsersControllerTest < FunctionalTestCase
-
   # ------------------------------------------------------------
   # indexes / searches
   # ------------------------------------------------------------
@@ -49,7 +48,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
                  "Wrong page displayed")
     assert_select("#sorts", { text: /Contribution/ },
-                  "Page is missing a link to sort Users by Contribution" )
+                  "Page is missing a link to sort Users by Contribution")
   end
 
   # When pattern has no matches, go to list page with flash message,
@@ -181,18 +180,18 @@ class UsersControllerTest < FunctionalTestCase
   #   ---------------
 
   def test_users_by_name
-      logout
-      get(:users_by_name)
-      assert_redirected_to(controller: :account, action: :login)
+    logout
+    get(:users_by_name)
+    assert_redirected_to(controller: :account, action: :login)
 
-      login("rolf")
-      get(:users_by_name)
-      assert_redirected_to(:root)
-      assert_flash_text(/denied|only.*admin/i)
+    login("rolf")
+    get(:users_by_name)
+    assert_redirected_to(:root)
+    assert_flash_text(/denied|only.*admin/i)
 
-      make_admin("rolf")
-      get(:users_by_name)
-      assert_template("users/index")
+    make_admin("rolf")
+    get(:users_by_name)
+    assert_template("users/index")
   end
 
   def test_change_user_bonuses
