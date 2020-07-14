@@ -1,40 +1,29 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# Test user controller
+# extracted from master ObserverControllerTest
 class UsersControllerTest < FunctionalTestCase
-
   # ------------------------------------------------------------
-  #  User
-  #  User_controller
+  # indexes / searches
   # ------------------------------------------------------------
 
-  def test_show_user_no_id
-    get(:show)
-    assert_redirected_to(action: :index_user)
-  end
+  # Prove that user_index is restricted to admins
+  def test_index
+    login("rolf")
+    get(:index)
+    assert_redirected_to(:root,
+                         ":index should be unavailable to non-admins")
 
-  def test_some_admin_pages
-    [
-      [:users_by_name,  "list_users", {}],
-      [:email_features, "email_features", {}]
-    ].each do |page, response, params|
-      logout
-      get(page, params: params)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(page, params: params)
-      assert_redirected_to(controller: :rss_logs, action: :index)
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get(page, params)
-      assert_template(response) # 1
+    make_admin
+    get(:index)
+    assert_response(:success)
+    User.find_each do |user|
+      assert_select("tr a[href='#{user_path(user)}']", true,
+                    "User index should have a row linking to each user")
     end
   end
-
-  #   -------------
-  #    user_search
-  #   -------------
 
   # Prove that user-type pattern searches go to correct page
   # When pattern is a user's id, go directly to that user's page
@@ -48,7 +37,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_name
     user = users(:uniquely_named_user)
     get(:user_search, params: { pattern: user.name })
-    assert_redirected_to(%r{/show_user/#{user.id}})
+    assert_redirected_to(/#{user_path(user.id)}/)
   end
 
   # When pattern matches multiple users, list them.
@@ -58,8 +47,8 @@ class UsersControllerTest < FunctionalTestCase
     # matcher includes optional quotation mark (?.)
     assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
                  "Wrong page displayed")
-
-    prove_sorting_links_include_contribution
+    assert_select("#sorts", { text: /Contribution/ },
+                  "Page is missing a link to sort Users by Contribution")
   end
 
   # When pattern has no matches, go to list page with flash message,
@@ -68,27 +57,49 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search,
                                params: { pattern: unmatched_pattern })
-    assert_template(:list_users)
-
+    assert_template(:index)
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
-                 "metadata <title> tag incorrect")
-    assert_empty(css_select("#sorts"),
-                 "There should be no sort links")
+    assert_select("head title", { text: "Mushroom Observer: User Search" },
+                  "metadata <title> tag incorrect")
+    assert_select("#sorts", false, "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
   end
 
+  def test_users_by_contribution
+    get(:users_by_contribution)
+    assert_template(:users_by_contribution)
+  end
+
   #   ---------------------
-  #    show_selected_users
+  #    show
   #   ---------------------
 
-  # Prove that sorting links include "Contribution" (when not in admin mode)
-  def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
-    assert_match(/Contribution/, sorting_links.text)
+  def test_show
+    get(:show, id: rolf.id)
+    assert_template(:show)
+
+    # :show without an ID throws an Error (because the route requires an id)
+    assert_raises(ActionController::UrlGenerationError) do
+      get(:user)
+    end
+    # assert_redirected_to(users_index_user_path)
+    assert_empty(@response.body)
+  end
+
+  def test_show_next_and_prev
+    # users sorted in default order
+    users_alpha = User.order(:name)
+
+    get(:show_next, params: { id: users_alpha.fourth.id })
+    assert_redirected_to(action: :show, id: users_alpha.fifth.id,
+                         params: @controller.query_params(QueryRecord.last))
+
+    get(:show_prev, params: { id: users_alpha.fourth.id })
+    assert_redirected_to(action: :show, id: users_alpha.third.id,
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   #   -----------
@@ -164,32 +175,23 @@ class UsersControllerTest < FunctionalTestCase
     assert(missing_names.empty?, "Species List missing #{missing_names}")
   end
 
-  def test_next_user_and_prev_user
-    # users sorted in default order
-    users_alpha = User.order(:name)
-
-    get(:next_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show, id: users_alpha.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:prev_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show, id: users_alpha.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-
   #   ---------------
   #    admin actions
   #   ---------------
 
-  # Prove that user_index is restricted to admins
-  def test_index_user
-    login("rolf")
-    get(:index_user)
-    assert_redirected_to(:root)
+  def test_users_by_name
+    logout
+    get(:users_by_name)
+    assert_redirected_to(controller: :account, action: :login)
 
-    make_admin
-    get(:index_user)
-    assert_response(:success)
+    login("rolf")
+    get(:users_by_name)
+    assert_redirected_to(:root)
+    assert_flash_text(/denied|only.*admin/i)
+
+    make_admin("rolf")
+    get(:users_by_name)
+    assert_template("users/index")
   end
 
   def test_change_user_bonuses
@@ -222,5 +224,4 @@ class UsersControllerTest < FunctionalTestCase
     get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
   end
-
 end

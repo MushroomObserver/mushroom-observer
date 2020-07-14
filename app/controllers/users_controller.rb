@@ -1,18 +1,36 @@
 # frozen_string_literal: true
 
+#  = User Controller
+#
+#  ==== Index
+#  index  == index_user ==list_users
+#  users_by_contribution
+#  users_by_name (admin only)
+#  user_search
+#
+#  ==== Show, Create, Edit
+#  show::
+#  show_next:: == next_user
+#  show_prev:: == prev_user
+#
+#  ==== Manage
+#  change_user_bonuses
+#
+#  ==== Other
+#  checklist
+#
 class UsersController < ApplicationController
-
   before_action :login_required, except: [
     :checklist,
-    :lookup_user,
-    :next_user,
-    :prev_user,
+    # :lookup_user, # in LookupController, redirected to :show
+    :next_user, # aliased
+    :prev_user, # aliased
     :show,
     :show_next,
     :show_prev,
-    :show_user,
+    :show_user, # aliased
     :user_search,
-    :users_by_contribution,
+    :users_by_contribution
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -26,9 +44,11 @@ class UsersController < ApplicationController
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
       flash_error(:runtime_search_has_expired.t)
-      redirect_to controller: :rss_logs, action: :index
+      redirect_to(:root)
     end
   end
+
+  alias index_user index
 
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
@@ -45,8 +65,7 @@ class UsersController < ApplicationController
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      # redirect_to controller: :rss_logs, action: :index
-      redirect_to rss_logs_path
+      redirect_to(:root)
     end
   end
 
@@ -70,46 +89,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def show_selected_users(query, args = {})
-    store_query_in_session(query)
-    @links ||= []
-    args = {
-      action: :index,
-      include: :user_groups,
-      matrix: !in_admin_mode?
-    }.merge(args)
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = if in_admin_mode?
-                             [
-                               ["id",          :sort_by_id.t],
-                               ["login",       :sort_by_login.t],
-                               ["name",        :sort_by_name.t],
-                               ["created_at",  :sort_by_created_at.t],
-                               ["updated_at",  :sort_by_updated_at.t],
-                               ["last_login",  :sort_by_last_login.t]
-                             ]
-                           else
-                             [
-                               ["login",         :sort_by_login.t],
-                               ["name",          :sort_by_name.t],
-                               ["created_at",    :sort_by_created_at.t],
-                               ["location",      :sort_by_location.t],
-                               ["contribution",  :sort_by_contribution.t]
-                             ]
-                           end
-
-    # Paginate by "correct" letter.
-    args[:letters] = if (query.params[:by] == "login") ||
-                        (query.params[:by] == "reverse_login")
-                       "users.login"
-                     else
-                       "users.name"
-                     end
-
-    show_index_of_objects(query, args)
-  end
-
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
@@ -117,7 +96,7 @@ class UsersController < ApplicationController
   end
 
   # show_user.rhtml
-  def show # :prefetch:
+  def show
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
@@ -143,6 +122,8 @@ class UsersController < ApplicationController
     @observations = @query.results(limit: 6)
   end
 
+  alias show_user show
+
   # Go to next user: redirects to show_user.
   def show_next
     redirect_to_next_object(
@@ -152,7 +133,7 @@ class UsersController < ApplicationController
     )
   end
 
-  alias_method :next_user, :show_next
+  alias next_user show_next
 
   # Go to previous user: redirects to show_user.
   def show_prev
@@ -163,7 +144,7 @@ class UsersController < ApplicationController
     )
   end
 
-  alias_method :prev_user, :show_prev
+  alias prev_user show_prev
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
@@ -189,9 +170,9 @@ class UsersController < ApplicationController
     end
   end
 
-  # Admin util linked from show_user page that lets admin add or change bonuses
-  # for a given user.
-  def change_user_bonuses # :root: :norobots:
+  # Admin util linked from show_user page
+  # Lets admin add or change bonuses for a given user.
+  def change_bonuses
     return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
     if in_admin_mode?
@@ -240,5 +221,51 @@ class UsersController < ApplicationController
     else
       redirect_to user_path(@user2.id)
     end
+  end
+
+  alias change_user_bonuses change_bonuses
+
+  ##############################################################################
+
+  private
+
+  def show_selected_users(query, args = {})
+    store_query_in_session(query)
+    @links ||= []
+    args = {
+      action: :index,
+      include: :user_groups,
+      matrix: !in_admin_mode?
+    }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = if in_admin_mode?
+                             [
+                               ["id",          :sort_by_id.t],
+                               ["login",       :sort_by_login.t],
+                               ["name",        :sort_by_name.t],
+                               ["created_at",  :sort_by_created_at.t],
+                               ["updated_at",  :sort_by_updated_at.t],
+                               ["last_login",  :sort_by_last_login.t]
+                             ]
+                           else
+                             [
+                               ["login",         :sort_by_login.t],
+                               ["name",          :sort_by_name.t],
+                               ["created_at",    :sort_by_created_at.t],
+                               ["location",      :sort_by_location.t],
+                               ["contribution",  :sort_by_contribution.t]
+                             ]
+                           end
+
+    # Paginate by "correct" letter.
+    args[:letters] = if (query.params[:by] == "login") ||
+                        (query.params[:by] == "reverse_login")
+                       "users.login"
+                     else
+                       "users.name"
+                     end
+
+    show_index_of_objects(query, args)
   end
 end
