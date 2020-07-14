@@ -2,6 +2,7 @@
 
 # helpers for creating links in views
 module ObjectLinkHelper
+  # include Routeable # be sure url_helpers available
   # Dictionary of urls for searches on external sites
   LOCATION_SEARCH_URLS = {
     Google_Maps: "https://maps.google.com/maps?q=",
