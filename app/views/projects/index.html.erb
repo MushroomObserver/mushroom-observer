@@ -2,7 +2,7 @@
   @title ||= :list_projects_title.t
 
   tabs = [
-    link_with_query(:list_projects_add_project.t, action: :new)
+    link_to(:list_projects_add_project.t, new_project_path(q: get_query_param))
   ]
   tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }

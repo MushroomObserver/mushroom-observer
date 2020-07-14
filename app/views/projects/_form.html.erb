@@ -1,11 +1,12 @@
-<%= # form_tag(add_query_param(action: :new)) do %>
-<%= # form_tag(add_query_param(action: :edit, id: @project.id)) do %>
-<%= form_with model: :project do |f| %>
+<% # form_tag(add_query_param(action: :new)) do %>
+<% # form_tag(add_query_param(action: :edit, id: @project.id)) do %>
+<# used by new/create, edit/update %>
+<%= form_with model: @project do |f| %>
 
   <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
 
   <%= f.hidden_field :q, value: get_query_param %>
-  <%= f.hidden_field :id, value: @project.id if action == :edit %>
+  <%= f.hidden_field :id, value: @project.id %>
 
   <div class="form-group mt-3">
     <%= f.label :title, :form_projects_title.t + ":" %>

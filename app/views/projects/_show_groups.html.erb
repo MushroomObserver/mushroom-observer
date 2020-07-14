@@ -2,7 +2,7 @@
   <b><%= :change_member_status_members.t %>:</b>
 </p>
 <p class="ml-3">
-  <% for u in project.user_group.users %>
+  <% project.user_group.users.each do |u| %>
     <%= user_link(u) %>
     <% if @project.is_admin?(@user) %>
       | <%= link_with_query(:change_member_status_change_status.t,
@@ -17,7 +17,7 @@
   <b><%= :change_member_status_admins.t %>:</b>
 </p>
 <p class="ml-3">
-  <% for u in project.admin_group.users %>
+  <% project.admin_group.users.each do |u| %>
     <%= user_link(u) %>
     <% if @project.is_member?(@user) %>
       | <%= link_with_query(:change_member_status_change_status.t,
