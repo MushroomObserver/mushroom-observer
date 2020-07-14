@@ -2,21 +2,21 @@ module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   # TODO: NIMMO pull out the repeated attributes into their own private methods
   def thumbnail(image, args = {})
-    image_id = image.is_a?(Integer) ? image : image.id
     # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+    image = Image.find(image) if image.is_a?(Integer)
 
     # these defaults could be passed instead
     responsive = true,
     notes = "",
 
     # size_url   = Image.url(size, image_id)
-    thumb_url  = Image.url(:thumbnail, image_id)
-    small_url  = Image.url(:small, image_id)
-    medium_url = Image.url(:medium, image_id)
-    large_url  = Image.url(:large, image_id)
-    huge_url   = Image.url(:huge, image_id)
-    full_url   = Image.url(:full_size, image_id)
-    orig_url   = Image.url(:original, image_id)
+    thumb_url  = Image.url(:thumbnail, image.id)
+    small_url  = Image.url(:small, image.id)
+    medium_url = Image.url(:medium, image.id)
+    large_url  = Image.url(:large, image.id)
+    huge_url   = Image.url(:huge, image.id)
+    full_url   = Image.url(:full_size, image.id)
+    orig_url   = Image.url(:original, image.id)
 
     # For lazy load content sizing: set img width and height,
     # using proportional padding-bottom. Max is 3:1 h/w for thumbnail
@@ -71,7 +71,7 @@ module ThumbnailHelper
       large_url: large_url,
       orig_url: orig_url,
       srcset: data_srcset,
-      link: image_path(image_id),
+      link: image_path(image.id),
       size: :small,
       img_proportion: img_proportion,
       votes: true,

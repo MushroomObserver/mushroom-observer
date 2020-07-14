@@ -10,7 +10,7 @@
               action: :show,
               id: @show_user.id),
       link_to(:show_objects.t(type: :observation),
-              controller: :users,
+              controller: :observations,
               action: :observations_by_user,
               id: @show_user.id),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
@@ -58,7 +58,7 @@
     @title = :checklist_for_site_title.t
     tabs = [
       link_to(:app_contributors.t,
-              controller: :info,
+              controller: :users,
               action: :users_by_contribution),
       link_to(:app_site_stats.t,
               controller: :info,
@@ -83,10 +83,10 @@
     <% num_cols = 5
     names = @data.species
     col_length = ((names.length + num_cols - 1).to_f / num_cols).truncate
-    for row in 1..col_length %>
+    (1..col_length).each do |row| %>
       <tr>
-        <% for col in 1..num_cols %>
-          <% i = (col-1) * col_length + row - 1
+        <% (1..num_cols).each do |col| %>
+          <% i = (col - 1) * col_length + row - 1
           if i < names.length %>
             <td><i>
               <%= link_to(names[i], name_link.merge(name: names[i])) %>

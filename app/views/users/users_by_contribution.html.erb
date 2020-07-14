@@ -2,7 +2,9 @@
   @title = :users_by_contribution_title.t
 
   tabs = [
-    link_with_query(:app_site_stats.t, action: :show_site_stats)
+    link_with_query(:app_site_stats.t,
+                    controller: :info,
+                    action: :show_site_stats)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -29,6 +31,7 @@
                   <td>
                     <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
                     <%= link_to(:Observations.t,
+                                controller: :observations,
                                 action: :observations_by_user,
                                 id: user.id) %>
                   </td>
@@ -39,8 +42,7 @@
             <div class="col-5">
               <%= if user.image_id
                     thumbnail(user.image_id,
-                              link: { action: :show,
-                                      id: user.id },
+                              link: { action: :show, id: user.id },
                               votes: false,
                               size: :thumbnail)
                   end

@@ -85,7 +85,7 @@
 
   # Add bonuses at the bottom.
   if @show_user.bonuses
-    for points, reason in @show_user.bonuses
+    @show_user.bonuses.each do |points, reason|
       rows << {
         label: reason.to_s.t,
         points: points.to_i
@@ -135,9 +135,9 @@
 
       <div class="col-sm-3">
         <% if @observations %>
-          <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
-            <%= thumbnail(obs.thumb_image, observation_path(obs.id),
-                          votes: true) %>
+          <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
+            <%= thumbnail(obs.thumb_image,
+                          { link: observation_path(obs.id), votes: true }) %>
           <% end %>
         <% end %>
       </div>
@@ -193,9 +193,9 @@
 
       <div class="col-sm-3">
         <% if @observations %>
-          <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
-            <%= thumbnail(obs.thumb_image, observation_path(obs.id),
-                          votes: true) %>
+          <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
+            <%= thumbnail(obs.thumb_image,
+                          { link: observation_path(obs.id), votes: true }) %>
           <% end %>
         <% end %>
       </div>

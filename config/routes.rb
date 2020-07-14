@@ -577,7 +577,6 @@ ACTIONS = {
     change_user_bonuses: {},
     checklist: {},
     index_user: {},
-    ilist_users: {},
     # list_users: {}, # aliased only
     # next_user: {}, # aliased only
     # prev_user: {}, # aliased only
