@@ -275,6 +275,7 @@ ACTIONS = {
     how_to_help: {},
     how_to_use: {},
     intro: {},
+    interview: {},
     show_site_stats: {},
     search_bar_help: {},
     textile: {}, # aliased only
@@ -684,9 +685,9 @@ MushroomObserver::Application.routes.draw do
 
   # Logged in - Default page is /rss_logs#index.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
-  # constraints ->(req) { !req.session[:user_id].blank? } do
-    # root :to => "rss_logs#index"
-  # end
+  constraints ->(req) { !req.session[:user_id].blank? } do
+    root :to => "rss_logs#index"
+  end
 
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"
@@ -740,8 +741,12 @@ MushroomObserver::Application.routes.draw do
         id: /\d+/
   end
 
-  namespace :names do
-    resources :descriptions
+  # namespace :names do
+  #   resources :descriptions
+  # end 
+
+  resources :names do
+    resources :descriptions, module: :names
   end
 
   ND_GET_ACTIONS = {
@@ -760,14 +765,14 @@ MushroomObserver::Application.routes.draw do
         as: "name_descriptions_#{action}",
         id: /\d+/
   end
-  
+
   resources :notifications, only: [:show]
 
   resources :pivotal, only: [:index]
 
   resources :rss_logs, only: [:index, :show]
 
-  resources :account, only: [:new, :create, :edit, :update, :destroy]
+  resources :account, only: [:index, :new, :create, :edit, :update, :destroy]
 
   resources :users, only: [:index, :show]
 

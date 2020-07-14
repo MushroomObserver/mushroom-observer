@@ -2,7 +2,6 @@
 
 # see app/controllers/species_lists_controller.rb
 class SpeciesListsController
-
   ##############################################################################
   #
   #  :section: Manage projects
@@ -14,7 +13,7 @@ class SpeciesListsController
 
   def manage_projects
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-    return unless (@species_list)
+    return unless @species_list
 
     if !check_permission!(@species_list)
       redirect_to species_list_path(@species_list.id)
@@ -22,23 +21,29 @@ class SpeciesListsController
       @projects = projects_to_manage
       @object_states = manage_object_states
       @project_states = manage_project_states
-      if request.method == "POST"
-        if params[:commit] == :ATTACH.l
-          if attach_objects_to_projects
-            redirect_to species_list_path(@species_list.id)
-          else
-            flash_warning(:runtime_no_changes.t)
-          end
-        elsif params[:commit] == :REMOVE.l
-          if remove_objects_from_projects
-            redirect_to species_list_path(@species_list.id)
-          else
-            flash_warning(:runtime_no_changes.t)
-          end
-        else
-          flash_error("Invalid submit button: #{params[:commit].inspect}")
-        end
+      manage_projects_update if request.method == "POST"
+    end
+  end
+
+  ##############################################################################
+
+  private
+
+  def manage_projects_update
+    if params[:commit] == :ATTACH.l
+      if attach_objects_to_projects
+        redirect_to species_list_path(@species_list.id)
+      else
+        flash_warning(:runtime_no_changes.t)
       end
+    elsif params[:commit] == :REMOVE.l
+      if remove_objects_from_projects
+        redirect_to species_list_path(@species_list.id)
+      else
+        flash_warning(:runtime_no_changes.t)
+      end
+    else
+      flash_error("Invalid submit button: #{params[:commit].inspect}")
     end
   end
 
@@ -71,13 +76,13 @@ class SpeciesListsController
     @any_changes = false
     @projects.each do |proj|
       if @project_states[proj.id]
-        if !@user.projects_member.include?(proj)
-          flash_error(:species_list_projects_no_add_to_project.
-                         t(proj: proj.title))
-        else
+        if @user.projects_member.include?(proj)
           attach_species_list_to_project(proj) if @object_states[:list]
           attach_observations_to_project(proj) if @object_states[:obs]
           attach_images_to_project(proj)       if @object_states[:img]
+        else
+          flash_error(:species_list_projects_no_add_to_project.
+                         t(proj: proj.title))
         end
       end
     end
@@ -169,5 +174,4 @@ class SpeciesListsController
                       project: proj.title))
     @any_changes = true
   end
-
 end

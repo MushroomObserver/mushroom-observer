@@ -103,13 +103,8 @@ class RssLogsController < ApplicationController
         #               action: :index_rss_log,
         #               make_default: 1
         #             ) ]
-        @links << [
-          link_to :rss_make_default.t,
-                  rss_logs_index_rss_log_path(
-                    make_default: 1,
-                    q: get_query_param
-                  )
-        ]
+        @links << [:rss_make_default.t,
+                   rss_logs_path(make_default: 1, q: get_query_param)]
       end
     end
 
@@ -120,10 +115,7 @@ class RssLogsController < ApplicationController
   def show
     pass_query_params
     store_location
-    @rss_log = find_or_goto_index(
-      RssLog,
-      params["id"]
-    )
+    @rss_log = find_or_goto_index(RssLog, params["id"])
   end
 
   alias_method :show_rss_log, :show

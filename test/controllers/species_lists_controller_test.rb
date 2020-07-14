@@ -91,32 +91,63 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_index_species_list_by_past_bys
+  # ----------------------------
+  #  Index and Search
+  # ----------------------------
+
+  def test_index
+    # TODO: use following path instead of action once helper paths are available
+    # get species_lists_path
+    get(:index)
+    assert_template(:index)
+  end
+
+  def test_index_by_past_bys
     get(:index_species_list, params: { by: :modified })
     assert_response(:success)
     get(:index_species_list, params: { by: :created })
     assert_response(:success)
   end
 
-  def test_index
-    get species_lists_path
+  def test_species_lists_by_title
+    get(:species_lists_by_title)
     assert_template(:index)
   end
+
+  def test_species_lists_by_user
+    get(:species_lists_by_user, id: rolf.id)
+    assert_template(:index)
+  end
+
+  def test_species_lists_for_project
+    get(:species_lists_for_project, id: projects(:bolete_project).id)
+    assert_template(:index)
+  end
+
+  # ----------------------------
+  #  Show
+  # ----------------------------
 
   def test_show
     sl_id = species_lists(:first_species_list).id
 
     # Show empty list with no one logged in.
-    get species_list_path(id: sl_id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: sl_id)
+    get(:show, id: sl_id)
     assert_template(:show, partial: "_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
-    get species_list_path(id: sl_id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: sl_id)
+    get(:show, id: sl_id)
     assert_template(:show, partial: "_comments")
 
     # Show non-empty list with owner logged in.
-    get species_list_path(id: species_lists(:unknown_species_list).id)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(id: species_lists(:unknown_species_list).id)
+    get(:show, id: species_lists(:unknown_species_list).id)
     assert_template(:show, partial: "_comments")
   end
 
@@ -126,969 +157,26 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_list_equal([], spl.projects)
 
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_no_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj1.add_species_list(spl)
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_match(proj1.title.t, @response.body)
     assert_no_match(proj2.title.t, @response.body)
 
     proj2.add_species_list(spl)
-    get species_list_path(params: { id: spl.id })
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, id: spl.id)
     assert_match(proj1.title.t, @response.body)
     assert_match(proj2.title.t, @response.body)
   end
-
-  def test_show_species_list_edit_links
-    spl = species_lists(:unknown_species_list)
-    proj = projects(:bolete_project)
-    assert_equal(mary.id, spl.user_id)            # owned by mary
-    assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([dick.id],
-                 proj.user_group.users.map(&:id)) # dick is only project member
-
-    login("rolf")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", count: 0)
-    assert_select("a[href*=destroy]", count: 0)
-    get edit_species_list_path(params: { id: spl.id })
-    assert_response(:redirect)
-    get species_list_path(params: { id: spl.id, method: "delete" })
-    assert_flash_error
-
-    login("mary")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", minimum: 1)
-    assert_select("a[href*=destroy]", minimum: 1)
-    get edit_species_list_path(params: { id: spl.id })
-    assert_response(:success)
-
-    login("dick")
-    get species_list_path(params: { id: spl.id })
-    assert_select("a[href*=edit]", minimum: 1)
-    assert_select("a[href*=destroy]", minimum: 1)
-    get edit_species_list_path(params: { id: spl.id })
-    assert_response(:success)
-    get species_list_path(params: { id: spl.id, method: "delete" })
-    assert_flash_success
-  end
-
-  def test_species_lists_by_title
-    get(:species_lists_by_title)
-    assert_template(:list_species_lists)
-  end
-
-  def test_species_lists_by_user
-    get(:species_lists_by_user, id: rolf.id)
-    assert_template(:list_species_lists)
-  end
-
-  def test_species_lists_for_project
-    get(:species_lists_for_project,
-                  id: projects(:bolete_project).id)
-    assert_template(:list_species_lists)
-  end
-
-  def test_destroy_species_list
-    spl = species_lists(:first_species_list)
-    assert(spl)
-    id = spl.id
-    params = { id: id.to_s }
-    assert_equal("rolf", spl.user.login)
-    requires_user(:destroy, [:show], params)
-    assert_redirected_to(action: :index)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      SpeciesList.find(id)
-    end
-  end
-
-  def test_manage_species_lists
-    obs = observations(:coprinus_comatus_obs)
-    params = { id: obs.id.to_s }
-    requires_login(:manage_species_lists, params)
-
-    assert(assigns_exist, "Missing species lists!")
-  end
-
-  def test_add_observation_to_species_list
-    sp = species_lists(:first_species_list)
-    obs = observations(:coprinus_comatus_obs)
-    assert_not(sp.observations.member?(obs))
-    params = { species_list: sp.id, observation: obs.id }
-    requires_login(:add_observation_to_species_list, params)
-    assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
-    assert(sp.reload.observations.member?(obs))
-  end
-
-  def test_remove_observation_from_species_list
-    spl = species_lists(:unknown_species_list)
-    obs = observations(:minimal_unknown_obs)
-    assert(spl.observations.member?(obs))
-    params = { species_list: spl.id, observation: obs.id }
-    owner = spl.user.login
-    assert_not_equal("rolf", owner)
-
-    # Try with non-owner (can't use requires_user since failure is a redirect)
-    # effectively fails and gets redirected to show
-    requires_login(:remove_observation_from_species_list, params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert(spl.reload.observations.member?(obs))
-
-    login owner
-    get(:remove_observation_from_species_list, params)
-    assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
-    assert_not(spl.reload.observations.member?(obs))
-  end
-
-  def test_manage_species_list_with_projects
-    proj = projects(:bolete_project)
-    spl1 = species_lists(:unknown_species_list)
-    spl2 = species_lists(:first_species_list)
-    spl3 = species_lists(:another_species_list)
-    spl2.user = dick
-    spl2.save
-    spl2.reload
-    obs1 = observations(:detailed_unknown_obs)
-    obs2 = observations(:coprinus_comatus_obs)
-    assert_obj_list_equal([dick], proj.user_group.users)
-    assert_obj_list_equal([proj], spl1.projects)
-    assert_obj_list_equal([], spl2.projects)
-    assert_obj_list_equal([], spl3.projects)
-    assert_true(spl1.observations.include?(obs1))
-    assert_false(spl1.observations.include?(obs2))
-    assert_obj_list_equal([], spl2.observations)
-    assert_obj_list_equal([], spl3.observations)
-    assert_users_equal(mary, spl1.user)
-    assert_users_equal(dick, spl2.user)
-    assert_users_equal(rolf, spl3.user)
-
-    login("dick")
-    get(species_lists_manage_species_lists_path( params: { id: obs1.id }))
-    assert_select("a[href*='species_list=#{spl1.id}']",
-                  text: :REMOVE.t, count: 1)
-    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
-    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
-
-    get(species_lists_manage_species_lists_path( params: { id: obs2.id }))
-    assert_select("a[href*='species_list=#{spl1.id}']", text: :ADD.t, count: 1)
-    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
-    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
-
-    post(:add_observation_to_species_list,
-         params: { observation: obs2.id,
-                   species_list: spl1.id })
-    assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
-    assert_true(spl1.reload.observations.include?(obs2))
-
-    post(:remove_observation_from_species_list,
-         params: { observation: obs2.id,
-                   species_list: spl1.id })
-    assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
-    assert_false(spl1.reload.observations.include?(obs2))
-  end
-
-  # ----------------------------
-  #  Create lists.
-  # ----------------------------
-
-  def test_new
-    requires_login(:new)
-    assert_form_action(action: :new)
-  end
-
-  def test_create_species_list_member_notes_areas
-    # Prove that only member_notes textarea is Other
-    # for user without notes template
-    user = users(:rolf)
-    login(user.login)
-    get(:new)
-    assert_page_has_correct_notes_areas(
-      klass: SpeciesList,
-      expect_areas: { Observation.other_notes_key => "" }
-    )
-
-    # Prove that member_notes textareas are those for template plus Other
-    # for user with notes template
-    user = users(:notes_templater)
-    login(user.login)
-    get(:new)
-    assert_page_has_correct_notes_areas(
-      klass: SpeciesList,
-      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
-                      Observation.other_notes_key => "" }
-    )
-  end
-
-  def test_unsuccessful_create_location_description
-    user = login("spamspamspam")
-    assert_false(user.is_successful_contributor?)
-    get(:new)
-    assert_response(:redirect)
-  end
-
-  # Test constructing species lists in various ways.
-  def test_construct_species_list
-    list_title = "List Title"
-    params = {
-      list: { members: names(:coprinus_comatus).text_name },
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: "  " + list_title.sub(/ /, "  ") + "  ",
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      }
-    }
-    post_requires_login(:new, params)
-    spl = SpeciesList.last
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    assert_equal(list_title, spl.title)
-    assert(spl.name_included(names(:coprinus_comatus)))
-    obs = spl.observations.first
-    assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
-    assert(obs.vote_cache > 2)
-    assert_equal(Observation.no_notes, obs.notes)
-    assert_nil(obs.lat)
-    assert_nil(obs.long)
-    assert_nil(obs.alt)
-    assert_equal(false, obs.is_collection_location)
-    assert_equal(false, obs.specimen)
-  end
-
-  def test_construct_species_list_without_location
-    list_title = "List Title"
-    params = {
-      list: { members: names(:coprinus_comatus).text_name },
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      }
-    }
-    post_requires_login(:new, params)
-    spl = SpeciesList.last
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_objs_equal(Location.unknown, spl.location)
-  end
-
-  def test_construct_species_list_existing_genus
-    agaricus = names(:agaricus)
-    list_title = "List Title"
-    params = {
-      list: { members: "#{agaricus.rank} #{agaricus.text_name}" },
-      checklist_data: {},
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      }
-    }
-    login("rolf")
-    post(:new, params: params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    assert(spl.name_included(agaricus))
-  end
-
-  def test_construct_species_list_new_family
-    list_title = "List Title"
-    rank = :Family
-    new_name_str = "Lecideaceae"
-    new_list_str = "#{rank} #{new_name_str}"
-    assert_nil(Name.find_by(text_name: new_name_str))
-    params = {
-      list: { members: new_list_str },
-      checklist_data: {},
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      },
-      approved_names: new_list_str
-    }
-    login("rolf")
-    post(:new, params: params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    # Creates Lecideaceae, spl, and obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    new_name = Name.find_by(text_name: new_name_str)
-    assert_not_nil(new_name)
-    assert_equal(rank, new_name.rank)
-    assert(spl.name_included(new_name))
-  end
-
-  # <name> = <name> shouldn't work in construct_species_list
-  def test_construct_species_list_synonym
-    list_title = "List Title"
-    name = names(:macrolepiota_rachodes)
-    synonym_name = names(:lepiota_rachodes)
-    assert_not(synonym_name.deprecated)
-    assert_nil(synonym_name.synonym_id)
-    params = {
-      list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
-      checklist_data: {},
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      }
-    }
-    login("rolf")
-    post(:new, params: params)
-    assert_create_species_list
-    assert_equal(10, rolf.reload.contribution)
-    assert_not(synonym_name.reload.deprecated)
-    assert_nil(synonym_name.synonym_id)
-  end
-
-  def test_construct_species_list_junk
-    list_title = "List Title"
-    new_name_str = "This is a bunch of junk"
-    assert_nil(Name.find_by(text_name: new_name_str))
-    params = {
-      list: { members: new_name_str },
-      checklist_data: {},
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      },
-      approved_names: new_name_str
-    }
-    login("rolf")
-    post(:new, params: params)
-    assert_create_species_list
-    assert_equal(10, rolf.reload.contribution)
-    assert_nil(Name.find_by(text_name: new_name_str))
-    assert_nil(SpeciesList.find_by(title: list_title))
-  end
-
-  def test_construct_species_list_double_space
-    list_title = "Double Space List"
-    new_name_str = "Lactarius rubidus  (Hesler and Smith) Methven"
-    params = {
-      list: { members: new_name_str },
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      },
-      approved_names: new_name_str.squeeze(" ")
-    }
-    login("rolf")
-    post(:new, params: params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    # Creating L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    obs = spl.observations.first
-    assert_not_nil(obs)
-    assert_not_nil(obs.updated_at)
-    name = Name.find_by(search_name: new_name_str.squeeze(" "))
-    assert_not_nil(name)
-    assert(spl.name_included(name))
-  end
-
-  def test_construct_species_list_rankless_taxon
-    list_title = "List Title"
-    new_name_str = "Lecideaceae"
-    assert_nil(Name.find_by(text_name: new_name_str))
-    params = {
-      list: { members: new_name_str },
-      checklist_data: {},
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      },
-      approved_names: new_name_str
-    }
-    login("rolf")
-    post(:new, params: params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    # Creates Lecideaceae, spl, obs/naming/splentry.
-    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    new_name = Name.find_by(text_name: new_name_str)
-    assert_not_nil(new_name)
-    assert_equal(:Family, new_name.rank)
-    assert(spl.name_included(new_name))
-  end
-
-  # Rather than repeat everything done for update_species, this construct
-  # species just does a bit of everything:
-  #   Written in:
-  #     Lactarius subalpinus (deprecated, approved)
-  #     Amanita baccata      (ambiguous, checked Arora in radio boxes)
-  #     New name             (new, approved from previous post)
-  #   Checklist:
-  #     Agaricus campestris  (checked)
-  #     Lactarius alpigenes  (checked, deprecated, approved,
-  #                           checked box for preferred name Lactarius alpinus)
-  # Should result in the following list:
-  #   Lactarius subalpinus
-  #   Amanita baccata Arora
-  #   New name
-  #   Agaricus campestris
-  #   Lactarius alpinus
-  #   (but *NOT* L. alpingenes)
-  def test_construct_species_list_extravaganza
-    deprecated_name = names(:lactarius_subalpinus)
-    list_members = [deprecated_name.text_name]
-    multiple_name = names(:amanita_baccata_arora)
-    list_members.push(multiple_name.text_name)
-    new_name_str = "New name"
-    list_members.push(new_name_str)
-    assert_nil(Name.find_by(text_name: new_name_str))
-
-    checklist_data = {}
-    current_checklist_name = names(:agaricus_campestris)
-    checklist_data[current_checklist_name.id.to_s] = "1"
-    deprecated_checklist_name = names(:lactarius_alpigenes)
-    approved_name = names(:lactarius_alpinus)
-    checklist_data[deprecated_checklist_name.id.to_s] = "1"
-
-    list_title = "List Title"
-    params = {
-      list: { members: list_members.join("\r\n") },
-      checklist_data: checklist_data,
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "6",
-        "when(3i)" => "4",
-        notes: "List Notes"
-      }
-    }
-    params[:approved_names] = new_name_str
-    params[:chosen_multiple_names] =
-      { multiple_name.id.to_s => multiple_name.id.to_s }
-    params[:chosen_approved_names] =
-      { deprecated_checklist_name.id.to_s => approved_name.id.to_s }
-    params[:approved_deprecated_names] = [
-      deprecated_name.id.to_s, deprecated_checklist_name.id.to_s
-    ].join("\r\n")
-
-    login("rolf")
-    post(:new, params: params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    # Creates "New" and "New name", spl, and five obs/naming/splentries.
-    assert_equal(10 + v_nam * 2 + v_spl + v_obs * 5, rolf.reload.contribution)
-    assert(spl.name_included(deprecated_name))
-    assert(spl.name_included(multiple_name))
-    assert(spl.name_included(Name.find_by(text_name: new_name_str)))
-    assert(spl.name_included(current_checklist_name))
-    assert_not(spl.name_included(deprecated_checklist_name))
-    assert(spl.name_included(approved_name))
-  end
-
-  def test_construct_species_list_nonalpha_multiple
-    # First try creating it with ambiguous name "Warnerbros bugs-bunny".
-
-    # There are two such names with authors One and Two, respectively.
-    # We don't know which Name has the lower autogenerated id.  So create a
-    # variable so we can relate Name to Author
-    bugs_names = Name.where(text_name: "Warnerbros bugs-bunny")
-
-    params = {
-      list: { members: "\n Warnerbros  bugs-bunny " },
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: "Testing nonalphas",
-        "when(1i)" => "2008",
-        "when(2i)" => "1",
-        "when(3i)" => "31",
-        notes: ""
-      }
-    }
-    login("rolf")
-    post(:new, params: params)
-    assert_create_species_list
-    assert_equal(10, rolf.reload.contribution)
-    assert_equal("Warnerbros bugs-bunny",
-                 @controller.instance_variable_get("@list_members"))
-    assert_equal([], @controller.instance_variable_get("@new_names"))
-    assert_equal([bugs_names.first],
-                 @controller.instance_variable_get("@multiple_names"))
-    assert_equal([], @controller.instance_variable_get("@deprecated_names"))
-
-    # Now re-post, having selected the other Bugs Bunny name.
-    params = {
-      list: { members: "Warnerbros bugs-bunny\r\n" },
-      member: { notes: Observation.no_notes },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: "Testing nonalphas",
-        "when(1i)" => "2008",
-        "when(2i)" => "1",
-        "when(3i)" => "31",
-        notes: ""
-      },
-      chosen_multiple_names: { bugs_names.first.id.to_s =>
-                               bugs_names.second.id }
-    }
-    post(:new, params: params)
-    spl = SpeciesList.last
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
-    assert(spl.name_included(bugs_names.second))
-  end
-
-  # Test constructing species lists, tweaking member fields.
-  def test_construct_species_list_with_member_fields
-    list_title = "List Title"
-    params = {
-      list: { members: names(:coprinus_comatus).text_name },
-      member: {
-        vote: Vote.minimum_vote,
-        notes: { Observation.other_notes_key => "member notes" },
-        lat: "12 34 56 N",
-        long: "78 9 12 W",
-        alt: "345 ft",
-        is_collection_location: "1",
-        specimen: "1"
-      },
-      species_list: {
-        place_name: "Burbank, California, USA",
-        title: list_title,
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "14",
-        notes: "List Notes"
-      }
-    }
-    post_requires_login(:new, params)
-    spl = SpeciesList.find_by(title: list_title)
-
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
-    assert_not_nil(spl)
-    assert(spl.name_included(names(:coprinus_comatus)))
-    obs = spl.observations.first
-    assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
-    assert_equal([Observation.other_notes_key], obs.notes.keys)
-    assert_equal(obs.notes[Observation.other_notes_key], "member notes")
-    assert_equal(12.5822, obs.lat)
-    assert_equal(-78.1533, obs.long)
-    assert_equal(105, obs.alt)
-    assert_equal(true, obs.is_collection_location)
-    assert_equal(true, obs.specimen)
-  end
-
-  # -----------------------------------------------
-  #  Test changing species lists in various ways.
-  # -----------------------------------------------
-
-  def test_edit_species_list
-    spl = species_lists(:first_species_list)
-    params = { id: spl.id.to_s }
-    assert_equal("rolf", spl.user.login)
-    requires_user(
-      :edit,
-      :show,
-      params
-    )
-    assert_edit_species_list
-    assert_form_action(
-      action: :edit,
-      id: spl.id.to_s,
-      approved_where: "Burbank, California, USA"
-    )
-  end
-
-  def test_update_species_list_nochange
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    params = spl_params(spl)
-    post_requires_user(
-      :edit,
-      :show,
-      params,
-      spl.user.login
-    )
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10, spl.user.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-  end
-
-  def test_update_species_list_text_add_multiple
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    params = spl_params(spl)
-    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
-    owner = spl.user.login
-    assert_not_equal("rolf", owner)
-
-    login("rolf")
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10, rolf.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-
-    login owner
-    post(:edit, params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
-    assert_equal(sp_count + 2, spl.reload.observations.size)
-  end
-
-  # This was intended to catch a bug seen in the wild, but it doesn't.
-  # The problem was in the HTML, and it requires integration test to show(?)
-  def test_update_species_list_add_unknown
-    new_name = "Agaricus nova"
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    old_contribution = mary.contribution
-    params = spl_params(spl)
-    params[:list][:members] = new_name
-    owner = spl.user.login
-    assert_equal("mary", owner)
-    login("mary")
-    post(:edit, params: params)
-    assert_edit_species_list
-
-    spl.reload
-    assert_equal(sp_count, spl.observations.size)
-
-    params[:approved_names] = new_name
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-
-    spl.reload
-    assert_equal(sp_count + 1, spl.observations.size)
-    assert_equal(old_contribution + v_nam + v_obs, mary.reload.contribution)
-  end
-
-  def test_update_species_list_text_add
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    params = spl_params(spl)
-    params[:list][:members] = "Coprinus comatus"
-    params[:species_list][:place_name] = "New Place, California, USA"
-    params[:species_list][:title] = "New Title"
-    params[:species_list][:notes] = "New notes."
-    owner = spl.user.login
-    assert_not_equal("rolf", owner)
-
-    login("rolf")
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10, rolf.reload.contribution)
-    assert(spl.reload.observations.size == sp_count)
-
-    login owner
-    post(:edit, params)
-    # assert_redirected_to(controller: :locations, action: :new)
-    assert_redirected_to(new_location_path)
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_equal("New Place, California, USA", spl.where)
-    assert_equal("New Title", spl.title)
-    assert_equal("New notes.", spl.notes)
-  end
-
-  def test_update_species_list_text_notifications
-    spl = species_lists(:first_species_list)
-    params = spl_params(spl)
-    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
-    login("rolf")
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-  end
-
-  def test_update_species_list_new_name
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    params = spl_params(spl)
-    params[:list][:members] = "New name"
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_edit_species_list
-    assert_equal(10, spl.user.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-  end
-
-  def test_update_species_list_approved_new_name
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    params = spl_params(spl)
-    params[:list][:members] = "New name"
-    params[:approved_names] = "New name"
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    # Creates "New", 'New name', observations/splentry/naming.
-    assert_equal(10 + v_nam * 2 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-  end
-
-  def test_update_species_list_multiple_match
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:amanita_baccata_arora)
-    assert_not(spl.name_included(name))
-    params = spl_params(spl)
-    params[:list][:members] = name.text_name
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_edit_species_list
-    assert_equal(10, spl.user.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-  end
-
-  def test_update_species_list_chosen_multiple_match
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:amanita_baccata_arora)
-    assert_not(spl.name_included(name))
-    params = spl_params(spl)
-    params[:list][:members] = name.text_name
-    params[:chosen_multiple_names] = { name.id.to_s => name.id.to_s }
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
-  end
-
-  def test_update_species_list_deprecated
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:list][:members] = name.text_name
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_edit_species_list
-    assert_equal(10, spl.user.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-  end
-
-  def test_update_species_list_approved_deprecated
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = [name.id.to_s]
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
-  end
-
-  def test_update_species_list_checklist_add
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_alpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "1"
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
-  end
-
-  def test_update_species_list_deprecated_checklist
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "1"
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_edit_species_list
-    assert_equal(10, spl.user.reload.contribution)
-    assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-  end
-
-  def test_update_species_list_approved_deprecated_checklist
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "1"
-    params[:approved_deprecated_names] = [name.id.to_s]
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
-  end
-
-  def test_update_species_list_approved_renamed_deprecated_checklist
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    approved_name = names(:lactarius_alpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "1"
-    params[:approved_deprecated_names] = [name.id.to_s]
-    params[:chosen_approved_names] =
-      { name.id.to_s => approved_name.id.to_s }
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-    assert(spl.name_included(approved_name))
-  end
-
-  def test_update_species_list_approved_rename
-    spl = species_lists(:unknown_species_list)
-    sp_count = spl.observations.size
-    name = names(:lactarius_subalpinus)
-    approved_name = names(:lactarius_alpinus)
-    params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    assert_not(spl.name_included(approved_name))
-    params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = name.id.to_s
-    params[:chosen_approved_names] =
-      { name.id.to_s => approved_name.id.to_s }
-    login(spl.user.login)
-    post(:edit, params: params)
-    assert_redirected_to(species_list_path(id: spl.id))
-    assert_equal(10 + v_obs, spl.user.reload.contribution)
-    assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-    assert(spl.name_included(approved_name))
-  end
-
-  # ----------------------------
-  #  Upload files.
-  # ----------------------------
-
-  def test_upload_species_list
-    spl = species_lists(:first_species_list)
-    params = {
-      id: spl.id
-    }
-    requires_user(
-      :upload_species_list,
-      :show,
-      params
-    )
-    assert_form_action(
-      action: :upload_species_list,
-      id: spl.id
-    )
-  end
-
-  def test_read_species_list
-    # TODO: Test read_species_list with a file larger than 13K to see if it
-    # gets a TempFile or a StringIO.
-    spl = species_lists(:first_species_list)
-    assert_equal(0, spl.observations.length)
-    filename = "#{::Rails.root}/test/species_lists/small_list.txt"
-    file = File.new(filename)
-    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
-    file = Rack::Test::UploadedFile.new(filename, "text/plain")
-    params = {
-      "id" => spl.id,
-      "species_list" => {
-        "file" => file
-      }
-    }
-    login("rolf", "testpassword")
-    post(:upload_species_list, params)
-    assert_edit_species_list
-    assert_equal(10, rolf.reload.contribution)
-    # Doesn't actually change list, just feeds it to edit
-    assert_equal(list_data, @controller.instance_variable_get("@list_members"))
-  end
-
-  def test_read_species_list_two
-    spl = species_lists(:first_species_list)
-    assert_equal(0, spl.observations.length)
-    filename = "#{::Rails.root}/test/species_lists/foray_notes.txt"
-    file = File.new(filename)
-    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
-    file = Rack::Test::UploadedFile.new(filename, "text/plain")
-    params = {
-      "id" => spl.id,
-      "species_list" => {
-        "file" => file
-      }
-    }
-    login("rolf", "testpassword")
-    post(:upload_species_list, params)
-    assert_edit_species_list
-    assert_equal(10, rolf.reload.contribution)
-    new_data = @controller.instance_variable_get("@list_members")
-    new_data = new_data.split("\r\n").sort.join("\r\n")
-    assert_equal(list_data, new_data)
-  end
-
-  # ----------------------------
-  #  Name lister and reports.
-  # ----------------------------
 
   def test_make_report
     now = Time.zone.now
@@ -1133,6 +221,967 @@ class SpeciesListsControllerTest < FunctionalTestCase
     end
   end
 
+  # ----------------------------
+  #  Modify
+  # ----------------------------
+
+  # ............................
+  #    New and Create
+  # ............................
+
+  def test_new
+    requires_login(:new)
+    # assert_form_action(action: :new)
+    assert_select("form", { action: "species_lists", method: "post" })
+  end
+
+  def test_new_member_notes_areas
+    # Prove that only member_notes textarea is Other
+    # for user without notes template
+    user = users(:rolf)
+    login(user.login)
+    get(:new)
+    assert_page_has_correct_notes_areas(
+      klass: SpeciesList,
+      expect_areas: { Observation.other_notes_key => "" }
+    )
+
+    # Prove that member_notes textareas are those for template plus Other
+    # for user with notes template
+    user = users(:notes_templater)
+    login(user.login)
+    get(:new)
+    assert_page_has_correct_notes_areas(
+      klass: SpeciesList,
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "" }
+    )
+  end
+
+  # Test constructing species lists in various ways.
+  def test_create
+    list_title = "List Title"
+    params = {
+      list: { members: names(:coprinus_comatus).text_name },
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: "  " + list_title.sub(/ /, "  ") + "  ",
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      }
+    }
+    post_requires_login(:create, params)
+
+    spl = SpeciesList.last
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    assert_equal(list_title, spl.title)
+    assert(spl.name_included(names(:coprinus_comatus)))
+    obs = spl.observations.first
+    assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
+    assert(obs.vote_cache > 2)
+    assert_equal(Observation.no_notes, obs.notes)
+    assert_nil(obs.lat)
+    assert_nil(obs.long)
+    assert_nil(obs.alt)
+    assert_equal(false, obs.is_collection_location)
+    assert_equal(false, obs.specimen)
+  end
+
+  def test_create_without_location
+    list_title = "List Title"
+    params = {
+      list: { members: names(:coprinus_comatus).text_name },
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      }
+    }
+    post_requires_login(:create, params)
+    spl = SpeciesList.last
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_objs_equal(Location.unknown, spl.location)
+  end
+
+  def test_new_unsuccessful_create_location_description
+    user = login("spamspamspam")
+    assert_false(user.is_successful_contributor?)
+    post(:create)
+
+    assert_response(:redirect)
+  end
+
+  def test_create_existing_genus
+    agaricus = names(:agaricus)
+    list_title = "List Title"
+    params = {
+      list: { members: "#{agaricus.rank} #{agaricus.text_name}" },
+      checklist_data: {},
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      }
+    }
+    login("rolf")
+    post(:create, params: params)
+    spl = SpeciesList.find_by(title: list_title)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    assert(spl.name_included(agaricus))
+  end
+
+  def test_create_new_family
+    list_title = "List Title"
+    rank = :Family
+    new_name_str = "Lecideaceae"
+    new_list_str = "#{rank} #{new_name_str}"
+    assert_nil(Name.find_by(text_name: new_name_str))
+    params = {
+      list: { members: new_list_str },
+      checklist_data: {},
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      },
+      approved_names: new_list_str
+    }
+    login("rolf")
+    post(:create, params: params)
+
+    spl = SpeciesList.find_by(title: list_title)
+    assert_redirected_to(species_list_path(id: spl.id))
+    # Creates Lecideaceae, spl, and obs/naming/splentry.
+    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    new_name = Name.find_by(text_name: new_name_str)
+    assert_not_nil(new_name)
+    assert_equal(rank, new_name.rank)
+    assert(spl.name_included(new_name))
+  end
+
+  # <name> = <name> shouldn't work in construct_species_list
+  def test_create_synonym
+    list_title = "List Title"
+    name = names(:macrolepiota_rachodes)
+    synonym_name = names(:lepiota_rachodes)
+    assert_not(synonym_name.deprecated)
+    assert_nil(synonym_name.synonym_id)
+    params = {
+      list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
+      checklist_data: {},
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      }
+    }
+    login("rolf")
+    post(:create, params: params)
+
+    assert_create_species_list
+    assert_equal(10, rolf.reload.contribution)
+    assert_not(synonym_name.reload.deprecated)
+    assert_nil(synonym_name.synonym_id)
+  end
+
+  def test_create_junk
+    list_title = "List Title"
+    new_name_str = "This is a bunch of junk"
+    assert_nil(Name.find_by(text_name: new_name_str))
+    params = {
+      list: { members: new_name_str },
+      checklist_data: {},
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      },
+      approved_names: new_name_str
+    }
+    login("rolf")
+    post(:create, params: params)
+
+    assert_create_species_list
+    assert_equal(10, rolf.reload.contribution)
+    assert_nil(Name.find_by(text_name: new_name_str))
+    assert_nil(SpeciesList.find_by(title: list_title))
+  end
+
+  def test_create_double_space
+    list_title = "Double Space List"
+    new_name_str = "Lactarius rubidus  (Hesler and Smith) Methven"
+    params = {
+      list: { members: new_name_str },
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      },
+      approved_names: new_name_str.squeeze(" ")
+    }
+    login("rolf")
+    post(:create, params: params)
+    spl = SpeciesList.find_by(title: list_title)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    # Creating L. rubidus (and spl and obs/splentry/naming).
+    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    obs = spl.observations.first
+    assert_not_nil(obs)
+    assert_not_nil(obs.updated_at)
+    name = Name.find_by(search_name: new_name_str.squeeze(" "))
+    assert_not_nil(name)
+    assert(spl.name_included(name))
+  end
+
+  def test_create_rankless_taxon
+    list_title = "List Title"
+    new_name_str = "Lecideaceae"
+    assert_nil(Name.find_by(text_name: new_name_str))
+    params = {
+      list: { members: new_name_str },
+      checklist_data: {},
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      },
+      approved_names: new_name_str
+    }
+    login("rolf")
+    post(:create, params: params)
+    spl = SpeciesList.find_by(title: list_title)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    # Creates Lecideaceae, spl, obs/naming/splentry.
+    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    new_name = Name.find_by(text_name: new_name_str)
+    assert_not_nil(new_name)
+    assert_equal(:Family, new_name.rank)
+    assert(spl.name_included(new_name))
+  end
+
+  # Rather than repeat everything done for update_species, this construct
+  # species just does a bit of everything:
+  #   Written in:
+  #     Lactarius subalpinus (deprecated, approved)
+  #     Amanita baccata      (ambiguous, checked Arora in radio boxes)
+  #     New name             (new, approved from previous post)
+  #   Checklist:
+  #     Agaricus campestris  (checked)
+  #     Lactarius alpigenes  (checked, deprecated, approved,
+  #                           checked box for preferred name Lactarius alpinus)
+  # Should result in the following list:
+  #   Lactarius subalpinus
+  #   Amanita baccata Arora
+  #   New name
+  #   Agaricus campestris
+  #   Lactarius alpinus
+  #   (but *NOT* L. alpingenes)
+  def test_create_extravaganza
+    deprecated_name = names(:lactarius_subalpinus)
+    list_members = [deprecated_name.text_name]
+    multiple_name = names(:amanita_baccata_arora)
+    list_members.push(multiple_name.text_name)
+    new_name_str = "New name"
+    list_members.push(new_name_str)
+    assert_nil(Name.find_by(text_name: new_name_str))
+
+    checklist_data = {}
+    current_checklist_name = names(:agaricus_campestris)
+    checklist_data[current_checklist_name.id.to_s] = "1"
+    deprecated_checklist_name = names(:lactarius_alpigenes)
+    approved_name = names(:lactarius_alpinus)
+    checklist_data[deprecated_checklist_name.id.to_s] = "1"
+
+    list_title = "List Title"
+    params = {
+      list: { members: list_members.join("\r\n") },
+      checklist_data: checklist_data,
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "6",
+        "when(3i)" => "4",
+        notes: "List Notes"
+      }
+    }
+    params[:approved_names] = new_name_str
+    params[:chosen_multiple_names] =
+      { multiple_name.id.to_s => multiple_name.id.to_s }
+    params[:chosen_approved_names] =
+      { deprecated_checklist_name.id.to_s => approved_name.id.to_s }
+    params[:approved_deprecated_names] = [
+      deprecated_name.id.to_s, deprecated_checklist_name.id.to_s
+    ].join("\r\n")
+
+    login("rolf")
+    post(:create, params: params)
+    spl = SpeciesList.find_by(title: list_title)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    # Creates "New" and "New name", spl, and five obs/naming/splentries.
+    assert_equal(10 + v_nam * 2 + v_spl + v_obs * 5, rolf.reload.contribution)
+    assert(spl.name_included(deprecated_name))
+    assert(spl.name_included(multiple_name))
+    assert(spl.name_included(Name.find_by(text_name: new_name_str)))
+    assert(spl.name_included(current_checklist_name))
+    assert_not(spl.name_included(deprecated_checklist_name))
+    assert(spl.name_included(approved_name))
+  end
+
+  def test_create_nonalpha_multiple
+    # First try creating it with ambiguous name "Warnerbros bugs-bunny".
+
+    # There are two such names with authors One and Two, respectively.
+    # We don't know which Name has the lower autogenerated id.  So create a
+    # variable so we can relate Name to Author
+    bugs_names = Name.where(text_name: "Warnerbros bugs-bunny")
+
+    params = {
+      list: { members: "\n Warnerbros  bugs-bunny " },
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: "Testing nonalphas",
+        "when(1i)" => "2008",
+        "when(2i)" => "1",
+        "when(3i)" => "31",
+        notes: ""
+      }
+    }
+    login("rolf")
+    post(:create, params: params)
+    assert_create_species_list
+    assert_equal(10, rolf.reload.contribution)
+    assert_equal("Warnerbros bugs-bunny",
+                 @controller.instance_variable_get("@list_members"))
+    assert_equal([], @controller.instance_variable_get("@new_names"))
+    assert_equal([bugs_names.first],
+                 @controller.instance_variable_get("@multiple_names"))
+    assert_equal([], @controller.instance_variable_get("@deprecated_names"))
+
+    # Now re-post, having selected the other Bugs Bunny name.
+    params = {
+      list: { members: "Warnerbros bugs-bunny\r\n" },
+      member: { notes: Observation.no_notes },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: "Testing nonalphas",
+        "when(1i)" => "2008",
+        "when(2i)" => "1",
+        "when(3i)" => "31",
+        notes: ""
+      },
+      chosen_multiple_names: { bugs_names.first.id.to_s =>
+                               bugs_names.second.id }
+    }
+    post(:create, params: params)
+    spl = SpeciesList.last
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert(spl.name_included(bugs_names.second))
+  end
+
+  # Test constructing species lists, tweaking member fields.
+  def test_create_with_member_fields
+    list_title = "List Title"
+    params = {
+      list: { members: names(:coprinus_comatus).text_name },
+      member: {
+        vote: Vote.minimum_vote,
+        notes: { Observation.other_notes_key => "member notes" },
+        lat: "12 34 56 N",
+        long: "78 9 12 W",
+        alt: "345 ft",
+        is_collection_location: "1",
+        specimen: "1"
+      },
+      species_list: {
+        place_name: "Burbank, California, USA",
+        title: list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        notes: "List Notes"
+      }
+    }
+    post_requires_login(:create, params)
+    spl = SpeciesList.find_by(title: list_title)
+
+    # TODO: use following path instead of action once helper paths are available
+    # assert_redirected_to(species_list_path(id: spl.id))
+    assert_redirected_to(action: :show, id: spl.id)
+    assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
+    assert_not_nil(spl)
+    assert(spl.name_included(names(:coprinus_comatus)))
+    obs = spl.observations.first
+    assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
+    assert_equal([Observation.other_notes_key], obs.notes.keys)
+    assert_equal(obs.notes[Observation.other_notes_key], "member notes")
+    assert_equal(12.5822, obs.lat)
+    assert_equal(-78.1533, obs.long)
+    assert_equal(105, obs.alt)
+    assert_equal(true, obs.is_collection_location)
+    assert_equal(true, obs.specimen)
+  end
+
+  def test_make_project_checkboxes
+    init_for_project_checkbox_tests
+
+    login("mary")
+    get(:new)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+
+    login("dick")
+    get(:new)
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
+
+    login("rolf")
+    get(:new)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+
+    # should have different default if recently created list attached to project
+    obs = Observation.create!
+    @proj1.add_observation(obs)
+    get(:new)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "0" } })
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+  end
+
+  # ............................
+  #    Edit and Update
+  # ............................
+
+  def test_edit
+    spl = species_lists(:first_species_list)
+    params = { id: spl.id.to_s }
+    assert_equal("rolf", spl.user.login)
+
+    requires_user(:edit, spl.id.to_s, params)
+    assert_response(:success)
+    assert_edit_species_list
+    assert_select("form", { action: species_list_path,
+                            method: "post" }) do
+      assert_select("form input", { type: "hidden",
+                                    name: "id",
+                                    value: spl.id.to_s })
+      assert_select("form input", { type: "hidden",
+                                    name: "species_list_approved_where",
+                                    value: "Burbank, California, USA" })
+    end
+
+    spl = species_lists(:unknown_species_list)
+    login(users(:zero_user).login)
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
+    assert_response(:redirect,
+                    "List non-member should be redirected upon attempt to edit")
+
+    proj = projects(:bolete_project)
+    assert(spl.projects.include?(proj))           # owned by bolete project
+    assert_not_equal(dick.id, spl.user_id)        # dick id not list owner
+    assert_equal([dick.id],
+                 proj.user_group.users.map(&:id)) # He's just a project member
+    login("dick")
+    # TODO: use following path instead of action once helper paths are available
+    # get edit_species_list_path(params: { id: spl.id })
+    get(:edit, params: { id: spl.id })
+    assert_response(
+      :success, "Any project member should be able to edit a project's lists"
+    )
+  end
+
+  def test_presence_of_links_to_modify_species_list
+    spl = species_lists(:unknown_species_list)
+    proj = projects(:bolete_project)
+    assert_equal(mary.id, spl.user_id)            # owned by mary
+    assert(spl.projects.include?(proj))           # owned by bolete project
+    assert_equal([dick.id],
+                 proj.user_group.users.map(&:id)) # dick is a project member
+
+    # Prove non-member does not get links to edit or destroy list
+    login(users(:zero_user).login)
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, count: 0)
+    assert_select("a[href*=destroy]", count: 0)
+
+    login("mary")
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    assert_select("a:match('href',?)", %r{#{spl.id}\/edit}, { minimum: 1 },
+                  "List owner should see link to edit list")
+    assert_select("a[href*=destroy]", { minimum: 1 },
+                  "List owner should see link to destroy list")
+
+    login("dick")
+    # TODO: use following path instead of action once helper paths are available
+    # get species_list_path(params: { id: spl.id })
+    get(:show, params: { id: spl.id })
+    assert_select("a[href*=edit]", { minimum: 1 },
+                  "Project member should see link to edit list")
+    assert_select("a[href*=destroy]", { minimum: 1 },
+                  "Project member should see link to destroy list")
+  end
+
+  def test_update_nochange
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    post_requires_user(:update, spl.id.to_s, params, spl.user.login)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10, spl.user.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+  end
+
+  def test_update_text_add_multiple
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
+    owner = spl.user.login
+    assert_not_equal("rolf", owner)
+
+    login("rolf")
+    post(:update, params: params)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10, rolf.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+
+    login owner
+    post(:update, params)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
+    assert_equal(sp_count + 2, spl.reload.observations.size)
+  end
+
+  # This was intended to catch a bug seen in the wild, but it doesn't.
+  # The problem was in the HTML, and it requires integration test to show(?)
+  def test_update_add_unknown
+    new_name = "Agaricus nova"
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    spl_owner = spl.user
+    old_contribution = spl_owner.contribution
+    params = spl_params(spl)
+    params[:list][:members] = new_name
+    login(spl_owner.login)
+
+    post(:update, params: params)
+    assert_edit_species_list
+    spl.reload
+    assert_equal(sp_count, spl.observations.size)
+
+    params[:approved_names] = new_name
+    post(:update, params: params)
+    assert_redirected_to(species_list_path(id: spl.id))
+
+    spl.reload
+    assert_equal(sp_count + 1, spl.observations.size)
+    assert_equal(old_contribution + v_nam + v_obs,
+                 spl_owner.reload.contribution)
+  end
+
+  def test_update_text_add
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "Coprinus comatus"
+    params[:species_list][:place_name] = "New Place, California, USA"
+    params[:species_list][:title] = "New Title"
+    params[:species_list][:notes] = "New notes."
+    owner = spl.user.login
+    assert_not_equal("rolf", owner)
+
+    login("rolf")
+    post(:update, params: params)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10, rolf.reload.contribution)
+    assert(spl.reload.observations.size == sp_count)
+
+    login owner
+    post(:update, params)
+    # assert_redirected_to(controller: :locations, action: :new)
+    assert_redirected_to(/#{new_location_path}/)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert_equal("New Place, California, USA", spl.where)
+    assert_equal("New Title", spl.title)
+    assert_equal("New notes.", spl.notes)
+  end
+
+  def test_update_text_notifications
+    spl = species_lists(:first_species_list)
+    params = spl_params(spl)
+    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
+    login("rolf")
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+  end
+
+  def test_update_new_name
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "New name"
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_edit_species_list
+    assert_equal(10, spl.user.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+  end
+
+  def test_update_approved_new_name
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "New name"
+    params[:approved_names] = "New name"
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    # Creates "New", 'New name', observations/splentry/naming.
+    assert_equal(10 + v_nam * 2 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+  end
+
+  def test_update_multiple_match
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:amanita_baccata_arora)
+    assert_not(spl.name_included(name))
+    params = spl_params(spl)
+    params[:list][:members] = name.text_name
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_edit_species_list
+    assert_equal(10, spl.user.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+    assert_not(spl.name_included(name))
+  end
+
+  def test_update_chosen_multiple_match
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:amanita_baccata_arora)
+    assert_not(spl.name_included(name))
+    params = spl_params(spl)
+    params[:list][:members] = name.text_name
+    params[:chosen_multiple_names] = { name.id.to_s => name.id.to_s }
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert(spl.name_included(name))
+  end
+
+  def test_update_deprecated
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:list][:members] = name.text_name
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_edit_species_list
+    assert_equal(10, spl.user.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+    assert_not(spl.name_included(name))
+  end
+
+  def test_update_approved_deprecated
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:list][:members] = name.text_name
+    params[:approved_deprecated_names] = [name.id.to_s]
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert(spl.name_included(name))
+  end
+
+  def test_update_checklist_add
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_alpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:checklist_data][name.id.to_s] = "1"
+    login(spl.user.login)
+    post(:update, params: params)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert(spl.name_included(name))
+  end
+
+  def test_update_deprecated_checklist
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:checklist_data][name.id.to_s] = "1"
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_edit_species_list
+    assert_equal(10, spl.user.reload.contribution)
+    assert_equal(sp_count, spl.reload.observations.size)
+    assert_not(spl.name_included(name))
+  end
+
+  def test_update_approved_deprecated_checklist
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:checklist_data][name.id.to_s] = "1"
+    params[:approved_deprecated_names] = [name.id.to_s]
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert(spl.name_included(name))
+  end
+
+  def test_update_approved_renamed_deprecated_checklist
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    params[:checklist_data][name.id.to_s] = "1"
+    params[:approved_deprecated_names] = [name.id.to_s]
+    params[:chosen_approved_names] =
+      { name.id.to_s => approved_name.id.to_s }
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert_not(spl.name_included(name))
+    assert(spl.name_included(approved_name))
+  end
+
+  def test_update_approved_rename
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
+    params = spl_params(spl)
+    assert_not(spl.name_included(name))
+    assert_not(spl.name_included(approved_name))
+    params[:list][:members] = name.text_name
+    params[:approved_deprecated_names] = name.id.to_s
+    params[:chosen_approved_names] =
+      { name.id.to_s => approved_name.id.to_s }
+    login(spl.user.login)
+    post(:update, params: params)
+
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
+    assert_not(spl.name_included(name))
+    assert(spl.name_included(approved_name))
+  end
+
+  def test_name_resolution
+    params = {
+      species_list: {
+        when: Time.zone.now,
+        place_name: "Somewhere, California, USA",
+        title: "title",
+        notes: "notes"
+      },
+      member: { notes: Observation.no_notes },
+      list: {}
+    }
+    @request.session[:user_id] = rolf.id
+
+    params[:list][:members] = [
+      "Fungi",
+      "Agaricus sp",
+      "Psalliota sp.",
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      "Chlorophyllum Author",
+      "Lepiota sp Author"
+    ].join("\n")
+    params[:approved_names] = [
+      "Psalliota sp.",
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      "Chlorophyllum Author",
+      "Lepiota sp Author"
+    ].join("\r\n")
+    post(:create, params: params)
+
+    assert_redirected_to(%r{/locations/new})
+    assert_equal(
+      [
+        "Fungi",
+        "Agaricus",
+        "Psalliota",
+        "Chlorophyllum Author",
+        "Lepiota Author",
+        '"One"',
+        '"Two"',
+        '"Three"',
+        'Agaricus "blah"'
+      ].sort,
+      assigns(:species_list).observations.map { |x| x.name.search_name }.sort
+    )
+
+    params[:list][:members] = [
+      "Fungi",
+      "Agaricus sp",
+      "Psalliota sp.",
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      "Chlorophyllum Author",
+      "Lepiota sp Author",
+      "Lepiota sp. Author"
+    ].join("\n")
+    params[:approved_names] = [
+      "Psalliota sp."
+    ].join("\r\n")
+    post(:create, params: params)
+    assert_redirected_to(%r{/locations/new})
+    assert_equal(
+      [
+        "Fungi",
+        "Agaricus",
+        "Psalliota",
+        "Chlorophyllum Author",
+        "Lepiota Author",
+        "Lepiota Author",
+        '"One"',
+        '"Two"',
+        '"Three"',
+        'Agaricus "blah"'
+      ].sort,
+      assigns(:species_list).observations.map { |x| x.name.search_name }.sort
+    )
+  end
+
+  def test_edit_project_checkboxes
+    init_for_project_checkbox_tests
+
+    login("rolf")
+    get(:edit, params: { id: @spl1.id })
+
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    get(:edit, params: { id: @spl2.id })
+    assert_response(:redirect)
+
+    login("mary")
+    get(:edit, params: { id: @spl1.id })
+    assert_response(:redirect)
+    # Mary is allowed to remove her list from a project she's not on.
+    get(:edit, params: { id: @spl2.id })
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
+    post(
+      :update,
+      params: {
+        id: @spl2.id,
+        species_list: { title: "" }, # causes failure
+        project: {
+          "id_#{@proj1.id}" => "1",
+          "id_#{@proj2.id}" => "0"
+        }
+      }
+    )
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
+
+    login("dick")
+    get(:edit, params: { id: @spl1.id })
+    assert_response(:redirect)
+    get(:edit, params: { id: @spl2.id })
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
+    @proj1.add_species_list(@spl2)
+    # Dick is not allowed to remove Mary's list from a project he's not on.
+    get(:edit, params: { id: @spl2.id })
+    assert_project_checks(@proj1.id => :checked_but_disabled,
+                          @proj2.id => :checked)
+  end
+
   def test_name_lister
     # This will have to be very rudimentary, since the vast majority of the
     # complexity is in Javascript.  Sigh.
@@ -1171,93 +1220,222 @@ class SpeciesListsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_name_resolution
-    params = {
-      species_list: {
-        when: Time.zone.now,
-        place_name: "Somewhere, California, USA",
-        title: "title",
-        notes: "notes"
-      },
-      member: { notes: Observation.no_notes },
-      list: {}
-    }
-    @request.session[:user_id] = rolf.id
+  # ............................
+  #    Upload files.
+  # ............................
 
-    params[:list][:members] = [
-      "Fungi",
-      "Agaricus sp",
-      "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
-      "Chlorophyllum Author",
-      "Lepiota sp Author"
-    ].join("\n")
-    params[:approved_names] = [
-      "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
-      "Chlorophyllum Author",
-      "Lepiota sp Author"
-    ].join("\r\n")
-    post(:new, params: params)
-    assert_redirected_to(%r{/locations/new})
-    assert_equal(
-      [
-        "Fungi",
-        "Agaricus",
-        "Psalliota",
-        "Chlorophyllum Author",
-        "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
-      ].sort,
-      assigns(:species_list).observations.map { |x| x.name.search_name }.sort
+  def test_upload_species_list
+    spl = species_lists(:first_species_list)
+    params = {
+      id: spl.id
+    }
+    requires_user(
+      :upload_species_list,
+      # :show,
+      spl.id.to_s,
+      params
+    )
+    assert_form_action(
+      action: :upload_species_list,
+      id: spl.id
+    )
+  end
+
+  def test_upload_read_species_list
+    # TODO: Test read_species_list with a file larger than 13K to see if it
+    # gets a TempFile or a StringIO.
+    spl = species_lists(:first_species_list)
+    assert_equal(0, spl.observations.length)
+    filename = "#{::Rails.root}/test/species_lists/small_list.txt"
+    file = File.new(filename)
+    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    file = Rack::Test::UploadedFile.new(filename, "text/plain")
+    params = {
+      "id" => spl.id,
+      "species_list" => {
+        "file" => file
+      }
+    }
+    login("rolf", "testpassword")
+    post(:upload_species_list, params)
+
+    assert_edit_species_list
+    assert_equal(10, rolf.reload.contribution)
+    # Doesn't actually change list, just feeds it to edit
+    assert_equal(list_data, @controller.instance_variable_get("@list_members"))
+  end
+
+  def test_read_species_list_two
+    spl = species_lists(:first_species_list)
+    assert_equal(0, spl.observations.length)
+    filename = "#{::Rails.root}/test/species_lists/foray_notes.txt"
+    file = File.new(filename)
+    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    file = Rack::Test::UploadedFile.new(filename, "text/plain")
+    params = {
+      "id" => spl.id,
+      "species_list" => {
+        "file" => file
+      }
+    }
+    login("rolf", "testpassword")
+    post(:upload_species_list, params)
+
+    assert_edit_species_list
+    assert_equal(10, rolf.reload.contribution)
+    new_data = @controller.instance_variable_get("@list_members")
+    new_data = new_data.split("\r\n").sort.join("\r\n")
+    assert_equal(list_data, new_data)
+  end
+
+  # ............................
+  #    Destroy
+  # ............................
+
+  def test_destroy
+    spl = species_lists(:first_species_list)
+    assert(spl)
+
+    login(users(:zero_user).login)
+    delete(:destroy, params: { id: spl.id })
+    assert_flash_error(
+      "Non-member should be unable to destroy a project list"
     )
 
-    params[:list][:members] = [
-      "Fungi",
-      "Agaricus sp",
-      "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
-      "Chlorophyllum Author",
-      "Lepiota sp Author",
-      "Lepiota sp. Author"
-    ].join("\n")
-    params[:approved_names] = [
-      "Psalliota sp."
-    ].join("\r\n")
-    post(:new, params: params)
-    assert_redirected_to(%r{/locations/new})
-    assert_equal(
-      [
-        "Fungi",
-        "Agaricus",
-        "Psalliota",
-        "Chlorophyllum Author",
-        "Lepiota Author",
-        "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
-      ].sort,
-      assigns(:species_list).observations.map { |x| x.name.search_name }.sort
+    login("rolf")
+    assert_equal("rolf", spl.user.login) # rolf owns this list
+    delete(:destroy, params: { id: spl.id })
+    assert_redirected_to(action: :index)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      SpeciesList.find(spl.id)
+    end
+
+    spl = species_lists(:unknown_species_list)
+    proj = projects(:bolete_project)
+    assert(spl.projects.include?(proj))           # owned by bolete project
+    assert_not_equal(dick.id, spl.user_id)        # dick does not own the list
+    assert_equal([dick.id],
+                 proj.user_group.users.map(&:id)) # but is a project member
+
+    login(users(:dick).login)
+    delete(:destroy, params: { id: spl.id })
+    assert_flash_success(
+      "Non-owner member should be able to destroy a project list"
     )
   end
 
   # ----------------------------
-  #  Bulk observation editor.
+  #  Manage Observations
   # ----------------------------
+
+  def test_manage_species_lists
+    obs = observations(:coprinus_comatus_obs)
+    params = { id: obs.id.to_s }
+    requires_login(:manage_species_lists, params)
+
+    assert(assigns_exist, "Missing species lists!")
+  end
+
+  def test_add_observation_to_species_list
+    sp = species_lists(:first_species_list)
+    obs = observations(:coprinus_comatus_obs)
+    assert_not(sp.observations.member?(obs))
+    params = { species_list: sp.id, observation: obs.id }
+    requires_login(:add_observation_to_species_list, params)
+
+    # TODO: update once helper paths work properly
+    # assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
+    assert_redirected_to(
+      "#{species_lists_manage_species_lists_path}/#{obs.id}"
+    )
+    assert(sp.reload.observations.member?(obs))
+  end
+
+  def test_remove_observation_from_species_list
+    spl = species_lists(:unknown_species_list)
+    obs = observations(:minimal_unknown_obs)
+    assert(spl.observations.member?(obs))
+    params = { species_list: spl.id, observation: obs.id }
+    owner = spl.user.login
+    assert_not_equal("rolf", owner)
+
+    # Try with non-owner (can't use requires_user since failure is a redirect)
+    # effectively fails and gets redirected to :show
+    requires_login(:remove_observation_from_species_list, params)
+    assert_redirected_to(species_list_path(id: spl.id))
+    assert(spl.reload.observations.member?(obs))
+
+    login owner
+    post(:remove_observation_from_species_list, params)
+    # TODO: update once helper paths work properly
+    # assert_redirected_to(species_lists_manage_species_lists_path(id: obs.id))
+    assert_redirected_to(
+      "#{species_lists_manage_species_lists_path}/#{obs.id}"
+    )
+    assert_not(spl.reload.observations.member?(obs))
+  end
+
+  def test_manage_species_list_with_projects
+    proj = projects(:bolete_project)
+    spl1 = species_lists(:unknown_species_list)
+    spl2 = species_lists(:first_species_list)
+    spl3 = species_lists(:another_species_list)
+    spl2.user = dick
+    spl2.save
+    spl2.reload
+    obs1 = observations(:detailed_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    assert_obj_list_equal([dick], proj.user_group.users)
+    assert_obj_list_equal([proj], spl1.projects)
+    assert_obj_list_equal([], spl2.projects)
+    assert_obj_list_equal([], spl3.projects)
+    assert_true(spl1.observations.include?(obs1))
+    assert_false(spl1.observations.include?(obs2))
+    assert_obj_list_equal([], spl2.observations)
+    assert_obj_list_equal([], spl3.observations)
+    assert_users_equal(mary, spl1.user)
+    assert_users_equal(dick, spl2.user)
+    assert_users_equal(rolf, spl3.user)
+
+    login("dick")
+    get(:manage_species_lists, params: { id: obs1.id })
+    # TODO: update once helper paths work properly
+    # get(species_lists_manage_species_lists_path(params: { id: obs1.id }))
+    get(:manage_species_lists, params: { id: obs1.id })
+    assert_select("a[href*='species_list=#{spl1.id}']",
+                  text: :REMOVE.t, count: 1)
+    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
+
+    # TODO: update once helper paths work properly
+    # get(species_lists_manage_species_lists_path( params: { id: obs2.id }))
+    get(:manage_species_lists, params: { id: obs2.id })
+    assert_select("a[href*='species_list=#{spl1.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
+
+    post(:add_observation_to_species_list,
+         params: { observation: obs2.id, species_list: spl1.id })
+    # TODO: update once helper paths work properly
+    # assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
+    assert_redirected_to(
+      "#{species_lists_manage_species_lists_path}/#{obs2.id}"
+    )
+    assert_true(spl1.reload.observations.include?(obs2))
+
+    post(:remove_observation_from_species_list,
+         params: { observation: obs2.id, species_list: spl1.id })
+    # TODO: update once helper paths work properly
+    # assert_redirected_to(species_lists_manage_species_lists_path(id: obs2.id))
+    assert_redirected_to(
+      "#{species_lists_manage_species_lists_path}/#{obs2.id}"
+    )
+    assert_false(spl1.reload.observations.include?(obs2))
+  end
+
+  # ............................
+  #  Bulk observation editor.
+  # ............................
 
   def test_bulk_editor
     now = Time.zone.now
@@ -1480,74 +1658,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     post(:bulk_editor, params: params)
     assert_flash_text(/#{:runtime_date_invalid.l}/)
-  end
-
-  def test_project_checkboxes_in_create_species_list_form
-    init_for_project_checkbox_tests
-
-    login("mary")
-    get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-
-    login("dick")
-    get(:new)
-    assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
-
-    login("rolf")
-    get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:new,
-         params: { project: { "id_#{@proj1.id}" => "1" } })
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-
-    # should have different default if recently create list attached to project
-    obs = Observation.create!
-    @proj1.add_observation(obs)
-    get(:new)
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:new,
-         params: { project: { "id_#{@proj1.id}" => "0" } })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-  end
-
-  def test_project_checkboxes_in_edit_species_list_form
-    init_for_project_checkbox_tests
-
-    login("rolf")
-    get(:edit, params: { id: @spl1.id })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    get(:edit, params: { id: @spl2.id })
-    assert_response(:redirect)
-
-    login("mary")
-    get(:edit, params: { id: @spl1.id })
-    assert_response(:redirect)
-    # Mary is allowed to remove her list from a project she's not on.
-    get(:edit, params: { id: @spl2.id })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(
-      :edit,
-      params: {
-        id: @spl2.id,
-        species_list: { title: "" }, # causes failure
-        project: {
-          "id_#{@proj1.id}" => "1",
-          "id_#{@proj2.id}" => "0"
-        }
-      }
-    )
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
-
-    login("dick")
-    get(:edit, params: { id: @spl1.id })
-    assert_response(:redirect)
-    get(:edit, params: { id: @spl2.id })
-    assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
-    @proj1.add_species_list(@spl2)
-    # Disk is not allowed to remove Mary's list from a project he's not on.
-    get(:edit, params: { id: @spl2.id })
-    assert_project_checks(@proj1.id => :checked_but_disabled,
-                          @proj2.id => :checked)
   end
 
   # ----------------------------
@@ -1904,41 +2014,41 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     post_requires_login(:post_add_remove_observations)
     assert_response(:redirect)
-    assert_redirected_to(species_lists_add_remove_observations_path)
+    assert_redirected_to(/#{species_lists_add_remove_observations_path}/)
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
-    assert_redirected_to(species_lists_add_remove_observations_path)
+    assert_redirected_to(/#{species_lists_add_remove_observations_path}/)
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(species_list: "blah"))
     assert_response(:redirect)
-    assert_redirected_to(species_lists_add_remove_observations_path)
+    assert_redirected_to(/#{species_lists_add_remove_observations_path}/)
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: { species_list: spl.title })
     assert_response(:redirect)
-    assert_redirected_to(species_list_path)
+    assert_redirected_to(species_list_path(spl.id))
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(species_list_path)
+    assert_redirected_to(species_list_path(spl.id))
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(species_list_path)
+    assert_redirected_to(species_list_path(spl.id))
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
@@ -1946,25 +2056,23 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:post_add_remove_observations,
          params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(species_list_path)
+    assert_redirected_to(species_list_path(spl.id))
     assert_flash_success
     assert_equal(new_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(commit: :REMOVE.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(species_list_path)
+    assert_redirected_to(species_list_path(spl.id))
     assert_flash_success
     assert_equal(0, spl.reload.observations.size)
   end
 
   def test_post_add_remove_double_observations
     spl = species_lists(:unknown_species_list)
-    old_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    old_obs_list = Observation.joins(:species_lists).
+                   where(species_lists: { id: spl.id }).
+                   pluck(:id)
     dup_obs = spl.observations.first
     new_obs = (Observation.all - spl.observations).first
     ids = [dup_obs.id, new_obs.id]
@@ -1977,11 +2085,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
     assert_flash_success
-    new_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
-      WHERE species_list_id = #{spl.id}
-      ORDER BY observation_id ASC
-    ))
+    new_obs_list = Observation.joins(:species_lists).
+                   where(species_lists: { id: spl.id }).
+                   pluck(:id)
     assert_equal(new_obs_list.length, old_obs_list.length + 1)
     assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
   end

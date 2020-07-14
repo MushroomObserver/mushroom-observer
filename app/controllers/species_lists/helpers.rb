@@ -2,7 +2,6 @@
 
 # see app/controllers/species_lists_controller.rb
 class SpeciesListsController
-
   ##############################################################################
   #
   #  :section: Helpers
@@ -24,7 +23,7 @@ class SpeciesListsController
   #   params[:checklist_names][name_id]     (Used by view to give a name to each
   #                                         id in checklist_data hash.)
 
-  # TODO NIMMO: Can we break this method into some shorter methods?
+  # TODO: NIMMO: Can we break this method into some shorter methods?
   def process_species_list(create_or_update)
     redirected = false
 
@@ -149,12 +148,14 @@ class SpeciesListsController
       end
     end
 
-    return if redirected
+    return true if redirected
 
     # Failed to create due to synonyms, unrecognized names, etc.
     init_name_vars_from_sorter(@species_list, sorter)
     init_member_vars_for_reload
     init_project_vars_for_reload(@species_list)
+
+    false
   end
 
   # Creates observations for names written in and/or selected from checklist.
@@ -245,44 +246,38 @@ class SpeciesListsController
   # an Array of names where the values are [display_name, name_id].  This
   # is destined for the instance variable @checklist.
   def calc_checklist(query = nil)
-    results = []
-    if query || (query = query_from_session)
-      results = case query.model
-                when Name
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    limit: 1000
-                  )
-                when Observation
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: :names,
-                    limit: 1000
-                  )
-                when Image
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { images_observations: { observations: :names } },
-                    limit: 1000
-                  )
-                when Location
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { observations: :names },
-                    limit: 1000
-                  )
-                when RssLog
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { observations: :names },
-                    where: "rss_logs.observation_id > 0",
-                    limit: 1000
-                  )
-                else
-                  []
-                end
+    return unless query || (query = query_from_session)
+
+    case query.model
+    when Name
+      query.select_rows(select: "DISTINCT names.display_name, names.id",
+                        limit: 1000)
+    when Observation
+      query.select_rows(select: "DISTINCT names.display_name, names.id",
+                        join: :names,
+                        limit: 1000)
+    when Image
+      query.select_rows(select: "DISTINCT names.display_name, names.id",
+                        join: { images_observations: { observations: :names } },
+                        limit: 1000)
+    when Location
+      query.select_rows(select: "DISTINCT names.display_name, names.id",
+                        join: { observations: :names },
+                        limit: 1000)
+    when RssLog
+      query.select_rows(select: "DISTINCT names.display_name, names.id",
+                        join: { observations: :names },
+                        where: "rss_logs.observation_id > 0",
+                        limit: 1000)
+    else
+      []
     end
-    results
+  end
+
+  def init_vars_for_create
+    init_name_vars_for_create
+    init_member_vars_for_create
+    init_project_vars_for_create
   end
 
   def init_name_vars_for_create
@@ -469,5 +464,4 @@ class SpeciesListsController
       val
     end
   end
-
 end

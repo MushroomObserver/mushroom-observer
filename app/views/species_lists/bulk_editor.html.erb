@@ -1,12 +1,13 @@
 <%
-  @title = :species_list_bulk_editor_title.t(name: @species_list.unique_format_name)
+  @title = :species_list_bulk_editor_title.t(
+    name: @species_list.unique_format_name
+  )
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :species_list),
-                    species_list_path(@species_list)),
-    link_with_query(:species_list_show_edit.t,
-                    action: :edit,
-                    id: @species_list.id)
+    link_to(:cancel_and_show.t(type: :species_list),
+            species_list_path(q: get_query_param)),
+    link_to(:species_list_show_edit.t,
+            edit_species_list_path(@species_list.id, q: get_query_param))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -15,14 +16,13 @@
   <%= :species_list_bulk_editor_help.tp %>
 </div>
 
-<%= form_tag(action: :bulk_editor,
-             id: @species_list.id) do %>
+<%= form_tag(action: :bulk_editor, id: @species_list.id) do %>
   <%= submit_tag(:UPDATE.l,
                  class: "btn mx-auto mt-3 mb-3") %>
 
   <%= paginate_block(@pages) do %>
     <table class="table-striped table-bulk-editor">
-      <% for obs in @observations %>
+      <% @observations.each do |obs| %>
         <tr id="row_<%=obs.id%>" onmouseover="enter_row(<%=obs.id%>)">
           <td class="form-inline">
             <div class="id_and_name">
@@ -110,7 +110,7 @@
             # loaded, instead of obs.thumb_image which has not.
             imgs = obs.images.select {|i| i.id == obs.thumb_image_id}
             imgs += obs.images
-            for img in imgs.uniq %>
+            imgs.uniq.each do |img| %>
               <%= img_tag = image_tag(img.thumbnail_url, class: "tiny")
               link_to(
                 img_tag,
@@ -128,7 +128,11 @@
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
     <%=
-      args = observation_path("XXX")
+      # `args` must be an array, because that's expected by add_query_param
+      # We cannot use helper paths because they output a string.
+      args = { controller: :observations,
+               action: :show,
+               id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:SHOW.l,
               "javascript:row_button(#{j url})")
@@ -154,7 +158,7 @@
 
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
     <%=
-      args = { controller: :naming,
+      args = { controller: :namings,
                action: :edit,
                observation_id: "XXX" }
       url = url_for(add_query_param(args, @query))
@@ -162,7 +166,7 @@
               "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :naming,
+      args = { controller: :namings,
                action: :create,
                id: "XXX" }
       url = url_for(add_query_param(args, @query))
@@ -220,8 +224,7 @@
     %>
   </div>
 
-  <%= submit_tag(:UPDATE.l,
-                 class: "btn mx-auto mt-3 mb-3") %>
+  <%= submit_tag(:UPDATE.l,  class: "btn mx-auto mt-3 mb-3") %>
 <% end %>
 
 <% first_id = @observations.first.id
