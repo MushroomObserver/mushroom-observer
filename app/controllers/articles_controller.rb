@@ -83,7 +83,84 @@ class ArticlesController < ApplicationController
     show_selected_articles(query)
   end
 
-  alias_method :list_articles, :index
+  alias list_articles index
+
+  ##############################################################################
+  #
+  #  :section: Show, Create, Edit, Destroy (a single Article)
+  #
+  ##############################################################################
+
+  # Display one Article
+  def show
+    return false unless (@article = find_or_goto_index(Article, params[:id]))
+
+    @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
+  end
+
+  alias show_article show
+
+  # Create a new article
+  def new
+    @article = Article.new
+  end
+
+  alias create_article new
+
+  def create
+    return render("new") if flash_missing_title?
+
+    @article = Article.new(
+      title: params[:article][:title],
+      body: params[:article][:body],
+      user_id: @user.id
+    )
+    @article.save
+    redirect_to article_path(@article.id)
+  end
+
+  # Edit existing article
+  def edit
+    pass_query_params
+    @article = find_or_goto_index(Article, params[:id])
+  end
+
+  alias edit_article edit
+
+  def update
+    @article = Article.find(params[:id])
+    return render("edit") if flash_missing_title?
+
+    @article.title = params[:article][:title]
+    @article.body = params[:article][:body]
+
+    if @article.changed?
+      raise(:runtime_unable_to_save_changes.t) unless @article.save
+
+      flash_notice(:runtime_edit_article_success.t(id: @article.id))
+    else
+      flash_warning(:runtime_no_changes.t)
+    end
+
+    redirect_to article_path(@article.id)
+  end
+
+  alias save_edits update
+
+  # Destroy one article
+  def destroy
+    pass_query_params
+    if (@article = Article.find(params[:id])) && @article.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
+    end
+    redirect_to action: :index_article
+  end
+
+  alias destroy_article destroy
+
+  ##############################################################################
+
+  private
 
   # Show selected list of articles.
   def show_selected_articles(query, args = {})
@@ -110,44 +187,6 @@ class ArticlesController < ApplicationController
     ]
   end
 
-  ##############################################################################
-  #
-  #  :section: Show, Create, Edit, Destroy (a single Article)
-  #
-  ##############################################################################
-
-  # Display one Article
-  def show
-    return false unless (@article = find_or_goto_index(Article, params[:id]))
-
-    @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
-  end
-
-  alias_method :show_article, :show
-
-  # Create a new article
-  def new
-    @article = Article.new
-  end
-
-  alias_method :create_article, :new
-
-  def create
-    return if flash_missing_title?
-
-    @article = Article.new(
-      title: params[:article][:title],
-      body: params[:article][:body],
-      user_id: @user.id
-    )
-    @article.save
-    # redirect_to(
-    #   action: :show,
-    #   id: @article.id
-    # )
-    redirect_to article_path(@article.id)
-  end
-
   # add flash message if title missing
   def flash_missing_title?
     return if params[:article][:title].present?
@@ -155,53 +194,6 @@ class ArticlesController < ApplicationController
     flash_error(:article_title_required.t)
     true
   end
-
-  # Edit existing article
-  def edit
-    pass_query_params
-    @article = find_or_goto_index(Article, params[:id])
-  end
-
-  alias_method :edit_article, :edit
-
-  def update
-    pass_query_params
-    @article = Article.find(params[:id])
-    return if flash_missing_title?
-
-    @article.title = params[:article][:title]
-    @article.body = params[:article][:body]
-
-    if @article.changed?
-      raise(:runtime_unable_to_save_changes.t) unless @article.save
-
-      flash_notice(:runtime_edit_article_success.t(id: @article.id))
-    else
-      flash_warning(:runtime_no_changes.t)
-    end
-    # redirect_to(
-    #   action: :show,
-    #   id: @article.id
-    # )
-    redirect_to article_path(@article.id)
-  end
-
-  alias_method :save_edits, :update
-
-  # Destroy one article
-  def destroy
-    pass_query_params
-    if (@article = Article.find(params[:id])) && @article.destroy
-      flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
-    end
-    redirect_to action: :index_article
-  end
-
-  alias_method :destroy_article, :destroy
-
-  ##############################################################################
-
-  private
 
   def whitelisted_article_params
     params[:article].permit(:body, :title)
