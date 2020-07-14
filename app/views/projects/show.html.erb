@@ -95,8 +95,8 @@
         <div class="ml-3">
           <% @draft_data.each do |datum| %>
             <%= link_to datum["display_name"].t,
-                        names_descriptions_path(datum["id"],
-                                                q: get_query_param) %>
+                        name_description_path(datum["id"],
+                                              q: get_query_param) %>
             (<%= user_link(User.find(datum["user_id"])) %>)<br/>
           <% end %>
         </div>
