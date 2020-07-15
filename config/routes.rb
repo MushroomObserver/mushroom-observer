@@ -394,6 +394,7 @@ ACTIONS = {
   #   show: {}
   # },
   observations: {
+    advanced_search: {},
     # create_observation: {}, # aliased only
     # destroy_observation: {}, # aliased only
     download_observations: {},
@@ -742,7 +743,7 @@ MushroomObserver::Application.routes.draw do
 
   # namespace :names do
   #   resources :descriptions
-  # end 
+  # end
 
   resources :names do
     resources :descriptions, module: :names
