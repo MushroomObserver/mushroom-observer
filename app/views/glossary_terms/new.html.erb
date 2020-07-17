@@ -1,2 +1,13 @@
-<h1>GlossaryTerms#new</h1>
-<p>Find me in app/views/glossary_terms/new.html.erb</p>
+<%
+  @title = :create_glossary_term_title.l
+
+  tabs = [
+    link_to(:glossary_term_index.t, glossary_terms_path)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= render partial: "form", locals: { button_name: :edit_glossary_term_save,
+                                    action: :new } %>
+</div>

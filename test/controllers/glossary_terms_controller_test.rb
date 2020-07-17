@@ -58,12 +58,53 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-=begin
-  test "should get index" do
-    get glossary_terms_index_url
-    assert_response :success
+  # ***** create *****
+  def convex_params
+    {
+      glossary_term:
+      { name: "Convex", description: "Boring" },
+      copyright_holder: "Me",
+      date: { copyright_year: 2013 },
+      upload: { license_id: licenses(:ccnc25).id }
+    }
   end
 
+  def posted_term
+    login_and_post_convex
+    GlossaryTerm.find(:all, order: "created_at DESC")[0]
+  end
+
+  def login_and_post_convex
+    login
+    post(:new, convex_params)
+  end
+
+  def test_new_no_login
+    get(:new)
+    assert_response(:redirect)
+  end
+
+  def test_new_logged_in
+    login
+    get(:new)
+    assert_template(:new)
+  end
+
+  def test_create
+    user = login
+    params = create_glossary_term_params
+    post(:create, params)
+    glossary_term = GlossaryTerm.order(created_at: :desc).first
+
+    assert_equal(params[:glossary_term][:name], glossary_term.name)
+    assert_equal(params[:glossary_term][:description],
+                 glossary_term.description)
+    assert_not_nil(glossary_term.rss_log)
+    assert_equal(user.id, glossary_term.user_id)
+    assert_response(:redirect)
+  end
+
+=begin
   test "should get new" do
     get glossary_terms_new_url
     assert_response :success
