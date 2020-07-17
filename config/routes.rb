@@ -188,6 +188,20 @@ ACTIONS = {
     # show: {},
     # update: {}
   },
+  glossary_terms: {
+    # create_glossary_term: {}, # aliased only
+    # edit_glossary_term: {}, # aliased only
+    # show_glossary_term: {}, # aliased only
+    show_past_glossary_term: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  },
   herbaria: {
     # create_herbarium: {}, # aliased only
     delete_curator: {},
@@ -627,15 +641,6 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 ].freeze
 
 MushroomObserver::Application.routes.draw do
-
-  get 'glossary_terms/show'
-  get 'glossary_terms/index'
-  get 'glossary_terms/new'
-  get 'glossary_terms/create'
-  get 'glossary_terms/edit'
-  get 'glossary_terms/update'
-  get 'glossary_terms/destroy'
-  get 'glossary_terms/show_past_glossary_term'
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -700,8 +705,8 @@ MushroomObserver::Application.routes.draw do
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"
 
-  resources :articles, :collection_numbers, :comments, :herbaria,
-    :herbarium_records, :images, :names, :namings, :observations,
+  resources :articles, :collection_numbers, :comments, :glossary_terms,
+    :herbaria, :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
 
   resources :glossary, as: "glossary_terms"

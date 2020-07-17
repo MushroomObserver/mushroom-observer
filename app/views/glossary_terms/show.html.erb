@@ -1,2 +1,48 @@
-<h1>GlossaryTerms#show</h1>
-<p>Find me in app/views/glossary_terms/show.html.erb</p>
+<%
+  @title = :show_glossary_term_title.t(name: @glossary_term.name)
+
+  tabs = [
+    link_to(:glossary_term_index.t, glossary_terms_path),
+    link_to(:create_glossary_term.t, new_glossary_term_path),
+    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row mt-3">
+  <% if @glossary_term.thumb_image %>
+    <div class="col-sm-8 max-width-text">
+      <%= @glossary_term.description.tpl %>
+    </div>
+    <div class="col-sm-4">
+      <%= thumbnail(@glossary_term.thumb_image, votes: true, size: :medium) %>
+    </div>
+  <% else %>
+    <div class="col-sm-12 max-width-text">
+      <%= @glossary_term.description.tpl %>
+    </div>
+  <% end %>
+
+  <div class="col-12 max-width-text mb-3">
+    <%= link_to(:show_glossary_term_reuse_image.t,
+                images_reuse_image_for_glossary_term_path(@glossary_term.id,
+                  q: get_query_param)) %><br/>
+    <%= link_to(:show_glossary_term_remove_image.t,
+                images_remove_images_for_glossary_term_path(@glossary_term.id,
+                  q: get_query_param)) %><br/>
+  </div>
+
+  <% @objects.each do |image|  %>
+    <div class="col-sm-4 color-block-item py-1">
+      <%= thumbnail(image, votes: true) %>
+    </div>
+  <% end %>
+
+  <div class="col-12 mt-3">
+    <%= show_previous_version(@glossary_term) %>
+    <p class="Date">
+      <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
+      <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
+    </p>
+  </div>
+</div>
