@@ -628,6 +628,14 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 
 MushroomObserver::Application.routes.draw do
 
+  get 'glossary_terms/show'
+  get 'glossary_terms/index'
+  get 'glossary_terms/new'
+  get 'glossary_terms/create'
+  get 'glossary_terms/edit'
+  get 'glossary_terms/update'
+  get 'glossary_terms/destroy'
+  get 'glossary_terms/show_past_glossary_term'
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
