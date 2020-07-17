@@ -35,19 +35,19 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Page is missing glossary term description")
   end
 
-  def test_show_past_glossary_term
+  def test_show_past_term
     get(:show_past_glossary_term, id: conic.id, version: conic.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 
-  def test_show_past_glossary_term_no_version
+  def test_show_past_term_no_version
     get(:show_past_glossary_term, id: conic.id)
     assert_response(:redirect)
   end
 
-  def test_show_past_glossary_term_prior_version_link_target
-    prior_version_target = "/glossary/show_past_glossary_term/" \
-                          "#{square.id}?version=#{square.version - 1}"
+  def test_show_past_term_prior_version_link
+    prior_version_target = "/glossary_terms/show_past_glossary_term/" \
+                           "#{square.id}?version=#{square.version - 1}"
     get(:show, id: square.id)
     assert_select "a[href='#{prior_version_target}']"
   end
