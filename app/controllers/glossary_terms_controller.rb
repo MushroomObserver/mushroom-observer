@@ -59,7 +59,7 @@ class GlossaryTermsController < ApplicationController
     #   action: :show,
     #   id: glossary_term.id
     # )
-    redirect_to glossary_path(@glossary_term.id)
+    redirect_to glossary_term_path(@glossary_term.id)
   end
 
   alias_method :glossary_term_post, :create
