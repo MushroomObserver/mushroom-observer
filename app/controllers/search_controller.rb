@@ -38,13 +38,9 @@ class SearchController < ApplicationController
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(
-        controller: :observations,
-        action: :index
-      )
+      redirect_back_or_default(:root)
       return
     end
-
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
       redirect_to(
@@ -62,11 +58,7 @@ class SearchController < ApplicationController
 
   def site_google_search(pattern)
     if pattern.blank?
-      # redirect_to(
-      #   controller: :observations,
-      #   action: :index
-      # )
-      redirect_to observations_path
+      redirect_to(:root)
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")

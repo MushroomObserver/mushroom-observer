@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class SearchControllerTest < FunctionalTestCase
-
   def test_advanced_search_form
     [Name, Image, Observation].each do |model|
       post(
@@ -70,15 +71,19 @@ class SearchControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :google } }
     get(:pattern_search, params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(:root)
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get(:pattern_search, params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(:root)
 
+    params = { search: { pattern: "", type: :all } }
+    get(:pattern_search, params)
+    assert_redirected_to(:root)
+
+    login("rolf")
     params = { search: { pattern: "", type: :observation } }
     get(:pattern_search, params)
-    assert_redirected_to(controller: :observations, action: :list_observations)
+    assert_redirected_to(:root)
   end
-
 end
