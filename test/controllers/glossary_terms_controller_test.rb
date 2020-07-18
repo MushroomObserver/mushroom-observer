@@ -37,26 +37,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** create *****
-  def convex_params
-    {
-      glossary_term:
-      { name: "Convex", description: "Boring" },
-      copyright_holder: "Me",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
-    }
-  end
-
-  def posted_term
-    login_and_post_convex
-    GlossaryTerm.find(:all, order: "created_at DESC")[0]
-  end
-
-  def login_and_post_convex
-    login
-    post(:new, convex_params)
-  end
-
   def test_new_no_login
     get(:new)
     assert_response(:redirect)
