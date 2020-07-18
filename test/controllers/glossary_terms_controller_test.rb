@@ -90,6 +90,26 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_destroy
+    term = GlossaryTerm.first
+    params  = { id: term.id }
+
+    login(users(:zero_user).login)
+    get(:destroy, params)
+    assert(GlossaryTerm.exists?(term.id),
+          "Non-admin should not be able to destroy glossary term")
+    assert_flash_text(:permission_denied.l)
+    assert_response(:redirect)
+
+    login(term.user.login)
+    make_admin
+    get(:destroy, params)
+    assert_not(GlossaryTerm.exists?(term.id),
+               "Admin failed to destroy GlossaryTerm")
+    assert_flash_success
+    assert_response(:redirect)
+  end
+
   ##############################################################################
 
   private

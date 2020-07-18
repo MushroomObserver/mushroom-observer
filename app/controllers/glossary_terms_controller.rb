@@ -63,6 +63,7 @@ class GlossaryTermsController < ApplicationController
   def edit
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
+    # JDC: :login_required callback Already limits this to logged-in users
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
   end
 
@@ -78,6 +79,22 @@ class GlossaryTermsController < ApplicationController
   end
 
   # no alias needed
+
+  def destroy
+    pass_query_params
+    return unless (@glossary_term = GlossaryTerm.find(params[:id]))
+
+    if in_admin_mode?
+      @glossary_term.destroy
+      flash_notice(:runtime_destroyed_id.t(type: GlossaryTerm,
+                                           value: params[:id]))
+    else
+      flash_warning(:permission_denied.t)
+    end
+
+    redirect_to(glossary_terms_path)
+  end
+
 
   ##############################################################################
 
