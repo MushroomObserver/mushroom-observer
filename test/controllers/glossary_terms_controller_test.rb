@@ -3,28 +3,6 @@
 require "test_helper"
 
 class GlossaryTermsControllerTest < FunctionalTestCase
-  # ***** test helpers *****
-  def conic
-    glossary_terms(:conic_glossary_term)
-  end
-
-  def plane
-    glossary_terms(:plane_glossary_term)
-  end
-
-  def square
-    glossary_terms(:square_glossary_term)
-  end
-
-  def create_glossary_term_params
-    {
-      glossary_term: { name: "Convex", description: "Boring old convex" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: "2013" },
-      upload: { license_id: licenses(:ccnc30).id }
-    }
-  end
-
   # ***** show *****
   def test_show
     glossary_term = glossary_terms(:plane_glossary_term)
@@ -104,35 +82,57 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-=begin
-  test "should get new" do
-    get glossary_terms_new_url
-    assert_response :success
+  # ***** actions that modify existing terms: :edit, :update, :destroy *****
+
+  def test_edit_no_login
+    get(:edit, id: conic.id)
+    assert_response(:redirect)
   end
 
-  test "should get create" do
-    get glossary_terms_create_url
-    assert_response :success
+  def test_edit_logged_in
+    login
+    get(:edit, id: conic.id)
+    assert_template(:edit)
   end
 
-  test "should get edit" do
-    get glossary_terms_edit_url
-    assert_response :success
+  def test_update
+    old_count = GlossaryTerm::Version.count
+    make_admin
+    params = create_glossary_term_params
+    params[:id] = conic.id.to_s
+
+    post(:update, params)
+    conic.reload
+
+    assert_equal(params[:glossary_term][:name], conic.name)
+    assert_equal(params[:glossary_term][:description], conic.description)
+    assert_equal(old_count + 1, GlossaryTerm::Version.count)
+    assert_response(:redirect)
   end
 
-  test "should get update" do
-    get glossary_terms_update_url
-    assert_response :success
+  ##############################################################################
+
+  private
+
+  # ***** test helpers *****
+  def conic
+    glossary_terms(:conic_glossary_term)
   end
 
-  test "should get destroy" do
-    get glossary_terms_destroy_url
-    assert_response :success
+  def plane
+    glossary_terms(:plane_glossary_term)
   end
 
-  test "should get show_past_glossary_term" do
-    get glossary_terms_show_past_glossary_term_url
-    assert_response :success
+  def square
+    glossary_terms(:square_glossary_term)
   end
-=end
+
+  def create_glossary_term_params
+    {
+      glossary_term: { name: "Convex", description: "Boring old convex" },
+      copyright_holder: "Insil Choi",
+      date: { copyright_year: "2013" },
+      upload: { license_id: licenses(:ccnc30).id }
+    }
+  end
 end
