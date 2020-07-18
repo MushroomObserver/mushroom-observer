@@ -55,14 +55,31 @@ class GlossaryTermsController < ApplicationController
                        description: params[:glossary_term][:description])
     @glossary_term.add_image(process_image(image_args))
     @glossary_term.save
-    # redirect_to(
-    #   action: :show,
-    #   id: glossary_term.id
-    # )
     redirect_to glossary_term_path(@glossary_term.id)
   end
 
   alias_method :glossary_term_post, :create
+
+  def edit
+    # Expand to any MO user,
+    # but make them owned and editable only by that user or an admin
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+  end
+
+  alias_method :edit_glossary_term, :edit
+
+  def update
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    @glossary_term.attributes = params[:glossary_term].
+                                  permit(:name, :description)
+    @glossary_term.user = @user
+    @glossary_term.save
+    redirect_to glossary_term_path(@glossary_term.id)
+  end
+
+  # no alias needed
+
+  ##############################################################################
 
   private
 
@@ -105,27 +122,4 @@ class GlossaryTermsController < ApplicationController
       flash_notice(:runtime_image_uploaded_image.t(name: name))
     end
   end
-
-  def edit
-    # Expand to any MO user,
-    # but make them owned and editable only by that user or an admin
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
-  end
-
-  alias_method :edit_glossary_term, :edit
-
-  def update
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @glossary_term.attributes = params[:glossary_term].
-                               permit(:name, :description)
-    @glossary_term.user = @user
-    @glossary_term.save
-    # redirect_to(
-    #   action: :show,
-    #   id: glossary_term.id
-    # )
-    redirect_to glossary_path(@glossary_term.id)
-  end
-
-  # no alias needed
 end
