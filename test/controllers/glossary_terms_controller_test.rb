@@ -110,6 +110,23 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_destroy_links_presence
+    term = GlossaryTerm.first
+    login(users(:zero_user).login)
+
+    get(:show, id: term.id)
+    assert_select(
+      "a", { text: :destroy_glossary_term.t, count: 0 },
+      "Non-admin should not have link to #{:destroy_glossary_term.t}"
+    )
+
+    make_admin
+    get(:show, id: term.id)
+    assert_select(
+      "a", { text: :destroy_glossary_term.t, count: 1 },
+      "Admin should have link to #{:destroy_glossary_term.t}"
+    )
+  end
   ##############################################################################
 
   private
