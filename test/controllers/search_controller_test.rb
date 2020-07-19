@@ -69,19 +69,21 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern_search, params)
     assert_redirected_to(target)
 
+    # note, due to :root for non-logged-in users being "observations#index",
+    # the path literal works, but not the controller/action hash! Mysterious -AN
     params = { search: { pattern: "", type: :google } }
     get(:pattern_search, params)
-    assert_redirected_to(:root)
+    assert_redirected_to("/observations")
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get(:pattern_search, params)
-    assert_redirected_to(:root)
+    assert_redirected_to("/observations")
 
     params = { search: { pattern: "", type: :all } }
     get(:pattern_search, params)
-    assert_redirected_to(:root)
+    assert_redirected_to("/observations")
 
-    # logged in users have a different :root, so check this goes to observations
+    # logged in users have a different :root, so use controller/action
     login("rolf")
     params = { search: { pattern: "", type: :observation } }
     get(:pattern_search, params)
