@@ -119,6 +119,16 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(images_length, glossary_term.images.length)
   end
 
+  def test_thumbnail?
+    term_with_nil_thumbnail = glossary_terms(:convex_glossary_term)
+    assert_false(term_with_nil_thumbnail.thumbnail?)
+
+    term_with_thumbnail = glossary_terms(:conic_glossary_term)
+    assert_true(term_with_thumbnail.thumbnail?)
+
+    term_with_thumbnail.thumb_image_id = 0
+    assert_false(term_with_thumbnail.thumbnail?)
+  end
   # Remove an image from images
   # Remove nil
   # Remove an image that is not associated with this glossary_term
