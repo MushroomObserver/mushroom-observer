@@ -14,8 +14,13 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_show_past_term
-    get(:show_past_glossary_term, id: conic.id, version: conic.version - 1)
+    term = conic
+    get(:show_past_glossary_term, id: term.id, version: term.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
+    assert(/#{term.name}/ =~ @response.body,
+           "Page is missing glossary term name ('#{term.name}')")
+    assert(/#{conic.description}/  =~ @response.body,
+           "Page is missing #{term.name} description")
   end
 
   def test_show_past_term_no_version
