@@ -22,8 +22,8 @@
         <%= glossary_term.description.tpl %>
       </td>
       <td>
-        <%= if glossary_term.thumb_image_id && glossary_term.thumb_image_id != 0
-          thumbnail(glossary_term.thumb_image, votes: true)
+        <%= if glossary_term.thumb_image_id&.nonzero?
+              thumbnail(glossary_term.thumb_image, votes: true)
         end %>
       </td>
     </tr>

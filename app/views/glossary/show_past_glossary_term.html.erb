@@ -13,8 +13,7 @@
 
 <div class="row">
   <div class="col-8">
-    <%= render "glossary/glossary_term", object: @glossary_term,
-                                         synonyms: false %>
+    <%= render "glossary_term", synonyms: false %>
   </div>
   <div class="col-4">
     <%= show_past_versions(@glossary_term) %>

@@ -10,6 +10,7 @@
     <%= f.text_area :description, rows: 20, class: "form-control" %>
   </div>
 
+  <%# Currently, allow image only when creating term %>
   <% if action == :new %>
     <div class="form-group mt-3">
       <%= f.label :upload_image, :Image.t + ":" %>

@@ -127,6 +127,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       "Admin should have link to #{:destroy_glossary_term.t}"
     )
   end
+
   ##############################################################################
 
   private

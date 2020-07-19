@@ -29,11 +29,13 @@
 
   <div class="col-12 max-width-text mb-3">
     <%= link_to(:show_glossary_term_reuse_image.t,
-                images_reuse_image_for_glossary_term_path(@glossary_term.id,
-                  q: get_query_param)) %><br/>
+                images_reuse_image_for_glossary_term_path(
+                  @glossary_term.id, q: get_query_param
+                )) %><br/>
     <%= link_to(:show_glossary_term_remove_image.t,
-                images_remove_images_for_glossary_term_path(@glossary_term.id,
-                  q: get_query_param)) %><br/>
+                images_remove_images_for_glossary_term_path(
+                  @glossary_term.id, q: get_query_param
+                )) %><br/>
   </div>
 
   <% @objects.each do |image|  %>
