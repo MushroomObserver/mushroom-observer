@@ -73,15 +73,15 @@ class SearchControllerTest < FunctionalTestCase
     # the path literal works, but not the controller/action hash! Mysterious -AN
     params = { search: { pattern: "", type: :google } }
     get(:pattern_search, params)
-    assert_redirected_to("/observations")
+    assert_redirected_to observations_path
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get(:pattern_search, params)
-    assert_redirected_to("/observations")
+    assert_redirected_to observations_path
 
     params = { search: { pattern: "", type: :all } }
     get(:pattern_search, params)
-    assert_redirected_to("/observations")
+    assert_redirected_to observations_path
 
     # logged in users have a different :root, so use controller/action
     login("rolf")
