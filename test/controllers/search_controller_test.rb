@@ -81,9 +81,10 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern_search, params)
     assert_redirected_to(:root)
 
+    # logged in users have a different :root, so check this goes to observations
     login("rolf")
     params = { search: { pattern: "", type: :observation } }
     get(:pattern_search, params)
-    assert_redirected_to(:root)
+    assert_redirected_to(controller: :observations, action: :index)
   end
 end
