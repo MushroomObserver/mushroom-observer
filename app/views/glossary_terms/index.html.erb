@@ -21,9 +21,7 @@
         <%= term.description.tpl %>
       </td>
       <td>
-        <%= if term.thumb_image_id&.nonzero?
-          thumbnail(term.thumb_image, votes: true)
-        end %>
+        <%= thumbnail(term.thumb_image, votes: true) if term.thumbnail? %>
       </td>
     </tr>
   <% end %>
