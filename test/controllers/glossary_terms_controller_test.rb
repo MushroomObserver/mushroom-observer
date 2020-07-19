@@ -80,9 +80,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_edit_logged_in
+    term = conic
     login
-    get(:edit, id: conic.id)
+    get(:edit, id: term.id)
     assert_template(:edit)
+    assert_response(:success)
+    assert_select("form input[name='glossary_term[name]']", { count: 1 },
+                  "Edit form is missing field for name") do
+      assert_select("input[value='#{term.name}']", { count: 1 },
+                    "Name field is not defaulting to glossary term name")
+    end
   end
 
   def test_update
