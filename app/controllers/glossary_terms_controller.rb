@@ -12,7 +12,7 @@ class GlossaryTermsController < ApplicationController
   def show
     store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/#{@glossary_term.id}"
+    @canonical_url = "#{MO.http_domain}/glossary_term/#{@glossary_term.id}"
     @layout = calc_layout_params
     @objects = @glossary_term.images
   end
