@@ -27,8 +27,7 @@ class VotesController < ApplicationController
     pass_query_params
     naming = Naming.find(params[:id].to_s)
     @observation = naming.observation
-    value = params[:value].to_i
-    @observation.change_vote(naming, value)
+    @observation.change_vote(naming, params[:value])
     # redirect_with_query(
     #   controller: :observations,
     #   action: :show,
