@@ -4,12 +4,10 @@
   tabs = [
     link_to(:glossary_term_index.t, glossary_terms_path),
     link_to(:create_glossary_term.t, new_glossary_term_path),
-    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id)),
+    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
   ]
-  if in_admin_mode?
-    tabs << link_to(:destroy_glossary_term.t, method: :delete,
-                    confirm: :are_you_sure.l)
-  end
+  tabs << link_to(:destroy_glossary_term.t, method: :delete,
+                  confirm: :are_you_sure.l) if in_admin_mode?
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
