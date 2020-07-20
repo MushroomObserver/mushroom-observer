@@ -363,9 +363,9 @@ class Observation < AbstractModel
 
   def place_name_and_coordinates
     if lat.present? && long.present?
-      lat2 = lat.negative? ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
-      long2 = long.negative? ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
-      "#{place_name} (#{lat2} #{long2})"
+      lat_string = format_coordinate(lat, "N", "S")
+      long_string = format_coordinate(long, "E", "W")
+      "#{place_name} (#{lat_string} #{long_string})"
     else
       place_name
     end
@@ -725,91 +725,13 @@ class Observation < AbstractModel
     vote = naming.users_vote(user)
     value = value.to_f
 
-    # This special value means destroy vote.
     if value == Vote.delete_vote
-      if vote
-        naming.votes.delete(vote)
-        result = true
-
-        # If this was one of the old favorites, we might have to elect new.
-        if vote.favorite
-
-          # Get user's max positive vote for this obs
-          max = 0
-          user_votes(user).each do |v|
-            max = v.value if v.value > max
-          end
-
-          # If any, mark all votes at that level "favorite".
-          if max.positive?
-            user_votes(user).each do |v|
-              next if v.value != max || v.favorite
-
-              v.favorite = true
-              v.save
-            end
-          end
-        end
-      end
+      result = delete_vote(naming, vote, user)
 
     # If no existing vote, or if changing value.
     elsif !vote || (vote.value != value)
       result = true
-
-      # First downgrade any existing 100% votes (if casting a 100% vote).
-      v80 = Vote.next_best_vote
-      if value > v80
-        user_votes(user).each do |v|
-          if v.value > v80
-            v.value = v80
-            v.save
-          end
-        end
-      end
-
-      other_votes = (user_votes(user) - [vote])
-      # Is this vote going to become the favorite?
-      favorite = false
-      if value.positive?
-        favorite = true
-        other_votes.each do |v|
-          # If any other vote higher, this is not the favorite.
-          if v.value > value
-            favorite = false
-            break
-          # If any other votes are lower, those will not be favorite.
-          elsif (v.value < value) &&
-                v.favorite
-            v.favorite = false
-            v.save
-          end
-        end
-      end
-
-      # Will another vote become a favorite?
-      max_positive_value = (other_votes.map(&:value) + [value, 0]).max
-      other_votes.each do |v|
-        if (v.value >= max_positive_value) && !v.favorite
-          v.favorite = true
-          v.save
-        end
-      end
-
-      # Create vote if none exists.
-      if !vote
-        naming.votes.create!(
-          user: user,
-          observation: self,
-          value: value,
-          favorite: favorite
-        )
-
-      # Change vote if it exists.
-      else
-        vote.value    = value
-        vote.favorite = favorite
-        vote.save
-      end
+      process_real_vote(naming, vote, value, user)
     end
 
     # Update consensus if anything changed.
@@ -828,35 +750,19 @@ class Observation < AbstractModel
   # always return a Naming, no matter how ambiguous, unless there are no
   # namings.
   def consensus_naming
-    result = nil
+    matches = find_matches
+    return nil if matches.empty?
+    return matches.first if matches.length == 1
 
-    # First, get the Naming(s) for this Name, if any exists.
-    matches = namings.select { |n| n.name_id == name_id }
+    best_naming = matches.first
+    best_value = matches.first.vote_cache
+    matches.each do |naming|
+      next unless naming.vote_cache > best_value
 
-    # If not, it means that a deprecated Synonym won.  Look up all Namings
-    # for Synonyms of the consensus Name.
-    if matches == [] && name && name.synonym_id
-      synonyms = name.synonyms
-      matches = namings.select { |n| synonyms.include?(n.name) }
+      best_naming = naming
+      best_value = naming.vote_cache
     end
-
-    # Only one match -- easy!
-    if matches.length == 1
-      result = matches.first
-
-    # More than one match: take the one with the highest vote.
-    elsif best_naming = matches.first
-      best_value = matches.first.vote_cache
-      matches.each do |naming|
-        next unless naming.vote_cache > best_value
-
-        best_naming = naming
-        best_value  = naming.vote_cache
-      end
-      result = best_naming
-    end
-
-    result
+    best_naming
   end
 
   def calc_consensus
@@ -877,74 +783,6 @@ class Observation < AbstractModel
     Observation.all.find_each(&:calc_consensus)
   end
 
-  # Return the review status based on the Vote's on the consensus Name by
-  # current reviewers.  Possible return values:
-  #
-  # unreviewed:: No reviewers have voted for the consensus.
-  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
-  # unvetted::   Some reviewer is not completely confident in this naming
-  #              (vote.value < Vote#maximum_vote).
-  # vetted::     All reviewers that have voted on the current consensus fully
-  #              support this name (vote.value = Vote#maximum_vote).
-  #
-  # *NOTE*: It probably makes sense to cache this result at some point.
-  #
-  # *NOTE*: This checks all Vote's for Synonym Naming's, taking each reviewer's
-  # highest Vote (if they voted for multiple Synonym's).
-  #
-  def review_status
-    # Get list of Name ids we care about.
-    name_ids = [name_id]
-    if name.synonym_id
-      name_ids = Name.connection.select_values %(
-        SELECT `id` FROM `names` WHERE `synonym_id` = '#{synonym_id}'
-      )
-    end
-
-    # Get list of User ids for reviewers.
-    group = UserGroup.find_by_name("reviewers")
-    user_ids = User.connection.select_values %(
-      SELECT `user_id` FROM `user_groups_users`
-      WHERE `user_group_id` = #{group.id}
-    )
-
-    # Get all the reviewers' Vote's for these Name's.
-    # Order of conditions makes no difference: query times are around 0.05 sec.
-    data = Vote.connection.select_rows %(
-      SELECT vote.user_id, vote.value
-      FROM `votes`, `namings`
-      WHERE votes.observation_id = #{id} AND
-            votes.naming_id = namings.id AND
-            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(",")}) AND
-            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(",")})
-    )
-
-    # Get highest vote for each User.
-    votes = {}
-    data.each do |user_id, value|
-      value = value.to_f
-      votes[user_id] = value if !votes[user_id] || votes[user_id] < value
-    end
-
-    # Apply heuristics to determine review status.
-    status = :unreviewed
-    v100 = Vote.maximum_vote.to_f
-    votes.each_value do |value|
-      if value.negative?
-        status = :inaccurate
-        break
-      elsif status != :inaccurate
-        if value != v100
-          status = :unvetted
-        elsif status == :unreviewed
-          status = :vetted
-        end
-      end
-    end
-
-    status
-  end
-
   ##############################################################################
   #
   #  :section: Preferred ID
@@ -959,6 +797,109 @@ class Observation < AbstractModel
   end
 
   private
+
+  def find_matches
+    matches = namings.select { |n| n.name_id == name_id }
+    return matches unless matches == [] && name && name.synonym_id
+
+    namings.select { |n| name.synonyms.include?(n.name) }
+  end
+
+  def format_coordinate(value, positive_point, negative_point)
+    return "#{-value.round(4)}°#{negative_point}" if value.negative?
+
+    "#{value.round(4)}°#{positive_point}"
+  end
+
+  def delete_vote(naming, vote, user)
+    return false unless vote
+
+    naming.votes.delete(vote)
+    find_new_favorite(user) if vote.favorite
+    true
+  end
+
+  def find_new_favorite(user)
+    max = max_positive_vote(user)
+
+    if max.positive?
+      user_votes(user).each do |v|
+        next if v.value != max || v.favorite
+
+        v.favorite = true
+        v.save
+      end
+    end
+  end
+
+  def max_positive_vote(user)
+    max = 0
+    user_votes(user).each do |v|
+      max = v.value if v.value > max
+    end
+    max
+  end
+
+  def process_real_vote(naming, vote, value, user)
+    downgrade_totally_confident_votes(value, user)
+    favorite = adjust_other_favorites(value, other_votes(vote, user))
+    if !vote
+      naming.votes.create!(
+        user: user,
+        observation: self,
+        value: value,
+        favorite: favorite
+      )
+    else
+      vote.value = value
+      vote.favorite = favorite
+      vote.save
+    end
+  end
+
+  def downgrade_totally_confident_votes(value, user)
+    # First downgrade any existing 100% votes (if casting a 100% vote).
+    v80 = Vote.next_best_vote
+    if value > v80
+      user_votes(user).each do |v|
+        if v.value > v80
+          v.value = v80
+          v.save
+        end
+      end
+    end
+  end
+
+  def adjust_other_favorites(value, other_votes)
+    favorite = false
+    if value.positive?
+      favorite = true
+      other_votes.each do |v|
+        if v.value > value
+          favorite = false
+          break
+        end
+        if (v.value < value) && v.favorite
+          v.favorite = false
+          v.save
+        end
+      end
+    end
+
+    # Will any other vote become a favorite?
+    max_positive_value = (other_votes.map(&:value) + [value, 0]).max
+    other_votes.each do |v|
+      if (v.value >= max_positive_value) && !v.favorite
+        v.favorite = true
+        v.save
+      end
+    end
+    favorite
+  end
+
+  def other_votes(vote, user)
+    user_votes(user) - [vote]
+  end
 
   # Does observation.user have a single preferred id for this observation?
   def owner_preference?
@@ -1156,12 +1097,7 @@ class Observation < AbstractModel
   #   obs.announce_consensus_change(old_name, new_name)
   #
   def announce_consensus_change(old_name, new_name)
-    if old_name
-      log(:log_consensus_changed, old: old_name.display_name,
-                                  new: new_name.display_name)
-    else
-      log(:log_consensus_created, name: new_name.display_name)
-    end
+    log_consensus_change(old_name, new_name)
 
     # Change can trigger emails.
     owner  = user
@@ -1188,6 +1124,15 @@ class Observation < AbstractModel
     end
   end
 
+  def log_consensus_change(old_name, new_name)
+    if old_name
+      log(:log_consensus_changed, old: old_name.display_name,
+                                  new: new_name.display_name)
+    else
+      log(:log_consensus_created, name: new_name.display_name)
+    end
+  end
+
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
     old_name = connection.quote(old_name)
@@ -1205,48 +1150,10 @@ class Observation < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    # Clean off leading/trailing whitespace from +where+.
-    self.where = where.strip_squeeze if where
-    self.where = nil if where == ""
-
-    if !self.when
-      self.when ||= Time.zone.now
-      # errors.add(:when, :validate_observation_when_missing.t)
-    elsif self.when.is_a?(Date) && self.when > Date.today + 1.day
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
-                        "Date.today=#{Date.today}")
-      errors.add(:when, :validate_observation_future_time.t)
-    elsif self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} " \
-                        "Time.now=#{Time.zone.now + 6.hours}")
-      errors.add(:when, :validate_observation_future_time.t)
-    elsif !self.when.respond_to?(:year) || self.when.year < 1500 ||
-          self.when.year > (Time.zone.now + 1.day).year
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when}")
-      errors.add(:when, :validate_observation_invalid_year.t)
-    end
-    if !user && !User.current
-      errors.add(:user, :validate_observation_user_missing.t)
-    end
-
-    if where.to_s.blank? && !location_id
-      self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
-    elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
-    end
-
-    if lat.blank? && long.present? ||
-       lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
-    end
-    if lat.present? && long.blank? ||
-       long.present? && !Location.parse_longitude(long)
-      errors.add(:long, :runtime_lat_long_error.t)
-    end
-    if alt.present? && !Location.parse_altitude(alt)
-      errors.add(:alt, :runtime_altitude_error.t)
-    end
+    check_when
+    check_where
+    check_user
+    check_coordinates
 
     return unless @when_str
 
@@ -1258,6 +1165,94 @@ class Observation < AbstractModel
       else
         errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
       end
+    end
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    check_date && check_time && check_year
+  end
+
+  def check_date
+    return true unless self.when.is_a?(Date) && self.when > Date.today + 1.day
+
+    errors.add(:when, when_message("Date.today=#{Date.today}"))
+    errors.add(:when, :validate_observation_future_time.t)
+    false
+  end
+
+  def when_message(details = nil)
+    start = "self.when=#{self.when.class.name}:#{self.when}"
+    return start unless details
+
+    "#{start} #{details}"
+  end
+
+  def check_time
+    unless self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
+      return true
+    end
+
+    # As of July 5, 2020 these statements appear to be unreachable
+    # because 'when' is a 'date' in the database.
+    errors.add(:when, when_message("Time.now=#{Time.zone.now + 6.hours}"))
+    errors.add(:when, :validate_observation_future_time.t)
+    false
+  end
+
+  def check_year
+    return true unless !self.when.respond_to?(:year) || self.when.year < 1500 ||
+                       self.when.year > (Time.zone.now + 1.day).year
+
+    errors.add(:when, when_message)
+    errors.add(:when, :validate_observation_invalid_year.t)
+    false
+  end
+
+  def check_where
+    # Clean off leading/trailing whitespace from +where+.
+    self.where = where.strip_squeeze if where
+    self.where = nil if where == ""
+
+    if where.to_s.blank? && !location_id
+      self.location = Location.unknown
+      # errors.add(:where, :validate_observation_where_missing.t)
+    elsif where.to_s.size > 1024
+      errors.add(:where, :validate_observation_where_too_long.t)
+    end
+  end
+
+  def check_user
+    if !user && !User.current
+      errors.add(:user, :validate_observation_user_missing.t)
+    end
+  end
+
+  def check_coordinates
+    check_latitude
+    check_longitude
+    check_altitude
+  end
+
+  def check_latitude
+    if lat.blank? && long.present? ||
+       lat.present? && !Location.parse_latitude(lat)
+      errors.add(:lat, :runtime_lat_long_error.t)
+    end
+  end
+
+  def check_longitude
+    if lat.present? && long.blank? ||
+       long.present? && !Location.parse_longitude(long)
+      errors.add(:long, :runtime_lat_long_error.t)
+    end
+  end
+
+  def check_altitude
+    if alt.present? && !Location.parse_altitude(alt)
+      # As of July 5, 2020 this statement appears to be unreachable
+      # because .to_i returns 0 for unparsable strings.
+      errors.add(:alt, :runtime_altitude_error.t)
     end
   end
 end

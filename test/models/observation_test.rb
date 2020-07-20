@@ -885,4 +885,113 @@ class ObservationTest < UnitTestCase
     assert_equal(34.1622, obs.public_lat)
     assert_equal(-118.3521, obs.public_long)
   end
+
+  def test_place_name_and_coordinates_with_values
+    obs = observations(:amateur_obs)
+    assert_equal(obs.place_name_and_coordinates,
+                 "Pasadena, California, USA (34.1622°N 118.3521°W)")
+  end
+
+  def test_place_name_and_coordinates_without_values
+    obs = observations(:unknown_with_no_naming)
+    assert_equal(obs.place_name_and_coordinates, "Who knows where")
+  end
+
+  def test_check_requirements_no_user
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id)
+    end
+    assert_match(:validate_observation_user_missing.t, exception.message)
+  end
+
+  def test_check_requirements_future_date
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days)
+    end
+    assert_match(:validate_observation_future_time.t, exception.message)
+  end
+
+  def test_check_requirements_future_time
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      # Note that 'when' gets automagically converted to Date
+      Observation.create!(name_id: fungi.id, when: Time.zone.now + 2.days)
+    end
+    assert_match(:validate_observation_future_time.t, exception.message)
+  end
+
+  def test_check_requirements_invalid_year
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1))
+    end
+    assert_match(:validate_observation_invalid_year.t, exception.message)
+  end
+
+  def test_check_requirements_where_too_long
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, where: "X" * 1025)
+    end
+    assert_match(:validate_observation_where_too_long.t, exception.message)
+  end
+
+  def test_check_requirements_where_no_latitude
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, long: 90.0)
+    end
+    assert_match(:runtime_lat_long_error.t, exception.message)
+  end
+
+  def test_check_requirements_where_no_longitude
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, lat: 90.0)
+    end
+    assert_match(:runtime_lat_long_error.t, exception.message)
+  end
+
+  def test_check_requirements_where_bad_altitude
+    User.current = mary
+    fungi = names(:fungi)
+    # Currently all strings are parsable as altitude
+    assert_nothing_raised do
+      Observation.create!(name_id: fungi.id, alt: "This should be bad")
+    end
+  end
+
+  def test_check_requirements_with_valid_when_str
+    User.current = mary
+    fungi = names(:fungi)
+    assert_nothing_raised do
+      Observation.create!(name_id: fungi.id, when_str: "2020-07-05")
+    end
+  end
+
+  def test_check_requirements_with_invalid_when_str_date
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, when_str: "0000-00-00")
+    end
+    assert_match(:runtime_date_invalid.t, exception.message)
+  end
+
+  def test_check_requirements_with_invalid_when_str
+    User.current = mary
+    fungi = names(:fungi)
+    exception = assert_raise(ActiveRecord::RecordInvalid) do
+      Observation.create!(name_id: fungi.id, when_str: "This is not a date")
+    end
+    assert_match(:runtime_date_should_be_yyyymmdd.t, exception.message)
+  end
 end
