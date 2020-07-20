@@ -560,8 +560,9 @@ class ImagesControllerTest < FunctionalTestCase
     }
     login("mary")
     get(:reuse_image_for_glossary_term, params)
-    assert_redirected_to(controller: :glossary, action: :show,
-                         id: glossary_term.id)
+    # assert_redirected_to(controller: :glossary, action: :show,
+    #                      id: glossary_term.id)
+    assert_redirected_to(glossary_term_path(glossary_term.id))
     assert(glossary_term.reload.images.member?(image))
   end
 

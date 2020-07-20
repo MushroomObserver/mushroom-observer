@@ -174,11 +174,11 @@ ACTIONS = {
     commercial_inquiry: {},
     email_question: {}
   },
-  glossary: {
-    # create_glossary_term: {}, # aliased only
-    # edit_glossary_term: {}, # aliased only
-    # show_glossary_term: {}, # aliased only
-    show_past_glossary_term: {}
+  # glossary: { # now handled by glossary_terms
+    # create_glossary_term: {}, # aliased only (create)
+    # edit_glossary_term: {}, # aliased only (edit)
+    # show_glossary_term: {}, # aliased only (show)
+    # show_past_glossary_term: {}
     # resources
     # create: {},
     # destroy: {},
@@ -187,7 +187,7 @@ ACTIONS = {
     # new: {},
     # show: {},
     # update: {}
-  },
+  # },
   glossary_terms: {
     # create_glossary_term: {}, # aliased only
     # edit_glossary_term: {}, # aliased only
@@ -708,8 +708,6 @@ MushroomObserver::Application.routes.draw do
   resources :articles, :collection_numbers, :comments, :glossary_terms,
     :herbaria, :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
-
-  resources :glossary, controller: "glossary_terms"
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
   resources :locations do

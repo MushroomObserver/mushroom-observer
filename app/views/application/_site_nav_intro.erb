@@ -20,9 +20,7 @@
                   id: "search_bar_help_link" %>
     </li>
     <li>
-      <%= link_to(:GLOSSARY.t,
-                  { controller: "/glossary", action: :index},
-                  { class: ""}) %>
+      <%= link_to :GLOSSARY.t, glossary_terms_path({ class: ""}) %>
     </li>
     <li>
       <%= link_to(:app_privacy_policy.t,
