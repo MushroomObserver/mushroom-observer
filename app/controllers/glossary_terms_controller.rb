@@ -17,20 +17,22 @@ class GlossaryTermsController < ApplicationController
     @objects = @glossary_term.images
   end
 
-  alias_method :show_glossary_term, :show
+  alias show_glossary_term show
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
-  def show_past_glossary_term # :prefetch: :norobots:
+  def show_past_glossary_term
     pass_query_params
     store_location
-    if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      if params[:version]
-        @glossary_term.revert_to(params[:version].to_i)
-      else
-        flash_error(:show_past_location_no_version.t)
-        redirect_to glossary_term_path(@glossary_term.id)
-      end
+    return unless (
+      @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
+    )
+
+    if params[:version]
+      @glossary_term.revert_to(params[:version].to_i)
+    else
+      flash_error(:show_past_location_no_version.t)
+      redirect_to glossary_term_path(@glossary_term.id)
     end
   end
 
@@ -46,8 +48,8 @@ class GlossaryTermsController < ApplicationController
     @licenses = License.current_names_and_ids(@user.license)
   end
 
-  alias_method :create_glossary_term, :new
-  alias_method :glossary_term_get, :new
+  alias create_glossary_term new
+  alias glossary_term_get new
 
   def create
     @glossary_term = \
@@ -58,7 +60,7 @@ class GlossaryTermsController < ApplicationController
     redirect_to glossary_term_path(@glossary_term.id)
   end
 
-  alias_method :glossary_term_post, :create
+  alias glossary_term_post create
 
   def edit
     # Expand to any MO user,
@@ -67,12 +69,12 @@ class GlossaryTermsController < ApplicationController
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
   end
 
-  alias_method :edit_glossary_term, :edit
+  alias edit_glossary_term edit
 
   def update
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @glossary_term.attributes = params[:glossary_term].
-                                  permit(:name, :description)
+                                permit(:name, :description)
     @glossary_term.user = @user
     @glossary_term.save
     redirect_to glossary_term_path(@glossary_term.id)
@@ -95,7 +97,6 @@ class GlossaryTermsController < ApplicationController
     redirect_to(glossary_terms_path)
   end
 
-
   ##############################################################################
 
   private
@@ -112,10 +113,9 @@ class GlossaryTermsController < ApplicationController
 
   def process_image(args)
     image = nil
-    name = nil
     upload = args[:image]
     if upload.blank?
-      name = upload.original_filename.force_encoding("utf-8") if
+      upload.original_filename.force_encoding("utf-8") if
         upload.respond_to?(:original_filename)
 
       image = Image.new(args)

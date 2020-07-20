@@ -37,7 +37,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
     assert(/#{term.name}/ =~ @response.body,
            "Page is missing glossary term name ('#{term.name}')")
-    assert(/#{conic.description}/  =~ @response.body,
+    assert(/#{conic.description}/ =~ @response.body,
            "Page is missing #{term.name} description")
   end
 
@@ -125,12 +125,12 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_destroy
     term = GlossaryTerm.first
-    params  = { id: term.id }
+    params = { id: term.id }
 
     login(users(:zero_user).login)
     get(:destroy, params)
     assert(GlossaryTerm.exists?(term.id),
-          "Non-admin should not be able to destroy glossary term")
+           "Non-admin should not be able to destroy glossary term")
     assert_flash_text(:permission_denied.l)
     assert_response(:redirect)
 
