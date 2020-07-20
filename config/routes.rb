@@ -709,7 +709,7 @@ MushroomObserver::Application.routes.draw do
     :herbaria, :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
 
-  resources :glossary, as: "glossary_terms"
+  resources :glossary, controller: "glossary_terms"
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
   resources :locations do
