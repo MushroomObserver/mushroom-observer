@@ -13,6 +13,24 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Page is missing glossary term description")
   end
 
+  def test_show_links_to_destroy
+    term = GlossaryTerm.first
+    login(users(:zero_user).login)
+
+    get(:show, id: term.id)
+    assert_select(
+      "a", { text: :destroy_glossary_term.t, count: 0 },
+      "Non-admin should not have link to #{:destroy_glossary_term.t}"
+    )
+
+    make_admin
+    get(:show, id: term.id)
+    assert_select(
+      "a", { text: :destroy_glossary_term.t, count: 1 },
+      "Admin should have link to #{:destroy_glossary_term.t}"
+    )
+  end
+
   def test_show_past_term
     term = conic
     get(:show_past_glossary_term, id: term.id, version: term.version - 1)
@@ -47,12 +65,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** create *****
-  def test_new_no_login
+  def test_new
     get(:new)
-    assert_response(:redirect)
-  end
+    assert_response(:redirect,
+                    "Not logged-in user should be unable to create term")
 
-  def test_new_logged_in
     login
     get(:new)
     assert_template(:new)
@@ -74,13 +91,12 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** actions that modify existing terms: :edit, :update, :destroy *****
 
-  def test_edit_no_login
-    get(:edit, id: conic.id)
-    assert_response(:redirect)
-  end
-
-  def test_edit_logged_in
+  def test_edit
     term = conic
+    get(:edit, id: term.id)
+    assert_response(:redirect,
+                    "Not logged-in user should be unable to edit term")
+
     login
     get(:edit, id: term.id)
     assert_template(:edit)
@@ -125,24 +141,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                "Admin failed to destroy GlossaryTerm")
     assert_flash_success
     assert_response(:redirect)
-  end
-
-  def test_destroy_links_presence
-    term = GlossaryTerm.first
-    login(users(:zero_user).login)
-
-    get(:show, id: term.id)
-    assert_select(
-      "a", { text: :destroy_glossary_term.t, count: 0 },
-      "Non-admin should not have link to #{:destroy_glossary_term.t}"
-    )
-
-    make_admin
-    get(:show, id: term.id)
-    assert_select(
-      "a", { text: :destroy_glossary_term.t, count: 1 },
-      "Admin should have link to #{:destroy_glossary_term.t}"
-    )
   end
 
   ##############################################################################
