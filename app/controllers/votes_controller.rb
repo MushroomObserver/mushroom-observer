@@ -26,15 +26,9 @@ class VotesController < ApplicationController
   def cast_vote
     pass_query_params
     naming = Naming.find(params[:id].to_s)
-    @observation = naming.observation
-    value = params[:value].to_i
-    @observation.change_vote(naming, value)
-    # redirect_with_query(
-    #   controller: :observations,
-    #   action: :show,
-    #   id: @observation.id
-    # )
-    redirect_to observation_path(@observation.id, q: get_query_param)
+    observation = naming.observation
+    observation.change_vote(naming, params[:value])
+    redirect_to observation_path(observation.id, q: get_query_param)
   end
 
   # This is the new POST method for show_observation.
