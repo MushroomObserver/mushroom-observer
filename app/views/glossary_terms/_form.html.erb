@@ -14,9 +14,18 @@
   <% if action == :new %>
     <div class="form-group mt-3">
       <%= f.label :upload_image, :Image.t + ":" %>
-      <%# f.custom_file_field :upload_image
-          # FIXME %>
-      <%= f.file_field :upload_image %>
+      <%= custom_file_field :upload_image, { id: "customFileField" } %>
+      <%# f.file_field :upload_image %>
+      <%# tag.div class: "input-group mb-3" do
+            # tag.div class: "input-group-prepend" do
+            #   tag.span "Upload", class: "input-group-text", id: "customFileFieldLabel"
+            # end
+            tag.div class: "custom-file" do
+              custom_file_field :upload_image, { id: "customFileField" }
+              # tag.label :no_file_selected.t, class: "custom-file-label", for: "customFileField"
+            end
+          end %>
+
     </div>
 
     <div class="form-group mt-3 form-inline">
@@ -32,19 +41,20 @@
                         { class: "form-control" } %>
       <%= f.date_select @copyright_year,
                         { field_name: :copyright_year,
-                          start_year: 1980,
+                          start_year: 20.years.ago.year,
                           end_year: Time.now.year,
                           discard_day: true,
                           discard_month: true },
                         { class: "form-control" } %><br>
       <%# f.select :upload, :license_id, @licenses, selected: @upload_license_id,
                    class: "form-control" %>
-      <%= f.select :license_id, @licenses, selected: @upload_license_id,
-                   class: "form-control" %>
+      <%= f.select :license_id, @licenses,
+                   { selected: @upload_license_id },
+                   { class: "custom-select" } %>
       <p class="help_block">(<%= :glossary_term_copyright_warning.t %>)</p>
     </div>
   <% end %>
 
-  <%= f.submit button_name.t, class: "btn mx-auto mt-3" %>
+  <%= f.submit button_name.t, class: "btn btn-primary mx-auto mt-3" %>
 
 <% end %>
