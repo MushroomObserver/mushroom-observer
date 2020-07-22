@@ -301,6 +301,11 @@
   border: 1px solid $gray-500;
 }
 
+.form-max-width {
+  max-width: map-get($container-max-widths, md);
+  margin-left: auto;
+  margin-right: auto;
+}
 // // Most browsers allow you to zoom in or out: let the user decide what
 // // an optimal width for a line of text should be.  There is no way for us
 // // to decide for them intelligently, since browsers differ so much in how

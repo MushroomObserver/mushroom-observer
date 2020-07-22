@@ -9,7 +9,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<div class="form-max-width mt-4">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render partial: "form",
              locals: { button_name: :edit_glossary_term_save, action: :edit } %>
 </div>
