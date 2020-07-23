@@ -1,10 +1,10 @@
-<%= provide :navbar_dropdowns do
-  render partial: "application/navbar_dropdown",
-         locals: { name: "Actions", links: @links }
-end %>
-
 <%= provide :navbar_search do
   render partial: "application/navbar_search"
+end %>
+
+<%= provide :navbar_dropdowns do
+  render partial: "application/navbar_dropdown",
+         locals: { name: "Actions", links: create_links(@links) }
 end %>
 
 <%= provide :navbar_create do

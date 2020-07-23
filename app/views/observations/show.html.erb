@@ -1,5 +1,15 @@
-<%# provide :context_navbar do
-  render "application/context_navbar"
+<%= provide :navbar_search do
+  render partial: "application/navbar_search"
+end %>
+
+<%= provide :navbar_dropdowns do
+  # Seems that in :show there are no @links
+  # render partial: "application/navbar_dropdown",
+  #        locals: { name: "Actions", links: create_links(@links) }
+end %>
+
+<%= provide :navbar_create do
+  render partial: "application/navbar_create"
 end %>
 
 <%

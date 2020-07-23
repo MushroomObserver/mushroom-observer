@@ -1,29 +1,23 @@
-<%# if @links %>
+<% links = create_links(links) if links.first.is_a? Array %>
 
-  <%# yield :navbar_dropdowns %>
-
-  <%# links = create_links(@links) %>
-
-  <%= tag.div class: "nav-item dropdown ml-5" do -%>
-    <%= button_tag name.t,
-          class: "btn nav-link dropdown-toggle",
-          type: "button",
-          id: name.underscore + "_menu_button",
-          data: {
-            toggle: "dropdown"
-          },
-          aria: {
-            haspopup: "true",
-            expanded: "false"
-          } %>
-    <%= tag.div class: "dropdown-menu",
-          aria: {
-            labelledby: name.underscore + "_menu_button"
-          } do -%>
-        <% links.reject(&:nil?).each do |link| %>
-          <%= link %>
-        <% end %>
-    <% end %>
+<%= tag.div class: "nav-item dropdown ml-5" do -%>
+  <%= button_tag name.t,
+        class: "btn nav-link dropdown-toggle",
+        type: "button",
+        id: name.underscore + "_menu_button",
+        data: {
+          toggle: "dropdown"
+        },
+        aria: {
+          haspopup: "true",
+          expanded: "false"
+        } %>
+  <%= tag.div class: "dropdown-menu",
+        aria: {
+          labelledby: name.underscore + "_menu_button"
+        } do -%>
+      <% links.reject(&:nil?).each do |link| %>
+        <%= link %>
+      <% end %>
   <% end %>
-
-<%# end %>
+<% end %>

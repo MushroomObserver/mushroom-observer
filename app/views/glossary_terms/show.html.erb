@@ -1,4 +1,5 @@
 <%
+  # TODO: NIMMO format this layout for bootstrap-4
   @title = :show_glossary_term_title.t(name: @glossary_term.name)
 
   tabs = [
@@ -8,8 +9,22 @@
   ]
   tabs << link_to(:destroy_glossary_term.t, method: :delete,
                   confirm: :are_you_sure.l) if in_admin_mode?
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
 %>
+
+<%= provide :navbar_search do
+  # Search maybe not relevant in this layout
+  # render partial: "application/navbar_search"
+end %>
+
+<%= provide :navbar_dropdowns do
+  render partial: "application/navbar_dropdown",
+         locals: { name: "Actions", links: tabs }
+end %>
+
+<%= provide :navbar_create do
+  render partial: "application/navbar_create"
+end %>
 
 <div class="row mt-3">
   <% if @glossary_term.thumb_image %>
