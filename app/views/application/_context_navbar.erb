@@ -45,30 +45,9 @@
 
     <% end %>
 
-    <% if @links %>
+    <% if @tabsets %>
 
-      <% links = create_links(@links) %>
-      <%= tag.div class: "nav-item dropdown ml-5" do -%>
-        <%= button_tag "Links",
-              class: "btn nav-link dropdown-toggle",
-              type: "button",
-              id: "actions_menu_button",
-              data: {
-                toggle: "dropdown"
-              },
-              aria: {
-                haspopup: "true",
-                expanded: "false"
-              } %>
-        <%= tag.div class: "dropdown-menu",
-              aria: {
-                labelledby: "actions_menu_button"
-              } do -%>
-            <% links.reject(&:nil?).each do |link| %>
-              <%= link %>
-            <% end %>
-        <% end %>
-      <% end %>
+      <%= @tabsets %>
 
     <% end %>
 

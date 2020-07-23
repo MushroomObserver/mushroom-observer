@@ -12,7 +12,7 @@
 
 
 .right-side-content {
-  
+
   @include media-breakpoint-up(md) {
     padding-left: 1.5rem;
   }
@@ -50,13 +50,13 @@
 
   .nav-link, .btn {
     font-weight: $font-weight-bold;
-    font-size: 1.125rem;
+    // font-size: 1.125rem;
     color: $primary-text;
   }
 
   .form-control {
     font-weight: $font-weight-semibold;
-    font-size: 1.125rem;
+    // font-size: 1.125rem;
     // background-color: $primary-text;
   }
 
