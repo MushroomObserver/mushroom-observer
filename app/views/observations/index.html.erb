@@ -1,17 +1,20 @@
-<%# provide :navbar_dropdowns do
-  render "application/context_navbar"
+<%= provide :navbar_dropdowns do
+  render partial: "application/navbar_dropdown",
+         locals: { name: "Actions", links: @links }
+end %>
+
+<%= provide :navbar_search do
+  render partial: "application/navbar_search"
+end %>
+
+<%= provide :navbar_create do
+  render partial: "application/navbar_create"
 end %>
 
 <%
-  # if @links.any? && @objects.any?
-    # tabs = create_links(@links)
-    # @tabsets = { right: draw_tab_set(tabs) }
-    # @tabsets = ""
+  # if @links.any?
+  #   @tabsets = navbar_dropdown("Actions", @links)
   # end
-
-  if @links.any?
-    @tabsets = navbar_dropdown("Actions", @links)
-  end
 
   flash_error(@error) if @error && @objects.empty?
 %>

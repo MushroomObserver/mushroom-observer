@@ -1,14 +1,14 @@
-<% if @links %>
+<%# if @links %>
 
   <%# yield :navbar_dropdowns %>
 
-  <% links = create_links(@links) %>
+  <%# links = create_links(@links) %>
 
   <%= tag.div class: "nav-item dropdown ml-5" do -%>
-    <%= button_tag "Links",
+    <%= button_tag name.t,
           class: "btn nav-link dropdown-toggle",
           type: "button",
-          id: "actions_menu_button",
+          id: name.underscore + "_menu_button",
           data: {
             toggle: "dropdown"
           },
@@ -18,7 +18,7 @@
           } %>
     <%= tag.div class: "dropdown-menu",
           aria: {
-            labelledby: "actions_menu_button"
+            labelledby: name.underscore + "_menu_button"
           } do -%>
         <% links.reject(&:nil?).each do |link| %>
           <%= link %>
@@ -26,4 +26,4 @@
     <% end %>
   <% end %>
 
-<% end %>
+<%# end %>

@@ -7,35 +7,6 @@ module TabsHelper
     render(partial: "/shared/tab_set", locals: { links: links })
   end
 
-  # http://yentran.org/blog/2013/10/31/helper-method-generate-nested-tags-from-block/
-  def navbar_dropdown(name, links) # &block
-    # (content = capture(&block)) && anchors = content.split(/\n/).reject { |a| a.blank? }
-    name = name.html_safe
-    anchors = links.reject(&:nil?)
-    anchors = create_links(anchors)
-
-    if anchors.present?
-      tag.div class: "nav-item dropdown ml-5" do
-        concat(
-          capture do
-            button_tag name.t, class: "btn nav-link dropdown-toggle",
-              type: "button", id: name + "_menu_button",
-              data: { toggle: "dropdown" },
-              aria: { haspopup: "true", expanded: "false" }
-          end
-        )
-        concat(
-          capture do
-            tag.div class: "dropdown-menu",
-                    aria: { labelledby: name + "_menu_button" } do
-              anchors.collect { |a| concat a }
-            end
-          end
-        )
-      end
-    end
-  end
-
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
   def show_observation_tabset(obs, user)

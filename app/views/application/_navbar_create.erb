@@ -1,0 +1,12 @@
+<% if Rails.application.routes.url_helpers.method_defined?(
+        "new_#{controller.controller_name.singularize}_path"
+) %>
+  <%= link_to({ controller: controller.controller_name, action: :new },
+              { class: "ml-4 ml-lg-5 btn nav-item nav-link btn-link",
+                id: "create_link" }) do -%>
+        <%= tag.span class: "text-nowrap" do -%>
+          <%= tag.span :CREATE.t, class: "mr-2" -%>
+          <%= tag.span class: "fas fa-edit" -%>
+        <% end %>
+  <% end %>
+<% end %>
