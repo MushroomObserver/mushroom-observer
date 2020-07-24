@@ -1,7 +1,8 @@
-<% unless browser.bot?%>
-  <div class="" style="overflow:visible">
-    <div class="dropdown">
-      <%= content_tag(:span, "#{:app_languages.t}:") %>
+<% unless browser.bot? %>
+  <div class="mo-toc-item">
+    <%= tag.span "#{:app_languages.t}:" %>
+    <ul class="nav mo-sidenav">
+
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
         <%= I18n.locale.upcase %>
         <span class="caret"></span>

@@ -16,6 +16,7 @@ module ApplicationHelper
   include LocalizationHelper
   include MapHelper
   include ObjectLinkHelper
+  include MenuHelper
   include TabsHelper
   include ThumbnailHelper
   include VersionHelper

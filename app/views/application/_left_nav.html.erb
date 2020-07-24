@@ -20,9 +20,9 @@
 
 <nav id="left_nav" class="navbar-light py-3" aria-label="Site navigation">
 
-  <%= render partial: "site_nav_user" %>
+  <%= render partial: "application/left_nav_item", locals: { menu: user_menu } %>
   <%= render partial: "site_nav_admin" %>
-  <%= render partial: "site_nav_intro" %>
+  <%= render partial: "application/left_nav_item", locals: { menu: intro_menu } %>
 
   <%= render partial: "site_nav_latest" %>
   <%= render partial: "site_nav_resources" %>

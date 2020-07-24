@@ -1,0 +1,19 @@
+<%
+klass = "mo-toc-item mo-toc-" + menu[:name].underscore
+menu_id = menu[:name].underscore + "_menu"
+sub_menu_id = menu[:name].underscore + "_collapse_menu"
+%>
+
+<%= tag.div class: klass, id: menu_id do %>
+  <%= link_to menu[:heading], "##{sub_menu_id}", class: "mo-toc-link",
+          data: { toggle: "collapse" }, role: "button",
+          aria: { expanded: "false", controls: "##{sub_menu_id}" } %>
+  <%= tag.ul class: "nav mo-sidenav collapse", id: "#{sub_menu_id}",
+         data: { parent: "#left_nav" } do %>
+      <% menu[:links].each do |link| %>
+          <%= tag.li do %>
+            <%= link %>
+          <% end %>
+      <% end %>
+  <% end %>
+<% end %>
