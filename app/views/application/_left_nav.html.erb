@@ -20,11 +20,11 @@
 
 <nav id="left_nav" class="navbar-light py-3" aria-label="Site navigation">
 
-  <%= render partial: "application/left_nav_item", locals: { menu: user_menu } %>
-  <%= render partial: "application/left_nav_item", locals: { menu: admin_menu } %>
-  <%= render partial: "application/left_nav_item", locals: { menu: intro_menu } %>
-  <%= render partial: "application/left_nav_item", locals: { menu: latest_menu } %>
-  <%= render partial: "application/left_nav_item", locals: { menu: help_menu } %>
+  <%= render "application/left_nav_item", menu: user_menu %>
+  <%= render "application/left_nav_item", menu: intro_menu %>
+  <%= render "application/left_nav_item", menu: latest_menu %>
+  <%= render "application/left_nav_item", menu: help_menu %>
+  <%= render "application/left_nav_item", menu: admin_menu if in_admin_mode? %>
 
   <%= render partial: "site_nav_translations" %>
 
