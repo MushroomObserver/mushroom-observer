@@ -6,14 +6,14 @@
   <%= render "application/navbar_title",
              title: @navbar[:title] if @navbar&.key?(:title) %>
 
-  <%= render "application/navbar_filter" if @navbar&.key?(:filter) %>
-  <%= render "application/navbar_sort" if @navbar&.key?(:sort) %>
-
   <% if @navbar&.key?(:links) && @navbar[:links].kind_of?(Array)
         @navbar[:links].reject(&:nil?).each do |link| %>
       <%= render "application/navbar_link", link: link %>
     <% end %>
   <% end %>
+
+  <%= render "application/navbar_filter" if @navbar&.key?(:filter) %>
+  <%= render "application/navbar_sort" if @sorts %>
 
   <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
 
