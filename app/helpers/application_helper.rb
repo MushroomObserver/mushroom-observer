@@ -42,6 +42,9 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # TODO: These two methods are broken but may be able to be repaired
+  # using the new object_path methods in object_link_helper.
+  # First need to review what the options hashes may contain. - NIMMO
   # Call link_to with query params added.
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)

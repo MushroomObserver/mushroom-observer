@@ -3,22 +3,26 @@
 
 <%= tag.div class: "navbar-nav w-100" do %>
 
-  <%# FIXME: not all controllers have an :index action, e.g. Account/login %>
-  <%# FIXME: controller.controller_name.humanize is not reliable (Rss logs) %>
-  <%# TODO: figure out how to provide a "controller home" link to view - AN %>
-  <%= link_to controller.controller_name.humanize,
-              { controller: controller.controller_name, # controller to provide
-                action: :index }, # this should be the provided link instead
-              { id: "page-title",
-                class: "navbar-brand mr-auto" } %>
+  <%= render "application/navbar_title",
+             title: @navbar[:title] if @navbar[:title] %>
+
+  <%# render "application/navbar_create" if @navbar[:create] %>
+
+  <% if @navbar[:links].is_a? Array
+        @navbar[:links].reject(&:nil?).each do |link| %>
+      <%= render "application/navbar_link", link: link %>
+    <% end %>
+  <% end %>
 
   <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
 
-    <%= yield :navbar_search %>
+    <% if @navbar[:dropdowns].is_a? Array
+          @navbar[:dropdowns].reject(&:nil?).each do |dropdown| %>
+        <%= render "application/navbar_dropdown", dropdown: dropdown %>
+      <% end %>
+    <% end %>
 
-    <%= yield :navbar_dropdowns %>
-
-    <%= yield :navbar_create %>
+    <%= render "application/navbar_search" if @navbar[:search] %>
 
   <% end %>
 

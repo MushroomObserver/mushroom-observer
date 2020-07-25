@@ -1,17 +1,3 @@
-<%= provide :navbar_search do
-  render partial: "application/navbar_search"
-end %>
-
-<%= provide :navbar_dropdowns do
-  # Seems that in :show there are no @links
-  # render partial: "application/navbar_dropdown",
-  #        locals: { name: "Actions", links: create_links(@links) }
-end %>
-
-<%= provide :navbar_create do
-  render partial: "application/navbar_create"
-end %>
-
 <%
   @owner_id = owner_id_line(@observation) # must go before show_obs_title
   @title = show_obs_title(@observation) # NIMMO: reformatting in title partial
@@ -24,6 +10,18 @@ end %>
   show_lists = @observation.species_lists.any?
   show_links = @observation.external_links.any? || @new_sites.any?
   comments = @observation.comments.any?
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:search] = 1
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_observation_path, icon: "fa-plus" },
+    { title: :EDIT.t, url: edit_observation_path(@observation.id),
+      icon: "fa-edit" }
+  ]
+  @navbar[:links] << { title: :destroy_observation.t, method: :delete,
+                       url: observation_path, icon: "fa-trash-alt",
+                       confirm: :are_you_sure.l } if in_admin_mode?
 %>
 
 <div class="row navbar h-auto p-0 mt-3">

@@ -1,10 +1,16 @@
 <%
   @title = :glossary_term_index_title.t
 
-  tabs = [
-    link_to(:create_glossary_term.t, new_glossary_term_path)
+  # tabs = [
+  #   link_to(:create_glossary_term.t, new_glossary_term_path)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_glossary_term_path, icon: "fa-plus" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

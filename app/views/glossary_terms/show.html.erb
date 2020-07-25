@@ -1,30 +1,26 @@
 <%
-  # TODO: NIMMO format this layout for bootstrap-4
+  # TODO: NIMMO reformat this layout for bootstrap-4
   @title = :show_glossary_term_title.t(name: @glossary_term.name)
 
-  tabs = [
-    link_to(:glossary_term_index.t, glossary_terms_path),
-    link_to(:create_glossary_term.t, new_glossary_term_path),
-    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
-  ]
-  tabs << link_to(:destroy_glossary_term.t, method: :delete,
-                  confirm: :are_you_sure.l) if in_admin_mode?
+  # tabs = [
+  #   link_to(:glossary_term_index.t, glossary_terms_path),
+  #   link_to(:create_glossary_term.t, new_glossary_term_path),
+  #   link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
+  # ]
+  # tabs << link_to(:destroy_glossary_term.t, method: :delete,
+  #                 confirm: :are_you_sure.l) if in_admin_mode?
   # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_glossary_term_path, icon: "fa-plus" }
+    { title: :EDIT.t, url: edit_glossary_term_path(@glossary_term.id),
+      icon: "fa-edit" }
+  ]
+  @navbar[:links] << { title: :destroy_glossary_term.t, method: :delete,
+                       url: glossary_term_path, icon: "fa-trash-alt",
+                       confirm: :are_you_sure.l } if in_admin_mode?
 %>
-
-<%= provide :navbar_search do
-  # Search maybe not relevant in this layout
-  # render partial: "application/navbar_search"
-end %>
-
-<%= provide :navbar_dropdowns do
-  render partial: "application/navbar_dropdown",
-         locals: { name: "Actions", links: tabs }
-end %>
-
-<%= provide :navbar_create do
-  render partial: "application/navbar_create"
-end %>
 
 <div class="row mt-3">
   <% if @glossary_term.thumb_image %>

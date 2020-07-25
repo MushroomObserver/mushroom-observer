@@ -1,16 +1,13 @@
 <%
   @title = :create_glossary_term_title.l
 
-  tabs = [
-    link_to(:glossary_term_index.t, glossary_terms_path)
-  ]
+  # tabs = [
+  #   link_to(:glossary_term_index.t, glossary_terms_path)
+  # ]
   # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
 %>
-
-<%= provide :navbar_dropdowns do
-  render partial: "application/navbar_dropdown",
-         locals: { name: "Actions", links: tabs }
-end %>
 
 <div class="form-max-width mt-4">
   <%= tag.h1 @title.humanize, class: "display-1" %>

@@ -1,20 +1,13 @@
-<%= provide :navbar_search do
-  render partial: "application/navbar_search"
-end %>
-
-<%= provide :navbar_dropdowns do
-  render partial: "application/navbar_dropdown",
-         locals: { name: "Actions", links: create_links(@links) }
-end %>
-
-<%= provide :navbar_create do
-  render partial: "application/navbar_create"
-end %>
-
 <%
-  # if @links.any?
-  #   @tabsets = navbar_dropdown("Actions", @links)
-  # end
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_observation_path, icon: "fa-plus" }
+  ]
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
+  @navbar[:search] = 1
 
   flash_error(@error) if @error && @objects.empty?
 %>
