@@ -11,6 +11,32 @@
 
 <div class="form-max-width mt-4">
   <%= tag.h1 @title.humanize, class: "display-1" %>
-  <%= render partial: "form",
-             locals: { button_name: :edit_glossary_term_save, action: :new } %>
+  <%= render "form", button_name: :edit_glossary_term_save do |f| %>
+
+    <%# form yields back to here so that view may supply image input form %>
+    <div class="form-group mt-3">
+      <%= f.label :upload_image, :Image.t + ":" %>
+      <%= custom_file_field :upload_image, { id: "customFileField" } %>
+    </div>
+
+    <div class="form-group mt-3 form-inline">
+      <%= f.label :copyright_holder,
+                  :glossary_term_copyright_holder.t + ":" %><br/>
+      <%= f.text_field :copyright_holder,
+                       value: @copyright_holder,
+                       class: "form-control" %>
+      <%= f.date_select @copyright_year,
+                        { field_name: :copyright_year,
+                          start_year: 20.years.ago.year,
+                          end_year: Time.now.year,
+                          discard_day: true,
+                          discard_month: true },
+                        { class: "form-control" } %><br>
+     <%= f.select :license_id, @licenses,
+                   { selected: @upload_license_id },
+                   { class: "custom-select" } %>
+      <p class="help_block">(<%= :glossary_term_copyright_warning.t %>)</p>
+    </div>
+
+  <% end %>
 </div>
