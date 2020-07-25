@@ -2,7 +2,14 @@
   @title ||= :list_collection_numbers_title.t
 
   tabs = create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :COLLECTION_NUMBERS.t,
+                      url: collection_numbers_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
 
   flash_error(@error) if @error && @objects.empty?
 %>

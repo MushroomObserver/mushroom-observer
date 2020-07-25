@@ -1,13 +1,17 @@
-<% provide :context_navbar do
-  render "application/context_navbar"
-end %>
-
 <%
-  tabs = [
-    link_to_coerced_query(@query, Observation),
-    link_to_coerced_query(@query, Location)
+  # tabs = [
+  #   link_to_coerced_query(@query, Observation),
+  #   link_to_coerced_query(@query, Location)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  # TODO: NIMMO - check links below against coerced queries above
+  @navbar[:links] = [
+    { title: :show_objects.t(type: :observation),
+      url: observations_path(q: get_query_param) }
+    { title: :show_objects.t(type: :location),
+      url: locations_path(q: get_query_param) }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <br/>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Custom View Helpers for rss_log View (Activity Feed)
-#
+# NOTE: Not currently used by Bootstrap-4
 module RssLogsHelper
   # All types of RssLogs
   def types

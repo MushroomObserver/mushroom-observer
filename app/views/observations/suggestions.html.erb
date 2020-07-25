@@ -3,11 +3,18 @@
   @title = show_obs_title(@observation)
   num_images = @observation.images.length
 
-  tabs = [
-    link_to :show_object.t(type: :observation),
-            observation_path(id: @observation.id, q: get_query_param)
+  # tabs = [
+  #   link_to :show_object.t(type: :observation),
+  #           observation_path(id: @observation.id, q: get_query_param)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:search] = 1
+  @navbar[:links] = [
+    { title: :show_object.t(type: :observation),
+      url: observation_path(id: @observation.id, q: get_query_param) },
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

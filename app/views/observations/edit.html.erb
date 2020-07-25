@@ -1,14 +1,18 @@
 <%
   @title = :edit_observation_title.t(name: @observation.unique_format_name)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :observation),
-            observation_path(id: @observation.id, q: get_query_param))
-  ]
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :observation),
+  #           observation_path(id: @observation.id, q: get_query_param))
+  # ]
   # @tabsets = { right: draw_tab_set(tabs) }
   @navbar = {} # reset
   @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
-  @navbar[:dropdowns] = [{ title: "Actions", links: tabs }]
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :observation),
+      url: observation_path(@observation.id, q: get_query_param),
+      icon: "fa-backspace" }
+  ]
 %>
 
 <%= tag.div class: "form-max-width mt-4" do %>

@@ -1,8 +1,16 @@
 <%
   @title ||= :ARTICLES.t
   tabs = index_tabs + create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
 
+  @navbar = {} # reset
+  @navbar[:title] = { title: :ARTICLES.t, url: articles_path }
+  # @navbar[:links] = [
+  #   { title: :CREATE.t, url: new_observation_path, icon: "fa-plus" }
+  # ]
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
   flash_error(@error) if @error && @objects.empty?
 %>
 

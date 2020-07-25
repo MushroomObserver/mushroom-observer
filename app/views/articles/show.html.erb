@@ -1,10 +1,17 @@
 <%
   @title = show_article_title(@article)
-  @tabsets = { right: draw_tab_set(show_article_tabs) }
+  # @tabsets = { right: draw_tab_set(show_article_tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :ARTICLES.t, url: articles_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: show_article_tabs }
+  ]
 %>
 <div>
- <%= :BY.t %> <%= user_link(@article.user) %>,
- <%= tag.small @article.created_at.fancy_time %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= :BY.t %> <%= user_link(@article.user) %>,
+  <%= tag.small @article.created_at.fancy_time %>
 </div>
 <div class="row mt-3">
   <div class="col-sm-12">
