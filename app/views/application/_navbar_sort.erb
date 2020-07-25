@@ -1,0 +1,34 @@
+<%
+sortby = ""
+@sorts.each do |title, action|
+  if action.nil?
+    sortby = title.to_s
+  end
+end
+# icon = tag.i class: "fas fa-sort-amount-up-alt mr-2"
+%>
+
+<%= tag.div class: "nav-item dropdown ml-5" do -%>
+  <%= button_tag :sort_by_header.t + " " + sortby,
+        class: "btn nav-link dropdown-toggle",
+        type: "button",
+        id: "sort_menu_button",
+        data: {
+          toggle: "dropdown"
+        },
+        aria: {
+          haspopup: "true",
+          expanded: "false"
+        } %>
+  <%= tag.div class: "dropdown-menu", id: "sorts",
+              aria: { labelledby: "sort_menu_button" } do -%>
+      <% @sorts.each do |title, action| %>
+        <%= if action.nil?
+              link_with_query(title, {}, class: "dropdown-item active",
+                                         disabled: true)
+            else
+              link_with_query(title, action, class: "dropdown-item")
+            end %>
+      <% end %>
+  <% end %>
+<% end %>

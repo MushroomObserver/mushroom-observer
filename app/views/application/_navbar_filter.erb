@@ -1,0 +1,62 @@
+<%
+name = :rss_show.t
+# puts name
+types = RssLog.all_types(&:to_s)
+puts types
+%>
+
+<%= tag.div class: "nav-item dropdown ml-5" do -%>
+
+  <%= button_tag name,
+        class: "btn nav-link dropdown-toggle",
+        type: "button",
+        id: "filter_menu_button",
+        data: {
+          toggle: "dropdown"
+        },
+        aria: {
+          haspopup: "true",
+          expanded: "false"
+        } %>
+
+  <%= tag.div class: "dropdown-menu",
+        aria: { labelledby: "filter_menu_button" } do -%>
+
+    <!-- The "Everything" tab -->
+    <%= link_to :rss_all.t, rss_logs_path(type: :all),
+                class: "dropdown-item", title: :rss_all_help.t %>
+
+    <%= tag.div class: "dropdown-divider" %>
+
+    <%= form_with url: rss_logs_path(q: get_query_param),
+                  class: "px-4 pb-2" do |f| %>
+
+      <!-- Checkboxes and Tabs for each type of RssLog -->
+      <% types.each do |type| %>
+
+        <% type_name = type.classify.constantize.rss_log_tab_label %>
+
+        <%= tag.div class: "form-check pb-2" do %>
+          <%= f.check_box "show_#{type}", id: "show_#{type}", checked: "checked",
+                          class: "form-check-input rss_log_tab" %>
+
+          <%# if @types == [type] %>
+            <%= f.label :rss_one.t(type: type_name), for: "show_#{type}",
+                        class: "form-check-label" %>
+          <%# else %>
+            <%# link_to :rss_one.t(type: type_name),
+                        rss_logs_path(type: type, q: get_query_param),
+                        class: "form-check-label",
+                        title: :rss_one_help.t(type: type.to_sym) %>
+          <%# end %>
+        <% end %>
+
+      <% end %>
+
+      <%= f.submit :RELOAD.t, class: "btn btn-primary mt-2 w-100" %>
+
+    <% end %>
+
+  <% end %>
+
+<% end %>
