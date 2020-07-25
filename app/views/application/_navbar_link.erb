@@ -1,0 +1,16 @@
+<%
+name = link[:title].underscore
+args = {
+  class: "ml-4 ml-lg-5 mr-auto btn nav-item nav-link btn-link",
+  id: name + "_link"
+}
+args[:method] = link[:method].to_sym if link[:method]
+args[:confirm] = link[:confirm].to_s if link[:confirm]
+%>
+
+<%= link_to link[:url], args do -%>
+  <%= tag.span class: "text-nowrap" do -%>
+    <%= tag.span class: "mr-1 fas " + link[:icon].to_s if link[:icon] -%>
+    <%= tag.span link[:title] -%>
+  <% end %>
+<% end %>

@@ -1,13 +1,13 @@
-<%# provide :context_navbar do
-  render "application/context_navbar"
-end %>
-
 <%
-  if @links.any? && @objects.any?
-    # tabs = create_links(@links)
-    # @tabsets = { right: draw_tab_set(tabs) }
-    @tabsets = ""
-  end
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_observation_path, icon: "fa-plus" }
+  ]
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
+  @navbar[:search] = 1
 
   flash_error(@error) if @error && @objects.empty?
 %>

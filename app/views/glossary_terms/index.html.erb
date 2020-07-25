@@ -1,0 +1,34 @@
+<%
+  @title = :glossary_term_index_title.t
+
+  # tabs = [
+  #   link_to(:create_glossary_term.t, new_glossary_term_path)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_glossary_term_path, icon: "fa-plus" }
+  ]
+%>
+
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :glossary_term_index_intro.tp %>
+  </div>
+</div>
+
+<table class="table table-striped">
+  <% @glossary_terms.each do |term| %>
+    <tr>
+      <td class="max-width-text">
+        <h4><%= link_to(term.name, glossary_term_path(term)) %>:</h4>
+        <%= term.description.tpl %>
+      </td>
+      <td>
+        <%= thumbnail(term.thumb_image, votes: true) if term.thumbnail? %>
+      </td>
+    </tr>
+  <% end %>
+</table>

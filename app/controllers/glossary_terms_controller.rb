@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # create and edit Glossary terms
-class GlossaryController < ApplicationController
+class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :show,
@@ -12,12 +12,29 @@ class GlossaryController < ApplicationController
   def show
     store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/#{@glossary_term.id}"
+    @canonical_url = "#{MO.http_domain}/glossary_term/#{@glossary_term.id}"
     @layout = calc_layout_params
     @objects = @glossary_term.images
   end
 
-  alias_method :show_glossary_term, :show
+  alias show_glossary_term show
+
+  # Show past version of GlossaryTerm.
+  # Accessible only from show_glossary_term page.
+  def show_past_glossary_term
+    pass_query_params
+    store_location
+    return unless (
+      @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
+    )
+
+    if params[:version]
+      @glossary_term.revert_to(params[:version].to_i)
+    else
+      flash_error(:show_past_location_no_version.t)
+      redirect_to glossary_term_path(@glossary_term.id)
+    end
+  end
 
   def index
     store_location
@@ -31,8 +48,8 @@ class GlossaryController < ApplicationController
     @licenses = License.current_names_and_ids(@user.license)
   end
 
-  alias_method :create_glossary_term, :new
-  alias_method :glossary_term_get, :new
+  alias create_glossary_term new
+  alias glossary_term_get new
 
   def create
     @glossary_term = \
@@ -40,14 +57,47 @@ class GlossaryController < ApplicationController
                        description: params[:glossary_term][:description])
     @glossary_term.add_image(process_image(image_args))
     @glossary_term.save
-    # redirect_to(
-    #   action: :show,
-    #   id: glossary_term.id
-    # )
-    redirect_to glossary_path(@glossary_term.id)
+    redirect_to glossary_term_path(@glossary_term.id)
   end
 
-  alias_method :glossary_term_post, :create
+  alias glossary_term_post create
+
+  def edit
+    # Expand to any MO user,
+    # but make them owned and editable only by that user or an admin
+    # JDC: :login_required callback Already limits this to logged-in users
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+  end
+
+  alias edit_glossary_term edit
+
+  def update
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    @glossary_term.attributes = params[:glossary_term].
+                                permit(:name, :description)
+    @glossary_term.user = @user
+    @glossary_term.save
+    redirect_to glossary_term_path(@glossary_term.id)
+  end
+
+  # no alias needed
+
+  def destroy
+    pass_query_params
+    return unless (@glossary_term = GlossaryTerm.find(params[:id]))
+
+    if in_admin_mode?
+      @glossary_term.destroy
+      flash_notice(:runtime_destroyed_id.t(type: GlossaryTerm,
+                                           value: params[:id]))
+    else
+      flash_warning(:permission_denied.t)
+    end
+
+    redirect_to(glossary_terms_path)
+  end
+
+  ##############################################################################
 
   private
 
@@ -63,10 +113,9 @@ class GlossaryController < ApplicationController
 
   def process_image(args)
     image = nil
-    name = nil
     upload = args[:image]
     if upload.blank?
-      name = upload.original_filename.force_encoding("utf-8") if
+      upload.original_filename.force_encoding("utf-8") if
         upload.respond_to?(:original_filename)
 
       image = Image.new(args)
@@ -88,48 +137,6 @@ class GlossaryController < ApplicationController
       name = image.original_name
       name = "##{image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
-    end
-  end
-
-  def edit
-    # Expand to any MO user,
-    # but make them owned and editable only by that user or an admin
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
-  end
-
-  alias_method :edit_glossary_term, :edit
-
-  def update
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @glossary_term.attributes = params[:glossary_term].
-                               permit(:name, :description)
-    @glossary_term.user = @user
-    @glossary_term.save
-    # redirect_to(
-    #   action: :show,
-    #   id: glossary_term.id
-    # )
-    redirect_to glossary_path(@glossary_term.id)
-  end
-
-  # no alias needed
-
-  # Show past version of GlossaryTerm.
-  # Accessible only from show_glossary_term page.
-  def show_past_glossary_term # :prefetch: :norobots:
-    pass_query_params
-    store_location
-    if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      if params[:version]
-        @glossary_term.revert_to(params[:version].to_i)
-      else
-        flash_error(:show_past_location_no_version.t)
-        # redirect_to(
-        #   action: :show,
-        #   id: glossary_term.id
-        # )
-        redirect_to glossary_path(@glossary_term.id)
-      end
     end
   end
 end

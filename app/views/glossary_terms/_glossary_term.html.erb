@@ -6,7 +6,7 @@
   <%= "*#{:glossary_term_description.t}:* #{@glossary_term.description}".tpl %>
 </p>
 
-<% if @glossary_term.thumb_image_id and @glossary_term.thumb_image_id != 0 %>
+<% if @glossary_term.thumbnail? %>
   <p class="mt-3">
     <%= thumbnail(@glossary_term.thumb_image_id, votes: false) %>
   </p>

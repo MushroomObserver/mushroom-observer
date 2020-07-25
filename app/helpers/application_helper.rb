@@ -16,6 +16,7 @@ module ApplicationHelper
   include LocalizationHelper
   include MapHelper
   include ObjectLinkHelper
+  include MenuHelper
   include TabsHelper
   include ThumbnailHelper
   include VersionHelper
@@ -41,6 +42,9 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # TODO: These two methods are broken but may be able to be repaired
+  # using the new object_path methods in object_link_helper.
+  # First need to review what the options hashes may contain. - NIMMO
   # Call link_to with query params added.
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
@@ -265,19 +269,30 @@ module ApplicationHelper
   end
 
   # Create stylable file input field with client-side size validation.
+  # Note that template should supply an ID for the input itself, in attr hash
   def custom_file_field(obj, attr, opts = {})
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
+    file_field = file_field_tag(
       obj,
-      attr,
       opts.merge(
+        class: "custom-file-input",
+        aria: { "describedby": attr[:id] },
         max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
         max_upload_size: max_size
       )
     )
-    content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
-      content_tag(:span, :no_file_selected.t)
+    label = tag.label :no_file_selected.t, class: "custom-file-label",
+                                           for: attr[:id]
+
+    capture do
+      tag.div class: "input-group mb-3" do
+        tag.div class: "custom-file" do
+          file_field + label
+        end
+      end
+    end
+
   end
 
   def date_select_opts(obj = nil)

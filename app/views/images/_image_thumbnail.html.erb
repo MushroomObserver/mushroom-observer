@@ -50,13 +50,13 @@
   <% if User.current && votes && image %>
     <div class="vote-section position-absolute ab-bottom zindex-2 text-center">
       <%= render "images/image_vote_links", image: image %>
-    <% end %>
-    <% if original && image && !image.original_name.blank? &&
-          (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-      <div class="text-center">
-        <span><%= image.original_name %></span>
-      </div>
-    </div>
+      <% if original && image && !image.original_name.blank? &&
+            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+        <div class="text-center">
+          <span><%= image.original_name %></span>
+        </div><!-- .text-center -->
+      <% end %>
+    </div><!-- .vote-section -->
   <% end %>
 
 </div>

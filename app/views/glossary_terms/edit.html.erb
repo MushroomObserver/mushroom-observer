@@ -1,0 +1,21 @@
+<%
+  @title = :edit_glossary_term_title.t(name: @glossary_term.name)
+
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :glossary_term),
+  #           glossary_term_path(@glossary_term.id)),
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: glossary_terms_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :glossary_term),
+      url: glossary_term_path(@glossary_term.id), icon: "fa-backspace" }
+  ]
+%>
+
+<div class="form-max-width mt-4">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render partial: "form",
+             locals: { button_name: :edit_glossary_term_save, action: :edit } %>
+</div>

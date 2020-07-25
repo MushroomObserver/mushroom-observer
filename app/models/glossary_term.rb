@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# Glossary Term
+# Definition and optional image for mycological terms
+# (Currently limited to one image)
+#
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
@@ -30,11 +34,6 @@ class GlossaryTerm < AbstractModel
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
-
-  # Override the default show_controller
-  def self.show_controller
-    "glossary"
-  end
 
   def text_name
     name
@@ -75,11 +74,15 @@ class GlossaryTerm < AbstractModel
       images.delete(image)
       save
     end
-    if thumb_image == image
-      new_thumb = images[0]
-      self.thumb_image = images[0]
-      images.delete(new_thumb) if new_thumb
-      save
-    end
+    return unless thumb_image == image
+
+    new_thumb = images[0]
+    self.thumb_image = images[0]
+    images.delete(new_thumb) if new_thumb
+    save
+  end
+
+  def thumbnail?
+    thumb_image_id&.nonzero?
   end
 end

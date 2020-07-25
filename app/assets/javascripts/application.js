@@ -28,6 +28,7 @@
 //= require image_vote
 //= require image_export
 //= require validate_file_input_fields
+//= require bootstrap_custom_file_input
 //= require observation_form_map
 //= require popup_exif
 //= require turbolinks

@@ -90,6 +90,9 @@ $(document).on('turbolinks:load', function () {
     apply_file_input_field_validation(this.id);
   });
 
+  // Initialize bootstrap custom file inputs
+  bsCustomFileInput.init();
+
   // This bit simply makes it so that if someone clicks on the span that it checks the checkbox
   // Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
   jQuery("[data-toggle='checkbox']").click(function() {

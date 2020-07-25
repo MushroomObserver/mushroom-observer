@@ -1,0 +1,38 @@
+<%= form_with url: search_pattern_search_path,
+              scope: :search,
+              class: "form-inline my-2 my-lg-0 ml-5" do |form|%>
+
+  <%= tag.div class: "input-group" do %>
+
+    <%= tag.div class: "input-group-prepend" do %>
+
+      <%= link_to search_advanced_search_form_path,
+                  class: "btn btn-primary btn-outline-accent",
+                  id: "advanced_search_link",
+                  title: :app_advanced_search.t do %>
+        <%= tag.span "Advanced", class: "text-nowrap" -%>
+        <%= tag.i class: "fas fa-graduation-cap ml-2" %>
+      <% end %>
+
+    <% end %>
+
+    <%= form.text_field :pattern,
+                        value: session[:pattern],
+                        class: "form-control",
+                        aria: { label: "Search".t },
+                        size: 30,
+                        placeholder: "Search for name, location..."  %>
+
+    <%= tag.div class: "input-group-append" do %>
+
+      <%= form.button class: "btn btn-accent",
+                      type: "submit",
+                      aria: { label: :app_search.l } do %>
+        <%= tag.i class: "fas fa-search fa-lg" %>
+      <% end %>
+
+    <% end %>
+
+  <% end %>
+
+<% end %>

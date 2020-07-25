@@ -3,87 +3,26 @@
 
 <%= tag.div class: "navbar-nav w-100" do %>
 
-  <%# FIXME: not all controllers have an :index action, e.g. Account/login %>
-  <%# FIXME: controller.controller_name.humanize is not reliable (Rss logs) %>
-  <%# TODO: figure out how to provide a "controller home" link to view - AN %>
-  <%= link_to controller.controller_name.humanize,
-              { controller: controller.controller_name, # controller to provide
-                action: :index }, # this should be the provided link instead
-              { id: "page-title",
-                class: "navbar-brand mr-auto" } %>
+  <%= render "application/navbar_title",
+             title: @navbar[:title] if @navbar&.key?(:title) %>
+
+  <%# render "application/navbar_create" if @navbar[:create] %>
+
+  <% if @navbar&.key?(:links) && @navbar[:links].kind_of?(Array)
+        @navbar[:links].reject(&:nil?).each do |link| %>
+      <%= render "application/navbar_link", link: link %>
+    <% end %>
+  <% end %>
 
   <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
 
-    <%= form_with url: search_pattern_search_path,
-                  scope: :search,
-                  class: "form-inline my-2 my-lg-0" do |form|%>
-
-      <%= tag.div class: "input-group" do %>
-
-        <%= form.text_field :pattern,
-                            value: session[:pattern],
-                            class: "form-control",
-                            aria: {label: "Search".t},
-                            size: 30,
-                            placeholder: "Search for name, location..."  %>
-
-        <%= tag.div class: "input-group-append" do %>
-          <%= form.button class: "btn btn-accent mr-2",
-                          type: "submit",
-                          aria: { label: :app_search.l } do %>
-            <%= tag.i class: "fas fa-search fa-lg" %>
-          <% end %>
-        <% end %>
-
-      <% end %>
-
-      <%= link_to search_advanced_search_form_path,
-                  class: "mx-2 btn btn-link",
-                  id: "advanced_search_link" do %>
-        <%= tag.span :app_advanced_search.t class: "text-nowrap" %>
-      <% end %>
-
-    <% end %>
-
-    <% if @links %>
-
-      <% links = create_links(@links) %>
-      <%= tag.div class: "nav-item dropdown ml-5" do -%>
-        <%= button_tag "Links",
-              class: "btn nav-link dropdown-toggle",
-              type: "button",
-              id: "actions_menu_button",
-              data: {
-                toggle: "dropdown"
-              },
-              aria: {
-                haspopup: "true",
-                expanded: "false"
-              } %>
-        <%= tag.div class: "dropdown-menu",
-              aria: {
-                labelledby: "actions_menu_button"
-              } do -%>
-            <% links.reject(&:nil?).each do |link| %>
-              <%= link %>
-            <% end %>
-        <% end %>
-      <% end %>
-
-    <% end %>
-
-    <% if Rails.application.routes.url_helpers.method_defined?(
-            "new_#{controller.controller_name.singularize}_path"
-    ) %>
-      <%= link_to({ controller: controller.controller_name, action: :new },
-                  { class: "ml-4 ml-lg-5 btn nav-item nav-link btn-link",
-                    id: "create_link" }) do -%>
-            <%= tag.span class: "text-nowrap" do -%>
-              <%= tag.span :CREATE.t, class: "mr-2" -%>
-              <%= tag.span class: "fas fa-edit" -%>
-            <% end %>
+    <% if @navbar&.key?(:dropdowns) && @navbar[:dropdowns].kind_of?(Array)
+          @navbar[:dropdowns].reject(&:nil?).each do |dropdown| %>
+        <%= render "application/navbar_dropdown", dropdown: dropdown %>
       <% end %>
     <% end %>
+
+    <%= render "application/navbar_search" if @navbar&.key?(:search) %>
 
   <% end %>
 

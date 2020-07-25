@@ -148,10 +148,7 @@ module ObjectLinkHelper
   #
   #   Description: <%= description_link(name.description) %>
   #
-  def description_link(obj, desc, type)
-    result = description_title(desc)
-    return result if result.match?("(#{:private.t})$")
-
+  def description_link(obj, desc)
     # TODO: NIMMO resolve or standardize new usage with path/get_query_param
     # Reason: the former way of building links and urls with a passed query,
     # using application_helper's link_with_query and abstract model's
@@ -173,13 +170,29 @@ module ObjectLinkHelper
     #
     # (type returns name or location -- type.to_s)
     # (or namespace as symbol: type.to_s.pluralize.to_sym)
-    if type.to_s == "name"
-      link_to(result,
-              name_description_path(obj.id, desc.id, q: get_query_param))
-    elsif type.to_s == "location"
-      link_to(result,
-              location_description_path(obj.id, desc.id, q: get_query_param))
-    end
+    # type_tag = obj.type_tag
+    # type = obj.type_tag.to_s
+    # type_id = (obj.type_tag.to_s + "_id").to_sym
+
+    d_params = {}
+    # d_params[type_id] = obj.id
+    # d_params[:id] = desc.id
+    d_params[:q] = get_query_param
+    # desc_route = object_route_s(desc)
+
+    result = description_title(desc)
+    return result if result.match?("(#{:private.t})$")
+
+    # link_to(result, send("#{desc_route}_path", d_params))
+    link_to(result, object_path(desc, d_params))
+
+    # if type_tag == :name
+    #   link_to(result,
+    #           name_description_path(obj.id, desc.id, q: get_query_param))
+    # elsif type_tag == :location
+    #   link_to(result,
+    #           location_description_path(obj.id, desc.id, q: get_query_param))
+    # end
   end
 
   # Array of links to searches on external sites;
@@ -242,25 +255,29 @@ module ObjectLinkHelper
   # - can accept params: object_path(@project, q: get_query_param)
   def object_path(obj, params = {})
     objroute = object_route_s(obj)
-    params[:id] = obj.id
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
     send("#{objroute}_path", params)
   end
 
   def edit_object_path(obj, params = {})
     objroute = object_route_s(obj)
-    params[:id] = obj.id
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
     send("edit_#{objroute}_path", params)
   end
 
   def new_object_path(obj, params = {})
     objroute = object_route_s(obj)
-    params[:id] = obj.id
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
     send("new_#{objroute}_path", params)
   end
 
   def object_action_path(obj, action, params = {})
     objroute = object_route_p(obj)
-    params[:id] = obj.id
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
     send("#{route}_#{action.to_s}_path", params)
   end
 
@@ -270,5 +287,21 @@ module ObjectLinkHelper
 
   def object_route_p(obj)
     obj.model_name.route_key
+  end
+
+  # Namespaced paths need an additional argument: the parent ID.
+  # This param also needs to be named correctly(!) for the path to work.
+  # This method adds that param if applicable. - AN 07/20
+  def add_object_path_params(obj, params)
+    # figure out if it's namespaced
+    p_class = obj.class.parent
+    if p_class != Object
+      # name the param correctly:
+      # p_class_type_tag = p_class.type_tag
+      # p_class_type = p_class.type_tag.to_s
+      p_class_id = (p_class.type_tag.to_s + "_id").to_sym
+      params[p_class_id] = obj.parent_id
+    end
+    params[:id] = obj.id
   end
 end

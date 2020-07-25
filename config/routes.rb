@@ -174,7 +174,21 @@ ACTIONS = {
     commercial_inquiry: {},
     email_question: {}
   },
-  glossary: {
+  # glossary: { # now handled by glossary_terms
+    # create_glossary_term: {}, # aliased only (create)
+    # edit_glossary_term: {}, # aliased only (edit)
+    # show_glossary_term: {}, # aliased only (show)
+    # show_past_glossary_term: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  # },
+  glossary_terms: {
     # create_glossary_term: {}, # aliased only
     # edit_glossary_term: {}, # aliased only
     # show_glossary_term: {}, # aliased only
@@ -627,7 +641,6 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 ].freeze
 
 MushroomObserver::Application.routes.draw do
-
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -692,11 +705,9 @@ MushroomObserver::Application.routes.draw do
   # Not logged in - Default page is /observations#index.
   root :to => "observations#index"
 
-  resources :articles, :collection_numbers, :comments, :herbaria,
-    :herbarium_records, :images, :names, :namings, :observations,
+  resources :articles, :collection_numbers, :comments, :glossary_terms,
+    :herbaria, :herbarium_records, :images, :names, :namings, :observations,
     :projects, :publications, :sequences, :species_lists
-
-  resources :glossary, as: "glossary_terms"
 
   # http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/
   resources :locations do

@@ -1,22 +1,22 @@
-<%# provide :context_navbar do
-  render "application/context_navbar"
-end %>
-
 <%
   @title = :create_observation_title.t
 
   tabs = [
-    link_with_query(:create_herbarium.t,
-                    controller: :herbaria,
-                    action: :new)
+    link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:dropdowns] = [{ title: "Actions", links: tabs }]
 %>
 
-<%= render "form",
-           form_action: :new,
-           logging_optional?: false,
-           include_naming?: true,
-           include_images?: true,
-           button_name: :CREATE.l,
-           has_specimen?: false %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render "form",
+             form_action: :new,
+             logging_optional?: false,
+             include_naming?: true,
+             include_images?: true,
+             button_name: :CREATE.l,
+             has_specimen?: false %>
+<% end %>

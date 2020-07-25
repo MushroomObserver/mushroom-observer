@@ -1,21 +1,23 @@
-<%# provide :context_navbar do
-  render "application/context_navbar"
-end %>
 <%
   @title = :edit_observation_title.t(name: @observation.unique_format_name)
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    action: :show,
-                    id: @observation.id)
+    link_to(:cancel_and_show.t(type: :observation),
+            observation_path(id: @observation.id, q: get_query_param))
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
+  @navbar[:dropdowns] = [{ title: "Actions", links: tabs }]
 %>
 
-<%= render "form",
-           form_action: :edit,
-           logging_optional?: true,
-           include_naming?: false,
-           include_images?: true,
-           button_name: :SAVE_EDITS.l,
-           has_specimen?: (@observation.herbarium_records.length > 0) %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render "form",
+             form_action: :edit,
+             logging_optional?: true,
+             include_naming?: false,
+             include_images?: true,
+             button_name: :SAVE_EDITS.l,
+             has_specimen?: (@observation.herbarium_records.length > 0) %>
+<% end %>

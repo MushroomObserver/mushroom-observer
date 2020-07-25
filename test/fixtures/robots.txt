@@ -3,5 +3,5 @@ Sitemap: http://mushroomobserver.org/sitemap/index.xml
 User-agent: *
 Disallow: *?*
 Disallow: /account/activate_api_key
-# Allow: /glossary/show_term
+# Allow: /glossary_term/show
 # Allow: /info/intro
