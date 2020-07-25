@@ -369,13 +369,15 @@ class AbstractModel < ApplicationRecord
 
   # Return the name of the "index_<object>" action (as a simple
   # lowercase string) that displays search index for this object.
+  # FIXME: Make search render on the default index action using params!
   #
   #   Name.index_action => "index_name"
   #   name.index_action => "index_name"
   #   Changed from    "index_" + name.underscore
   #
   def self.index_action
-    "index_" + name.underscore
+    # "index_" + name.underscore
+    "index"
   end
 
   def index_action

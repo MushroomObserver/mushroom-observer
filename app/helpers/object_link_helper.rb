@@ -281,6 +281,16 @@ module ObjectLinkHelper
     send("#{route}_#{action.to_s}_path", params)
   end
 
+  # def model_index_path(model, params = {})
+  #   objroute = object_route_p(model)
+  #   send("#{objroute}_path", params)
+  # end
+  #
+  # def model_show_path(model, params = {})
+  #   objroute = object_route_s(model)
+  #   send("#{objroute}_path", params)
+  # end
+  #
   def object_route_s(obj)
     obj.model_name.singular_route_key
   end
@@ -302,6 +312,8 @@ module ObjectLinkHelper
       p_class_id = (p_class.type_tag.to_s + "_id").to_sym
       params[p_class_id] = obj.parent_id
     end
-    params[:id] = obj.id
+    if !params[:id].present?
+      params[:id] = obj.id
+    end
   end
 end

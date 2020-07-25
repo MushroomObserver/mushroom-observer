@@ -49,6 +49,7 @@ require "mocha/minitest"
   flash_extensions
   controller_extensions
   integration_extensions
+  integration_controller_extensions
   language_extensions
   session_extensions
   session_form_extensions
@@ -59,7 +60,7 @@ require "mocha/minitest"
   unit_test_case
   functional_test_case
   integration_test_case
-  integration_controller_test
+  integration_controller_test_case
 ].each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end

@@ -8,7 +8,7 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <div class="card")>
+  <div class="card">
     <% @objects.each do |object| %>
       <div class="card-body">
         <%= link_to(object.unique_format_name,

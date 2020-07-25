@@ -76,11 +76,11 @@ class LogItemPresenter
       if target&.respond_to?(:thumb_image) &&
          target&.thumb_image &&
          target&.thumb_image&.content_type
-        view.thumbnail(target.thumb_image, link: { # problem object_path(target)
-                         controller: target.show_controller,
-                         action: target.show_action,
-                         id: target.id
-                         })
+        view.thumbnail(target.thumb_image, link: object_path(target)) # problem
+                         # controller: target.show_controller,
+                         # action: target.show_action,
+                         # id: target.id
+                         # })
       end
     self.detail = rss_log.detail
     self.time = rss_log.updated_at
