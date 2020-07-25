@@ -13,7 +13,7 @@
   @navbar = {} # reset
   @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
   @navbar[:links] = [
-    { title: :CREATE.t, url: new_glossary_term_path, icon: "fa-plus" }
+    { title: :CREATE.t, url: new_glossary_term_path, icon: "fa-plus" },
     { title: :EDIT.t, url: edit_glossary_term_path(@glossary_term.id),
       icon: "fa-edit" }
   ]

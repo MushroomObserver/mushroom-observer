@@ -4,11 +4,11 @@
 <%= tag.div class: "navbar-nav w-100" do %>
 
   <%= render "application/navbar_title",
-             title: @navbar[:title] if @navbar[:title] %>
+             title: @navbar[:title] if @navbar&.key?(:title) %>
 
   <%# render "application/navbar_create" if @navbar[:create] %>
 
-  <% if @navbar[:links].is_a? Array
+  <% if @navbar&.key?(:links) && @navbar[:links].kind_of?(Array)
         @navbar[:links].reject(&:nil?).each do |link| %>
       <%= render "application/navbar_link", link: link %>
     <% end %>
@@ -16,13 +16,13 @@
 
   <%= tag.div class: "ml-auto d-flex flex-column flex-md-row justify-content-between" do %>
 
-    <% if @navbar[:dropdowns].is_a? Array
+    <% if @navbar&.key?(:dropdowns) && @navbar[:dropdowns].kind_of?(Array)
           @navbar[:dropdowns].reject(&:nil?).each do |dropdown| %>
         <%= render "application/navbar_dropdown", dropdown: dropdown %>
       <% end %>
     <% end %>
 
-    <%= render "application/navbar_search" if @navbar[:search] %>
+    <%= render "application/navbar_search" if @navbar&.key?(:search) %>
 
   <% end %>
 

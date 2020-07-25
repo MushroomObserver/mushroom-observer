@@ -4,11 +4,17 @@
     name: @glossary_term.name
   )
 
-  tabs = [
-    link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
-            glossary_term_path(@glossary_term.id))
+  # tabs = [
+  #   link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
+  #           glossary_term_path(@glossary_term.id))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :GLOSSARY_TERMS.t, url: glossary_terms_path }
+  @navbar[:links] = [
+    { title: :show_glossary_term.t(glossary_term: @glossary_term.name),
+      url: glossary_term_path(@glossary_term.id), icon: "fa-plus" },
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
