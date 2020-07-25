@@ -111,6 +111,7 @@ module TabsHelper
       link_to(:account_api_keys_link.t,
               action: :api_keys)
     ]
-    { right: draw_tab_set(tabs) }
+    # { right: draw_tab_set(tabs) }
+    tabs
   end
 end

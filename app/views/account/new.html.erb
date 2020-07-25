@@ -1,8 +1,11 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
   @title = :signup_title.t
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= form_with model: @new_user do |f| %>
     <div class="form-group mt-3">
       <%= f.label :login, :signup_login.t + ":" %>
@@ -45,6 +48,7 @@
             class: "form-control" %>
     </div>
 
-    <%= f.submit :signup_button.l, class: "btn mx-auto mt-3" %>
+    <%= f.submit :signup_button.l,
+                 class: "btn btn-primary btn-lg mx-auto mt-3" %>
   <% end %>
 </div>

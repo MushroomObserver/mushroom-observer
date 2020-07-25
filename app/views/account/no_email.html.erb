@@ -1,8 +1,12 @@
 <%
-  @title = :email_welcome.t(user: @user.legal_name)
+@navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
+@title = :email_welcome.t(user: @user.legal_name)
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= @note.tp %>
   <%= :no_email_how_to_reenable.tp %>
   <%= :no_email_some_maybe_queued.tp %>
