@@ -34,8 +34,8 @@
     @navbar[:links] << {
       title: :destroy_object.t(type: :sequence),
       url: sequence_path(id: @sequence.id, q: get_query_param,
-                         back: :index, method: :delete),
-      data: { confirm: :are_you_sure.t },
+                         back: :index),
+      method: :delete, data: { confirm: :are_you_sure.t }, 
       icon: "fa-trash-alt" }
   end
 %>
