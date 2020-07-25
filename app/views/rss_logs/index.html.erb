@@ -9,13 +9,23 @@
 
   @title = titlebar
 
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+  # if @links.any?
+  #   tabs = create_links(@links)
+  #   @tabsets = { right: draw_tab_set(tabs) }
+  # end
 
-  @full_width_tab_set = render(partial: "rss_log_tabset")
+  # @full_width_tab_set = render(partial: "rss_log_tabset")
   flash_error(@error) if @error && @objects.empty?
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :RSS_LOG.t, url: rss_logs_path }
+  if @links.any?
+    @navbar[:dropdowns] = [
+      { title: "Actions", links: create_links(@links) }
+    ]
+  end
+  @navbar[:search] = 1
+  @navbar[:filter] = 1
 %>
 
 <%= paginate_block(@pages) do %>

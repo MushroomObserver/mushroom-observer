@@ -1,4 +1,4 @@
-<%= form_tag add_query_param(action: :index) do %>
+<%= form_with url: rss_logs_path(q: get_query_param) do |f| %>
   <div class="btn-group pb-2 d-none d-sm-block text-nowrap">
     <%= content_tag(:span, :rss_show.t, class: "btn btn-xs disabled") %>
 
@@ -10,6 +10,6 @@
     <!-- Checkboxes and Tabs for each type of RssLog -->
     <%= render(partial: "type", collection: types) %>
 
-    <%= submit_tag(:SUBMIT.t, class: "btn btn-xs") %>
+    <%= f.submit :SUBMIT.t, class: "btn btn-xs" %>
   </div>
 <% end %>

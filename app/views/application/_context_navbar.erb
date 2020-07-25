@@ -6,7 +6,8 @@
   <%= render "application/navbar_title",
              title: @navbar[:title] if @navbar&.key?(:title) %>
 
-  <%# render "application/navbar_create" if @navbar[:create] %>
+  <%= render "application/navbar_filter" if @navbar&.key?(:filter) %>
+  <%= render "application/navbar_sort" if @navbar&.key?(:sort) %>
 
   <% if @navbar&.key?(:links) && @navbar[:links].kind_of?(Array)
         @navbar[:links].reject(&:nil?).each do |link| %>
