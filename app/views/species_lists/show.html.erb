@@ -51,8 +51,17 @@
   tabs << draw_interest_icons(@species_list) if @user
   @tabsets = {
     pager_for: @species_list,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
+  
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_species_list_path, icon: "fa-plus" }
+  ]
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
 %>
 
 <div class="row">

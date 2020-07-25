@@ -1,8 +1,12 @@
 <%
   @title = :species_list_upload_title.t
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= form_tag({action: :upload_species_list, id: @species_list.id}, multipart: true) do %>
     <div class="form-group mt-3">
       <%= :species_list_upload_label.t %>:
@@ -13,4 +17,4 @@
     </div>
     <%= submit_tag(:UPLOAD.l, class: "btn mx-auto mt-3") %>
   <% end %>
-</div>
+<% end %>

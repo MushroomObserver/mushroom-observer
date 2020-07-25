@@ -1,10 +1,20 @@
 <%
   @title = :species_list_create_title.t
 
-  tabs = [
-    link_to(:name_lister_title.t, action: :name_lister)
+  # tabs = [
+  #   link_to(:name_lister_title.t, action: :name_lister)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :name_lister_title.t, url: species_lists_name_lister_path,
+      icon: "fa-list" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "form", button_name: :CREATE %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render "form", button_name: :CREATE %>
+<% end %>

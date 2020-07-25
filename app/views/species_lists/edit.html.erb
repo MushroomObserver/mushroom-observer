@@ -1,13 +1,28 @@
 <%
   @title = :species_list_edit_title.t(name: @species_list.unique_format_name)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :species_list),
-            species_list_path(q: get_query_param)),
-    link_with_query(:species_list_upload_title.t,
-                    action: :upload_species_list, id: @species_list.id)
+  # tabs = [
+    # link_to(:cancel_and_show.t(type: :species_list),
+    #         species_list_path(q: get_query_param)),
+    # link_with_query(:species_list_upload_title.t,
+    #                 action: :upload_species_list, id: @species_list.id)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :species_list),
+      url: species_list_path(q: get_query_param),
+      icon: "fa-backspace" }
+    { title: :species_list_upload_title.t,
+      url: species_list_upload_species_list_path(id: @species_list.id,
+        q: get_query_param),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render "form", button_name: :UPDATE %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render "form", button_name: :UPDATE %>
+<% end %>
