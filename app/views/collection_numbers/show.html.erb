@@ -9,7 +9,7 @@
                     back: collection_number_path(@collection_number.id))
     tabs << link_to(:delete_collection_number.t,
                     collection_number_path(@collection_number.id,
-                      q: get_query_param, method: "DELETE"),
+                      q: get_query_param, method: :delete),
                     data: {confirm: :are_you_sure.t})
   end
 

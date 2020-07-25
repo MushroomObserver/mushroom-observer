@@ -1,22 +1,43 @@
 <%
   @title = @sequence.unique_format_name
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :observation),
-            observation_path(@sequence.observation))
-  ]
-  if check_permission(@sequence)
-    tabs << link_with_query(:edit_object.t(type: :sequence),
-                            action: :edit, id: @sequence.id, back: :show)
-    tabs << link_with_query(:destroy_object.t(type: :sequence),
-                            {action: :destroy, id: @sequence.id, back: :index},
-                            data: {confirm: :are_you_sure.t})
-  end
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :observation),
+  #           observation_path(@sequence.observation))
+  # ]
+  # if check_permission(@sequence)
+  #   tabs << link_with_query(:edit_object.t(type: :sequence),
+  #                           action: :edit, id: @sequence.id, back: :show)
+  #   tabs << link_with_query(:destroy_object.t(type: :sequence),
+  #                           {action: :destroy, id: @sequence.id, back: :index},
+  #                           data: {confirm: :are_you_sure.t})
+  # end
 
   @tabsets = {
     pager_for: @sequence,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SEQUENCES.t, url: sequences_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :species_list),
+      url: observation_path(@sequence.observation),
+      icon: "fa-backspace" }
+  ]
+  if check_permission(@sequence)
+    @navbar[:links] << {
+      title: :edit_object.t(type: :sequence),
+      url: edit_sequence_path(id: @sequence.id, q: get_query_param,
+                              back: :show),
+      icon: "fa-edit" }
+    @navbar[:links] << {
+      title: :destroy_object.t(type: :sequence),
+      url: sequence_path(id: @sequence.id, q: get_query_param,
+                         back: :index, method: :delete),
+      data: { confirm: :are_you_sure.t },
+      icon: "fa-trash-alt" }
+  end
 %>
 
 <%= render(partial: "observation_title",
