@@ -1632,9 +1632,8 @@ class ApplicationController < ActionController::Base
     image: Image,
     location: Location,
     name: Name,
-    naming: Observation,
+    naming: Observation, # is this right? - AN 07/20
     observation: Observation,
-    observer: RssLog,
     project: Project,
     rss_log: RssLog,
     species_list: SpeciesList,

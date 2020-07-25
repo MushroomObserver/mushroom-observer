@@ -302,6 +302,8 @@ module ObjectLinkHelper
       p_class_id = (p_class.type_tag.to_s + "_id").to_sym
       params[p_class_id] = obj.parent_id
     end
-    params[:id] = obj.id
+    if !params[:id].present?
+      params[:id] = obj.id
+    end
   end
 end
