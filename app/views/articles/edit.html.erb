@@ -1,6 +1,16 @@
 <% @title = edit_article_title(@article)
-   tabs = [link_to(:index_article.t, articles_path)]
-   @tabsets = { right: draw_tab_set(tabs) }
+   # tabs = [link_to(:index_article.t, articles_path)]
+   # @tabsets = { right: draw_tab_set(tabs) }
+
+   @navbar = {} # reset
+   @navbar[:title] = { title: :ARTICLES.t, url: articles_path }
+   # @navbar[:links] = [
+   #   { title: :cancel_and_show.t(type: :glossary_term),
+   #     url: glossary_term_path(@glossary_term.id), icon: "fa-backspace" }
+   # ]
 %>
 
-<%= render "articles/form" %>
+<div class="form-max-width mt-4">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render "articles/form" %>
+</div>

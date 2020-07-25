@@ -1,19 +1,31 @@
 <%
   @title = :create_collection_number_title.l
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :observation),
-            observation_path(@observation.id))
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :observation),
+  #           observation_path(@observation.id))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :COLLECTION_NUMBERS.t,
+                      url: collection_numbers_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :observation),
+      url: observation_path(@observation.id),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-12 col-sm-7 max-width-text">
-    <%= render "collection_numbers/form", button: :ADD %>
-  </div>
+<div class="form-max-width mt-4">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <div class="row">
+    <div class="col-12 col-sm-7 max-width-text">
+      <%= render "collection_numbers/form", button: :ADD %>
+    </div>
 
-  <div class="col-12 col-sm-5 max-width-text">
-    <%= render "shared/log_item", object: @observation.rss_log %>
+    <div class="col-12 col-sm-5 max-width-text">
+      <%= render "shared/log_item", object: @observation.rss_log %>
+    </div>
   </div>
 </div>

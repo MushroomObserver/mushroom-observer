@@ -15,8 +15,16 @@
 
   @tabsets = {
     pager_for: @collection_number,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :COLLECTION_NUMBERS.t,
+                      url: collection_numbers_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
+
 %>
 
 <div class="max-width-text mt-3">

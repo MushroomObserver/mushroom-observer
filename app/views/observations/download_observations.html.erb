@@ -1,13 +1,11 @@
-<%# provide :context_navbar do
-  render "application/context_navbar"
-end %>
 <%
   @title = :download_observations_title.t
 
-  tabs = [
-    link_with_query(:download_observations_back.t, action: :index_observation)
-  ]
+  # tabs = [
+  #   link_with_query(:download_observations_back.t, action: :index_observation)
+  # ]
   @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
 %>
 
 <%= form_tag(add_query_param({})) %>

@@ -1,13 +1,16 @@
 <%
   @title = :create_observation_title.t
 
-  tabs = [
-    link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
-  ]
+  # tabs = [
+  #   link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
+  # ]
   # @tabsets = { right: draw_tab_set(tabs) }
   @navbar = {} # reset
   @navbar[:title] = { title: :OBSERVATIONS.t, url: observations_path }
-  @navbar[:dropdowns] = [{ title: "Actions", links: tabs }]
+  @navbar[:links] = [
+    { title: :create_herbarium.t,
+      url: new_herbarium_path(q: get_query_param) }
+  ]
 %>
 
 <%= tag.div class: "form-max-width mt-4" do %>
