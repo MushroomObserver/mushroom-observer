@@ -1,7 +1,12 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
   @title = :email_welcome.t(user: @unverified_user.legal_name)
 %>
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
-  <%= link_to :reverify_link.t, account_send_verify_path(@unverified_user.id) %>
+  <%= link_to :reverify_link.t, account_send_verify_path(@unverified_user.id),
+              class: "btn btn-primary btn-lg" %>
 </div>

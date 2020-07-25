@@ -1,5 +1,5 @@
 <%
-  @title = :profile_title.t
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
 
   tabs = [
     link_to(:bulk_license_link.t, images_license_updater_path),
@@ -7,10 +7,17 @@
     link_to(:prefs_link.t, account_prefs_path),
     link_to(:account_api_keys_link.t, account_api_keys_path)
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
+
+  @title = :profile_title.t
 %>
 
 <div class="max-width-text">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= form_with model: @user, html: { multipart: true } do |f| %>
 
     <%= f.submit :profile_button.l, class: "btn mx-auto mt-3" %>
@@ -70,7 +77,8 @@
       <%= f.text_area :mailing_address, rows: 5, class: "form-control" %>
     </div>
 
-    <%= f.submit :profile_button.l, class: "btn mx-auto mt-3" %>
+    <%= f.submit :profile_button.l,
+                 class: "btn btn-primary btn-lg mx-auto mt-3" %>
 
   <% end %>
 </div>

@@ -1,12 +1,16 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
   @title = @user ? :email_welcome.t(user: @user.legal_name) :
                    :welcome_no_user_title.t
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <% if @user %>
     <%= :welcome_note.tp %>
-    <%= link_to(:welcome_logout_link.t, account_logout_user_path) %>
+    <%= link_to :welcome_logout_link.t, account_logout_user_path,
+                class: "btn btn-primary btn-lg"%>
   <% else %>
     <%= :welcome_no_user_note.tp %>
   <% end %>

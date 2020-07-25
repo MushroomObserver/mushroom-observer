@@ -1,9 +1,16 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+  # @tabsets = prefs_tabset
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: prefs_tabset }
+  ]
+
   @title = :prefs_title.t
-  @tabsets = prefs_tabset
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= form_with url: account_prefs_path, scope: :user do |form| %>
     <%= render partial: "prefs_login", locals: { form: form } %>
     <%= render partial: "prefs_privacy", locals: { form: form } %>

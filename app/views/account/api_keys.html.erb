@@ -1,15 +1,25 @@
 <%
-  @title = :account_api_keys_title.t
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
 
-  tabs = [
-    link_to(:prefs_link.t, account_prefs_path),
-    link_to(:profile_link.t, edit_account_path)
+  # FIXME: NIMMO this form needs bootstrap-4 help
+  
+  # tabs = [
+  #   link_to(:prefs_link.t, account_prefs_path),
+  #   link_to(:profile_link.t, edit_account_path)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:links] = [
+    { title: :prefs_link.t, url: account_prefs_path, icon: "fa-user" },
+    { title: :profile_link.t, url: edit_account_path, icon: "fa-user-edit" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+
+  @title = :account_api_keys_title.t
 
   javascript_include("api_key")
   inject_javascript_at_end("ApiKeyModule()")
 %>
+
+<%= tag.h1 @title.humanize, class: "display-1" %>
 
 <div class="row">
   <div class="col-12 max-width-text">
@@ -76,7 +86,8 @@
         <%= label_tag(:user_notes, :account_api_keys_notes_label.t) %>
         <%= form.text_field(:notes, class: "form-control") %>
       </div>
-      <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn mx-auto mt-3") %>
+      <%= form.submit :account_api_keys_create_button.l, id: "create_button",
+                      class: "btn btn-primary btn-lg mx-auto mt-3" %>
     <% end %>
   </div>
 </div>

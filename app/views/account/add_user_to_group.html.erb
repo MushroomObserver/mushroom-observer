@@ -1,8 +1,11 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
   @title = :add_user_to_group_title.t
 %>
 
 <div class="max-width-text">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= form_with url: account_add_user_to_group_path do |f| %>
     <div class="form-group mt-3">
       <%= f.label :user_name, :add_user_to_group_user.t + ":" %>
@@ -14,6 +17,6 @@
       <%= f.text_field :group_name, "", class: "form-control" %>
     </div>
 
-    <%= f.submit :ADD.t, class: "btn mt-3 mx-auto" %>
+    <%= f.submit :ADD.t, class: "btn btn-primary btn-lg mt-3 mx-auto" %>
   <% end %>
 </div>

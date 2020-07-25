@@ -1,7 +1,10 @@
 <%
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
   @title = :logout_title.t
 %>
 
 <div class="max-width-text">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :logout_note.tp %>
 </div>

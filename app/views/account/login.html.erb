@@ -1,8 +1,13 @@
 <%
+  @navbar = {} # reset
+  @navbar[:title] = { title: :ACCOUNT.t, url: account_login_path }
+
   @title = :login_please_login.t
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+
   <%= form_with(model: @user, url: account_login_path) do |f| %>
     <%# f.fields_for :user do |fields| %>
 
@@ -26,7 +31,7 @@
 
     <%# end %>
 
-    <%= f.submit :login_login.l, class: "btn btn-primary mx-auto mt-3" %>
+    <%= f.submit :login_login.l, class: "btn btn-primary btn-lg mx-auto mt-3" %>
 
     <div class="form-group mt-3">
       <%= :login_forgot_password.tp %>
