@@ -152,7 +152,7 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
-  # TODO: NIMMO This goes in ApplicationController
+  # TODO: NIMMO This maybe should go in another controller?
   # Update banner across all translations.
   def change_banner # :root: :norobots:
     if !in_admin_mode?
