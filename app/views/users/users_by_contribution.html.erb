@@ -2,11 +2,14 @@
   @title = :users_by_contribution_title.t
 
   tabs = [
-    link_with_query(:app_site_stats.t,
-                    controller: :info,
-                    action: :show_site_stats)
+    link_to(:app_site_stats.t, info_show_site_stats_path)
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:title] = { title: :USERS.t, url: users_path }
+  @navbar[:links] = [
+    { title: :app_site_stats.t, url: info_show_site_stats_path,
+      icon: "fa-signal" }
+  ]
 %>
 
 <div class="row">
