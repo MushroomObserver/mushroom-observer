@@ -283,6 +283,18 @@ class QueryTest < UnitTestCase
     assert_equal(7, QueryRecord.count)
   end
 
+  def test_title
+    assert_equal("Observation Index",
+                 Query.lookup(:Observation).title,
+                 "Wrong Query title for one-word model")
+    assert_equal("Herbarium Record Index",
+                 Query.lookup(:HerbariumRecord).title,
+                 "Wrong Query title for multiple-word model")
+    assert_equal("Name Descriptions by ID",
+                 Query.lookup(:NameDescription, :all, by: :id).title,
+                 "Wrong Query title for namespaced model")
+  end
+
   ##############################################################################
   #
   #  :section: Query Mechanics

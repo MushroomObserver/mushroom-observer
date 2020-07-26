@@ -9,9 +9,15 @@ module Query
 
       def initialize_title
         @title_tag = "query_title_#{flavor}".to_sym
-        @title_args = { type: model.to_s.underscore.to_sym }
+        @title_args = {
+          type: model.to_s.underscore.
+                # for namespaced models, convert paths to underscore separation
+                gsub("/", "_").
+                to_sym
+        }
       end
 
+      # translated title, used by views
       def title
         initialize_query unless initialized?
         @title_tag.t(params.merge(@title_args))
