@@ -3,21 +3,38 @@
     herbarium_label: @herbarium_record.herbarium_label
   )
 
-  tabs = []
-  if @back == "index"
-    tabs << link_to(:edit_herbarium_record_back_to_index.t,
-                    herbarium_records_index_herbarium_record_path(
-                      q: get_query_param))
-  else
-    tabs << link_to(:cancel_and_show.t(type: @back_object.type_tag),
-                    object_path(@back_object, q: get_query_param))
-  end
-  tabs << link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
-  tabs << link_to(:herbarium_index.t, herbaria_path)
+  # tabs = []
+  # if @back == "index"
+  #   tabs << link_to(:edit_herbarium_record_back_to_index.t,
+  #                   herbarium_records_index_herbarium_record_path(
+  #                     q: get_query_param))
+  # else
+  #   tabs << link_to(:cancel_and_show.t(type: @back_object.type_tag),
+  #                   object_path(@back_object, q: get_query_param))
+  # end
+  # tabs << link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param))
+  # tabs << link_to(:herbarium_index.t, herbaria_path)
+  #
+  # @tabsets = { right: draw_tab_set(tabs) }
 
-  @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIUM_RECORDS.t, url: herbarium_records_path }
+  @navbar[:links] = [
+    { title: :create_herbarium.t, url: new_herbarium_path(q: get_query_param),
+      icon: "fa-plus" },
+    { title: :herbarium_index.t, url: herbaria_path(q: get_query_param) }
+  ]
+  if @back == "index"
+    @navbar[:links] << { title: :edit_herbarium_record_back_to_index.t,
+      url: herbarium_records_index_herbarium_record_path(q: get_query_param),
+      icon: "fa-backspace" }
+  else
+    @navbar[:links] << { title: :cancel_and_show.t(type: @back_object.type_tag),
+      url: object_path(@back_object, q: get_query_param), icon: "fa-backspace" }
+  end
 %>
 
+<%= tag.h1 @title.humanize, class: "display-1" %>
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
     <%= render partial: "form", locals: { button_name: :SAVE } %>

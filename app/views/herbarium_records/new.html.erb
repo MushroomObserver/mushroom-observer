@@ -1,15 +1,27 @@
 <%
   @title = :create_herbarium_record_title.l
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :observation),
-            observation_path(@observation, q: get_query_param)),
-    link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param)),
-    link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :observation),
+  #           observation_path(@observation, q: get_query_param)),
+  #   link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param)),
+  #   link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIUM_RECORDS.t, url: herbarium_records_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :observation),
+      url: observation_path(@observation.id, q: get_query_param),
+      icon: "fa-backspace" }
+    { title: :create_herbarium.t, url: new_herbarium_path(q: get_query_param),
+      icon: "fa-plus" }
+    { title: :herbarium_index.t, url: herbaria_path(q: get_query_param) }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
+<%= tag.h1 @title.humanize, class: "display-1" %>
 <div class="row">
   <div class="col-12 col-sm-7 max-width-text">
     <div class="font-size-lg mb-3"><%= :Observation.t %> #<%= @observation.id %></div>

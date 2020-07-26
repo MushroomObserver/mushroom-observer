@@ -2,26 +2,43 @@
   @title = :HERBARIUM_RECORD.t +
            " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
 
-  tabs = []
-  if in_admin_mode? || @herbarium_record.can_edit?
-    tabs << link_to(:edit_herbarium_record.t,
-                    edit_herbarium_record_path(@herbarium_record.id,
-                                               back: :show))
-    tabs << link_to(:delete_herbarium_record.t,
-                    delete_herbarium_record_path(@herbarium_record.id),
-                    data: {confirm: :are_you_sure.t})
-  end
-  tabs << link_to(:herbarium_index.t, herbarium_records_path)
+  # tabs = []
+  # if in_admin_mode? || @herbarium_record.can_edit?
+  #   tabs << link_to(:edit_herbarium_record.t,
+  #                   edit_herbarium_record_path(@herbarium_record.id,
+  #                                              back: :show))
+  #   tabs << link_to(:delete_herbarium_record.t,
+  #                   delete_herbarium_record_path(@herbarium_record.id),
+  #                   data: {confirm: :are_you_sure.t})
+  # end
+  # tabs << link_to(:herbarium_index.t, herbarium_records_path)
 
+  # TODO: figure out pager_for
   @tabsets = {
     pager_for: @herbarium_record,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
 
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIUM_RECORDS.t, url: herbarium_records_path }
+  if in_admin_mode? || @herbarium_record.can_edit?
+    @navbar[:links] = [
+      { title: :edit_herbarium_record.t,
+        url: edit_herbarium_record_path(id: @herbarium_record.id, back: :show,
+        q: get_query_param),
+        icon: "fa-edit" },
+      { title: :delete_herbarium_record.t,
+        url: herbarium_record_path(id: @herbarium_record.id),
+        method: :delete, data: { confirm: :are_you_sure.t },
+        icon: "fa-trash-alt" }
+    ]
+  end
+  
   herbarium = @herbarium_record.herbarium
 %>
 
-<div class="max-width-text mt-3">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <p>
     <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium_path(herbarium)) %><br/>
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
@@ -44,4 +61,4 @@
       <%= :UPDATED_AT.t %>: <%= @herbarium_record.updated_at.web_date %><br/>
     </p>
   </center>
-</div>
+<% end %>

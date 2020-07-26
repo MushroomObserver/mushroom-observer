@@ -1,12 +1,16 @@
 <%
   @title ||= :add_project_title.t
 
-  tabs = [
-    link_to(:app_list_projects.t, action: :index)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # tabs = [
+  #   link_to(:app_list_projects.t, action: :index)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render "form", button_name: :CREATE %>
-</div>
+<% end %>

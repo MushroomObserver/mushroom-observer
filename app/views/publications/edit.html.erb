@@ -1,13 +1,21 @@
 <%
   @title = :edit_publication_title.l
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :publication), @publication),
-    link_to(:publication_index.t, publications_path)
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :publication), @publication),
+  #   link_to(:publication_index.t, publications_path)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PUBLICATIONS.t, url: publications_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :publication),
+      url: publication_path(@publication.id), icon: "fa-backspace" },
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render "form", locals: { button_name: :SAVE } %>
-</div>
+<% end %>

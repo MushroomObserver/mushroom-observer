@@ -1,6 +1,11 @@
-<% @title = :how_title.t %>
+<%
+@title = :how_title.t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :how_intro.tp %>
 
   <h4><%= :how_common_tasks.t %>:</h4>
@@ -10,7 +15,7 @@
     <li id="searching"             ><%= :how_searching.tp           %></li>
     <li id="unknown_help"          ><%= :how_unknown_help.tp        %></li>
     <li id="adding_observations"   ><%= :how_adding_observations.tp %></li>
-    <li id="proposing_names"       ><%= :how_proposing_names.tp     %></li>    
+    <li id="proposing_names"       ><%= :how_proposing_names.tp     %></li>
     <li id="voting"                ><%= :how_voting.tp(
       min_pos_vote: @min_pos_vote,
       min_neg_vote: @min_neg_vote,
@@ -45,4 +50,4 @@
       no_opinion:   :vote_no_opinion.l
     ) %></li>
   </ol>
-</div>
+<% end %>

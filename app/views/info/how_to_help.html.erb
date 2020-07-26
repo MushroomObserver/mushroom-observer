@@ -1,6 +1,11 @@
-<% @title = :how_help_title.t %>
+<%
+@title = :how_help_title.t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :how_help_intro.tp %>
 
   <ul type="none">
@@ -23,4 +28,4 @@
       <%= :how_help_business_planning.tp %>
     </li>
   </ul>
-</div>
+<% end %>

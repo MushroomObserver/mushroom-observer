@@ -1,26 +1,32 @@
 <%
   @title = :show_rss_log_title.t(title: @rss_log.unique_format_name)
   @tabsets = {pager_for: @rss_log}
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :RSS_LOG.t, url: rss_logs_path }
 %>
 
-<% if @rss_log.notes %>
-  <table>
-    <% for key, args, time in @rss_log.parse_log
-      if key != :log_orphan %>
-        <tr>
-          <td class="text-nowrap align-text-top">
-	    <%= time.web_time %>
-	  </td>
-          <td style="width:10px">:</td>
-          <td><%= key.t(args) %></td>
-        </tr>
-      <% end
-    end %>
-  </table>
-<% end %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <% if @rss_log.notes %>
+    <table>
+      <% for key, args, time in @rss_log.parse_log
+        if key != :log_orphan %>
+          <tr>
+            <td class="text-nowrap align-text-top">
+  	    <%= time.web_time %>
+  	  </td>
+            <td style="width:10px">:</td>
+            <td><%= key.t(args) %></td>
+          </tr>
+        <% end
+      end %>
+    </table>
+  <% end %>
 
-<%= if target = @rss_log.target
-  link_with_query(:show_object.t(type: target.type_tag),
-                  controller: target.show_controller,
-                  action: target.show_action, id: target.id)
-end %>
+  <%= if target = @rss_log.target
+    link_with_query(:show_object.t(type: target.type_tag),
+                    controller: target.show_controller,
+                    action: target.show_action, id: target.id)
+  end %>
+<% end %>

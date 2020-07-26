@@ -1,35 +1,46 @@
 <%
   @title = :add_members_title.t(title: @project.title)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :project),
-            project_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :project),
+  #           project_path(q: get_query_param))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :project),
+      url: project_path(q: get_query_param),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<table class="table-striped table-project-members mt-3">
-  <thead>
-    <tr>
-      <th><%= :Login_name.t %></th>
-      <th><%= :Full_name.t %></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @users.each do |user| %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <table class="table-striped table-project-members mt-3">
+    <thead>
       <tr>
-        <td>
-          <%= user_link(user, user.login) %>
-        </td>
-        <td>
-          <%= user.name %>
-        </td>
-        <td>
-          <%= link_with_query(:ADD.t, action: :add_members, id: @project.id,
-                              candidate: user.id) %>
-        </td>
-      </tr
-    <% end %>
-  </tbody>
-</table>
+        <th><%= :Login_name.t %></th>
+        <th><%= :Full_name.t %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td>
+            <%= user_link(user, user.login) %>
+          </td>
+          <td>
+            <%= user.name %>
+          </td>
+          <td>
+            <%= link_with_query(:ADD.t, action: :add_members, id: @project.id,
+                                candidate: user.id) %>
+          </td>
+        </tr
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

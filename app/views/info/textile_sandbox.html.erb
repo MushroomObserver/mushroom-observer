@@ -1,6 +1,11 @@
-<% @title = :sandbox_title.t %>
+<%
+@title = :sandbox_title.t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <div class="help-block">
     <%= :sandbox_header.tp %>
   </div>
@@ -45,4 +50,4 @@
     <%= link_to(:sandbox_link5.t, "http://redcloth.org/hobix.com/textile/") %><br/>
     <%= link_to(:sandbox_link6.t, "http://warpedvisions.org/projects/textile-cheat-sheet.md") %><br/>
   </div>
-</div>
+<% end %>

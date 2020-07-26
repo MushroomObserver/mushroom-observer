@@ -1,13 +1,22 @@
 <%
   @title = :edit_herbarium_title.l
-  tabs = [
-    link_to(:cancel_and_show.t(type: :herbarium),
-            herbarium_path(q: get_query_param)),
-    link_with_query(:herbarium_index.t, action: :index)
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :herbarium),
+  #           herbarium_path(id: @herbarium.id, q: get_query_param)),
+  #   link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIA.t, url: herbaria_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :herbarium),
+      url: herbarium_path(id: @herbarium.id q: get_query_param),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render partial: "form", locals: { button_name: :SAVE } %>
-</div>
+<% end %>

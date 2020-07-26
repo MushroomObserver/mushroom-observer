@@ -1,8 +1,12 @@
 <%
   @title = :admin_request_title.t(title: @project.title)
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= form_tag(add_query_param(action: :admin_request, id: @project.id)) do %>
     <%= :admin_request_note.tp %>
 
@@ -18,4 +22,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
   <% end %>
-</div>
+<% end %>

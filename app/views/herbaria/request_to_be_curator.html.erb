@@ -1,19 +1,27 @@
 <%
   @title = :show_herbarium_curator_request.t
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: :herbarium),
-            herbarium_path(q: get_query_param)),
-    link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: :herbarium),
+  #           herbarium_path(id: @herbarium.id, q: get_query_param)),
+  #   link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIA.t, url: herbaria_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :herbarium),
+      url: herbarium_path(id: @herbarium.id q: get_query_param),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :show_herbarium_curator_help.tp %>
-  <%= form_tag(add_query_param(action: :request_to_be_curator,
-                               id: @herbarium.id,
-                               back: @back)) do %>
+  <%= form_with url: herbaria_request_to_be_curator_path(id: @herbarium.id,
+        q: get_query_param, back: @back) do %>
     <div class="form-group mt-3">
       <%= label_tag(:herbarium_name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
     </div>
@@ -26,4 +34,4 @@
 
     <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
   <% end %>
-</div>
+<% end %>
