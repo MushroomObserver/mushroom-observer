@@ -1,8 +1,14 @@
 <%
   @title ||= :SEQUENCES.t
 
-  tabs = create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  # tabs = create_links(@links)
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SEQUENCES.t, url: sequences_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
 
   flash_error(@error) if @error && @objects.empty?
 %>

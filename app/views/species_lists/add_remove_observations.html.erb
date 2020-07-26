@@ -1,15 +1,24 @@
 <%
   @title = :species_list_add_remove_title.t
 
-  tabs = [
-    link_with_query(:species_list_add_remove_cancel.t,
-                    controller: :observations,
-                    action: :index)
+  # tabs = [
+  #   link_with_query(:species_list_add_remove_cancel.t,
+  #                   controller: :observations,
+  #                   action: :index)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :species_list_add_remove_cancel.t,
+      url: observations_path(q: get_query_param),
+      icon: "fa-backspace" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  
   <%= form_tag(add_query_param(action: :post_add_remove_observations)) do %>
     <p><%= :species_list_add_remove_body.tp(num: @query.num_results) %></p>
 
@@ -27,4 +36,4 @@
       <%= submit_tag(:REMOVE.l, class: "btn") %>
     </div>
   <% end %>
-</div>
+<% end %>

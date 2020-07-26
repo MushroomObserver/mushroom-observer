@@ -1,11 +1,20 @@
 <%
   @title = :species_list_projects_title.t(list: @species_list.title)
-  tabs = [link_to(:cancel_and_show.t(type: :species_list),
-                  species_list_path)]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # tabs = [link_to(:cancel_and_show.t(type: :species_list),
+  #                 species_list_path)]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :species_list),
+      url: species_list_path(q: get_query_param),
+      icon: "fa-backspace" }
+  ]
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <div class="help-block mt-3">
     <%= :species_list_projects_help.tp %>
   </div>
@@ -47,4 +56,4 @@
       <%= submit_tag(:REMOVE.l, class: "btn") %>
     </center>
   </form>
-</div>
+<% end %>

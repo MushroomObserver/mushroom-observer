@@ -1,3 +1,6 @@
-<% @title = :show_votes_title.t(name: @naming.unique_format_name) %>
+<%
+@title = :show_votes_title.t(name: @naming.unique_format_name)
+@navbar[:title] = { title: :VOTES.t, url: votes_show_path }
+%>
 
 <%= render(partial: "votes_table", locals: {do_cancel: false}) %>

@@ -1,8 +1,17 @@
 <%
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+  # if @links.any?
+  #   tabs = create_links(@links)
+  #   @tabsets = { right: draw_tab_set(tabs) }
+  # end
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :CREATE.t, url: new_species_list_path, icon: "fa-plus" }
+  ]
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
 
   flash_error(@error) if @error && @objects.empty?
 %>

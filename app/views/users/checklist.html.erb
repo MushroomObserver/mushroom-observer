@@ -18,7 +18,7 @@
               action: :ask_user_question,
               id: @show_user.id)
     ]
-    @tabsets = { right: draw_tab_set(tabs) }
+    # @tabsets = { right: draw_tab_set(tabs) }
     name_link[:user_id] = @show_user.id
 
   elsif @project
@@ -32,7 +32,7 @@
               controller: :projects,
               action: :index)
     ]
-    @tabsets = { right: draw_tab_set(tabs) }
+    # @tabsets = { right: draw_tab_set(tabs) }
     name_link[:project_id] = @project.id
 
   elsif @species_list
@@ -51,7 +51,7 @@
                 id: @species_list.id)
       ]
     end
-    @tabsets = { right: draw_tab_set(tabs) }
+    # @tabsets = { right: draw_tab_set(tabs) }
     name_link[:species_list_id] = @species_list.id
 
   else
@@ -64,11 +64,16 @@
               controller: :info,
               action: :show_site_stats)
     ]
-    @tabsets = { right: draw_tab_set(tabs) }
+    # @tabsets = { right: draw_tab_set(tabs) }
+    @navbar[:title] = { title: :USERS.t, url: users_path }
+    @navbar[:dropdowns] = [
+      { title: "Actions", links: tabs }
+    ]
   end
 %>
 
 <center>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :checklist_summary.t(species: @data.num_species, genera: @data.num_genera) %>
   <br/>
   <br/>
