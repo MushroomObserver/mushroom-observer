@@ -1,21 +1,32 @@
 <%
   @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
 
-  tabs = [
-    link_to(:cancel_and_show.t(type: @back_object.type_tag),
-            object_path(@back_object, q: get_query_param))
-  ]
+  # tabs = [
+  #   link_to(:cancel_and_show.t(type: @back_object.type_tag),
+  #           object_path(@back_object, q: get_query_param))
+  # ]
+  #
+  # @tabsets = { right: draw_tab_set(tabs) }
 
-  @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SEQUENCES.t, url: sequences_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: @back_object.type_tag),
+      url: object_path(@back_object, q: get_query_param),
+      icon: "fa-backspace" }
+  ]
 %>
 
-<%= render(partial: "observation_title",
-           locals: { observation: @sequence.observation }) %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= render(partial: "observation_title",
+             locals: { observation: @sequence.observation }) %>
 
-<%= render "form" %>
+  <%= render "form" %>
 
-<div class="small">
-  <span class="bold"><%= :CREATED_BY.t %>:</span>
-  <%= user_link(@sequence.user) %>
-</div>
-<%= show_object_footer(@sequence) %>
+  <div class="small">
+    <span class="bold"><%= :CREATED_BY.t %>:</span>
+    <%= user_link(@sequence.user) %>
+  </div>
+  <%= show_object_footer(@sequence) %>
+<% end %>

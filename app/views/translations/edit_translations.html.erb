@@ -1,6 +1,9 @@
 <%
   @title = :edit_translations_title.t
   javascript_include("translations")
+
+  @navbar[:title] = { title: :TRANSLATIONS.t,
+                      url: translations_edit_translations_path }
 %>
 
 <% inject_javascript_at_end %(

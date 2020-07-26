@@ -58,8 +58,13 @@
   end
   @tabsets = {
     pager_for: @show_user,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
+
+  @navbar[:title] = { title: :USERS.t, url: users_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: tabs }
+  ]
 
   # These are roughly in decreasing order of importance.
   rows = []

@@ -1,8 +1,10 @@
 <%
   @title = :confirm_title.l
+  @navbar[:title] = { title: :SUPPORT.t, url: support_donate_path }
 %>
 
-<div class="max-width-text">
+<div class="form-max-width">
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :confirm_text.tp %>
 
   <p>
@@ -15,7 +17,7 @@
       <%= :donate_email.t %>: <%= @donation.email %><br/>
     <% end %>
   </p>
-   
+
   <div class="text-center">
     <form id="donate_form" name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
       <input type="hidden" name="business" value="<%= MO.donation_business %>">
@@ -38,4 +40,3 @@
     </form>
   </div>
 </div>
-

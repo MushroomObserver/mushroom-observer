@@ -1,10 +1,17 @@
 <%
   @title = :name_lister_title.t
 
-  tabs = [
-    link_to(:name_lister_classic.t, controller: :species_lists, action: :new)
+  # tabs = [
+  #   link_to(:name_lister_classic.t, controller: :species_lists, action: :new)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SPECIES_LISTS.t, url: species_lists_path }
+  @navbar[:links] = [
+    { title: :name_lister_classic.t, url: new_species_list_path,
+      icon: "fa-list" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 
   javascript_include "name_lister"
   javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline

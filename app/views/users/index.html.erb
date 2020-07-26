@@ -1,7 +1,10 @@
 <%
-   @title ||= :users_by_name_title.t
+  @navbar = {} # reset
+  @navbar[:title] = { title: :USERS.t, url: users_path }
+  
+  @title ||= :users_by_name_title.t
 
-   flash_error(@error) if @error && @objects.empty?
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%

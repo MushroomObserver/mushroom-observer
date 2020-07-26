@@ -6,6 +6,7 @@ args = {
 }
 args[:method] = link[:method].to_sym if link[:method]
 args[:confirm] = link[:confirm].to_s if link[:confirm]
+args[:data] = link[:data] if link[:data]
 %>
 
 <%= link_to link[:url], args do -%>
