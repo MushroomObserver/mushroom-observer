@@ -64,7 +64,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     end
   end
 
-  # ***** create *****
+  # ***** new/create *****
   def test_new
     get(:new)
     assert_response(:redirect,
@@ -73,6 +73,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
     get(:new)
     assert_template(:new)
+    assert_select("input#upload_image", true,
+                  "new GlossaryTerm form should include image input form")
   end
 
   def test_create
@@ -106,6 +108,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       assert_select("input[value='#{term.name}']", { count: 1 },
                     "Name field is not defaulting to glossary term name")
     end
+    assert_select("input#upload_image", false,
+                  "edit GlossaryTerm form should omit image input form")
   end
 
   def test_update
