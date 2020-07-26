@@ -1,8 +1,12 @@
 <%
   @title ||= :privacy_title.t
+  @navbar = {} # reset
+  @navbar[:title] = { title: :POLICY.t, url: policy_privacy_path }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  
   <%= :privacy_last_modified.tp %>
 
   <%= :privacy_intro_header.tp %>
@@ -95,4 +99,4 @@
   <%= :privacy_thank_you_content.tp %>
 
   <%= :privacy_last_modified.tp %>
-</div>
+<% end %>

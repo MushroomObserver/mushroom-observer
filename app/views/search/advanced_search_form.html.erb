@@ -1,11 +1,14 @@
 <%
   @title = :app_advanced_search.t
+  @navbar = {} # reset
+  @navbar[:title] = { title: :SEARCH.t, url: search_advanced_search_path }
 %>
 
-<div class="max-width-text">
-  <p class="help-block"><%= :advanced_search_caveat.t %></p>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= tag.p :advanced_search_caveat.t, class: "help-block" %>
 
-  <%= form_tag(action: :advanced_search_form) do %>
+  <%= form_with url: search_advanced_search_path do %>
     <p>
       <%= submit_tag(:advanced_search_submit.l,
                      class: "btn mx-auto") %>
@@ -71,4 +74,4 @@
     <%= submit_tag(:advanced_search_submit.l,
                    class: "btn mx-auto") %>
   <% end %>
-</div>
+<% end %>

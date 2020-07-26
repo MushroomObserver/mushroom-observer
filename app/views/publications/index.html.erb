@@ -1,78 +1,87 @@
 <%
   @title = :publication_index_title.l
 
-  tabs = [
-    link_to(:create_publication.t, new_publication_path)
+  # tabs = [
+  #   link_to(:create_publication.t, new_publication_path)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PUBLICATIONS.t, url: publications_path }
+  @navbar[:links] = [
+    { title: :create_publication.t, url: new_publication_path,
+      icon: "fa-plus" },
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-12 max-width-text">
-    <%= :publication_index_intro.tp %>
-    <%= :publication_citation.tp %>
-    <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <div class="row">
+    <div class="col-12">
+      <%= :publication_index_intro.tp %>
+      <%= :publication_citation.tp %>
+      <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
+    </div>
   </div>
-</div>
 
-<div class="row">
-  <div class="col-12">
-    <table class="table-striped table-publications mb-3 mt-3">
+  <div class="row">
+    <div class="col-12">
+      <table class="table-striped table-publications mb-3 mt-3">
 
-      <thead>
-        <tr>
-          <th>
-            <%= :publication_full.t %> (<%= @full_count %>)
-          </th>
-          <th>
-            <%= :publication_link.t %>
-          </th>
-          <th>
-            (<%= @peer_count %>)
-          </th>
-          <th>
-            (<%= @mo_count %>)
-          </th>
-          <th>
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <% for publication in @publications %>
+        <thead>
           <tr>
-            <td>
-              <%= link_to(publication.full.t.strip_links.html_safe, publication) %>
-            </td>
-            <td>
-              <%= if publication.link
-                str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
-                link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"})
-              end %>
-            </td>
-            <td>
-              <%= "P" if publication.peer_reviewed %>
-            </td>
-            <td>
-              <%= "M" if publication.mo_mentioned %>
-            </td>
-            <td>
-              <% if in_admin_mode? || publication.can_edit?(@user) %>
-                <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
-                <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
-                            {data: {confirm: :are_you_sure.t}}) %>
-              <% end %>
-            </td>
+            <th>
+              <%= :publication_full.t %> (<%= @full_count %>)
+            </th>
+            <th>
+              <%= :publication_link.t %>
+            </th>
+            <th>
+              (<%= @peer_count %>)
+            </th>
+            <th>
+              (<%= @mo_count %>)
+            </th>
+            <th>
+            </th>
           </tr>
-        <% end %>
-      </tbody>
+        </thead>
 
-    </table>
-  </div>
-</div>
+        <tbody>
+          <% for publication in @publications %>
+            <tr>
+              <td>
+                <%= link_to(publication.full.t.strip_links.html_safe, publication) %>
+              </td>
+              <td>
+                <%= if publication.link
+                  str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
+                  link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"})
+                end %>
+              </td>
+              <td>
+                <%= "P" if publication.peer_reviewed %>
+              </td>
+              <td>
+                <%= "M" if publication.mo_mentioned %>
+              </td>
+              <td>
+                <% if in_admin_mode? || publication.can_edit?(@user) %>
+                  <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
+                  <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
+                              {data: {confirm: :are_you_sure.t}}) %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
 
-<div class="row">
-  <div class="col-12 max-width-text">
-    <%= :publication_legend.tp %>
+      </table>
+    </div>
   </div>
-</div>
+
+  <div class="row">
+    <div class="col-12 max-width-text">
+      <%= :publication_legend.tp %>
+    </div>
+  </div>
+<% end %>

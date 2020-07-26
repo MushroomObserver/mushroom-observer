@@ -1,10 +1,15 @@
-<% @title = :search_bar_help_title .t %>
+<%
+@title = :search_bar_help_title .t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :pattern_search_terms_help.tp %>
   <%= content_tag(:p, "#{:OBSERVATIONS.t} #{:SEARCHES.t}", { class: "bold" }) %>
   <%= PatternSearch::Observation.terms_help.tp %>
 
   <%= content_tag(:p, "#{:NAMES.t} #{:SEARCHES.t}", { class: "bold" }) %>
   <%= PatternSearch::Name.terms_help.tp %>
-</div>
+<% end %>

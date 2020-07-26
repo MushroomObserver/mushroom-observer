@@ -1,11 +1,21 @@
 <%
   @title ||= :list_projects_title.t
 
-  tabs = [
-    link_to(:list_projects_add_project.t, new_project_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:list_projects_add_project.t, new_project_path(q: get_query_param))
+  # ]
+  # tabs += create_links(@links)
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
+  @navbar[:links] = [
+    { title: :list_projects_add_project.t,
+      url: new_project_path(q: get_query_param) }
   ]
-  tabs += create_links(@links)
-  @tabsets = { right: draw_tab_set(tabs) }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
 
   flash_error(@error) if @error && @objects.empty?
 %>

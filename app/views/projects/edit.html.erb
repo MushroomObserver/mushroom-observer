@@ -1,19 +1,35 @@
 <%
   @title ||= :edit_project_title.t(title: @project.title)
 
-  tabs = [
-    link_to(:app_list_projects.t, action: :index),
-    link_to(:cancel_and_show.t(type: :project),
-            project_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:app_list_projects.t, action: :index),
+  #   link_to(:cancel_and_show.t(type: :project),
+  #           project_path(q: get_query_param))
+  # ]
+  # if check_permission(@project)
+  #   tabs << link_with_query(:edit_project_destroy.t,
+  #                           { action: :destroy, id: @project.id },
+  #                           { data: { confirm: :are_you_sure.l } })
+  # end
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :project),
+      url: project_path(id: @project.id, q: get_query_param),
+      icon: "fa-backspace" }
   ]
   if check_permission(@project)
-    tabs << link_with_query(:edit_project_destroy.t,
-                            { action: :destroy, id: @project.id },
-                            { data: { confirm: :are_you_sure.l } })
+    @navbar[:links] << {
+      title: :edit_project_destroy.t,
+      url: project_path(id: @project.id),
+      method: :delete, data: { confirm: :are_you_sure.t },
+      icon: "fa-trash-alt" }
   end
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render "form", button_name: :SAVE_EDITS %>
-</div>
+<% end %>

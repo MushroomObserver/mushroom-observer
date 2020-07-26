@@ -4,21 +4,36 @@
     title: @project.title
   )
 
-  tabs = [
-    link_to(:app_list_projects.t, action: :index),
-    link_to(:cancel_and_show.t(type: :project),
-            project_path(q: get_query_param))
+  # tabs = [
+  #   link_to(:app_list_projects.t, action: :index),
+  #   link_to(:cancel_and_show.t(type: :project),
+  #           project_path(q: get_query_param))
+  # ]
+  # if check_permission(@project)
+  #   tabs << link_with_query(:change_member_status_edit.t, action: :edit,
+  #                           id: @project.id)
+  # end
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PROJECTS.t, url: projects_path }
+  @navbar[:links] = [
+    { title: :cancel_and_show.t(type: :project),
+      url: project_path(q: get_query_param),
+      icon: "fa-backspace" }
   ]
   if check_permission(@project)
-    tabs << link_with_query(:change_member_status_edit.t, action: :edit,
-                            id: @project.id)
+    @navbar[:links] << {
+      title: :change_member_status_edit.t,
+      url: edit_project_path(id: @project.id, q: get_query_param),
+      icon: "fa-edit" }
   end
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="max-width-text">
-  <%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
-                               candidate: @candidate.id)) do %>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= form_with url: projects_change_member_status_path(id: @project.id,
+        candidate: @candidate.id, q: get_query_param) do %>
 
     <div class="form-group mt-3">
       <%= submit_tag(:change_member_status_make_member.l,
@@ -40,4 +55,4 @@
   <% end %>
 
   <%= render "show_groups", project: @project %>
-</div>
+<% end %>

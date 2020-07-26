@@ -1,21 +1,35 @@
 <%
   @title = :show_notifications_title.t(user: @user.legal_name)
 
+  # if @observation
+  #   tabs = [
+  #     link_to :show_object.t(type: :observation),
+  #             observation_path(@observation.id)
+  #   ]
+  #   @tabsets = { right: draw_tab_set(tabs) }
+  # end
+
+  # TODO: Is this really the right navbar title/anchor?
+  # Should it be Account?
+  @navbar = {} # reset
+  @navbar[:title] = { title: :NOTIFICATIONS.t, url: notifications_path }
   if @observation
-    tabs = [
-      link_to :show_object.t(type: :observation),
-              observation_path(@observation.id)
+    @navbar[:links] = [
+      { title: :show_object.t(type: :observation),
+        url: observation_path(@observation.id) }
     ]
-    @tabsets = { right: draw_tab_set(tabs) }
   end
 %>
 
-<% odd_or_even = 0
-for notification, naming in @data
-  odd_or_even = 1 - odd_or_even %>
-  <p>
-    <div class="ListLine<%= odd_or_even %>" class="my-0 mx-4 py-2 px-4" style="border:1px dotted;">
-      <%= notification.calc_note(user: @user, naming: naming).tp %>
-    </div>
-  </p>
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <% odd_or_even = 0
+  for notification, naming in @data
+    odd_or_even = 1 - odd_or_even %>
+    <p>
+      <div class="ListLine<%= odd_or_even %>" class="my-0 mx-4 py-2 px-4" style="border:1px dotted;">
+        <%= notification.calc_note(user: @user, naming: naming).tp %>
+      </div>
+    </p>
+  <% end %>
 <% end %>

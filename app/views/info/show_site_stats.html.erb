@@ -1,16 +1,27 @@
 <%
   @title = :show_site_stats_title.t
 
-  tabs = [
-    link_to(:app_contributors.t,
-            controller: :users,
-            action: :users_by_contribution),
-    link_to(:site_stats_observed_taxa.t,
-            controller: :users,
-            action: :checklist)
+  # tabs = [
+  #   link_to(:app_contributors.t,
+  #           controller: :users,
+  #           action: :users_by_contribution),
+  #   link_to(:site_stats_observed_taxa.t,
+  #           controller: :users,
+  #           action: :checklist)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :INFO.t, url: info_path }
+  @navbar[:links] = [
+    { title: :app_contributors.t, url: users_users_by_contribution_path,
+      icon: "fa-user-shield" }
+    { title: :site_stats_observed_taxa.t, url: users_checklist_path,
+      icon: "fa-clipboard-list" }
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
 %>
+
+<%= tag.h1 @title.humanize, class: "display-1" %>
 
 <div class="row mt-3">
   <div class="d-none d-sm-block col-md-3">
@@ -69,7 +80,7 @@
       <% @observations[3,3].each do |obs| %>
         <%= thumbnail(obs.thumb_image,
                       link: { controller: :observations,
-                              action: :show, 
+                              action: :show,
                               id: obs.id },
                       votes: true) %><br/><br/>
       <% end %>

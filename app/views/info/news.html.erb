@@ -1,6 +1,11 @@
-<% @title = :news_title.t %>
+<%
+@title = :news_title.t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :news_header.tp %>
   <%= :news_content.tp %>
-</div>
+<% end %>

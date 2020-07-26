@@ -1,12 +1,16 @@
 <%
   @title = :create_herbarium_title.l
 
-  tabs = [
-    link_with_query(:herbarium_index.t, action: :index)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  # tabs = [
+  #   link_with_query(:herbarium_index.t, action: :index)
+  # ]
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIA.t, url: herbaria_path }
 %>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= render partial: "form", locals: { button_name: :CREATE } %>
-</div>
+<% end %>

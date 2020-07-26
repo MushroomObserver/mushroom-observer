@@ -1,33 +1,50 @@
 <%
   @title = @herbarium.format_name.t
 
-  tabs = []
-  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
-    tabs += [
-      link_with_query(:edit_herbarium.t,
-                      action: :edit,
-                      id: @herbarium.id),
-      link_with_query(:destroy_object.t(type: :herbarium),
-                      action: :destroy,
-                      id: @herbarium.id,
-                      back: url_after_delete(@herbarium))
-    ]
-  end
-  tabs += [
-    link_with_query(:create_herbarium.t,
-                    action: :new),
-    link_with_query(:herbarium_index.t,
-                    action: :index)
-  ]
+  # tabs = []
+  # if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
+  #   tabs += [
+  #     link_to(:edit_herbarium.t,
+  #             edit_herbarium_path(id: @herbarium.id, q: get_query_param)),
+  #     link_to(:destroy_object.t(type: :herbarium),
+  #             herbarium_path(id: @herbarium.id, q: get_query_param),
+  #             method: :delete, data: { confirm: :are_you_sure.t },
+  #             back: url_after_delete(@herbarium))
+  #   ]
+  # end
+  # tabs += [
+  #   link_to(:create_herbarium.t, new_herbarium_path(q: get_query_param)),
+  #   link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # ]
 
+  # TODO: figure out pager_for
   @tabsets = {
     pager_for: @herbarium,
-    right: draw_tab_set(tabs)
+    # right: draw_tab_set(tabs)
   }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIA.t, url: herbaria_path }
+  @navbar[:links] = [
+    { title: :create_herbarium.t, url: new_herbarium_path(q: get_query_param),
+      icon: "fa-plus" }
+  ]
+  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
+    @navbar[:links] << {
+      title: :edit_herbarium.t,
+      url: edit_herbarium_path(id: @herbarium.id, q: get_query_param),
+      icon: "fa-edit" }
+    @navbar[:links] << {
+      title: :destroy_object.t(type: :herbarium),
+      url: herbarium_path(id: @herbarium.id),
+      method: :delete, data: { confirm: :are_you_sure.t },
+      icon: "fa-trash-alt" }
+  end
 
   map = @herbarium.location ? true : false
 %>
 
+<%= tag.h1 @title.humanize, class: "display-1" %>
 <div class="row">
   <div class="col-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
     <div class="mt-3">

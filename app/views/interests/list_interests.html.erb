@@ -1,4 +1,9 @@
 <%
+  # TODO: Is this really the right navbar title/anchor?
+  # Should it be Account?
+  @navbar = {} # reset
+  @navbar[:title] = { title: :INTERESTS.t, url: interests_path }
+
   flash_error(@error) if @error && !@targets.any?(&:target)
 %>
 

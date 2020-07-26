@@ -1,5 +1,8 @@
 <%
   @title = :pivotal_index_title.l
+  @navbar = {} # reset
+  @navbar[:title] = { title: :PIVOTAL.t, url: pivotal_path }
+  
   javascript_include("pivotal")
 
   label_map = {}

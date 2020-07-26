@@ -1,9 +1,15 @@
 <%
   @title ||= :list_herbarium_records_title.t
 
-  tabs = create_links(@links)
-  tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
-  @tabsets = { right: draw_tab_set(tabs) }
+  # tabs = create_links(@links)
+  # tabs << link_to(:herbarium_index.t, herbaria_path(q: get_query_param))
+  # @tabsets = { right: draw_tab_set(tabs) }
+
+  @navbar = {} # reset
+  @navbar[:title] = { title: :HERBARIUM_RECORDS.t, url: herbarium_records_path }
+  @navbar[:dropdowns] = [
+    { title: "Actions", links: create_links(@links) }
+  ]
 
   flash_error(@error) if @error && @objects.empty?
 %>
@@ -12,7 +18,7 @@
   <% if @objects.any? %>
     <table class="table table-striped">
       <% @objects.each do |herbarium_record|
-				   herbarium = herbarium_record.herbarium %>
+            herbarium = herbarium_record.herbarium %>
         <tr>
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?

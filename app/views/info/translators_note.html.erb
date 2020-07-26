@@ -1,6 +1,11 @@
-<% @title = :translators_note_title.t %>
+<%
+@title = :translators_note_title.t
+@navbar = {} # reset
+@navbar[:title] = { title: :INFO.t, url: info_path }
+%>
 
-<div class="max-width-text">
+<%= tag.div class: "form-max-width mt-4" do %>
+  <%= tag.h1 @title.humanize, class: "display-1" %>
   <%= :translators_note.tpl(repo: "#{MO.code_repository}/mushroom-observer/blob/master/config/locales/en.txt") %>
 
   <ul>
@@ -11,4 +16,4 @@
       </li>
     <% end %>
   </ul>
-</div>
+<% end %>
