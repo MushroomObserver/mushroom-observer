@@ -283,6 +283,30 @@ class QueryTest < UnitTestCase
     assert_equal(7, QueryRecord.count)
   end
 
+  def test_flavor
+    assert_equal(:all,
+                 Query.lookup(:Observation, :all, by: :id).flavor,
+                 "Wrong Query flavor for one-word model")
+    assert_equal(:all,
+                 Query.lookup(:HerbariumRecord, :all, by: :id).flavor,
+                 "Wrong Query flavor for multiple-word model")
+    assert_equal(:all,
+                 Query.lookup(:NameDescription, :all, by: :id).flavor,
+                 "Wrong Query flavor for namespaced model")
+  end
+
+  def test_title
+    assert_equal("Observation Index",
+                 Query.lookup(:Observation).title,
+                 "Wrong Query title for one-word model")
+    assert_equal("Herbarium Record Index",
+                 Query.lookup(:HerbariumRecord).title,
+                 "Wrong Query title for multiple-word model")
+    assert_equal("Name Descriptions by ID",
+                 Query.lookup(:NameDescription, :all, by: :id).title,
+                 "Wrong Query title for namespaced model")
+  end
+
   ##############################################################################
   #
   #  :section: Query Mechanics
@@ -2355,7 +2379,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_descriptions
-    expect = Name::Description.distinct(:name_id).order(:name_id).pluck(:name_id)
+    expect = Name::Description.distinct(:name_id).order(:name_id).
+             pluck(:name_id)
     assert_query(expect, :Name, :with_descriptions, by: :id)
   end
 

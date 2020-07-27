@@ -224,6 +224,7 @@
 #  initialized?::       Has this query been initialized?
 #  coerce::             Coerce a query for one model into a query for another.
 #  coercable?::         Check if +coerce+ will work (but don't actually do it).
+#  title::              Translated title, used by views
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
