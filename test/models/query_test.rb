@@ -283,6 +283,20 @@ class QueryTest < UnitTestCase
     assert_equal(7, QueryRecord.count)
   end
 
+  def test_flavor
+=begin
+    assert_equal(:all,
+                 Query.lookup(:Observation, :all, by: :id).flavor,
+                 "Wrong Query flavor for one-word model")
+    assert_equal(:all,
+                 Query.lookup(:HerbariumRecord, :all, by: :id).flavor,
+                 "Wrong Query flavor for multiple-word model")
+=end
+    assert_equal(:all,
+                 Query.lookup(:NameDescription, :all, by: :id).flavor,
+                 "Wrong Query flavor for namespaced model")
+  end
+
   def test_title
     assert_equal("Observation Index",
                  Query.lookup(:Observation).title,

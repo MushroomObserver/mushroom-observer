@@ -24,7 +24,11 @@ module Query
     include Query::Modules::Validation
 
     def flavor
-      self.class.to_s.sub(/^.*::/, "")[model.to_s.length..-1].underscore.to_sym
+      class_name_minus_model_name.underscore.to_sym
+    end
+
+    def class_name_minus_model_name
+      self.class.name.sub(/^.*::/, "")[model.name.gsub("::","").length..-1]
     end
 
     def parameter_declarations
