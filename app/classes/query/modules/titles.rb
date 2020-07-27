@@ -9,12 +9,9 @@ module Query
 
       def initialize_title
         @title_tag = "query_title_#{flavor}".to_sym
-        @title_args = {
-          type: model.to_s.underscore.
-                # for namespaced models, convert paths to underscore separation
-                gsub("/", "_").
-                to_sym
-        }
+        @title_args = { type: model.to_s.underscore.
+                      tr("/", "_"). # for namespaced models
+                      to_sym }
       end
 
       # translated title, used by views

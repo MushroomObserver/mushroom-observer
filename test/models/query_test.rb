@@ -284,14 +284,12 @@ class QueryTest < UnitTestCase
   end
 
   def test_flavor
-=begin
     assert_equal(:all,
                  Query.lookup(:Observation, :all, by: :id).flavor,
                  "Wrong Query flavor for one-word model")
     assert_equal(:all,
                  Query.lookup(:HerbariumRecord, :all, by: :id).flavor,
                  "Wrong Query flavor for multiple-word model")
-=end
     assert_equal(:all,
                  Query.lookup(:NameDescription, :all, by: :id).flavor,
                  "Wrong Query flavor for namespaced model")
@@ -2381,7 +2379,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_descriptions
-    expect = Name::Description.distinct(:name_id).order(:name_id).pluck(:name_id)
+    expect = Name::Description.distinct(:name_id).order(:name_id).
+             pluck(:name_id)
     assert_query(expect, :Name, :with_descriptions, by: :id)
   end
 
