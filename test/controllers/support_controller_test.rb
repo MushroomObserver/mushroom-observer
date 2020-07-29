@@ -2,6 +2,7 @@
 
 require "test_helper"
 
+# Donations to MO; information about donations
 class SupportControllerTest < FunctionalTestCase
   def test_gets
     [
