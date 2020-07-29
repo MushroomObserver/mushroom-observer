@@ -28,7 +28,7 @@ module Query
     end
 
     def class_name_minus_model_name
-      self.class.to_s.sub(/^.*::/, "")[model.to_s.remove("::").length..-1]
+      self.class.to_s.demodulize.delete_prefix(model.to_s.remove("::"))
     end
 
     def parameter_declarations
