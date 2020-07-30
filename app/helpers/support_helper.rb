@@ -7,14 +7,10 @@ module SupportHelper
   end
 
   def create_donation_navbar
-    init_navbar([
-      { title: :donors_tab.t, url: support_donors_path,
-        icon: "fa-user-friends" },
-      { title: :donate_tab.t, url: support_donate_path,
-        icon: "fa-hands-helping" },
-      { title: :review_donations_tab.t, url: support_review_donations_path,
-        icon: "fa-clipboard-list" }
-    ])
+    init_navbar(default_links <<
+        { title: :review_donations_tab.t, url: support_review_donations_path,
+          icon: "fa-clipboard-list" }
+    )
   end
 
   def donate_navbar
@@ -23,12 +19,12 @@ module SupportHelper
         icon: "fa-user-friends" }
     ]
     if in_admin_mode?
-      links << [
+      links <<
         { title: :create_donation_tab.t, url: support_create_donation_path,
-          icon: "fa-donate" },
+          icon: "fa-donate" }
+      links <<
         { title: :review_donations_tab.t, url: support_review_donations_path,
           icon: "fa-clipboard-list" }
-      ]
     end
     init_navbar(links)
   end
@@ -37,12 +33,22 @@ module SupportHelper
     donate_navbar
   end
 
+  def review_donations_navbar
+    links = default_links
+    if in_admin_mode?
+      links <<
+        { title: :create_donation_tab.t, url: support_create_donation_path,
+          icon: "fa-donate" }
+    end
+    init_navbar(links)
+  end
+
   def default_links
     [
-      { title: :donate_tab.t, url: support_donate_path,
-        icon: "fa-helping-hands" },
       { title: :donors_tab.t, url: support_donors_path,
-        icon: "fa-user-friends" }
-    ].freeze
+        icon: "fa-user-friends" },
+      { title: :donate_tab.t, url: support_donate_path,
+        icon: "fa-helping-hands" }
+    ]
   end
 end
