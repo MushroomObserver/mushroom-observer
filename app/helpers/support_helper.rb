@@ -2,12 +2,13 @@
 
 # helpers for Support controller and views
 module SupportHelper
-  def init_navbar(links = nil )
+  def init_navbar(links = nil)
     { title: { title: :SUPPORT.t, url: support_donate_path }, links: links }
   end
 
   def create_donation_navbar
-    init_navbar(default_links <<
+    init_navbar(
+      default_links <<
         { title: :review_donations_tab.t, url: support_review_donations_path,
           icon: "fa-clipboard-list" }
     )
