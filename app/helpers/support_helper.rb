@@ -6,7 +6,18 @@ module SupportHelper
     { title: { title: :SUPPORT.t, url: support_donate_path }, links: links }
   end
 
-  def donors_navbar
+  def create_donation_navbar
+    init_navbar([
+      { title: :donors_tab.t, url: support_donors_path,
+        icon: "fa-user-friends" },
+      { title: :donate_tab.t, url: support_donate_path,
+        icon: "fa-hands-helping" },
+      { title: :review_donations_tab.t, url: support_review_donations_path,
+        icon: "fa-clipboard-list" }
+    ])
+  end
+
+  def donate_navbar
     links = [
       { title: :donors_tab.t, url: support_donors_path,
         icon: "fa-user-friends" }
@@ -20,6 +31,10 @@ module SupportHelper
       ]
     end
     init_navbar(links)
+  end
+
+  def donors_navbar
+    donate_navbar
   end
 
   def default_links

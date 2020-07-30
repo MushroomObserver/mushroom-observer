@@ -1,31 +1,6 @@
 <%
   @title = :donate_title.l
-
-  # tabs = [
-  #   link_to(:donors_tab.t, action: :donors)
-  # ]
-  # if in_admin_mode?
-  #   tabs += [
-  #           link_to(:create_donation_tab.t, action: :create_donation),
-  #           link_to(:review_donations_tab.t, action: :review_donations)
-  #   ]
-  # end
-  # @tabsets = { right: draw_tab_set(tabs) }
-
-  @navbar[:title] = { title: :SUPPORT.t, url: support_donate_path }
-  @navbar[:links] = [
-    { title: :donors_tab.t, url: support_donors_path,
-      icon: "fa-user-friends" }
-  ]
-  if in_admin_mode?
-    @navbar[:links] << [
-      { title: :create_donation_tab.t, url: support_create_donation_path,
-        icon: "fa-donate" }
-      { title: :review_donations_tab.t, url: support_review_donations_path,
-        icon: "fa-clipboard-list" }
-    ]
-  end
-
+  @navbar = donate_navbar
   javascript_include "donate"
 %>
 
@@ -38,7 +13,7 @@
     <%= form_tag(action: :confirm) do %>
       <p>
         <div class="row">
-          <% for a in [25.00, 50.00, 100.00, 200.00] %>
+          <% [25.00, 50.00, 100.00, 200.00].each do |a| %>
             <div class="col-3">
               <%= radio_button(:donation, :amount, a) %>
               $<%= a.to_i %>
