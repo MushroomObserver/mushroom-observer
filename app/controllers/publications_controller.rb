@@ -132,28 +132,25 @@ class PublicationsController < ApplicationController
 
   def init_navbar(links = nil)
     { title: { title: :PUBLICATIONS.t, url: publications_path },
-               links: links }
+      links: links }
   end
 
   def index_navbar
-    init_navbar([
-      { title: :create_publication.t, url: new_publication_path,
-        icon: "fa-plus" }
-    ])
+    init_navbar([{ title: :create_publication.t,
+                   url: new_publication_path,
+                   icon: "fa-plus" }])
   end
 
   def edit_navbar
-    init_navbar([
-      { title: :cancel_and_show.t(type: :publication),
-        url: publication_path(@publication.id), icon: "fa-backspace" }
-    ])
+    init_navbar([{ title: :cancel_and_show.t(type: :publication),
+                   url: publication_path(@publication.id),
+                   icon: "fa-backspace" }])
   end
 
   def new_navbar
-    init_navbar([
-      { title: :cancel_and_show.t(type: :PUBLICATIONS),
-        url: publications_path, icon: "fa-backspace" }
-    ])
+    init_navbar([{ title: :cancel_and_show.t(type: :PUBLICATIONS),
+                   url: publications_path,
+                   icon: "fa-backspace" }])
   end
 
   def show_navbar
@@ -165,12 +162,14 @@ class PublicationsController < ApplicationController
       links << {
         title: :edit_object.t(type: :publication),
         url: edit_publication_path(id: @publication.id),
-        icon: "fa-edit" }
+        icon: "fa-edit"
+      }
       links << {
         title: :destroy_object.t(type: :publication),
         url: publication_path(id: @publication.id),
         method: :delete, data: { confirm: :are_you_sure.t },
-        icon: "fa-trash-alt" }
+        icon: "fa-trash-alt"
+      }
     end
     init_navbar(links)
   end

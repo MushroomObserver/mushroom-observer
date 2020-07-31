@@ -27,9 +27,9 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response :success
     assert(
       # :cancel_and_show has regex meta characters that need escaping
-      Regexp.new(Regexp.escape(
-        :cancel_and_show.t(type: :PUBLICATIONS)
-      )) =~ @response.body,
+      Regexp.new(
+        Regexp.escape(:cancel_and_show.t(type: :PUBLICATIONS))
+      ) =~ @response.body,
       "Page should have a link to cancel creation of publication"
     )
   end
