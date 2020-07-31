@@ -7,11 +7,11 @@ class PublicationsControllerTest < FunctionalTestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:publications)
-    Publications.find_each do |publication|
+    Publication.find_each do |publication|
       assert_select("a[href*='#{publications_path}/#{publication.id}']",
-                    { text: publication.title },
+                    { text: publication.full },
                     "Publications Index should link to each publication, " \
-                    "including #{publication.title} (##{publication.id})")
+                    "including #{publication.full} (##{publication.id})")
     end
 
     pub_id = publications(:one_pub).id
@@ -25,8 +25,13 @@ class PublicationsControllerTest < FunctionalTestCase
     login
     get :new
     assert_response :success
-    assert_select("a", { text: :cancel_and_show.t },
-                  "Page is missing a link to cancel creation of publication")
+    assert(
+      # :cancel_and_show has regex meta characters that need escaping
+      Regexp.new(Regexp.escape(
+        :cancel_and_show.t(type: :PUBLICATIONS)
+      )) =~ @response.body,
+      "Page should have a link to cancel creation of publication"
+    )
   end
 
   def test_create
