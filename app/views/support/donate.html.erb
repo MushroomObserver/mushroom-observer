@@ -2,10 +2,11 @@
   @title = :donate_title.l
   @navbar = donate_navbar
   javascript_include "donate"
+  byebug
 %>
 
 <div class="form-max-width">
-  <%= tag.h1 @title.humanize, class: "display-1" %>
+  <%= tag.h1 @title, class: "display-1" %>
   <%= :donate_thanks.tp %>
   <%= :donate_explanation.tp %>
 
