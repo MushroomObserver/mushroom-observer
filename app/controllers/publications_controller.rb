@@ -145,24 +145,21 @@ class PublicationsController < ApplicationController
   def edit_navbar
     init_navbar([
       { title: :cancel_and_show.t(type: :publication),
-        url: publication_path(@publication.id), icon: "fa-backspace" },
-      { title: :PUBLICATIONS.t, url: publications_path }
+        url: publication_path(@publication.id), icon: "fa-backspace" }
     ])
   end
 
   def new_navbar
     init_navbar([
       { title: :cancel_and_show.t(type: :PUBLICATIONS),
-        url: publications_path, icon: "fa-backspace" },
-      { title: :PUBLICATIONS.t, url: publications_path }
+        url: publications_path, icon: "fa-backspace" }
     ])
   end
 
   def show_navbar
     links = [
       { title: :create_publication.t, url: new_publication_path,
-        icon: "fa-plus" },
-      { title: :PUBLICATIONS.t, url: publications_path }
+        icon: "fa-plus" }
     ]
     if in_admin_mode? || @publication.can_edit?(@user)
       links << {
