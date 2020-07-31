@@ -9,12 +9,12 @@
   @navbar = {} # reset
   @navbar[:title] = { title: :PUBLICATIONS.t, url: publications_path }
   @navbar[:links] = [
-    { title: :cancel_and_show.t(type: :publication),
-      url: publication_path(@publication.id), icon: "fa-backspace" },
+    { title: :cancel_and_show.t(type: :PUBLICATIONS),
+      url: publications_path, icon: "fa-backspace" },
   ]
 %>
 
 <%= tag.div class: "form-max-width mt-4" do %>
   <%= tag.h1 @title.humanize, class: "display-1" %>
-  <%= render "form", locals: { button_name: :CREATE } %>
+  <%= render "form", button_name: :CREATE %>
 <% end %>

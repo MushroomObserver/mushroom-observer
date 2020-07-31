@@ -1,6 +1,6 @@
-<%= # form_for(@publication, action: :new) do |form| %>
-<%= # form_for(@publication, action: :update) do |form| %>
-<%= form_with model: :publication do |f| %>
+<%# form_for(@publication, action: :new) do |form| %>
+<%# form_for(@publication, action: :update) do |form| %>
+<%= form_with model: @publication do |f| %>
 
   <div class="form-group mt-3">
     <%= f.label :full, :publication_full.t + ":" %>
