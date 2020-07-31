@@ -1,18 +1,3 @@
-<%
-  @title = :publication_index_title.l
-
-  # tabs = [
-  #   link_to(:create_publication.t, new_publication_path)
-  # ]
-  # @tabsets = { right: draw_tab_set(tabs) }
-  @navbar = {} # reset
-  @navbar[:title] = { title: :PUBLICATIONS.t, url: publications_path }
-  @navbar[:links] = [
-    { title: :create_publication.t, url: new_publication_path,
-      icon: "fa-plus" },
-  ]
-%>
-
 <%= tag.div class: "form-max-width mt-4" do %>
   <%= tag.h1 @title.humanize, class: "display-1" %>
   <div class="row">

@@ -1,20 +1,4 @@
-<%
-  @title = :create_publication_title.l
-
-  # tabs = [
-  #   link_to(:cancel_and_show.t(type: :publication), @publication),
-  #   link_to(:publication_index.t, publications_path)
-  # ]
-  # @tabsets = { right: draw_tab_set(tabs) }
-  @navbar = {} # reset
-  @navbar[:title] = { title: :PUBLICATIONS.t, url: publications_path }
-  @navbar[:links] = [
-    { title: :cancel_and_show.t(type: :PUBLICATIONS),
-      url: publications_path, icon: "fa-backspace" },
-  ]
-%>
-
 <%= tag.div class: "form-max-width mt-4" do %>
-  <%= render "form", button_name: :CREATE %>
   <%= tag.h1 @title , class: "display-1" %>
+  <%= render partial: "form", locals: { button_name: :CREATE } %>
 <% end %>
