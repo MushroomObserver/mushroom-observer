@@ -141,18 +141,6 @@ class PublicationsController < ApplicationController
                    icon: "fa-plus" }])
   end
 
-  def edit_navbar
-    init_navbar([{ title: :cancel_and_show.t(type: :publication),
-                   url: publication_path(@publication.id),
-                   icon: "fa-backspace" }])
-  end
-
-  def new_navbar
-    init_navbar([{ title: :cancel_and_show.t(type: :PUBLICATIONS),
-                   url: publications_path,
-                   icon: "fa-backspace" }])
-  end
-
   def show_navbar
     links = [
       { title: :create_publication.t, url: new_publication_path,
@@ -172,6 +160,18 @@ class PublicationsController < ApplicationController
       }
     end
     init_navbar(links)
+  end
+
+  def new_navbar
+    init_navbar([{ title: :cancel_and_show.t(type: :PUBLICATIONS),
+                   url: publications_path,
+                   icon: "fa-backspace" }])
+  end
+
+  def edit_navbar
+    init_navbar([{ title: :cancel_and_show.t(type: :publication),
+                   url: publication_path(@publication.id),
+                   icon: "fa-backspace" }])
   end
 
   def whitelisted_publication_params
