@@ -2429,6 +2429,7 @@
 
 
   # support/donate
+  SUPPORT: Support Mushroom Observer
   donate_title: Donate to Mushroom Observer, Inc.
   donate_tab: Donate
   donate_other: Other Amount
