@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# CRUD lists of publications which benefitted from MO
 class PublicationsController < ApplicationController
   before_action :login_required, except: [
     :index,
@@ -14,11 +15,12 @@ class PublicationsController < ApplicationController
   # GET /publications.xml
   def index
     store_location
-    # @publications = Publication.find(:all, order: 'full') # Rails 3
     @publications = Publication.all.order("full")
     @full_count = @publications.length
     @peer_count = @publications.count(&:peer_reviewed)
     @mo_count   = @publications.count(&:mo_mentioned)
+    @title = :publication_index_title.l
+    @navbar = index_navbar
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render xml: @publications }
@@ -30,6 +32,8 @@ class PublicationsController < ApplicationController
   def show
     store_location
     @publication = Publication.find(params[:id])
+    @title = :show_publication_title.l
+    @navbar = show_navbar
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render xml: @publication }
@@ -40,6 +44,8 @@ class PublicationsController < ApplicationController
   # GET /publications/new.xml
   def new
     @publication = Publication.new
+    @title = :create_publication_title.l
+    @navbar = new_navbar
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render xml: @publication }
@@ -50,6 +56,8 @@ class PublicationsController < ApplicationController
   def edit
     @publication = Publication.find(params[:id])
     redirect_to publications_path unless can_edit?(@publication)
+    @title = :edit_publication_title.l
+    @navbar = edit_navbar
   end
 
   # POST /publications
@@ -121,6 +129,50 @@ class PublicationsController < ApplicationController
   ##############################################################################
 
   private
+
+  def init_navbar(links = nil)
+    { title: { title: :PUBLICATIONS.t, url: publications_path },
+      links: links }
+  end
+
+  def index_navbar
+    init_navbar([{ title: :create_publication.t,
+                   url: new_publication_path,
+                   icon: "fa-plus" }])
+  end
+
+  def show_navbar
+    links = [
+      { title: :create_publication.t, url: new_publication_path,
+        icon: "fa-plus" }
+    ]
+    if in_admin_mode? || @publication.can_edit?(@user)
+      links << {
+        title: :edit_object.t(type: :publication),
+        url: edit_publication_path(id: @publication.id),
+        icon: "fa-edit"
+      }
+      links << {
+        title: :destroy_object.t(type: :publication),
+        url: publication_path(id: @publication.id),
+        method: :delete, data: { confirm: :are_you_sure.t },
+        icon: "fa-trash-alt"
+      }
+    end
+    init_navbar(links)
+  end
+
+  def new_navbar
+    init_navbar([{ title: :cancel_and_show.t(type: :PUBLICATIONS),
+                   url: publications_path,
+                   icon: "fa-backspace" }])
+  end
+
+  def edit_navbar
+    init_navbar([{ title: :cancel_and_show.t(type: :publication),
+                   url: publication_path(@publication.id),
+                   icon: "fa-backspace" }])
+  end
 
   def whitelisted_publication_params
     if params[:publication]

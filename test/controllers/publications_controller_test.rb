@@ -3,30 +3,41 @@
 require "test_helper"
 
 class PublicationsControllerTest < FunctionalTestCase
-  def test_should_get_index
+  def test_index
     get :index
     assert_response :success
     assert_not_nil assigns(:publications)
-  end
+    Publication.find_each do |publication|
+      assert_select("a[href*='#{publications_path}/#{publication.id}']",
+                    { text: publication.full },
+                    "Publications Index should link to each publication, " \
+                    "including #{publication.full} (##{publication.id})")
+    end
 
-  def test_should_get_index_for_user_who_owns_a_publication
     pub_id = publications(:one_pub).id
     login("rolf")
     get :index
-    assert_response :success
-    assert_not_nil assigns(:publications)
     assert_link_in_html("Edit", action: :edit, id: pub_id)
     assert_link_in_html("Destroy", action: :destroy, id: pub_id)
   end
 
-  def test_should_get_new
+  def test_new
     login
     get :new
     assert_response :success
+    assert(
+      # :cancel_and_show has regex meta characters that need escaping
+      Regexp.new(
+        Regexp.escape(:cancel_and_show.t(type: :PUBLICATIONS))
+      ) =~ @response.body,
+      "Page should have a link to cancel creation of publication"
+    )
   end
 
-  def test_should_create_publication
+  def test_create
     login
+    create_with_empty_form
+
     user = User.current
     ref  = "Author, J.R. 2014. Mushroom Observer Rocks! Some Journal 1(2): 3-4."
     link = "http://some_journal.com/mo_rocks.html"
@@ -50,21 +61,16 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_redirected_to publication_path(assigns(:publication))
   end
 
-  def test_should_not_create_publication_if_user_not_successful
-    login "spamspamspam"
-    assert_no_difference("Publication.count") do
+  def create_with_empty_form
+    assert_no_difference(
+      "Publication.count",
+      "Publication should not be created by empty form"
+    ) do
       post :create, publication: {}
     end
   end
 
-  def test_should_not_create_publication_if_form_empty
-    login
-    assert_no_difference("Publication.count") do
-      post :create, publication: {}
-    end
-  end
-
-  def test_should_show_publication
+  def test_show
     get :show, id: publications(:one_pub).id
     assert_response :success
     login("rolf")
@@ -72,19 +78,19 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response :success
   end
 
-  def test_should_get_edit
+  def test_edit
     login
     get :edit, id: publications(:one_pub).id
     assert_response :success
   end
 
-  def test_should_update_publication
+  def test_update
     login
     put :update, id: publications(:one_pub).id, publication: {}
     assert_redirected_to publication_path(assigns(:publication))
   end
 
-  def test_should_destroy_publication
+  def test_destroy
     login
     assert_difference("Publication.count", -1) do
       delete :destroy, id: publications(:one_pub).id
