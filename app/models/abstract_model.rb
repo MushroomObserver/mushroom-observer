@@ -306,24 +306,36 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
+  # TODO: After all controllers are normalized, consider deleting the
+  # normalized/unnormalized conditionals in those methods, plus delete the
+  # associated helper methods "controller_normalized?" and "class_defined?"".
+  # I don't think there will be relevant special cases,
+  # i.e., searchable models with singular controller names. JDC 2020-08-02
+
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
-  #   Article.show_controller => "articles"
+  #   Article.show_controller => "articles" # for normalized controller
   #
-  #   Name.show_controller => "name"
+  #   Name.show_controller => "name" # unnormalized controller and special cases
   #   name.show_controller => "name"
   #
   def self.show_controller
-    if class_defined?("#{name.pluralize}Controller")
+    if controller_normalized?(name)
       name.pluralize.underscore # Rails standard for most controllers
     else
-      name.underscore # special cases and old MO controller names
+      name.underscore # old MO controller names and any special cases
     end
   end
 
   def show_controller
     self.class.show_controller
+  end
+
+  # Has controller been normalized to Rails 6.0 standards:
+  #  plural controller name, CRUD action names standardized if they exist
+  def self.controller_normalized?(name)
+    class_defined?("#{name.pluralize}Controller")
   end
 
   # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
@@ -336,11 +348,17 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "index_<object>" action (as a simple
   # lowercase string) that displays search index for this object.
   #
-  #   Name.index_action => "index_name"
+  #   Article.index_action => "index" # normalized controller
+  #
+  #   Name.index_action => "index_name" #unormalized
   #   name.index_action => "index_name"
   #
   def self.index_action
-    "index_" + name.underscore
+    if controller_normalized?(name)
+      "index" # Rails standard for most controllers
+    else
+      "index_" + name.underscore # old MO controller names and any special cases
+    end
   end
 
   def index_action
@@ -350,11 +368,17 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "show_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   Name.show_action => "show_name"
+  #   Article.show_action => "show" # normalized controller
+  #
+  #   Name.show_action => "show_name" #unormalized
   #   name.show_action => "show_name"
   #
   def self.show_action
-    "show_" + name.underscore
+    if controller_normalized?(name)
+      "show" # Rails standard for most controllers
+    else
+      "show_" + name.underscore # old MO controller names and any special cases
+    end
   end
 
   def show_action
@@ -363,11 +387,19 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "show_<object>" action
   #
+  #   # normalized controller
+  #   Article.index_action => "http://mushroomobserver.org/article/12"
+  #
+  #   # unnormalized controller
   #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
   #
   def self.show_url(id)
-    "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+    if controller_normalized?(name)
+      "#{MO.http_domain}/#{show_controller}/#{id}"
+    else
+      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+    end
   end
 
   def show_url
