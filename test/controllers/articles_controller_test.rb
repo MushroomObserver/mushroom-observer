@@ -71,13 +71,13 @@ class ArticlesControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     get(:edit, params)
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index_article)
+    assert_redirected_to(articles_path)
 
     # Prove authorized user can create article
     login(users(:article_writer).login)
     make_admin
     get(:edit, params)
-    assert_form_action(action: "edit_article")
+    assert_form_action(action: :update) # "edit" form posts to :update action
   end
 
   ############ test Actions to Modify data: (create, update, destroy, etc.)
