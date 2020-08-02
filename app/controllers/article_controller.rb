@@ -155,12 +155,4 @@ class ArticleController < ApplicationController
     end
     redirect_to(action: "index_article")
   end
-
-  ##############################################################################
-
-  private
-
-  def whitelisted_article_params
-    params[:article].permit(:body, :title)
-  end
 end
