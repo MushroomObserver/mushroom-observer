@@ -26,7 +26,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove that an actual article gets shown
     get(:show, id: articles(:premier_article).id)
     assert_response(:success)
-    assert_template(:show_article)
+    assert_template(:show)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)

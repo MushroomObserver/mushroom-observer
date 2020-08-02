@@ -19,7 +19,7 @@ module ArticlesHelper
 
     tabs.push(link_to(:create_article_title.t, new_article_path),
               link_to(:EDIT.t, edit_article_path(@article.id)),
-              link_to(:DESTROY.t, action: :destroy_article, id: @article.id))
+              link_to(:DESTROY.t, action: :destroy, id: @article.id))
   end
 
   # "Title (#nnn)" textilized
