@@ -4,6 +4,45 @@ require "test_helper"
 
 # Controller tests for news articles
 class ArticlesControllerTest < FunctionalTestCase
+  ############ test Actions that Display data (index, show, etc.)
+
+  def test_index
+    # Prove any user can see article index
+    get(:index_article)
+    assert(:success)
+
+    # Prove privileged user get link to create an article
+    login(users(:article_writer).login)
+    get(:index_article)
+    assert_select("a", text: :create_article_title.l)
+  end
+
+  def test_list_articles
+    get(:list_articles)
+    assert(:success)
+  end
+
+  def test_show_article
+    # Prove that an actual article gets shown
+    get(:show_article, id: articles(:premier_article).id)
+    assert_response(:success)
+    assert_template(:show_article)
+
+    # Prove privileged user gets extra links
+    login(users(:article_writer).login)
+    get(:show_article, id: articles(:premier_article).id)
+    assert_select("a", text: :create_article_title.l)
+    assert_select("a", text: :EDIT.l)
+    assert_select("a", text: :DESTROY.l)
+
+    # Prove that trying to show non-existent article provokes error & redirect
+    get(:show_article, id: -1)
+    assert_flash_error
+    assert_response(:redirect)
+  end
+
+  ############ test Actions that Display forms -- (new, edit, etc.)
+
   def test_create_article_get
     # Prove unathorized user cannot see create_article form
     login(users(:zero_user).login)
@@ -23,6 +62,8 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
   end
+
+  ############ test Actions to Modify data: (create, update, destroy, etc.)
 
   def test_create_article_post
     user   = users(:article_writer)
@@ -62,23 +103,6 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_equal(title, article.title)
     assert_redirected_to(action: :show_article, id: article.id)
     assert_not_nil(article.rss_log, "Failed to create rss_log entry")
-  end
-
-  def test_edit_article_get
-    # Prove unauthorized user cannot see edit form
-    article = articles(:premier_article)
-    params = { id: article.id }
-
-    login(users(:zero_user).login)
-    get(:edit_article, params)
-    assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index_article)
-
-    # Prove authorized user can create article
-    login(users(:article_writer).login)
-    make_admin
-    get(:edit_article, params)
-    assert_form_action(action: "edit_article")
   end
 
   def test_edit_article_post
@@ -139,38 +163,5 @@ class ArticlesControllerTest < FunctionalTestCase
                "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
 
-  def test_index
-    # Prove any user can see article index
-    get(:index_article)
-    assert(:success)
-
-    # Prove privileged user get link to create an article
-    login(users(:article_writer).login)
-    get(:index_article)
-    assert_select("a", text: :create_article_title.l)
-  end
-
-  def test_list_articles
-    get(:list_articles)
-    assert(:success)
-  end
-
-  def test_show_article
-    # Prove that an actual article gets shown
-    get(:show_article, id: articles(:premier_article).id)
-    assert_response(:success)
-    assert_template(:show_article)
-
-    # Prove privileged user gets extra links
-    login(users(:article_writer).login)
-    get(:show_article, id: articles(:premier_article).id)
-    assert_select("a", text: :create_article_title.l)
-    assert_select("a", text: :EDIT.l)
-    assert_select("a", text: :DESTROY.l)
-
-    # Prove that trying to show non-existent article provokes error & redirect
-    get(:show_article, id: -1)
-    assert_flash_error
-    assert_response(:redirect)
-  end
+  ############ test Public methods (unrouted)
 end

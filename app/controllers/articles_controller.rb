@@ -4,14 +4,14 @@
 #
 #  Actions
 #
-#    create:          Create article from data in "new" form
-#    destroy::        Destroy article
-#    edit::           Display form for editing article
-#    index::          List all articles
-#    index_article::  List selected (based on last search) articles
-#    new::            Display form for new article
-#    show::           Show one article
-#    update::         Update article from "edit" form
+#    create:           Create article from data in "new" form
+#    destroy::         Destroy article
+#    edit::            Display form for editing article
+#    index::           List all articles
+#    index_articles::  List selected (based on last search) articles
+#    new::             Display form for new article
+#    show::            Show one article
+#    update::          Update article from "edit" form
 #
 #
 #  Callbacks and Methods
@@ -23,7 +23,7 @@
 class ArticlesController < ApplicationController
   before_action :login_required, except: [
     :index,
-    :index_article,
+    :index_articles,
     :list_articles, # aliased
     :show,
     :show_article # aliased
@@ -31,7 +31,7 @@ class ArticlesController < ApplicationController
   before_action :store_location
   before_action :ignore_request_unless_permitted, except: [
     :index,
-    :index_article,
+    :index_articles,
     :list_articles, # aliased
     :show,
     :show_article # aliased

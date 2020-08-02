@@ -102,7 +102,7 @@ ACTIONS = {
     # create_article: {}, # aliased only
     # destroy_article: {}, # aliased only
     # edit_article: {}, # aliased only
-    index_article: {},
+    index_articles: {},
     # list_articles: {}, # aliased only
     # show_article: {}, # aliased only
     # resources
@@ -558,6 +558,7 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
+  get "articles/list_articles" => "articles"
   resources :articles
 
   get "publications/:id/destroy" => "publications#destroy"
