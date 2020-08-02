@@ -61,15 +61,6 @@ class ArticlesController < ApplicationController
 
   alias_method :list_articles, :index
 
-  def show_article_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :sort_by_user.t],
-      ["title",       :sort_by_title.t]
-    ]
-  end
-
   # Display one Article
   def show
     return false unless (@article = find_or_goto_index(Article, params[:id]))
@@ -163,9 +154,18 @@ class ArticlesController < ApplicationController
     @links ||= []
 
     # Add some alternate sorting criteria.
-    args[:sorting_links] = show_article_sorts
+    args[:sorting_links] = show_sorts
 
     show_index_of_objects(query, args)
+  end
+
+  def show_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :sort_by_user.t],
+      ["title",       :sort_by_title.t]
+    ].freeze
   end
 
   # Unless user permitted to perform request, just index_articles
