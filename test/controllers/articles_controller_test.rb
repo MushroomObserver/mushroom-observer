@@ -22,7 +22,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
-  def test_show_article
+  def test_show
     # Prove that an actual article gets shown
     get(:show_article, id: articles(:premier_article).id)
     assert_response(:success)
@@ -43,7 +43,7 @@ class ArticlesControllerTest < FunctionalTestCase
 
   ############ test Actions that Display forms -- (new, edit, etc.)
 
-  def test_create_article_get
+  def test_new
     # Prove unathorized user cannot see create_article form
     login(users(:zero_user).login)
     get(:create_article)
@@ -63,9 +63,26 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_article)
   end
 
+  def test_edit
+    # Prove unauthorized user cannot see edit form
+    article = articles(:premier_article)
+    params = { id: article.id }
+
+    login(users(:zero_user).login)
+    get(:edit_article, params)
+    assert_flash_text(:permission_denied.l)
+    assert_redirected_to(action: :index_article)
+
+    # Prove authorized user can create article
+    login(users(:article_writer).login)
+    make_admin
+    get(:edit_article, params)
+    assert_form_action(action: "edit_article")
+  end
+
   ############ test Actions to Modify data: (create, update, destroy, etc.)
 
-  def test_create_article_post
+  def test_create
     user   = users(:article_writer)
     title  = "Test article"
     body   = "The body of a new test article."
@@ -105,7 +122,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_not_nil(article.rss_log, "Failed to create rss_log entry")
   end
 
-  def test_edit_article_post
+  def test_update
     # Prove unauthorized user cannot edit article
     article = articles(:premier_article)
     new_title = "Edited Article Title"
@@ -145,7 +162,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_template(:edit_article)
   end
 
-  def test_destroy_article
+  def test_destroy
     article = articles(:premier_article)
     params  = { id: article.id }
 
