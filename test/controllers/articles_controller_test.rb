@@ -48,19 +48,19 @@ class ArticlesControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     get(:new)
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index_article)
+    assert_redirected_to(articles_path)
 
     # Prove authorized user can go to create_article form
     login(users(:article_writer).login)
     make_admin
     get(:new)
-    assert_form_action(action: "create_article")
+    assert_form_action(action: :create) # "new" form posts to :create action
 
     # Prove that if News Articles project doesn't exist, there's no error.
     Project.destroy(Article.news_articles_project.id)
     get(:new)
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index_article)
+    assert_redirected_to(articles_path)
   end
 
   def test_edit

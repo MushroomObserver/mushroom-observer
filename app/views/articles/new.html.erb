@@ -1,8 +1,6 @@
 <% @title = :create_article_title.l
-   tabs = [link_to(:index_article.t, action: :index_article)]
+   tabs = [link_to(:index_article.t, articles_path)]
    @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:article, url: {action: :create_article}) do |form| %>
-  <%= render(partial: "form_article", locals: {form: form}) %>
-<% end %>
+<%= render(partial: "form") %>

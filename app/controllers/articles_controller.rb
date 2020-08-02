@@ -176,7 +176,7 @@ class ArticlesController < ApplicationController
     # rubocop disable Style/AndOr
     # RuboCop 0.83 autocorrects the following line to:
     #   redirect_to(action: "index_article") && (return)
-    redirect_to action: :index_article
+    redirect_to(articles_path)
     # rubocop enable Style/AndOr
   end
 
