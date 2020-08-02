@@ -8,12 +8,12 @@ class ArticlesControllerTest < FunctionalTestCase
 
   def test_index
     # Prove any user can see article index
-    get(:index_article)
+    get(:index_articles)
     assert(:success)
 
     # Prove privileged user get link to create an article
     login(users(:article_writer).login)
-    get(:index_article)
+    get(:index_articles)
     assert_select("a", text: :create_article_title.l)
   end
 
