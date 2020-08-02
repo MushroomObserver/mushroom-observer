@@ -395,4 +395,14 @@ class AbstractModelTest < UnitTestCase
     assert_nil(SpeciesList.safe_find(spl_id))
     assert_equal(:species_list, rss_log.target_type)
   end
+
+  # -------------------------------------------------------------------
+
+  def test_show_controller
+    assert_equal("articles", Article.show_controller)
+    assert_equal("abstract_model_test/phony", Phony.show_controller)
+  end
+
+  class Phony < AbstractModel
+  end
 end

@@ -309,15 +309,28 @@ class AbstractModel < ApplicationRecord
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
+  #   Article.show_controller => "articles"
+  #
   #   Name.show_controller => "name"
   #   name.show_controller => "name"
   #
   def self.show_controller
-    name.underscore
+    if class_defined?("#{name.pluralize}Controller")
+      name.pluralize.underscore # Rails standard for most controllers
+    else
+      name.underscore # special cases and old MO controller names
+    end
   end
 
   def show_controller
     self.class.show_controller
+  end
+
+  # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
+  def self.class_defined?(klass)
+    Object.const_get(klass)
+  rescue
+    false
   end
 
   # Return the name of the "index_<object>" action (as a simple
