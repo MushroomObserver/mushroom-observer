@@ -80,6 +80,7 @@ class ArticlesController < ApplicationController
   alias_method :show_article, :show
 
   ############ Actions to Display forms -- (new, edit, etc.)
+
   def new
     @article = Article.new
   end
@@ -95,6 +96,7 @@ class ArticlesController < ApplicationController
   alias_method :edit_article, :edit
 
   ############ Actions to Modify data: (create, update, destroy, etc.)
+
   def create
     return if flash_missing_title?
 
@@ -127,7 +129,6 @@ class ArticlesController < ApplicationController
 
   alias_method :save_edits, :update
 
-  # Destroy one article
   def destroy
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
