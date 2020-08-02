@@ -98,13 +98,21 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  article: {
-    create_article: {},
-    destroy_article: {},
-    edit_article: {},
+  articles: {
+    # create_article: {}, # aliased only
+    # destroy_article: {}, # aliased only
+    # edit_article: {}, # aliased only
     index_article: {},
-    list_articles: {},
-    show_article: {}
+    # list_articles: {}, # aliased only
+    # show_article: {}, # aliased only
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
   },
   collection_number: {
     collection_number_search: {},
@@ -549,6 +557,8 @@ MushroomObserver::Application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
+
+  resources :articles
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
