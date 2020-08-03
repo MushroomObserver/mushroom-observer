@@ -106,7 +106,7 @@ class ArticlesController < ApplicationController
   def update
     pass_query_params
     @article = Article.find(params[:id])
-    return render(edit_article_path) if flash_missing_title?
+    return render(:edit) if flash_missing_title?
 
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]

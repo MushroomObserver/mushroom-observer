@@ -159,7 +159,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params)
     assert_flash_text(:article_title_required.l)
-    assert_template(:edit_article)
+    assert_template(:edit)
   end
 
   def test_destroy
