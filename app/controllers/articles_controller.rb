@@ -106,7 +106,7 @@ class ArticlesController < ApplicationController
   def update
     pass_query_params
     @article = Article.find(params[:id])
-    return if flash_missing_title?
+    return render(edit_article_path) if flash_missing_title?
 
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
@@ -128,7 +128,7 @@ class ArticlesController < ApplicationController
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
     end
-    redirect_to action: :index_article
+    redirect_to(articles_path)
   end
 
   alias_method :destroy_article, :destroy

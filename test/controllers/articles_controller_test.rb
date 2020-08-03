@@ -144,7 +144,7 @@ class ArticlesControllerTest < FunctionalTestCase
     article.reload
 
     assert_flash_success
-    assert_redirected_to(action: :show, id: article.id)
+    assert_redirected_to(article_path(article.id))
     assert_equal(new_title, article.title)
     assert_equal(new_body, article.body)
 
@@ -153,7 +153,7 @@ class ArticlesControllerTest < FunctionalTestCase
     post(:update, params)
     article.reload
     assert_flash_warning
-    assert_redirected_to(action: :show_article, id: article.id)
+    assert_redirected_to(article_path(article.id))
 
     # Prove removing title provokes warning
     params[:article][:title] = ""
@@ -168,14 +168,14 @@ class ArticlesControllerTest < FunctionalTestCase
 
     # Prove unauthorized user cannot destroy article
     login(users(:zero_user).login)
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_flash_text(:permission_denied.l)
     assert(Article.exists?(article.id))
 
     # Prove authorized user can destroy article
     login(article.user.login)
     make_admin
-    get(:destroy, params)
+    delete(:destroy, params)
     assert_not(Article.exists?(article.id),
                "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
