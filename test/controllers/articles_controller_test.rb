@@ -96,7 +96,7 @@ class ArticlesControllerTest < FunctionalTestCase
     post(:create, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
-    assert_redirected_to(action: :index_article)
+    assert_redirected_to(articles_path)
 
     # Prove authorized user cannot create title-less Article
     login(user.login)
@@ -107,7 +107,7 @@ class ArticlesControllerTest < FunctionalTestCase
     post(:create, params)
     assert_equal(old_count, Article.count)
     assert_flash_text(:article_title_required.l)
-    assert_template(:create_article)
+    assert_template(:new)
 
     # Prove authorized user can create Article
     params = {
@@ -118,7 +118,7 @@ class ArticlesControllerTest < FunctionalTestCase
     article = Article.last
     assert_equal(body, article.body)
     assert_equal(title, article.title)
-    assert_redirected_to(action: :show_article, id: article.id)
+    assert_redirected_to(article_path(article.id))
     assert_not_nil(article.rss_log, "Failed to create rss_log entry")
   end
 
@@ -135,7 +135,7 @@ class ArticlesControllerTest < FunctionalTestCase
     post(:update, params)
 
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index_article)
+    assert_redirected_to(articles_path)
 
     # Prove authorized user can edit article
     login(users(:article_writer).login)

@@ -89,15 +89,18 @@ class ArticlesController < ApplicationController
   ############ Actions to Modify data: (create, update, destroy, etc.)
 
   def create
-    return if flash_missing_title?
-
-    @article = Article.new(
-      title: params[:article][:title],
-      body: params[:article][:body],
-      user_id: @user.id
-    )
-    @article.save
-    redirect_to article_path(@article.id)
+    if flash_missing_title?
+      render(:new)
+      return
+    else
+      @article = Article.new(
+        title: params[:article][:title],
+        body: params[:article][:body],
+        user_id: @user.id
+      )
+      @article.save
+      redirect_to article_path(@article.id)
+    end
   end
 
   def update
