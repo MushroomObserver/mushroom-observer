@@ -42,7 +42,6 @@ class ArticlesController < ApplicationController
   # List selected articles, filtered by current Query.
   # articles GET      /articles(.:format)
   def index
-    store_location
     pass_query_params
     if params[:q] || params[:by]
       index_filtered
@@ -56,7 +55,6 @@ class ArticlesController < ApplicationController
   # Display one Article
   # article GET      /articles/:id(.:format)
   def show
-    store_location
     pass_query_params
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
@@ -69,7 +67,6 @@ class ArticlesController < ApplicationController
 
   # new_article GET      /articles/new(.:format)
   def new
-    store_location
     pass_query_params
 
     @article = Article.new
@@ -80,7 +77,6 @@ class ArticlesController < ApplicationController
   # Edit existing article
   # edit_article GET      /articles/:id/edit(.:format)
   def edit
-    store_location
     pass_query_params
     @article = find_or_goto_index(Article, params[:id])
   end
@@ -129,7 +125,6 @@ class ArticlesController < ApplicationController
 
   # DELETE   /articles/:id(.:format)
   def destroy
-    store_location
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
