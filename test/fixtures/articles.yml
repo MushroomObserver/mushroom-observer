@@ -9,3 +9,6 @@ DEFAULTS: &DEFAULTS
 
 premier_article:
   <<: *DEFAULTS
+
+second_article:
+  <<:  *DEFAULTS

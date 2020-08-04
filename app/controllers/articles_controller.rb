@@ -39,30 +39,23 @@ class ArticlesController < ApplicationController
 
   ############ - Actions to Display data (index, show, etc.)
 
-  # List selected articles, based on current Query.
-  def index_articles
-    query = find_or_create_query(:Article, by: params[:by])
-    show_selected_articles(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
-  end
-
-  # List all articles
+  # List selected articles, filtered by current Query.
   def index
-    query = create_query(
-      :Article,
-      :all,
-      by: :created_at
-    )
-    show_selected_articles(query)
+    store_location
+    pass_query_params
+    if params[:q] || params[:by]
+      index_filtered
+    else
+      index_full
+    end
   end
 
   alias_method :list_articles, :index
 
   # Display one Article
   def show
+    store_location
+    pass_query_params
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
     @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
@@ -73,6 +66,9 @@ class ArticlesController < ApplicationController
   ############ Actions to Display forms -- (new, edit, etc.)
 
   def new
+    store_location
+    pass_query_params
+
     @article = Article.new
   end
 
@@ -80,6 +76,7 @@ class ArticlesController < ApplicationController
 
   # Edit existing article
   def edit
+    store_location
     pass_query_params
     @article = find_or_goto_index(Article, params[:id])
   end
@@ -124,6 +121,7 @@ class ArticlesController < ApplicationController
   alias_method :save_edits, :update
 
   def destroy
+    store_location
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
@@ -145,6 +143,24 @@ class ArticlesController < ApplicationController
   ##############################################################################
 
   private
+
+  def index_filtered
+    query = find_or_create_query(:Article, by: params[:by])
+    show_selected_articles(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
+  end
+
+  def index_full
+    query = create_query(
+      :Article,
+      :all,
+      by: :created_at
+    )
+    show_selected_articles(query)
+  end
 
   # Show selected list of articles.
   def show_selected_articles(query, args = {})

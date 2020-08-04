@@ -7,19 +7,30 @@ class ArticlesControllerTest < FunctionalTestCase
   ############ test Actions that Display data (index, show, etc.)
 
   def test_index
-    # Prove any user can see article index
-    get(:index_articles)
-    assert(:success)
+    get(:index)
+    assert(:success, "Any user should be able to see article index")
+    Article.find_each do |article|
+      assert_select(
+        "a[href *= '#{article_path(article.id)}']", true,
+        "full Article Index missing link to #{article.title} (##{article.id})"
+      )
+    end
 
-    # Prove privileged user get link to create an article
+    article = Article.first
+    query = Query.lookup(:Article, :in_set, ids: [article.id])
+    params = @controller.query_params(query)
+    get(:index, params: params)
+    assert_select("a:match('href',?)", /\/articles\/\d+/, { count: 1 },
+                  "filtered Article Index has wrong number of entries")
+    assert_select(
+      "a[href *= '#{article_path(article.id)}']", true,
+      "filtered Article Index missing link to #{article.title} (##{article.id})"
+    )
+
     login(users(:article_writer).login)
-    get(:index_articles)
-    assert_select("a", text: :create_article_title.l)
-  end
-
-  def test_list_articles
-    get(:list_articles)
-    assert(:success)
+    get(:index)
+    assert_select("a", { text: :create_article_title.l },
+                  "Privileged user should get link to Create Article")
   end
 
   def test_show

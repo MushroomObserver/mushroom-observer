@@ -6,7 +6,6 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<!-- list the projects -->
 <%= paginate_block(@pages) do %>
   <div class="list-group")>
     <%= render(partial: "object", collection: @objects) %>
