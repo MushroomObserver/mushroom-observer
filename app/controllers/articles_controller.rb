@@ -40,6 +40,7 @@ class ArticlesController < ApplicationController
   ############ - Actions to Display data (index, show, etc.)
 
   # List selected articles, filtered by current Query.
+  # articles GET      /articles(.:format)
   def index
     store_location
     pass_query_params
@@ -53,6 +54,7 @@ class ArticlesController < ApplicationController
   alias_method :list_articles, :index
 
   # Display one Article
+  # article GET      /articles/:id(.:format)
   def show
     store_location
     pass_query_params
@@ -65,6 +67,7 @@ class ArticlesController < ApplicationController
 
   ############ Actions to Display forms -- (new, edit, etc.)
 
+  # new_article GET      /articles/new(.:format)
   def new
     store_location
     pass_query_params
@@ -75,6 +78,7 @@ class ArticlesController < ApplicationController
   alias_method :create_article, :new
 
   # Edit existing article
+  # edit_article GET      /articles/:id/edit(.:format)
   def edit
     store_location
     pass_query_params
@@ -85,6 +89,7 @@ class ArticlesController < ApplicationController
 
   ############ Actions to Modify data: (create, update, destroy, etc.)
 
+  # POST     /articles(.:format)
   def create
     if flash_missing_title?
       render(:new)
@@ -100,6 +105,8 @@ class ArticlesController < ApplicationController
     end
   end
 
+  # PATCH    /articles/:id(.:format)
+  # PUT      /articles/:id(.:format)
   def update
     pass_query_params
     @article = Article.find(params[:id])
@@ -120,6 +127,7 @@ class ArticlesController < ApplicationController
 
   alias_method :save_edits, :update
 
+  # DELETE   /articles/:id(.:format)
   def destroy
     store_location
     pass_query_params
