@@ -99,12 +99,6 @@ ACTIONS = {
     users: {}
   },
   articles: {
-    # create_article: {}, # aliased only
-    # destroy_article: {}, # aliased only
-    # edit_article: {}, # aliased only
-    # index_articles: {}, # combined with index
-    # list_articles: {}, # aliased only
-    # show_article: {}, # aliased only
     # resources
     # create: {},
     # destroy: {},

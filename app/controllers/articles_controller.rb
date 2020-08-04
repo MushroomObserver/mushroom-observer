@@ -23,18 +23,12 @@
 class ArticlesController < ApplicationController
   before_action :login_required, except: [
     :index,
-    :index_articles,
-    :list_articles, # aliased
-    :show,
-    :show_article # aliased
+    :show
   ]
   before_action :store_location
   before_action :ignore_request_unless_permitted, except: [
     :index,
-    :index_articles,
-    :list_articles, # aliased
     :show,
-    :show_article # aliased
   ]
 
   ############ - Actions to Display data (index, show, etc.)
@@ -61,8 +55,6 @@ class ArticlesController < ApplicationController
     @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
   end
 
-  alias_method :show_article, :show
-
   ############ Actions to Display forms -- (new, edit, etc.)
 
   # new_article GET      /articles/new(.:format)
@@ -80,8 +72,6 @@ class ArticlesController < ApplicationController
     pass_query_params
     @article = find_or_goto_index(Article, params[:id])
   end
-
-  alias_method :edit_article, :edit
 
   ############ Actions to Modify data: (create, update, destroy, etc.)
 
@@ -121,8 +111,6 @@ class ArticlesController < ApplicationController
     redirect_to article_path(@article.id)
   end
 
-  alias_method :save_edits, :update
-
   # DELETE   /articles/:id(.:format)
   def destroy
     pass_query_params
@@ -131,8 +119,6 @@ class ArticlesController < ApplicationController
     end
     redirect_to(articles_path)
   end
-
-  alias_method :destroy_article, :destroy
 
   ############ Public methods (unrouted)
 
