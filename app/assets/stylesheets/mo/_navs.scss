@@ -121,6 +121,8 @@
 }
 
 .mo-toc-item {
+  padding-bottom: 0.75em;
+  border-bottom: 1px solid $background;
 
   &:not(:first-of-type){
     margin-top: 0.5rem;
@@ -150,6 +152,7 @@
 
 .mo-sidenav {
   display: block;
+  padding-left: 0.5rem;
 
   > li > a {
     color: rgba( $secondary-text, .72 );
