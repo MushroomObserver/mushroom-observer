@@ -34,7 +34,7 @@ class ArticlesController < ApplicationController
   ############ - Actions to Display data (index, show, etc.)
 
   # List selected articles, filtered by current Query.
-  # articles GET      /articles(.:format)
+  # articles  GET /articles(.:format)
   def index
     pass_query_params
     if params[:q] || params[:by]
@@ -47,7 +47,7 @@ class ArticlesController < ApplicationController
   alias_method :list_articles, :index
 
   # Display one Article
-  # article GET      /articles/:id(.:format)
+  # article  GET /articles/:id(.:format)
   def show
     pass_query_params
     return false unless (@article = find_or_goto_index(Article, params[:id]))
@@ -57,7 +57,7 @@ class ArticlesController < ApplicationController
 
   ############ Actions to Display forms -- (new, edit, etc.)
 
-  # new_article GET      /articles/new(.:format)
+  # new_article  GET /articles/new(.:format)
   def new
     pass_query_params
 
@@ -67,7 +67,7 @@ class ArticlesController < ApplicationController
   alias_method :create_article, :new
 
   # Edit existing article
-  # edit_article GET      /articles/:id/edit(.:format)
+  # edit_article  GET /articles/:id/edit(.:format)
   def edit
     pass_query_params
     @article = find_or_goto_index(Article, params[:id])
@@ -75,7 +75,7 @@ class ArticlesController < ApplicationController
 
   ############ Actions to Modify data: (create, update, destroy, etc.)
 
-  # POST     /articles(.:format)
+  # POST /articles(.:format)
   def create
     if flash_missing_title?
       render(:new)
@@ -91,8 +91,8 @@ class ArticlesController < ApplicationController
     end
   end
 
-  # PATCH    /articles/:id(.:format)
-  # PUT      /articles/:id(.:format)
+  # PATCH /articles/:id(.:format)
+  # PUT   /articles/:id(.:format)
   def update
     pass_query_params
     @article = Article.find(params[:id])
@@ -111,7 +111,7 @@ class ArticlesController < ApplicationController
     redirect_to article_path(@article.id)
   end
 
-  # DELETE   /articles/:id(.:format)
+  # DELETE /articles/:id(.:format)
   def destroy
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
