@@ -110,12 +110,15 @@ gem "brakeman", require: false
 # WARNING: Whenever updating RuboCop, also:
 #   - Update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 #       docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-#   - Regenerate .rubocop_todo.yml
-#     https://docs.rubocop.org/en/stable/configuration,
-#       Automatically Generated Configuration
+#   - Run `rubocop --auto-gen-config` to regenerate .rubocop_todo.yml
+#       For more information about autoconfiguration
+#       go to https://docs.rubocop.org/,
+#       enter Automatically Generated Configuration in the Rubocop search bar.
+#   - Add any added-but-unconfigured cops to .rubocop.yml and re-autoconfigure
+#
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses
-gem "rubocop", "= 0.83", require: false
+gem "rubocop", "= 0.88", require: false
 gem "rubocop-performance"
 gem "rubocop-rails"
 
