@@ -33,15 +33,27 @@ AllCops:
     - script/perf_monitor
     - "tmp/**/*"
 
-
 ###################### Global Enables #########################################
 # Enable pending cops added by recent RuboCop versions
+
 # (0.83)
 Layout/EmptyLinesAroundAttributeAccessor:
   Enabled: true
 
 # (0.82)
 Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+
+# (0.84)
+Lint/DeprecatedOpenSSLConstant:
+  Enabled: true
+
+# (0.88)
+Lint/DuplicateElsifCondition:
+  Enabled: true
+
+# (0.85)
+Lint/MixedRegexpCaptureTypes:
   Enabled: true
 
 # (0.81)
@@ -52,12 +64,36 @@ Lint/RaiseException:
 Lint/StructNewOverride:
   Enabled: true
 
+# (0.87)
+Style/AccessorGrouping:
+  Enabled: true
+
+# (0.88)
+Style/ArrayCoercion:
+  Enabled: true
+
+# (0.87)
+Style/BisectedAttrAccessor:
+  Enabled: true
+
+# (0.88)
+Style/CaseLikeIf:
+  Enabled: true
+
 # (0.82)
 Style/ExponentialNotation:
   Enabled: true
 
+# (0.88)
+Style/HashAsLastArrayItem:
+  Enabled: true
+
 # (0.80)
 Style/HashEachMethods:
+  Enabled: true
+
+# (0.88)
+Style/HashLikeCase:
   Enabled: true
 
 # (0.80)
@@ -68,27 +104,36 @@ Style/HashTransformKeys:
 Style/HashTransformValues:
   Enabled: true
 
+# (0.87)
+Style/RedundantAssignment:
+  Enabled: true
+
+# (0.86)
+Style/RedundantFetchBlock:
+  Enabled: true
+
+# (0.88)
+Style/RedundantFileExtensionInRequire:
+  Enabled: true
+
+# (0.85)
+Style/RedundantRegexpCharacterClass:
+  Enabled: true
+
+# (0.85)
+Style/RedundantRegexpEscape:
+  Enabled: true
+
 # (0.83)
 Style/SlicingWithRange:
   Enabled: true
 
 ###################### Global Disables #########################################
 
-# Disable because it casecmp does not work with Unicode in Ruby 2.4
+# Disable because it does not work with Unicode in Ruby 2.4
 # Cop supports --auto-correct.
 Performance/Casecmp:
   Enabled: false
-
-Performance/RegexpMatch:
-  # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
-  # The latter throws an error when something == nil:
-  # undefined method `match?' for nil:NilClass
-  # So manually correct to: regexp.match?(something)
-  AutoCorrect: false
-
-# Causes test failures when used with Rubocop auto-correct
-Rails/DynamicFindBy:
-  Enabled: False
 
 # MO uses HABTM extensively; RuboCop prefers the newer has_many through
 # Switching would require a migration process, detailed here:
@@ -97,25 +142,15 @@ Rails/DynamicFindBy:
 Rails/HasAndBelongsToMany:
   Enabled: false
 
-# MO overrides Rails http methods, using positional arguments in our code,
-# but passing keyword arguments to Rails
-Rails/HttpPositionalArguments:
-  Enabled: False
+# Allow non-ascii characters in comments; we need to use accented chars
+Style/AsciiComments:
+  Enabled: false
 
-Style/FrozenStringLiteralComment:
-  # When it's auto-corrected in Ruby 2.4, our test suite won't run.
-  # We get: "can't modify frozen String" error
-  # Rubocop describes this cop as:
-  #
-  # This cop is designed to help upgrade to Ruby 3.0.
-  # It will add the comment  # frozen_string_literal: true to the top of files
-  # to enable frozen string literals.
-  # Frozen string literals may be default in Ruby 3.0.
-  # The comment will be added below a shebang and encoding comment.
-  # The frozen string literal comment is only valid in Ruby 2.3+.
-  AutoCorrect: true
+# Repeat the RuboCop default because CodeClimate silently overrides it
+Style/DateTime:
+  Enabled: false
 
-###################### Metrics #################################################
+###################### Options #################################################
 
 Metrics/AbcSize:
 # Can we try relaxing this one?  Even short simple methods sometimes exceed
@@ -167,8 +202,6 @@ Metrics/PerceivedComplexity:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
 
-###################### Layout and Style ########################################
-
 # Repeat the default because Codeclimate ignores it as of 2019-07-09
 Layout/HashAlignment:
   EnforcedColonStyle: key
@@ -182,13 +215,21 @@ Layout/LineLength:
   # RuboCop default is 120 as of 0.84
   Max: 80
 
-# Allow non-ascii characters in comments; we need to use accented chars
-Style/AsciiComments:
-  Enabled: false
+Performance/RegexpMatch:
+  # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
+  # The latter throws an error when something == nil:
+  #   undefined method `match?' for nil:NilClass
+  # So manually correct to: regexp.match?(something)
+  AutoCorrect: false
 
-# Repeat the RuboCop default because CodeClimate silently overrides it
-Style/DateTime:
-  Enabled: false
+# Causes test failures when used with Rubocop auto-correct
+Rails/DynamicFindBy:
+  AutoCorrect: false
+
+Style/FrozenStringLiteralComment:
+  # When it's auto-corrected in Ruby 2.4, our test suite won't run.
+  # We get: "can't modify frozen String" error
+  AutoCorrect: true
 
 # Repeat the RuboCop defaults because CodeClimate silently overrides them
 Style/PercentLiteralDelimiters:
