@@ -12,12 +12,10 @@
 #    show::            Show one article
 #    update::          Update article from "edit" form
 #
-#
-#  Public methods
-#
-#    permitted?         boolean: permitted to create/update/destroy Articles
+#  Public methods      None (ideally)
 #
 class ArticlesController < ApplicationController
+  # TODO: use explainig variables/methods in options
   before_action :login_required, except: [
     :index,
     :show
@@ -107,15 +105,6 @@ class ArticlesController < ApplicationController
   end
 
   # ---------- Public methods (unrouted) ---------------------------------------
-  #  Hopefully there are none.
-
-  # TODO: Move to helper, and call here with "helpers.permitted?"
-  # permitted to create/update/destroy any Article
-  def permitted?
-    Article.can_edit?(@user)
-  end
-
-  helper_method :permitted?
 
   ##############################################################################
 
@@ -125,7 +114,7 @@ class ArticlesController < ApplicationController
 
   # Filter: Unless user permitted to perform request, just index
   def ignore_request_unless_permitted
-    return if permitted?
+    return if helpers.permitted?(@user)
 
     flash_notice(:permission_denied.t)
     # TODO: Update to 0.88 and see if fixed
@@ -182,8 +171,9 @@ class ArticlesController < ApplicationController
     ].freeze
   end
 
-  # TODO: Revise if possible. Feels overworked:
-  # It's both a conditional and changes state
+  # TODO: Revise if possible. Feels overworked with two concerns:
+  # supplies a flashh and changes state. Would a better name work?
+  #
   # add flash message if title missing
   def flash_missing_title?
     return if params[:article][:title].present?
@@ -192,9 +182,11 @@ class ArticlesController < ApplicationController
     true
   end
 
+  # Retained as a model for other controllers, but
+  # Not needed or testable in ArticleController because
+  # because it does not mass assign
+  #
   # encapsulate parameters allowed to be mass assigned
-  #  Not needed or testable in ArticleController because
-  #  because this controller does not mass assign
   # def article_params
   #   params[:article].permit(:body, :title)
   # end

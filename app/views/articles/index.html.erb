@@ -1,6 +1,6 @@
 <%
   @title ||= :ARTICLES.t
-  tabs = index_tabs + create_links(@links)
+  tabs = index_tabs_for_user(@user) + create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?

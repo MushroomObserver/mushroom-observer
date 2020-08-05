@@ -7,19 +7,24 @@
 #   xx_title::     Title of x page; includes any markup
 #
 module ArticlesHelper
-  def index_tabs
-    return [] unless permitted?
+  def index_tabs_for_user(user)
+    return [] unless permitted?(user)
 
     [link_to(:create_article_title.t, new_article_path)]
   end
 
-  def show_tabs
+  def show_tabs_for_user(user)
     tabs = [link_to(:index_article.t, articles_path)]
-    return tabs unless permitted?
+    return tabs unless permitted?(user)
 
     tabs.push(link_to(:create_article_title.t, new_article_path),
               link_to(:EDIT.t, edit_article_path(@article.id)),
               link_to(:DESTROY.t, action: :destroy, id: @article.id))
+  end
+
+  # Can user modify all articles
+  def permitted?(user)
+    Article.can_edit?(user)
   end
 
   # "Title (#nnn)" textilized
