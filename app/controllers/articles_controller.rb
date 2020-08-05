@@ -32,11 +32,7 @@ class ArticlesController < ApplicationController
   # List selected articles, filtered by current Query.
   # articles  GET /articles(.:format)
   def index
-    if params[:q] || params[:by]
-      index_filtered
-    else
-      index_full
-    end
+    filter_index? ? index_filtered : index_full
   end
 
   # article  GET /articles/:id(.:format)
@@ -126,6 +122,11 @@ class ArticlesController < ApplicationController
   end
 
   # --------- Other private methods
+
+  # should index be filtered?
+  def filter_index?
+    params[:q] || params[:by]
+  end
 
   def index_filtered
     query = find_or_create_query(:Article, by: params[:by])
