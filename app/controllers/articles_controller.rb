@@ -7,17 +7,14 @@
 #    create:           Create article from data in "new" form
 #    destroy::         Destroy article
 #    edit::            Display form for editing article
-#    index::           List all articles
-#    index_articles::  List selected (based on last search) articles
+#    index::           List articles, filtered by current query
 #    new::             Display form for new article
 #    show::            Show one article
 #    update::          Update article from "edit" form
 #
 #
-#  Callbacks and Methods
+#  Public methods
 #
-#    ignore_request_unless_permitted:: Unless user permitted to perform request,
-#                       then index_articles
 #    permitted?         boolean: permitted to create/update/destroy Articles
 #
 class ArticlesController < ApplicationController
@@ -25,18 +22,18 @@ class ArticlesController < ApplicationController
     :index,
     :show
   ]
-  before_action :store_location
+  before_action :store_location, except: :destroy
+  before_action :pass_query_params, except: :index
   before_action :ignore_request_unless_permitted, except: [
     :index,
     :show,
   ]
 
-  ############ - Actions to Display data (index, show, etc.)
+  # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   # List selected articles, filtered by current Query.
   # articles  GET /articles(.:format)
   def index
-    pass_query_params
     if params[:q] || params[:by]
       index_filtered
     else
@@ -44,39 +41,30 @@ class ArticlesController < ApplicationController
     end
   end
 
-  alias_method :list_articles, :index
-
-  # Display one Article
   # article  GET /articles/:id(.:format)
   def show
-    pass_query_params
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
-    @canonical_url = "#{MO.http_domain}/articles/#{@article.id}"
+    @canonical_url = article_url(@article.id)
   end
 
-  ############ Actions to Display forms -- (new, edit, etc.)
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   # new_article  GET /articles/new(.:format)
   def new
-    pass_query_params
-
     @article = Article.new
   end
 
-  alias_method :create_article, :new
-
-  # Edit existing article
   # edit_article  GET /articles/:id/edit(.:format)
   def edit
-    pass_query_params
     @article = find_or_goto_index(Article, params[:id])
   end
 
-  ############ Actions to Modify data: (create, update, destroy, etc.)
+  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   # POST /articles(.:format)
   def create
+    # TODO: use guard clause? See :update BUT see note at flash_missing_title?
     if flash_missing_title?
       render(:new)
       return
@@ -94,7 +82,6 @@ class ArticlesController < ApplicationController
   # PATCH /articles/:id(.:format)
   # PUT   /articles/:id(.:format)
   def update
-    pass_query_params
     @article = Article.find(params[:id])
     return render(:edit) if flash_missing_title?
 
@@ -113,15 +100,16 @@ class ArticlesController < ApplicationController
 
   # DELETE /articles/:id(.:format)
   def destroy
-    pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
     end
     redirect_to(articles_path)
   end
 
-  ############ Public methods (unrouted)
+  # ---------- Public methods (unrouted) ---------------------------------------
+  #  Hopefully there are none.
 
+  # TODO: Move to helper, and call here with "helpers.permitted?"
   # permitted to create/update/destroy any Article
   def permitted?
     Article.can_edit?(@user)
@@ -132,6 +120,23 @@ class ArticlesController < ApplicationController
   ##############################################################################
 
   private
+
+  # --------- Filters
+
+  # Filter: Unless user permitted to perform request, just index
+  def ignore_request_unless_permitted
+    return if permitted?
+
+    flash_notice(:permission_denied.t)
+    # TODO: Update to 0.88 and see if fixed
+    # rubocop disable Style/AndOr
+    # RuboCop 0.83 autocorrects the following line to:
+    #   redirect_to(action: "index_article") && (return)
+    redirect_to(articles_path)
+    # rubocop enable Style/AndOr
+  end
+
+  # --------- Other private methods
 
   def index_filtered
     query = find_or_create_query(:Article, by: params[:by])
@@ -167,6 +172,7 @@ class ArticlesController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  # TODO: unextract unless needed to avoid metric offense
   def show_sorts
     [
       ["created_at",  :sort_by_created_at.t],
@@ -176,18 +182,8 @@ class ArticlesController < ApplicationController
     ].freeze
   end
 
-  # Unless user permitted to perform request, just index_articles
-  def ignore_request_unless_permitted
-    return if permitted?
-
-    flash_notice(:permission_denied.t)
-    # rubocop disable Style/AndOr
-    # RuboCop 0.83 autocorrects the following line to:
-    #   redirect_to(action: "index_article") && (return)
-    redirect_to(articles_path)
-    # rubocop enable Style/AndOr
-  end
-
+  # TODO: Revise if possible. Feels overworked:
+  # It's both a conditional and changes state
   # add flash message if title missing
   def flash_missing_title?
     return if params[:article][:title].present?
@@ -197,7 +193,8 @@ class ArticlesController < ApplicationController
   end
 
   # encapsulate parameters allowed to be mass assigned
-  # Not needed or testable because this controller does not mass assign
+  #  Not needed or testable in ArticleController because
+  #  because this controller does not mass assign
   # def article_params
   #   params[:article].permit(:body, :title)
   # end
