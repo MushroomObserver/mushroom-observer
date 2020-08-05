@@ -35,13 +35,16 @@ class ArticlesControllerTest < FunctionalTestCase
 
   def test_show
     # Prove that an actual article gets shown
-    get(:show, id: articles(:premier_article).id)
+    article = articles(:premier_article)
+    get(:show, id: article.id)
     assert_response(:success)
     assert_template(:show)
+    assert(/#{article.body}/ =~ @response.body,
+           "Page is missing article body")
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
-    get(:show, id: articles(:premier_article).id)
+    get(:show, id: article.id)
     assert_select("a", text: :create_article_title.l)
     assert_select("a", text: :EDIT.l)
     assert_select("a", text: :DESTROY.l)
@@ -100,13 +103,13 @@ class ArticlesControllerTest < FunctionalTestCase
     params = {
       article: { title: title, body: body }
     }
-    old_count = Article.count
 
     # Prove unauthorized user cannot create Article
     login(users(:zero_user).login)
-    post(:create, params)
+    assert_no_difference("Article.count") do
+      post(:create, params)
+    end
     assert_flash_text(:permission_denied.l)
-    assert_equal(old_count, Article.count)
     assert_redirected_to(articles_path)
 
     # Prove authorized user cannot create title-less Article
@@ -115,17 +118,20 @@ class ArticlesControllerTest < FunctionalTestCase
     params = {
       article: { title: "", body: body }
     }
-    post(:create, params)
-    assert_equal(old_count, Article.count)
+    assert_no_difference("Article.count") do
+      post(:create, params)
+    end
     assert_flash_text(:article_title_required.l)
     assert_template(:new)
+    assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
     params = {
       article: { title: title, body: body }
     }
-    post(:create, params)
-    assert_equal(old_count + 1, Article.count)
+    assert_difference("Article.count", 1) do
+      post(:create, params)
+    end
     article = Article.last
     assert_equal(body, article.body)
     assert_equal(title, article.title)
@@ -171,6 +177,7 @@ class ArticlesControllerTest < FunctionalTestCase
     post(:update, params)
     assert_flash_text(:article_title_required.l)
     assert_template(:edit)
+    assert_form_action(action: :update) # "edit" form
   end
 
   def test_destroy
