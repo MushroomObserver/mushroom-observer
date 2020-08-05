@@ -13,13 +13,13 @@ module ArticlesHelper
     [link_to(:create_article_title.t, new_article_path)]
   end
 
-  def show_tabs_for_user(user)
+  def show_tabs_for_user(article, user)
     tabs = [link_to(:index_article.t, articles_path)]
     return tabs unless permitted?(user)
 
     tabs.push(link_to(:create_article_title.t, new_article_path),
-              link_to(:EDIT.t, edit_article_path(@article.id)),
-              link_to(:DESTROY.t, action: :destroy, id: @article.id))
+              link_to(:EDIT.t, edit_article_path(article.id)),
+              link_to(:DESTROY.t, action: :destroy, id: article.id))
   end
 
   # Can user modify all articles

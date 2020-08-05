@@ -20,7 +20,7 @@ class ArticlesControllerTest < FunctionalTestCase
     query = Query.lookup(:Article, :in_set, ids: [article.id])
     params = @controller.query_params(query)
     get(:index, params: params)
-    assert_select("a:match('href',?)", /\/articles\/\d+/, { count: 1 },
+    assert_select("a:match('href',?)", %r{/articles/\d+}, { count: 1 },
                   "filtered Article Index has wrong number of entries")
     assert_select(
       "a[href *= '#{article_path(article.id)}']", true,

@@ -24,7 +24,7 @@ class ArticlesController < ApplicationController
   before_action :pass_query_params, except: :index
   before_action :ignore_request_unless_permitted, except: [
     :index,
-    :show,
+    :show
   ]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
