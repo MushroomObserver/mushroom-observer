@@ -552,7 +552,49 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
+  # redirect actions of deleted MO controller to equivalent actions in the
+  # equivalent normalized controller
+  # Examples:
+  #  redirect_old_crud_actions(old_controller: "article")
+  #  redirect_old_crud_actions(old_controller: "herbarium")
+  #  redirect_old_crud_actions(old_controller: "glossary",
+  #                            new_controller: "glossary_terms",
+  #                            actions: [:create, :edit, :show])
+  def redirect_old_crud_actions(
+    old_controller: "",
+    new_controller: "#{old_controller.pluralize}",
+    model: "#{new_controller}.singularize",
+    actions: [:create, :destroy, :edit, :index, :show]
+  )
+    return if old_controller.blank?
+
+    actions.each do |action|
+      case action
+      when :index # 3 old paths redirect to index
+        get "/#{old_controller}" => redirect("#{new_controller}")
+        get "/#{old_controller}/index_#{model}" => redirect("#{new_controller}")
+        get "/#{old_controller}/list_#{model}s" => redirect("#{new_controller}")
+      when :show
+        get "/#{old_controller}/show_article/:id" =>
+          redirect("#{new_controller}/%{id}")
+      when :create
+        match "/#{old_controller}/create_#{model}",
+              to: redirect("#{new_controller}/new"),
+              via: [:get, :post] # new, create
+      when :edit
+        match "/#{old_controller}/edit_#{model}/:id",
+              to: redirect("#{new_controller}/%{id}/edit"),
+              via: [:get, :post] # edit, update
+      when :destroy
+        match "/#{old_controller}/destroy_#{model}",
+              to: redirect("#{new_controller}/%{id}"),
+              via: [:patch, :post, :put]
+      end
+    end
+  end
+
   resources :articles
+  redirect_old_crud_actions(old_controller: "article")
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
