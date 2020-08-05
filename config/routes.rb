@@ -575,7 +575,7 @@ MushroomObserver::Application.routes.draw do
         get "/#{old_controller}/index_#{model}" => redirect("#{new_controller}")
         get "/#{old_controller}/list_#{model}s" => redirect("#{new_controller}")
       when :show
-        get "/#{old_controller}/show_article/:id" =>
+        get "/#{old_controller}/show_#{model}/:id" =>
           redirect("#{new_controller}/%{id}")
       when :create
         match "/#{old_controller}/create_#{model}",
