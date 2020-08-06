@@ -495,6 +495,16 @@ LOOKUP_XXX_ID_ACTIONS = %w[
   lookup_user
 ].freeze
 
+
+# redirect deleted MO controller's actions to equivalent actions in the
+# equivalent normalized controller
+# Examples:
+#  redirect_old_crud_actions(old_controller: "article")
+#  redirect_old_crud_actions(old_controller: "herbarium")
+#  redirect_old_crud_actions(old_controller: "glossary",
+#                            new_controller: "glossary_terms",
+#                            actions: [:create, :edit, :show])
+#
 def redirect_old_crud_actions(
   old_controller: "",
   new_controller: old_controller&.pluralize,
@@ -605,15 +615,6 @@ MushroomObserver::Application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
-
-  # redirect actions of deleted MO controller to equivalent actions in the
-  # equivalent normalized controller
-  # Examples:
-  #  redirect_old_crud_actions(old_controller: "article")
-  #  redirect_old_crud_actions(old_controller: "herbarium")
-  #  redirect_old_crud_actions(old_controller: "glossary",
-  #                            new_controller: "glossary_terms",
-  #                            actions: [:create, :edit, :show])
 
   resources :articles
   redirect_old_crud_actions(old_controller: "article")
