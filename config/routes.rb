@@ -495,6 +495,60 @@ LOOKUP_XXX_ID_ACTIONS = %w[
   lookup_user
 ].freeze
 
+def redirect_old_crud_actions(
+  old_controller: "",
+  new_controller: old_controller&.pluralize,
+  model: new_controller&.singularize,
+  actions: [:create, :destroy, :edit, :index, :show]
+)
+  return if old_controller.blank?
+
+  actions.each do |action|
+    case action
+    when :index # 3 old paths redirect to index
+      get "/#{old_controller}" =>
+        redirect("/#{new_controller}")
+      get "/#{old_controller}/index_#{model}" =>
+        redirect("/#{new_controller}")
+      get "/#{old_controller}/list_#{model}s" =>
+        redirect("/#{new_controller}")
+    when :show
+      get "/#{old_controller}/show_#{model}/:id" =>
+        redirect("/#{new_controller}/%{id}")
+    when :create
+      match "/#{old_controller}/create_#{model}",
+            to: redirect("/#{new_controller}/new"),
+            via: [:get, :post] # new, create
+    when :edit
+      match "/#{old_controller}/edit_#{model}/:id",
+            to: redirect("/#{new_controller}/%{id}/edit"),
+            via: [:get, :post] # edit, update
+    when :destroy
+      match "/#{old_controller}/destroy_#{model}",
+            to: redirect("#{new_controller}/%{id}"),
+            via: [:patch, :post, :put]
+    end
+  end
+end
+
+# declare routes for the actions in the ACTIONS hash
+def route_actions_hash
+  ACTIONS.each do |controller, actions|
+    # Default action for any controller is "index".
+    get controller.to_s => "#{controller}#index"
+
+    # Standard routes
+    actions.each_key do |action|
+      get "#{controller}/#{action}", controller: controller, action: action
+      match "#{controller}(/#{action}(/:id))",
+            controller: controller,
+            action: action,
+            via: [:get, :post],
+            id: /\d+/
+    end
+  end
+end
+
 MushroomObserver::Application.routes.draw do
   get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
@@ -560,38 +614,6 @@ MushroomObserver::Application.routes.draw do
   #  redirect_old_crud_actions(old_controller: "glossary",
   #                            new_controller: "glossary_terms",
   #                            actions: [:create, :edit, :show])
-  def redirect_old_crud_actions(
-    old_controller: "",
-    new_controller: "#{old_controller.pluralize}",
-    model: "#{new_controller}.singularize",
-    actions: [:create, :destroy, :edit, :index, :show]
-  )
-    return if old_controller.blank?
-
-    actions.each do |action|
-      case action
-      when :index # 3 old paths redirect to index
-        get "/#{old_controller}" => redirect("#{new_controller}")
-        get "/#{old_controller}/index_#{model}" => redirect("#{new_controller}")
-        get "/#{old_controller}/list_#{model}s" => redirect("#{new_controller}")
-      when :show
-        get "/#{old_controller}/show_#{model}/:id" =>
-          redirect("#{new_controller}/%{id}")
-      when :create
-        match "/#{old_controller}/create_#{model}",
-              to: redirect("#{new_controller}/new"),
-              via: [:get, :post] # new, create
-      when :edit
-        match "/#{old_controller}/edit_#{model}/:id",
-              to: redirect("#{new_controller}/%{id}/edit"),
-              via: [:get, :post] # edit, update
-      when :destroy
-        match "/#{old_controller}/destroy_#{model}",
-              to: redirect("#{new_controller}/%{id}"),
-              via: [:patch, :post, :put]
-      end
-    end
-  end
 
   resources :articles
   redirect_old_crud_actions(old_controller: "article")
@@ -618,20 +640,8 @@ MushroomObserver::Application.routes.draw do
         controller: "observer", action: action, id: /.*/)
   end
 
-  ACTIONS.each do |controller, actions|
-    # Default action for any controller is "index".
-    get controller.to_s => "#{controller}#index"
-
-    # Standard routes
-    actions.each_key do |action|
-      get "#{controller}/#{action}", controller: controller, action: action
-      match "#{controller}(/#{action}(/:id))",
-            controller: controller,
-            action: action,
-            via: [:get, :post],
-            id: /\d+/
-    end
-  end
+  # declare routes for the actions in the ACTIONS hash
+  route_actions_hash
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "theme/#{scheme}" }
