@@ -1014,9 +1014,7 @@ class ApplicationController < ActionController::Base
   helper_method :query_params
 
   def add_query_param(params, query = nil)
-    unless browser.bot?
-      params[:q] = get_query_param(query)
-    end
+    params[:q] = get_query_param(query) unless browser.bot?
     params
   end
   helper_method :add_query_param

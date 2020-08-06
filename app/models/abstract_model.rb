@@ -306,12 +306,12 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # TODO: After all controllers are normalized, consider deleting the
-  # normalized/unnormalized conditionals in those methods, plus delete the
-  # associated helper methods "controller_normalized?" and "class_defined?"".
+  # After all controllers are normalized, consider deleting the
+  # normalized/unnormalized conditionals in this method, and delete the
+  # sub-methods "controller_normalized?" and "class_defined?".
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
-
+  #
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
@@ -341,7 +341,7 @@ class AbstractModel < ApplicationRecord
   # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
   def self.class_defined?(klass)
     Object.const_get(klass)
-  rescue
+  rescue StandardError
     false
   end
 

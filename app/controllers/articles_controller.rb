@@ -15,7 +15,6 @@
 #  Public methods      None (ideally)
 #
 class ArticlesController < ApplicationController
-  # TODO: use explainig variables/methods in options
   before_action :login_required, except: [
     :index,
     :show
@@ -58,19 +57,15 @@ class ArticlesController < ApplicationController
 
   # POST /articles(.:format)
   def create
-    # TODO: use guard clause? See :update BUT see note at flash_missing_title?
-    if flash_missing_title?
-      render(:new)
-      return
-    else
-      @article = Article.new(
-        title: params[:article][:title],
-        body: params[:article][:body],
-        user_id: @user.id
-      )
-      @article.save
-      redirect_to article_path(@article.id)
-    end
+    return render(:new) if flash_missing_title?
+
+    @article = Article.new(
+      title: params[:article][:title],
+      body: params[:article][:body],
+      user_id: @user.id
+    )
+    @article.save
+    redirect_to article_path(@article.id)
   end
 
   # PATCH /articles/:id(.:format)
@@ -82,13 +77,7 @@ class ArticlesController < ApplicationController
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
 
-    if @article.changed?
-      raise(:runtime_unable_to_save_changes.t) unless @article.save
-
-      flash_notice(:runtime_edit_article_success.t(id: @article.id))
-    else
-      flash_warning(:runtime_no_changes.t)
-    end
+    save_any_changes
     redirect_to article_path(@article.id)
   end
 
@@ -113,12 +102,7 @@ class ArticlesController < ApplicationController
     return if helpers.permitted?(@user)
 
     flash_notice(:permission_denied.t)
-    # TODO: Update to 0.88 and see if fixed
-    # rubocop disable Style/AndOr
-    # RuboCop 0.83 autocorrects the following line to:
-    #   redirect_to(action: "index_article") && (return)
     redirect_to(articles_path)
-    # rubocop enable Style/AndOr
   end
 
   # --------- Other private methods
@@ -157,30 +141,32 @@ class ArticlesController < ApplicationController
     @links ||= []
 
     # Add some alternate sorting criteria.
-    args[:sorting_links] = show_sorts
-
-    show_index_of_objects(query, args)
-  end
-
-  # TODO: unextract unless needed to avoid metric offense
-  def show_sorts
-    [
+    args[:sorting_links] = [
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t],
       ["user",        :sort_by_user.t],
       ["title",       :sort_by_title.t]
     ].freeze
+
+    show_index_of_objects(query, args)
   end
 
-  # TODO: Revise if possible. Feels overworked with two concerns:
-  # supplies a flashh and changes state. Would a better name work?
-  #
   # add flash message if title missing
   def flash_missing_title?
     return if params[:article][:title].present?
 
     flash_error(:article_title_required.t)
     true
+  end
+
+  def save_any_changes
+    if @article.changed?
+      raise(:runtime_unable_to_save_changes.t) unless @article.save
+
+      flash_notice(:runtime_edit_article_success.t(id: @article.id))
+    else
+      flash_warning(:runtime_no_changes.t)
+    end
   end
 
   # Retained as a model for other controllers, but
