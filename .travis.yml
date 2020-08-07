@@ -1,13 +1,11 @@
-dist: xenial # use Ubuntu 16.04
+os: linux
+dist: bionic # Ubuntu 18.04 (Bionic Beaver)
 services:
   - mysql
 
 language: ruby
 rvm:
   - "2.6.6"
-
-# make Travis use its legacy infrastructure
-sudo: true
 
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rake lang:update
