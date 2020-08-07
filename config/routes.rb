@@ -98,16 +98,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  articles: {
-    # resources
-    # create: {},
-    # destroy: {},
-    # edit: {},
-    # index: {},
-    # new: {},
-    # show: {},
-    # update: {}
-  },
   collection_number: {
     collection_number_search: {},
     create_collection_number: {},
@@ -494,7 +484,6 @@ LOOKUP_XXX_ID_ACTIONS = %w[
   lookup_species_list
   lookup_user
 ].freeze
-
 
 # redirect deleted MO controller's actions to equivalent actions in the
 # equivalent normalized controller
