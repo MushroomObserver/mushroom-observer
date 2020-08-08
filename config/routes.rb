@@ -503,32 +503,46 @@ def redirect_old_crud_actions(
   return if old_controller.blank?
 
   actions.each do |action|
-    case action
-    when :index # 3 old paths redirect to index
-      get "/#{old_controller}" =>
-        redirect("/#{new_controller}")
-      get "/#{old_controller}/index_#{model}" =>
-        redirect("/#{new_controller}")
-      get "/#{old_controller}/list_#{model}s" =>
-        redirect("/#{new_controller}")
-    when :show
-      get "/#{old_controller}/show_#{model}/:id" =>
-        redirect("/#{new_controller}/%{id}")
-    when :create
-      match "/#{old_controller}/create_#{model}",
-            to: redirect("/#{new_controller}/new"),
-            via: [:get, :post] # new, create
-    when :edit
-      match "/#{old_controller}/edit_#{model}/:id",
-            to: redirect("/#{new_controller}/%{id}/edit"),
-            via: [:get, :post] # edit, update
-    when :destroy
-      match "/#{old_controller}/destroy_#{model}",
-            to: redirect("#{new_controller}/%{id}"),
-            via: [:patch, :post, :put]
-    end
+    send("redirect_#{action}", old_controller, new_controller, model)
   end
 end
+
+# rubocop:disable Style/FormatStringToken
+# For consistency with Rails Guide "Rails Routing from the Outside In"
+# (And I don't know if RuboCop's suggestion works here)
+def redirect_create(old_controller, new_controller, model)
+  match "/#{old_controller}/create_#{model}",
+        to: redirect("/#{new_controller}/new"),
+        via: [:get, :post] # new, create
+end
+
+def redirect_edit(old_controller, new_controller, model)
+  match "/#{old_controller}/edit_#{model}/:id",
+        to: redirect("/#{new_controller}/%{id}/edit"),
+        via: [:get, :post] # edit, update
+end
+
+def redirect_destroy(old_controller, new_controller, model)
+  match "/#{old_controller}/destroy_#{model}",
+        to: redirect("#{new_controller}/%{id}"),
+        via: [:patch, :post, :put]
+end
+
+def redirect_index(old_controller, new_controller, model)
+  # 3 old paths redirect to index
+  get "/#{old_controller}" =>
+    redirect("/#{new_controller}")
+  get "/#{old_controller}/index_#{model}" =>
+    redirect("/#{new_controller}")
+  get "/#{old_controller}/list_#{model}s" =>
+    redirect("/#{new_controller}")
+end
+
+def redirect_show(old_controller, new_controller, model)
+  get "/#{old_controller}/show_#{model}/:id" =>
+    redirect("/#{new_controller}/%{id}")
+end
+# rubocop:enable Style/FormatStringToken
 
 # declare routes for the actions in the ACTIONS hash
 def route_actions_hash
