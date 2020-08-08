@@ -15,7 +15,9 @@ class ArticlesControllerTest < FunctionalTestCase
         "full Article Index missing link to #{article.title} (##{article.id})"
       )
     end
+  end
 
+  def test_index_filtered
     article = Article.first
     query = Query.lookup(:Article, :in_set, ids: [article.id])
     params = @controller.query_params(query)
@@ -26,7 +28,9 @@ class ArticlesControllerTest < FunctionalTestCase
       "a[href *= '#{article_path(article.id)}']", true,
       "filtered Article Index missing link to #{article.title} (##{article.id})"
     )
+  end
 
+  def test_index_links_to_create
     login(users(:article_writer).login)
     get(:index)
     assert_select("a", { text: :create_article_title.l },
