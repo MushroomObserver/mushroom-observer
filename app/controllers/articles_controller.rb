@@ -28,13 +28,10 @@ class ArticlesController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # List selected articles, filtered by current Query.
-  # articles  GET /articles(.:format)
   def index
     filter_index? ? index_filtered : index_full
   end
 
-  # article  GET /articles/:id(.:format)
   def show
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
@@ -43,19 +40,16 @@ class ArticlesController < ApplicationController
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
-  # new_article  GET /articles/new(.:format)
   def new
     @article = Article.new
   end
 
-  # edit_article  GET /articles/:id/edit(.:format)
   def edit
     @article = find_or_goto_index(Article, params[:id])
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
-  # POST /articles(.:format)
   def create
     return render(:new) if flash_missing_title?
 
@@ -68,8 +62,6 @@ class ArticlesController < ApplicationController
     redirect_to article_path(@article.id)
   end
 
-  # PATCH /articles/:id(.:format)
-  # PUT   /articles/:id(.:format)
   def update
     @article = Article.find(params[:id])
     return render(:edit) if flash_missing_title?
@@ -81,7 +73,6 @@ class ArticlesController < ApplicationController
     redirect_to article_path(@article.id)
   end
 
-  # DELETE /articles/:id(.:format)
   def destroy
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
