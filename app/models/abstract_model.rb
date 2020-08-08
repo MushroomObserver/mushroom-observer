@@ -354,11 +354,9 @@ class AbstractModel < ApplicationRecord
   #   name.index_action => "index_name"
   #
   def self.index_action
-    if controller_normalized?(name)
-      "index" # Rails standard for most controllers
-    else
-      "index_" + name.underscore # old MO controller names and any special cases
-    end
+    return "index" if controller_normalized?(name) # Rails standard
+
+    "index_#{name.underscore}" # Old MO style
   end
 
   def index_action
@@ -374,11 +372,9 @@ class AbstractModel < ApplicationRecord
   #   name.show_action => "show_name"
   #
   def self.show_action
-    if controller_normalized?(name)
-      "show" # Rails standard for most controllers
-    else
-      "show_" + name.underscore # old MO controller names and any special cases
-    end
+    return "show" if controller_normalized?(name) # Rails standard
+
+    "show_#{name.underscore}" # Old MO style
   end
 
   def show_action
