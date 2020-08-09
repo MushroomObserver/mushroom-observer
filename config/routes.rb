@@ -500,7 +500,6 @@ def redirect_old_crud_actions(
   model: new_controller&.singularize,
   actions: [:create, :destroy, :edit, :index, :show]
 )
-  return if old_controller.blank?
 
   actions.each do |action|
     send("redirect_#{action}", old_controller, new_controller, model)
@@ -620,7 +619,9 @@ MushroomObserver::Application.routes.draw do
   #   end
 
   resources :articles
-  redirect_old_crud_actions(old_controller: "article")
+  redirect_old_crud_actions(
+    old_controller: "article",
+    actions: [:create, :destroy, :edit, :index, :show])
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
