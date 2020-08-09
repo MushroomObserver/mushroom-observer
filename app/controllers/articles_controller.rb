@@ -59,7 +59,7 @@ class ArticlesController < ApplicationController
       user_id: @user.id
     )
     @article.save
-    redirect_to article_path(@article.id)
+    redirect_to(article_path(@article.id))
   end
 
   def update
@@ -70,7 +70,7 @@ class ArticlesController < ApplicationController
     @article.body = params[:article][:body]
 
     save_any_changes
-    redirect_to article_path(@article.id)
+    redirect_to(article_path(@article.id))
   end
 
   def destroy
