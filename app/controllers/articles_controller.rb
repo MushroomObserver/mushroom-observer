@@ -126,18 +126,13 @@ class ArticlesController < ApplicationController
     args = {
       action: :index,
       letters: "articles.title",
-      num_per_page: 50
+      num_per_page: 50,
+      sorting_links: [["created_at",  :sort_by_created_at.t],
+                      ["updated_at",  :sort_by_updated_at.t],
+                      ["user",        :sort_by_user.t],
+                      ["title",       :sort_by_title.t]].freeze
     }.merge(args)
-
     @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :sort_by_user.t],
-      ["title",       :sort_by_title.t]
-    ].freeze
 
     show_index_of_objects(query, args)
   end
