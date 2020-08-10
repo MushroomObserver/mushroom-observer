@@ -518,7 +518,7 @@ ACTION_REDIRECTS = {
   },
   show: {
     from: "/%<old_controller>s/show_%<model>s/:id",
-    to: "/%<new_controller>s}/%<id>s",
+    to: "/%<new_controller>s/%<id>s",
     via: [:get]
   }
 }.freeze
@@ -538,10 +538,12 @@ def redirect_old_crud_actions(old_controller: "",
                               actions: ACTION_REDIRECTS.keys)
   actions.each do |action|
     data = ACTION_REDIRECTS[action]
+    to_url = format(data[:to],
+                    # Rails routes currently only accept template tokens
+                    id: "%{id}", # rubocop:disable Style/FormatStringToken
+                    new_controller: new_controller)
     match(format(data[:from], old_controller: old_controller, model: model),
-          to: redirect(format(data[:to],
-                              new_controller: new_controller,
-                              id: "%<id>s")),
+          to: redirect(to_url),
           via: data[:via])
   end
 end
