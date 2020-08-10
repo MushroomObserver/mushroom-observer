@@ -50,22 +50,4 @@ class RedirectsTest < IntegrationTestCase
     assert_equal("/articles/#{Article.first.id}",
                  @response.request.fullpath)
   end
-
-=begin
-
-  def test_edit_article_get
-    get("/article/show_article/#{Article.first.id}")
-    assert_equal(@response.request.fullpath, "/articles/#{Article.first.id}")
-  end
-
-  def test_edit_article_post
-    get("/article/show_article/#{Article.first.id}")
-    assert_equal(@response.request.fullpath, "/articles/#{Article.first.id}")
-  end
-
-  def test_delete_article
-    get("/article/show_article/#{Article.first.id}")
-    assert_equal(@response.request.fullpath, "/articles/#{Article.first.id}")
-  end
-=end
 end
