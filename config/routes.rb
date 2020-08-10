@@ -623,7 +623,7 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  resources :articles, id: /d+/ 
+  resources :articles, id: /\d+/
   redirect_old_crud_actions(old_controller: "article")
   # Or if you want to be explicit (but then why have a default argument?):
   # actions: [:create, :edit, :destroy, :controller, :index, :list, :show]

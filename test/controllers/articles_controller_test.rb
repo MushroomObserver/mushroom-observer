@@ -54,7 +54,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_select("a", text: :DESTROY.l)
 
     # Prove that trying to show non-existent article provokes error & redirect
-    get(:show, params: { id: -1 })
+    get(:show, params: { id: 0 })
     assert_flash_error
     assert_response(:redirect)
   end
