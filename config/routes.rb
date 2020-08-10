@@ -485,6 +485,44 @@ LOOKUP_XXX_ID_ACTIONS = %w[
   lookup_user
 ].freeze
 
+ACTION_REDIRECTS = {
+  create: {
+    from: "/%<old_controller>s/create_%<model>s",
+    to: "/%<new_controller>s/new",
+    via: [:get, :post]
+  },
+  edit: {
+    from: "/%<old_controller>s/edit_%<model>s/:id",
+    to: "/%<new_controller>s/%<id>s/edit",
+    via: [:get, :post]
+  },
+  destroy: {
+    from: "/%<old_controller>s/destroy_%<model>s/:id",
+    to: "/%<new_controller>s/%<id>s",
+    via: [:patch, :post, :put]
+  },
+  controller: {
+    from: "/%<old_controller>s",
+    to: "/%<new_controller>s",
+    via: [:get]
+  },
+  index: {
+    from: "/%<old_controller>s/index_%<model>s",
+    to: "/%<new_controller>s",
+    via: [:get]
+  },
+  list: {
+    from: "/%<old_controller>s/list_%<model>s",
+    to: "/%<new_controller>s",
+    via: [:get]
+  },
+  show: {
+    from: "/%<old_controller>s/show_%<model>s/:id",
+    to: "/%<new_controller>s/%<id>s",
+    via: [:get]
+  }
+}.freeze
+
 # redirect deleted MO controller's actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
@@ -494,54 +532,21 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 #                            new_controller: "glossary_terms",
 #                            actions: [:create, :edit, :show])
 #
-def redirect_old_crud_actions(
-  old_controller: "",
-  new_controller: old_controller&.pluralize,
-  model: new_controller&.singularize,
-  actions: [:create, :destroy, :edit, :index, :show]
-)
-
+def redirect_old_crud_actions(old_controller: "",
+                              new_controller: old_controller&.pluralize,
+                              model: new_controller&.singularize,
+                              actions: ACTION_REDIRECTS.keys)
   actions.each do |action|
-    send("redirect_#{action}", old_controller, new_controller, model)
+    data = ACTION_REDIRECTS[action]
+    to_url = format(data[:to],
+                    # Rails routes currently only accept template tokens
+                    id: "%{id}", # rubocop:disable Style/FormatStringToken
+                    new_controller: new_controller)
+    match(format(data[:from], old_controller: old_controller, model: model),
+          to: redirect(to_url),
+          via: data[:via])
   end
 end
-
-# rubocop:disable Style/FormatStringToken
-# For consistency with Rails Guide "Rails Routing from the Outside In"
-# (And I don't know if RuboCop's suggestion works here)
-def redirect_create(old_controller, new_controller, model)
-  match("/#{old_controller}/create_#{model}",
-        to: redirect("/#{new_controller}/new"),
-        via: [:get, :post]) # new, create
-end
-
-def redirect_edit(old_controller, new_controller, model)
-  match("/#{old_controller}/edit_#{model}/:id",
-        to: redirect("/#{new_controller}/%{id}/edit"),
-        via: [:get, :post]) # edit, update
-end
-
-def redirect_destroy(old_controller, new_controller, model)
-  match("/#{old_controller}/destroy_#{model}",
-        to: redirect("#{new_controller}/%{id}"),
-        via: [:patch, :post, :put])
-end
-
-def redirect_index(old_controller, new_controller, model)
-  # 3 old paths redirect to index
-  get("/#{old_controller}" =>
-    redirect("/#{new_controller}"))
-  get("/#{old_controller}/index_#{model}" =>
-    redirect("/#{new_controller}"))
-  get("/#{old_controller}/list_#{model}s" =>
-    redirect("/#{new_controller}"))
-end
-
-def redirect_show(old_controller, new_controller, model)
-  get("/#{old_controller}/show_#{model}/:id" =>
-    redirect("/#{new_controller}/%{id}"))
-end
-# rubocop:enable Style/FormatStringToken
 
 # declare routes for the actions in the ACTIONS hash
 def route_actions_hash
@@ -619,10 +624,9 @@ MushroomObserver::Application.routes.draw do
   #   end
 
   resources :articles
-  redirect_old_crud_actions(
-    old_controller: "article",
-    actions: [:create, :destroy, :edit, :index, :show]
-  )
+  redirect_old_crud_actions(old_controller: "article")
+  # Or if you want to be explicit (but then why have a default argument?):
+  # actions: [:create, :edit, :destroy, :controller, :index, :list, :show]
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
