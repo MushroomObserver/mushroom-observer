@@ -3,6 +3,11 @@
 require("test_helper")
 
 class RedirectsTest < IntegrationTestCase
+  def test_controller
+    get("/article")
+    assert_equal("/articles", @response.request.fullpath)
+  end
+
   def test_list_article
     get("/article/list_article")
     assert_equal("/articles", @response.request.fullpath)
