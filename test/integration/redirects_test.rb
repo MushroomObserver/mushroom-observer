@@ -55,4 +55,18 @@ class RedirectsTest < IntegrationTestCase
     assert_equal("/articles/#{Article.first.id}",
                  @response.request.fullpath)
   end
+
+  def test_destroy_article_patch
+    login("article_writer", "testpassword", true)
+    patch("/article/destroy_article/#{Article.first.id}")
+    # Rails sends patch/put to intermediate page, not the "to:" location
+    assert_equal(article_url(Article.first.id), @response.header["Location"])
+  end
+
+  def test_destroy_article_put
+    login("article_writer", "testpassword", true)
+    put("/article/destroy_article/#{Article.first.id}")
+    # Rails sends patch/put to intermediate page, not the "to:" location
+    assert_equal(article_url(Article.first.id), @response.header["Location"])
+  end
 end
