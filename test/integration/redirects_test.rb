@@ -24,33 +24,33 @@ class RedirectsTest < IntegrationTestCase
   end
 
   def test_create_article_get
-    login!("article_writer", "testpassword", true)
+    login("article_writer", "testpassword", true)
     get("/article/create_article")
     assert_equal("/articles/new", @response.request.fullpath)
   end
 
   def test_create_article_post
-    login!("article_writer", "testpassword", true)
+    login("article_writer", "testpassword", true)
     post("/article/create_article")
     assert_equal("/articles/new", @response.request.fullpath)
   end
 
   def test_edit_article_get
-    login!("article_writer", "testpassword", true)
+    login("article_writer", "testpassword", true)
     get("/article/edit_article/#{Article.first.id}")
     assert_equal("/articles/#{Article.first.id}/edit",
                  @response.request.fullpath)
   end
 
   def test_edit_article_post
-    login!("article_writer", "testpassword", true)
+    login("article_writer", "testpassword", true)
     post("/article/edit_article/#{Article.first.id}")
     assert_equal("/articles/#{Article.first.id}/edit",
                  @response.request.fullpath)
   end
 
   def test_destroy_article_post
-    login!("article_writer", "testpassword", true)
+    login("article_writer", "testpassword", true)
     post("/article/destroy_article/#{Article.first.id}")
     assert_equal("/articles/#{Article.first.id}",
                  @response.request.fullpath)
