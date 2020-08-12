@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Test existence of redirect routes
-class RedirectsTest < UnitTestCase
+class RedirectRoutesTest < UnitTestCase
   # Test existence of correct routes from MO old-style CRUDISH actions
   # to normalized, resourceful Crud
   def test_redirect_old_crud_actions
