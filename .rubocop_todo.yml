@@ -55,7 +55,7 @@ Lint/MissingCopEnableDirective:
   Exclude:
     - 'app/classes/observation_report/adolf.rb'
     - 'app/classes/observation_report/darwin.rb'
-    - 'app/classes/observation_report/mycoflora.rb'
+    - 'app/classes/observation_report/fundis.rb'
     - 'app/classes/observation_report/raw.rb'
     - 'app/classes/observation_report/symbiota.rb'
 

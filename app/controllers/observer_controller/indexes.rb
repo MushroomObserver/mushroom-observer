@@ -262,8 +262,8 @@ class ObserverController
       ObservationReport::Darwin.new(args)
     when "symbiota"
       ObservationReport::Symbiota.new(args)
-    when "mycoflora"
-      ObservationReport::Mycoflora.new(args)
+    when "fundis"
+      ObservationReport::Fundis.new(args)
     else
       raise("Invalid download type: #{format.inspect}")
     end
@@ -279,8 +279,8 @@ class ObserverController
   end
 
   def make_labels(observations)
-    @mycoflora_herbarium = Herbarium.where(
-      name: "North American Mycoflora Project"
+    @fundis_herbarium = Herbarium.where(
+      name: "Fungal Diversity Survey Project"
     ).first
     observations.map do |observation|
       make_label(observation)
@@ -289,7 +289,7 @@ class ObserverController
 
   def make_label(observation)
     rows = label_data(observation)
-    insert_mycoflora_id(rows, observation)
+    insert_fundis_id(rows, observation)
     rows
   end
 
@@ -304,14 +304,14 @@ class ObserverController
     ]
   end
 
-  def insert_mycoflora_id(rows, observation)
-    return unless @mycoflora_herbarium
+  def insert_fundis_id(rows, observation)
+    return unless @fundis_herbarium
 
-    mycoflora_record = observation.herbarium_records.where(
-      herbarium: @mycoflora_herbarium
+    fundis_record = observation.herbarium_records.where(
+      herbarium: @fundis_herbarium
     ).first
-    return unless mycoflora_record
+    return unless fundis_record
 
-    rows.insert(1, ["Mycoflora #", mycoflora_record.accession_number])
+    rows.insert(1, ["FunDiS #", fundis_record.accession_number])
   end
 end

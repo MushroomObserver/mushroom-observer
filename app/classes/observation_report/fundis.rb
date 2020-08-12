@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module ObservationReport
-  # Format for export to Mycoflora.
-  class Mycoflora < ObservationReport::CSV
-    MYCOFLORA_PROJECT_NAME = "North American Mycoflora Project"
+  # Format for export to FunDiS.
+  class Fundis < ObservationReport::CSV
+    FUNDIS_PROJECT_NAME = "Fungal Diversity Survey Project"
 
     def labels
       %w[
@@ -63,7 +63,7 @@ module ObservationReport
         row.obs_when,
         row.obs_url,
         image_urls(row),
-        "NA Mycoflora Project",
+        "FunDiS",
         *explode_notes(row)
       ]
     end

@@ -980,7 +980,7 @@ class ApiTest < UnitTestCase
     rolfs_obs         = observations(:strobilurus_diminutivus_obs)
     marys_obs         = observations(:detailed_unknown_obs)
     @obs              = rolfs_obs
-    @herbarium        = herbaria(:mycoflora_herbarium)
+    @herbarium        = herbaria(:fundis_herbarium)
     @initial_det      = "Absurdus namus"
     @accession_number = "13579a"
     @notes            = "i make good specimen"
@@ -1040,14 +1040,14 @@ class ApiTest < UnitTestCase
     # touch Mary's record at an herbarium that he doesn't curate.
     rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
     nybgs_rec = herbarium_records(:interesting_unknown)
-    marys_rec = herbarium_records(:mycoflora_record)
-    mycoflora = herbaria(:mycoflora_herbarium)
+    marys_rec = herbarium_records(:fundis_record)
+    fundis = herbaria(:fundis_herbarium)
     params = {
       method: :patch,
       action: :herbarium_record,
       api_key: @api_key.key,
       id: rolfs_rec.id,
-      set_herbarium: "North American Mycoflora Project",
+      set_herbarium: "Fungal Diversity Survey Project",
       set_initial_det: " New name ",
       set_accession_number: " 1234 ",
       set_notes: " new notes "
@@ -1058,7 +1058,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(set_initial_det: ""))
     assert_api_fail(params.merge(set_accession_number: ""))
     assert_api_pass(params)
-    assert_objs_equal(mycoflora, rolfs_rec.reload.herbarium)
+    assert_objs_equal(fundis, rolfs_rec.reload.herbarium)
     assert_equal("New name", rolfs_rec.initial_det)
     assert_equal("1234", rolfs_rec.accession_number)
     assert_equal("new notes", rolfs_rec.notes)
@@ -1070,7 +1070,7 @@ class ApiTest < UnitTestCase
     assert_equal("1234", nybgs_rec.accession_number)
     assert_equal("new notes", nybgs_rec.notes)
 
-    # Rolfs_rec is now at Mycoflora, so Rolf is not a curator, just owns rec.
+    # Rolfs_rec is now at fundis, so Rolf is not a curator, just owns rec.
     old_obs   = rolfs_rec.observations.first
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:minimal_unknown_obs)
@@ -1095,7 +1095,7 @@ class ApiTest < UnitTestCase
     # Mary's records at a different herbarium that he doesn't curate.
     rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
     nybgs_rec = herbarium_records(:interesting_unknown)
-    marys_rec = herbarium_records(:mycoflora_record)
+    marys_rec = herbarium_records(:fundis_record)
     params = {
       method: :delete,
       action: :herbarium_record,
