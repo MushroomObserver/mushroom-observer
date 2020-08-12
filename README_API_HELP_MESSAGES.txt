@@ -333,7 +333,7 @@ GET observation
   west:	longitude (min longitude)
 
 POST observation
-  accession_number:	string (unique herbarium id)
+  accession_number:	string (unique fungarium id)
   altitude:	altitude
   collection_number:	string
   collectors_name:	string
