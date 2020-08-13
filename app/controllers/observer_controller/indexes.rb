@@ -280,7 +280,7 @@ class ObserverController
 
   def make_labels(observations)
     @fundis_herbarium = Herbarium.where(
-      name: "Fungal Diversity Survey Project"
+      name: "Fungal Diversity Survey"
     ).first
     observations.map do |observation|
       make_label(observation)

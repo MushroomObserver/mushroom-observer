@@ -1047,7 +1047,7 @@ class ApiTest < UnitTestCase
       action: :herbarium_record,
       api_key: @api_key.key,
       id: rolfs_rec.id,
-      set_herbarium: "Fungal Diversity Survey Project",
+      set_herbarium: "Fungal Diversity Survey",
       set_initial_det: " New name ",
       set_accession_number: " 1234 ",
       set_notes: " new notes "

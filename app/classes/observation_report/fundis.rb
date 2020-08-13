@@ -3,7 +3,7 @@
 module ObservationReport
   # Format for export to FunDiS.
   class Fundis < ObservationReport::CSV
-    FUNDIS_PROJECT_NAME = "Fungal Diversity Survey Project"
+    FUNDIS_PROJECT_NAME = "Fungal Diversity Survey"
 
     def labels
       %w[
