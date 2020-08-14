@@ -129,14 +129,15 @@ class NameSorter
   end
 
   def push_synonym(arg)
-    if arg.is_a?(Integer)
+    case arg
+    when Integer
       @approved_synonyms.push(Name.find(arg))
-    elsif arg.is_a?(ActiveRecord::Base)
+    when ActiveRecord::Base
       @approved_synonyms.push(arg)
     else
       raise(TypeError.new(
         "NameSorter synonyms must be Integer or ActiveRecord::Base, "\
-        "not #{arg.clasS}."
+        "not #{arg.class}."
       ))
     end
   end

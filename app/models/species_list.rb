@@ -313,12 +313,13 @@ class SpeciesList < AbstractModel
         end
 
         key, value = kv
-        if key == "Date"
+        case key
+        when "Date"
           # timestamp = Time.local(*(ParseDate.parsedate(value)))
           timestamp = Time.zone.parse(value)
-        elsif key == "Name"
+        when "Name"
           what = value.strip.squeeze(" ")
-        elsif key == "Time"
+        when "Time"
           # Ignore
         else
           raise(format("Unrecognized key|value pair: %s\n", key_value))

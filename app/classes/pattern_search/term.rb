@@ -245,6 +245,9 @@ module PatternSearch
       raise(TooManyValuesError.new(var: var)) if vals.length > 1
 
       val = vals.first
+      # rubocop:disable Style/CaseLikeIf
+      # case does not work if the code nested after "when /regex/" uses a
+      # named capture group
       if /^(?<yr>\d{4})$/ =~ val
         yyyymmdd([yr, 1, 1], [yr, 12, 31])
       elsif /^(?<yr>\d{4})-(?<mo>\d\d?)$/ =~ val
@@ -267,6 +270,7 @@ module PatternSearch
       else
         raise(BadDateRangeError.new(var: var, val: val))
       end
+      # rubocop:enable Style/CaseLikeIf
     end
 
     def yyyymmdd(from, to)

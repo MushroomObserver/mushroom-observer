@@ -215,10 +215,10 @@ class NameDescription < Description
     self.last_review   = Time.zone.now
 
     # Save unless there are substantive changes pending.
-    unless save_version?
-      save_without_our_callbacks
-      raise("update_review_status failed: [#{dump_errors}]") unless errors.empty?
-    end
+    return if save_version?
+
+    save_without_our_callbacks
+    raise("update_review_status failed: [#{dump_errors}]") unless errors.empty?
   end
 
   ##############################################################################

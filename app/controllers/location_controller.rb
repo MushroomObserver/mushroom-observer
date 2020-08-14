@@ -889,10 +889,10 @@ class LocationController < ApplicationController
 
       o.location_id = location.id
       o.where = nil
-      unless o.save
-        flash_error(:runtime_location_merge_failed.t(name: o.unique_format_name))
-        success = false
-      end
+      next if o.save
+
+      flash_error(:runtime_location_merge_failed.t(name: o.unique_format_name))
+      success = false
     end
     success
   end

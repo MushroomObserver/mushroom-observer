@@ -104,7 +104,9 @@ class API
     def validate_update_params!(params)
       @classification = params[:classification]
       validate_classification!(params)
-      raise(MissingSetParameters.new) if params.empty? && no_other_update_params?
+      return unless params.empty? && no_other_update_params?
+
+      raise(MissingSetParameters.new)
     end
 
     def delete
