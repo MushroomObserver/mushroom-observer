@@ -128,7 +128,7 @@ Style/RedundantRegexpEscape:
 Style/SlicingWithRange:
   Enabled: true
 
-###################### Global Disables #########################################
+###################### Global Disables, Enables ################################
 
 # Disable because it does not work with Unicode in Ruby 2.4
 # Cop supports --auto-correct.
@@ -149,6 +149,10 @@ Style/AsciiComments:
 # Repeat the RuboCop default because CodeClimate silently overrides it
 Style/DateTime:
   Enabled: false
+
+# When the cop is enabled, the default is require_parentheses.
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
 
 ###################### Options #################################################
 

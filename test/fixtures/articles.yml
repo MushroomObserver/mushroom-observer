@@ -3,9 +3,12 @@
 
 DEFAULTS: &DEFAULTS
   title:      $LABEL
-  body:       Body of Article
+  body:       Body of $LABEL article
   user:       rolf
   rss_log_id:
 
 premier_article:
   <<: *DEFAULTS
+
+second_article:
+  <<:  *DEFAULTS

@@ -1,6 +1,6 @@
 <%
-  @title = show_article_title(@article)
-  @tabsets = { right: draw_tab_set(show_article_tabs) }
+  @title = show_title(@article)
+  @tabsets = { right: draw_tab_set(show_tabs_for_user(@article, @user)) }
 %>
 <div>
  <%= :BY.t %> <%= user_link(@article.user) %>,
