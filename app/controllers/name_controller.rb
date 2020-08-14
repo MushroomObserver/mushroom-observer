@@ -163,7 +163,7 @@ class NameController < ApplicationController
   # Display list of the most popular 100 names that don't have descriptions.
   def needed_descriptions
     # NOTE!! -- all this extra info and help will be lost if user re-sorts.
-    data = Name.connection.select_rows %(
+    data = Name.connection.select_rows(%(
       SELECT names.id, name_counts.count
       FROM names LEFT OUTER JOIN name_descriptions
         ON names.id = name_descriptions.name_id,
@@ -178,7 +178,7 @@ class NameController < ApplicationController
         AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
       ORDER BY name_counts.count DESC, names.sort_name ASC
       LIMIT 100
-    )
+    ))
     @help = :needed_descriptions_help
     query = create_query(:Name, :in_set,
                          ids: data.map(&:first),
@@ -413,9 +413,9 @@ class NameController < ApplicationController
 
     # Old correct spellings could have gotten merged with something else
     # and no longer exist.
-    @correct_spelling = Name.connection.select_value %(
+    @correct_spelling = Name.connection.select_value(%(
       SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
-    )
+    ))
   end
 
   # Show past version of NameDescription.  Accessible only from
@@ -525,7 +525,7 @@ class NameController < ApplicationController
         flash_notice(:runtime_name_description_success.t(id: @description.id))
         redirect_to(action: "show_name_description", id: @description.id)
       else
-        flash_object_errors @description
+        flash_object_errors(@description)
       end
     end
   end
@@ -685,7 +685,7 @@ class NameController < ApplicationController
     # Has the user NOT had a chance to choose from among the synonyms of any
     # names they've written in?
     elsif !sorter.only_approved_synonyms
-      flash_notice :name_change_synonyms_confirm.t
+      flash_notice(:name_change_synonyms_confirm.t)
     else
       # Create synonym and add this name to it if this name not already
       # associated with a synonym.
@@ -773,7 +773,7 @@ class NameController < ApplicationController
 
   def post_deprecate_name
     if @what.blank?
-      flash_error :runtime_name_deprecate_must_choose.t
+      flash_error(:runtime_name_deprecate_must_choose.t)
       return
     end
 
@@ -1006,7 +1006,7 @@ class NameController < ApplicationController
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
-    image_data = Name.connection.select_all %(
+    image_data = Name.connection.select_all(%(
       SELECT name_id, image_id, observation_id, images.user_id,
              images.license_id, images.created_at
       FROM observations, images_observations, images
@@ -1017,7 +1017,7 @@ class NameController < ApplicationController
       AND images.vote_cache >= 2
       AND images.ok_for_export
       ORDER BY observations.vote_cache
-    )
+    ))
     image_data = image_data.to_a
 
     # Fill in @image_data, @users, and @licenses.
@@ -1079,7 +1079,7 @@ class NameController < ApplicationController
     sorter.sort_names(list)
     if sorter.only_single_names
       sorter.create_new_synonyms
-      flash_notice :name_bulk_success.t
+      flash_notice(:name_bulk_success.t)
       redirect_to(controller: "observer", action: "list_rss_logs")
     else
       if sorter.new_name_strs != []

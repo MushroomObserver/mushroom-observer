@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class NameSorterTest < UnitTestCase
   def test_add_name_default

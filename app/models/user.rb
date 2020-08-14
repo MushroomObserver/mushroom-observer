@@ -500,7 +500,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    update_attribute "password", self.class.sha1(pass) if pass.present?
+    update_attribute("password", self.class.sha1(pass)) if pass.present?
   end
 
   # Mark a User account as "verified".
@@ -532,11 +532,11 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    @projects_admin ||= Project.find_by_sql %(
+    @projects_admin ||= Project.find_by_sql(%(
       SELECT projects.* FROM projects, user_groups_users
       WHERE projects.admin_group_id = user_groups_users.user_group_id
         AND user_groups_users.user_id = #{id}
-    )
+    ))
   end
 
   # Return an Array of Project's that this User is a member of.
@@ -598,12 +598,12 @@ class User < AbstractModel
       results = species_lists
       if projects_member.any?
         project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.find_by_sql %(
+        results += SpeciesList.find_by_sql(%(
           SELECT species_lists.* FROM species_lists, projects_species_lists
           WHERE species_lists.user_id != #{id}
             AND projects_species_lists.project_id IN (#{project_ids})
             AND projects_species_lists.species_list_id = species_lists.id
-        )
+        ))
       end
       results
     end
@@ -785,9 +785,9 @@ class User < AbstractModel
       [:translation_strings_versions,   :user_id],
       [:votes,                          :user_id]
     ].each do |table, col|
-      User.connection.update %(
+      User.connection.update(%(
         UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      )
+      ))
     end
 
     # Delete references to their one-user group.
@@ -803,9 +803,9 @@ class User < AbstractModel
         [:name_descriptions_writers,     :user_group_id],
         [:user_groups,                   :id]
       ].each do |table, col|
-        User.connection.delete %(
+        User.connection.delete(%(
           DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        )
+        ))
       end
     end
 
@@ -827,15 +827,15 @@ class User < AbstractModel
         [:votes,                           :observation_id]
       ].each do |table, id_col, type_col|
         if type_col
-          User.connection.delete %(
+          User.connection.delete(%(
             DELETE FROM #{table}
             WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          )
+          ))
         else
-          User.connection.delete %(
+          User.connection.delete(%(
             DELETE FROM #{table}
             WHERE `#{id_col}` IN (#{ids})
-          )
+          ))
         end
       end
     end
@@ -871,9 +871,9 @@ class User < AbstractModel
       [:user_groups_users,              :user_id],
       [:users,                          :id]
     ].each do |table, col|
-      User.connection.delete %(
+      User.connection.delete(%(
         DELETE FROM #{table} WHERE `#{col}` = #{id}
-      )
+      ))
     end
   end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class AdminTest < IntegrationTestCase
   def test_csrf_bug_in_review_donations_page

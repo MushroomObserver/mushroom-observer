@@ -230,7 +230,7 @@ class HerbariumRecordController < ApplicationController
     return true if in_admin_mode? || @herbarium_record.can_edit?
     return true if @herbarium_record.herbarium.curator?(@user)
 
-    flash_error :permission_denied.t
+    flash_error(:permission_denied.t)
     redirect_to_observation_or_herbarium_record
     false
   end

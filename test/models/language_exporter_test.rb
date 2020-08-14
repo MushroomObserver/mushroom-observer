@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LanguageExporterTest < UnitTestCase
   attr_accessor :tmp_dir
@@ -115,11 +115,11 @@ class LanguageExporterTest < UnitTestCase
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
-    assert pass == expected_val, msg
+    assert(pass == expected_val, msg)
     msg = assert_message(
       "Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}"
     )
-    assert !!in_tag == (in_tag_end == 1), msg
+    assert(!!in_tag == (in_tag_end == 1), msg)
     Language.clear_verbose_messages
   end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class SymbolExtensionsTest < UnitTestCase
   def test_localize_postprocessing
@@ -58,15 +58,15 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_hello
-    assert_equal "Hello world", :hello.t
+    assert_equal("Hello world", :hello.t)
   end
 
   def test_the_birds_flew_by
-    assert_equal "The birds flew by", :they_flew_by.t(they: "birds")
+    assert_equal("The birds flew by", :they_flew_by.t(they: "birds"))
   end
 
   def test_birds_fly
-    assert_equal "Birds fly", :they_fly.t(they: "birds")
+    assert_equal("Birds fly", :they_fly.t(they: "birds"))
   end
 
   def test_quotes
@@ -78,23 +78,23 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_Yep # rubocop:disable Naming/MethodName
-    assert_equal "Yes", :YEP.t
+    assert_equal("Yes", :YEP.t)
   end
 
   def test_yep
-    assert_equal "yes", :yep.t
+    assert_equal("yes", :yep.t)
   end
 
   def test_Nope # rubocop:disable Naming/MethodName
-    assert_equal "No", :NOPE.t
+    assert_equal("No", :NOPE.t)
   end
 
   def test_nope
-    assert_equal "no", :nope.t
+    assert_equal("no", :nope.t)
   end
 
   def test_with_newlines
-    assert_equal "This<br />\nhas<br />\nnewlines", :with_newlines.t
+    assert_equal("This<br />\nhas<br />\nnewlines", :with_newlines.t)
   end
 
   def test_with_a_link
@@ -103,15 +103,15 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_hello_has_translation
-    assert :hello.has_translation?
+    assert(:hello.has_translation?)
   end
 
   def test_Hello_has_translation # rubocop:disable Naming/MethodName
-    assert :Hello.has_translation?
+    assert(:Hello.has_translation?)
   end
 
   def test_no_translation
-    assert_not :no_translation.has_translation?
+    assert_not(:no_translation.has_translation?)
   end
 
   def test_upcase_first

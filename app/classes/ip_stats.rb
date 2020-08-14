@@ -13,14 +13,14 @@ class IpStats
       file = MO.ip_stats_file
       now = Time.now.utc
       File.open(file, "a") do |fh|
-        fh.puts [
+        fh.puts([
           stats[:time].utc,
           stats[:ip],
           User.current_id,
           now - stats[:time].utc,
           stats[:controller],
           stats[:action]
-        ].join(",")
+        ].join(","))
       end
     end
 
@@ -83,7 +83,7 @@ class IpStats
     def add_ips(ips, file)
       File.open(file, "a") do |fh|
         ips.each do |ip|
-          fh.puts "#{ip},#{Time.now.utc}"
+          fh.puts("#{ip},#{Time.now.utc}")
         end
       end
     end

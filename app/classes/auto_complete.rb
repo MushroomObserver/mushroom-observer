@@ -20,7 +20,7 @@ class AutoComplete
   def self.subclass(type)
     "AutoComplete#{type.camelize}".constantize
   rescue StandardError
-    raise "Invalid auto-complete type: #{type.inspect}"
+    raise("Invalid auto-complete type: #{type.inspect}")
   end
 
   def initialize(string, _params = {})

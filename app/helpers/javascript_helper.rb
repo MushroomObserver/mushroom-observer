@@ -37,9 +37,9 @@ module JavascriptHelper
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
     if args.reject { |arg| arg.class == String } != []
-      raise ArgumentError.new(
+      raise(ArgumentError.new(
         "javascript_include doesn't take symbols like :default, etc."
-      )
+      ))
     end
 
     @javascript_files ||= []
@@ -52,7 +52,7 @@ module JavascriptHelper
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
   def javascript_includes
     @javascript_files ||= []
-    @javascript_files.unshift "application"
+    @javascript_files.unshift("application")
     @javascript_files.uniq
   end
 

@@ -14,7 +14,7 @@ class API
         lang = Language.find_by_locale(str)
         return lang.locale if lang
 
-        raise BadLimitedParameterValue.new(str, limit)
+        raise(BadLimitedParameterValue.new(str, limit))
       end
     end
   end

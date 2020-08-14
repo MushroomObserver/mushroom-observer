@@ -211,7 +211,7 @@ class CollectionNumberController < ApplicationController
   def make_sure_can_edit!(obj)
     return true if in_admin_mode? || obj.can_edit?
 
-    flash_error :permission_denied.t
+    flash_error(:permission_denied.t)
     redirect_to_observation_or_collection_number
     false
   end

@@ -30,8 +30,8 @@
 #
 ################################################################################
 
-require File.expand_path("../config/boot.rb", __dir__)
-require File.expand_path("../config/environment.rb", __dir__)
+require(File.expand_path("../config/boot.rb", __dir__))
+require(File.expand_path("../config/environment.rb", __dir__))
 
 DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml"
@@ -88,9 +88,9 @@ OTHER_ALLOWED_PATHS = [
   "/name/eol"
 ].freeze
 
-LOCALES = Language.connection.select_values %(
+LOCALES = Language.connection.select_values(%(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
-)
+))
 
 ROBOTS_HEADER = <<~"EOB"
   # See http://www.robotstxt.org for documentation.
@@ -176,18 +176,18 @@ def update_sitemap_files
 end
 
 def get_new_comments(last_update)
-  Name.connection.select_rows %(
+  Name.connection.select_rows(%(
     SELECT target_type, target_id, updated_at
     FROM comments WHERE updated_at >= "#{last_update}"
-  )
+  ))
 end
 
 def get_new_images(last_update)
-  Name.connection.select_rows %(
+  Name.connection.select_rows(%(
     SELECT io.observation_id, i.updated_at
     FROM images i, images_observations io
     WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
-  )
+  ))
 end
 
 def map_one_object_type(params, comments, last_update)
@@ -202,9 +202,9 @@ def map_one_object_type(params, comments, last_update)
 end
 
 def update_times_of_new_objects(times, table, last_update)
-  for id, time in Name.connection.select_rows %(
+  for id, time in Name.connection.select_rows(%(
     SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
-  )
+  ))
     times[id.to_i] = parse_mysql_time(time)
   end
 end
@@ -280,22 +280,22 @@ end
 def write_sitemap_xml(name, pages)
   file = SITEMAP_FILE.sub("NAME", name)
   File.open(file, "w") do |fh|
-    fh.write SITEMAP_LEAF_HEADER
+    fh.write(SITEMAP_LEAF_HEADER)
     for str, path, time in pages
-      fh.puts "<url><loc>#{DOMAIN}/#{path}</loc>#{time}</url>"
+      fh.puts("<url><loc>#{DOMAIN}/#{path}</loc>#{time}</url>")
     end
-    fh.write SITEMAP_LEAF_FOOTER
+    fh.write(SITEMAP_LEAF_FOOTER)
   end
 end
 
 def write_sitemap_html(name, pages)
   file = INDEX_FILE.sub("NAME", name)
   File.open(file, "w") do |fh|
-    fh.write INDEX_HEADER
+    fh.write(INDEX_HEADER)
     for str, path, time in pages
-      fh.puts "<a href=\"/#{path}\">#{str}</a><br/>"
+      fh.puts("<a href=\"/#{path}\">#{str}</a><br/>")
     end
-    fh.write INDEX_FOOTER
+    fh.write(INDEX_FOOTER)
   end
 end
 
@@ -303,13 +303,13 @@ def write_index_xml(sitemaps)
   now = get_current_time
   file = SITEMAP_FILE.sub("NAME", "index")
   File.open(file, "w") do |fh|
-    fh.write SITEMAP_ROOT_HEADER
+    fh.write(SITEMAP_ROOT_HEADER)
     for sitemap in sitemaps
       url  = "<loc>#{SITEMAP_URL.sub("NAME", sitemap)}</loc>"
       time = "<lastmod>#{now}</lastmod>"
-      fh.puts "<sitemap>#{url}#{time}</sitemap>"
+      fh.puts("<sitemap>#{url}#{time}</sitemap>")
     end
-    fh.write SITEMAP_ROOT_FOOTER
+    fh.write(SITEMAP_ROOT_FOOTER)
   end
 end
 
@@ -317,11 +317,11 @@ def write_index_html(sitemaps)
   now = get_current_time
   file = INDEX_FILE.sub("NAME", "index")
   File.open(file, "w") do |fh|
-    fh.write INDEX_HEADER
+    fh.write(INDEX_HEADER)
     for sitemap in sitemaps
-      fh.puts "<a href=\"#{sitemap}.html\">#{sitemap}</a><br/>"
+      fh.puts("<a href=\"#{sitemap}.html\">#{sitemap}</a><br/>")
     end
-    fh.write INDEX_FOOTER
+    fh.write(INDEX_FOOTER)
   end
 end
 
@@ -335,7 +335,7 @@ def parse_mysql_time(time)
 end
 
 def format_time(time)
-  time.utc.strftime "%Y-%m-%dT%H:%M:%S+00:00"
+  time.utc.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 end
 
 def get_last_update
@@ -441,14 +441,14 @@ end
 
 def write_robots_file(disallowed_paths, allowed_paths)
   File.open(ROBOTS_FILE, "w") do |fh|
-    fh.write ROBOTS_HEADER
+    fh.write(ROBOTS_HEADER)
     for path in disallowed_paths.sort
-      fh.puts "Disallow: #{path}"
+      fh.puts("Disallow: #{path}")
     end
     for path in allowed_paths
-      fh.puts "# Allow: #{path}"
+      fh.puts("# Allow: #{path}")
     end
-    fh.write ROBOTS_FOOTER
+    fh.write(ROBOTS_FOOTER)
   end
 end
 
@@ -456,4 +456,4 @@ end
 
 update_sitemap_files
 update_robots_file
-exit 0
+exit(0)

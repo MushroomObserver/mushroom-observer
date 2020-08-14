@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
@@ -18,7 +18,7 @@ class NameTest < UnitTestCase
   # Parse a string, with detailed error message.
   def do_name_parse_test(str, expects, deprecated: false)
     parse = Name.parse_name(str, deprecated: deprecated)
-    assert parse, "Expected #{str.inspect} to parse!"
+    assert(parse, "Expected #{str.inspect} to parse!")
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
     [
@@ -52,8 +52,8 @@ class NameTest < UnitTestCase
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
-    assert_not pattern.match(string),
-               "Expected #{string.inspect} not to match #{@pat}."
+    assert_not(pattern.match(string),
+               "Expected #{string.inspect} not to match #{@pat}.")
     assert_name_match_various_authors(pattern, string, first_match)
   end
 
@@ -94,7 +94,7 @@ class NameTest < UnitTestCase
 
   def assert_name_match(pattern, string, first, second = "")
     match = pattern.match(string)
-    assert match, "Expected #{string.inspect} to match #{@pat}."
+    assert(match, "Expected #{string.inspect} to match #{@pat}.")
     assert_equal(first, match[1].to_s,
                  "#{@pat} matched name part of #{string.inspect} wrong.")
     assert_equal(second, match[2].to_s,
@@ -112,14 +112,14 @@ class NameTest < UnitTestCase
     parse = Name.parse_classification(text)
     assert_equal(expected, parse)
   rescue RuntimeError => e
-    raise e if expected
+    raise(e) if expected
   end
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
     assert(expected == result)
   rescue RuntimeError => e
-    raise e if expected
+    raise(e) if expected
   end
 
   ##############################################################################
@@ -136,53 +136,53 @@ class NameTest < UnitTestCase
     result = Name.find_or_create_name_and_parents(
       "Coprinus comatus v. bogus (With) Author"
     )
-    assert_equal 3, result.length
-    assert_equal names(:coprinus).id, result[0].id
-    assert_equal names(:coprinus_comatus).id, result[1].id
-    assert_nil result[2].id
-    assert_equal "Coprinus", result[0].text_name
-    assert_equal "Coprinus comatus", result[1].text_name
-    assert_equal "Coprinus comatus var. bogus", result[2].text_name
-    assert_equal "", result[0].author
-    assert_equal "(O.F. Müll.) Pers.", result[1].author
-    assert_equal "(With) Author", result[2].author
+    assert_equal(3, result.length)
+    assert_equal(names(:coprinus).id, result[0].id)
+    assert_equal(names(:coprinus_comatus).id, result[1].id)
+    assert_nil(result[2].id)
+    assert_equal("Coprinus", result[0].text_name)
+    assert_equal("Coprinus comatus", result[1].text_name)
+    assert_equal("Coprinus comatus var. bogus", result[2].text_name)
+    assert_equal("", result[0].author)
+    assert_equal("(O.F. Müll.) Pers.", result[1].author)
+    assert_equal("(With) Author", result[2].author)
 
     # Conocybe filaris does not have an author.
     result = Name.find_or_create_name_and_parents(
       "Conocybe filaris var bogus (With) Author"
     )
-    assert_equal 3, result.length
-    assert_equal names(:conocybe).id, result[0].id
-    assert_equal names(:conocybe_filaris).id, result[1].id
-    assert_nil result[2].id
-    assert_equal "Conocybe", result[0].text_name
-    assert_equal "Conocybe filaris", result[1].text_name
-    assert_equal "Conocybe filaris var. bogus", result[2].text_name
-    assert_equal "", result[0].author
-    assert_equal "", result[1].author
-    assert_equal "(With) Author", result[2].author
+    assert_equal(3, result.length)
+    assert_equal(names(:conocybe).id, result[0].id)
+    assert_equal(names(:conocybe_filaris).id, result[1].id)
+    assert_nil(result[2].id)
+    assert_equal("Conocybe", result[0].text_name)
+    assert_equal("Conocybe filaris", result[1].text_name)
+    assert_equal("Conocybe filaris var. bogus", result[2].text_name)
+    assert_equal("", result[0].author)
+    assert_equal("", result[1].author)
+    assert_equal("(With) Author", result[2].author)
 
     # Agaricus fixture does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus L.")
-    assert_equal 1, result.length
-    assert_equal names(:agaricus).id, result[0].id
-    assert_equal "Agaricus", result[0].text_name
-    assert_equal "L.", result[0].author
+    assert_equal(1, result.length)
+    assert_equal(names(:agaricus).id, result[0].id)
+    assert_equal("Agaricus", result[0].text_name)
+    assert_equal("L.", result[0].author)
 
     # Agaricus does not have an author.
     result = Name.find_or_create_name_and_parents(
       "Agaricus abra f. cadabra (With) Another Author"
     )
-    assert_equal 3, result.length
-    assert_equal names(:agaricus).id, result[0].id
-    assert_nil result[1].id
-    assert_nil result[2].id
-    assert_equal "Agaricus", result[0].text_name
-    assert_equal "Agaricus abra", result[1].text_name
-    assert_equal "Agaricus abra f. cadabra", result[2].text_name
-    assert_equal "", result[0].author
-    assert_equal "", result[1].author
-    assert_equal "(With) Another Author", result[2].author
+    assert_equal(3, result.length)
+    assert_equal(names(:agaricus).id, result[0].id)
+    assert_nil(result[1].id)
+    assert_nil(result[2].id)
+    assert_equal("Agaricus", result[0].text_name)
+    assert_equal("Agaricus abra", result[1].text_name)
+    assert_equal("Agaricus abra f. cadabra", result[2].text_name)
+    assert_equal("", result[0].author)
+    assert_equal("", result[1].author)
+    assert_equal("(With) Another Author", result[2].author)
   end
 
   def test_standardize_name

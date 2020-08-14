@@ -162,7 +162,7 @@ class AccountController < ApplicationController
 
   # This action is never actually used.  Its template is rendered by verify.
   def reverify
-    raise "This action should never occur!"
+    raise("This action should never occur!")
   end
 
   # This is used by the "reverify" page to re-send the verification email.
@@ -217,13 +217,13 @@ class AccountController < ApplicationController
     user = User.authenticate(@login, @password)
     user ||= User.authenticate(@login, @password.strip)
 
-    return flash_error :runtime_login_failed.t unless user
+    return flash_error(:runtime_login_failed.t) unless user
 
     user.verified ? login_success(user) : login_unverified(user)
   end
 
   def login_success(user)
-    flash_notice :runtime_login_success.t
+    flash_notice(:runtime_login_success.t)
     @user = user
     @user.last_login = now = Time.zone.now
     @user.updated_at = now
@@ -248,7 +248,7 @@ class AccountController < ApplicationController
     @new_user = User.where("login = ? OR name = ? OR email = ?",
                            @login, @login, @login).first
     if @new_user.nil?
-      flash_error :runtime_email_new_password_failed.t(user: @login)
+      flash_error(:runtime_email_new_password_failed.t(user: @login))
     else
       password = String.random(10)
       @new_user.change_password(password)
@@ -754,22 +754,22 @@ class AccountController < ApplicationController
 
   def do_add_user_to_group(user, group)
     user.user_groups << group
-    flash_notice :add_user_to_group_success. \
-      t(user: user.name, group: group.name)
+    flash_notice(:add_user_to_group_success. \
+      t(user: user.name, group: group.name))
   end
 
   def do_not_add_user_to_group(user, group, user_name, group_name)
     if user && group
-      flash_warning :add_user_to_group_already. \
-        t(user: user_name, group: group_name)
+      flash_warning(:add_user_to_group_already. \
+        t(user: user_name, group: group_name))
     else
-      flash_error :add_user_to_group_no_user.t(user: user_name) unless user
-      flash_error :add_user_to_group_no_group.t(group: group_name) unless group
+      flash_error(:add_user_to_group_no_user.t(user: user_name)) unless user
+      flash_error(:add_user_to_group_no_group.t(group: group_name)) unless group
     end
   end
 
   def add_user_to_group_user_mode
-    flash_error :permission_denied.t
+    flash_error(:permission_denied.t)
     redirect_back_or_default(controller: "observer", action: "index")
   end
 

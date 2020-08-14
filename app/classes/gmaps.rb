@@ -186,7 +186,7 @@ module GM
         elsif key == :height
           height = val
         else
-          raise "Unexpected option \"#{key}\" for GMap#div."
+          raise("Unexpected option \"#{key}\" for GMap#div.")
         end
       end
       height = height.to_s + "px" if height.is_a?(Integer)
@@ -268,7 +268,7 @@ module GM
         elsif key == :title
           self.title = opts[key].to_s
         else
-          raise "Unexpected option \"#{key}\" for GMarker."
+          raise("Unexpected option \"#{key}\" for GMarker.")
         end
       end
     end

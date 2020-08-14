@@ -7,13 +7,13 @@ class API
       FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/.freeze
 
       def parse(str)
-        raise BadParameterValue.new(str, :float) unless FLOAT.match?(str)
+        raise(BadParameterValue.new(str, :float)) unless FLOAT.match?(str)
 
         val = str.to_f
         limit = args[:limit]
         return val if !limit || limit.include?(val)
 
-        raise BadLimitedParameterValue.new(str, limit)
+        raise(BadLimitedParameterValue.new(str, limit))
       end
 
       # Reduce trivial ranges to just a single value.

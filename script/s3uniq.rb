@@ -22,7 +22,7 @@ $stdin.each_line do |line|
   data[key] = val
 end
 data.each do |key, val|
-  $stdout.write [key, val].join("\t")
+  $stdout.write([key, val].join("\t"))
 end
 
-exit 0
+exit(0)

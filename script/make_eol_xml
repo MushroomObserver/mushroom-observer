@@ -12,10 +12,10 @@
 #
 ################################################################################
 
-require "tempfile"
-require "net/http"
-require "net/https"
-require "erb"
+require("tempfile")
+require("net/http")
+require("net/https")
+require("erb")
 
 # Following line commented out per discussion with Nathan Wilson, 2019-02-09,
 # in order to get Code Climate passing. Per Nathan, this script is pretty broken
@@ -70,7 +70,7 @@ end
 
 def get_content(filename, url)
   cmd = "wget -q -O #{filename} '#{url}'"
-  system cmd
+  system(cmd)
 end
 
 def get_size(filename)
@@ -98,8 +98,8 @@ dest_filename = ARGV[0]
 if testing
   # Mock response because real MO website blocks robots
   File.open(temp_filename, "w") do |file|
-    file.puts "Mock eol file content: "
-    file.puts '<results number="1">'
+    file.puts("Mock eol file content: ")
+    file.puts('<results number="1">')
   end
 else
   get_content(temp_filename, get_parsed_url.url)
@@ -109,15 +109,15 @@ new_size = get_size(temp_filename)
 old_size = get_size(dest_filename)
 
 if !new_size
-  print "Unable to create the new EOL dump as #{temp_filename}.\n"
-  exit 1
+  print("Unable to create the new EOL dump as #{temp_filename}.\n")
+  exit(1)
 elsif new_size < old_size * 0.9
-  print "Size of new EOL dump, #{new_size}, "\
-        "was less than 90% of the old dump, #{old_size}.\n"
-  print "Left the old file in place.\n"
-  exit 1
+  print("Size of new EOL dump, #{new_size}, "\
+        "was less than 90% of the old dump, #{old_size}.\n")
+  print("Left the old file in place.\n")
+  exit(1)
 else
   File.rename(temp_filename, dest_filename)
   File.chmod(0o644, dest_filename)
-  exit 0
+  exit(0)
 end

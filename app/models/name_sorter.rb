@@ -134,10 +134,10 @@ class NameSorter
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      raise TypeError.new(
+      raise(TypeError.new(
         "NameSorter synonyms must be Integer or ActiveRecord::Base, "\
         "not #{arg.clasS}."
-      )
+      ))
     end
   end
 
@@ -148,10 +148,10 @@ class NameSorter
     if synonyms.class == Array
       synonyms.each { |id| push_synonym(id.to_i) }
     else
-      raise TypeError.new(
+      raise(TypeError.new(
         "Only Arrays can be appended to a NameSorter synonym list not %s" %
           synonyms.class
-      )
+      ))
     end
   end
 

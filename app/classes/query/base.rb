@@ -52,7 +52,7 @@ module Query
     end
 
     def default_order
-      raise "Didn't supply default order for #{model} #{flavor} query."
+      raise("Didn't supply default order for #{model} #{flavor} query.")
     end
 
     def ==(other)

@@ -16,7 +16,7 @@ class QueuedEmail::ConsensusChange < QueuedEmail
 
   def self.create_email(sender, recipient, observation, old_name, new_name)
     result = create(sender, recipient)
-    raise "Missing observation!" unless observation
+    raise("Missing observation!") unless observation
 
     result.add_integer(:observation, observation.id)
     result.add_integer(:old_name, old_name ? old_name.id : 0)

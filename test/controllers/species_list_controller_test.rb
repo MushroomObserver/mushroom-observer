@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class SpeciesListControllerTest < FunctionalTestCase
   # Score for one new name.
@@ -237,7 +237,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert(spl.reload.observations.member?(obs))
 
-    login owner
+    login(owner)
     get_with_dump(:remove_observation_from_species_list, params)
     assert_redirected_to(action: "manage_species_lists", id: obs.id)
     assert_not(spl.reload.observations.member?(obs))
@@ -765,7 +765,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(10, rolf.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
 
-    login owner
+    login(owner)
     post_with_dump(:edit_species_list, params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
@@ -816,7 +816,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(10, rolf.reload.contribution)
     assert(spl.reload.observations.size == sp_count)
 
-    login owner
+    login(owner)
     post_with_dump(:edit_species_list, params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})

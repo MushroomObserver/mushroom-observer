@@ -528,13 +528,6 @@ Style/InverseMethods:
     - 'lib/tasks/jason.rake'
     - 'test/models/api_test.rb'
 
-# Offense count: 968
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoreMacros, IgnoredMethods, IgnoredPatterns, IncludedMacros, AllowParenthesesInMultilineCall, AllowParenthesesInChaining, AllowParenthesesInCamelCaseMethod, EnforcedStyle.
-# SupportedStyles: require_parentheses, omit_parentheses
-Style/MethodCallWithArgsParentheses:
-  Enabled: false
-
 # Offense count: 2
 Style/MethodMissingSuper:
   Exclude:

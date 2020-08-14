@@ -19,7 +19,7 @@ class Query::CommentForTarget < Query::CommentBase
   def target_instance
     type = params[:type].to_s.constantize
     unless type.reflect_on_association(:comments)
-      raise "The model #{params[:type].inspect} does not support comments!"
+      raise("The model #{params[:type].inspect} does not support comments!")
     end
 
     find_cached_parameter_instance(type, :target)

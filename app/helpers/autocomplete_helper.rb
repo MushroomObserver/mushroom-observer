@@ -3,9 +3,9 @@
 module AutocompleteHelper
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)
-    inject_javascript_at_end %(
+    inject_javascript_at_end(%(
       AUTOCOMPLETERS[jQuery('##{first_id}').data('uuid')].reuse('#{new_id}')
-    )
+    ))
   end
 
   # Turn a text_field into an auto-completer.
@@ -21,7 +21,7 @@ module AutocompleteHelper
 
   # Make text_field auto-complete for fixed set of strings.
   def turn_into_menu_auto_completer(id, opts = {})
-    raise "Missing primer for menu auto-completer!" unless opts[:primer]
+    raise("Missing primer for menu auto-completer!") unless opts[:primer]
 
     turn_into_auto_completer(id, {
       unordered: false
@@ -87,9 +87,9 @@ module AutocompleteHelper
   def turn_into_year_auto_completer(id, opts = {})
     js_args = escape_js_opts(opts)
     javascript_include("date_select.js")
-    inject_javascript_at_end %(
+    inject_javascript_at_end(%(
       replace_date_select_with_text_field("#{id}", #{js_args})
-    )
+    ))
   end
 
   # Convert ruby Hash into Javascript string that evaluates to a hash.

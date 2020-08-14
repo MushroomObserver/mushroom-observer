@@ -94,8 +94,8 @@ class API
     end
 
     def validate_create_parameters!(params)
-      raise MissingParameter.new(:name) if @name.blank?
-      raise MissingParameter.new(:rank) if @rank.blank?
+      raise(MissingParameter.new(:name)) if @name.blank?
+      raise(MissingParameter.new(:rank)) if @rank.blank?
 
       @classification = params[:classification]
       validate_classification!(params)
@@ -104,11 +104,11 @@ class API
     def validate_update_params!(params)
       @classification = params[:classification]
       validate_classification!(params)
-      raise MissingSetParameters.new if params.empty? && no_other_update_params?
+      raise(MissingSetParameters.new) if params.empty? && no_other_update_params?
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", action)
+      raise(NoMethodForAction.new("DELETE", action))
     end
 
     # Our restrictions on edit permissions for the API are much more strict
@@ -138,7 +138,7 @@ class API
       params[:classification] = \
         Name.validate_classification(:Genus, @classification)
     rescue RuntimeError
-      raise BadClassification.new
+      raise(BadClassification.new)
     end
 
     # ----------------------------------------
@@ -153,8 +153,8 @@ class API
     def make_sure_name_parses!
       str   = Name.clean_incoming_string("#{@name} #{@author}")
       parse = Name.parse_name(str, rank: @rank, deprecated: @deprecated)
-      raise NameDoesntParse.new(@name)         unless parse
-      raise NameWrongForRank.new(@name, @rank) if parse.rank != @rank
+      raise(NameDoesntParse.new(@name))         unless parse
+      raise(NameWrongForRank.new(@name, @rank)) if parse.rank != @rank
 
       parse
     end
@@ -166,7 +166,7 @@ class API
                     match.any? { |n| n.author.blank? } ||
                     match.any? { |n| n.author == parse.author }
 
-      raise NameAlreadyExists.new(parse.search_name)
+      raise(NameAlreadyExists.new(parse.search_name))
     end
 
     def create_name(parse, params)
@@ -188,31 +188,31 @@ class API
     def must_be_creator!(name)
       return if name.user == @user
 
-      raise MustBeCreator.new(:name)
+      raise(MustBeCreator.new(:name))
     end
 
     def must_be_only_editor!(name)
       return unless name.versions.any? { |x| x.user_id != @user.id }
 
-      raise MustBeOnlyEditor.new(:name)
+      raise(MustBeOnlyEditor.new(:name))
     end
 
     def must_own_all_descriptions!(name)
       return unless name.descriptions.any? { |x| x.user != @user }
 
-      raise MustOwnAllDescriptions.new(:name)
+      raise(MustOwnAllDescriptions.new(:name))
     end
 
     def must_own_all_observations!(name)
       return unless name.observations.any? { |x| x.user != @user }
 
-      raise MustOwnAllObservations.new(:name)
+      raise(MustOwnAllObservations.new(:name))
     end
 
     def must_own_all_namings!(name)
       return unless name.namings.any? { |x| x.user != @user }
 
-      raise MustOwnAllNamings.new(:name)
+      raise(MustOwnAllNamings.new(:name))
     end
 
     def parse_set_name!
@@ -222,7 +222,7 @@ class API
       return unless @name || @author || @rank
       return if query.num_results < 2
 
-      raise TryingToSetMultipleNamesAtOnce.new
+      raise(TryingToSetMultipleNamesAtOnce.new)
     end
 
     def parse_set_synonymy!
@@ -234,8 +234,8 @@ class API
                 (@clear_synonyms ? 1 : 0) +
                 (@set_correct_spelling ? 1 : 0) <= 1
 
-      raise OneOrTheOther.new([:synonymize_with, :clear_synonyms,
-                               :set_correct_spelling])
+      raise(OneOrTheOther.new([:synonymize_with, :clear_synonyms,
+                               :set_correct_spelling]))
     end
 
     # Disable cop because there's no reasonable way to avoid the offense
@@ -261,7 +261,7 @@ class API
 
     def add_synonym(name)
       return unless @synonymize_with
-      raise CanOnlySynonymizeUnsynonimizedNames.new if name.synonym_id
+      raise(CanOnlySynonymizeUnsynonimizedNames.new) if name.synonym_id
 
       name.merge_synonyms(@synonymize_with)
     end
@@ -275,7 +275,7 @@ class API
     def change_correct_spelling(name)
       return unless @correct_spelling
       return if name.correct_spelling_id == @correct_spelling.id
-      raise CanOnlySynonymizeUnsynonimizedNames.new \
+      raise(CanOnlySynonymizeUnsynonimizedNames.new) \
         if name.synonym_id && name_synonym_id != @correct_spelling.synonym_id
 
       name.change_deprecated(true) unless name.deprecated

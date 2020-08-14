@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
-require "auto_complete"
+require("auto_complete")
 
 class AutoCompleteMock < AutoCompleteByString
   attr_accessor :rough_matches, :limit

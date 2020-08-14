@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class HerbariumRecordControllerTest < FunctionalTestCase
   def herbarium_record_params

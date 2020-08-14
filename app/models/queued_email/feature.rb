@@ -9,7 +9,7 @@ class QueuedEmail::Feature < QueuedEmail
 
   def self.create_email(receiver, content)
     result = create(nil, receiver)
-    raise "Missing content!" unless content
+    raise("Missing content!") unless content
 
     result.set_note(content)
     result.finish

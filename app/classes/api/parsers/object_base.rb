@@ -5,10 +5,10 @@ class API
     # Base class for API object parsers.
     class ObjectBase < Base
       def parse(str)
-        raise BadParameterValue.new(str, model.type_tag) if str.blank?
+        raise(BadParameterValue.new(str, model.type_tag)) if str.blank?
 
         obj = find_object(str)
-        raise ObjectNotFoundByString.new(str, model) unless obj
+        raise(ObjectNotFoundByString.new(str, model)) unless obj
 
         check_permissions!(obj)
         value_based_on_as_argument(args[:as], str, obj)
@@ -24,11 +24,11 @@ class API
         obj = model.safe_find(str.to_i)
         return obj if obj
 
-        raise ObjectNotFoundById.new(str, model)
+        raise(ObjectNotFoundById.new(str, model))
       end
 
       def try_finding_by_string(str)
-        raise BadParameterValue.new(str, key)
+        raise(BadParameterValue.new(str, key))
       end
 
       def check_permissions!(obj)
@@ -40,19 +40,19 @@ class API
       def check_if_owner!(obj)
         return if obj.user == api.user
 
-        raise MustBeOwner.new(obj)
+        raise(MustBeOwner.new(obj))
       end
 
       def check_view_permission!(obj)
         return if obj.can_view?(api.user)
 
-        raise MustHaveViewPermission.new(obj)
+        raise(MustHaveViewPermission.new(obj))
       end
 
       def check_edit_permission!(obj)
         return if obj.can_edit?(api.user)
 
-        raise MustHaveEditPermission.new(obj)
+        raise(MustHaveEditPermission.new(obj))
       end
 
       # ------------------------------------------------------------------------

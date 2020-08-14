@@ -287,7 +287,7 @@ module GeneralExtensions
     result = []
     file = "#{Rails.root}/test/fixtures/#{table}.yml"
     unless File.exist?(file)
-      raise "Can't find fixtures file for #{table}! Should be #{file}."
+      raise("Can't find fixtures file for #{table}! Should be #{file}.")
     end
 
     last_id = 0
@@ -300,8 +300,8 @@ module GeneralExtensions
       label = match[1]
       id = match[2].to_i
       if id != last_id + 1
-        raise "IDs are not consecutive at #{file} line #{line_num}: " \
-              "#{id} should be #{last_id + 1}\n"
+        raise("IDs are not consecutive at #{file} line #{line_num}: " \
+              "#{id} should be #{last_id + 1}\n")
       end
       result[id - 1] = label
       last_id = id
@@ -407,20 +407,20 @@ module GeneralExtensions
 
   # Dump out XML tree.
   def dump_xml(exp, indent = "")
-    print "#{indent}#{e.name}"
+    print("#{indent}#{e.name}")
     if exp.has_attributes?
       attrs = []
       exp.attributes.each do |a, v|
         attrs << "#{a}=#{v}"
       end
-      print "(#{attrs.join(" ")})"
+      print("(#{attrs.join(" ")})")
     end
     if exp.has_text? && exp.text =~ /\S/
       txt = exp.text.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ")
       txt = "\"#{txt}\"" if txt.match?(" ")
-      print " = #{txt}"
+      print(" = #{txt}")
     end
-    print "\n"
+    print("\n")
     if exp.has_elements?
       exp.elements.each do |child|
         dump_xml(child, indent + "  ")

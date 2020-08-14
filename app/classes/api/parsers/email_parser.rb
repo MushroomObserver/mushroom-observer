@@ -10,7 +10,7 @@ class API
         val = super || return
         return val if EMAIL.match?(val)
 
-        raise BadParameterValue.new(val, :email)
+        raise(BadParameterValue.new(val, :email))
       end
     end
   end

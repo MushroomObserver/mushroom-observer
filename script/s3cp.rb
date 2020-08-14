@@ -2,8 +2,8 @@
 # frozen_string_literal: true
 
 app_root = File.expand_path("..", __dir__)
-require "#{app_root}/app/classes/image_s3.rb"
-require "fileutils"
+require("#{app_root}/app/classes/image_s3.rb")
+require("fileutils")
 
 abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
@@ -69,7 +69,7 @@ if copy
     old_size, old_md5 = `grep ^#{key} #{cache_file} | tail -1`.split[1, 2]
     if old_size == size.to_s && old_md5 == md5
       log("Already uploaded #{server}/#{key}\n") if verbose
-      exit 0
+      exit(0)
     end
   end
 end
@@ -111,7 +111,7 @@ if copy
   end
   log("Uploaded #{server}/#{key}\n") if verbose
   File.open(cache_file, "a") do |fh|
-    fh.puts [key, size, md5].join("\t")
+    fh.puts([key, size, md5].join("\t"))
   end
 end
 
@@ -126,4 +126,4 @@ if delete
   FileUtils.rm(temp_file)
 end
 
-exit 0
+exit(0)

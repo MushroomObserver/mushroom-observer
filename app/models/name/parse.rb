@@ -378,7 +378,7 @@ class Name < AbstractModel
     if compare_ranks(prev_rank, next_rank) <= 0 ||
        Name.ranks_above_species.include?(prev_rank) &&
        Name.ranks_below_species.include?(next_rank)
-      raise RankMessedUp.new
+      raise(RankMessedUp.new)
     end
   end
 

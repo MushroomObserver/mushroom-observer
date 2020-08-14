@@ -30,9 +30,9 @@ module PatternSearch
           query_param, parse_method = param
           args[query_param] = term.send(parse_method)
         else
-          raise BadTermError.new(term: term,
+          raise(BadTermError.new(term: term,
                                  type: model.type_tag,
-                                 help: help_message)
+                                 help: help_message))
         end
       end
     end

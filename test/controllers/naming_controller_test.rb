@@ -2,7 +2,7 @@
 
 # frozen_string_literal: true.
 
-require "test_helper"
+require("test_helper")
 
 class NamingControllerTest < FunctionalTestCase
   def test_create_get

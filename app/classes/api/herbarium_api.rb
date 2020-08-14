@@ -28,15 +28,15 @@ class API
     end
 
     def post
-      raise NoMethodForAction.new("POST", :external_sites)
+      raise(NoMethodForAction.new("POST", :external_sites))
     end
 
     def patch
-      raise NoMethodForAction.new("PATCH", :external_sites)
+      raise(NoMethodForAction.new("PATCH", :external_sites))
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", :external_sites)
+      raise(NoMethodForAction.new("DELETE", :external_sites))
     end
   end
 end

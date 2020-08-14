@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ImageS3Test < UnitTestCase
   def test_basic_stuff
@@ -11,7 +11,7 @@ class ImageS3Test < UnitTestCase
       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       stub: true # (makes Aws::S3 return empty responses for everything)
     )
-    assert s3.status("key")
+    assert(s3.status("key"))
     s3.list.each do |_obj|
       break
     end
@@ -33,7 +33,7 @@ class ImageS3Test < UnitTestCase
       stub: true
     )
     s3.client.stub_responses(:head_object, "NotFound")
-    assert_nil s3.status("key")
+    assert_nil(s3.status("key"))
   end
 
   def test_503_error

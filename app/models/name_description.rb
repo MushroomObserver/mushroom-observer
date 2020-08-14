@@ -217,7 +217,7 @@ class NameDescription < Description
     # Save unless there are substantive changes pending.
     unless save_version?
       save_without_our_callbacks
-      raise "update_review_status failed: [#{dump_errors}]" unless errors.empty?
+      raise("update_review_status failed: [#{dump_errors}]") unless errors.empty?
     end
   end
 

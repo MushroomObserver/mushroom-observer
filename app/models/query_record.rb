@@ -15,12 +15,12 @@ class QueryRecord < ApplicationRecord
                   (@@last_cleanup < 5.minutes.ago) ||
                   ::Rails.env.test?
 
-    connection.delete %(
+    connection.delete(%(
       DELETE FROM #{table_name}
       WHERE
         access_count = 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR
         access_count > 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
-    )
+    ))
     @@last_cleanup = Time.zone.now
   end
 end

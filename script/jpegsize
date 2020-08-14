@@ -74,7 +74,7 @@ else
 end
 
 # Help message whenever screw up command line.
-warn %(
+warn(%(
   USAGE
     script/jpegsize <file>.jpg
     script/jpegsize -f <file_list.txt>
@@ -86,6 +86,6 @@ warn %(
     -h --help             Print this message.
     -f --file <file>      Report size of all files listed in <file>.
 
-)
+))
 
-exit 1
+exit(1)

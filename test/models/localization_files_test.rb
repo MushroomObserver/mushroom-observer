@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LocalizationFilesTest < UnitTestCase
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)
     msg = "Missing #{type} translations:\n" +
           missing.map(&:inspect).sort.join("\n") + "\n"
-    assert_empty missing, msg
+    assert_empty(missing, msg)
   end
 
   ##############################################################################
@@ -22,8 +22,8 @@ class LocalizationFilesTest < UnitTestCase
     Language.clear_verbose_messages
     lang.check_export_syntax
     errors += Language.verbose_messages
-    assert_empty errors, "Bad syntax in language export files:\n" +
-                         errors.join("\n")
+    assert_empty(errors, "Bad syntax in language export files:\n" +
+                         errors.join("\n"))
   end
 
   # Make sure all "[:tag]" refs inside the translations exist.

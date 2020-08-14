@@ -33,7 +33,7 @@ class API
       Location.check_for_bad_chars(name)
     return if citations.none?
 
-    raise DubiousLocationName.new(citations)
+    raise(DubiousLocationName.new(citations))
   end
 
   def parse_bounding_box!
@@ -44,7 +44,7 @@ class API
     return if no_edges(n, s, e, w)
     return [n, s, e, w] if all_edges(n, s, e, w)
 
-    raise NeedAllFourEdges.new
+    raise(NeedAllFourEdges.new)
   end
 
   #########

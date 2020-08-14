@@ -11,7 +11,7 @@ class AjaxController
   def api_key
     @user = session_user!
     key   = ApiKey.find(@id)
-    raise "Permission denied" if key.user != @user
+    raise("Permission denied") if key.user != @user
 
     if @type == "activate"
       activate_api_key(key)
@@ -28,7 +28,7 @@ class AjaxController
   end
 
   def edit_api_key(key, value)
-    raise :runtime_api_key_notes_cannot_be_blank.l if value.blank?
+    raise(:runtime_api_key_notes_cannot_be_blank.l) if value.blank?
 
     key.update_attribute(:notes, value.strip_squeeze)
     render(plain: key.notes)

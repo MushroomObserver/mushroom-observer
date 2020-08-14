@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LicenseTest < UnitTestCase
   def test_current_names_and_ids

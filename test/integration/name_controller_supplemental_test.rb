@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Tests which supplement controller/name_controller_test.rb
 class NameControllerSupplementalTest < IntegrationTestCase

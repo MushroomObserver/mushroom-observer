@@ -12,6 +12,6 @@ class Object
   # called the caller, and winding up at the executable program's name.
   def _stacktrace
     result = caller(2)
-    result.push "main: #{File.expand_path($PROGRAM_NAME)}"
+    result.push("main: #{File.expand_path($PROGRAM_NAME)}")
   end
 end

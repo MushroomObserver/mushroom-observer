@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 # test Observation model
 class ObservationTest < UnitTestCase
   def create_new_objects
@@ -33,7 +33,7 @@ class ObservationTest < UnitTestCase
   def test_update
     create_new_objects
     assert_save(@cc_nam)
-    assert_equal names(:fungi), @cc_nam.name
+    assert_equal(names(:fungi), @cc_nam.name)
     @cc_nam.name = names(:coprinus_comatus)
     assert_save(@cc_nam)
     @cc_nam.reload

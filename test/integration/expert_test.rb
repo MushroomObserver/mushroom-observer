@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Test a few representative sessions of a power-user.
 class ExpertTest < IntegrationTestCase

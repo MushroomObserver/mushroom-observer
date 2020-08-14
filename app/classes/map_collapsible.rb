@@ -80,7 +80,7 @@ class CollapsibleCollectionOfMappableObjects
 
   def init_sets(objects)
     objects = [objects] unless objects.is_a?(Array)
-    raise "Tried to create empty map!" if objects.empty?
+    raise("Tried to create empty map!") if objects.empty?
 
     @sets = {}
     for obj in objects
@@ -93,7 +93,7 @@ class CollapsibleCollectionOfMappableObjects
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
-        raise "Tried to map #{obj.class}!"
+        raise("Tried to map #{obj.class}!")
       end
     end
   end

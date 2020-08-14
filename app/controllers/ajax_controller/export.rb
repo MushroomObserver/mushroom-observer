@@ -9,8 +9,8 @@ class AjaxController
   def export
     @user  = session_user!
     @image = Image.find(@id)
-    raise "Permission denied." unless @user.in_group?("reviewers")
-    raise "Bad value." if @value != "0" && @value != "1"
+    raise("Permission denied.") unless @user.in_group?("reviewers")
+    raise("Bad value.") if @value != "0" && @value != "1"
 
     export_image(@image, @value)
   end

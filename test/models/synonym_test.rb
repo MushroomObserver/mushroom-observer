@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class SynonymTest < UnitTestCase
   def test_make_sure_all_referenced_synonyms_exist

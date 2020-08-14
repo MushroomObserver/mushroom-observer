@@ -4,7 +4,7 @@
 # TODO: vote API
 # TODO: image_vote API
 
-require "test_helper"
+require("test_helper")
 
 class Hash
   def remove(*keys)
@@ -4095,12 +4095,12 @@ class ApiTest < UnitTestCase
       return unless File.exist?(file)
 
       File.open(file, "a") do |fh|
-        fh.puts "#{method.to_s.upcase} #{action}"
-        fh.puts api.errors.first.to_s.gsub(/; /, "\n  ").
+        fh.puts("#{method.to_s.upcase} #{action}")
+        fh.puts(api.errors.first.to_s.gsub(/; /, "\n  ").
           sub(/^Usage: /, "  ").
           sub(/^  query params: */, " query params\n  ").
           sub(/^  update params: */, " update params\n  ").
-          gsub(/^(  [^:]*:) */, "\\1\t")
+          gsub(/^(  [^:]*:) */, "\\1\t"))
         fh.puts
       end
     end

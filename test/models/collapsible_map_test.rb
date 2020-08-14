@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
-require "map_collapsible"
-require "map_set"
+require("map_collapsible")
+require("map_set")
 
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
@@ -93,8 +93,8 @@ class CollapsibleMapTest < UnitTestCase
       end
       messages << message
     end
-    assert_not differ, "Mapsets are wrong: expect -vs- actual\n" \
-                   "#{messages.join} \n"
+    assert_not(differ, "Mapsets are wrong: expect -vs- actual\n" \
+                   "#{messages.join} \n")
   end
 
   # ------------------------------------------------------------

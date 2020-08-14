@@ -21,7 +21,7 @@ class AjaxController
   def cast_naming_vote(id, value_str)
     @naming = Naming.find(id)
     value = Vote.validate_value(value_str)
-    raise "Bad value." unless value
+    raise("Bad value.") unless value
 
     @naming.change_vote(value, @user)
     @observation = @naming.observation
@@ -36,7 +36,7 @@ class AjaxController
 
   def cast_image_vote(id, value)
     image = Image.find(id)
-    raise "Bad value." if value != "0" && !Image.validate_vote(value)
+    raise("Bad value.") if value != "0" && !Image.validate_vote(value)
 
     value = value == "0" ? nil : Image.validate_vote(value)
     anon = (@user.votes_anonymous == :yes)
