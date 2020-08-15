@@ -137,7 +137,7 @@ class NameSorter
     else
       raise(TypeError.new(
         "NameSorter synonyms must be Integer or ActiveRecord::Base, "\
-        "not #{arg.clasS}."
+        "not #{arg.class}."
       ))
     end
   end
