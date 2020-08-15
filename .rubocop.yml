@@ -77,6 +77,11 @@ Style/BisectedAttrAccessor:
   Enabled: true
 
 # (0.88)
+# Unsafe -- although the 0.88 documentation says "Safe"
+# The edge case is an if-elsif with a regex,
+# where the following code depends on $1 being something other than true/false,
+# e.g., where it uses a named capture group.
+# This has been reported https://github.com/rubocop-hq/rubocop/issues/8541
 Style/CaseLikeIf:
   Enabled: true
 
