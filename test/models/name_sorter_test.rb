@@ -95,4 +95,37 @@ class NameSorterTest < UnitTestCase
     assert_equal(["Genus Foobar = Genus Bazwoof"], name_sorter.new_line_strs)
     assert_equal([], name_sorter.all_names)
   end
+
+  def test_append_approved_synonym
+    sorter = NameSorter.new
+    sorter.add_name(names(:namings_deprecated_1).text_name)
+    sorter.add_name(names(:namings_deprecated_2).text_name)
+
+    sorter.append_approved_synonyms([names(:namings_deprecated).id])
+    assert(sorter.approved_synonyms.include?(names(:namings_deprecated)))
+
+    sorter.append_approved_synonyms("#{names(:fungi).id}/#{names(:lichen).id}")
+    assert(sorter.approved_synonyms.include?(names(:fungi)))
+    assert(sorter.approved_synonyms.include?(names(:lichen)))
+
+    assert_raises(TypeError) do
+      sorter.append_approved_synonyms(names(:suillus))
+    end
+  end
+
+  def test_push_synonym
+    sorter = NameSorter.new
+    sorter.add_name(names(:namings_deprecated_1).text_name)
+    sorter.add_name(names(:namings_deprecated_2).text_name)
+
+    sorter.push_synonym(names(:namings_deprecated).id)
+    assert(sorter.approved_synonyms.include?(names(:namings_deprecated)))
+
+    sorter.push_synonym(names(:fungi))
+    assert(sorter.approved_synonyms.include?(names(:fungi)))
+
+    assert_raises(TypeError) do
+      sorter.push_synonym("A string")
+    end
+  end
 end
