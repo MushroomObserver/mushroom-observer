@@ -48,10 +48,10 @@ herbarium_record_with_notes:
     accession_number: yyy
     notes: rare
 
-mycoflora_record:
+fundis_record:
     created_at: 2017-11-29 18:08:00
     updated_at: 2017-11-29 18:08:00
-    herbarium: mycoflora_herbarium
+    herbarium: fundis_herbarium
     user: mary
     initial_det: Fungi
     accession_number: 314159
