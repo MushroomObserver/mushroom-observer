@@ -1300,7 +1300,7 @@
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
   download_observations_symbiota: Symbiota
-  download_observations_mycoflora: MycoFlora
+  download_observations_fundis: FunDiS
   download_observations_what_is_this: what is this?
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
