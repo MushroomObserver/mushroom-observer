@@ -23,7 +23,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_herbarium_with_no_herbarium_records_index
     get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:list_herbarium_records)
-    assert_flash_text(/No matching herbarium records found/)
+    assert_flash_text(/No matching fungarium records found/)
   end
 
   def test_observation_index
@@ -36,7 +36,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     get_with_dump(:observation_index,
                   id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:list_herbarium_records)
-    assert_flash_text(/No matching herbarium records found/)
+    assert_flash_text(/No matching fungarium records found/)
   end
 
   def test_herbarium_record_search
