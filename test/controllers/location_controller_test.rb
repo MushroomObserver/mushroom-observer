@@ -289,7 +289,7 @@ class LocationControllerTest < FunctionalTestCase
                               gen_desc: "nifty botanical garden",
                               ecology: "varied",
                               species: "all",
-                              notes: "NAMP participant",
+                              notes: "FunDiS participant",
                               refs: "" },
                id: loc.id }
 

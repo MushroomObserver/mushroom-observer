@@ -8,7 +8,7 @@
 #
 #  DESCRIPTION::
 #
-#  Creates JSON data file for Narth American Mycoflora Project's
+#  Creates JSON data file for Fungal Diversity Survey's
 #  Mushroom Mapper app.
 #
 #  It writes output to:
