@@ -181,12 +181,13 @@ module GM
     def div(args)
       width = height = nil
       args.each do |key, val|
-        if key == :width
+        case key
+        when :width
           width = val
-        elsif key == :height
+        when :height
           height = val
         else
-          raise "Unexpected option \"#{key}\" for GMap#div."
+          raise("Unexpected option \"#{key}\" for GMap#div.")
         end
       end
       height = height.to_s + "px" if height.is_a?(Integer)
@@ -263,12 +264,13 @@ module GM
       self.draggable   = false
       self.info_window = nil
       opts.each_key do |key|
-        if key == :draggable
+        case key
+        when :draggable
           self.draggable = !!opts[key]
-        elsif key == :title
+        when :title
           self.title = opts[key].to_s
         else
-          raise "Unexpected option \"#{key}\" for GMarker."
+          raise("Unexpected option \"#{key}\" for GMarker.")
         end
       end
     end

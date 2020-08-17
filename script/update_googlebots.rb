@@ -31,10 +31,10 @@ end
 # ----------------------------------------
 
 app_root = File.expand_path("..", __dir__)
-require "#{app_root}/config/consts.rb"
-require "#{app_root}/app/classes/ip_stats.rb"
-require "fileutils"
-require "time"
+require("#{app_root}/config/consts.rb")
+require("#{app_root}/app/classes/ip_stats.rb")
+require("fileutils")
+require("time")
 
 abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
@@ -89,4 +89,4 @@ new_ips.each do |ip|
 end
 IpStats.add_okay_ips(new_ips)
 
-exit 0
+exit(0)

@@ -17,7 +17,7 @@ class TranslationController < ApplicationController
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
     @form = build_form(@lang, @show_tags)
   rescue StandardError => e
-    raise e if Rails.env.test? && @lang
+    raise(e) if Rails.env.test? && @lang
 
     flash_error(*error_message(e))
     redirect_back_or_default("/")

@@ -138,7 +138,7 @@ class QueuedEmail < AbstractModel
   #
   Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
     match = /(\w+)\.rb$/.match(file)
-    require "queued_email/#{match[1]}" if match
+    require("queued_email/#{match[1]}") if match
   end
 
   # ----------------------------
@@ -279,7 +279,7 @@ class QueuedEmail < AbstractModel
     # Failing to send email should not throw an error in production
     return warn(error) if Rails.env.production?
 
-    raise error
+    raise(error)
   end
 
   # Returns "flavor from to" for debugging.

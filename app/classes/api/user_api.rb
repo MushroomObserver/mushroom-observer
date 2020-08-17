@@ -61,11 +61,11 @@ class API
 
     def validate_create_params!(params)
       login = params[:login]
-      raise MissingParameter.new(:login)    unless params[:login]
-      raise MissingParameter.new(:name)     unless params[:name]
-      raise MissingParameter.new(:email)    unless params[:email]
-      raise MissingParameter.new(:password) unless params[:password]
-      raise UserAlreadyExists.new(login)    if User.find_by_login(login)
+      raise(MissingParameter.new(:login))    unless params[:login]
+      raise(MissingParameter.new(:name))     unless params[:name]
+      raise(MissingParameter.new(:email))    unless params[:email]
+      raise(MissingParameter.new(:password)) unless params[:password]
+      raise(UserAlreadyExists.new(login))    if User.find_by_login(login)
 
       params[:password_confirmation] = params[:password]
     end
@@ -81,7 +81,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", action)
+      raise(NoMethodForAction.new("DELETE", action))
     end
   end
 end

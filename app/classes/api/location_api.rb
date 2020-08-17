@@ -58,11 +58,11 @@ class API
 
     def validate_create_params!(params)
       name = params[:display_name]
-      raise MissingParameter.new(:name)  unless params[:display_name]
-      raise MissingParameter.new(:north) unless params[:north]
-      raise MissingParameter.new(:south) unless params[:south]
-      raise MissingParameter.new(:east)  unless params[:east]
-      raise MissingParameter.new(:west)  unless params[:west]
+      raise(MissingParameter.new(:name))  unless params[:display_name]
+      raise(MissingParameter.new(:north)) unless params[:north]
+      raise(MissingParameter.new(:south)) unless params[:south]
+      raise(MissingParameter.new(:east))  unless params[:east]
+      raise(MissingParameter.new(:west))  unless params[:west]
 
       make_sure_location_doesnt_exist!(name)
       make_sure_location_isnt_dubious!(name)
@@ -73,11 +73,11 @@ class API
       make_sure_location_doesnt_exist!(name)
       make_sure_location_isnt_dubious!(name)
       make_sure_not_setting_name_of_multiple_locations!
-      raise MissingSetParameters.new if params.empty?
+      raise(MissingSetParameters.new) if params.empty?
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", action)
+      raise(NoMethodForAction.new("DELETE", action))
     end
 
     # Our restrictions on edit permissions for the API are much more strict
@@ -101,53 +101,53 @@ class API
     def must_be_creator!(loc)
       return if loc.user == @user
 
-      raise MustBeCreator.new(:location)
+      raise(MustBeCreator.new(:location))
     end
 
     def must_be_only_editor!(loc)
       return unless loc.versions.any? { |x| x.user_id != @user.id }
 
-      raise MustBeOnlyEditor.new(:location)
+      raise(MustBeOnlyEditor.new(:location))
     end
 
     def must_own_all_descriptions!(loc)
       return unless loc.descriptions.any? { |x| x.user != @user }
 
-      raise MustOwnAllDescriptions.new(:location)
+      raise(MustOwnAllDescriptions.new(:location))
     end
 
     def must_own_all_observations!(loc)
       return unless loc.observations.any? { |x| x.user != @user }
 
-      raise MustOwnAllObservations.new(:location)
+      raise(MustOwnAllObservations.new(:location))
     end
 
     def must_own_all_species_lists!(loc)
       return unless loc.species_lists.any? { |x| x.user != @user }
 
-      raise MustOwnAllSpeciesLists.new(:location)
+      raise(MustOwnAllSpeciesLists.new(:location))
     end
 
     def must_not_be_another_users_profile_location!(loc)
       return unless loc.users.any? { |x| x != @user }
 
-      raise AnotherUsersProfileLocation.new
+      raise(AnotherUsersProfileLocation.new)
     end
 
     def must_not_have_any_herbaria!(loc)
       return unless loc.herbaria.any?
 
-      raise MustNotHaveAnyHerbaria.new
+      raise(MustNotHaveAnyHerbaria.new)
     end
 
     def make_sure_location_doesnt_exist!(name)
       return unless Location.find_by_name_or_reverse_name(name)
 
-      raise LocationAlreadyExists.new(name)
+      raise(LocationAlreadyExists.new(name))
     end
 
     def make_sure_not_setting_name_of_multiple_locations!
-      raise TryingToSetMultipleLocationsToSameName.new \
+      raise(TryingToSetMultipleLocationsToSameName.new) \
         if query.num_results > 1
     end
   end

@@ -272,7 +272,7 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      raise :runtime_user_bad_rank.t(rank: rank.to_s) if rank_index(rank).nil?
+      raise(:runtime_user_bad_rank.t(rank: rank.to_s)) if rank_index(rank).nil?
 
       rank_idx = [rank_index(:Genus), rank_index(rank)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
@@ -289,22 +289,22 @@ class Name < AbstractModel
                       end
         line_rank_idx = rank_index(line_rank)
         if line_rank_idx.nil?
-          raise :runtime_user_bad_rank.t(rank: line_rank.to_s)
+          raise(:runtime_user_bad_rank.t(rank: line_rank.to_s))
         end
 
         line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
 
         if line_rank_idx <= rank_idx
-          raise :runtime_invalid_rank.t(line_rank: line_rank_str,
-                                        rank: rank_str)
+          raise(:runtime_invalid_rank.t(line_rank: line_rank_str,
+                                        rank: rank_str))
         end
         if parsed_names[line_rank]
-          raise :runtime_duplicate_rank.t(rank: line_rank_str)
+          raise(:runtime_duplicate_rank.t(rank: line_rank_str))
         end
 
         if real_rank != expect_rank && kingdom == "Fungi"
-          raise :runtime_wrong_rank.t(expect: line_rank_str,
-                                      actual: real_rank_str, name: line_name)
+          raise(:runtime_wrong_rank.t(expect: line_rank_str,
+                                      actual: real_rank_str, name: line_name))
         end
         parsed_names[line_rank] = line_name
         kingdom = line_name if line_rank == :Kingdom
@@ -354,7 +354,7 @@ class Name < AbstractModel
           line_name = match[2]
           results.push([line_rank, line_name])
         elsif line.present?
-          raise :runtime_invalid_classification.t(text: line)
+          raise(:runtime_invalid_classification.t(text: line))
         end
       end
     end

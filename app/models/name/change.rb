@@ -11,14 +11,14 @@ class Name < AbstractModel
     in_str = Name.clean_incoming_string("#{in_text_name} #{in_author}")
     parse = Name.parse_name(in_str, rank: in_rank, deprecated: deprecated)
     if !parse || parse.rank != in_rank
-      raise :runtime_invalid_for_rank.t(rank: :"rank_#{in_rank.to_s.downcase}",
-                                        name: in_str)
+      raise(:runtime_invalid_for_rank.t(rank: :"rank_#{in_rank.to_s.downcase}",
+                                        name: in_str))
     end
     if parse.parent_name &&
        !Name.find_by_text_name(parse.parent_name)
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       if parents.last.nil?
-        raise :runtime_unable_to_create_name.t(name: parse.parent_name)
+        raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
       elsif save_parents
         parents.each { |n| n.save if n&.new_record? }
       end

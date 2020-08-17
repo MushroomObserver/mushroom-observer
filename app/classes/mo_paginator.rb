@@ -156,7 +156,7 @@ class MOPaginator
   # Validate the number per page.
   def num_per_page=(num)
     @num_per_page = num.to_i
-    raise "Invalid num_per_page: #{num.inspect}" if @num_per_page < 1
+    raise("Invalid num_per_page: #{num.inspect}") if @num_per_page < 1
 
     @num_per_page
   end

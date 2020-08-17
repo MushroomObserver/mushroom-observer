@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "net/http"
-require "rexml/document"
+require("net/http")
+require("rexml/document")
 
 #  = Geocoder Class
 #

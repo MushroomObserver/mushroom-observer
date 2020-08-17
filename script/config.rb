@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "yaml"
+require("yaml")
 
 class ImageConfigData
   def initialize
@@ -51,6 +51,6 @@ end
 
 # If run from command line, evaluate arguments and print results.
 if File.basename($PROGRAM_NAME) == "config.rb"
-  puts ARGV.map { |arg| eval(arg).to_s }.join("\n")
-  exit 0
+  puts(ARGV.map { |arg| eval(arg).to_s }.join("\n"))
+  exit(0)
 end

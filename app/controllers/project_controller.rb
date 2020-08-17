@@ -115,14 +115,14 @@ class ProjectController < ApplicationController
       @is_member = @project.is_member?(@user)
       @is_admin = @project.is_admin?(@user)
 
-      @draft_data = Project.connection.select_all %(
+      @draft_data = Project.connection.select_all(%(
         SELECT n.display_name, nd.id, nd.user_id
         FROM names n, name_descriptions nd, name_descriptions_admins nda
         WHERE nda.user_group_id = #{@project.admin_group_id}
           AND nd.id = nda.name_description_id
           AND n.id = nd.name_id
         ORDER BY n.sort_name ASC, n.author ASC
-      )
+      ))
       @draft_data = @draft_data.to_a
     end
   end

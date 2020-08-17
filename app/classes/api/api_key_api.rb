@@ -20,7 +20,7 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:app) if params[:notes].blank?
+      raise(MissingParameter.new(:app)) if params[:notes].blank?
     end
 
     def after_create(api_key)
@@ -30,15 +30,15 @@ class API
     end
 
     def get
-      raise NoMethodForAction.new("GET", :api_keys)
+      raise(NoMethodForAction.new("GET", :api_keys))
     end
 
     def patch
-      raise NoMethodForAction.new("PATCH", :api_keys)
+      raise(NoMethodForAction.new("PATCH", :api_keys))
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", :api_keys)
+      raise(NoMethodForAction.new("DELETE", :api_keys))
     end
   end
 end

@@ -217,7 +217,7 @@ class ObserverController
 
   def download_observations
     @query = find_or_create_query(:Observation, by: params[:by])
-    raise "no robots!" if browser.bot?
+    raise("no robots!") if browser.bot?
 
     query_params_set(@query)
     @format = params[:format] || "raw"

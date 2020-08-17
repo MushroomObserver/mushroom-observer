@@ -107,7 +107,7 @@ module Query::Modules::HighLevelQueries
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
     if !letters.is_a?(String)
-      raise "You must pass a SQL expression to 'need_letters'."
+      raise("You must pass a SQL expression to 'need_letters'.")
     elsif need_letters != letters
       @result_ids = nil
       @num_results = nil
@@ -191,7 +191,7 @@ module Query::Modules::HighLevelQueries
     extra_args = args.keys - expect
     return if extra_args.empty?
 
-    raise "Unexpected arguments to Query##{method}: #{extra_args.inspect}"
+    raise("Unexpected arguments to Query##{method}: #{extra_args.inspect}")
   end
 
   # Split up a Hash of arguments, putting all the ones in the given list in

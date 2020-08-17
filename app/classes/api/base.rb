@@ -254,7 +254,7 @@ class API
     subclass = subclass.constantize
     subclass.new(params)
   rescue StandardError
-    raise BadAction.new(action)
+    raise(BadAction.new(action))
   end
 
   def initialize(params = {})
@@ -269,7 +269,7 @@ class API
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
-      raise BadVersion.new(version)
+      raise(BadVersion.new(version))
     else
       self.version = version.to_f
     end
@@ -282,9 +282,9 @@ class API
       User.current_location_format = :postal
     else
       key = ApiKey.find_by(key: key_str)
-      raise BadApiKey.new(key_str)        unless key
-      raise ApiKeyNotVerified.new(key)    unless key.verified
-      raise UserNotVerified.new(key.user) unless key.user.verified
+      raise(BadApiKey.new(key_str))        unless key
+      raise(ApiKeyNotVerified.new(key))    unless key.verified
+      raise(UserNotVerified.new(key.user)) unless key.user.verified
 
       User.current = self.user = key.user
       User.current_location_format = :postal
@@ -297,17 +297,17 @@ class API
   def process_request
     tmp_method  = parse(:string, :method)
     self.method = tmp_method.downcase.to_sym
-    raise MissingMethod.new     unless method
-    raise BadMethod.new(method) unless respond_to?(method)
+    raise(MissingMethod.new)     unless method
+    raise(BadMethod.new(method)) unless respond_to?(method)
 
     send(method)
   end
 
   def abort_if_any_errors!
-    raise AbortDueToErrors.new if errors.any?
+    raise(AbortDueToErrors.new) if errors.any?
   end
 
   def must_authenticate!
-    raise MustAuthenticate.new unless user
+    raise(MustAuthenticate.new) unless user
   end
 end

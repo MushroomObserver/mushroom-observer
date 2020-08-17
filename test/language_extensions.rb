@@ -4,7 +4,7 @@
 # TypeError: superclass mismatch for class Language
 #   /vagrant/mushroom-observer/app/models/language.rb:27:in `<top (required)>'
 # when running rake
-require "language.rb"
+require("language.rb")
 
 class Language
   @@verbose_messages = []

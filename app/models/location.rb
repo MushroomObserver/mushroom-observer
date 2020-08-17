@@ -248,7 +248,7 @@ class Location < AbstractModel
       location = Location.where("name LIKE ?", name).first
       return location if location
     end
-    raise "There is no \"unknown\" location!"
+    raise("There is no \"unknown\" location!")
   end
 
   # Is this one of the names we recognize for the "unknown" location?

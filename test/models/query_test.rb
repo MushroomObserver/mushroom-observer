@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "set"
+require("test_helper")
+require("set")
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)

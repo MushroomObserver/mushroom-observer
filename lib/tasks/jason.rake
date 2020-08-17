@@ -57,7 +57,7 @@ namespace :jason do
             table2 = Regexp.last_match(1)
           elsif table == table2 && line.match(/^ +t.text +"(\w+)"/)
             column = Regexp.last_match(1)
-            print "Getting #{table} #{column}...\n"
+            print("Getting #{table} #{column}...\n")
             notes += Name.connection.select_values(
               "SELECT DISTINCT #{column} FROM #{table}"
             )
@@ -67,7 +67,7 @@ namespace :jason do
     end
     print "Writing notes.yml...\n"
     File.open("notes.yml", "w") do |fh|
-      fh.write notes.select { |x| x&.index("_") }.uniq.to_yaml
+      fh.write(notes.select { |x| x&.index("_") }.uniq.to_yaml)
     end
     print "Done!\n"
   end
@@ -84,8 +84,8 @@ namespace :jason do
       next unless str.index("_")
 
       if (n % 15).zero?
-        print format("%.2f%% done\n", (100.0 * n / notes.length))
-        sleep 1
+        print(format("%.2f%% done\n", (100.0 * n / notes.length)))
+        sleep(1)
       end
       n += 1
       begin
@@ -96,7 +96,7 @@ namespace :jason do
     end
     print "Writing redcloth.yml...\n"
     File.open("redcloth.yml", "w") do |fh|
-      fh.write results.map(&:to_yaml)
+      fh.write(results.map(&:to_yaml))
     end
     print "Done!\n"
   end
@@ -216,7 +216,7 @@ namespace :jason do
         name_parse = NameParse.new(name)
         results = Name.find_or_create_name_and_parents(name_parse.search_name)
         if results.last.nil?
-          print "\nError: #{name_parse.name}\n"
+          print("\nError: #{name_parse.name}\n")
           name = nil
         else
           name = n = results.last
@@ -238,7 +238,7 @@ namespace :jason do
           name_parse.synonym_search_name
         )
         if results.last.nil?
-          print "\nError: = #{name_parse.synonym}\n"
+          print("\nError: = #{name_parse.synonym}\n")
         else
           synonym = n = results.last
           n.rank  = name_parse.synonym_rank if name_parse.synonym_rank
@@ -277,7 +277,7 @@ namespace :jason do
     for hash in Comment.connection.select_all("show global status").to_a
       key = hash["Variable_name"]
       val = hash["Value"]
-      printf "%-40.40s %s\n", key, val
+      printf("%-40.40s %s\n", key, val)
     end
     Comment.connection.execute("flush status")
   end

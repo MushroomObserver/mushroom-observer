@@ -9,7 +9,7 @@ class API
       def parse(str)
         scalar_yyyymmdd(str)
       rescue ArgumentError
-        raise BadParameterValue.new(str, :date)
+        raise(BadParameterValue.new(str, :date))
       end
 
       def parse_range
@@ -19,7 +19,7 @@ class API
 
         try_all_range_patterns(str)
       rescue ArgumentError
-        raise BadParameterValue.new(str, :date_range)
+        raise(BadParameterValue.new(str, :date_range))
       end
 
       private
@@ -152,7 +152,7 @@ class API
         match = str.match(/^#{YYYYMMDD1}$/) ||
                 str.match(/^#{YYYYMMDD2}$/) ||
                 str.match(/^#{YYYYMMDD3}$/)
-        raise ArgumentError unless match
+        raise(ArgumentError) unless match
 
         str = strip_time(str)
         Date.parse(str)

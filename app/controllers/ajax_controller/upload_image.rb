@@ -42,7 +42,7 @@ class AjaxController
     upload_image(image, args)
     return image if image.save && image.process_image
 
-    raise image.formatted_errors.join("\n")
+    raise(image.formatted_errors.join("\n"))
   ensure
     image.try(&:clean_up)
   end

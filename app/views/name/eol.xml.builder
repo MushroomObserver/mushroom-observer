@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-xml.instruct! :xml, version: "1.0"
+xml.instruct!(:xml, version: "1.0")
 xml.response(
   "xmlns" => "http://www.eol.org/transfer/content/0.2",
   "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",

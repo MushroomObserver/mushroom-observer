@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require File.expand_path("config", __dir__)
+require(File.expand_path("config", __dir__))
 TESTING = true
 
 # # ----------------------------
@@ -45,11 +45,11 @@ TESTING = true
 #  Access via Pivotal class.
 # ----------------------------
 
-require File.expand_path("../app/classes/pivotal/http.rb", __dir__)
-require File.expand_path("../app/classes/pivotal/story.rb", __dir__)
-require File.expand_path("../app/classes/pivotal/comment.rb", __dir__)
-require File.expand_path("../app/classes/pivotal/vote.rb", __dir__)
-require File.expand_path("../app/classes/pivotal/user.rb", __dir__)
+require(File.expand_path("../app/classes/pivotal/http.rb", __dir__))
+require(File.expand_path("../app/classes/pivotal/story.rb", __dir__))
+require(File.expand_path("../app/classes/pivotal/comment.rb", __dir__))
+require(File.expand_path("../app/classes/pivotal/vote.rb", __dir__))
+require(File.expand_path("../app/classes/pivotal/user.rb", __dir__))
 
 # id = MO.pivotal_test_id
 # story = Pivotal.get_story(id, :refresh_cache)
@@ -57,5 +57,5 @@ require File.expand_path("../app/classes/pivotal/user.rb", __dir__)
 # exit 0
 
 stories = Pivotal.get_stories
-puts "Found #{stories.length} stories!"
-exit 0
+puts("Found #{stories.length} stories!")
+exit(0)

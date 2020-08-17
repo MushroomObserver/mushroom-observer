@@ -27,7 +27,7 @@ class API
         val = parse(str)
         return val unless val.blank? && args[:not_blank]
 
-        raise ParameterCantBeBlank.new(key)
+        raise(ParameterCantBeBlank.new(key))
       end
 
       # Parse a list of comma-separated values.  Always returns an Array if the

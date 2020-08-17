@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_dependency "user"
+require_dependency("user")
 
 # Methods to restrict method access to logged-in users
 module LoginSystem
@@ -64,7 +64,7 @@ module LoginSystem
   # example use :
   # a popup window might just close itself for instance
   def access_denied
-    redirect_to controller: "account", action: "login"
+    redirect_to(controller: "account", action: "login")
   end
 
   # store current uri in  the session.
@@ -76,9 +76,9 @@ module LoginSystem
   # move to the last store_location call or to the passed default one
   def redirect_back_or_default(default)
     if session["return-to"].nil?
-      redirect_to default
+      redirect_to(default)
     else
-      redirect_to session["return-to"]
+      redirect_to(session["return-to"])
       session["return-to"] = nil
     end
   end

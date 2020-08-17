@@ -12,8 +12,8 @@ class QueuedEmail::NameProposal < QueuedEmail
 
   def self.create_email(sender, recipient, observation, naming)
     result = create(sender, recipient)
-    raise "Missing naming!"      unless naming
-    raise "Missing observation!" unless observation
+    raise("Missing naming!")      unless naming
+    raise("Missing observation!") unless observation
 
     result.add_integer(:naming, naming.id)
     result.add_integer(:observation, observation.id)

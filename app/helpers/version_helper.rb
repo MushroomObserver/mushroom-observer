@@ -53,11 +53,11 @@ module VersionHelper
       versions = obj.versions.reverse
     else
       version_class = "#{obj.class.name}::Version".constantize
-      versions = version_class.find_by_sql %(
+      versions = version_class.find_by_sql(%(
         SELECT * FROM #{type}s_versions
         WHERE #{type}_id = #{@old_parent_id} AND id <= #{@merge_source_id}
         ORDER BY id DESC
-      )
+      ))
     end
 
     table = versions.map do |ver|

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test MO extensions to Ruby's Array class
 class ArrayExtensionsTest < UnitTestCase

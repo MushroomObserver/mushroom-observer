@@ -43,7 +43,7 @@ rescue StandardError
 end
 
 File.open(LOG_FILE, "a") do |file|
-  file.print "date                   memory           swap\n" unless size
+  file.print("date                   memory           swap\n") unless size
   file.printf("%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%\n",
               date,
               mem_used / 1e6,
@@ -65,4 +65,4 @@ if swap_pct > 50 && mem_pct > 99
   end
 end
 
-exit 0
+exit(0)

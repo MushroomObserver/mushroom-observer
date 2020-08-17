@@ -844,7 +844,7 @@ class SpeciesListController < ApplicationController
     if sorter.new_name_strs != []
       if Rails.env.test?
         x = sorter.new_name_strs.map(&:to_s).inspect
-        flash_error "Unrecognized names given: #{x}"
+        flash_error("Unrecognized names given: #{x}")
       end
       failed = true
     end
@@ -853,7 +853,7 @@ class SpeciesListController < ApplicationController
     unless sorter.only_single_names
       if Rails.env.test?
         x = sorter.multiple_line_strs.map(&:to_s).inspect
-        flash_error "Ambiguous names given: #{x}"
+        flash_error("Ambiguous names given: #{x}")
       end
       failed = true
     end
@@ -862,7 +862,7 @@ class SpeciesListController < ApplicationController
     if sorter.has_unapproved_deprecated_names
       if Rails.env.test?
         x = sorter.deprecated_names.map(&:display_name).inspect
-        flash_error "Found deprecated names: #{x}"
+        flash_error("Found deprecated names: #{x}")
       end
       failed = true
     end

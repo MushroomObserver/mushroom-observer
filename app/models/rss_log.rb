@@ -381,7 +381,7 @@ class RssLog < AbstractModel
   def self.encode(tag, args, time)
     time = time.utc.strftime("%Y%m%d%H%M%S")
     tag = tag.to_s
-    raise "Invalid rss log tag: #{tag}" if tag.blank?
+    raise("Invalid rss log tag: #{tag}") if tag.blank?
 
     args = args.keys.sort_by(&:to_s).map do |key|
       [key.to_s, escape(args[key])]
@@ -414,7 +414,7 @@ class RssLog < AbstractModel
       if Rails.env.production?
         time = Time.zone.now # (but don't crash in production)
       else
-        raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
+        raise("rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}")
       end
     end
     [tag.to_s.to_sym, Hash[*args], time]

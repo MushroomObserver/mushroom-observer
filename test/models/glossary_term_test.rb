@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class GlossaryTermTest < UnitTestCase
   def test_glossary_term_load

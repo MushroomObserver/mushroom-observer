@@ -41,7 +41,7 @@ class API
       params[:by] = :id
       Query.lookup(model.name.to_sym, query_flavor, params)
     rescue RuntimeError => e
-      raise QueryError.new(e)
+      raise(QueryError.new(e))
     end
 
     def query_flavor
@@ -50,7 +50,7 @@ class API
 
     # Stub for parsing and validating params passed to Query.
     def query_params
-      raise "missing query_params stub!"
+      raise("missing query_params stub!")
     end
 
     # ----------------------------------------
@@ -69,7 +69,7 @@ class API
 
     # Stub for parsing and validating attributes passed to Model.create.
     def create_params
-      raise "missing create_params stub!"
+      raise("missing create_params stub!")
     end
 
     # Stub for validating parameters before actually creating the object.
@@ -104,11 +104,11 @@ class API
 
     # Stub for parsing and validating attributes to pass to record.update.
     def update_params
-      raise "missing update_params stub!"
+      raise("missing update_params stub!")
     end
 
     def validate_update_params!(params)
-      raise MissingSetParameters.new if params.empty?
+      raise(MissingSetParameters.new) if params.empty?
     end
 
     def build_setter(params)
@@ -144,7 +144,7 @@ class API
     def must_have_view_permission!(obj)
       if obj.respond_to?(:is_reader?) &&
          !obj.is_reader?(user)
-        raise MustHaveViewPermission.new(obj)
+        raise(MustHaveViewPermission.new(obj))
       end
     end
 
@@ -154,7 +154,7 @@ class API
       elsif obj.respond_to?(:can_edit?) &&
             obj.can_edit?(user)
       else
-        raise MustHaveEditPermission.new(obj)
+        raise(MustHaveEditPermission.new(obj))
       end
     end
 

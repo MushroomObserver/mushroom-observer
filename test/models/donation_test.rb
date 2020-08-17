@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class DonationTest < UnitTestCase
   # Replace this with your real tests.
   def test_truth
-    assert true
+    assert(true)
   end
 end

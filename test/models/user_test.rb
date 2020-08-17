@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class UserTest < UnitTestCase
   def test_auth
-    assert_equal rolf, User.authenticate("rolf", "testpassword")
-    assert_nil User.authenticate("nonrolf", "testpassword")
+    assert_equal(rolf, User.authenticate("rolf", "testpassword"))
+    assert_nil(User.authenticate("nonrolf", "testpassword"))
   end
 
   def test_password_change
     mary.change_password("marypasswd")
-    assert_equal mary, User.authenticate("mary", "marypasswd")
-    assert_nil User.authenticate("mary", "longtest")
+    assert_equal(mary, User.authenticate("mary", "marypasswd"))
+    assert_nil(User.authenticate("mary", "longtest"))
     mary.change_password("longtest")
-    assert_equal mary, User.authenticate("mary", "longtest")
-    assert_nil User.authenticate("mary", "marypasswd")
+    assert_equal(mary, User.authenticate("mary", "longtest"))
+    assert_nil(User.authenticate("mary", "marypasswd"))
   end
 
   def test_disallowed_passwords
@@ -26,17 +26,17 @@ class UserTest < UnitTestCase
     u.mailing_address = ""
 
     u.password = u.password_confirmation = "tiny"
-    assert_not u.save
-    assert u.errors[:password].any?
+    assert_not(u.save)
+    assert(u.errors[:password].any?)
 
     u.password = u.password_confirmation = "huge" * 43 # size = 4 * 43 == 172
-    assert_not u.save
-    assert u.errors[:password].any?
+    assert_not(u.save)
+    assert(u.errors[:password].any?)
 
     # This is allowed now to let API create users without a password chosen yet.
     u.password = u.password_confirmation = "bobs_secure_password"
-    assert u.save
-    assert u.errors.empty?
+    assert(u.save)
+    assert(u.errors.empty?)
   end
 
   def test_bad_logins
@@ -48,20 +48,20 @@ class UserTest < UnitTestCase
     u.mailing_address = ""
 
     u.login = "x"
-    assert_not u.save
-    assert u.errors[:login].any?
+    assert_not(u.save)
+    assert(u.errors[:login].any?)
 
     u.login = "hugebob" * 26 # size = 7 * 26 == 182
-    assert_not u.save
-    assert u.errors[:login].any?
+    assert_not(u.save)
+    assert(u.errors[:login].any?)
 
     u.login = ""
-    assert_not u.save
-    assert u.errors[:login].any?
+    assert_not(u.save)
+    assert(u.errors[:login].any?)
 
     u.login = "okbob"
-    assert u.save
-    assert u.errors.empty?
+    assert(u.save)
+    assert(u.errors.empty?)
   end
 
   def test_collision
@@ -72,7 +72,7 @@ class UserTest < UnitTestCase
     u.notes = ""
     u.mailing_address = ""
     u.password = u.password_confirmation = "rolfs_secure_password"
-    assert_not u.save
+    assert_not(u.save)
   end
 
   def test_create
@@ -84,7 +84,7 @@ class UserTest < UnitTestCase
     u.mailing_address = ""
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "nonexistingbob@collectivesource.com"
-    assert u.save
+    assert(u.save)
   end
 
   def test_sha1
@@ -95,8 +95,8 @@ class UserTest < UnitTestCase
     u.theme = "NULL"
     u.notes = ""
     u.mailing_address = ""
-    assert u.save
-    assert_equal "74996ba5c4aa1d583563078d8671fef076e2b466", u.password
+    assert(u.save)
+    assert_equal("74996ba5c4aa1d583563078d8671fef076e2b466", u.password)
   end
 
   def test_meta_groups

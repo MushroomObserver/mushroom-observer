@@ -55,7 +55,7 @@ module Query
         elsif args.key?(arg.to_s)
           val = args[arg.to_s]
         else
-          raise MissingValue.new
+          raise(MissingValue.new)
         end
         args.delete(arg)
         args.delete(arg.to_s)

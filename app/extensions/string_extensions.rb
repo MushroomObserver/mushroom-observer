@@ -569,7 +569,7 @@ class String
     len      = alphabet.length
     str.split("").inject(0) do |num, char|
       i = alphabet.index(char)
-      raise "Character not in alphabet: '#{char}'" if i.nil?
+      raise("Character not in alphabet: '#{char}'") if i.nil?
 
       num = num * len + i
     end
@@ -641,6 +641,6 @@ class String
   ### Misc Utilities ###
   #
   def print_thing(thing)
-    print "#{self}: #{thing.class}: #{thing}\n"
+    print("#{self}: #{thing.class}: #{thing}\n")
   end
 end

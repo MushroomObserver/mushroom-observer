@@ -250,10 +250,10 @@ class EolData
     # Just grab the ones with contribution > 0 (1621)
     # since we're going to use at least 400 of them
     result = {}
-    data = User.connection.select_rows %(
+    data = User.connection.select_rows(%(
       SELECT id, IF(COALESCE(name,'') = '', login, name) AS name
       FROM users WHERE contribution > 0
-    )
+    ))
     for id, legal_name in data
       result[id] = legal_name
     end
@@ -261,9 +261,9 @@ class EolData
   end
 
   def description_id_to_authors
-    data = Name.connection.select_rows %(
+    data = Name.connection.select_rows(%(
       SELECT name_description_id, user_id FROM name_descriptions_authors
-    )
+    ))
     pairs = data.map do |name_description_id, user_id|
       [name_description_id.to_i, @user_id_to_legal_name[user_id.to_i]]
     end

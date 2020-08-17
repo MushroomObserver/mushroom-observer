@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ObserverControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
@@ -3789,17 +3789,17 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_normal_permissions
-    get :intro
+    get(:intro)
     assert_equal(200, @response.status)
-    get :textile
+    get(:textile)
     assert_equal(200, @response.status)
   end
 
   def test_robot_permissions
     @request.user_agent = "Googlebot"
-    get :intro
+    get(:intro)
     assert_equal(200, @response.status)
-    get :textile
+    get(:textile)
     assert_equal(403, @response.status)
   end
 

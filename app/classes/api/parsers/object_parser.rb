@@ -23,7 +23,7 @@ class API
 
       def parse_object_type(str)
         match = str.match(/^([a-z][ _a-z]*[a-z]) #?(\d+)$/i)
-        raise BadParameterValue.new(str, :object) unless match
+        raise(BadParameterValue.new(str, :object)) unless match
 
         [match[1].tr(" ", "_").downcase, match[2]]
       end
@@ -38,7 +38,7 @@ class API
 
           raise ObjectNotFoundById.new(str, model)
         end
-        raise BadLimitedParameterValue.new(str, limit.map(&:type_tag))
+        raise(BadLimitedParameterValue.new(str, limit.map(&:type_tag)))
       end
     end
   end

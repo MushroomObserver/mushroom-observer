@@ -235,7 +235,7 @@ class HerbariumController < ApplicationController
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?
 
-    flash_error :permission_denied.t
+    flash_error(:permission_denied.t)
     redirect_to_referrer || redirect_to_show_herbarium
     false
   end

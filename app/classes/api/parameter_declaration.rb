@@ -71,7 +71,7 @@ class API
       when User
         "you"
       else
-        raise "Don't know how to display #{val.class.name} in api help msg."
+        raise("Don't know how to display #{val.class.name} in api help msg.")
       end
     end
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Test the class which communicates with PivotalTracker (MO's issue tracker)
 class PivotalTest < UnitTestCase
@@ -51,7 +51,7 @@ class PivotalTest < UnitTestCase
       Pivotal.delete_story(story.id)
     end
 
-    puts "Creating temp story..."
+    puts("Creating temp story...")
     story = Pivotal.create_story("temp", "this is a test", mary)
     assert_not_nil(story)
     assert_equal("feature", story.type)
@@ -63,7 +63,7 @@ class PivotalTest < UnitTestCase
     assert_equal([], story.comments)
     assert_equal([], story.votes)
 
-    puts "Casting vote..."
+    puts("Casting vote...")
     result = Pivotal.cast_vote(story.id, rolf, 1)
     assert_kind_of(Pivotal::Story, result)
     assert_equal(story.id, result.id)
@@ -74,7 +74,7 @@ class PivotalTest < UnitTestCase
     assert_equal(rolf.id, result.votes.first.id)
     assert_equal(1, result.votes.first.data)
 
-    puts "Changing vote..."
+    puts("Changing vote...")
     result = Pivotal.cast_vote(story.id, rolf, -1)
     assert_kind_of(Pivotal::Story, result)
     assert_equal(story.id, result.id)
@@ -83,20 +83,20 @@ class PivotalTest < UnitTestCase
     assert_equal(1, result.votes.length)
     assert_equal(-1, result.score)
 
-    puts "Posting comment..."
+    puts("Posting comment...")
     result = Pivotal.post_comment(story.id, mary, "test comment")
     assert_kind_of(Pivotal::Comment, result)
     assert_equal("test comment\n", result.text)
     assert_equal(mary.id, result.user.id)
 
-    puts "Checking final result..."
+    puts("Checking final result...")
     updated_story = Pivotal.get_story(story.id)
     assert_equal(story.id, updated_story.id)
     assert_equal(1, updated_story.comments.length)
     assert_equal("test comment\n", updated_story.comments.first.text)
     assert_equal(mary.id, updated_story.comments.first.user.id)
 
-    puts "Cleaning up..."
+    puts("Cleaning up...")
     Pivotal.delete_story(story.id)
   end
 end

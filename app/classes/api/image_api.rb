@@ -78,7 +78,7 @@ class API
     end
 
     def validate_create_params!(_params)
-      raise MissingUpload.new unless @upload
+      raise(MissingUpload.new) unless @upload
     end
 
     def build_object

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "rexml/document"
+require("test_helper")
+require("rexml/document")
 
 class ApiControllerTest < FunctionalTestCase
   def assert_no_api_errors(msg = nil)

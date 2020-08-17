@@ -388,7 +388,7 @@ class ImageController < ApplicationController
       done = false
       if xargs.empty?
         if update_projects(@image, params[:project])
-          flash_notice :runtime_image_edit_success.t(id: @image.id)
+          flash_notice(:runtime_image_edit_success.t(id: @image.id))
         else
           flash_notice(:runtime_no_changes.t)
         end
@@ -398,7 +398,7 @@ class ImageController < ApplicationController
       else
         xargs[:id] = @image
         @image.log_update
-        flash_notice :runtime_image_edit_success.t(id: @image.id)
+        flash_notice(:runtime_image_edit_success.t(id: @image.id))
         update_projects(@image, params[:project])
         done = true
       end
@@ -813,14 +813,14 @@ class ImageController < ApplicationController
     if request.method == "POST"
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
-        ImageVote.connection.update %(
+        ImageVote.connection.update(%(
           UPDATE image_votes SET anonymous = TRUE WHERE user_id = #{@user.id}
-        )
+        ))
         flash_notice(:image_vote_anonymity_made_anonymous.t)
       elsif submit == :image_vote_anonymity_make_public.l
-        ImageVote.connection.update %(
+        ImageVote.connection.update(%(
           UPDATE image_votes SET anonymous = FALSE WHERE user_id = #{@user.id}
-        )
+        ))
         flash_notice(:image_vote_anonymity_made_public.t)
       else
         flash_error(
@@ -829,14 +829,14 @@ class ImageController < ApplicationController
       end
       redirect_to(controller: "account", action: "prefs")
     else
-      @num_anonymous = ImageVote.connection.select_value %(
+      @num_anonymous = ImageVote.connection.select_value(%(
         SELECT count(id) FROM image_votes
         WHERE user_id = #{@user.id} AND anonymous
-      )
-      @num_public = ImageVote.connection.select_value %(
+      ))
+      @num_public = ImageVote.connection.select_value(%(
         SELECT count(id) FROM image_votes
         WHERE user_id = #{@user.id} AND !anonymous
-      )
+      ))
     end
   end
 

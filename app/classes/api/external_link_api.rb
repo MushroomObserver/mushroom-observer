@@ -44,13 +44,13 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:observation)   unless params[:observation]
-      raise MissingParameter.new(:external_site) unless params[:external_site]
-      raise MissingParameter.new(:url)           if params[:url].blank?
+      raise(MissingParameter.new(:observation))   unless params[:observation]
+      raise(MissingParameter.new(:external_site)) unless params[:external_site]
+      raise(MissingParameter.new(:url))           if params[:url].blank?
       return if params[:observation].can_edit?(@user)
       return if @user.external_sites.include?(params[:external_site])
 
-      raise ExternalLinkPermissionDenied.new
+      raise(ExternalLinkPermissionDenied.new)
     end
   end
 end

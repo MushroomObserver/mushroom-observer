@@ -12,14 +12,14 @@ def all_locales
 end
 
 def define_tasks(action, verbose, verbose_method, description)
-  desc description.gsub(/XXX/, "official").gsub(/\(S\)/, "")
+  desc(description.gsub(/XXX/, "official").gsub(/\(S\)/, ""))
   task(official: :setup) do
     lang = Language.official
     lang.verbose(verbose + " " + lang.send(verbose_method))
     lang.send(action)
   end
 
-  desc description.gsub(/XXX/, "unofficial").gsub(/\(S\)/, "s")
+  desc(description.gsub(/XXX/, "unofficial").gsub(/\(S\)/, "s"))
   task(unofficial: :setup) do
     Language.unofficial.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
@@ -27,7 +27,7 @@ def define_tasks(action, verbose, verbose_method, description)
     end
   end
 
-  desc description.gsub(/XXX/, "all").gsub(/\(S\)/, "s")
+  desc(description.gsub(/XXX/, "all").gsub(/\(S\)/, "s"))
   task(all: :setup) do
     Language.all.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
@@ -100,7 +100,7 @@ namespace :lang do
   task(:safe_mode) do
     if ENV.include?("safe")
       Language.safe_mode = true
-      puts "*** SAFE MODE ***"
+      puts("*** SAFE MODE ***")
     end
   end
 end

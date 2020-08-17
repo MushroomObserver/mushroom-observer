@@ -44,7 +44,7 @@ class AjaxController
     end
     return if obs.user == @user || site.member?(@user) || @user.admin
 
-    raise "Permission denied."
+    raise("Permission denied.")
   end
 
   def create_link(obs, site, url)

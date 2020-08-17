@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "json"
+require("test_helper")
+require("json")
 
 class AjaxControllerTest < FunctionalTestCase
   def good_ajax_request(action, params = {})
@@ -291,9 +291,9 @@ class AjaxControllerTest < FunctionalTestCase
                              value: 3)
 
     # Assert
-    assert_template layout: nil
-    assert_template layout: false
-    assert_template partial: "image/_image_vote_links"
+    assert_template(layout: nil)
+    assert_template(layout: false)
+    assert_template(partial: "image/_image_vote_links")
   end
 
   def test_image_vote_renders_correct_links

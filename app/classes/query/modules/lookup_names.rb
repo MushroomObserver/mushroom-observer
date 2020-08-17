@@ -72,7 +72,7 @@ module Query
       def complain_about_unused_flag!(args, arg)
         return if args[arg].nil?
 
-        raise "Flag \"#{arg}\" is invalid without \"names\" parameter."
+        raise("Flag \"#{arg}\" is invalid without \"names\" parameter.")
       end
 
       def find_exact_name_matches(vals)

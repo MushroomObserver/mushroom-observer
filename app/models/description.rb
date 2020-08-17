@@ -417,7 +417,7 @@ class Description < AbstractModel
     elsif user.try(:to_i)&.nonzero?
       group_user_ids(table).include?(user.to_i)
     else
-      raise ArgumentError.new("Was expecting User instance, id or nil.")
+      raise(ArgumentError.new("Was expecting User instance, id or nil."))
     end
   end
 
@@ -430,9 +430,9 @@ class Description < AbstractModel
     ids = group_user_ids(table)
     ids = ["-1"] if ids.empty?
     id_list = ids.map(&:to_s).join(",")
-    @group_users[table] = User.find_by_sql %(
+    @group_users[table] = User.find_by_sql(%(
       SELECT * FROM users
-      WHERE id IN (#{id_list}))
+      WHERE id IN (#{id_list})))
   end
 
   # Do minimal query to enumerate the users in a list of groups.  Return as an

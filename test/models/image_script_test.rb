@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ScriptTest < UnitTestCase
   DATABASE_CONFIG = YAML.safe_load(IO.
@@ -105,12 +105,12 @@ class ScriptTest < UnitTestCase
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
-      file.puts "#{local_root}/orig//#{in_situ_id}.jpg"
-      file.puts "#{local_root}/1280//#{in_situ_id}.jpg"
-      file.puts "#{local_root}/960//#{in_situ_id}.jpg"
-      file.puts "#{local_root}/640//#{in_situ_id}.jpg"
-      file.puts "#{local_root}/320//#{in_situ_id}.jpg"
-      file.puts "#{local_root}/thumb//#{in_situ_id}.jpg"
+      file.puts("#{local_root}/orig//#{in_situ_id}.jpg")
+      file.puts("#{local_root}/1280//#{in_situ_id}.jpg")
+      file.puts("#{local_root}/960//#{in_situ_id}.jpg")
+      file.puts("#{local_root}/640//#{in_situ_id}.jpg")
+      file.puts("#{local_root}/320//#{in_situ_id}.jpg")
+      file.puts("#{local_root}/thumb//#{in_situ_id}.jpg")
     end
     output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
     sizes = output.each_line.map do |line|

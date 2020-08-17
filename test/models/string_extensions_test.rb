@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test extensions to Ruby and Rails String Class
 class StringExtensionsTest < UnitTestCase
@@ -26,19 +26,19 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_random_no_seed_string
-    srand 314_159
+    srand(314_159)
     random_str = String.random(10)
     assert_equal("l83parchj1", random_str)
   end
 
   def test_random_with_seed_string
-    srand 314_159
+    srand(314_159)
     random_str = String.random(6, "mushroomobserver")
     assert_equal("ersovr", random_str)
   end
 
   def test_rand_char
-    srand 314_159
+    srand(314_159)
     random_char = "Superman".rand_char
     assert_equal("e", random_char)
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "browser"
+require("browser")
 
 module Browser
   # Prevent `browser` gem from saying that mobile DuckDuckGo browsers are bots

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "textile"
+require("test_helper")
+require("textile")
 
 class Textile
   def send_private(method, *args, &block)

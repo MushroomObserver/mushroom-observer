@@ -57,8 +57,8 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:observation) unless @observation
-      raise MissingParameter.new(:herbarium)   unless params[:herbarium]
+      raise(MissingParameter.new(:observation)) unless @observation
+      raise(MissingParameter.new(:herbarium))   unless params[:herbarium]
 
       make_sure_can_add_herbarium_record!(params)
       provide_default_label!(params)
@@ -67,14 +67,14 @@ class API
     def validate_update_params!(params)
       return if params.any? || @adds || @removes
 
-      raise MissingSetParameters.new
+      raise(MissingSetParameters.new)
     end
 
     def make_sure_can_add_herbarium_record!(params)
       return if @observation.can_edit?(@user)
       return if params[:herbarium].curator?(@user)
 
-      raise CantAddHerbariumRecord.new
+      raise(CantAddHerbariumRecord.new)
     end
 
     def provide_default_label!(params)
@@ -105,7 +105,7 @@ class API
         accession_number: params[:accession_number]
       ).first
       return nil unless obj
-      raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
+      raise(HerbariumRecordAlreadyExists.new(obj)) unless obj.can_edit?(@user)
 
       obj.add_observation(@observation)
       obj
@@ -134,7 +134,7 @@ class API
       return true if obj.can_edit?(@user) ||
                      obj.herbarium.curator?(@user)
 
-      raise MustHaveEditPermission.new(obj)
+      raise(MustHaveEditPermission.new(obj))
     end
 
     def lookup_matching_herbarium_record(obj)
@@ -150,14 +150,14 @@ class API
     end
 
     def merge_herbarium_records(this_obj, _other_obj)
-      raise HerbariumRecordAlreadyExists.new(this_obj)
+      raise(HerbariumRecordAlreadyExists.new(this_obj))
     end
 
     def add_observations(obj)
       return unless @adds
 
       @adds.each do |obs|
-        raise MustHaveEditPermission.new(obj) \
+        raise(MustHaveEditPermission.new(obj)) \
           unless obs.can_edit?(@user) || obj.herbarium.curator?(@user)
 
         obj.add_observation(obs)
