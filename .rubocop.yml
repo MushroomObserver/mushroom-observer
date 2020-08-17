@@ -4,18 +4,44 @@ require:
 
 inherit_from: .rubocop_todo.yml
 
-# RuboCop configuration
-# Uses Rubcop's default configuration, except as specified below
-# For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
-
-# WARNING: .codeclimate.yml can specify the RuboCop version ('channel') used
+# ------------------------------------------------------------------------------
+#
+# UPDATING RUBOCOP in MushroomObserver
+# Please use the following procedure or equivalent in order to:
+# - Avoid discrepancies between RuboCop locally vs in continuous integration;
+# - Prevent increases in the number of offenses.
+#
+# *** Update the Codeclimate channel
+# .codeclimate.yml specifies the RuboCop version ('channel') used
 # by Code Climate, which can be different than the version in Gemfile.lock
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-# Therefore .codeclimate.yml should be updated whenever we update RuboCop
+# Therefore .codeclimate.yml should be updated whenever updating RuboCop
+#
+# *** Update the RuboCop configuration (this file)
+# - Run "rubocop --auto-gen-config" BUT DON'T COMMIT .rubocop_todo.yml
+# - Add any new cops to .rubocop.yml (this file) if the output so indicates.
+#
+# *** Fix any new offenses caused by the update
+# - Iteratively do the following steps until all new offenses are fixed:
+#   - Again run "rubocop --auto-gen-config" BUT DON'T COMMIT .rubocop_todo.yml
+#   - Compare the newly generated and existing versions of .rubocop_todo.yml
+#   - Fix any new offenses.
+# (The initial new offenses will have been caused by new or updated cops.
+#  Fixing those offenses may cause new offenses. And so forth.)
+#
+# *** Prune the todo list
+# Compare the new and existing versions of .rubocop_todo.yml (the todo list)
+# Accept any changes that reduce the todo list.
+#
+# ------------------------------------------------------------------------------
+
+# RuboCop configuration
+# Uses Rubcop's default configuration, except as specified below
+# For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
 
-  ###################### Exclusions ############################################
+  ###################### Excluded files ########################################
   # Completely ignore the following
   Exclude:
     - .codeclimate.yml
