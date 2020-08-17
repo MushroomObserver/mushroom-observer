@@ -71,7 +71,7 @@ class API
     def create_params
       parse_create_params!
       {
-        when: parse(:date, :date) || Date.today,
+        when: parse(:date, :date) || Time.zone.today,
         place_name: @location,
         lat: @latitude,
         long: @longitude,
