@@ -1174,9 +1174,9 @@ class Observation < AbstractModel
   end
 
   def check_date
-    return true unless self.when.is_a?(Date) && self.when > Date.today + 1.day
+    return true unless self.when.is_a?(Date) && self.when > Time.zone.tomorrow
 
-    errors.add(:when, when_message("Date.today=#{Date.today}"))
+    errors.add(:when, when_message("Time.zone.today=#{Time.zone.today}"))
     errors.add(:when, :validate_observation_future_time.t)
     false
   end
