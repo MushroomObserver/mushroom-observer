@@ -3,25 +3,27 @@
 
   tabs = [
     link_to(:cancel_and_show.t(type: :glossary_term),
-            action: :show_glossary_term, id: @glossary_term.id),
-    link_to(:glossary_term_index.t, action: :index)
+            glossary_term_path(@glossary_term.id)),
+    link_to(:glossary_term_index.t, glossary_terms_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text">
-  <%= form_for(:glossary_term, url: {action: :edit_glossary_term,
-               id: @glossary_term.id}) do |form| %>
+  <%= form_for(:glossary_term,
+               url: edit_glossary_term_url(id: @glossary_term.id)) do |form| %>
     <div class="form-group push-down">
-      <%= label_tag(:glossary_name, :glossary_term_name.t + ":") %>
+      <%= label_tag(:glossary_name, "#{:glossary_term_name.t}:") %>
       <%= form.text_field(:name, class: "form-control") %>
     </div>
 
     <div class="form-group push-down">
-      <%= label_tag(:glossary_description, :glossary_term_description.t + ":") %>
+      <%= label_tag(:glossary_description,
+                    "#{:glossary_term_description.t}:") %>
       <%= form.text_area(:description, rows: 15, class: "form-control") %>
     </div>
 
-    <%= submit_tag(:edit_glossary_term_save.t, class: "btn center-block push-down") %>
+    <%= submit_tag(:edit_glossary_term_save.t,
+                   class: "btn center-block push-down") %>
   <% end %>
 </div>

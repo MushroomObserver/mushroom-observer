@@ -143,7 +143,7 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
 
   def post_conic_edit_changes
     make_admin
-    post(:edit_glossary_term, changes_to_conic)
+    post(:update, changes_to_conic)
   end
 
   def post_conic_edit_changes_and_reload
@@ -152,24 +152,24 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
   end
 
   ##### tests #####
-  def test_edit_glossary_term_no_login
-    get(:edit_glossary_term, id: conic.id)
+  def test_edit
+    login
+    get(:edit, id: conic.id)
+    assert_template(:edit)
+  end
+
+  def test_edit_no_login
+    get(:edit, id: conic.id)
     assert_response(:redirect)
   end
 
-  def test_edit_glossary_term_logged_in
-    login
-    get(:edit_glossary_term, id: conic.id)
-    assert_template(:edit_glossary_term)
-  end
-
-  def test_edit_glossary_term_post
+  def test_update
     old_count = GlossaryTerm::Version.count
     make_admin
     params = create_glossary_term_params
     params[:id] = conic.id
 
-    post(:edit_glossary_term, params)
+    post(:update, params)
     conic.reload
 
     assert_equal(params[:glossary_term][:name], conic.name)
@@ -206,7 +206,7 @@ class GlossaryControllerImageTest < GlossaryTermsControllerTest
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     {
-      glossary_term:  { name: "Pancake", description: "Flat" },
+      glossary_term: { name: "Pancake", description: "Flat" },
       copyright_holder: "Me",
       date: { copyright_year: 2013 },
       upload: { license_id: licenses(:ccnc25).id },
