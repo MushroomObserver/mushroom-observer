@@ -59,7 +59,7 @@ class GlossaryTermsController < ApplicationController
 
   # TODO: add destroy action
 
-  # ---------- Non-standard CRUD Actions ---------------------------------------
+  # ---------- Non-standard REST Actions ---------------------------------------
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
@@ -71,7 +71,7 @@ class GlossaryTermsController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(glossary_terms_path(glossary_term.id))
+        redirect_to(glossary_term_path(@glossary_term.id))
       end
     end
   end
