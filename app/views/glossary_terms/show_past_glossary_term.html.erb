@@ -6,7 +6,7 @@
 
   tabs = [
     link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
-            action: :show_glossary_term, id: @glossary_term.id)
+            glossary_term_path(@glossary_term.id))
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

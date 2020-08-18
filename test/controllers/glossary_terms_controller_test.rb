@@ -27,7 +27,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 end
 
-# tests of controller methods which do not change glossary terms
+# ---------- Actions to Display data (index, show, etc.) -----------------------
 class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
   def setup
     @controller = GlossaryTermsController.new
@@ -36,7 +36,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
 
   # ***** index *****
   def test_index
-    get_with_dump(:index)
+    get(:index)
     assert_template(:index)
   end
 
@@ -48,13 +48,13 @@ class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
   end
 
   def test_show_past_glossary_term
-    get_with_dump(:show_past_glossary_term, id: conic.id,
-                                            version: conic.version - 1)
+    get(:show_past_glossary_term, id: conic.id,
+                                  version: conic.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 
   def test_show_past_glossary_term_no_version
-    get_with_dump(:show_past_glossary_term, id: conic.id)
+    get(:show_past_glossary_term, id: conic.id)
     assert_response(:redirect)
   end
 
@@ -100,7 +100,7 @@ class GlossaryControllerCreateTest < GlossaryTermsControllerTest
 
   def test_create_glossary_term_logged_in
     login
-    get_with_dump(:create_glossary_term)
+    get(:create_glossary_term)
     assert_template(:create_glossary_term)
   end
 
@@ -151,13 +151,13 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
 
   ##### tests #####
   def test_edit_glossary_term_no_login
-    get_with_dump(:edit_glossary_term, id: conic.id)
+    get(:edit_glossary_term, id: conic.id)
     assert_response(:redirect)
   end
 
   def test_edit_glossary_term_logged_in
     login
-    get_with_dump(:edit_glossary_term, id: conic.id)
+    get(:edit_glossary_term, id: conic.id)
     assert_template(:edit_glossary_term)
   end
 
@@ -186,8 +186,8 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
 
     assert_equal(old_count + 1, glossary_term.versions.length)
 
-    get_with_dump(:show_past_glossary_term, id: glossary_term.id,
-                                            version: glossary_term.version - 1)
+    get(:show_past_glossary_term, id: glossary_term.id,
+                                  version: glossary_term.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 end
