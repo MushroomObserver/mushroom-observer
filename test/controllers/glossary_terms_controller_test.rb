@@ -92,24 +92,24 @@ class GlossaryControllerCreateTest < GlossaryTermsControllerTest
 
   def login_and_post_convex
     login
-    post(:create_glossary_term, convex_params)
+    post(:create, convex_params)
   end
 
-  def test_create_glossary_term_no_login
-    get(:create_glossary_term)
+  def test_new_no_login
+    get(:new)
     assert_response(:redirect)
   end
 
-  def test_create_glossary_term_logged_in
+  def test_new_logged_in
     login
-    get(:create_glossary_term)
-    assert_template(:create_glossary_term)
+    get(:new)
+    assert_template(:new)
   end
 
-  def test_create_glossary_term_post
+  def test_create
     user = login
     params = create_glossary_term_params
-    post(:create_glossary_term, params)
+    post(:create, params)
     glossary_term = GlossaryTerm.order(created_at: :desc).first
 
     assert_equal(params[:glossary_term][:name], glossary_term.name)

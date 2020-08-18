@@ -8,8 +8,8 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:glossary_term, url: {action: :create_glossary_term},
-              html: {multipart: true}) do |form| %>
+  <%= form_for(:glossary_term, url: {action: :new},
+               html: {multipart: true}) do |form| %>
     <div class="form-group push-down">
       <%= label_tag(:glossary_name, :glossary_term_name.t + ":") %>
       <%= form.text_field(:name, class: "form-control") %>
