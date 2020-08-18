@@ -3,8 +3,8 @@
 require("test_helper")
 
 # functional tests of glossary controller and views
-# tests of controller methods which do not change glossary terms
-class GlossaryControllerTest < FunctionalTestCase
+class GlossaryTermsControllerTest < FunctionalTestCase
+  # ***** helpers *****
   def conic
     glossary_terms(:conic_glossary_term)
   end
@@ -28,10 +28,16 @@ class GlossaryControllerTest < FunctionalTestCase
 end
 
 # tests of controller methods which do not change glossary terms
-class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
+class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
   def setup
     @controller = GlossaryController.new
     super
+  end
+
+  # ***** index *****
+  def test_index
+    get_with_dump(:index)
+    assert_template(:index)
   end
 
   # ***** show *****
@@ -58,16 +64,10 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
     get(:show_glossary_term, id: square.id)
     assert_select("a[href='#{prior_version_target}']")
   end
-
-  # ***** index *****
-  def test_index
-    get_with_dump(:index)
-    assert_template(:index)
-  end
 end
 
 # tests of controller methods which create glossary terms
-class GlossaryControllerCreateTest < GlossaryControllerTest
+class GlossaryControllerCreateTest < GlossaryTermsControllerTest
   def setup
     @controller = GlossaryController.new
   end
@@ -120,7 +120,7 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
 end
 
 # tests of controller methods which edit glossary terms
-class GlossaryControllerEditTest < GlossaryControllerTest
+class GlossaryControllerEditTest < GlossaryTermsControllerTest
   # ##### helpers #####
   def setup
     @controller = GlossaryController.new
@@ -193,7 +193,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 end
 
 # tests of image handling
-class GlossaryControllerImageTest < GlossaryControllerTest
+class GlossaryControllerImageTest < GlossaryTermsControllerTest
   def setup
     @controller = GlossaryController.new
   end
