@@ -14,54 +14,40 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** show *****
   def test_show
-    glossary_term = glossary_terms(:plane_glossary_term)
-    get(:show, id: glossary_term.id)
-    assert_template("show")
-  end
-
-  def test_show_past_term
-    get(:show_past_glossary_term, id: conic.id,
-                                  version: conic.version - 1)
-    assert_template(:show_past_glossary_term, partial: "_glossary_term")
-  end
-
-  def test_show_past_term_no_version
-    get(:show_past_glossary_term, id: conic.id)
-    assert_response(:redirect)
-  end
-
-  def test_show_past_term_prior_version_link_target
+    term = glossary_terms(:square_glossary_term)
     prior_version_path =
-      "/glossary_terms/#{square.id}/show_past_glossary_term?" \
-      "version=#{square.version - 1}"
-    get(:show, id: square.id)
+      "/glossary_terms/#{term.id}/show_past_glossary_term?" \
+      "version=#{term.version - 1}"
+    get(:show, id: term.id)
 
-    assert_select("a[href='#{prior_version_path}']")
+    assert_template("show")
+    assert_select("a[href='#{prior_version_path}']", true,
+                  "View should have link to prior version")
   end
 
   # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
 
   # ***** new *****
-  def test_new_no_login
-    get(:new)
-    assert_response(:redirect)
-  end
-
-  def test_new_logged_in
+  def test_new # happy path
     login
     get(:new)
     assert_template(:new)
   end
 
+  def test_new_no_login
+    get(:new)
+    assert_response(:redirect)
+  end
+
   # ***** edit *****
-  def test_edit
+  def test_edit  # happy path
     login
-    get(:edit, id: conic.id)
+    get(:edit, id: GlossaryTerm.first.id)
     assert_template(:edit)
   end
 
   def test_edit_no_login
-    get(:edit, id: conic.id)
+    get(:edit, id: GlossaryTerm.first.id)
     assert_response(:redirect)
   end
 
@@ -72,18 +58,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     user = login
     params = create_term_params
     post(:create, params)
-    glossary_term = GlossaryTerm.order(created_at: :desc).first
+    term = GlossaryTerm.order(created_at: :desc).first
 
-    assert_equal(params[:glossary_term][:name], glossary_term.name)
-    assert_equal(params[:glossary_term][:description],
-                 glossary_term.description)
-    assert_not_nil(glossary_term.rss_log)
-    assert_equal(user.id, glossary_term.user_id)
+    assert_equal(params[:glossary_term][:name], term.name)
+    assert_equal(params[:glossary_term][:description], term.description)
+    assert_not_nil(term.rss_log)
+    assert_equal(user.id, term.user_id)
     assert_response(:redirect)
   end
 
   def test_create_image_save_failure
-    login("rolf")
+    login
     # Simulate image.save failure.
     Image.any_instance.stubs(:save).returns(false)
     post(:create, term_with_image_params)
@@ -91,7 +76,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_process_image_failure
-    login("rolf")
+    login
     # Simulate process_image failure.
     Image.any_instance.stubs(:process_image).returns(false)
     post(:create, term_with_image_params)
@@ -100,48 +85,36 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** update *****
   def test_update
-    old_count = GlossaryTerm::Version.count
+    term = glossary_terms(:conic_glossary_term)
     params = changes_to_conic
-    make_admin
-    post(:update, params)
-    conic.reload
-
-    assert_equal(params[:glossary_term][:name], conic.name)
-    assert_equal(params[:glossary_term][:description], conic.description)
-    assert_equal(old_count + 1, GlossaryTerm::Version.count)
-    assert_response(:redirect)
-  end
-
-  def test_update_and_reload_plane_past_version
+    old_count = term.versions.count
     login
-    glossary_term = glossary_terms(:plane_glossary_term)
-    old_count = glossary_term.versions.length
+    post(:update, params)
+    term.reload
 
-    glossary_term.update(description: "Are we flying yet?")
-    glossary_term.reload
-
-    assert_equal(old_count + 1, glossary_term.versions.length)
-
-    get(:show_past_glossary_term, id: glossary_term.id,
-                                  version: glossary_term.version - 1)
-    assert_template(:show_past_glossary_term, partial: "_glossary_term")
+    assert_equal(params[:glossary_term][:name], term.name)
+    assert_equal(params[:glossary_term][:description], term.description)
+    assert_equal(old_count + 1, term.versions.count)
+    assert_response(:redirect)
   end
 
   # TODO: Test destroy
 
   # ---------- Other actions ---------------------------------------------------
 
-  # TODO: Test show_past_glossary_term
+  def test_show_past_term # happy_path
+    term = glossary_terms(:conic_glossary_term)
+    get(:show_past_glossary_term, id: term.id, version: term.version - 1)
+    assert_template(:show_past_glossary_term, partial: "_glossary_term")
+  end
+
+  def test_show_past_term_no_version
+    term = glossary_terms(:conic_glossary_term)
+    get(:show_past_glossary_term, id: term.id)
+    assert_response(:redirect)
+  end
 
   # ---------- helpers ---------------------------------------------------------
-
-  def conic
-    glossary_terms(:conic_glossary_term)
-  end
-
-  def square
-    glossary_terms(:square_glossary_term)
-  end
 
   def create_term_params
     {
@@ -154,7 +127,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def changes_to_conic
     {
-      id: conic.id,
+      id: glossary_terms(:conic_glossary_term).id,
       glossary_term: { name: "Convex", description: "Boring old convex" },
       copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
       upload: { license_id: licenses(:ccnc25).id }
