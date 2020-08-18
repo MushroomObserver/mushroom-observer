@@ -41,7 +41,7 @@
   <% end %>
 
   <div class="col-xs-12 push-down">
-    <%= show_past_glossary_term_glossary_term_path(@glossary_term) %>
+    <%= show_previous_version(@glossary_term) %>
     <p class="Date">
       <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
       <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
