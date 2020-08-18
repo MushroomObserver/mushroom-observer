@@ -224,7 +224,7 @@ class GlossaryControllerImageTest < GlossaryTermsControllerTest
     login("rolf")
     # Simulate process_image failure.
     Image.any_instance.stubs(:process_image).returns(false)
-    post(:create_glossary_term, term_with_image_params)
+    post(:create, term_with_image_params)
     assert_flash_error
   end
 
@@ -232,7 +232,7 @@ class GlossaryControllerImageTest < GlossaryTermsControllerTest
     login("rolf")
     # Simulate image.save failure.
     Image.any_instance.stubs(:save).returns(false)
-    post(:create_glossary_term, term_with_image_params)
+    post(:create, term_with_image_params)
     assert_empty(GlossaryTerm.last.images)
   end
 end
