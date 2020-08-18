@@ -4,35 +4,7 @@ require("test_helper")
 
 # functional tests of glossary controller and views
 class GlossaryTermsControllerTest < FunctionalTestCase
-  # ***** helpers *****
-  def conic
-    glossary_terms(:conic_glossary_term)
-  end
-
-  def plane
-    glossary_terms(:plane_glossary_term)
-  end
-
-  def square
-    glossary_terms(:square_glossary_term)
-  end
-
-  def create_glossary_term_params
-    {
-      glossary_term: { name: "Convex", description: "Boring old convex" },
-      copyright_holder: "Insil Choi",
-      date: { copyright_year: "2013" },
-      upload: { license_id: licenses(:ccnc30).id }
-    }
-  end
-end
-
-# ---------- Actions to Display data (index, show, etc.) -----------------------
-class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
-  def setup
-    @controller = GlossaryTermsController.new
-    super
-  end
+  # ---------- Test actions that Display data (index, show, etc.) --------------
 
   # ***** index *****
   def test_index
@@ -66,35 +38,10 @@ class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
 
     assert_select("a[href='#{prior_version_path}']")
   end
-end
 
-# tests of controller methods which create glossary terms
-class GlossaryControllerCreateTest < GlossaryTermsControllerTest
-  def setup
-    @controller = GlossaryTermsController.new
-  end
+  # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
 
-  # ***** create *****
-  def convex_params
-    {
-      glossary_term:
-      { name: "Convex", description: "Boring" },
-      copyright_holder: "Me",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
-    }
-  end
-
-  def posted_term
-    login_and_post_convex
-    GlossaryTerm.find(:all, order: "created_at DESC")[0]
-  end
-
-  def login_and_post_convex
-    login
-    post(:create, convex_params)
-  end
-
+  # ***** new *****
   def test_new_no_login
     get(:new)
     assert_response(:redirect)
@@ -106,52 +53,7 @@ class GlossaryControllerCreateTest < GlossaryTermsControllerTest
     assert_template(:new)
   end
 
-  def test_create
-    user = login
-    params = create_glossary_term_params
-    post(:create, params)
-    glossary_term = GlossaryTerm.order(created_at: :desc).first
-
-    assert_equal(params[:glossary_term][:name], glossary_term.name)
-    assert_equal(params[:glossary_term][:description],
-                 glossary_term.description)
-    assert_not_nil(glossary_term.rss_log)
-    assert_equal(user.id, glossary_term.user_id)
-    assert_response(:redirect)
-  end
-end
-
-# tests of controller methods which edit glossary terms
-class GlossaryControllerEditTest < GlossaryTermsControllerTest
-  # ##### helpers #####
-  def setup
-    @controller = GlossaryTermsController.new
-  end
-
-  def conic
-    glossary_terms(:conic_glossary_term)
-  end
-
-  def changes_to_conic
-    {
-      id: conic.id,
-      glossary_term: { name: "Convex", description: "Boring old convex" },
-      copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id }
-    }
-  end
-
-  def post_conic_edit_changes
-    make_admin
-    post(:update, changes_to_conic)
-  end
-
-  def post_conic_edit_changes_and_reload
-    post_conic_edit_changes
-    conic.reload
-  end
-
-  ##### tests #####
+  # ***** edit *****
   def test_edit
     login
     get(:edit, id: conic.id)
@@ -163,12 +65,44 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
     assert_response(:redirect)
   end
 
+  # ---------- Test actions that Modify data: (create, update, destroy, etc.) --
+
+  # ***** create *****
+  def test_create
+    user = login
+    params = create_term_params
+    post(:create, params)
+    glossary_term = GlossaryTerm.order(created_at: :desc).first
+
+    assert_equal(params[:glossary_term][:name], glossary_term.name)
+    assert_equal(params[:glossary_term][:description],
+                 glossary_term.description)
+    assert_not_nil(glossary_term.rss_log)
+    assert_equal(user.id, glossary_term.user_id)
+    assert_response(:redirect)
+  end
+
+  def test_create_image_save_failure
+    login("rolf")
+    # Simulate image.save failure.
+    Image.any_instance.stubs(:save).returns(false)
+    post(:create, term_with_image_params)
+    assert_empty(GlossaryTerm.last.images)
+  end
+
+  def test_create_process_image_failure
+    login("rolf")
+    # Simulate process_image failure.
+    Image.any_instance.stubs(:process_image).returns(false)
+    post(:create, term_with_image_params)
+    assert_flash_error
+  end
+
+  # ***** update *****
   def test_update
     old_count = GlossaryTerm::Version.count
+    params = changes_to_conic
     make_admin
-    params = create_glossary_term_params
-    params[:id] = conic.id
-
     post(:update, params)
     conic.reload
 
@@ -178,7 +112,7 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
     assert_response(:redirect)
   end
 
-  def update_and_reload_plane_past_version
+  def test_update_and_reload_plane_past_version
     login
     glossary_term = glossary_terms(:plane_glossary_term)
     old_count = glossary_term.versions.length
@@ -192,12 +126,39 @@ class GlossaryControllerEditTest < GlossaryTermsControllerTest
                                   version: glossary_term.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
-end
 
-# tests of image handling
-class GlossaryControllerImageTest < GlossaryTermsControllerTest
-  def setup
-    @controller = GlossaryTermsController.new
+  # TODO: Test destroy
+
+  # ---------- Other actions ---------------------------------------------------
+
+  # TODO: Test show_past_glossary_term
+
+  # ---------- helpers ---------------------------------------------------------
+
+  def conic
+    glossary_terms(:conic_glossary_term)
+  end
+
+  def square
+    glossary_terms(:square_glossary_term)
+  end
+
+  def create_term_params
+    {
+      glossary_term: { name: "Convex", description: "Boring old convex" },
+      copyright_holder: "Insil Choi",
+      date: { copyright_year: "2013" },
+      upload: { license_id: licenses(:ccnc30).id }
+    }.freeze
+  end
+
+  def changes_to_conic
+    {
+      id: conic.id,
+      glossary_term: { name: "Convex", description: "Boring old convex" },
+      copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
+      upload: { license_id: licenses(:ccnc25).id }
+    }.freeze
   end
 
   def term_with_image_params
@@ -217,22 +178,6 @@ class GlossaryControllerImageTest < GlossaryTermsControllerTest
           when: Time.current
         }
       }
-    }
-  end
-
-  def test_process_image_failure
-    login("rolf")
-    # Simulate process_image failure.
-    Image.any_instance.stubs(:process_image).returns(false)
-    post(:create, term_with_image_params)
-    assert_flash_error
-  end
-
-  def test_image_save_failure
-    login("rolf")
-    # Simulate image.save failure.
-    Image.any_instance.stubs(:save).returns(false)
-    post(:create, term_with_image_params)
-    assert_empty(GlossaryTerm.last.images)
+    }.freeze
   end
 end
