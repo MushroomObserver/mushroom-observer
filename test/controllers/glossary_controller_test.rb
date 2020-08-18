@@ -191,3 +191,46 @@ class GlossaryControllerEditTest < GlossaryControllerTest
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 end
+
+# tests of image handling
+class GlossaryControllerImageTest < GlossaryControllerTest
+  def setup
+    @controller = GlossaryController.new
+  end
+
+  def term_with_image_params
+    setup_image_dirs
+    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rack::Test::UploadedFile.new(file, "image/jpeg")
+
+    {
+      glossary_term:  { name: "Pancake", description: "Flat" },
+      copyright_holder: "Me",
+      date: { copyright_year: 2013 },
+      upload: { license_id: licenses(:ccnc25).id },
+      image: {
+        "0" => {
+          image: file,
+          copyright_holder: "zuul",
+          when: Time.current
+        }
+      }
+    }
+  end
+
+  def test_process_image_failure
+    login("rolf")
+    # Simulate process_image failure.
+    Image.any_instance.stubs(:process_image).returns(false)
+    post(:create_glossary_term, term_with_image_params)
+    assert_flash_error
+  end
+
+  def test_image_save_failure
+    login("rolf")
+    # Simulate image.save failure.
+    Image.any_instance.stubs(:save).returns(false)
+    post(:create_glossary_term, term_with_image_params)
+    assert_empty(GlossaryTerm.last.images)
+  end
+end
