@@ -41,10 +41,10 @@ class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
   end
 
   # ***** show *****
-  def test_show_glossary_term
+  def test_show
     glossary_term = glossary_terms(:plane_glossary_term)
-    get_with_dump(:show_glossary_term, id: glossary_term.id)
-    assert_template("show_glossary_term")
+    get(:show, id: glossary_term.id)
+    assert_template("show")
   end
 
   def test_show_past_glossary_term
