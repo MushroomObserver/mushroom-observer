@@ -628,6 +628,9 @@ MushroomObserver::Application.routes.draw do
   # Or if you want to be explicit (but then why have a default argument?):
   # actions: [:create, :edit, :destroy, :controller, :index, :list, :show]
 
+  resources :glossary_terms, id: /\d+/
+  redirect_old_crud_actions(old_controller: "glossary")
+
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 

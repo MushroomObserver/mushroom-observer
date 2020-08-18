@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # create and edit Glossary terms
-class GlossaryController < ApplicationController
+class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [
     :index,
     :show_past_glossary_term,

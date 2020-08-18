@@ -30,7 +30,7 @@ end
 # tests of controller methods which do not change glossary terms
 class GlossaryControllerShowAndIndexTest < GlossaryTermsControllerTest
   def setup
-    @controller = GlossaryController.new
+    @controller = GlossaryTermsController.new
     super
   end
 
@@ -69,7 +69,7 @@ end
 # tests of controller methods which create glossary terms
 class GlossaryControllerCreateTest < GlossaryTermsControllerTest
   def setup
-    @controller = GlossaryController.new
+    @controller = GlossaryTermsController.new
   end
 
   # ***** create *****
@@ -123,7 +123,7 @@ end
 class GlossaryControllerEditTest < GlossaryTermsControllerTest
   # ##### helpers #####
   def setup
-    @controller = GlossaryController.new
+    @controller = GlossaryTermsController.new
   end
 
   def conic
@@ -195,7 +195,7 @@ end
 # tests of image handling
 class GlossaryControllerImageTest < GlossaryTermsControllerTest
   def setup
-    @controller = GlossaryController.new
+    @controller = GlossaryTermsController.new
   end
 
   def term_with_image_params
