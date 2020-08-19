@@ -49,14 +49,14 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:observation) unless @observation
-      raise MissingParameter.new(:number)      if params[:number].blank?
+      raise(MissingParameter.new(:observation)) unless @observation
+      raise(MissingParameter.new(:number))      if params[:number].blank?
     end
 
     def validate_update_params!(params)
       return if params.any? || @adds || @removes
 
-      raise MissingSetParameters.new
+      raise(MissingSetParameters.new)
     end
 
     def before_create(params)
@@ -111,7 +111,7 @@ class API
       return unless @adds
 
       @adds.each do |obs|
-        raise MustHaveEditPermission.new(obj) unless obs.can_edit?(@user)
+        raise(MustHaveEditPermission.new(obj)) unless obs.can_edit?(@user)
 
         obj.add_observation(obs)
       end

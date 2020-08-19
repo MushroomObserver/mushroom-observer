@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ApplicationHelperTest < ActionView::TestCase
   def test_add_args_to_url_two_args

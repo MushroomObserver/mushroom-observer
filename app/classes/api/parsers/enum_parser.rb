@@ -17,7 +17,7 @@ class API
         limit.each do |val|
           return val if str.casecmp(val.to_s).zero?
         end
-        raise BadLimitedParameterValue.new(str, limit)
+        raise(BadLimitedParameterValue.new(str, limit))
       end
 
       # Make sure range is in correct order, and reduce trivial ranges to

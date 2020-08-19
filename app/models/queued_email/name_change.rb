@@ -45,7 +45,7 @@ class QueuedEmail::NameChange < QueuedEmail
                         review_status_changed,
                         force_prev = false)
     result = create(sender, recipient)
-    raise "Missing name or description!" if !name && !desc
+    raise("Missing name or description!") if !name && !desc
 
     if name
       result.add_integer(:name, name.id)

@@ -175,7 +175,7 @@ class SpeciesList < AbstractModel
   def names
     # Takes 0.07 seconds on Sebastopol Observations.
     # (Methods that call this don't need the description, review status, etc.)
-    Name.find_by_sql %(
+    Name.find_by_sql(%(
       SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
              n.author, n.display_name, n.display_name, n.synonym_id,
              n.correct_spelling_id, n.citation
@@ -184,7 +184,7 @@ class SpeciesList < AbstractModel
         AND os.observation_id = o.id
         AND os.species_list_id = #{id}
       ORDER BY n.sort_name ASC
-    )
+    ))
 
     # Takes 0.10 seconds on Sebastopol Observations.
     # Name.find_by_sql %(
@@ -268,10 +268,10 @@ class SpeciesList < AbstractModel
            "application/octet-stream"
         self.data = file_field.read
       else
-        raise "Unrecognized content_type: #{content_type.inspect}"
+        raise("Unrecognized content_type: #{content_type.inspect}")
       end
     else
-      raise "Unrecognized file_field class: #{file_field.inspect}"
+      raise("Unrecognized file_field class: #{file_field.inspect}")
     end
   end
 
@@ -309,19 +309,20 @@ class SpeciesList < AbstractModel
       e.split(/\s*\r\s*/).each do |key_value|
         kv = key_value.split(/\s*\|\s*/)
         if kv.length != 2
-          raise format("Bad key|value pair (%s) in %s", key_value, filename)
+          raise(format("Bad key|value pair (%s) in %s", key_value, filename))
         end
 
         key, value = kv
-        if key == "Date"
+        case key
+        when "Date"
           # timestamp = Time.local(*(ParseDate.parsedate(value)))
           timestamp = Time.zone.parse(value)
-        elsif key == "Name"
+        when "Name"
           what = value.strip.squeeze(" ")
-        elsif key == "Time"
+        when "Time"
           # Ignore
         else
-          raise format("Unrecognized key|value pair: %s\n", key_value)
+          raise(format("Unrecognized key|value pair: %s\n", key_value))
         end
       end
       sorter.add_name(what, timestamp) if what
@@ -349,7 +350,7 @@ class SpeciesList < AbstractModel
   #   )
   #
   def construct_observation(name, args = {})
-    raise "missing or invalid name: #{name.inspect}" unless name.is_a?(Name)
+    raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
     args[:user] ||= User.current
     args[:when] ||= self.when

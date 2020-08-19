@@ -35,10 +35,10 @@
 #
 ################################################################################
 
-require File.expand_path("../config/boot.rb", __dir__)
-require File.expand_path("../config/environment.rb", __dir__)
-require File.expand_path("../app/extensions/extensions.rb", __dir__)
-require "optparse"
+require(File.expand_path("../config/boot.rb", __dir__))
+require(File.expand_path("../config/environment.rb", __dir__))
+require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require("optparse")
 
 def parse_options
   user_id     = nil
@@ -88,9 +88,9 @@ def parse_options
   raise("Couldn't find old name #{old_name_id.inspect}.\n") unless @old_name
   raise("Couldn't find new name #{new_name_id.inspect}.\n") unless @new_name
 
-  puts "User: #{@user.login.inspect}"
-  puts "Old:  #{@old_name.search_name.inspect}"
-  puts "New:  #{@new_name.search_name.inspect}"
+  puts("User: #{@user.login.inspect}")
+  puts("Old:  #{@old_name.search_name.inspect}")
+  puts("New:  #{@new_name.search_name.inspect}")
   puts
 end
 
@@ -125,33 +125,33 @@ def print_observation(obs)
   name = obs.name.search_name
   name = "(old name)" if obs.name == @old_name
   name = "(new name)" if obs.name == @new_name
-  puts "https://mushroomobserver.org/#{obs.id} -- #{name}"
+  puts("https://mushroomobserver.org/#{obs.id} -- #{name}")
 end
 
 def print_initial_state
   name = "(cur=#{@cur_score.inspect})"
   name = "cur=#{@cur_score.inspect}/#{@cur_vote.inspect}" if
     @cur_name != @old_name && @cur_name != @new_name
-  puts "  avg/user: " \
+  puts("  avg/user: " \
        "old=#{@old_score.inspect}/#{@old_vote.inspect}, " \
        "new=#{@new_score.inspect}/#{@new_vote.inspect}, " +
-       name
+       name)
 end
 
 def print_result
   name = @observation.name
   if name != @cur_name && name == @new_name
-    puts "  SUCCESS -- changed to new name"
+    puts("  SUCCESS -- changed to new name")
   elsif name != @cur_name && name == @old_name
-    puts "  FAILED -- accidentally changed to old name!!"
+    puts("  FAILED -- accidentally changed to old name!!")
   elsif name != @cur_name
-    puts "  FAILED -- accidentally changed to #{name.search_name.inspect}"
+    puts("  FAILED -- accidentally changed to #{name.search_name.inspect}")
   elsif name == @old_name
-    puts "  FAILED -- consensus is stuck on old name"
+    puts("  FAILED -- consensus is stuck on old name")
   elsif name != @new_name
-    puts "  FAILED -- consensus is stuck on #{name.search_name.inspect}"
+    puts("  FAILED -- consensus is stuck on #{name.search_name.inspect}")
   else
-    puts "  SUCCESS -- stayed on new name"
+    puts("  SUCCESS -- stayed on new name")
   end
   puts
 end
@@ -159,7 +159,7 @@ end
 def propose_new_name
   return if @new_naming
 
-  puts "  > proposing new name..."
+  puts("  > proposing new name...")
   @new_naming = Naming.new(
     observation: @observation,
     name: @new_name,
@@ -175,7 +175,7 @@ def vote_on_new_name
   return unless @new_naming
 
   vote = @old_vote || @old_score.try(&:ceil) || 1
-  puts "  > voting #{vote} on new name..."
+  puts("  > voting #{vote} on new name...")
   @observation.change_vote(@new_naming, vote, @user)
   @any_changes = true
 end
@@ -183,14 +183,14 @@ end
 def vote_against_old_name
   return unless @old_naming
 
-  puts "  > voting -3 on old name..."
+  puts("  > voting -3 on old name...")
   @observation.change_vote(@old_naming, -3, @user)
   @any_changes = true
 end
 
 def add_comment
   summary, body = @comment.split(%r{/}, 2)
-  puts "  > adding comment #{summary.inspect}..."
+  puts("  > adding comment #{summary.inspect}...")
   Comment.create!(
     target: @observation,
     user: @user,
@@ -225,4 +225,4 @@ $stdout.sync = true
 Observation.where(name: @old_name).each do |obs|
   process_observation(obs)
 end
-exit 0
+exit(0)

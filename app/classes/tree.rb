@@ -95,7 +95,7 @@ class Tree
       tree
     when Hash
       unless add_this
-        raise "Can't use one-table form of Tree.add_leaf if tree is a Hash!"
+        raise("Can't use one-table form of Tree.add_leaf if tree is a Hash!")
       end
 
       tree.each_pair do |key, val|

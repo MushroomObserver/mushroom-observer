@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Test typical sessions of amateur user who just posts the occasional comment,
 # observations, or votes.

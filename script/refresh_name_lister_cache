@@ -15,10 +15,10 @@
 #
 ################################################################################
 
-require File.expand_path("../config/boot.rb", __dir__)
-require File.expand_path("../config/environment.rb", __dir__)
+require(File.expand_path("../config/boot.rb", __dir__))
+require(File.expand_path("../config/environment.rb", __dir__))
 
-require "string_extensions"
+require("string_extensions")
 
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
@@ -32,15 +32,15 @@ end
 # altogether if all goes well!)  This should plug one of our major memory
 # leaks.  (fingers crossed)
 
-genera = Name.connection.select_all %(
+genera = Name.connection.select_all(%(
   SELECT text_name as n, deprecated as d
   FROM names
   WHERE rank = #{Name.ranks[:Genus]} AND correct_spelling_id IS NULL
   ORDER BY sort_name
-)
+))
 genera = genera.to_a
 
-species = Name.connection.select_all %(
+species = Name.connection.select_all(%(
   SELECT text_name as n, author as a, deprecated as d, synonym_id as s
   FROM names
   WHERE (rank = #{Name.ranks[:Species]} OR
@@ -49,7 +49,7 @@ species = Name.connection.select_all %(
          rank = #{Name.ranks[:Form]})
         AND correct_spelling_id IS NULL
   ORDER BY sort_name
-)
+))
 # species = species.to_a
 
 # Place "*" after all accepted genera.
@@ -101,11 +101,11 @@ unless File.directory?(MO.name_lister_cache_file)
   FileUtils.mkpath(File.dirname(MO.name_lister_cache_file))
 end
 File.open(MO.name_lister_cache_file, "w") do |fh|
-  fh.write <<-END.unindent
+  fh.write(<<-END.unindent)
     var NL_GENERA  = [#{genera.map  { |n| "'#{escape(n)}'" }.join(",")}];
     var NL_SPECIES = [#{species.map { |n| "'#{escape(n)}'" }.join(",")}];
     var NL_NAMES   = [];
   END
 end
 
-exit 0
+exit(0)

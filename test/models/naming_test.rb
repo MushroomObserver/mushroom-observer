@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class NamingTest < UnitTestCase
   # Propose a naming for an observation.
   def test_create
-    assert_kind_of Observation, observations(:coprinus_comatus_obs)
+    assert_kind_of(Observation, observations(:coprinus_comatus_obs))
     now = Time.zone.now
     naming = Naming.new(
       created_at: now,
@@ -14,15 +14,15 @@ class NamingTest < UnitTestCase
       name_id: names(:agaricus_campestris).id,
       user_id: mary.id
     )
-    assert naming.save, naming.errors.full_messages.join("; ")
+    assert(naming.save, naming.errors.full_messages.join("; "))
   end
 
   # Change an existing one.
   def test_update
-    assert_kind_of Observation, observations(:coprinus_comatus_obs)
-    assert_kind_of Naming, namings(:coprinus_comatus_naming)
-    assert_kind_of Name, names(:coprinus_comatus)
-    assert_kind_of Name, names(:agaricus_campestris)
+    assert_kind_of(Observation, observations(:coprinus_comatus_obs))
+    assert_kind_of(Naming, namings(:coprinus_comatus_naming))
+    assert_kind_of(Name, names(:coprinus_comatus))
+    assert_kind_of(Name, names(:agaricus_campestris))
     assert_equal(names(:coprinus_comatus),
                  namings(:coprinus_comatus_naming).name)
     assert_equal(names(:coprinus_comatus),
@@ -30,9 +30,9 @@ class NamingTest < UnitTestCase
 
     namings(:coprinus_comatus_naming).updated_at = Time.zone.now
     namings(:coprinus_comatus_naming).name = names(:agaricus_campestris)
-    assert namings(:coprinus_comatus_naming).save
+    assert(namings(:coprinus_comatus_naming).save)
 
-    assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")
+    assert(namings(:coprinus_comatus_naming).errors.full_messages.join("; "))
     namings(:coprinus_comatus_naming).reload
     observations(:coprinus_comatus_obs).reload
     User.current = rolf
@@ -46,12 +46,12 @@ class NamingTest < UnitTestCase
   # Make sure it fails if we screw up.
   def test_validate
     naming = Naming.new
-    assert_not naming.save
-    assert_equal 3, naming.errors.count
-    assert_equal :validate_naming_name_missing.t, naming.errors[:name].first
+    assert_not(naming.save)
+    assert_equal(3, naming.errors.count)
+    assert_equal(:validate_naming_name_missing.t, naming.errors[:name].first)
     assert_equal(:validate_naming_observation_missing.t,
                  naming.errors[:observation].first)
-    assert_equal :validate_naming_user_missing.t, naming.errors[:user].first
+    assert_equal(:validate_naming_user_missing.t, naming.errors[:user].first)
   end
 
   # Destroy one.

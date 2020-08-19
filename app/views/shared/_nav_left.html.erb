@@ -73,7 +73,7 @@
   <%= link_to(:HERBARIA.t, {controller: :herbarium, action: :index}, {class: "list-group-item indent"}) %>
   <%= link_to(:LOCATIONS.t, {controller: :location, action: :list_locations}, {class: "list-group-item indent"}) %>
   <%= link_to(:NAMES.t, {controller: :name, action: :observation_index}, {class: "list-group-item indent"}) %>
-  <%= link_to(:NEWS.t, {controller: :article, action: :list_articles}, {class: "list-group-item indent"}) %>
+  <%= link_to(:NEWS.t, articles_path, {class: "list-group-item indent"}) %>
   <%= link_to(:PROJECTS.t, {controller: :project, action: :list_projects}, {class: "list-group-item indent"}) %>
 
   <div class="list-group-item disabled bold">

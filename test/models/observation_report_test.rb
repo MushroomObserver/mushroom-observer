@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ObservationReportTest < UnitTestCase
   def do_csv_test(report_type, obs, expect, &block)
@@ -103,7 +103,7 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Darwin, obs, expect, &:id)
   end
 
-  def test_mycoflora_no_exact_lat_long
+  def test_fundis_no_exact_lat_long
     # There are two collection numbers for this observation.  I can't think of
     # any good way to ensure the order that these are rendered in the report be
     # consistent.  So I'm just going to delete one of the numbers.
@@ -135,17 +135,17 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org/#{obs.id}",
       "/remote_images/orig/#{img1.id}.jpg " \
         "/remote_images/orig/#{img2.id}.jpg",
-      "NA Mycoflora Project",
+      "FunDiS",
       "",
       "",
       "",
       "",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
   end
 
-  def test_mycoflora_with_exact_lat_long
+  def test_fundis_with_exact_lat_long
     obs = observations(:unknown_with_lat_long)
     obs.notes = {
       "Collector's_Name": "John Doe",
@@ -180,17 +180,17 @@ class ObservationReportTest < UnitTestCase
       "2010-07-22",
       "http://mushroomobserver.org/#{obs.id}",
       "",
-      "NA Mycoflora Project",
+      "FunDiS",
       "John Doe",
       "wood chips",
       "lawn",
       "Agaricus",
       "Foo: Bar\nOther: Things"
     ]
-    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
   end
 
-  def test_mycoflora_with_hidden_gps
+  def test_fundis_with_hidden_gps
     obs = observations(:unknown_with_lat_long)
     obs.update_attribute(:gps_hidden, true)
 
@@ -217,20 +217,20 @@ class ObservationReportTest < UnitTestCase
       "2010-07-22",
       "http://mushroomobserver.org/#{obs.id}",
       "",
-      "NA Mycoflora Project",
+      "FunDiS",
       "",
       "",
       "",
       "",
       "unknown_with_lat_long"
     ]
-    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
 
     User.current = mary
     expect[11] = "34.1622"
     expect[12] = "-118.3521"
     expect[13] = nil
-    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
   end
 
   def test_raw

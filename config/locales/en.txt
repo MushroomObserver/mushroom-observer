@@ -267,16 +267,16 @@
   glossary_term: glossary term
   GLOSSARY_TERMS: Glossary Terms
   glossary_terms: glossary terms
-  HERBARIUM_RECORD: Herbarium Record
-  herbarium_record: herbarium record
-  HERBARIUM_RECORDS: Herbarium Records
-  herbarium_records: herbarium records
-  herbaria: herbaria
-  HERBARIA: Herbaria
-  herbarium: herbarium
-  HERBARIUM: Herbarium
-  herbariums: herbaria
-  HERBARIUMS: Herbaria
+  HERBARIUM_RECORD: Fungarium Record
+  herbarium_record: fungarium record
+  HERBARIUM_RECORDS: Fungarium Records
+  herbarium_records: fungarium records
+  HERBARIA: Fungaria
+  herbaria: fungaria
+  HERBARIUM: Fungarium
+  herbarium: fungarium
+  HERBARIUMS: Fungaria
+  herbariums: fungaria
   LICENSE: License
   license: license
   LICENSES: Licenses
@@ -1300,7 +1300,7 @@
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
   download_observations_symbiota: Symbiota
-  download_observations_mycoflora: MycoFlora
+  download_observations_fundis: FunDiS
   download_observations_what_is_this: what is this?
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
@@ -1336,7 +1336,7 @@
 
   # observer/edit_observation
   edit_observation_title: "[:edit_object(type=:observation)]: [name]"
-  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
+  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, fungarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password
   email_new_password_title: Email New Password
@@ -1475,7 +1475,7 @@
   form_observations_image_too_big: This image is too large. Images must be less than [max]Mb in file size.
   form_observations_upload_error: Something went wrong while uploading image. Skipping it for now. You can try uploading it again later after we've created the observation.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
-  form_observations_herbarium_record_help: If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
+  form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal fungarium and leave the accession number blank.
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
 
@@ -2099,7 +2099,7 @@
   show_user_joined: Joined
   show_user_mailing_address: Mailing Address for Collections
   show_user_primary_location: Primary Location
-  show_user_personal_herbarium: Personal Herbarium
+  show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
@@ -2312,40 +2312,40 @@
   herbarium_curator: Curator
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
-  user_personal_herbarium: "[name]: Personal Herbarium"
+  user_personal_herbarium: "[name]: Personal Fungarium"
 
   # herbarium/show_herbarium
-  show_herbarium_herbarium_record_count: This herbarium contains [count] herbarium record(s).
+  show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator
-  show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this herbarium.  When we add curators to an MO herbarium, those curators are given exclusive rights to edit the herbarium's addresses and notes.  Curators are also allowed to create herbarium records for other users' observations.  For example, when an herbarium accessions a contributor's specimen, the herbarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your herbarium and what its accession number is.  Please ask how MO can help your herbarium IT people automate this process via our API.
+  show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this fungarium.  When we add curators to an MO fungarium, those curators are given exclusive rights to edit the fungarium's addresses and notes.  Curators are also allowed to create fungarium records for other users' observations.  For example, when a fungarium accessions a contributor's specimen, the fungarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your fungarium and what its accession number is.  Please ask how MO can help your fungarium IT people automate this process via our API.
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbarium/create_herbarium
-  create_herbarium: Create New Herbarium
-  create_herbarium_title: Create New Herbarium
-  create_herbarium_personal: Check this box if this is your personal herbarium
-  create_herbarium_personal_help: Each user can have one personal herbarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
+  create_herbarium: Create New Fungarium
+  create_herbarium_title: Create New Fungarium
+  create_herbarium_personal: Check this box if this is your personal fungarium
+  create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
-  create_herbarium_code_help: Look up the standard abbreviation for an herbarium at "Index Herbariorum":http://sweetgum.nybg.org/science/ih/.
+  create_herbarium_code_help: Look up the standard abbreviation for a fungarium at "Index Herbariorum":http://sweetgum.nybg.org/science/ih/.
   create_herbarium_email: Email Address
   create_herbarium_mailing_address: Mailing Address
-  create_herbarium_duplicate_name: Herbarium called '[name]' already exists.
-  create_herbarium_personal_already_exists: You've already created a personal herbarium called '[name]'.
-  create_herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
+  create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
+  create_herbarium_personal_already_exists: You've already created a personal fungarium called '[name]'.
+  create_herbarium_must_define_location: You must define this location before we can use it for this fungarium. Any other information you provided has been saved.
 
   # herbarium/edit_herbarium
-  edit_herbarium: Edit Herbarium
-  edit_herbarium_title: Editing Herbarium
-  edit_herbarium_this_is_personal_herbarium: This is your personal herbarium. You are only allowed one personal herbarium. If you would like to change which herbarium is your personal herbarium, please contact the admins and explain the situation.
-  edit_herbarium_cant_make_personal: You can't make this your personal herbarium because you don't own all the herbarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
-  edit_herbarium_admin_make_personal: Make this the personal herbarium for
-  edit_herbarium_user_records: User "[name]" has [num] records in this herbarium.
-  edit_herbarium_no_herbarium_records: No herbarium records for this herbarium.
-  edit_herbarium_user_already_has_personal_herbarium: User "[user]" already has a personal herbarium called "[herbarium]".
-  edit_herbarium_successfully_made_personal: Successfully made this the personal herbarium of "[user]".
-  edit_herbarium_successfully_made_nonpersonal: Successfully made this nobody's personal herbarium.
+  edit_herbarium: Edit Fungarium
+  edit_herbarium_title: Editing Fungarium
+  edit_herbarium_this_is_personal_herbarium: This is your personal fungarium. You are only allowed one personal fungarium. If you would like to change which fungarium is your personal fungarium, please contact the admins and explain the situation.
+  edit_herbarium_cant_make_personal: You can't make this your personal fungarium because you don't own all the fungarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
+  edit_herbarium_admin_make_personal: Make this the personal fungarium for
+  edit_herbarium_user_records: User "[name]" has [num] records in this fungarium.
+  edit_herbarium_no_herbarium_records: No fungarium records for this fungarium.
+  edit_herbarium_user_already_has_personal_herbarium: User "[user]" already has a personal fungarium called "[herbarium]".
+  edit_herbarium_successfully_made_personal: Successfully made this the personal fungarium of "[user]".
+  edit_herbarium_successfully_made_nonpersonal: Successfully made this nobody's personal fungarium.
 
 
 
@@ -2353,42 +2353,42 @@
   list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
   # herbarium/index
-  herbarium_index: Herbarium Index
-  herbarium_index_list_all_herbaria: List All Herbaria
-  herbarium_index_nonpersonal_herbaria: List Institutional Herbaria
+  herbarium_index: Fungarium Index
+  herbarium_index_list_all_herbaria: List All Fungaria
+  herbarium_index_nonpersonal_herbaria: List Institutional Fungaria
   herbarium_index_records: Records
-  herbarium_index_merge_help: Click on the herbarium below that you would like to merge "[name]" into.  This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new herbarium.  If you do not have permission to perform the merge, it will send a request to the admins.  ("+Cancel merge.+":[url])
+  herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into.  This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium.  If you do not have permission to perform the merge, it will send a request to the admins.  ("+Cancel merge.+":[url])
 
 
   # herbarium record fields
-  herbarium_record_herbarium_name: Herbarium Name
+  herbarium_record_herbarium_name: Fungarium Name
   herbarium_record_initial_det: Initial Determination
   herbarium_record_accession_number: Accession Number
   herbarium_record_user: Record Creator
 
   # herbarium_record/create_herbarium_record
-  create_herbarium_record: Add Herbarium Record
-  create_herbarium_record_title: Add Herbarium Record
-  create_herbarium_record_accession_number_help: "Must be a unique identifier for this herbarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013."
-  create_herbarium_separately: The herbarium you entered doesn't exist. Please create it separately and then add the herbarium record to your observation.
-  create_herbarium_record_missing_herbarium_name: Missing herbarium name.
-  create_herbarium_record_already_used: This herbarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct herbarium record.
+  create_herbarium_record: Add Fungarium Record
+  create_herbarium_record_title: Add Fungarium Record
+  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013."
+  create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
+  create_herbarium_record_missing_herbarium_name: Missing fungarium name.
+  create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
   create_herbarium_record_already_used_by_someone_else: This accession number has already been recorded by someone else for [herbarium_name]. Try adding your initials to the accession number to distinguish labels.
-  create_herbarium_record_only_curator_or_owner: Only curators can add herbarium records to other users' observations.
+  create_herbarium_record_only_curator_or_owner: Only curators can add fungarium records to other users' observations.
 
   # herbarium_record/edit_herbarium_record
-  edit_herbarium_record: Edit Herbarium Record
-  edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
-  edit_herbarium_record_back_to_index: Back to Herbarium Record Index
-  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
-  edit_herbarium_record_already_used: This herbarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
+  edit_herbarium_record: Edit Fungarium Record
+  edit_herbarium_record_title: Edit Fungarium Record [herbarium_label]
+  edit_herbarium_record_back_to_index: Back to Fungarium Record Index
+  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from a fungarium record.
+  edit_herbarium_record_already_used: This fungarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
   edit_affects_multiple_observations: The changes you make here will affect all of the observations shown.  If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one.  That will leave the [type] unchanged for any other observations associated with it.
 
   # herbarium_record/destroy_herbarium_record
-  delete_herbarium_record: Destroy Herbarium Record
+  delete_herbarium_record: Destroy Fungarium Record
 
   # herbarium_record/herbarium_record_index (not a real page)
-  herbarium_record_index_title: "[subject] Herbarium Record Index"
+  herbarium_record_index_title: "[subject] Fungarium Record Index"
 
   # herbarium_record/list_herbarium_records
   list_herbarium_records_title: "[:list_objects(type=:herbarium_record)]"
@@ -2769,7 +2769,7 @@
   pivotal_head_performance: site performance
   pivotal_head_projects: working on group projects
   pivotal_head_search: search capabilities and data mining
-  pivotal_head_specimen: how herbarium specimens are documented
+  pivotal_head_specimen: how fungarium specimens are documented
   pivotal_head_voting: voting on observation names and images
 
   pivotal_label_api: API
@@ -3063,7 +3063,7 @@
   # EMAIL MESSAGES
 
   # Subject lines.
-  email_subject_add_herbarium_record_not_curator: Herbarium Record Added to [herbarium_name]
+  email_subject_add_herbarium_record_not_curator: Fungarium Record Added to [herbarium_name]
   email_subject_comment: "[:COMMENT] About [name]"
   email_subject_commercial_inquiry: Commercial Inquiry About [Name]
   email_subject_consensus_change: Consensus Changed from [old] to [new]
@@ -3136,7 +3136,7 @@
   email_comment_intro_to_owner: "h2. *Comment on Your [Type]*\n\nThe following comment was posted on the [:app_title] website regarding your [type] <u>[name]</u>:"
   email_commercial_intro: "h2. *Commercial Inquiry*\n\n[user] ([email]) asked the [:app_title] website to forward the following commercial inquiry to you about your image [image]:"
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
-  email_add_herbarium_record_not_curator_intro: "h2. *Herbarium Record Added By Non-Curator*\n\nThe user, [login], added the herbarium record, [herbarium_label], to the herbarium, [herbarium_name], which you curate."
+  email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
@@ -3248,7 +3248,7 @@
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
-  observation_term_herbarium: Specimen at an herbarium.
+  observation_term_herbarium: Specimen at a fungarium.
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
@@ -3552,7 +3552,7 @@
   runtime_description_removed_writer: Revoked edit permission for [name].
   runtime_destroy_description_not_admin: Only a description's admins can delete that description.
   runtime_duplicate_rank: "Rank appears twice: '[rank]'"
-  runtime_herbarium_record_already_exists: Herbarium record [number] at [herbarium] already used by someone else.
+  runtime_herbarium_record_already_exists: Fungarium record [number] at [herbarium] already used by someone else.
   runtime_image_updated_notes: "Updated notes on image #[id]."
   runtime_image_uploaded: Uploaded image '[name]'.
   runtime_index_no_at_location: No [types] at [location].
@@ -3726,7 +3726,7 @@
   pattern_search_bad_float_error: Invalid value for [term], [value], expected a number between [min] and [max].
   pattern_search_bad_confidence_error: Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. "0-100".
   pattern_search_bad_name_error: Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched.
-  pattern_search_bad_herbarium_error: Invalid or unrecognized value for [term], [value], expected herbarium id, code or name; nothing matched.
+  pattern_search_bad_herbarium_error: Invalid or unrecognized value for [term], [value], expected fungarium id, code or name; nothing matched.
   pattern_search_bad_location_error: Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched.
   pattern_search_bad_project_error: Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched.
   pattern_search_bad_species_list_error: Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched.
@@ -3737,8 +3737,8 @@
   # content for html header title tag,
   # used when there are no hits for a list or search
   title_for_comment_search: Comment Search
-  title_for_herbarium_search: Herbarium Search
-  title_for_herbarium_record_search: Herbarium Record Search
+  title_for_herbarium_search: Fungarium Search
+  title_for_herbarium_record_search: Fungarium Record Search
   title_for_image_search: Image Search
   title_for_location_search: Location Search
   title_for_name_search: Name Search
@@ -3766,7 +3766,7 @@
   api_bad_email_parameter_value: Invalid email address, "[val]".
   api_bad_external_site_parameter_value: Invalid external site, "[val]".
   api_bad_float_parameter_value: Invalid float, "[val]".
-  api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id, code or name.
+  api_bad_herbarium_parameter_value: Invalid or unknown fungarium, "[val]", accept numerical id, code or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
   api_bad_integer_parameter_value: Invalid integer, "[val]".
   api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
@@ -3788,7 +3788,7 @@
   api_can_only_synonymize_unsynonimized_names: Presently, we're only allowing API clients to synonymize unsynonmized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
-  api_cant_add_herbarium_record: Only owner of observation and curators of herbarium can add herbarium records to an observation.
+  api_cant_add_herbarium_record: Only owner of observation and curators of fungarium can add fungarium records to an observation.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
@@ -3841,7 +3841,7 @@
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
 
   api_help_accession_has: search within accession number
-  api_help_accession_number: unique herbarium id
+  api_help_accession_number: unique fungarium id
   api_help_accession_number_has: search within accession number
   api_help_any_date: this date can mean anything you want
   api_help_api_key_user: user you are creating api key for
@@ -3882,6 +3882,7 @@
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
+  api_help_region: "matches locations which end in this, e.g. \"California, USA\""
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?
@@ -3913,7 +3914,7 @@
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
-  query_title_nonpersonal: List of Institutional Herbaria
+  query_title_nonpersonal: List of Institutional Fungaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"
   query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
@@ -3945,7 +3946,7 @@
   query_help_comment_for_object: comments about a given object
   query_help_comment_for_user: comments sent to a given user
   query_help_comment_pattern_search: comments matching a search string
-  query_help_herbarium_record_in_herbarium: records in a given herbarium
+  query_help_herbarium_record_in_herbarium: records in a given fungarium
   query_help_herbarium_record_for_observation: records attached to a given observation
   query_help_image_advanced_search: images of observations matching advanced search criteria
   query_help_image_all: all images
@@ -4048,7 +4049,7 @@
   sort_by_filename: File Name
   sort_by_header: "Sort by:"
   sort_by_herbarium_label: Label
-  sort_by_herbarium_name: Herbarium
+  sort_by_herbarium_name: Fungarium
   sort_by_id: ID
   sort_by_image_quality: Image Quality
   sort_by_last_login: Last Login

@@ -246,11 +246,11 @@ module ControllerExtensions
       count += 1
       next unless count > 100
 
-      raise RangeError.new(
+      raise(RangeError.new(
         "More than 100 files found with a label of '#{label}'"
-      )
+      ))
     end
-    print "Creating html_dump file: #{file_name}\n"
+    print("Creating html_dump file: #{file_name}\n")
     file = File.new(file_name, "w")
     # show_params(file, params, "params")
     file.write(html)
@@ -565,7 +565,7 @@ module ControllerExtensions
         msg += "Expected redirect to <account/welcome>" + got
         assert_redirected_to({ controller: "account", action: "login" }, msg)
       else
-        raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
+        raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")
       end
     end
   end
@@ -593,8 +593,8 @@ module ControllerExtensions
     if mismatches[:controller].to_s == controller.controller_name.to_s
       mismatches.delete(:controller)
     elsif mismatches.member?(:controller)
-      print "assert_redirect_match: #{partial}\n"
-      print "assert_redirect_match: #{response.redirect_url}\n"
+      print("assert_redirect_match: #{partial}\n")
+      print("assert_redirect_match: #{response.redirect_url}\n")
     end
     assert_equal({}, mismatches, "Mismatched partial hash: #{mismatches}")
   end
@@ -697,7 +697,7 @@ module ControllerExtensions
     when :no_field
       assert_select("input##{id}", 0)
     else
-      raise "Invalid state in check_project_checks: #{state.inspect}"
+      raise("Invalid state in check_project_checks: #{state.inspect}")
     end
   end
 

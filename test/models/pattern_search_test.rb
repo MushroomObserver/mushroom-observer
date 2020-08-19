@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class PatternSearchTest < UnitTestCase
   def test_parse_next_term
@@ -266,8 +266,8 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::MissingValueError) do
       x.parse_list_of_herbaria
     end
-    x.vals = ["North American Mycoflora Project"]
-    assert_equal([herbaria(:mycoflora_herbarium).id], x.parse_list_of_herbaria)
+    x.vals = ["Fungal Diversity Survey"]
+    assert_equal([herbaria(:fundis_herbarium).id], x.parse_list_of_herbaria)
     x.vals = [ids.first.to_s]
     assert_equal([ids.first], x.parse_list_of_herbaria)
     x.vals = ids.map(&:to_s)

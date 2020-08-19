@@ -62,7 +62,8 @@ class API
         north: n,
         south: s,
         east: e,
-        west: w
+        west: w,
+        region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
@@ -125,7 +126,7 @@ class API
 
     def validate_update_params!(params)
       check_for_unknown_location!(params)
-      raise MissingSetParameters.new if params.empty? && no_adds_or_removes?
+      raise(MissingSetParameters.new) if params.empty? && no_adds_or_removes?
     end
 
     def build_setter(params)
@@ -202,7 +203,7 @@ class API
 
     def update_projects(obs)
       return unless @add_to_project || @remove_from_project
-      raise MustBeOwner.new(obs) if obs.user != @user
+      raise(MustBeOwner.new(obs)) if obs.user != @user
 
       obs.projects.push(@add_to_project) if @add_to_project
       obs.projects.delete(@remove_from_project) if @remove_from_project
@@ -267,7 +268,7 @@ class API
       keys = User.parse_notes_template(str)
       return keys.first.to_sym if keys.length == 1
 
-      raise BadNotesFieldParameter.new(str)
+      raise(BadNotesFieldParameter.new(str))
     end
 
     def parse_set_coordinates!
@@ -276,7 +277,7 @@ class API
       @altitude  = parse(:altitude, :set_altitude)
       return unless @latitude && !@longitude || @longitude && !@latitude
 
-      raise LatLongMustBothBeSet.new
+      raise(LatLongMustBothBeSet.new)
     end
 
     def parse_set_images!
@@ -336,22 +337,22 @@ class API
     def make_sure_both_latitude_and_longitude!
       return if @latitude && @longitude || !@longitude && !@latitude
 
-      raise LatLongMustBothBeSet.new
+      raise(LatLongMustBothBeSet.new)
     end
 
     def make_sure_has_specimen_set!
       return if @has_specimen
 
       error_class = CanOnlyUseThisFieldIfHasSpecimen
-      raise error_class.new(:herbarium)         if @herbarium
-      raise error_class.new(:collectors_name)   if @collectors_name
-      raise error_class.new(:collection_number) if @collection_number
-      raise error_class.new(:initial_det)       if @initial_det
-      raise error_class.new(:accession_number)  if @accession_number
+      raise(error_class.new(:herbarium))         if @herbarium
+      raise(error_class.new(:collectors_name))   if @collectors_name
+      raise(error_class.new(:collection_number)) if @collection_number
+      raise(error_class.new(:initial_det))       if @initial_det
+      raise(error_class.new(:accession_number))  if @accession_number
     end
 
     def make_sure_location_provided!
-      raise MissingParameter.new(:location) unless @location
+      raise(MissingParameter.new(:location)) unless @location
     end
 
     def check_for_unknown_location!(params)

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # tests of Herbarium controller
 class HerbariumControllerTest < FunctionalTestCase
@@ -31,7 +31,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_list_herbaria_merge_source
     herb1 = herbaria(:nybg_herbarium)
-    herb2 = herbaria(:mycoflora_herbarium)
+    herb2 = herbaria(:fundis_herbarium)
     herb3 = herbaria(:dick_herbarium)
     assert_true(herb1.can_edit?(rolf))  # rolf id curator
     assert_true(herb2.can_edit?(rolf))  # no curators
@@ -75,7 +75,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_list_herbaria_merge_target
     source = herbaria(:field_museum)
     herb1  = herbaria(:nybg_herbarium)
-    herb2  = herbaria(:mycoflora_herbarium)
+    herb2  = herbaria(:fundis_herbarium)
     herb3  = herbaria(:dick_herbarium)
     assert_true(herb1.can_edit?(rolf))  # rolf id curator
     assert_true(herb2.can_edit?(rolf))  # no curators
@@ -110,12 +110,12 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_merge_herbaria
     # Rule is non-admins can only merge herbaria which they own all the records
     # at, into their own personal herbarium.  Nothing else.  Mary owns all the
-    # records at Mycoflora, randomly enough, so if we create a personal
-    # herbarium for her, she should be able to merge Mycoflora into it.
-    mycoflora = herbaria(:mycoflora_herbarium)
-    assert_true(mycoflora.owns_all_records?(mary))
+    # records at fundis, randomly enough, so if we create a personal
+    # herbarium for her, she should be able to merge fundis into it.
+    fundis = herbaria(:fundis_herbarium)
+    assert_true(fundis.owns_all_records?(mary))
     mary_herbarium = mary.create_personal_herbarium
-    id1 = mycoflora.id
+    id1 = fundis.id
     id2 = mary_herbarium.id
     id3 = herbaria(:nybg_herbarium).id
     id4 = herbaria(:field_museum).id
@@ -145,8 +145,8 @@ class HerbariumControllerTest < FunctionalTestCase
                          type: :Herbarium, old_id: id1, new_id: id3)
     get(:merge_herbaria, this: id1, that: id2)
     assert_flash_success
-    # Mycoflora ends up being the destination because it is older.
-    assert_redirected_to(action: :index_herbarium, id: mycoflora.id)
+    # fundis ends up being the destination because it is older.
+    assert_redirected_to(action: :index_herbarium, id: fundis.id)
 
     make_admin("mary")
     get(:merge_herbaria, this: id3, that: id4)
@@ -405,7 +405,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_user_make_personal
     # Make sure this herbarium is ready to be made Mary's personal herbarium.
-    herbarium = herbaria(:mycoflora_herbarium)
+    herbarium = herbaria(:fundis_herbarium)
     assert_empty(herbarium.curators)
     assert_nil(herbarium.personal_user_id)
     assert_true(herbarium.owns_all_records?(mary))
@@ -435,7 +435,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_edit_herbarium_post_admin_set_personal_user
-    herbarium = herbaria(:mycoflora_herbarium)
+    herbarium = herbaria(:fundis_herbarium)
     params = herbarium_params.merge(
       name: herbarium.name,
       personal_user_name: "mary"
@@ -580,7 +580,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_destroy_herbarium_noncurator_owns_all_records
-    herbarium = herbaria(:mycoflora_herbarium)
+    herbarium = herbaria(:fundis_herbarium)
     assert_true(herbarium.owns_all_records?(mary))
     assert_empty(herbarium.curators)
 

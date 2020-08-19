@@ -35,7 +35,7 @@ module Query
       def make_sure_user_entered_something(*args)
         return unless args.all?(&:blank?)
 
-        raise :runtime_no_conditions.t
+        raise(:runtime_no_conditions.t)
       end
 
       def add_name_condition(name)

@@ -8,7 +8,7 @@
 #
 #  DESCRIPTION::
 #
-#  Creates JSON data file for Narth American Mycoflora Project's
+#  Creates JSON data file for Fungal Diversity Survey's
 #  Mushroom Mapper app.
 #
 #  It writes output to:
@@ -34,10 +34,10 @@
 #
 ################################################################################
 
-require File.expand_path("../config/boot.rb", __dir__)
-require File.expand_path("../config/environment.rb", __dir__)
+require(File.expand_path("../config/boot.rb", __dir__))
+require(File.expand_path("../config/environment.rb", __dir__))
 
-require "json"
+require("json")
 
 JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json"
 RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
@@ -57,10 +57,10 @@ synonyms = {}
 aliases  = {}
 names    = {}
 ids      = {}
-name_data = Name.connection.select_rows %(
+name_data = Name.connection.select_rows(%(
   SELECT id, text_name, rank, deprecated, synonym_id, correct_spelling_id
   FROM names
-)
+))
 
 # > 5 parameters needed for 2nd name.data block, and it's efficient
 # to use name_data for the 1st block to avoid hitting db twice
@@ -90,10 +90,10 @@ name_data.
 
 # Build table of number of observations per genus.
 observations = {}
-for id in Name.connection.select_values %(
+for id in Name.connection.select_values(%(
   SELECT name_id
   FROM observations
-) do
+)) do
   next unless real_id = aliases[id]
 
   text_name, rank, deprecated = names[real_id]
@@ -108,13 +108,13 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-for id, genus, classification in Name.connection.select_rows %(
+for id, genus, classification in Name.connection.select_rows(%(
   SELECT id as i, text_name as n, classification as c
   FROM names
   WHERE rank = #{Name.ranks[:Genus]}
     AND !deprecated
     AND correct_spelling_id IS NULL
-) do
+)) do
   kingdom =
     classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
   klass   =
@@ -148,14 +148,14 @@ end
 
 # Build table of species in each genus.
 genus_to_species = {}
-for species in Name.connection.select_values %(
+for species in Name.connection.select_values(%(
   SELECT text_name as n
   FROM names
   WHERE rank = #{Name.ranks[:Species]}
     AND !deprecated
     AND correct_spelling_id IS NULL
   ORDER BY sort_name
-) do
+)) do
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species
@@ -198,7 +198,7 @@ for family in family_to_genus.keys.sort do
   data["families"] << family_data
 end
 File.open(JSON_FILE, "w") do |fh|
-  fh.write JSON.generate(data)
+  fh.write(JSON.generate(data))
 end
 
 # Write raw data file.
@@ -209,4 +209,4 @@ File.open(RAW_FILE, "w") do |fh|
   end
 end
 
-exit 0
+exit(0)

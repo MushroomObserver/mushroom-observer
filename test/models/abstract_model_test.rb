@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class AbstractModelTest < UnitTestCase
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
@@ -394,5 +394,38 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_species_list_destroyed, rss_log)
     assert_nil(SpeciesList.safe_find(spl_id))
     assert_equal(:species_list, rss_log.target_type)
+  end
+
+  # -------------------------------------------------------------------
+  #  Test the methods that generate controller and action names
+  #  based on the Query model
+  # -------------------------------------------------------------------
+
+  def test_show_controller
+    assert_equal("articles", Article.show_controller)
+    assert_equal("#{self.class.name.underscore}/phony", Phony.show_controller)
+  end
+
+  def test_show_action
+    assert_equal("show", Article.show_action)
+    assert_equal("show_#{Phony.name.underscore}", Phony.show_action)
+  end
+
+  def test_show_url
+    assert_equal("#{MO.http_domain}/articles/2020",
+                 Article.show_url(2020))
+    assert_equal("#{MO.http_domain}/" \
+                 "#{Phony.show_controller}/" \
+                 "#{Phony.show_action}/2020",
+                 Phony.show_url(2020))
+  end
+
+  def test_index_action
+    assert_equal("index", Article.index_action)
+    assert_equal("index_#{Phony.name.underscore}", Phony.index_action)
+  end
+
+  # fixture for above tests
+  class Phony < AbstractModel
   end
 end

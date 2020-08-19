@@ -14,8 +14,8 @@ module ObservationReport
     def initialize(args)
       self.query    = args[:query]
       self.encoding = args[:encoding] || default_encoding
-      raise "ObservationReport initialized without query!"    unless query
-      raise "ObservationReport initialized without encoding!" unless encoding
+      raise("ObservationReport initialized without query!")    unless query
+      raise("ObservationReport initialized without encoding!") unless encoding
     end
 
     def filename
@@ -143,18 +143,18 @@ module ObservationReport
     end
 
     def add_herbarium_labels!(rows, col)
-      vals = HerbariumRecord.connection.select_rows %(
+      vals = HerbariumRecord.connection.select_rows(%(
         SELECT ho.observation_id,
           CONCAT(h.initial_det, ": ", h.accession_number)
         FROM herbarium_records h
         JOIN herbarium_records_observations ho ON ho.herbarium_record_id = h.id
         JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
-      )
+      ))
       add_column!(rows, vals, col)
     end
 
     def add_herbarium_accession_numbers!(rows, col)
-      vals = HerbariumRecord.connection.select_rows %(
+      vals = HerbariumRecord.connection.select_rows(%(
         SELECT ho.observation_id,
           GROUP_CONCAT(DISTINCT CONCAT(h.code, "\t", hr.accession_number)
                        SEPARATOR "\n")
@@ -164,12 +164,12 @@ module ObservationReport
         JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
         WHERE h.code != ""
         GROUP BY ho.observation_id
-      )
+      ))
       add_column!(rows, vals, col)
     end
 
     def add_collector_ids!(rows, col)
-      vals = CollectionNumber.connection.select_rows %(
+      vals = CollectionNumber.connection.select_rows(%(
         SELECT co.observation_id,
           GROUP_CONCAT(DISTINCT CONCAT(c.id, "\t", c.name, "\t", c.number)
                        SEPARATOR "\n")
@@ -178,16 +178,16 @@ module ObservationReport
           ON co.collection_number_id = c.id
         JOIN (#{plain_query}) AS ids ON ids.id = co.observation_id
         GROUP BY co.observation_id
-      )
+      ))
       add_column!(rows, vals, col)
     end
 
     def add_image_ids!(rows, col)
-      vals = Image.connection.select_rows %(
+      vals = Image.connection.select_rows(%(
         SELECT io.observation_id, io.image_id
         FROM images_observations io
         JOIN (#{plain_query}) AS ids ON ids.id = io.observation_id
-      )
+      ))
       add_column!(rows, vals, col)
     end
 

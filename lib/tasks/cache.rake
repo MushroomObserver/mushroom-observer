@@ -37,12 +37,12 @@ namespace :cache do
     QueuedEmail.connection.update(
       "update queued_emails set flavor_tmp=flavor+0"
     )
-    ActiveRecord::Migration.remove_column :queued_emails, :flavor
+    ActiveRecord::Migration.remove_column(:queued_emails, :flavor)
     ActiveRecord::Migration.add_column(
       :queued_emails, :flavor, :enum, limit: QueuedEmail.all_flavors
     )
     QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
-    ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
+    ActiveRecord::Migration.remove_column(:queued_emails, :flavor_tmp)
   end
 
   desc "Reset the ranks"
@@ -52,12 +52,12 @@ namespace :cache do
       :names, :rank_tmp, :enum, limit: Name.all_ranks
     )
     Name.connection.update("update names set rank_tmp=rank+0")
-    ActiveRecord::Migration.remove_column :names, :rank
+    ActiveRecord::Migration.remove_column(:names, :rank)
     ActiveRecord::Migration.add_column(
       :names, :rank, :enum, limit: Name.all_ranks
     )
     Name.connection.update("update names set rank=rank_tmp")
-    ActiveRecord::Migration.remove_column :names, :rank_tmp
+    ActiveRecord::Migration.remove_column(:names, :rank_tmp)
   end
 
   desc "Reset the search_states query_type enum"
@@ -69,14 +69,14 @@ namespace :cache do
     SearchState.connection.update(
       "update search_states set query_type_tmp=query_type+0"
     )
-    ActiveRecord::Migration.remove_column :search_states, :query_type
+    ActiveRecord::Migration.remove_column(:search_states, :query_type)
     ActiveRecord::Migration.add_column(
       :search_states, :query_type, :enum, limit: SearchState.all_query_types
     )
     SearchState.connection.update(
       "update search_states set query_type=query_type_tmp"
     )
-    ActiveRecord::Migration.remove_column :search_states, :query_type_tmp
+    ActiveRecord::Migration.remove_column(:search_states, :query_type_tmp)
   end
 
   desc "Reset the name review_status enum"
@@ -92,8 +92,8 @@ namespace :cache do
     Name.connection.update(
       "update past_names set review_status_tmp=review_status+0"
     )
-    ActiveRecord::Migration.remove_column :names, :review_status
-    ActiveRecord::Migration.remove_column :past_names, :review_status
+    ActiveRecord::Migration.remove_column(:names, :review_status)
+    ActiveRecord::Migration.remove_column(:past_names, :review_status)
     ActiveRecord::Migration.add_column(
       :names, :review_status, :enum, limit: Name.all_review_statuses
     )
@@ -104,8 +104,8 @@ namespace :cache do
     Name.connection.update(
       "update past_names set review_status=review_status_tmp"
     )
-    ActiveRecord::Migration.remove_column :names, :review_status_tmp
-    ActiveRecord::Migration.remove_column :past_names, :review_status_tmp
+    ActiveRecord::Migration.remove_column(:names, :review_status_tmp)
+    ActiveRecord::Migration.remove_column(:past_names, :review_status_tmp)
   end
 
   desc "Add reviewers"
@@ -115,28 +115,28 @@ namespace :cache do
     [].each do |login|
       user = User.find_by_login(login)
       if user.user_groups.member?(group)
-        print "#{login} is already in the reviewers group\n"
+        print("#{login} is already in the reviewers group\n")
       else
         user.user_groups << group
         user.save
-        print "Added #{login} to the reviewers group\n"
+        print("Added #{login} to the reviewers group\n")
       end
     end
   end
 
   desc "Update authors and editors"
   task(update_authors: :environment) do
-    Name.connection.update %(
+    Name.connection.update(%(
       UPDATE names
       SET user_id = 1
       WHERE user_id = 0
-    )
+    ))
 
-    Name.connection.update %(
+    Name.connection.update(%(
       UPDATE past_names
       SET user_id = 1
       WHERE user_id = 0
-    )
+    ))
 
     users = {}
     # for n in Name.find(:all) # Rails 3
@@ -146,8 +146,8 @@ namespace :cache do
       last_version = 0
       for v in n.versions
         if last_version > v.version
-          print "Expected version numbers to be strictly increasing\n"
-          print "#{n.search_name}: #{last_version} > #{v.version}\n"
+          print("Expected version numbers to be strictly increasing\n")
+          print("#{n.search_name}: #{last_version} > #{v.version}\n")
         end
         last_version = v.version
         id = v.user_id

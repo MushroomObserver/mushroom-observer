@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "open3"
-require "mimemagic"
+require("open3")
+require("mimemagic")
 #
 #  = Image Model
 #
@@ -701,7 +701,7 @@ class Image < AbstractModel
   def move_original
     original_image = local_file_name(:original)
     unless File.rename(upload_temp_file, original_image)
-      raise SystemCallError.new("Try again.")
+      raise(SystemCallError.new("Try again."))
     end
 
     FileUtils.chmod(0o644, original_image)

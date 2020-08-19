@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "fileutils"
+require("test_helper")
+require("fileutils")
 
 class IpStatsTest < UnitTestCase
   def setup
@@ -32,7 +32,7 @@ class IpStatsTest < UnitTestCase
     assert_false(IpStats.blocked?("3.14.15.9"))  # in okay_ips.txt
     assert_false(IpStats.blocked?(new_ip))       # not in either yet
     File.open(MO.blocked_ips_file, "a") do |fh|
-      fh.puts "#{new_ip},#{1.hour.ago}"
+      fh.puts("#{new_ip},#{1.hour.ago}")
     end
     assert_true(IpStats.blocked?(new_ip))
   end
@@ -41,7 +41,7 @@ class IpStatsTest < UnitTestCase
     old_ip = "12.34.56.78"
     assert_true(IpStats.blocked?(old_ip))
     File.open(MO.okay_ips_file, "a") do |fh|
-      fh.puts old_ip
+      fh.puts(old_ip)
     end
     assert_false(IpStats.blocked?(old_ip))
   end

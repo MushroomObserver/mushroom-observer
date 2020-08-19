@@ -58,21 +58,21 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    user_ids = self.class.connection.select_rows %(
+    user_ids = self.class.connection.select_rows(%(
       SELECT user_id
       FROM translation_strings
       WHERE language_id = #{id} AND user_id != 0
       GROUP BY user_id
       ORDER BY COUNT(id) DESC
       LIMIT #{num}
-    )
+    ))
     if user_ids.any?
-      user_ids = self.class.connection.select_rows %(
+      user_ids = self.class.connection.select_rows(%(
         SELECT id, login
         FROM users
         WHERE id IN (#{user_ids.join(",")})
         ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
-      )
+      ))
     end
     user_ids
   end
@@ -81,12 +81,12 @@ class Language < AbstractModel
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values %(
+    for text in Language.connection.select_values(%(
       SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
       FROM translation_strings_versions
       WHERE user_id = #{user.id}
       GROUP BY translation_string_id
-    )
+    ))
       lines += score_lines(text)
     end
     lines
@@ -94,14 +94,14 @@ class Language < AbstractModel
 
   def calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values %(
+    for text in Language.connection.select_values(%(
       SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
       FROM translation_strings t, translation_strings_versions v
       WHERE t.language_id = #{id}
         AND v.translation_string_id = t.id
         AND v.user_id = #{user.id}
       GROUP BY t.id
-    )
+    ))
       lines += Language.score_lines(text)
     end
     lines
@@ -127,12 +127,12 @@ class Language < AbstractModel
   def self.update_recent_translations
     cutoff = @@last_update
     @@last_update = Time.zone.now
-    for locale, tag, text in Language.connection.select_rows %(
+    for locale, tag, text in Language.connection.select_rows(%(
       SELECT locale, tag, text
       FROM translation_strings t, languages l
       WHERE t.language_id = l.id
         AND t.updated_at >= #{Language.connection.quote(cutoff)}
-    )
+    ))
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end

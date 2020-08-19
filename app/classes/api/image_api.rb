@@ -11,7 +11,13 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
+      :license,
+      :observations,
       :user
+    ]
+
+    self.low_detail_includes = [
+      :observations
     ]
 
     # rubocop:disable Metrics/AbcSize
@@ -78,7 +84,7 @@ class API
     end
 
     def validate_create_params!(_params)
-      raise MissingUpload.new unless @upload
+      raise(MissingUpload.new) unless @upload
     end
 
     def build_object

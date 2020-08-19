@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class CuratorTest < IntegrationTestCase
   def test_first_herbarium_record
@@ -58,7 +58,7 @@ class CuratorTest < IntegrationTestCase
     get("/#{obs.id}")
     click(href: "/herbarium_record/show_herbarium_record/#{rec.id}")
     assert_template("herbarium_record/show_herbarium_record")
-    click(label: "Edit Herbarium Record")
+    click(label: "Edit Fungarium Record")
     assert_template("herbarium_record/edit_herbarium_record")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
@@ -66,7 +66,7 @@ class CuratorTest < IntegrationTestCase
     end
     assert_template("herbarium_record/edit_herbarium_record")
     push_page
-    click(label: "Cancel (Show Herbarium Record)")
+    click(label: "Cancel (Show Fungarium Record)")
     assert_template("herbarium_record/show_herbarium_record")
     go_back
     open_form do |form|
@@ -74,7 +74,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Save")
     end
     assert_template("herbarium_record/show_herbarium_record")
-    click(label: "Destroy Herbarium Record")
+    click(label: "Destroy Fungarium Record")
     assert_template("herbarium_record/list_herbarium_records")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
@@ -94,7 +94,7 @@ class CuratorTest < IntegrationTestCase
     end
     assert_template("herbarium_record/edit_herbarium_record")
     push_page
-    click(label: "Back to Herbarium Record Index")
+    click(label: "Back to Fungarium Record Index")
     assert_template("herbarium_record/list_herbarium_records")
     go_back
     open_form do |form|

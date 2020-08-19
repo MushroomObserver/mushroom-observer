@@ -51,9 +51,9 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:summary) if params[:summary].blank?
-      raise MissingParameter.new(:content) if params[:comment].blank?
-      raise MissingParameter.new(:target)  if params[:target].blank?
+      raise(MissingParameter.new(:summary)) if params[:summary].blank?
+      raise(MissingParameter.new(:content)) if params[:comment].blank?
+      raise(MissingParameter.new(:target))  if params[:target].blank?
 
       must_have_view_permission!(params[:target])
     end

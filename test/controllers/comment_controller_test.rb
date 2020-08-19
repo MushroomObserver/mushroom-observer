@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class CommentControllerTest < FunctionalTestCase
   def test_list_comments
@@ -40,7 +40,7 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_add_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
-    login :katrina
+    login(:katrina)
     get(:add_comment, type: "NameDescription", id: katrina_is_not_reader.id)
 
     assert_flash_error("MO should flash if trying to comment on object"\

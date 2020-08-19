@@ -9,7 +9,7 @@ class API
         limit = args[:limit]
         return val if !limit || val == limit
 
-        raise BadLimitedParameterValue.new(str, [limit])
+        raise(BadLimitedParameterValue.new(str, [limit]))
       end
 
       private
@@ -19,7 +19,7 @@ class API
         when "1", "yes", "true", :yes.l then true
         when "0", "no", "false", :no.l then false
         else
-          raise BadParameterValue.new(str, :boolean)
+          raise(BadParameterValue.new(str, :boolean))
         end
       end
     end

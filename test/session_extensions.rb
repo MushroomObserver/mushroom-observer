@@ -51,7 +51,7 @@ module SessionExtensions
   def dump_links
     assert_select("a[href]") do |links|
       for link in links
-        puts "link: #{link.attributes["href"]}"
+        puts("link: #{link.attributes["href"]}")
       end
     end
   end
@@ -78,7 +78,7 @@ module SessionExtensions
               "Got unknown 500 error from outside our application?!\n" \
                     "This usually means that a file failed to parse.\n"
             end
-      flunk msg
+      flunk(msg)
     end
     assert_equal([], Symbol.missing_tags,
                  "Language tag(s) are missing. #{url}: #{method}")
@@ -299,7 +299,7 @@ module SessionExtensions
       end
     end
 
-    assert done, "Expected a link matching: #{args.inspect}"
+    assert(done, "Expected a link matching: #{args.inspect}")
   end
 
   ##############################################################################

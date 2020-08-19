@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LocationControllerTest < FunctionalTestCase
   def setup
@@ -289,7 +289,7 @@ class LocationControllerTest < FunctionalTestCase
                               gen_desc: "nifty botanical garden",
                               ecology: "varied",
                               species: "all",
-                              notes: "NAMP participant",
+                              notes: "FunDiS participant",
                               refs: "" },
                id: loc.id }
 

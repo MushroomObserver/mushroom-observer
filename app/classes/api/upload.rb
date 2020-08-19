@@ -5,7 +5,7 @@ class API
   def prepare_upload
     uploads = [upload_from_url, upload_from_file, upload_from_http]
     uploads.reject!(&:nil?)
-    raise TooManyUploads.new if uploads.length > 1
+    raise(TooManyUploads.new) if uploads.length > 1
 
     uploads.first
   end
@@ -51,11 +51,11 @@ class API
     def initialize(url)
       fetch(url)
     rescue StandardError => e
-      raise CouldntDownloadURL.new(url, e)
+      raise(CouldntDownloadURL.new(url, e))
     end
 
     def fetch(url, limit = 10)
-      raise ArgumentError.new("Too many HTTP redirects") if limit <= 0
+      raise(ArgumentError.new("Too many HTTP redirects")) if limit <= 0
 
       uri = URI(url)
       Net::HTTP.start(
@@ -101,7 +101,7 @@ class API
   # Class encapsulating an upload from a file stored locally on the server
   class UploadFromFile < Upload
     def initialize(file)
-      raise FileMissing.new(file) unless File.exist?(file)
+      raise(FileMissing.new(file)) unless File.exist?(file)
 
       self.content = File.open(file, "rb")
       self.content_length = File.size(file)

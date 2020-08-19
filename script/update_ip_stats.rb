@@ -31,10 +31,10 @@ end
 # ----------------------------------------
 
 app_root = File.expand_path("..", __dir__)
-require "#{app_root}/config/consts.rb"
-require "#{app_root}/app/classes/ip_stats.rb"
-require "fileutils"
-require "time"
+require("#{app_root}/config/consts.rb")
+require("#{app_root}/app/classes/ip_stats.rb")
+require("fileutils")
+require("time")
 
 abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
@@ -71,19 +71,19 @@ end
 
 def report_user(stats)
   id = stats[:user]
-  puts "User ##{id} is hogging the server!"
-  puts "  https://mushroomobserver.org/observer/show_user/#{id}"
-  puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
-  puts "  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds"
-  puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
+  puts("User ##{id} is hogging the server!")
+  puts("  https://mushroomobserver.org/observer/show_user/#{id}")
+  puts("  request rate: #{(stats[:rate] * 60).round(2)} requests / minute")
+  puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
+  puts("  server load:  #{(stats[:load] * 100).round(2)}% of one worker")
   puts
 end
 
 def report_nonuser(stats)
-  puts "IP #{stats[:ip]} is hogging the server!"
-  puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
-  puts "  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds"
-  puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
+  puts("IP #{stats[:ip]} is hogging the server!")
+  puts("  request rate: #{(stats[:rate] * 60).round(2)} requests / minute")
+  puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
+  puts("  server load:  #{(stats[:load] * 100).round(2)}% of one worker")
   puts
 end
 
@@ -94,4 +94,4 @@ bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
 IpStats.remove_blocked_ips(bad_ips)
 IpStats.add_blocked_ips(bad_ips)
 
-exit 0
+exit(0)

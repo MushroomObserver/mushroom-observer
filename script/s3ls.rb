@@ -2,8 +2,8 @@
 # frozen_string_literal: true
 
 app_root = File.expand_path("..", __dir__)
-require "#{app_root}/app/classes/image_s3.rb"
-require "fileutils"
+require("#{app_root}/app/classes/image_s3.rb")
+require("fileutils")
 
 abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
@@ -85,7 +85,7 @@ File.open(cache_file, "a") do |fh|
     md5  = obj.etag.gsub(/^"|"$/, "")
     num += 1
     sum += size
-    fh.puts [key, size, md5].join("\t")
+    fh.puts([key, size, md5].join("\t"))
     log("#{sum} bytes in #{num} files...\r") if verbose
   end
 end
@@ -100,4 +100,4 @@ unless replace
   FileUtils.rm(temp_file2)
 end
 
-exit 0
+exit(0)

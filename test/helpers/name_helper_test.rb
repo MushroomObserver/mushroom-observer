@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test the helpers for ObserverController
 class NameHelperTest < ActionView::TestCase
@@ -71,35 +71,35 @@ class NameHelperTest < ActionView::TestCase
 
     # Now test the Query's
     results = obss_of_taxon(nam).results
-    assert results.include?(nam_proposed_and_consensus)
-    assert results.include?(nam_proposed_syn_is_consensus)
-    assert results.include?(syn_proposed_and_consensus)
-    assert results.include?(syn_proposed_nam_is_consensus)
-    assert results.exclude?(nam_proposed_other_taxon_is_consensus)
-    assert results.exclude?(syn_proposed_other_taxon_is_consensus)
+    assert(results.include?(nam_proposed_and_consensus))
+    assert(results.include?(nam_proposed_syn_is_consensus))
+    assert(results.include?(syn_proposed_and_consensus))
+    assert(results.include?(syn_proposed_nam_is_consensus))
+    assert(results.exclude?(nam_proposed_other_taxon_is_consensus))
+    assert(results.exclude?(syn_proposed_other_taxon_is_consensus))
 
     results = obss_of_taxon_other_names(nam).results
-    assert results.exclude?(nam_proposed_and_consensus)
-    assert results.include?(nam_proposed_syn_is_consensus)
-    assert results.include?(syn_proposed_and_consensus)
-    assert results.exclude?(syn_proposed_nam_is_consensus)
-    assert results.exclude?(nam_proposed_other_taxon_is_consensus)
-    assert results.exclude?(syn_proposed_other_taxon_is_consensus)
+    assert(results.exclude?(nam_proposed_and_consensus))
+    assert(results.include?(nam_proposed_syn_is_consensus))
+    assert(results.include?(syn_proposed_and_consensus))
+    assert(results.exclude?(syn_proposed_nam_is_consensus))
+    assert(results.exclude?(nam_proposed_other_taxon_is_consensus))
+    assert(results.exclude?(syn_proposed_other_taxon_is_consensus))
 
     results = obss_other_taxa_this_taxon_proposed(nam).results
-    assert results.exclude?(nam_proposed_and_consensus)
-    assert results.exclude?(nam_proposed_syn_is_consensus)
-    assert results.exclude?(syn_proposed_and_consensus)
-    assert results.exclude?(syn_proposed_nam_is_consensus)
-    assert results.include?(nam_proposed_other_taxon_is_consensus)
-    assert results.include?(syn_proposed_other_taxon_is_consensus)
+    assert(results.exclude?(nam_proposed_and_consensus))
+    assert(results.exclude?(nam_proposed_syn_is_consensus))
+    assert(results.exclude?(syn_proposed_and_consensus))
+    assert(results.exclude?(syn_proposed_nam_is_consensus))
+    assert(results.include?(nam_proposed_other_taxon_is_consensus))
+    assert(results.include?(syn_proposed_other_taxon_is_consensus))
 
     results = obss_this_name_proposed(nam).results
-    assert results.include?(nam_proposed_and_consensus)
-    assert results.include?(nam_proposed_syn_is_consensus)
-    assert results.exclude?(syn_proposed_and_consensus)
-    assert results.include?(syn_proposed_nam_is_consensus)
-    assert results.include?(nam_proposed_other_taxon_is_consensus)
-    assert results.exclude?(syn_proposed_other_taxon_is_consensus)
+    assert(results.include?(nam_proposed_and_consensus))
+    assert(results.include?(nam_proposed_syn_is_consensus))
+    assert(results.exclude?(syn_proposed_and_consensus))
+    assert(results.include?(syn_proposed_nam_is_consensus))
+    assert(results.include?(nam_proposed_other_taxon_is_consensus))
+    assert(results.exclude?(syn_proposed_other_taxon_is_consensus))
   end
 end

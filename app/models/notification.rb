@@ -60,8 +60,8 @@ class Notification < AbstractModel
     tracker  = user
     observer = args[:user]
     naming   = args[:naming]
-    raise "Missing 'user' argument for #{flavor} notification." unless observer
-    raise "Missing 'naming' argument for #{flavor} notification." unless naming
+    raise("Missing 'user' argument for #{flavor} notification.") unless observer
+    raise("Missing 'naming' argument for #{flavor} notification.") unless naming
 
     template.
       gsub(":observer", observer.login).

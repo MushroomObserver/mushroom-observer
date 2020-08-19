@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # functional tests of glossary controller and views
 # tests of controller methods which do not change glossary terms
@@ -56,7 +56,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
     prior_version_target = "/glossary/show_past_glossary_term/" \
                           "#{square.id}?version=#{square.version - 1}"
     get(:show_glossary_term, id: square.id)
-    assert_select "a[href='#{prior_version_target}']"
+    assert_select("a[href='#{prior_version_target}']")
   end
 
   # ***** index *****

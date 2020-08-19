@@ -50,14 +50,14 @@ module LanguageExporter
     def alt_locales_path(path, &block)
       old_path = locales_path
       Language.locales_path = path
-      yield block
+      yield(block)
     ensure
       Language.locales_path = old_path
     end
   end
 
   def verbose(msg)
-    puts msg if Language.verbose
+    puts(msg) if Language.verbose
   end
 
   def safe_mode
@@ -96,7 +96,7 @@ module LanguageExporter
   def import_from_file
     any_changes = false
     unless old_user = User.current
-      raise "Must specify a user to import translation file!" unless official
+      raise("Must specify a user to import translation file!") unless official
 
       User.current = User.admin
     end

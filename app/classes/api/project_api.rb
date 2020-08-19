@@ -52,10 +52,10 @@ class API
     def validate_create_params!(params)
       @title = params[:title].to_s
       @title2 = @title + ".admin"
-      raise MissingParameter.new(:title) if @title.blank?
-      raise ProjectTaken.new(@title)     if Project.find_by_title(@title)
-      raise UserGroupTaken.new(@title)   if UserGroup.find_by_name(@title)
-      raise UserGroupTaken.new(@title2)  if UserGroup.find_by_name(@title2)
+      raise(MissingParameter.new(:title)) if @title.blank?
+      raise(ProjectTaken.new(@title))     if Project.find_by_title(@title)
+      raise(UserGroupTaken.new(@title))   if UserGroup.find_by_name(@title)
+      raise(UserGroupTaken.new(@title2))  if UserGroup.find_by_name(@title2)
     end
 
     def before_create(params)
@@ -77,12 +77,12 @@ class API
     def validate_update_params!(params)
       return unless params.empty? && adds_and_removes.empty?
 
-      raise MissingSetParameters.new
+      raise(MissingSetParameters.new)
     end
 
     def build_setter(params)
       lambda do |proj|
-        raise MustBeAdmin.new(proj) unless proj.is_admin?(@user)
+        raise(MustBeAdmin.new(proj)) unless proj.is_admin?(@user)
 
         proj.update!(params) unless params.empty?
         update_admin_group(proj)
@@ -95,7 +95,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction.new("DELETE", action)
+      raise(NoMethodForAction.new("DELETE", action))
     end
 
     ############################################################################

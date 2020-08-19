@@ -123,14 +123,14 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_before_action :create_view_instance_variable
-    skip_before_action :verify_authenticity_token
-    skip_before_action :fix_bad_domains
-    skip_before_action :autologin
-    skip_before_action :set_timezone
-    skip_before_action :refresh_translations
-    skip_before_action :track_translations
-    before_action :disable_link_prefetching
+    skip_before_action(:create_view_instance_variable)
+    skip_before_action(:verify_authenticity_token)
+    skip_before_action(:fix_bad_domains)
+    skip_before_action(:autologin)
+    skip_before_action(:set_timezone)
+    skip_before_action(:refresh_translations)
+    skip_before_action(:track_translations)
+    before_action(:disable_link_prefetching)
     before_action { User.current = nil }
   end
 
@@ -226,7 +226,7 @@ class ApplicationController < ActionController::Base
     IpStats.log_stats(stats)
     logger.warn(request_stats_log_message(stats))
   rescue StandardError => e
-    raise @error = e
+    raise(@error = e)
   end
 
   def request_stats
@@ -413,7 +413,7 @@ class ApplicationController < ActionController::Base
   def block_suspended_users
     return true unless user_suspended? # Tell Rails to continue processing.
 
-    block user
+    block(user)
     false # Tell Rails to stop processing.
   end
 
@@ -477,7 +477,7 @@ class ApplicationController < ActionController::Base
   #
   def check_permission!(obj)
     unless (result = check_permission(obj))
-      flash_error :permission_denied.t
+      flash_error(:permission_denied.t)
     end
     result
   end
@@ -574,7 +574,7 @@ class ApplicationController < ActionController::Base
     # Update user preference.
     @user.update(locale: lang.locale) if @user && @user.locale != lang.locale
 
-    logger.debug "[I18n] Locale set to #{I18n.locale}"
+    logger.debug("[I18n] Locale set to #{I18n.locale}")
 
     # Tell Rails to continue to process request.
     true
@@ -587,28 +587,28 @@ class ApplicationController < ActionController::Base
   def params_locale
     return unless params[:user_locale]
 
-    logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
+    logger.debug("[I18n] loading locale: #{params[:user_locale]} from params")
     params[:user_locale]
   end
 
   def prefs_locale
     return unless @user&.locale.present? && params[:controller] != "ajax"
 
-    logger.debug "[I18n] loading locale: #{@user.locale} from @user"
+    logger.debug("[I18n] loading locale: #{@user.locale} from @user")
     @user.locale
   end
 
   def session_locale
     return unless session[:locale]
 
-    logger.debug "[I18n] loading locale: #{session[:locale]} from session"
+    logger.debug("[I18n] loading locale: #{session[:locale]} from session")
     session[:locale]
   end
 
   def browser_locale
     return unless (locale = valid_locale_from_request_header)
 
-    logger.debug "[I18n] loading locale: #{locale} from request header"
+    logger.debug("[I18n] loading locale: #{locale} from request header")
     locale
   end
 
@@ -626,7 +626,7 @@ class ApplicationController < ActionController::Base
       begin
         Time.zone = tz
       rescue StandardError
-        logger.warn "TimezoneError: #{tz.inspect}"
+        logger.warn("TimezoneError: #{tz.inspect}")
       end
     end
     @js = js_enabled?(tz)
@@ -652,7 +652,7 @@ class ApplicationController < ActionController::Base
       result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     end
 
-    logger.debug "[globalite] client accepted locales: #{result.join(", ")}"
+    logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
 
@@ -689,11 +689,11 @@ class ApplicationController < ActionController::Base
   # Lookup the closest match based on the given request priorities.
   def lookup_valid_locale(requested_locales)
     requested_locales.each do |locale|
-      logger.debug "[globalite] trying to match locale: #{locale}"
+      logger.debug("[globalite] trying to match locale: #{locale}")
       language = locale.split("-").first
       next unless I18n.available_locales.include?(language.to_sym)
 
-      logger.debug "[globalite] language match: #{language}"
+      logger.debug("[globalite] language match: #{language}")
       return language
     end
     "en"
@@ -889,8 +889,8 @@ class ApplicationController < ActionController::Base
 
     # Parse must have failed.
     else
-      flash_error :runtime_no_create_name.t(type: :name,
-                                            value: name_parse.name)
+      flash_error(:runtime_no_create_name.t(type: :name,
+                                            value: name_parse.name))
     end
   end
 
@@ -926,8 +926,8 @@ class ApplicationController < ActionController::Base
 
     # Parse must have failed.
     else
-      flash_error :runtime_no_create_name.t(type: :name,
-                                            value: name_parse.synonym)
+      flash_error(:runtime_no_create_name.t(type: :name,
+                                            value: name_parse.synonym))
     end
   end
 
@@ -1014,17 +1014,24 @@ class ApplicationController < ActionController::Base
   helper_method :query_params
 
   def add_query_param(params, query = nil)
-    if browser.bot?
-      # do nothing
-    elsif query
-      query.save unless query.id
-      params[:q] = query.id.alphabetize
-    elsif @query_params
-      params[:q] = @query_params[:q]
-    end
+    params[:q] = get_query_param(query) unless browser.bot?
     params
   end
   helper_method :add_query_param
+
+  # Allows us to add query to a path helper:
+  #   object_path(@object, q: get_query_param)
+  def get_query_param(query = nil)
+    return nil if browser.bot?
+
+    if query
+      query.save unless query.id
+      query.id.alphabetize
+    elsif @query_params
+      @query_params[:q]
+    end
+  end
+  helper_method :get_query_param
 
   def redirect_with_query(args, query = nil)
     redirect_to(add_query_param(args, query))
@@ -1595,7 +1602,7 @@ class ApplicationController < ActionController::Base
     pass_query_params
     from = redirect_from(redirect)
     to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
-    raise "Unsure where to go from #{from}." unless to_model
+    raise("Unsure where to go from #{from}.") unless to_model
 
     redirect_with_query(controller: to_model.show_controller,
                         action: to_model.index_action)
@@ -1720,7 +1727,7 @@ class ApplicationController < ActionController::Base
   def disable_link_prefetching
     return unless request.env["HTTP_X_MOZ"] == "prefetch"
 
-    logger.debug "prefetch detected: sending 403 Forbidden"
+    logger.debug("prefetch detected: sending 403 Forbidden")
     render(plain: "", status: :forbidden)
     false
   end

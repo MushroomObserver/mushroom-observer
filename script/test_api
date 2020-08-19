@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "digest/md5"
-require "net/http"
-require "net/https"
-require "uri"
+require("digest/md5")
+require("net/http")
+require("net/https")
+require("uri")
 
 # HOST = 'mushroomobserver.org'
 # PORT = 443
@@ -29,7 +29,7 @@ path = "/api/observations?" + [
   "help=1"
 ].join("&")
 response = http.post(path, "")
-puts response.body
+puts(response.body)
 exit
 
 # # Create image via upload.

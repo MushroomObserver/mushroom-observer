@@ -181,11 +181,11 @@ class SiteData
 
   def self.update_weight(impact, user_id)
     unless impact.zero?
-      User.connection.update %(
+      User.connection.update(%(
         UPDATE users SET contribution =
           IF(contribution IS NULL, #{impact}, contribution + #{impact})
         WHERE id = #{user_id}
-      )
+      ))
     end
   end
 

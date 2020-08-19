@@ -16,9 +16,9 @@
 # require File.expand_path('../../config/environment.rb', __FILE__)
 # require "string_extensions"
 
-require File.expand_path("../app/extensions/string_extensions.rb", __dir__)
+require(File.expand_path("../app/extensions/string_extensions.rb", __dir__))
 
 q = ARGV[0]
 id = q.dealphabetize
-puts id
-exit 0
+puts(id)
+exit(0)

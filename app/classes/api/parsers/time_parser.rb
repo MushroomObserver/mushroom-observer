@@ -12,7 +12,7 @@ class API
 
         scalar_yyyymmddhhmmss(str)
       rescue ArgumentError
-        raise BadParameterValue.new(str, :time)
+        raise(BadParameterValue.new(str, :time))
       end
 
       def parse_range
@@ -22,7 +22,7 @@ class API
 
         try_all_range_patterns(str)
       rescue ArgumentError
-        raise BadParameterValue.new(str, :time_range)
+        raise(BadParameterValue.new(str, :time_range))
       end
 
       def try_all_range_patterns(str)
@@ -197,7 +197,7 @@ class API
         match = str.match(/^#{YYYYMMDDHHMMSS1}$/) ||
                 str.match(/^#{YYYYMMDDHHMMSS2}$/) ||
                 str.match(/^#{YYYYMMDDHHMMSS3}$/)
-        raise ArgumentError unless match
+        raise(ArgumentError) unless match
 
         str = strip_time(str) + " UTC"
         DateTime.parse(str)

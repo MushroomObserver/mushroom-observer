@@ -57,12 +57,12 @@ class API
 
     def validate_create_params!(params)
       make_sure_location_isnt_dubious!(params[:place_name])
-      raise MissingParameter.new(:title) if params[:title].blank?
+      raise(MissingParameter.new(:title)) if params[:title].blank?
 
       title = params[:title].to_s
       return unless SpeciesList.find_by_title(title)
 
-      raise SpeciesListAlreadyExists.new(title)
+      raise(SpeciesListAlreadyExists.new(title))
     end
 
     def validate_update_params!(params)
@@ -70,7 +70,7 @@ class API
       validate_set_title!(params)
       return unless params.empty? && @add_obs.empty? && @remove_obs.empty?
 
-      raise MissingSetParameters.new
+      raise(MissingSetParameters.new)
     end
 
     def build_setter(params)
@@ -95,13 +95,13 @@ class API
     def validate_set_title!(params)
       title = params[:title].to_s || return
       return if query.num_results.zero?
-      raise TryingToSetMultipleLocationsToSameName.new \
+      raise(TryingToSetMultipleLocationsToSameName.new) \
         if query.num_results > 1
 
       match = SpeciesList.find_by_title(title)
       return if !match || query.results.first == match
 
-      raise SpeciesListAlreadyExists.new(title)
+      raise(SpeciesListAlreadyExists.new(title))
     end
 
     def parse_add_remove_observations

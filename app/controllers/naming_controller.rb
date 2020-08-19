@@ -130,7 +130,7 @@ class NamingController < ApplicationController
     naming.create_reasons(params[:reason], params[:was_js_on] == "yes")
     save_with_log(naming)
     @params.logged_change_vote
-    flash_warning :create_new_naming_warn.l
+    flash_warning(:create_new_naming_warn.l)
   end
 
   def change_naming

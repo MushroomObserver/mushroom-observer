@@ -1,28 +1,28 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class PublicationsControllerTest < FunctionalTestCase
   def test_should_get_index
-    get :index
-    assert_response :success
-    assert_not_nil assigns(:publications)
+    get(:index)
+    assert_response(:success)
+    assert_not_nil(assigns(:publications))
   end
 
   def test_should_get_index_for_user_who_owns_a_publication
     pub_id = publications(:one_pub).id
     login("rolf")
-    get :index
-    assert_response :success
-    assert_not_nil assigns(:publications)
+    get(:index)
+    assert_response(:success)
+    assert_not_nil(assigns(:publications))
     assert_link_in_html("Edit", action: :edit, id: pub_id)
     assert_link_in_html("Destroy", action: :destroy, id: pub_id)
   end
 
   def test_should_get_new
     login
-    get :new
-    assert_response :success
+    get(:new)
+    assert_response(:success)
   end
 
   def test_should_create_publication
@@ -47,11 +47,11 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_equal(help, pub.how_helped)
     assert_equal(true, pub.mo_mentioned)
     assert_equal(true, pub.peer_reviewed)
-    assert_redirected_to publication_path(assigns(:publication))
+    assert_redirected_to(publication_path(assigns(:publication)))
   end
 
   def test_should_not_create_publication_if_user_not_successful
-    login "spamspamspam"
+    login("spamspamspam")
     assert_no_difference("Publication.count") do
       post :create, publication: {}
     end
@@ -65,23 +65,23 @@ class PublicationsControllerTest < FunctionalTestCase
   end
 
   def test_should_show_publication
-    get :show, id: publications(:one_pub).id
-    assert_response :success
+    get(:show, id: publications(:one_pub).id)
+    assert_response(:success)
     login("rolf")
-    get :show, id: publications(:one_pub).id
-    assert_response :success
+    get(:show, id: publications(:one_pub).id)
+    assert_response(:success)
   end
 
   def test_should_get_edit
     login
-    get :edit, id: publications(:one_pub).id
-    assert_response :success
+    get(:edit, id: publications(:one_pub).id)
+    assert_response(:success)
   end
 
   def test_should_update_publication
     login
-    put :update, id: publications(:one_pub).id, publication: {}
-    assert_redirected_to publication_path(assigns(:publication))
+    put(:update, id: publications(:one_pub).id, publication: {})
+    assert_redirected_to(publication_path(assigns(:publication)))
   end
 
   def test_should_destroy_publication
@@ -90,6 +90,6 @@ class PublicationsControllerTest < FunctionalTestCase
       delete :destroy, id: publications(:one_pub).id
     end
 
-    assert_redirected_to publications_path
+    assert_redirected_to(publications_path)
   end
 end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class DescriptionTest < UnitTestCase
   # Make sure authors and editors are as they should be.
@@ -132,9 +132,9 @@ class DescriptionTest < UnitTestCase
                                   license_id: licenses(:ccnc25).id)
     burbank = locations(:burbank)
     obj.parent = burbank
-    assert obj.parent_id == burbank.id
+    assert(obj.parent_id == burbank.id)
     obj.parent_id = albion.id
-    assert obj.parent == albion
+    assert(obj.parent == albion)
   end
 
   def test_permitted?

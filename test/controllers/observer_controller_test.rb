@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ObserverControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
@@ -999,7 +999,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Obs3 owned by mary, in bolete project (dick admin and member),
     # two collection_numbers owned by mary,
     # two herbarium_records, one owned by rolf at NY,
-    #   one owned by mary at MycoFlora,
+    #   one owned by mary at FunDiS,
     # several sequences all owned by dick.
     assert_users_equal(mary, obs3.user)
     assert_equal("Bolete Project", obs3.projects.first.title)
@@ -3774,7 +3774,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>=, 4)
     get(:print_labels, params: { q: query.id.alphabetize })
     assert_select("div#labels td", query.num_results)
-    assert_match(/314159/, @response.body) # make sure mycoflora id in there!
+    assert_match(/314159/, @response.body) # make sure fundis id in there!
     assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
     # Alternative entry point.
@@ -3789,17 +3789,17 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_normal_permissions
-    get :intro
+    get(:intro)
     assert_equal(200, @response.status)
-    get :textile
+    get(:textile)
     assert_equal(200, @response.status)
   end
 
   def test_robot_permissions
     @request.user_agent = "Googlebot"
-    get :intro
+    get(:intro)
     assert_equal(200, @response.status)
-    get :textile
+    get(:textile)
     assert_equal(403, @response.status)
   end
 

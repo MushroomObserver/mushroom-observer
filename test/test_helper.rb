@@ -13,9 +13,9 @@
 
 # Code to allow both local and coveralls coverage.  From:
 # https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
-require "rails"
-require "simplecov"
-require "coveralls"
+require("rails")
+require("simplecov")
+require("coveralls")
 
 # Coveralls.wear!("rails")
 formatters = [SimpleCov::Formatter::HTMLFormatter,
@@ -25,24 +25,24 @@ SimpleCov.start
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
-require "minitest/reporters"
+require("minitest/reporters")
 MiniTest::Reporters.use!
 
-require "minitest/autorun"
+require("minitest/autorun")
 
 # Allow stubbing and setting expectations on HTTP, and selective
 #  disabling of internet requests.
-require "webmock/minitest"
+require("webmock/minitest")
 
 # Disable external requests while allowing localhost
 WebMock.disable_net_connect!(allow_localhost: true)
 
 ENV["RAILS_ENV"] ||= "test"
-require File.expand_path("../config/environment", __dir__)
-require "rails/test_help"
+require(File.expand_path("../config/environment", __dir__))
+require("rails/test_help")
 
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
-require "mocha/minitest"
+require("mocha/minitest")
 
 %w[
   general_extensions
@@ -64,7 +64,7 @@ require "mocha/minitest"
 end
 
 # Allow simuluation of user-browser interaction with capybara
-require "capybara/rails"
+require("capybara/rails")
 
 I18n.enforce_available_locales = true
 
@@ -140,7 +140,7 @@ module ActiveSupport
     # Report time this test took to run.
     def end_timer
       ellapsed = Time.zone.now - @@times[method_name]
-      puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
+      puts("\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}")
     end
 
     # This will ensure that the logs stay a reasonable size.  If you forget to

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class EolDataTest < UnitTestCase
   def name_test(obj, name)

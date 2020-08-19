@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "geocoder"
+require("geocoder")
 
 # Location controller.
 class LocationController < ApplicationController
@@ -561,7 +561,7 @@ class LocationController < ApplicationController
             done = true
           else
             # Failed to create location
-            flash_object_errors @location
+            flash_object_errors(@location)
           end
         end
       end
@@ -714,7 +714,7 @@ class LocationController < ApplicationController
                     id: @description.id)
 
       else
-        flash_object_errors @description
+        flash_object_errors(@description)
       end
     end
   end
@@ -889,10 +889,10 @@ class LocationController < ApplicationController
 
       o.location_id = location.id
       o.where = nil
-      unless o.save
-        flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
-        success = false
-      end
+      next if o.save
+
+      flash_error(:runtime_location_merge_failed.t(name: o.unique_format_name))
+      success = false
     end
     success
   end

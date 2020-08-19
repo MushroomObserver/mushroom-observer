@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "aws-sdk-s3"
+require("aws-sdk-s3")
 
 # communicate with image server
 # large size images are stored and served from separate server
@@ -33,9 +33,9 @@ class ImageS3
   def list
     Results.new(client.list_objects(bucket: @bucket))
   rescue Aws::S3::Errors::Http503Error
-    raise "#{@server} temporarily unavailable"
+    raise("#{@server} temporarily unavailable")
   rescue StandardError => e
-    raise "Unable to get directory of S3 bucket #{@bucket} at #{@server}: #{e}"
+    raise("Unable to get directory of S3 bucket #{@bucket} at #{@server}: #{e}")
   end
 
   # Get information about objects stored on image server
@@ -49,7 +49,7 @@ class ImageS3
         response.contents.each(&block)
       end
     rescue Aws::S3::Errors::Http503Error
-      raise "#{@server} temporarily unavailable"
+      raise("#{@server} temporarily unavailable")
     end
   end
 
@@ -69,10 +69,10 @@ class ImageS3
                  body: io)
     ).data
   rescue Aws::S3::Errors::Http503Error
-    raise "#{@server} temporarily unavailable"
+    raise("#{@server} temporarily unavailable")
   rescue StandardError => e
-    raise "Unable to upload image #{key} to S3 bucket #{@bucket} "\
-          "at #{@server}: #{e}"
+    raise("Unable to upload image #{key} to S3 bucket #{@bucket} "\
+          "at #{@server}: #{e}")
   end
 
   # Get basic info about one object, returns nil if doesn't exist:
@@ -88,10 +88,10 @@ class ImageS3
   rescue Aws::S3::Errors::NotFound, Aws::S3::Errors::NoSuchKey
     nil
   rescue Aws::S3::Errors::Http503Error
-    raise "#{@server} temporarily unavailable"
+    raise("#{@server} temporarily unavailable")
   rescue StandardError => e
-    raise "Unable to get info on #{key} from S3 bucket #{@bucket} "\
-          "at #{@server}: #{e.class.name}: #{e}"
+    raise("Unable to get info on #{key} from S3 bucket #{@bucket} "\
+          "at #{@server}: #{e.class.name}: #{e}")
   end
 
   # Delete one object:
@@ -104,10 +104,10 @@ class ImageS3
       key: key
     )
   rescue Aws::S3::Errors::Http503Error
-    raise "#{@server} temporarily unavailable"
+    raise("#{@server} temporarily unavailable")
   rescue StandardError => e
-    raise "Unable to delete image #{key} from S3 bucket #{@bucket} "\
-          "at #{@server}: #{e}"
+    raise("Unable to delete image #{key} from S3 bucket #{@bucket} "\
+          "at #{@server}: #{e}")
   end
 
   def client
@@ -118,6 +118,6 @@ class ImageS3
       stub_responses: @stub
     )
   rescue StandardError => e
-    raise "couldn't establish connection: #{e}"
+    raise("couldn't establish connection: #{e}")
   end
 end

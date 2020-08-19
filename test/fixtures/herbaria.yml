@@ -29,10 +29,10 @@ dick_herbarium:
     personal_user: dick
     curators: dick
 
-mycoflora_herbarium:
+fundis_herbarium:
     created_at: 2017-11-29 18:05:00
     updated_at: 2017-11-29 18:05:00
-    name: "North American Mycoflora Project"
+    name: "Fungal Diversity Survey"
 
 field_museum:
     created_at: 2017-12-16 11:15:00

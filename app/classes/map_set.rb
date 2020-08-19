@@ -38,7 +38,7 @@ class MapSet
           update_extents_with_box(loc)
         end
       else
-        raise "Tried to map #{obj.class}!"
+        raise("Tried to map #{obj.class}!")
       end
     end
   end

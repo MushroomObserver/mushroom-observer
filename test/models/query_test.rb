@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "set"
+require("test_helper")
+require("set")
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)
@@ -1340,8 +1340,13 @@ class QueryTest < UnitTestCase
                                OR body LIKE '%premier_article%'"),
                  :Article, :pattern_search, pattern: "premier_article")
     # body
-    assert_query(Article.where("title LIKE '%Body of Article%'
-                               OR body LIKE '%Body of Article%'"),
+    expect = Article.where("title LIKE ? AND title LIKE ? AND title LIKE ?",
+                           "%Body%", "%of%", "%Article%").
+             or(
+               Article.where("body LIKE ? AND body LIKE ? AND body LIKE ?",
+                             "%Body%", "%of%", "%Article%")
+             )
+    assert_query(expect,
                  :Article, :pattern_search, pattern: "Body of Article")
     assert_query(Article.all,
                  :Article, :pattern_search, pattern: "")
