@@ -3882,6 +3882,7 @@
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
+  api_help_region: "matches locations which end in this, e.g. \"California, USA\""
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?
