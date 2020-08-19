@@ -326,6 +326,7 @@ GET observation
   north:	latitude (max latitude)
   notes_has:	string (search within notes)
   project:	project list
+  region:	string (matches locations which end in this, e.g. "California, USA")
   south:	latitude (min latitude)
   species_list:	species_list list
   updated_at:	time range
@@ -381,6 +382,7 @@ PATCH observation
   north:	latitude (max latitude)
   notes_has:	string (search within notes)
   project:	project list
+  region:	string (matches locations which end in this, e.g. "California, USA")
   south:	latitude (min latitude)
   species_list:	species_list list
   updated_at:	time range
@@ -431,6 +433,7 @@ DELETE observation
   north:	latitude (max latitude)
   notes_has:	string (search within notes)
   project:	project list
+  region:	string (matches locations which end in this, e.g. "California, USA")
   south:	latitude (min latitude)
   species_list:	species_list list
   updated_at:	time range
