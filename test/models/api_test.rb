@@ -2245,6 +2245,12 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(north: 35, south: 34, east: -118))
     assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses)
+
+    obses = Observation.where("`where` like '%, California, USA' OR " \
+                              "`where` = 'California, USA'")
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(region: "California, USA"))
+    assert_api_results(obses)
   end
 
   def test_post_minimal_observation
