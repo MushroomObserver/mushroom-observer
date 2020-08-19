@@ -287,7 +287,7 @@ class RssLog < AbstractModel
       format("/glossary/show_glossary_term/%d?time=%d",
              glossary_term_id, updated_at.tv_sec)
     elsif article_id
-      format("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
+      format("/articles/%d?time=%d", article_id, updated_at.tv_sec)
     else
       format("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
