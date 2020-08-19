@@ -27,8 +27,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show, id: term.id)
 
     assert_template("show")
+    assert_select("body", /#{term.description}/,
+                  "Page is missing glossary term description")
     assert_select("a[href='#{prior_version_path}']", true,
-                  "View should have link to prior version")
+                  "Page should have link to prior version")
   end
 
   # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
@@ -37,24 +39,38 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_new # happy path
     login
     get(:new)
+    assert_response(:success)
     assert_template(:new)
+    assert_select("form input[name='glossary_term[name]']", { count: 1 },
+                  "Form is missing field for name")
   end
 
   def test_new_no_login
     get(:new)
-    assert_response(:redirect)
+    assert_response(:redirect,
+                    "Unlogged-in user should not be able to create term")
   end
 
   # ***** edit *****
   def test_edit  # happy path
     login
-    get(:edit, id: GlossaryTerm.first.id)
+    term = GlossaryTerm.first
+    get(:edit, id: term.id)
     assert_template(:edit)
+    assert_response(:success)
+    assert_select("form input[name='glossary_term[name]']", { count: 1 },
+                  "Form is missing field for name") do
+      assert_select("input[value='#{term.name}']", { count: 1 },
+                    "Name should default to glossary term name")
+    end
+    assert_select("input#upload_image", false,
+                  "edit GlossaryTerm form should omit image input form")
   end
 
   def test_edit_no_login
     get(:edit, id: GlossaryTerm.first.id)
-    assert_response(:redirect)
+    assert_response(:redirect,
+                    "Unlogged-in user should not be able to edit term")
   end
 
   # ---------- Test actions that Modify data: (create, update, destroy, etc.) --
