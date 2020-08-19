@@ -147,6 +147,7 @@ class ApiController < ApplicationController
   end
 
   def do_render
+    set_cors_headers
     # need to default to xml for backwards compatibility
     request.format = "xml" if request.format == "html"
     respond_to do |format|
@@ -161,5 +162,13 @@ class ApiController < ApplicationController
 
   def do_render_json
     render(layout: false, template: "/api/results")
+  end
+
+  def set_cors_headers
+    return unless request.method == "GET"
+    response.set_header("Access-Control-Allow-Origin", "*")
+    response.set_header("Access-Control-Allow-Headers",
+                        "Origin, X-Requested-With, Content-Type, Accept")
+    response.set_header("Access-Control-Allow-Methods", "GET")
   end
 end
