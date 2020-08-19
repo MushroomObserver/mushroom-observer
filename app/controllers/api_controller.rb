@@ -166,6 +166,7 @@ class ApiController < ApplicationController
 
   def set_cors_headers
     return unless request.method == "GET"
+
     response.set_header("Access-Control-Allow-Origin", "*")
     response.set_header("Access-Control-Allow-Headers",
                         "Origin, X-Requested-With, Content-Type, Accept")
