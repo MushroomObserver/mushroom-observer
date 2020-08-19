@@ -6,7 +6,7 @@ require("test_helper")
 class RssLogTest < UnitTestCase
   def test_url_for_normalized_controllers
     normalized_rss_log_types.each do |type|
-      rss_log = rss_log_for_type(type)
+      rss_log = create_rss_log(type)
       id = rss_log.target_id
       assert_match(type_normalized_show_path(type, id), rss_log.url,
                    "rss_log.url incorrect for #{model(type)}")
@@ -26,7 +26,7 @@ class RssLogTest < UnitTestCase
   end
 
   # rss_log factory
-  def rss_log_for_type(type)
+  def create_rss_log(type)
     # Target must have id; use an existing object to avoid hitting db
     target = model(type).first
     rss_log = RssLog.new
