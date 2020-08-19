@@ -35,10 +35,6 @@ class RssLogTest < UnitTestCase
     rss_log
   end
 
-  def target_id(rss_log)
-    rss_log.target_id
-  end
-
   def type_normalized_show_path(type, id)
     %r{/#{model(type).show_controller}/#{id}}
   end
