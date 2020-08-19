@@ -10,6 +10,12 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_index
     get(:index)
     assert_template(:index)
+    GlossaryTerm.find_each do |term|
+      assert_select(
+        "a[href *= '#{glossary_term_path(term.id)}']", true,
+        "Glossary Index missing link to #{term.unique_text_name})"
+      )
+    end
   end
 
   # ***** show *****
