@@ -57,7 +57,20 @@ class GlossaryTermsController < ApplicationController
     redirect_to(glossary_terms_path(glossary_term.id))
   end
 
-  # TODO: add destroy action
+  def destroy
+    pass_query_params
+    return unless (@glossary_term = GlossaryTerm.find(params[:id]))
+
+    if in_admin_mode?
+      @glossary_term.destroy
+      flash_notice(:runtime_destroyed_id.t(type: GlossaryTerm,
+                                           value: params[:id]))
+    else
+      flash_warning(:permission_denied.t)
+    end
+
+    redirect_to(glossary_terms_path)
+  end
 
   # ---------- Non-standard REST Actions ---------------------------------------
 
@@ -83,7 +96,6 @@ class GlossaryTermsController < ApplicationController
   private
 
   # --------- Filters
-
 
   # --------- Other private methods
 
@@ -126,5 +138,4 @@ class GlossaryTermsController < ApplicationController
       flash_notice(:runtime_image_uploaded_image.t(name: name))
     end
   end
-
 end
