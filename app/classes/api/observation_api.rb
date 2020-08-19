@@ -62,7 +62,8 @@ class API
         north: n,
         south: s,
         east: e,
-        west: w
+        west: w,
+        region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
