@@ -31,11 +31,6 @@ class GlossaryTerm < AbstractModel
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
 
-  # Override the default show_controller
-  def self.show_controller
-    "glossary"
-  end
-
   def text_name
     name
   end

@@ -453,7 +453,9 @@ class AbstractModel < ApplicationRecord
   #   name.edit_action => "edit_name"
   #
   def self.edit_action
-    "edit_" + name.underscore
+    return "edit" if controller_normalized?(name) # Rails standard
+
+    "edit_#{name.underscore}" # Old MO styl
   end
 
   def edit_action
