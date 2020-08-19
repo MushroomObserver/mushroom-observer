@@ -381,18 +381,24 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
-  # Return the name of the "show_past_<object>" action
-  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
-  # actions are normalized.
-  # See https://www.pivotaltracker.com/story/show/174440291
-  def self.show_past_action
-    return "show_past" if controller_normalized?(name) # Rails standard
-
-    "show_past_#{name.underscore}" # Old MO style
+  # Return the path of the "show_<object>" action
+  #
+  #   # normalized controller
+  #   Article.index_action => "articles/12"
+  #
+  #   # unnormalized controller
+  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"	  #
+  def self.show_path(id)
+    if controller_normalized?(name)
+      "/#{show_controller}/#{id}"
+    else
+      "/#{show_controller}/#{show_action}/#{id}"
+    end
   end
 
-  def show_past_action
-    self.class.show_past_action
+  def show_path
+    self.class.show_url(id)
   end
 
   # Return the URL of the "show_<object>" action
@@ -414,6 +420,20 @@ class AbstractModel < ApplicationRecord
 
   def show_url
     self.class.show_url(id)
+  end
+
+  # Return the name of the "show_past_<object>" action
+  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
+  # actions are normalized.
+  # See https://www.pivotaltracker.com/story/show/174440291
+  def self.show_past_action
+    return "show_past" if controller_normalized?(name) # Rails standard
+
+    "show_past_#{name.underscore}" # Old MO style
+  end
+
+  def show_past_action
+    self.class.show_past_action
   end
 
   # Return the link_to args of the "show_<object>" action
