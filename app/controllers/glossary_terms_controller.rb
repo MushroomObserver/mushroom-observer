@@ -7,7 +7,7 @@ class GlossaryTermsController < ApplicationController
     :show_past_glossary_term,
     :show
   ]
-  before_action :store_location, only: [:indes, :show, :destroy]
+  before_action :store_location, only: [:index, :show, :destroy]
   before_action :pass_query_params, only: [:destroy, :show_past_glossary_term]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
