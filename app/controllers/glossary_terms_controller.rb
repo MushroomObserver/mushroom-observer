@@ -7,16 +7,16 @@ class GlossaryTermsController < ApplicationController
     :show_past_glossary_term,
     :show
   ]
+  before_action :store_location, only: [:indes, :show, :destroy]
+  before_action :pass_query_params, only: [:destroy, :show_past_glossary_term]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    store_location
     @glossary_terms = GlossaryTerm.all.order(:name)
   end
 
   def show
-    store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/"\
                      "#{@glossary_term.id}"
@@ -58,7 +58,6 @@ class GlossaryTermsController < ApplicationController
   end
 
   def destroy
-    pass_query_params
     return unless (@glossary_term = GlossaryTerm.find(params[:id]))
 
     if in_admin_mode?
@@ -77,8 +76,6 @@ class GlossaryTermsController < ApplicationController
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
   def show_past_glossary_term
-    pass_query_params
-    store_location
     if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       if params[:version]
         @glossary_term.revert_to(params[:version].to_i)
