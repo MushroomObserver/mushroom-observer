@@ -77,4 +77,16 @@ class RedirectsTest < IntegrationTestCase
     assert_equal(article_url(Article.first.id),
                  @response.header["Location"])
   end
+
+  def test_show_glossary_term
+    get("/glossary/show_glossary_term/#{GlossaryTerm.first.id}")
+    assert_equal(glossary_term_path(GlossaryTerm.first.id),
+                 @response.request.fullpath)
+  end
+
+  def test_show_past_glossary_term
+    get("/glossary/show_past_glossary_term/#{GlossaryTerm.first.id}")
+    assert_equal(glossary_term_path(GlossaryTerm.first.id),
+                 @response.request.fullpath)
+  end
 end

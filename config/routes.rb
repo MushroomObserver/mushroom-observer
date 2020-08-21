@@ -125,13 +125,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  glossary: {
-    create_glossary_term: {},
-    edit_glossary_term: {},
-    index: {},
-    show_glossary_term: {},
-    show_past_glossary_term: {}
-  },
   herbarium: {
     create_herbarium: {},
     delete_curator: {},
@@ -520,28 +513,39 @@ ACTION_REDIRECTS = {
     from: "/%<old_controller>s/show_%<model>s/:id",
     to: "/%<new_controller>s/%<id>s",
     via: [:get]
+  },
+  show_past: {
+    from: "/%<old_controller>s/show_past_%<model>s/:id",
+    to: "/%<new_controller>s/show_past_%<model>s/%<id>s",
+    via: [:get]
   }
 }.freeze
+
+LEGACY_CRUD_ACTIONS = [
+  :create, :edit, :destroy, :controller, :index, :list, :show
+]
 
 # redirect deleted MO controller's actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
-#  redirect_old_crud_actions(old_controller: "article")
-#  redirect_old_crud_actions(old_controller: "herbarium")
-#  redirect_old_crud_actions(old_controller: "glossary",
+#  redirect_legacy_actions(old_controller: "article")
+#  redirect_legacy_actions(old_controller: "herbarium")
+#  redirect_legacy_actions(old_controller: "glossary",
 #                            new_controller: "glossary_terms",
 #                            actions: [:create, :edit, :show])
 #
-def redirect_old_crud_actions(old_controller: "",
-                              new_controller: old_controller&.pluralize,
-                              model: new_controller&.singularize,
-                              actions: ACTION_REDIRECTS.keys)
+def redirect_legacy_actions(old_controller: "",
+                            new_controller: old_controller&.pluralize,
+                            model: new_controller&.singularize,
+                            # legacy equivalents of standard CRUD actions
+                            actions: LEGACY_CRUD_ACTIONS)
   actions.each do |action|
     data = ACTION_REDIRECTS[action]
     to_url = format(data[:to],
                     # Rails routes currently only accept template tokens
                     id: "%{id}", # rubocop:disable Style/FormatStringToken
-                    new_controller: new_controller)
+                    new_controller: new_controller,
+                    model: model)
     match(format(data[:from], old_controller: old_controller, model: model),
           to: redirect(to_url),
           via: data[:via])
@@ -624,7 +628,7 @@ MushroomObserver::Application.routes.draw do
   #   end
 
   resources :articles, id: /\d+/
-  redirect_old_crud_actions(old_controller: "article")
+  redirect_legacy_actions(old_controller: "article")
 
   resources :glossary_terms, id: /\d+/ do
     member do
@@ -632,7 +636,6 @@ MushroomObserver::Application.routes.draw do
       # get("show_past_glossary_term")
     end
   end
-
   # Use a direct route to have :id at the end and generate path
   # because "member" routes put :id after the controller, e.g.:
   # member do
@@ -643,9 +646,12 @@ MushroomObserver::Application.routes.draw do
       controller: "glossary_terms",
       action: "show_past_glossary_term",
       id: /\d+/,
-      as: "glossary_terms_show_past_glossary_term"
-      )
-  # redirect_old_crud_actions(old_controller: "glossary")
+      as: "glossary_terms_show_past_glossary_term")
+  redirect_legacy_actions(
+    old_controller: "glossary",
+    new_controller: "glossary_terms",
+    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+  )
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
