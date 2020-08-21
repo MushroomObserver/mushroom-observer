@@ -18,8 +18,7 @@ class GlossaryTermsController < ApplicationController
 
   def show
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/"\
-                     "#{@glossary_term.id}"
+    @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @objects = @glossary_term.images
   end
