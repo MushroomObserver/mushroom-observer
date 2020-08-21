@@ -52,7 +52,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** edit *****
-  def test_edit  # happy path
+  def test_edit # happy path
     login
     term = GlossaryTerm.first
     get(:edit, id: term.id)
@@ -147,9 +147,14 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ---------- Other actions ---------------------------------------------------
 
   def test_show_past_term # happy_path
-    term = glossary_terms(:conic_glossary_term)
-    get(:show_past_glossary_term, id: term.id, version: term.version - 1)
+    term = glossary_terms(:square_glossary_term)
+    get(:show_past_glossary_term,
+        id: term.id,
+        version: term.versions.first) # oldest version
+
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
+    assert_select("a[href='#{glossary_term_path(term.id)}']", true,
+                  "Page should have link to last (current) version")
   end
 
   def test_show_past_term_no_version

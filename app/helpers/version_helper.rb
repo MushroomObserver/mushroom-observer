@@ -86,7 +86,7 @@ module VersionHelper
                                        version: version)
         elsif ver == obj.versions.last
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_#{type}", id: obj.id)
+                                       action: obj.show_action, id: obj.id)
         else
           link = link_with_query(link, controller: obj.show_controller,
                                        action: "show_past_#{type}", id: obj.id,
