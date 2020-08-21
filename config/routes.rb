@@ -628,10 +628,24 @@ MushroomObserver::Application.routes.draw do
 
   resources :glossary_terms, id: /\d+/ do
     member do
-      get "show_past_glossary_term"
+      # /glossary_terms/:id/show_past_glossary_term
+      # get("show_past_glossary_term")
     end
   end
-  redirect_old_crud_actions(old_controller: "glossary")
+
+  # Use a direct route to have :id at the end and generate path
+  # because "member" routes put :id after the controller, e.g.:
+  # member do
+  #  get("show_past_glossary_term")
+  # end
+  # =>  /glossary_terms/:id/show_past_glossary_term
+  get("glossary_terms/show_past_glossary_term/(:id)",
+      controller: "glossary_terms",
+      action: "show_past_glossary_term",
+      id: /\d+/,
+      as: "glossary_terms_show_past_glossary_term"
+      )
+  # redirect_old_crud_actions(old_controller: "glossary")
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications

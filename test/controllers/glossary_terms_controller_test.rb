@@ -22,7 +22,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_show
     term = glossary_terms(:square_glossary_term)
     prior_version_path =
-      "/glossary_terms/#{term.id}/show_past_glossary_term?" \
+      "/glossary_terms/show_past_glossary_term/#{term.id}?" \
       "version=#{term.version - 1}"
     get(:show, id: term.id)
 
@@ -156,6 +156,20 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     term = glossary_terms(:conic_glossary_term)
     get(:show_past_glossary_term, id: term.id)
     assert_response(:redirect)
+  end
+
+  # ---------- Routes ---------------------------------------------------
+
+  def test_routes
+    assert_generates("glossary_terms/show_past_glossary_term/1234",
+                     { controller: "glossary_terms",
+                       action: "show_past_glossary_term",
+                       id: "1234" })
+
+    assert_recognizes({ controller: "glossary_terms",
+                        action: "show_past_glossary_term",
+                        id: "1234" },
+                      "glossary_terms/show_past_glossary_term/1234")
   end
 
   # ---------- helpers ---------------------------------------------------------
