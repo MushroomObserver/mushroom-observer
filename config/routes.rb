@@ -516,7 +516,7 @@ ACTION_REDIRECTS = {
   },
   show_past: {
     from: "/%<old_controller>s/show_past_%<model>s/:id",
-    to: "/%<new_controller>s/show_past_%<model>s/%<id>s",
+    to: "/%<new_controller>s/%<id>s/show_past_%<model>s",
     via: [:get]
   }
 }.freeze
@@ -634,21 +634,9 @@ MushroomObserver::Application.routes.draw do
 
   resources :glossary_terms, id: /\d+/ do
     member do
-      # /glossary_terms/:id/show_past_glossary_term
-      # get("show_past_glossary_term")
+      get("show_past_glossary_term")
     end
   end
-  # Use a direct route to have :id at the end and generate path
-  # because "member" routes put :id after the controller, e.g.:
-  # member do
-  #  get("show_past_glossary_term")
-  # end
-  # =>  /glossary_terms/:id/show_past_glossary_term
-  get("glossary_terms/show_past_glossary_term/(:id)",
-      controller: "glossary_terms",
-      action: "show_past_glossary_term",
-      id: /\d+/,
-      as: "glossary_terms_show_past_glossary_term")
   redirect_legacy_actions(
     old_controller: "glossary",
     new_controller: "glossary_terms",
