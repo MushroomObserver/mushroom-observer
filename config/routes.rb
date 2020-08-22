@@ -515,8 +515,8 @@ ACTION_REDIRECTS = {
     via: [:get]
   },
   show_past: {
-    from: "/%<old_controller>s/show_past_%<model>s/:id",
-    to: "/%<new_controller>s/show_past_%<model>s/%<id>s",
+    from: "/%<old_controller>s/show_past_%<model>s/:id?version=:version",
+    to: "/%<new_controller>s/show_past_%<model>s/%<id>s?version=%<version>s",
     via: [:get]
   }
 }.freeze
@@ -542,10 +542,11 @@ def redirect_legacy_actions(old_controller: "",
   actions.each do |action|
     data = ACTION_REDIRECTS[action]
     to_url = format(data[:to],
-                    # Rails routes currently only accept template tokens
-                    id: "%{id}", # rubocop:disable Style/FormatStringToken
                     new_controller: new_controller,
-                    model: model)
+                    model: model,
+                    # Rails routes currently only accept template tokens
+                    id: "%{id}") # rubocop:disable Style/FormatStringToken
+
     match(format(data[:from], old_controller: old_controller, model: model),
           to: redirect(to_url),
           via: data[:via])
@@ -650,8 +651,11 @@ MushroomObserver::Application.routes.draw do
   redirect_legacy_actions(
     old_controller: "glossary",
     new_controller: "glossary_terms",
-    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+    # actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+    actions: LEGACY_CRUD_ACTIONS - [:destroy]
   )
+  get("/glossary/show_past_glossary_term/:id",
+      to: redirect(path: "/glossary_terms/show_past_glossary_term/%{id}"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
