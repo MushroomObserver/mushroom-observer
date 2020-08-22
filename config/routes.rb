@@ -515,8 +515,8 @@ ACTION_REDIRECTS = {
     via: [:get]
   },
   show_past: {
-    from: "/%<old_controller>s/show_past_%<model>s/:id?version=:version",
-    to: "/%<new_controller>s/show_past_%<model>s/%<id>s?version=%<version>s",
+    from: "/%<old_controller>s/show_past_%<model>s/:id",
+    to: "/%<new_controller>s/show_past_%<model>s/%<id>s",
     via: [:get]
   }
 }.freeze
@@ -524,16 +524,17 @@ ACTION_REDIRECTS = {
 # legacy actions that translate to standard CRUD actions
 LEGACY_CRUD_ACTIONS = [
   :create, :edit, :destroy, :controller, :index, :list, :show
-]
+].freeze
 
-# redirect deleted MO controller's actions to equivalent actions in the
+# redirect legacy MO actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
 #  redirect_legacy_actions(old_controller: "article")
-#  redirect_legacy_actions(old_controller: "herbarium")
-#  redirect_legacy_actions(old_controller: "glossary",
-#                            new_controller: "glossary_terms",
-#                            actions: [:create, :edit, :show])
+#  redirect_legacy_actions(
+#    old_controller: "glossary",
+#    new_controller: "glossary_terms",
+#    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+#  )
 #
 def redirect_legacy_actions(old_controller: "",
                             new_controller: old_controller&.pluralize,
@@ -548,7 +549,7 @@ def redirect_legacy_actions(old_controller: "",
                     id: "%{id}") # rubocop:disable Style/FormatStringToken
 
     match(format(data[:from], old_controller: old_controller, model: model),
-          to: redirect(to_url),
+          to: redirect(path: to_url),
           via: data[:via])
   end
 end
@@ -651,11 +652,8 @@ MushroomObserver::Application.routes.draw do
   redirect_legacy_actions(
     old_controller: "glossary",
     new_controller: "glossary_terms",
-    # actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
-    actions: LEGACY_CRUD_ACTIONS - [:destroy]
+    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
-  get("/glossary/show_past_glossary_term/:id",
-      to: redirect(path: "/glossary_terms/show_past_glossary_term/%{id}"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
