@@ -521,6 +521,7 @@ ACTION_REDIRECTS = {
   }
 }.freeze
 
+# legacy actions that translate to standard CRUD actions
 LEGACY_CRUD_ACTIONS = [
   :create, :edit, :destroy, :controller, :index, :list, :show
 ]
@@ -537,7 +538,6 @@ LEGACY_CRUD_ACTIONS = [
 def redirect_legacy_actions(old_controller: "",
                             new_controller: old_controller&.pluralize,
                             model: new_controller&.singularize,
-                            # legacy equivalents of standard CRUD actions
                             actions: LEGACY_CRUD_ACTIONS)
   actions.each do |action|
     data = ACTION_REDIRECTS[action]
