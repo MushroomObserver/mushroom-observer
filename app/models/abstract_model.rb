@@ -381,6 +381,20 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
+  # Return the name of the "show_past_<object>" action
+  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
+  # actions are normalized.
+  # See https://www.pivotaltracker.com/story/show/174440291
+  def self.show_past_action
+    return "show_past" if controller_normalized?(name) # Rails standard
+
+    "show_past_#{name.underscore}" # Old MO style
+  end
+
+  def show_past_action
+    self.class.show_past_action
+  end
+
   # Return the URL of the "show_<object>" action
   #
   #   # normalized controller

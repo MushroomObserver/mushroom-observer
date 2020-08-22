@@ -22,8 +22,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_show
     term = glossary_terms(:square_glossary_term)
     prior_version_path =
-      "/glossary_terms/show_past_glossary_term/#{term.id}?" \
-      "version=#{term.version - 1}"
+      "/glossary_terms/#{term.id}/show_past?version=#{term.version - 1}"
     get(:show, id: term.id)
 
     assert_template("show")
@@ -146,35 +145,33 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ---------- Other actions ---------------------------------------------------
 
-  def test_show_past_term # happy_path
+  def test_show_past # happy_path
     term = glossary_terms(:square_glossary_term)
-    get(:show_past_glossary_term,
-        id: term.id,
-        version: term.versions.first) # oldest version
+    get(:show_past, id: term.id, version: term.versions.first) # oldest version
 
-    assert_template(:show_past_glossary_term, partial: "_glossary_term")
+    assert_template(:show_past, partial: "_glossary_term")
     assert_select("a[href='#{glossary_term_path(term.id)}']", true,
                   "Page should have link to last (current) version")
   end
 
-  def test_show_past_term_no_version
+  def test_show_past_no_version
     term = glossary_terms(:conic_glossary_term)
-    get(:show_past_glossary_term, id: term.id)
+    get(:show_past, id: term.id)
     assert_response(:redirect)
   end
 
   # ---------- Routes ---------------------------------------------------
 
   def test_routes
-    assert_generates("glossary_terms/show_past_glossary_term/1234",
+    assert_generates("glossary_terms/1234/show_past",
                      { controller: "glossary_terms",
-                       action: "show_past_glossary_term",
+                       action: "show_past",
                        id: "1234" })
 
     assert_recognizes({ controller: "glossary_terms",
-                        action: "show_past_glossary_term",
+                        action: "show_past",
                         id: "1234" },
-                      "glossary_terms/show_past_glossary_term/1234")
+                      "glossary_terms/1234/show_past")
   end
 
   # ---------- helpers ---------------------------------------------------------

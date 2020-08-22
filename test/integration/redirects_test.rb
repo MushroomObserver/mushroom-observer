@@ -87,7 +87,7 @@ class RedirectsTest < IntegrationTestCase
   def test_show_past_glossary_term
     get("/glossary/show_past_glossary_term/#{GlossaryTerm.first.id}?version=1")
     assert_equal(
-      show_past_glossary_term_glossary_term_path(
+      show_past_glossary_term_path(
         GlossaryTerm.first.id, version: 1
       ),
       @response.request.fullpath

@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# helpers which create html which links to prior version(s)
+# JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
+# actions are normalized.
+# See https://www.pivotaltracker.com/story/show/174440291
 module VersionHelper
   # Just shows the current version number and a link to see the previous.
   #
@@ -22,7 +26,7 @@ module VersionHelper
 
     if previous_version = latest_version.previous
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
-      html += link_with_query(str, action: "show_past_#{type}", id: obj.id,
+      html += link_with_query(str, action: obj.show_past_action, id: obj.id,
                                    version: previous_version.version)
       if previous_version.respond_to?(:merge_source_id) &&
          previous_version.merge_source_id
@@ -81,15 +85,18 @@ module VersionHelper
       if ver.version != obj.version
         if @merge_source_id
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_past_#{type}", id: obj.id,
+                                       action: obj.show_past_action,
+                                       id: obj.id,
                                        merge_source_id: @merge_source_id,
                                        version: version)
         elsif ver == obj.versions.last
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: obj.show_action, id: obj.id)
+                                       action: obj.show_action,
+                                       id: obj.id)
         else
           link = link_with_query(link, controller: obj.show_controller,
-                                       action: "show_past_#{type}", id: obj.id,
+                                       action: obj.show_past_action,
+                                       id: obj.id,
                                        version: ver.version)
         end
       end
@@ -108,6 +115,10 @@ module VersionHelper
     html = content_tag(:p, :VERSIONS.t) + table + safe_br
   end
 
+  ##############################################################################
+
+  private
+
   # Return link to orphaned versions of old description if this version
   # was the result of a merge.
   def get_version_merge_link(obj, ver)
@@ -121,7 +132,7 @@ module VersionHelper
       parent_id = other_ver.send("#{type}_id")
       link_with_query(:show_past_version_merged_with.t(id: parent_id),
                       controller: obj.show_controller,
-                      action: "show_past_#{type}",
+                      action: obj.show_past_action,
                       id: obj.id,
                       merge_source_id: ver.merge_source_id)
     end

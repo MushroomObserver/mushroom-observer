@@ -4,11 +4,11 @@
 class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [
     :index,
-    :show_past_glossary_term,
+    :show_past,
     :show
   ]
   before_action :store_location, only: [:index, :show, :destroy]
-  before_action :pass_query_params, only: [:destroy, :show_past_glossary_term]
+  before_action :pass_query_params, only: [:destroy, :show_past]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
@@ -74,7 +74,7 @@ class GlossaryTermsController < ApplicationController
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
-  def show_past_glossary_term
+  def show_past
     if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       if params[:version]
         @glossary_term.revert_to(params[:version].to_i)

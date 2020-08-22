@@ -516,7 +516,7 @@ ACTION_REDIRECTS = {
   },
   show_past: {
     from: "/%<old_controller>s/show_past_%<model>s/:id",
-    to: "/%<new_controller>s/%<id>s/show_past_%<model>s",
+    to: "/%<new_controller>s/%<id>s/show_past",
     via: [:get]
   }
 }.freeze
@@ -634,7 +634,7 @@ MushroomObserver::Application.routes.draw do
 
   resources :glossary_terms, id: /\d+/ do
     member do
-      get("show_past_glossary_term")
+      get("show_past")
     end
   end
   redirect_legacy_actions(
