@@ -28,7 +28,7 @@
 
     <div class="form-group push-down form-inline">
       <%= label_tag(:copyright_holder,
-                    "#:{glossary_term_copyright_holder.t}:") %><br/>
+                    "#{:glossary_term_copyright_holder.t}:") %><br/>
       <%= text_field_tag(:copyright_holder, @copyright_holder,
                          class: "form-control") %>
       <%= select_year(@copyright_year,
