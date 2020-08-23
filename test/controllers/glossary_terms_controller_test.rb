@@ -128,18 +128,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_update
     term = glossary_terms(:conic_glossary_term)
     params = changes_to_conic
-    old_count = term.versions.count
     login
-    post(:update, params)
-    term.reload
 
-    assert_equal(params[:glossary_term][:name], term.name)
+    assert_difference("term.versions.count") do
+      post(:update, params)
+    end
+    assert_equal(params[:glossary_term][:name], term.reload.name)
     assert_equal(params[:glossary_term][:description], term.description)
-    assert_equal(old_count + 1, term.versions.count)
-    assert_response(:redirect)
+    assert_redirected_to(glossary_term_path(term.id))
   end
 
-  # ***** update *****
+  # ***** destroy *****
   def test_destroy # happy path
     term = GlossaryTerm.first
     login(term.user.login)
@@ -148,8 +147,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_response(:redirect)
-    assert_not(GlossaryTerm.exists?(term.id),
-               "Admin failed to destroy GlossaryTerm")
+    assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
   end
 
   def test_destroy_no_login
@@ -167,7 +165,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_show_past # happy_path
     term = glossary_terms(:square_glossary_term)
-    version = term.versions.first  # oldest version
+    version = term.versions.first # oldest version
     get(:show_past, id: term.id, version: version.version)
 
     assert_response(:success)
