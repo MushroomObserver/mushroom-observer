@@ -10,8 +10,9 @@
 %>
 
 <div class="max-width-text">
-  <%= form_for(:glossary_term,
-               url: edit_glossary_term_url(id: @glossary_term.id)) do |form| %>
+  <%= form_for(@glossary_term,
+               url: { action: "update" },
+               method: :put) do |form| %>
     <div class="form-group push-down">
       <%= label_tag(:glossary_name, "#{:glossary_term_name.t}:") %>
       <%= form.text_field(:name, class: "form-control") %>

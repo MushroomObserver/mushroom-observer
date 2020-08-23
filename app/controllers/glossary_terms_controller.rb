@@ -53,7 +53,7 @@ class GlossaryTermsController < ApplicationController
                                permit(:name, :description)
     glossary_term.user = @user
     glossary_term.save
-    redirect_to(glossary_terms_path(glossary_term.id))
+    redirect_to(glossary_term_path(glossary_term.id))
   end
 
   def destroy
