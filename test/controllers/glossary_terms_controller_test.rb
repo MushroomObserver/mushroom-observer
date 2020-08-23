@@ -4,12 +4,15 @@ require("test_helper")
 
 # functional tests of glossary controller and views
 class GlossaryTermsControllerTest < FunctionalTestCase
+  ESSENTIAL_ATTRIBUTES = %w[name description].freeze
+
   # ---------- Test actions that Display data (index, show, etc.) --------------
 
   # ***** index *****
   def test_index
     get(:index)
-    assert_template(:index)
+
+    assert_response(:success)
     GlossaryTerm.find_each do |term|
       assert_select(
         "a[href *= '#{glossary_term_path(term.id)}']", true,
@@ -21,13 +24,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ***** show *****
   def test_show
     term = glossary_terms(:square_glossary_term)
-    prior_version_path =
-      "/glossary_terms/#{term.id}/show_past?version=#{term.version - 1}"
+    prior_version_path = show_past_glossary_term_path(
+      term.id, version: term.version - 1
+    )
     get(:show, id: term.id)
 
-    assert_template("show")
-    assert_select("body", /#{term.description}/,
-                  "Page is missing glossary term description")
+    assert_response(:success)
+    ESSENTIAL_ATTRIBUTES.each do |attr|
+      assert_select("body", /#{term.send(attr)}/,
+                    "Page is missing glossary term #{attr}")
+    end
+
     assert_select("a[href='#{prior_version_path}']", true,
                   "Page should have link to prior version")
   end
@@ -38,10 +45,12 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_new # happy path
     login
     get(:new)
+
     assert_response(:success)
-    assert_template(:new)
-    assert_select("form input[name='glossary_term[name]']", { count: 1 },
-                  "Form is missing field for name")
+    ESSENTIAL_ATTRIBUTES.each do |attr|
+      assert_select("form #glossary_term_#{attr}", { count: 1 },
+                    "Form is missing field for #{attr}")
+    end
   end
 
   def test_new_no_login
@@ -55,13 +64,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
     term = GlossaryTerm.first
     get(:edit, id: term.id)
-    assert_template(:edit)
+
     assert_response(:success)
-    assert_select("form input[name='glossary_term[name]']", { count: 1 },
-                  "Form is missing field for name") do
-      assert_select("input[value='#{term.name}']", { count: 1 },
-                    "Name should default to glossary term name")
-    end
+    assert_select(
+      "form #glossary_term_name[value='#{term.name}']", { count: 1 },
+      "Form lacks Name field that defaults to glossary term name"
+    )
+    assert_select(
+      "form #glossary_term_description",
+      { text: /#{term.description}/, count: 1 },
+      "Form lacks Description field that defaults to glossary term description"
+    )
     assert_select("input#upload_image", false,
                   "edit GlossaryTerm form should omit image input form")
   end
@@ -147,9 +160,13 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_show_past # happy_path
     term = glossary_terms(:square_glossary_term)
-    get(:show_past, id: term.id, version: term.versions.first) # oldest version
+    version = term.versions.first  # oldest version
+    get(:show_past, id: term.id, version: version)
 
-    assert_template(:show_past, partial: "_glossary_term")
+    ESSENTIAL_ATTRIBUTES.each do |attr|
+      assert_select("body", /#{version.send(attr)}/,
+                    "Page is missing glossary term #{attr}")
+    end
     assert_select("a[href='#{glossary_term_path(term.id)}']", true,
                   "Page should have link to last (current) version")
   end
