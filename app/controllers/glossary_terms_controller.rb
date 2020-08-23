@@ -44,7 +44,7 @@ class GlossaryTermsController < ApplicationController
                        description: params[:glossary_term][:description])
     glossary_term.add_image(process_image(image_args))
     glossary_term.save
-    redirect_to(glossary_terms_path(glossary_term.id))
+    redirect_to(glossary_term_path(glossary_term.id))
   end
 
   def update
