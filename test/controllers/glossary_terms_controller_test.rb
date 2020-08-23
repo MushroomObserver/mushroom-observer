@@ -13,6 +13,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
+    assert_title(:glossary_term_index_title.l)
+
     GlossaryTerm.find_each do |term|
       assert_select(
         "a[href *= '#{glossary_term_path(term.id)}']", true,
@@ -30,11 +32,12 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show, id: term.id)
 
     assert_response(:success)
+    assert_title(:show_glossary_term_title.l(name: term.name))
+
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{term.send(attr)}/,
                     "Page is missing glossary term #{attr}")
     end
-
     assert_select("a[href='#{prior_version_path}']", true,
                   "Page should have link to prior version")
   end
@@ -47,6 +50,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_response(:success)
+    assert_title(:create_glossary_term_title.l)
+
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("form #glossary_term_#{attr}", { count: 1 },
                     "Form is missing field for #{attr}")
@@ -66,6 +71,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:edit, id: term.id)
 
     assert_response(:success)
+    assert_title(:edit_glossary_term_title.l(name: term.name))
+
     assert_select(
       "form #glossary_term_name[value='#{term.name}']", { count: 1 },
       "Form lacks Name field that defaults to glossary term name"
@@ -76,7 +83,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       "Form lacks Description field that defaults to glossary term description"
     )
     assert_select("input#upload_image", false,
-                  "edit GlossaryTerm form should omit image input form")
+                  "Edit GlossaryTerm form should omit image input form")
   end
 
   def test_edit_no_login
@@ -161,7 +168,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_show_past # happy_path
     term = glossary_terms(:square_glossary_term)
     version = term.versions.first  # oldest version
-    get(:show_past, id: term.id, version: version)
+    get(:show_past, id: term.id, version: version.version)
+
+    assert_response(:success)
+    assert_title(:show_past_glossary_term_title.l(num: version.version,
+                                                  name: term.name))
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{version.send(attr)}/,
@@ -172,7 +183,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_show_past_no_version
-    term = glossary_terms(:conic_glossary_term)
+    term = GlossaryTerm.first
     get(:show_past, id: term.id)
     assert_response(:redirect)
   end
@@ -192,6 +203,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ---------- helpers ---------------------------------------------------------
+
+  def assert_title(title)
+    assert_select("head title", { text: /#{title}/, count: 1 },
+                  "Incorrect page or page title displayed")
+  end
 
   def create_term_params
     {
