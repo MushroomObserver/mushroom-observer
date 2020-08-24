@@ -114,6 +114,8 @@ class GlossaryTermsController < ApplicationController
 
     image = Image.new(args)
     save_or_flash(image)
+
+    image
   end
 
   def save_or_flash(image)
