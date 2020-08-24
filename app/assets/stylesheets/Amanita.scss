@@ -129,3 +129,8 @@ $DANGER_FG_COLOR:                   black;
 .list-group-item {
   border: 0px !important;
 }
+
+// Some error messages are invisible!
+div.alert p.help-block {
+  color: black !important;
+}

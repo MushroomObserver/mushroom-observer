@@ -160,16 +160,12 @@
 
     <% if !@best_description.blank? %>
       <strong><%= :show_name_brief_description.t %>:</strong>
-      <div>
-        <span class="pull-right">
-          <%= link_with_query(:show_name_see_more.t, controller: :name,
+        [<%= link_with_query(:show_name_see_more.t, controller: :name,
                               action: :show_name_description,
                               id: @name.description.id) %> |
           <%= link_with_query(:EDIT.t, controller: :name,
                               action: :edit_name_description,
-                              id: @name.description.id) %>
-        </span>
-      </div>
+                              id: @name.description.id) %>]
       <div class="list-group">
         <div class="list-group-item">
           <%= @best_description.tpl %>
