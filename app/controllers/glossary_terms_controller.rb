@@ -106,17 +106,14 @@ class GlossaryTermsController < ApplicationController
   end
 
   def process_image(args)
-    image = nil
-    name = nil
-    upload = args[:image]
-    if upload.blank?
-      name = upload.original_filename.force_encoding("utf-8") if
-        upload.respond_to?(:original_filename)
+    return unless (upload = args[:image])
 
-      image = Image.new(args)
-      save_or_flash(image)
+    if upload.respond_to?(:original_filename)
+      name = upload.original_filename.force_encoding("utf-8")
     end
-    image
+
+    image = Image.new(args)
+    save_or_flash(image)
   end
 
   def save_or_flash(image)
