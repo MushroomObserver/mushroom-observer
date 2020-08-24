@@ -231,17 +231,18 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     {
-      glossary_term: { name: "Pancake", description: "Flat" },
-      copyright_holder: "Me",
-      date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id },
-      image: {
-        "0" => {
+      glossary_term: {
+        name: "Pancake",
+        description: "Flat",
+        upload_image: {
           image: file,
           copyright_holder: "zuul",
           when: Time.current
         }
-      }
+      },
+      copyright_holder: "Me",
+      date: { copyright_year: 2013 },
+      upload: { license_id: licenses(:ccnc25).id },
     }.freeze
   end
 end
