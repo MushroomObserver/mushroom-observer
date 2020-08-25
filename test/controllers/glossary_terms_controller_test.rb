@@ -98,9 +98,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_create
     user = login
     params = create_term_params
-    post(:create, params)
+    assert_no_difference("Image.count") do
+      post(:create, params)
+    end
     term = GlossaryTerm.order(created_at: :desc).first
-
     assert_equal(params[:glossary_term][:name], term.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_not_nil(term.rss_log)
