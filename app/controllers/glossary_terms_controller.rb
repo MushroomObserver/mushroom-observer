@@ -42,7 +42,10 @@ class GlossaryTermsController < ApplicationController
     glossary_term = \
       GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
                        description: params[:glossary_term][:description])
-    glossary_term.add_image(process_image(image_args))
+
+    if params[:glossary_term][:upload_image]
+      glossary_term.add_image(process_image(image_args))
+    end
     glossary_term.save
     redirect_to(glossary_term_path(glossary_term.id))
   end
