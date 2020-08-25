@@ -99,13 +99,20 @@ class GlossaryTermsController < ApplicationController
   # --------- Other private methods
 
   def image_args
-    {
+    args = {
       copyright_holder: params[:copyright_holder],
       when: Time.local(params[:date][:copyright_year]).utc,
       license: License.safe_find(params[:upload][:license_id]),
       user: @user,
       image: params[:glossary_term][:upload_image]
     }
+
+    if Rails.env.test?
+      # When testing, let model mass assign this param
+      args[:image] = params[:glossary_term][:upload_image][:image]
+    end
+
+    args
   end
 
   def process_image(args)

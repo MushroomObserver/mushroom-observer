@@ -108,6 +108,17 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_create_upload_image
+    user = login
+    params = term_with_image_params
+
+    assert_difference("Image.count") do
+      post(:create, params)
+    end
+    term = GlossaryTerm.order(created_at: :desc).first
+    assert_equal(Image.last, term.thumb_image)
+  end
+
   def test_create_image_save_failure
     login
     # Simulate image.save failure.
