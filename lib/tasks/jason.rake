@@ -535,7 +535,7 @@ namespace :jason do
         lines.push('>>>>>>>> missing "vote"')  if what && !vote
 
         if lines.select { |l| l.start_with?(">>>>") }.empty?
-          date ||= Date.today
+          date ||= Time.zone.today
           spec ||= false
           is_co ||= true
 

@@ -3254,7 +3254,7 @@ class ApiTest < UnitTestCase
     assert_last_species_list_correct
 
     @title    = "Minimal New Species List"
-    @date     = Date.today
+    @date     = Time.zone.today
     @location = Location.unknown
     @where    = Location.unknown.name
     @notes    = nil
@@ -3268,7 +3268,7 @@ class ApiTest < UnitTestCase
     assert_last_species_list_correct
 
     @title    = "New Species List with Undefined Location"
-    @date     = Date.today
+    @date     = Time.zone.today
     @location = nil
     @where    = "Bogus, Arkansas, USA"
     @notes    = nil
