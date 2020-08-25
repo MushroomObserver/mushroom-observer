@@ -99,6 +99,10 @@ class GlossaryTermsController < ApplicationController
   # --------- Other private methods
 
   def image_args
+    Rails.env.test? ? permit_upload_image_param : strong_upload_image_param
+  end
+
+  def strong_upload_image_param
     args = {
       copyright_holder: params[:copyright_holder],
       when: Time.local(params[:date][:copyright_year]).utc,
@@ -106,12 +110,12 @@ class GlossaryTermsController < ApplicationController
       user: @user,
       image: params[:glossary_term][:upload_image]
     }
+  end
 
-    if Rails.env.test?
-      # When testing, let model mass assign this param
-      args[:image] = params[:glossary_term][:upload_image][:image]
-    end
-
+  def permit_upload_image_param
+    args = strong_image_args
+    # Remove "permitted: false" from this param so that model can mass assign it
+    args[:image] = params[:glossary_term][:upload_image][:image]
     args
   end
 
