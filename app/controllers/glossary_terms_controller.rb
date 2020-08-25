@@ -113,7 +113,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def permit_upload_image_param
-    args = strong_image_args
+    args = strong_upload_image_param
     # Remove "permitted: false" from this param so that model can mass assign it
     args[:image] = params[:glossary_term][:upload_image][:image]
     args
