@@ -242,7 +242,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       },
       copyright_holder: "Me",
       date: { copyright_year: 2013 },
-      upload: { license_id: licenses(:ccnc25).id },
+      upload: { license_id: licenses(:ccnc25).id }
     }.freeze
   end
 end
