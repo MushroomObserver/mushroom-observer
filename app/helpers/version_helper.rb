@@ -83,22 +83,22 @@ module VersionHelper
       link = "#{:VERSION.t} #{ver.version}"
       link += " " + ver.format_name.t if ver.respond_to?(:format_name)
       if ver.version != obj.version
-        if @merge_source_id
-          link = link_with_query(link, controller: obj.show_controller,
+        link = if @merge_source_id
+                 link_with_query(link, controller: obj.show_controller,
                                        action: obj.show_past_action,
                                        id: obj.id,
                                        merge_source_id: @merge_source_id,
                                        version: version)
-        elsif ver == obj.versions.last
-          link = link_with_query(link, controller: obj.show_controller,
+               elsif ver == obj.versions.last
+                 link_with_query(link, controller: obj.show_controller,
                                        action: obj.show_action,
                                        id: obj.id)
-        else
-          link = link_with_query(link, controller: obj.show_controller,
+               else
+                 link_with_query(link, controller: obj.show_controller,
                                        action: obj.show_past_action,
                                        id: obj.id,
                                        version: ver.version)
-        end
+               end
       end
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
