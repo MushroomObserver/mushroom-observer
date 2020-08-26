@@ -22,6 +22,7 @@
         <%= glossary_term.description.tpl %>
       </td>
       <td>
+        <%= destroy_button(glossary_term) if in_admin_mode? %>
         <%= if glossary_term&.thumb_image_id&.nonzero?
           thumbnail(glossary_term.thumb_image, votes: true)
         end %>

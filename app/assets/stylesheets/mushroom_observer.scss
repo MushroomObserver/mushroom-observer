@@ -1538,6 +1538,25 @@ table.table-namings {
     border-radius: 0 !important;
 }
 
+form.button_to {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  div { display: inline; }
+  input[type=submit] {
+    margin: 0;
+    padding: 0;
+    -webkit-appearance: caret;
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: normal;
+    cursor: pointer;
+    color: #0000FF;
+  }
+}
+
 .monospace {
     font-family: monospace
 }

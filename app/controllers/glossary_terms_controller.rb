@@ -62,15 +62,19 @@ class GlossaryTermsController < ApplicationController
   def destroy
     return unless (@glossary_term = GlossaryTerm.find(params[:id]))
 
-    if in_admin_mode?
-      @glossary_term.destroy
-      flash_notice(:runtime_destroyed_id.t(type: GlossaryTerm,
-                                           value: params[:id]))
-    else
+    unless in_admin_mode?
       flash_warning(:permission_denied.t)
+      return redirect_to(glossary_term_path(@glossary_term.id))
     end
 
-    redirect_to(glossary_terms_path)
+    if @glossary_term.destroy
+      flash_notice(
+        :runtime_destroyed_id.t(type: GlossaryTerm, value: params[:id])
+      )
+      redirect_to(glossary_terms_path)
+    else
+      redirect_to(glossary_term_path(@glossary_term.id))
+    end
   end
 
   # ---------- Non-standard REST Actions ---------------------------------------
