@@ -109,6 +109,18 @@ class SpeciesList < AbstractModel
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
 
+  def clear
+    num = SpeciesList.connection.select_value(%(
+      SELECT COUNT(observation_id) FROM observations_species_lists
+      WHERE species_list_id = #{id}
+    ))
+    SpeciesList.connection.delete(%(
+      DELETE FROM observations_species_lists
+      WHERE species_list_id = #{id}
+    ))
+    SiteData.update_contribution(:del, :species_list_entries, user_id, num)
+  end
+
   ##############################################################################
   #
   #  :section: Names

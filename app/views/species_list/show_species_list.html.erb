@@ -1,40 +1,40 @@
 <%
   @title = :species_list_show_title.t(name: @species_list.unique_format_name)
 
-  tabs = []
+  tabs = [
+    link_with_query(:species_list_show_download.t,
+                    { action: "download", id: @species_list.id })
+  ]
   if @user
     tabs += [
-      link_with_query(:species_list_show_clone_list.t,
-                      {action: :create_species_list, clone: @species_list.id},
-                      {help: :species_list_show_clone_list_help.l}),
       link_with_query(:species_list_show_set_source.t,
-                      {action: :show_species_list, id: @species_list.id,
-                      set_source: 1},
-                      {help: :species_list_show_set_source_help.l}),
-      link_with_query(:species_list_show_bulk_edit.t,
-                      {action: :bulk_editor, id: @species_list.id},
-                      {help: :species_list_show_bulk_edit_help.l})
+                      { action: "show_species_list", id: @species_list.id,
+                        set_source: 1 },
+                      { help: :species_list_show_set_source_help.l }),
+      link_with_query(:species_list_show_clone_list.t,
+                      { action: :create_species_list,
+                        clone: @species_list.id }),
+      link_to(:species_list_show_add_remove_from_another_list.t,
+              add_query_param({ controller: "species_list",
+                                action: "add_remove_observations" },
+                              @query))
     ]
   end
   if check_permission(@species_list)
     tabs += [
       link_with_query(:species_list_show_manage_projects.t,
-                      action: :manage_projects, id: @species_list.id),
+                      { action: :manage_projects, id: @species_list.id },
+                      { help: :species_list_show_manage_projects_help.l }),
       link_with_query(:species_list_show_edit.t,
-                      action: :edit_species_list, id: @species_list.id),
-      link_with_query(:DESTROY.t,
-                      {action: :destroy_species_list, id: @species_list.id},
-                      {class: "text-danger", data: {confirm: :are_you_sure.l}})
+                      { action: :edit_species_list, id: @species_list.id }),
+      link_with_query(:species_list_show_clear_list.t,
+                      { action: :clear_species_list, id: @species_list.id },
+                      { class: "text-danger", data: { confirm: :are_you_sure.l } }),
+      link_with_query(:species_list_show_destroy.t,
+                      { action: :destroy_species_list, id: @species_list.id },
+                      { class: "text-danger", data: { confirm: :are_you_sure.l } })
     ]
   end
-  tabs += [
-    link_with_query(:species_list_show_save_as_txt.t,
-                    action: :make_report, id: @species_list.id, type: "txt"),
-    link_with_query(:species_list_show_save_as_rtf.t,
-                    action: :make_report, id: @species_list.id, type: "rtf"),
-    link_with_query(:species_list_show_save_as_csv.t,
-                    action: :make_report, id: @species_list.id, type: "csv")
-  ]
   tabs << draw_interest_icons(@species_list) if @user
   @tabsets = {
     pager_for: @species_list,
@@ -57,7 +57,9 @@
             <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
           </div>
         <% end %>
-        <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
+        <% if @species_list.notes.present? %>
+          <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -73,17 +75,22 @@
 
           <div class="list-group-item default">
             <%= :species_list_show_members.t %>:
-            <%= link_to_coerced_query(@query, Observation) %> |
-            <%= link_to_coerced_query(@query, Image) %> |
+            <%= link_to(:species_list_show_regular_index.t,
+                        add_query_param({ controller: "species_list",
+                                          action: "add_remove_observations" },
+                                         @query),
+                        { help: :species_list_show_regular_index_help.t }) %> |
+            <%= link_to_coerced_query(@query, Location) %> |
             <%= link_to_coerced_query(@query, Name) %> |
+            <%= link_to_coerced_query(@query, Image) %> |
             <%= link_to(:app_checklist.t,
-                        controller: :observer,
-                        action: :checklist,
-                        species_list_id: @species_list.id) %> |
-            <%= link_with_query(:species_list_show_print_labels.t,
-                                controller: :observer, action: :print_labels) %> |
-            <%= link_with_query(:DOWNLOAD.t, controller: :observer,
-                                            action: :download_observations) %>
+                        { controller: :observer,
+                          action: :checklist,
+                          species_list_id: @species_list.id }) %> |
+            <%= link_to(:show_object.t(type: :map),
+                        add_query_param({ controller: "observer",
+                                          action: "map_observations" },
+                                        @query)) %>
           </div>
 
           <% if @objects.any? %>
