@@ -925,7 +925,7 @@ class SpeciesListController < ApplicationController
   # an Array of names where the values are [display_name, name_id].  This
   # is destined for the instance variable @checklist.
   def calc_checklist(query = nil)
-    return unless (query ||= query_from_session)
+    return unless query ||= query_from_session
 
     case query.model.name
     when "Name"
