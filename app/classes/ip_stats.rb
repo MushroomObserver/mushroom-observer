@@ -40,22 +40,29 @@ class IpStats
       data = {}
       now = Time.now.utc
       file = MO.ip_stats_file
-      read_file(file) do |time, ip, user, load, controller, action, api_key|
-        hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
-        # Weight turns rate into average number of requests per second,
-        # and load into average percentage of server time used.  It weights
-        # recent activity more heavily than old activity.
-        weight = calc_weight(now, Time.parse(time).utc)
-        weight /= 2 if controller.to_s == "api"
-        hash[:ip] = ip
-        hash[:user] ||= user.to_i if user.to_s != ""
-        hash[:api_key] ||= api_key.to_s if api_key.to_s != ""
-        hash[:load] += load.to_f * weight
-        hash[:rate] += weight
-        hash[:activity] << [time, load.to_f, controller, action] \
-          if do_activity
+      read_file(file) do |*vals|
+        add_one_line_to_stats(data, vals, now, do_activity)
       end
       data
+    end
+
+    def add_one_line_to_stats(data, vals, now, do_activity)
+      time, ip, user, load, controller, action, api_key = *vals
+      hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
+      weight = calc_weight(now, Time.parse(time).utc)
+      weight /= 2 if controller.to_s == "api"
+      update_one_stat(hash, vals, weight, do_activity)
+    end
+
+    def update_one_stat(hash, vals, weight)
+      time, ip, user, load, controller, action, api_key = *vals
+      hash[:ip] = ip
+      hash[:user] ||= user.to_i if user.to_s != ""
+      hash[:api_key] ||= api_key.to_s if api_key.to_s != ""
+      hash[:load] += load.to_f * weight
+      hash[:rate] += weight
+      hash[:activity] << [time, load.to_f, controller, action] \
+        if do_activity
     end
 
     def clean_stats
@@ -132,6 +139,9 @@ class IpStats
 
     private
 
+    # Weight turns rate into average number of requests per second,
+    # and load into average percentage of server time used.  It weights
+    # recent activity more heavily than old activity.
     def calc_weight(now, time)
       return 0.0 if now - time > 60 * STATS_TIME
 

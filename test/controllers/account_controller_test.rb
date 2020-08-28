@@ -768,13 +768,11 @@ class AccountControllerTest < FunctionalTestCase
     IpStats.remove_blocked_ips([new_ip])
     # make sure there is an API key logged to test that part of view
     api_key = api_keys(:rolfs_api_key)
-    IpStats.log_stats({
-      ip:         "3.14.15.9",
-      time:       Time.now,
-      controller: "api",
-      action:     "observations",
-      api_key:    api_key.key
-    })
+    IpStats.log_stats({ ip: "3.14.15.9",
+                        time: Time.zone.now,
+                        controller: "api",
+                        action: "observations",
+                        api_key: api_key.key })
     assert_false(IpStats.blocked?(new_ip))
 
     login(:rolf)
