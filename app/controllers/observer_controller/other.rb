@@ -21,7 +21,7 @@ class ObserverController
   end
 
   # Force javascript on.
-  def turn_javascript_on # :norobots:
+  def turn_javascript_on
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
     redirect_to(:back)
@@ -30,7 +30,7 @@ class ObserverController
   end
 
   # Force javascript off.
-  def turn_javascript_off # :norobots:
+  def turn_javascript_off
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
     redirect_to(:back)
@@ -39,7 +39,7 @@ class ObserverController
   end
 
   # Enable auto-detection.
-  def turn_javascript_nil # :norobots:
+  def turn_javascript_nil
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
     redirect_to(:back)
@@ -54,7 +54,7 @@ class ObserverController
   end
 
   # Update banner across all translations.
-  def change_banner # :root: :norobots:
+  def change_banner
     if !in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(action: "list_rss_logs")
@@ -87,7 +87,7 @@ class ObserverController
 
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
-  def set_export_status # :norobots:
+  def set_export_status
     pass_query_params
     id    = params[:id].to_s
     type  = params[:type].to_s

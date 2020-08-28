@@ -5,7 +5,7 @@ class TranslationController < ApplicationController
   #  :section: Edit Actions
   # ----------------------------
 
-  def edit_translations # :norobots:
+  def edit_translations
     @lang = get_language_and_authorize_user
     @ajax = false
     @page = params[:page]
@@ -23,7 +23,7 @@ class TranslationController < ApplicationController
     redirect_back_or_default("/")
   end
 
-  def edit_translations_ajax_get # :norobots:
+  def edit_translations_ajax_get
     @lang = get_language_and_authorize_user
     @ajax = true
     @tag = params[:tag]
@@ -36,7 +36,7 @@ class TranslationController < ApplicationController
     render(plain: msg, status: :internal_server_error)
   end
 
-  def edit_translations_ajax_post # :norobots:
+  def edit_translations_ajax_post
     @lang = get_language_and_authorize_user
     @ajax = true
     @tag = params[:tag]

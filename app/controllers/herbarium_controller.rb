@@ -11,7 +11,7 @@ class HerbariumController < ApplicationController
   ]
 
   # Displays selected Herbarium's (based on current Query).
-  def index_herbarium # :norobots:
+  def index_herbarium
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
@@ -30,7 +30,7 @@ class HerbariumController < ApplicationController
   end
 
   # Display list of Herbaria whose text matches a string pattern.
-  def herbarium_search # :norobots:
+  def herbarium_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium = Herbarium.safe_find(pattern))
@@ -58,15 +58,15 @@ class HerbariumController < ApplicationController
     end
   end
 
-  def next_herbarium # :norobots:
+  def next_herbarium
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  def prev_herbarium # :norobots:
+  def prev_herbarium
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
-  def create_herbarium # :norobots:
+  def create_herbarium
     store_location
     pass_query_params
     keep_track_of_referrer
@@ -79,7 +79,7 @@ class HerbariumController < ApplicationController
     end
   end
 
-  def edit_herbarium # :norobots:
+  def edit_herbarium
     store_location
     pass_query_params
     keep_track_of_referrer
@@ -98,7 +98,7 @@ class HerbariumController < ApplicationController
     end
   end
 
-  def merge_herbaria # :norobots:
+  def merge_herbaria
     pass_query_params
     keep_track_of_referrer
     this = find_or_goto_index(Herbarium, params[:this]) || return
@@ -107,7 +107,7 @@ class HerbariumController < ApplicationController
     redirect_to_herbarium_index(result)
   end
 
-  def delete_curator # :norobots:
+  def delete_curator
     pass_query_params
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -122,7 +122,7 @@ class HerbariumController < ApplicationController
     redirect_to_referrer || redirect_to_show_herbarium
   end
 
-  def request_to_be_curator # :norobots:
+  def request_to_be_curator
     pass_query_params
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -138,7 +138,7 @@ class HerbariumController < ApplicationController
     redirect_to_referrer || redirect_to_show_herbarium
   end
 
-  def destroy_herbarium # :norobots:
+  def destroy_herbarium
     pass_query_params
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])

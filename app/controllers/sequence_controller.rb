@@ -21,19 +21,19 @@ class SequenceController < ApplicationController
     :prev_sequence
   ]
 
-  def index_sequence # :norobots:
+  def index_sequence
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def list_sequences # :norobots:
+  def list_sequences
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
   end
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search # :norobots:
+  def sequence_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
@@ -44,7 +44,7 @@ class SequenceController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
@@ -63,11 +63,11 @@ class SequenceController < ApplicationController
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  def next_sequence # :norobots:
+  def next_sequence
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  def prev_sequence # :norobots:
+  def prev_sequence
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
