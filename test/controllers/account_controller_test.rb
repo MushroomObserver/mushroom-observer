@@ -766,6 +766,15 @@ class AccountControllerTest < FunctionalTestCase
   def test_blocked_ips
     new_ip = "5.4.3.2"
     IpStats.remove_blocked_ips([new_ip])
+    # make sure there is an API key logged to test that part of view
+    api_key = api_keys(:rolfs_api_key)
+    IpStats.log_stats({
+      ip:         "3.14.15.9",
+      time:       Time.now,
+      controller: "api",
+      action:     "observations",
+      api_key:    api_key.key
+    })
     assert_false(IpStats.blocked?(new_ip))
 
     login(:rolf)
@@ -775,6 +784,7 @@ class AccountControllerTest < FunctionalTestCase
     make_admin
     get(:blocked_ips)
     assert_response(:success)
+    assert_includes(@response.body, api_key.key)
 
     get(:blocked_ips, add_bad: "garbage")
     assert_flash_error

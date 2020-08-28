@@ -9,6 +9,7 @@ class IpStats
     #   time::       Time request started.
     #   controller:: Controller (string).
     #   action::     Action (string).
+    #   api_key::    API key (string).
     def log_stats(stats)
       file = MO.ip_stats_file
       now = Time.now.utc
@@ -19,13 +20,15 @@ class IpStats
           User.current_id,
           now - stats[:time].utc,
           stats[:controller],
-          stats[:action]
+          stats[:action],
+          stats[:api_key]
         ].join(","))
       end
     end
 
     # Returns data for each IP address:
-    #   user::     User ID if logged in (integer).
+    #   user::     User ID if logged in, first of any to use this IP (integer).
+    #   api_key::  API key if given, first of any to use this IP (string).
     #   load::     Percentage of time of one server instance used (float).
     #   rate::     Rate of requests per second (float).
     #   activity:: Array of recent activity, each entry an Array of four data:
@@ -36,14 +39,17 @@ class IpStats
     def read_stats(do_activity = false)
       data = {}
       now = Time.now.utc
-      read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
+      file = MO.ip_stats_file
+      read_file(file) do |time, ip, user, load, controller, action, api_key|
         hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
         # and load into average percentage of server time used.  It weights
         # recent activity more heavily than old activity.
         weight = calc_weight(now, Time.parse(time).utc)
+        weight /= 2 if controller.to_s == "api"
         hash[:ip] = ip
-        hash[:user] = user.to_i if user.to_s != ""
+        hash[:user] ||= user.to_i if user.to_s != ""
+        hash[:api_key] ||= api_key.to_s if api_key.to_s != ""
         hash[:load] += load.to_f * weight
         hash[:rate] += weight
         hash[:activity] << [time, load.to_f, controller, action] \
