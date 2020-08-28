@@ -54,7 +54,7 @@ class IpStats
       update_one_stat(hash, vals, weight, do_activity)
     end
 
-    def update_one_stat(hash, vals, weight)
+    def update_one_stat(hash, vals, weight, do_activity)
       time, ip, user, load, controller, action, api_key = *vals
       hash[:ip] = ip
       hash[:user] ||= user.to_i if user.to_s != ""
