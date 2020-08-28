@@ -152,7 +152,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** destroy *****
   def test_destroy # happy path
-    term = GlossaryTerm.first
+    term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
+    unused_image = term.thumb_image
+    used_images = term.all_images - [unused_image]
+
     login(term.user.login)
     make_admin
     get(:destroy, id: term.id)
@@ -160,6 +163,13 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_flash_success
     assert_response(:redirect)
     assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
+
+    assert_not(Image.exists?(unused_image.id),
+               "Failed to destroy unused Image #{unused_image.id}")
+    used_images.each do |image|
+      assert(Image.exists?(image.id),
+             "Image #{image.id} which was used elsewhere was destroyed")
+    end
   end
 
   def test_destroy_no_login

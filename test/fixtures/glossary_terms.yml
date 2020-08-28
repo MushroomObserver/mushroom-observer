@@ -3,6 +3,13 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+DEFAULTS: &DEFAULTS
+  version: 1
+  user: rolf
+  thumb_image:
+  name: $LABEL
+  description: Description of $LABEL
+
 conic_glossary_term:
   version: 1
   user: rolf
@@ -40,3 +47,7 @@ square_glossary_term:
   created_at: 2013-08-17 06:33:50
   updated_at: 2013-08-17 06:35:20
 
+unused_thumb_and_used_image_glossary_term:
+  <<: *DEFAULTS
+  thumb_image: unused_image
+  images: conic_image

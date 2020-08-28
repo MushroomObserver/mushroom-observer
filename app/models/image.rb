@@ -246,6 +246,11 @@ class Image < AbstractModel
     observations + subjects + best_glossary_terms + glossary_terms
   end
 
+  # Is image used by an object other than obj
+  def other_subjects?(obj)
+    (get_subjects - [obj]).present?
+  end
+
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #

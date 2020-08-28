@@ -11,6 +11,8 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
+  after_destroy(:destroy_unused_images)
+
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
     table_name: "glossary_terms_versions",
@@ -76,5 +78,13 @@ class GlossaryTerm < AbstractModel
       images.delete(new_thumb) if new_thumb
       save
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def destroy_unused_images
+    all_images.each { |image| image.destroy unless image.other_subjects?(self) }
   end
 end
