@@ -72,6 +72,7 @@ end
 def report_user(stats)
   id = stats[:user]
   puts("User ##{id} is hogging the server!")
+  puts("  API key: #{stats[:api_key]}") if stats[:api_key].to_s != ""
   puts("  https://mushroomobserver.org/observer/show_user/#{id}")
   puts("  request rate: #{(stats[:rate] * 60).round(2)} requests / minute")
   puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
