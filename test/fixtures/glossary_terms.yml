@@ -37,5 +37,5 @@ square_glossary_term:
 
 unused_thumb_and_used_image_glossary_term:
   <<: *DEFAULTS
-  thumb_image: unused_image
-  images: conic_image
+  thumb_image: unused_image # not used elsewhere
+  images: conic_image # used elsewhere (conic_glossary_term)
