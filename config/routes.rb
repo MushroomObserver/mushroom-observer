@@ -633,13 +633,10 @@ MushroomObserver::Application.routes.draw do
   redirect_legacy_actions(old_controller: "article")
 
   resources :glossary_terms, id: /\d+/ do
-    member do
-      get("show_past")
-    end
+    member { get("show_past") }
   end
   redirect_legacy_actions(
-    old_controller: "glossary",
-    new_controller: "glossary_terms",
+    old_controller: "glossary", new_controller: "glossary_terms",
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 

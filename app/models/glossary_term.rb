@@ -72,12 +72,13 @@ class GlossaryTerm < AbstractModel
       images.delete(image)
       save
     end
-    if thumb_image == image
-      new_thumb = images[0]
-      self.thumb_image = images[0]
-      images.delete(new_thumb) if new_thumb
-      save
-    end
+
+    return unless thumb_image == image
+
+    new_thumb = images[0]
+    self.thumb_image = images[0]
+    images.delete(new_thumb) if new_thumb
+    save
   end
 
   ##############################################################################

@@ -29,7 +29,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     prior_version_path = show_past_glossary_term_path(
       term.id, version: term.version - 1
     )
-    get(:show, id: term.id)
+    get(:show, params: { id: term.id })
 
     assert_response(:success)
     assert_title(:show_glossary_term_title.l(name: term.name))
@@ -45,7 +45,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
 
   # ***** new *****
-  def test_new # happy path
+  def test_new
     login
     get(:new)
 
@@ -65,10 +65,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** edit *****
-  def test_edit # happy path
+  def test_edit
     login
     term = GlossaryTerm.first
-    get(:edit, id: term.id)
+    get(:edit, params: { id: term.id })
 
     assert_response(:success)
     assert_title(:edit_glossary_term_title.l(name: term.name))
@@ -87,7 +87,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_edit_no_login
-    get(:edit, id: GlossaryTerm.first.id)
+    get(:edit, params: { id: GlossaryTerm.first.id })
     assert_response(:redirect,
                     "Unlogged-in user should not be able to edit term")
   end
@@ -98,8 +98,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_create
     user = login
     params = create_term_params
+
     assert_no_difference("Image.count") do
-      post(:create, params)
+      post(:create, params: params)
     end
     term = GlossaryTerm.order(created_at: :desc).first
     assert_equal(params[:glossary_term][:name], term.name)
@@ -110,11 +111,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_upload_image
-    user = login
+    login
     params = term_with_image_params
 
     assert_difference("Image.count") do
-      post(:create, params)
+      post(:create, params: params)
     end
     term = GlossaryTerm.order(created_at: :desc).first
     assert_equal(Image.last, term.thumb_image)
@@ -124,7 +125,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
     # Simulate image.save failure.
     Image.any_instance.stubs(:save).returns(false)
-    post(:create, term_with_image_params)
+    post(:create, params: term_with_image_params)
+
     assert_empty(GlossaryTerm.last.images)
   end
 
@@ -132,7 +134,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
     # Simulate process_image failure.
     Image.any_instance.stubs(:process_image).returns(false)
-    post(:create, term_with_image_params)
+    post(:create, params: term_with_image_params)
+
     assert_flash_error
   end
 
@@ -143,7 +146,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     assert_difference("term.versions.count") do
-      post(:update, params)
+      post(:update, params: params)
     end
     assert_equal(params[:glossary_term][:name], term.reload.name)
     assert_equal(params[:glossary_term][:description], term.description)
@@ -151,14 +154,14 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** destroy *****
-  def test_destroy # happy path
+  def test_destroy
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
     used_images = term.all_images - [unused_image]
 
     login(term.user.login)
     make_admin
-    get(:destroy, id: term.id)
+    get(:destroy, params: { id: term.id })
 
     assert_flash_success
     assert_response(:redirect)
@@ -175,7 +178,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_destroy_no_login
     term = GlossaryTerm.first
     login(users(:zero_user).login)
-    get(:destroy, id: term.id)
+    get(:destroy, params: { id: term.id })
 
     assert_flash_text(:permission_denied.l)
     assert_response(:redirect)
@@ -185,10 +188,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ---------- Other actions ---------------------------------------------------
 
-  def test_show_past # happy_path
+  def test_show_past
     term = glossary_terms(:square_glossary_term)
     version = term.versions.first # oldest version
-    get(:show_past, id: term.id, version: version.version)
+    get(:show_past, params: { id: term.id, version: version.version })
 
     assert_response(:success)
     assert_title(:show_past_glossary_term_title.l(num: version.version,
@@ -204,7 +207,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_show_past_no_version
     term = GlossaryTerm.first
-    get(:show_past, id: term.id)
+    get(:show_past, params: { id: term.id })
+
     assert_response(:redirect)
   end
 
