@@ -14,17 +14,16 @@
 </div>
 
 <table class="table table-striped">
-  <% @glossary_terms.each do |glossary_term| %>
+  <% @glossary_terms.each do |term| %>
     <tr>
       <td class="max-width-text">
-        <h4><%= link_to(glossary_term.name,
-                        glossary_term_path(glossary_term.id)) %>:</h4>
-        <%= glossary_term.description.tpl %>
+        <h4><%= link_to(term.name, glossary_term_path(term.id)) %>:</h4>
+        <%= term.description.tpl %>
       </td>
       <td>
-        <%= destroy_button(glossary_term) if in_admin_mode? %>
-        <%= if glossary_term&.thumb_image_id&.nonzero?
-          thumbnail(glossary_term.thumb_image, votes: true)
+        <%= destroy_button(term) if in_admin_mode? %>
+        <%= if term&.thumb_image_id&.nonzero?
+          thumbnail(term.thumb_image, votes: true)
         end %>
       </td>
     </tr>
