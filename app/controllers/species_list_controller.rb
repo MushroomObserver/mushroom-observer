@@ -195,7 +195,7 @@ class SpeciesListController < ApplicationController
   #
   ##############################################################################
 
-  def download # :norobots:
+  def download
     pass_query_params
     @list = find_or_goto_index(SpeciesList, params[:id].to_s)
     @type = params[:type] || "txt"
@@ -395,7 +395,7 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def clear_species_list # :norobots:
+  def clear_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 

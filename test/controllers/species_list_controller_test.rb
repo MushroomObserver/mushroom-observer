@@ -1116,12 +1116,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     end
   end
 
+  def test_print_labels
+    spl = species_lists(:one_genus_three_species_list)
+    get(:print_labels, id: spl.id)
+  end
+
   def test_download
     spl = species_lists(:one_genus_three_species_list)
     query = Query.lookup_and_save(:Observation, :in_species_list,
                                   species_list: spl)
 
-    get_with_dump(:download, id: spl.id)
+    get(:download, id: spl.id)
 
     args = { controller: "observer", action: "print_labels" }
     url = url_for(@controller.add_query_param(args, query))

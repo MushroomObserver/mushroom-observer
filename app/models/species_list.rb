@@ -110,10 +110,9 @@ class SpeciesList < AbstractModel
   end
 
   def clear
-    num = SpeciesList.connection.select_value(%(
-      SELECT COUNT(observation_id) FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+    num = observations.count
+    # I don't see how to do this using Rails without triggering
+    # remove_obs_callback a bunch of times. -JPH 20200828
     SpeciesList.connection.delete(%(
       DELETE FROM observations_species_lists
       WHERE species_list_id = #{id}
