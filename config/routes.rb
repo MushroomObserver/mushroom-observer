@@ -629,11 +629,17 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
+  # Default page is /observer/list_rss_logs.
+  root "observer#list_rss_logs"
+
+  # Route /123 to /observer/show_observation/123.
+  get ":id" => "observer#show_observation", id: /\d+/
+
   resources :articles, id: /\d+/
   redirect_legacy_actions(old_controller: "article")
 
   resources :glossary_terms, id: /\d+/ do
-    member { get("show_past") }
+    get "show_past", on: :member
   end
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
@@ -642,12 +648,6 @@ MushroomObserver::Application.routes.draw do
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
-
-  # Default page is /observer/list_rss_logs.
-  root "observer#list_rss_logs"
-
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
