@@ -34,7 +34,7 @@
       <%= select_year(@copyright_year,
                       { field_name: :copyright_year,
                         start_year: 1980,
-                        end_year: Time.now.year},
+                        end_year: Time.zone.now.year },
                       { class: "form-control" }) %><br/>
       <%= select(:upload, :license_id, @licenses,
                  selected: @upload_license_id,
