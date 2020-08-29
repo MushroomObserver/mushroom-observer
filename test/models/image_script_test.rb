@@ -62,7 +62,7 @@ class ScriptTest < UnitTestCase
     cmd = "UPDATE images
            SET width=1000, height=1000, transferred=false
            WHERE id=#{in_situ_id}"
-    system("mysql -u #{user} -p#{pass} #{db} -e '#{cmd}'")
+    system("mysql --defaults-extra-file=#{mysql_config_file} -e '#{cmd}'")
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
     FileUtils.rm_rf("#{remote_root}2")
@@ -72,14 +72,18 @@ class ScriptTest < UnitTestCase
   end
 
   def clear_image_transferred_state_externally(id)
-    system("mysql -u mo -pmo mo_test -e "\
+    system("mysql --defaults-extra-file=#{mysql_config_file} -e "\
            "'update images set transferred=false where id = #{id}'")
   end
 
   def get_image_transferred_state_externally(id)
-    result = `mysql -u mo -pmo mo_test -e '\
+    result = `mysql --defaults-extra-file=#{mysql_config_file} -e '\
              '"select transferred from images where id = #{id}"`
     result.split("\n").last.strip == "1"
+  end
+
+  def mysql_config_file
+    "#{Rails.root}/config/mysql-#{Rails.env}.cnf"
   end
 
   ##############################################################################
