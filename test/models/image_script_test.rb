@@ -83,7 +83,7 @@ class ScriptTest < UnitTestCase
   end
 
   def mysql_config_file
-    "#{Rails.root}/config/mysql-#{Rails.env}.cnf"
+    Rails.root.join("config", "mysql-#{Rails.env}.cnf")
   end
 
   ##############################################################################
