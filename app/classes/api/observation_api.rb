@@ -62,7 +62,8 @@ class API
         north: n,
         south: s,
         east: e,
-        west: w
+        west: w,
+        region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
@@ -71,7 +72,7 @@ class API
     def create_params
       parse_create_params!
       {
-        when: parse(:date, :date) || Date.today,
+        when: parse(:date, :date) || Time.zone.today,
         place_name: @location,
         lat: @latitude,
         long: @longitude,

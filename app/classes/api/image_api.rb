@@ -11,7 +11,13 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
+      :license,
+      :observations,
       :user
+    ]
+
+    self.low_detail_includes = [
+      :observations
     ]
 
     # rubocop:disable Metrics/AbcSize
@@ -107,7 +113,7 @@ class API
       @observations = parse_array(:observation, :observations,
                                   must_have_edit_permission: true) || []
       @default_date =
-        @observations.any? ? @observations.first.when : Date.today
+        @observations.any? ? @observations.first.when : Time.zone.today
       @vote = parse(:enum, :vote, limit: Image.all_votes)
       @upload = prepare_upload
     end

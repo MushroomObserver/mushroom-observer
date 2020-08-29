@@ -107,14 +107,9 @@ gem("coveralls", require: false)
 gem("brakeman", require: false)
 
 # Use rubocop and associated gems for code quality control
-# WARNING: Whenever updating RuboCop, also:
-#   - Update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
-#       docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-#   - Run `rubocop --auto-gen-config` to regenerate .rubocop_todo.yml
-#       For more information about autoconfiguration
-#       go to https://docs.rubocop.org/,
-#       enter Automatically Generated Configuration in the Rubocop search bar.
-#   - Add any added-but-unconfigured cops to .rubocop.yml and re-autoconfigure
+#
+# WARNING:
+# When upgrading RuboCop, please use the procedure specified in .rubocop.yml
 #
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses

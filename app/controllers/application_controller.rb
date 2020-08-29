@@ -234,6 +234,7 @@ class ApplicationController < ActionController::Base
       time: Time.current,
       controller: params[:controller],
       action: params[:action],
+      api_key: params[:api_key],
       robot: browser.bot? ? "robot" : "user",
       ip: request.try(&:remote_ip),
       url: request.try(&:url),

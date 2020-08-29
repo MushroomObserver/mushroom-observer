@@ -1147,7 +1147,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Please remember to <a href="https://mushroomobserver.org/support/donate">donate</a> to support Mushroom Observer.  We are entirely volunteering run, but we still need to pay for our servers.  Thanks!<br/><br/>We have just updated our <a href="https://mushroomobserver.org/policy/privacy">privacy policy</a> and made it available through our menu.  Please check it out!<br/><br/>If you are trying to scrape data from Mushroom Observer, please <a href="https://mushroomobserver.org/observer/ask_webmaster_question">contact the webmasters</a> (webmaster@mushroomobserver.org).  We are here to help.  If we detect unauthorized scraping, it will be blocked.
+  app_banner_box: "We're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nWe have started work on some changes to the MO naming system.  See <a href=\"https://docs.google.com/document/d/185sbHDRpfdwO2C4ygK3dXRboR1WjjyHZG7d30JmdQKU/edit\">this Google doc</a> for more details and feel free to leave comments.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -2045,7 +2045,7 @@
   suggestions_processing_images: Loading images
   suggestions_processing_image: Analyzing image
   suggestions_processing_results: Processing results
-  suggestions_error: "Something went wrong, sorry!"
+  suggestions_error: Something went wrong, sorry!
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -3885,6 +3885,7 @@
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
+  api_help_region: "matches locations which end in this, e.g. \"California, USA\""
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?

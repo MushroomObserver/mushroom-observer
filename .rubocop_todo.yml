@@ -231,19 +231,6 @@ Rails/ApplicationMailer:
   Exclude:
     - 'app/models/account_mailer.rb'
 
-# Offense count: 9
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: strict, flexible
-Rails/Date:
-  Exclude:
-    - 'app/classes/api/image_api.rb'
-    - 'app/classes/api/observation_api.rb'
-    - 'app/classes/api/species_list_api.rb'
-    - 'lib/tasks/jason.rake'
-    - 'test/controllers/api_controller_test.rb'
-    - 'test/models/api_test.rb'
-    - 'test/models/time_extensions_test.rb'
-
 # Offense count: 88
 # Cop supports --auto-correct.
 # Configuration parameters: Whitelist.

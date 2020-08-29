@@ -54,7 +54,7 @@ abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 HELP
 
 def bad_ip?(stats)
-  if stats[:user].to_s != ""
+  if stats[:user].to_s != "" || stats[:api_key].to_s != ""
     report_user(stats) if stats[:rate] * 60  >= 30 || # requests per minute
                           stats[:load] * 100 >= 100   # pct use of one worker
   elsif stats[:rate] * 60  > 20 || # requests per minute
@@ -72,6 +72,7 @@ end
 def report_user(stats)
   id = stats[:user]
   puts("User ##{id} is hogging the server!")
+  puts("  API key: #{stats[:api_key]}") if stats[:api_key].to_s != ""
   puts("  https://mushroomobserver.org/observer/show_user/#{id}")
   puts("  request rate: #{(stats[:rate] * 60).round(2)} requests / minute")
   puts("  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds")
@@ -93,5 +94,6 @@ bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
 # Removing then re-adding has effect of updating the time stamp on each bad IP.
 IpStats.remove_blocked_ips(bad_ips)
 IpStats.add_blocked_ips(bad_ips)
+IpStats.clean_blocked_ips # remove old blocked ips after a day
 
 exit(0)

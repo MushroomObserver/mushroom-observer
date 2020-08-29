@@ -3,6 +3,11 @@
 <% if user_id = @stats[@ip][:user] %>
   User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
 <% end %>
+<% if api_key_str = @stats[@ip][:api_key]
+  api_key = ApiKey.find_by_key(api_key_str) %>
+  API key: <%= api_key_str %> (<%= api_key ? user_link(api_key.user) :
+                                             "bogus!" %>)<br/>
+<% end %>
 Rate: <%= (@stats[@ip][:rate].to_f * 60).round(2) %> / minute
       = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> seconds<br/>
 Load: <%= (@stats[@ip][:load].to_f * 100).round(2) %>% of one worker<br/>
