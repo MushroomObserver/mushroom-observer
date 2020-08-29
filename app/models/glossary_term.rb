@@ -86,6 +86,8 @@ class GlossaryTerm < AbstractModel
   private
 
   def destroy_unused_images
-    all_images.each { |image| image.destroy unless image.other_subjects?(self) }
+    all_images.each do |image|
+      image.destroy if image && !image.other_subjects?(self)
+    end
   end
 end

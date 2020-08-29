@@ -154,12 +154,24 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** destroy *****
-  def test_destroy
+  def test_destroy_term_lacking_images
+    term = glossary_terms(:no_images_glossary_term)
+
+    login
+    make_admin
+    get(:destroy, params: { id: term.id })
+
+    assert_flash_success
+    assert_response(:redirect)
+    assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
+  end
+
+  def test_destroy_term_with_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
     used_images = term.all_images - [unused_image]
 
-    login(term.user.login)
+    login
     make_admin
     get(:destroy, params: { id: term.id })
 

@@ -35,6 +35,9 @@ square_glossary_term:
   name: Square
   description: equilateral
 
+no_images_glossary_term:
+  <<: *DEFAULTS
+
 unused_thumb_and_used_image_glossary_term:
   <<: *DEFAULTS
   thumb_image: unused_image # not used elsewhere
