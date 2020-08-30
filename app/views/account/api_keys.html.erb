@@ -31,7 +31,7 @@
             <th><%= :NOTES.t %></th>
           </tr>
           <% @user.api_keys.sort_by do |key|
-            last_use = Time.now - key.last_used rescue 0
+            last_use = Time.zone.now - key.last_used rescue 0
             [-key.num_uses, last_use, key.id]
           end.each do |key| %>
             <tr>
