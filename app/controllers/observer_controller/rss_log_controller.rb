@@ -9,7 +9,7 @@ class ObserverController
   end
 
   # Displays matrix of selected RssLog's (based on current Query).
-  def index_rss_log # :norobots:
+  def index_rss_log
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
@@ -76,12 +76,12 @@ class ObserverController
   end
 
   # Go to next RssLog: redirects to show_<object>.
-  def next_rss_log # :norobots:
+  def next_rss_log
     redirect_to_next_object(:next, RssLog, params[:id].to_s)
   end
 
   # Go to previous RssLog: redirects to show_<object>.
-  def prev_rss_log # :norobots:
+  def prev_rss_log
     redirect_to_next_object(:prev, RssLog, params[:id].to_s)
   end
 
