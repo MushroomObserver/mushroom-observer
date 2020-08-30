@@ -37,19 +37,16 @@ module PatternSearch
     end
 
     def parse_pattern
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map { |v| quote(v) }.join(" ")
     end
 
     def parse_boolean(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+      val = make_sure_there_is_one_value!
+      return true if /^(1|yes|true)$/i.match?(val)
 
-      val = vals.first
-      return true  if /^(1|yes|true)$/i.match?(val)
-      return false if /^(0|no|false)$/i.match?(val) && !only_yes
       raise(BadYesError.new(var: var, val: val)) if only_yes
+      return false if /^(0|no|false)$/i.match?(val)
 
       raise(BadBooleanError.new(var: var, val: val))
     end
@@ -59,10 +56,7 @@ module PatternSearch
     end
 
     def parse_yes_no_both
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       return "only"   if /^(1|yes|true)$/i.match?(val)
       return "no"     if /^(0|no|false)$/i.match?(val)
       return "either" if /^(both|either)$/i.match?(val)
@@ -71,8 +65,7 @@ module PatternSearch
     end
 
     def parse_list_of_names
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           ::Name.safe_find(val) ||
@@ -85,8 +78,7 @@ module PatternSearch
     end
 
     def parse_list_of_herbaria
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Herbarium.safe_find(val) ||
@@ -100,8 +92,7 @@ module PatternSearch
     end
 
     def parse_list_of_locations
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Location.safe_find(val) ||
@@ -115,8 +106,7 @@ module PatternSearch
     end
 
     def parse_list_of_projects
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Project.safe_find(val) ||
@@ -129,8 +119,7 @@ module PatternSearch
     end
 
     def parse_list_of_species_lists
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           SpeciesList.safe_find(val) ||
@@ -143,8 +132,7 @@ module PatternSearch
     end
 
     def parse_list_of_users
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           User.safe_find(val) ||
@@ -158,17 +146,11 @@ module PatternSearch
     end
 
     def parse_string
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      vals.first
+      make_sure_there_is_one_value!
     end
 
     def parse_float(min, max)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
@@ -186,30 +168,22 @@ module PatternSearch
     end
 
     def parse_confidence
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+      val = make_sure_there_is_one_value!
+      from, to = val.to_s.split("-", 2)
+      [parse_one_confidence_value(from),
+       parse_one_confidence_value(to || "100")]
+    end
 
-      val = vals.first
-      if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
-         (-100..100).cover?(val.to_f)
-        [val.to_f * 3 / 100, 3]
-      elsif val.to_s.
-            match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
-            (-100..100).cover?(Regexp.last_match(1).to_f) &&
-            (-100..100).cover?(Regexp.last_match(3).to_f) &&
-            Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
-        [Regexp.last_match(1).to_f * 3 / 100,
-         Regexp.last_match(3).to_f * 3 / 100]
-      else
+    def parse_one_confidence_value(val)
+      val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
+        (-100..100).cover?(val.to_f) ||
         raise(BadConfidenceError.new(var: var, val: val))
-      end
+
+      [val.to_f * 3 / 100, 3]
     end
 
     def parse_date_range
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       # rubocop:disable Style/CaseLikeIf
       # case does not work if the code nested after "when /regex/" uses a
       # named capture group
@@ -249,10 +223,7 @@ module PatternSearch
     end
 
     def parse_rank_range
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       from, to = val.split("-", 2).map(&:strip)
       to ||= from
       from = lookup_rank(from)
@@ -280,6 +251,17 @@ module PatternSearch
       else
         false
       end
+    end
+
+    def make_sure_values_not_empty!
+      raise(MissingValueError.new(var: var)) if vals.empty?
+    end
+
+    def make_sure_there_is_one_value!
+      raise(MissingValueError.new(var: var)) if vals.empty?
+      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+
+      vals.first
     end
   end
 end
