@@ -530,7 +530,6 @@ class NameController < ApplicationController
     end
   end
 
-  # :prefetch: :norobots:
   def edit_name_description
     store_location
     pass_query_params

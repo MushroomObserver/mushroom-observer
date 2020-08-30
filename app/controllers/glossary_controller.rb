@@ -22,7 +22,7 @@ class GlossaryController < ApplicationController
     @glossary_terms = GlossaryTerm.all.order(:name)
   end
 
-  def create_glossary_term # :norobots:
+  def create_glossary_term
     if request.method == "POST"
       glossary_term_post
     else
@@ -86,7 +86,7 @@ class GlossaryController < ApplicationController
     end
   end
 
-  def edit_glossary_term # :norobots:
+  def edit_glossary_term
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
     if request.method == "POST"
@@ -103,7 +103,7 @@ class GlossaryController < ApplicationController
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
-  def show_past_glossary_term # :prefetch: :norobots:
+  def show_past_glossary_term
     pass_query_params
     store_location
     if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)

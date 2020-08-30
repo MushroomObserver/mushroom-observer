@@ -9,7 +9,7 @@ class NamingController < ApplicationController
     :edit
   ]
 
-  def edit # :prefetch: :norobots:
+  def edit
     pass_query_params
     @params = NamingParams.new
     naming = @params.naming = Naming.from_params(params)
@@ -21,7 +21,7 @@ class NamingController < ApplicationController
     request.method == "POST" ? edit_post : @params.edit_init
   end
 
-  def create # :prefetch: :norobots:
+  def create
     pass_query_params
     @params = NamingParams.new(params[:name])
     @params.observation = find_or_goto_index(Observation, params[:id].to_s)
@@ -31,7 +31,7 @@ class NamingController < ApplicationController
     create_post if request.method == "POST"
   end
 
-  def destroy # :norobots:
+  def destroy
     pass_query_params
     naming = Naming.find(params[:id].to_s)
     if destroy_if_we_can(naming)

@@ -87,7 +87,6 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  # :norobots:
   def locations_by_editor
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
@@ -97,7 +96,6 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  # :norobots:
   def location_search
     query = create_query(
       :Location, :pattern_search,
@@ -610,7 +608,6 @@ class LocationController < ApplicationController
     end
   end
 
-  # :prefetch: :norobots:
   def edit_location
     store_location
     pass_query_params

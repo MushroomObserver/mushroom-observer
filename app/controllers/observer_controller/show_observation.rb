@@ -19,7 +19,7 @@ class ObserverController
   #   @mappable
   #   @new_sites
   #   @votes
-  def show_observation # :prefetch:
+  def show_observation
     pass_query_params
     store_location
     check_if_user_wants_to_make_their_votes_public
@@ -82,17 +82,17 @@ class ObserverController
   end
 
   # Go to next observation: redirects to show_observation.
-  def next_observation # :norobots:
+  def next_observation
     redirect_to_next_object(:next, Observation, params[:id].to_s)
   end
 
   # Go to previous observation: redirects to show_observation.
-  def prev_observation # :norobots:
+  def prev_observation
     redirect_to_next_object(:prev, Observation, params[:id].to_s)
   end
 
   # Show map of observation.
-  def map_observation # :norobots:
+  def map_observation
     pass_query_params
     obs = find_or_goto_index(Observation, params[:id].to_s)
     return unless obs
