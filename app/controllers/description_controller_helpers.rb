@@ -670,7 +670,7 @@ module DescriptionControllerHelpers
   def group_name(group)
     return :adjust_permissions_all_users.t if group.name == "all users"
 
-    return :REVIEWERS.t group.name == "reviewers"
+    return :REVIEWERS.t if group.name == "reviewers"
 
     return group.users.first.legal_name if /^user \d+$/.match?(group.name.match)
 
