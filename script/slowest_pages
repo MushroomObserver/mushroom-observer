@@ -33,7 +33,7 @@ File.open(FILE).readlines.each do |line|
   path = "/#{controller}/#{action}"
   rec = data[path] ||= [0, 0, 0, 0]
   rec[0] += time
-  rec[1] += time * time
+  rec[1] += time**2
   rec[2] += 1
   rec[3] += 1 if robot
 end
@@ -41,7 +41,7 @@ end
 for path, rec in data
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
-  rec[1] = sig = Math.sqrt(ssq / num - avg * avg)
+  rec[1] = Math.sqrt(ssq / num - avg**2)
 end
 
 n = 0

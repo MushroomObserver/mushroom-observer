@@ -544,8 +544,14 @@ module DescriptionControllerHelpers
       author = desc.is_author?(@user)
 
       params.delete(:source_type) unless root
-      params.delete(:source_name) unless root || ((admin || author) &&
-        (desc.source_type != :project && desc.source_type != :project))
+      unless root ||
+             ((admin || author) &&
+               # originally was
+               # (desc.source_type != :project && desc.source_type != :project))
+               # see https://www.pivotaltracker.com/story/show/174566300
+               desc.source_type != :project)
+        params.delete(:source_name)
+      end
       params.delete(:license_id) unless root || admin || author
     end
 
@@ -662,15 +668,13 @@ module DescriptionControllerHelpers
 
   # Return name of group or user if it's a one-user group.
   def group_name(group)
-    if group.name == "all users"
-      :adjust_permissions_all_users.t
-    elsif group.name == "reviewers"
-      :REVIEWERS.t
-    elsif /^user \d+$/.match?(group.name.match)
-      group.users.first.legal_name
-    else
-      group.name
-    end
+    return :adjust_permissions_all_users.t if group.name == "all users"
+
+    return :REVIEWERS.t group.name == "reviewers"
+
+    return group.users.first.legal_name if /^user \d+$/.match?(group.name.match)
+
+    group.name
   end
 
   # Attempt to merge one description into another, deleting the old one
