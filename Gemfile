@@ -113,7 +113,7 @@ gem("brakeman", require: false)
 #
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses
-gem("rubocop", "= 0.88", require: false)
+gem("rubocop", "= 0.89", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
 

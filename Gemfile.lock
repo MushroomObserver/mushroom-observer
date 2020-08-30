@@ -186,10 +186,10 @@ GEM
     raindrops (0.19.1)
     rake (13.0.1)
     ref (2.0.0)
-    regexp_parser (1.7.0)
+    regexp_parser (1.7.1)
     rexml (3.2.4)
     rtf (0.3.3)
-    rubocop (0.88.0)
+    rubocop (0.89.0)
       parallel (~> 1.10)
       parser (>= 2.7.1.1)
       rainbow (>= 2.2.2, < 4.0)
@@ -294,7 +294,7 @@ DEPENDENCIES
   rails (~> 5.2.2)
   rails-controller-testing
   rtf
-  rubocop (= 0.88)
+  rubocop (= 0.89)
   rubocop-performance
   rubocop-rails
   sassc-rails
