@@ -6,8 +6,7 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
-    attr_accessor :var
-    attr_accessor :vals
+    attr_accessor :var, :vals
 
     def initialize(var)
       self.var = var
@@ -69,40 +68,6 @@ module PatternSearch
       return "either" if /^(both|either)$/i.match?(val)
 
       raise(BadYesNoBothError.new(var: var, val: val))
-    end
-
-    # Assure that param has only one value - a booleanish string -
-    #   returning "TRUE" or "FALSE" (rather than true/false).
-    # This is needed where the param interacts with user content filters and
-    #   and where the relevant sql string is TRUE / FALSE
-    #   e.g., :has_specimen
-    def parse_to_true_false_string(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      return "TRUE"  if /^(1|yes|true)$/i.match?(val)
-      return "FALSE" if /^(0|no|false)$/i.match?(val) && !only_yes
-      raise(BadYesError.new(var: var, val: val)) if only_yes
-
-      raise(BadBooleanError.new(var: var, val: val))
-    end
-
-    # Assure that param has only one value - a booleanish string -
-    #   returning "NULL" or "NOT NULL" (rather than true/false).
-    # This is needed where the param interacts with user content filters and
-    #   and where the relevant sql string is NULL / NOT NULL
-    #   e.g., :has_images
-    def parse_to_null_not_null_string(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      return "NOT NULL" if /^(1|yes|true)$/i.match?(val)
-      return "NULL"     if /^(0|no|false)$/i.match?(val) && !only_yes
-      raise(BadYesError.new(var: var, val: val)) if only_yes
-
-      raise(BadBooleanError.new(var: var, val: val))
     end
 
     def parse_list_of_names
