@@ -54,7 +54,7 @@ abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 HELP
 
 def bad_ip?(stats)
-  if stats[:user].to_s != "" || stats[:api_key].to_d != ""
+  if stats[:user].to_s != "" || stats[:api_key].to_s != ""
     report_user(stats) if stats[:rate] * 60  >= 30 || # requests per minute
                           stats[:load] * 100 >= 100   # pct use of one worker
   elsif stats[:rate] * 60  > 20 || # requests per minute

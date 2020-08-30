@@ -72,7 +72,7 @@ xml.response(
           xml.mimeType("image/jpeg")
           # Illustrations need to be identified
           xml.agent(user, role: "photographer")
-          xml.dcterms(:created, Time.parse(image.created_at.to_s).utc.
+          xml.dcterms(:created, Time.zone.parse(image.created_at.to_s).utc.
                                      strftime("%Y-%m-%dT%H:%M:%SZ"))
           xml.license(@data.license_url(image.license_id))
           xml.dcterms(:rightsHolder, user)
