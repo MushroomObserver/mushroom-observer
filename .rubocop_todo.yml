@@ -36,14 +36,6 @@ Lint/DuplicateMethods:
     - 'app/classes/query/modules/high_level_queries.rb'
     - 'app/models/image.rb'
 
-# Offense count: 7
-# Configuration parameters: AllowComments.
-Lint/EmptyConditionalBody:
-  Exclude:
-    - 'app/classes/api/model_api.rb'
-    - 'app/controllers/translation_controller.rb'
-    - 'app/models/language_exporter.rb'
-
 # Offense count: 1
 Lint/FloatComparison:
   Exclude:

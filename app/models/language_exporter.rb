@@ -442,12 +442,12 @@ module LanguageExporter
     value = value.to_s.dup
     pass = true
     while value =~ /\S/
-      if value.sub!(/^[^\[\]]+/, "")
-      elsif value.sub!(/^\[\[/, "")
-      elsif value.sub!(/^\]\]/, "")
-      elsif value.sub!(/^\[\w+\]/, "")
-      elsif value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "")
-        if Regexp.last_match(1) && \
+      if value.sub!(/^[^\[\]]+/, "") ||
+         value.sub!(/^\[\[/, "") ||
+         value.sub!(/^\]\]/, "") ||
+         value.sub!(/^\[\w+\]/, "") ||
+         value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "")
+        if Regexp.last_match(1) &&
            !validate_square_brackets_args(Regexp.last_match(1))
           pass = false
           break
@@ -457,6 +457,7 @@ module LanguageExporter
         break
       end
     end
+
     pass
   end
 
