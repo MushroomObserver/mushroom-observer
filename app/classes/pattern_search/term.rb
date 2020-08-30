@@ -169,7 +169,7 @@ module PatternSearch
 
     def parse_confidence
       val = make_sure_there_is_one_value!
-      from, to = val.to_s.split("-", 2)
+      from, to = val.to_s.split(/(?<=\d)-/, 2)
       [parse_one_confidence_value(from),
        parse_one_confidence_value(to || "100")]
     end
@@ -179,7 +179,7 @@ module PatternSearch
         (-100..100).cover?(val.to_f) ||
         raise(BadConfidenceError.new(var: var, val: val))
 
-      [val.to_f * 3 / 100, 3]
+      val.to_f * 3 / 100
     end
 
     def parse_date_range
