@@ -44,6 +44,6 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
     end
   end
 
-  @end_time = Time.now
+  @end_time = Time.zone.now
   xml_ellapsed_time(xml, :run_time, @end_time - @start_time)
 end
