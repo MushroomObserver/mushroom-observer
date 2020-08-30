@@ -12,9 +12,7 @@ class ImageS3Test < UnitTestCase
       stub: true # (makes Aws::S3 return empty responses for everything)
     )
     assert(s3.status("key"))
-    s3.list.each do |_obj|
-      break
-    end
+    assert(s3.list.methods.include?(:each))
     file = Rails.root.join("test", "fixtures", "robots.txt")
 
     s3.upload("key", file, content_type: "text/plain")
