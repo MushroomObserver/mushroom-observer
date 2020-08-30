@@ -6,6 +6,9 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
+    require_dependency "pattern_search/term/dates"
+    include Dates
+
     attr_accessor :var, :vals
 
     def initialize(var)
@@ -36,6 +39,10 @@ module PatternSearch
       val.to_s.sub(/^['"](.*)['"]$/, '\1').gsub(/\\(.)/, '\1')
     end
 
+    def first_val
+      vals.first
+    end
+
     def parse_pattern
       make_sure_values_not_empty!
       vals.map { |v| quote(v) }.join(" ")
@@ -43,10 +50,10 @@ module PatternSearch
 
     def parse_boolean(only_yes = false)
       val = make_sure_there_is_one_value!
-      return true if /^(1|yes|true)$/i.match?(val)
+      return true if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
 
       raise(BadYesError.new(var: var, val: val)) if only_yes
-      return false if /^(0|no|false)$/i.match?(val)
+      return false if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
 
       raise(BadBooleanError.new(var: var, val: val))
     end
@@ -57,9 +64,9 @@ module PatternSearch
 
     def parse_yes_no_both
       val = make_sure_there_is_one_value!
-      return "only"   if /^(1|yes|true)$/i.match?(val)
-      return "no"     if /^(0|no|false)$/i.match?(val)
-      return "either" if /^(both|either)$/i.match?(val)
+      return "only"   if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
+      return "no"     if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
+      return "either" if /^(both|either|#{:search_value_both.l})$/i.match?(val)
 
       raise(BadYesNoBothError.new(var: var, val: val))
     end
@@ -133,16 +140,22 @@ module PatternSearch
 
     def parse_list_of_users
       make_sure_values_not_empty!
-      vals.map do |val|
-        if /^\d+$/.match?(val)
-          User.safe_find(val) ||
-            raise(BadUserError.new(var: var, val: val))
-        else
-          User.find_by_login(val) ||
-            User.find_by_name(val) ||
-            raise(BadUserError.new(var: var, val: val))
-        end
-      end.map(&:id)
+      vals.map { |val| parse_one_user(val) }.map(&:id)
+    end
+
+    def parse_one_user(val)
+      case val
+      when "me" || :search_value_me.l
+        User.current ||
+          raise(UserMeNotLoggedInError.new)
+      when /^\d+$/
+        User.safe_find(val) ||
+          raise(BadUserError.new(var: var, val: val))
+      else
+        User.find_by_login(val) ||
+          User.find_by_name(val) ||
+          raise(BadUserError.new(var: var, val: val))
+      end
     end
 
     def parse_string
@@ -180,46 +193,6 @@ module PatternSearch
         raise(BadConfidenceError.new(var: var, val: val))
 
       val.to_f * 3 / 100
-    end
-
-    def parse_date_range
-      val = make_sure_there_is_one_value!
-      # rubocop:disable Style/CaseLikeIf
-      # case does not work if the code nested after "when /regex/" uses a
-      # named capture group
-      if /^(?<yr>\d{4})$/ =~ val
-        yyyymmdd([yr, 1, 1], [yr, 12, 31])
-      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)$/ =~ val
-        yyyymmdd([yr, mo, 1], [yr, mo, 31])
-      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)-(?<day>\d\d?)$/ =~ val
-        yyyymmdd([yr, mo, day], [yr, mo, day])
-      elsif /^(?<yr1>\d{4})-(?<yr2>\d{4})$/ =~ val
-        yyyymmdd([yr1, 1, 1], [yr2, 12, 31])
-      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<yr2>\d{4})-(?<mo2>\d\d?)$/ =~ val
-        yyyymmdd([yr1, mo1, 1], [yr2, mo2, 31])
-      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<dy1>\d\d?)-
-             (?<yr2>\d{4})-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/x =~ val
-        yyyymmdd([yr1, mo1, dy1], [yr2, mo2, dy2])
-      elsif /^(?<mo>\d\d?)$/ =~ val
-        mmdd([mo, 1], [mo, 31])
-      elsif /^(?<mo1>\d\d?)-(?<mo2>\d\d?)$/ =~ val
-        mmdd([mo1, 1], [mo2, 31])
-      elsif /^(?<mo1>\d\d?)-(?<dy1>\d\d?)-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/ =~ val
-        mmdd([mo1, dy1], [mo2, dy2])
-      else
-        raise(BadDateRangeError.new(var: var, val: val))
-      end
-      # rubocop:enable Style/CaseLikeIf
-    end
-
-    def yyyymmdd(from, to)
-      [format("%04d-%02d-%02d", from.first, from.second.to_i, from.third.to_i),
-       format("%04d-%02d-%02d", to.first, to.second.to_i, to.third.to_i)]
-    end
-
-    def mmdd(from, to)
-      [format("%02d-%02d", from.first.to_i, from.second.to_i),
-       format("%02d-%02d", to.first.to_i, to.second.to_i)]
     end
 
     def parse_rank_range

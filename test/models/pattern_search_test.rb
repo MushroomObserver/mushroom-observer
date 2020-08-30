@@ -256,6 +256,12 @@ class PatternSearchTest < UnitTestCase
     assert_equal([dick.id], x.parse_list_of_users)
     x.vals = [rolf.id.to_s, mary.id.to_s, dick.id.to_s]
     assert_equal([rolf.id, mary.id, dick.id], x.parse_list_of_users)
+    x.vals = ["me"]
+    assert_raises(PatternSearch::UserMeNotLoggedInError) \
+      { x.parse_list_of_users }
+    User.current = mary
+    x.vals = ["me"]
+    assert_equal([mary.id], x.parse_list_of_users)
   end
 
   def test_parse_date_range
@@ -287,6 +293,36 @@ class PatternSearchTest < UnitTestCase
     x.vals = ["1-2-3-4-5-6"]
     assert_raises(PatternSearch::BadDateRangeError) { x.parse_date_range }
   end
+
+  def test_parse_date_range
+    today = Time.zone.parse("2020-09-03")
+    ActiveSupport::TimeZone.any_instance.stubs(:today).returns(today)
+    x = PatternSearch::Term.new(:xxx)
+    x.vals = ["today"]
+    assert_equal(%w[2020-09-03 2020-09-03], x.parse_date_range)
+    x.vals = ["yesterday"]
+    assert_equal(%w[2020-09-02 2020-09-02], x.parse_date_range)
+    x.vals = ["3 days ago-today"]
+    assert_equal(%w[2020-08-31 2020-09-03], x.parse_date_range)
+    x.vals = ["this week"]
+    assert_equal(%w[2020-08-31 2020-09-06], x.parse_date_range)
+    x.vals = ["last week"]
+    assert_equal(%w[2020-08-24 2020-08-30], x.parse_date_range)
+    x.vals = ["3_weeks_ago-yesterday"]
+    assert_equal(%w[2020-08-10 2020-09-02], x.parse_date_range)
+    x.vals = ["this_month"]
+    assert_equal(%w[2020-09-01 2020-09-30], x.parse_date_range)
+    x.vals = ["last month"]
+    assert_equal(%w[2020-08-01 2020-08-31], x.parse_date_range)
+    x.vals = ["3 months ago-2 months ago"]
+    assert_equal(%w[2020-06-01 2020-07-31], x.parse_date_range)
+    x.vals = ["this_year"]
+    assert_equal(%w[2020-01-01 2020-12-31], x.parse_date_range)
+    x.vals = ["last year"]
+    assert_equal(%w[2019-01-01 2019-12-31], x.parse_date_range)
+    x.vals = ["10 years ago"]
+    assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
+end
 
   def test_parse_rank_range
     x = PatternSearch::Term.new(:xxx)
