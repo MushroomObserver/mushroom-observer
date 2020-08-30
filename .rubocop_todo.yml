@@ -36,11 +36,6 @@ Lint/DuplicateMethods:
     - 'app/classes/query/modules/high_level_queries.rb'
     - 'app/models/image.rb'
 
-# Offense count: 1
-Lint/FloatComparison:
-  Exclude:
-    - 'script/bulk_name_change'
-
 # Offense count: 11
 Lint/IneffectiveAccessModifier:
   Exclude:
