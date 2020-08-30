@@ -666,7 +666,7 @@ module DescriptionControllerHelpers
       :adjust_permissions_all_users.t
     elsif group.name == "reviewers"
       :REVIEWERS.t
-    elsif /^user \d+$/.match?(group.name.match)
+    elsif /^user \d+$/.match?(group.name)
       group.users.first.legal_name
     else
       group.name
