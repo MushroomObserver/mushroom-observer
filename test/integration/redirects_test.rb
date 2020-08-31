@@ -2,8 +2,9 @@
 
 require("test_helper")
 
+# Test whether actions redirected correctly
 class RedirectsTest < IntegrationTestCase
-  def test_controller
+  def test_controller_article
     get("/article")
     assert_equal(articles_path,
                  @response.request.fullpath)
@@ -78,19 +79,65 @@ class RedirectsTest < IntegrationTestCase
                  @response.header["Location"])
   end
 
+
+  def test_controller_glossary
+    get("/glossary")
+    assert_equal(glossary_terms_path,
+                 @response.request.fullpath)
+  end
+
+  def test_list_glossary_term
+    get("/glossary/list_glossary_term")
+    assert_equal(glossary_terms_path,
+                 @response.request.fullpath)
+  end
+
+  TERM_ID = GlossaryTerm.take.id
+  GLOSSARY_USER_LOGIN = User.take.login
+
+  def test_index_glossary
+    get("/glossary/index_glossary_term")
+    assert_equal(glossary_terms_path,
+                 @response.request.fullpath)
+  end
+
   def test_show_glossary_term
-    get("/glossary/show_glossary_term/#{GlossaryTerm.first.id}")
-    assert_equal(glossary_term_path(GlossaryTerm.first.id),
+    get("/glossary/show_glossary_term/#{TERM_ID}")
+    assert_equal(glossary_term_path(TERM_ID),
+                 @response.request.fullpath)
+  end
+
+  def test_create_glossary_get
+    login(GLOSSARY_USER_LOGIN)
+    get("/glossary/create_glossary_term")
+    assert_equal(new_glossary_term_path,
+                 @response.request.fullpath)
+  end
+
+  def test_create_glossary_post
+    login(GLOSSARY_USER_LOGIN)
+    post("/glossary/create_glossary_term")
+    assert_equal(new_glossary_term_path,
+                 @response.request.fullpath)
+  end
+
+  def test_edit_glossary_get
+    login(GLOSSARY_USER_LOGIN)
+    get("/glossary/edit_glossary_term/#{TERM_ID}")
+    assert_equal(edit_glossary_term_path(TERM_ID),
+                 @response.request.fullpath)
+  end
+
+  def test_edit_glossary_post
+    login(GLOSSARY_USER_LOGIN)
+    post("/glossary/edit_glossary_term/#{TERM_ID}")
+    assert_equal(edit_glossary_term_path(TERM_ID),
                  @response.request.fullpath)
   end
 
   def test_show_past_glossary_term
-    get("/glossary/show_past_glossary_term/#{GlossaryTerm.first.id}?version=1")
-    assert_equal(
-      show_past_glossary_term_path(
-        GlossaryTerm.first.id, version: 1
-      ),
-      @response.request.fullpath
-    )
+    get("/glossary/show_past_glossary_term/#{TERM_ID}?version=1")
+    assert_equal(show_past_glossary_term_path(TERM_ID, version: 1),
+                 @response.request.fullpath)
   end
 end
