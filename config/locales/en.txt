@@ -1006,6 +1006,51 @@
   lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
+  # These are the search terms we look for, e.g. "date" in "date:today".
+  search_term_author: author
+  search_term_citation: citation
+  search_term_classification: classification
+  search_term_comments: comments
+  search_term_confidence: confidence
+  search_term_created: created
+  search_term_date: date
+  search_term_deprecated: deprecated
+  search_term_east: east
+  search_term_exclude_consensus: exclude_consensus
+  search_term_has_author: has_author
+  search_term_has_citation: has_citation
+  search_term_has_classification: has_classification
+  search_term_has_comments: has_comments
+  search_term_has_description: has_description
+  search_term_has_field: has_field
+  search_term_has_location: has_location
+  search_term_has_name: has_name
+  search_term_has_notes: has_notes
+  search_term_has_observations: has_observations
+  search_term_has_synonyms: has_synonyms
+  search_term_herbarium: herbarium
+  search_term_images: images
+  search_term_include_all_name_proposals: include_all_name_proposals
+  search_term_include_misspellings: include_misspellings
+  search_term_include_subtaxa: include_subtaxa
+  search_term_include_synonyms: include_synonyms
+  search_term_is_collection_location: is_collection_location
+  search_term_lichen: lichen
+  search_term_list: list
+  search_term_location: location
+  search_term_modified: modified
+  search_term_name: name
+  search_term_north: north
+  search_term_notes: notes
+  search_term_project: project
+  search_term_rank: rank
+  search_term_region: region
+  search_term_sequence: sequence
+  search_term_south: south
+  search_term_specimen: specimen
+  search_term_user: user
+  search_term_west: west
+
   # Words recognized in search bar.
   # e.g. "user:me"
   search_value_me: me
@@ -1028,10 +1073,6 @@
   search_value_this_year: this year
   search_value_last_year: last year
   search_value_years_ago: N years ago
-
-  # These are the search terms we look for, e.g. "date" in "date:today".
-  search_term_date: date
-  search_term_user: user
 
   # Rss log messages.
   log_ancient: "[String]"
@@ -3744,6 +3785,7 @@
 
   # Pattern search error messages.
   pattern_search_syntax_error: Syntax error in pattern at [string].
+  pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.

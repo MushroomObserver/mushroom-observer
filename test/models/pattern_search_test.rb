@@ -15,6 +15,17 @@ class PatternSearchTest < UnitTestCase
     assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(str))
   end
 
+  def test_parse_pattern_order
+    parser = PatternSearch::Parser.new("")
+    # make str mutable because it is modified by parse_next_term
+    str = + "one two user:me three"
+    assert_equal([:pattern, "one"], parser.parse_next_term!(str, nil))
+    assert_equal([:pattern, "two"], parser.parse_next_term!(str, :pattern))
+    assert_equal([:user, "me"], parser.parse_next_term!(str, :pattern))
+    assert_raises(PatternSearch::PatternMustBeFirstError) \
+      { parser.parse_next_term!(str, :user) }
+  end
+
   def test_term
     x = PatternSearch::Term.new(:xxx)
     x << 2
@@ -322,7 +333,7 @@ class PatternSearchTest < UnitTestCase
     assert_equal(%w[2019-01-01 2019-12-31], x.parse_date_range)
     x.vals = ["10 years ago"]
     assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
-end
+  end
 
   def test_parse_rank_range
     x = PatternSearch::Term.new(:xxx)
@@ -358,14 +369,24 @@ end
     assert_equal(:pattern, x.terms.first.var)
     assert_equal("abc", x.terms.first.parse_pattern)
 
-    x = PatternSearch::Parser.new(' abc  user:dick "tack  this  on"')
-    assert_equal('abc user:dick "tack this on"', x.clean_incoming_string)
+    x = PatternSearch::Parser.new(' abc   "tack  this  on"  user:dick  ')
+    assert_equal('abc "tack this on" user:dick', x.clean_incoming_string)
     assert_equal(2, x.terms.length)
     y, z = x.terms.sort_by(&:var)
     assert_equal(:pattern, y.var)
     assert_equal('abc "tack this on"', y.parse_pattern)
     assert_equal(:user, z.var)
     assert_equal([dick.id], z.parse_list_of_users)
+  end
+
+  def test_translated_parameter_names
+    # Ensure the translations are initialized
+    assert_equal("user", :search_term_user.t)
+    TranslationString.translations(:fr)[:search_term_user] = "utilisateur"
+    I18n.locale = "fr"
+    x = PatternSearch::Observation.new("")
+    assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
+    assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
   end
 
   def test_observation_search

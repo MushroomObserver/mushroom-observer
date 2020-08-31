@@ -5,6 +5,7 @@ module PatternSearch
     attr_accessor :args
 
     def initialize(args = {})
+      super
       self.args = args
     end
   end
@@ -12,6 +13,13 @@ module PatternSearch
   class SyntaxError < Error
     def to_s
       :pattern_search_syntax_error.t(string: args[:string].inspect)
+    end
+  end
+
+  class PatternMustBeFirstError < Error
+    def to_s
+      :pattern_search_pattern_must_be_first_error.t(str: args[:str].inspect,
+                                                    var: args[:var].inspect)
     end
   end
 
