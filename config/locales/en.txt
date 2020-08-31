@@ -3760,7 +3760,7 @@
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
-  pattern_search_user_me_not_logged_in: "The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!"
+  pattern_search_user_me_not_logged_in_error: "The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!"
 
   # content for html header title tag,
   # used when there are no hits for a list or search

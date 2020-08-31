@@ -294,7 +294,7 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::BadDateRangeError) { x.parse_date_range }
   end
 
-  def test_parse_date_range
+  def test_parse_date_range_english
     today = Time.zone.parse("2020-09-03")
     ActiveSupport::TimeZone.any_instance.stubs(:today).returns(today)
     x = PatternSearch::Term.new(:xxx)
