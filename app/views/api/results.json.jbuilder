@@ -30,5 +30,5 @@ unless @api.errors.empty?
   end
 end
 
-@end_time = Time.now
+@end_time = Time.zone.now
 json.run_time @end_time - @start_time

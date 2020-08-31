@@ -3,7 +3,7 @@
 # see observer_controller.rb
 class ObserverController
   # User index, restricted to admins.
-  def index_user # :norobots:
+  def index_user
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -18,7 +18,7 @@ class ObserverController
   alias list_users index_user
 
   # User index, restricted to admins.
-  def users_by_name # :norobots:
+  def users_by_name
     if in_admin_mode?
       query = create_query(:User, :all, by: :name)
       show_selected_users(query)
@@ -29,7 +29,7 @@ class ObserverController
   end
 
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def user_search # :norobots:
+  def user_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
@@ -81,13 +81,13 @@ class ObserverController
   end
 
   # users_by_contribution.rhtml
-  def users_by_contribution # :norobots:
+  def users_by_contribution
     SiteData.new
     @users = User.order("contribution desc, name, login")
   end
 
   # show_user.rhtml
-  def show_user # :prefetch:
+  def show_user
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
@@ -106,18 +106,18 @@ class ObserverController
   end
 
   # Go to next user: redirects to show_user.
-  def next_user # :norobots:
+  def next_user
     redirect_to_next_object(:next, User, params[:id].to_s)
   end
 
   # Go to previous user: redirects to show_user.
-  def prev_user # :norobots:
+  def prev_user
     redirect_to_next_object(:prev, User, params[:id].to_s)
   end
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
-  def checklist # :norobots:
+  def checklist
     store_location
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
@@ -141,7 +141,7 @@ class ObserverController
 
   # Admin util linked from show_user page that lets admin add or change bonuses
   # for a given user.
-  def change_user_bonuses # :root: :norobots:
+  def change_user_bonuses
     return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
     if in_admin_mode?

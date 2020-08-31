@@ -13,21 +13,21 @@ class CollectionNumberController < ApplicationController
   ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_collection_number # :norobots:
+  def index_collection_number
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
   # Show list of collection_numbers.
-  def list_collection_numbers # :norobots:
+  def list_collection_numbers
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
   end
 
   # Display list of CollectionNumbers whose text matches a string pattern.
-  def collection_number_search # :norobots:
+  def collection_number_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (collection_number = CollectionNumber.safe_find(pattern))
@@ -38,7 +38,7 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  def observation_index # :norobots:
+  def observation_index
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
@@ -58,15 +58,15 @@ class CollectionNumberController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
-  def next_collection_number # :norobots:
+  def next_collection_number
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
-  def prev_collection_number # :norobots:
+  def prev_collection_number
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
-  def create_collection_number # :norobots:
+  def create_collection_number
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -85,7 +85,7 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  def edit_collection_number # :norobots:
+  def edit_collection_number
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -104,7 +104,7 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  def remove_observation # :norobots:
+  def remove_observation
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
@@ -117,7 +117,7 @@ class CollectionNumberController < ApplicationController
     redirect_with_query(@observation.show_link_args)
   end
 
-  def destroy_collection_number # :norobots:
+  def destroy_collection_number
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
