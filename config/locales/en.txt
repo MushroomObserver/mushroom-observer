@@ -1043,6 +1043,7 @@
   search_term_north: north
   search_term_notes: notes
   search_term_project: project
+  search_term_project_lists: project_lists
   search_term_rank: rank
   search_term_region: region
   search_term_sequence: sequence
