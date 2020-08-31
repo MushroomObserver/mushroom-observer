@@ -81,7 +81,7 @@ module PatternSearch
           ::Name.find_by_text_name(val) || ::Name.find_by_search_name(val) ||
             raise(BadNameError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_herbaria
@@ -91,11 +91,11 @@ module PatternSearch
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
-          Herbarium.find_by_code(val) ||
-            Herbarium.find_by_name(val) ||
+          Herbarium.find_by_code_with_wildcards(val) ||
+            Herbarium.find_by_name_with_wildcards(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_locations
@@ -105,11 +105,11 @@ module PatternSearch
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
-          Location.find_by_name(val) ||
-            Location.find_by_scientific_name(val) ||
+          Location.find_by_name_with_wildcards(val) ||
+            Location.find_by_scientific_name_with_wildcards(val) ||
             raise(BadLocationError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_projects
@@ -119,10 +119,10 @@ module PatternSearch
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
-          Project.find_by_title(val) ||
+          Project.find_by_title_with_wildcards(val) ||
             raise(BadProjectError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_species_lists
@@ -132,15 +132,15 @@ module PatternSearch
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else
-          SpeciesList.find_by_title(val) ||
+          SpeciesList.find_by_title_with_wildcards(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_users
       make_sure_values_not_empty!
-      vals.map { |val| parse_one_user(val) }.map(&:id)
+      vals.map { |val| parse_one_user(val) }.flatten.map(&:id).uniq
     end
 
     def parse_one_user(val)

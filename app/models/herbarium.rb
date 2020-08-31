@@ -55,9 +55,7 @@ class Herbarium < AbstractModel
   belongs_to :personal_user, class_name: "User"
 
   # Used by create/edit form.
-  attr_accessor :place_name
-  attr_accessor :personal
-  attr_accessor :personal_user_name
+  attr_accessor :place_name, :personal, :personal_user_name
 
   def can_edit?(user = User.current)
     if personal_user_id
@@ -180,5 +178,13 @@ class Herbarium < AbstractModel
       )).sort
     end
     result
+  end
+
+  def self.find_by_code_with_wildcards(str)
+    find_using_wildcards("code", str)
+  end
+
+  def self.find_by_name_with_wildcards(str)
+    find_using_wildcards("name", str)
   end
 end

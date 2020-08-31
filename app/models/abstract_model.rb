@@ -19,6 +19,8 @@
 #                       then pass it to count_by_sql.
 #  revert_clone::       Clone and revert to old version
 #                       (or return nil if version not found).
+#  find_using_wildcards::
+#                       Lookup instances with a string that may contain "*"s.
 #
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
@@ -148,6 +150,21 @@ class AbstractModel < ApplicationRecord
   def self.count_by_sql_wrapping_select_query(sql)
     sql = sanitize_sql(sql)
     count_by_sql("select count(*) from (#{sql}) as my_table")
+  end
+
+  # Lookup all instances matching a given wildcard pattern.  If there are no
+  # "*" in the pattern, it just does a regular find_by_xxx lookup.  A number
+  # of convenience wrappers are included in the major models. Returns nil if
+  # none found.
+  #
+  #   Project.find_using_wildcards("title", "FunDiS *")
+  #   Project.find_by_title_with_wildcards("FunDiS *")
+  #
+  def self.find_using_wildcards(col, str)
+    return send("find_by_#{col}", str) unless str.include?("*")
+
+    matches = where("#{col} LIKE ?", str.tr("*", "%"))
+    matches.empty? ? nil : matches
   end
 
   ##############################################################################

@@ -207,6 +207,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_herbaria)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_herbaria)
+    x.vals = ["*Herbarium"]
+    expect = Herbarium.where("name LIKE '%Herbarium'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_herbaria.sort)
   end
 
   def test_parse_list_of_locations
@@ -224,6 +228,12 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_locations)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
+    x.vals = ["*California, USA"]
+    expect = Location.where("name LIKE '%California, USA'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_locations.sort)
+    x.vals = ["USA, California*"]
+    assert_equal(expect, x.parse_list_of_locations.sort)
   end
 
   def test_parse_list_of_projects
@@ -237,6 +247,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_projects)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_projects)
+    x.vals = ["two*"]
+    expect = Project.where("title LIKE 'two%'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_projects.sort)
   end
 
   def test_parse_list_of_species_lists
@@ -253,6 +267,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_species_lists)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_species_lists)
+    x.vals = ["query*"]
+    expect = SpeciesList.where("title LIKE 'query%'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_species_lists.sort)
   end
 
   def test_parse_list_of_users
