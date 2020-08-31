@@ -13,7 +13,8 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   def index
-    @glossary_terms = GlossaryTerm.all.order(:name)
+    @glossary_terms = GlossaryTerm.includes(thumb_image: :image_votes).
+                                   order(:name)
   end
 
   def show
