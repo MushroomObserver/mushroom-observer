@@ -3321,6 +3321,7 @@
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
+  observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
