@@ -81,8 +81,8 @@ class RedirectsTest < IntegrationTestCase
 
   #######
 
-  TERM_ID = GlossaryTerm.first
-  GLOSSARY_USER_LOGIN = User.first
+  TERM_ID = GlossaryTerm.first.id
+  GLOSSARY_USER_LOGIN = User.first.login
 
   def test_controller_glossary
     get("/glossary")
