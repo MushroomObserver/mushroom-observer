@@ -79,6 +79,10 @@ class RedirectsTest < IntegrationTestCase
                  @response.header["Location"])
   end
 
+  #######
+
+  TERM_ID = GlossaryTerm.take.id
+  GLOSSARY_USER_LOGIN = User.take.login
 
   def test_controller_glossary
     get("/glossary")
@@ -91,9 +95,6 @@ class RedirectsTest < IntegrationTestCase
     assert_equal(glossary_terms_path,
                  @response.request.fullpath)
   end
-
-  TERM_ID = GlossaryTerm.take.id
-  GLOSSARY_USER_LOGIN = User.take.login
 
   def test_index_glossary
     get("/glossary/index_glossary_term")
