@@ -14,7 +14,7 @@ class GlossaryTermsController < ApplicationController
 
   def index
     @glossary_terms = GlossaryTerm.includes(thumb_image: :image_votes).
-                                   order(:name)
+                      order(:name)
   end
 
   def show
