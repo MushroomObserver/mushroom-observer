@@ -7,6 +7,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
+<%# Combine "new" and "edit" forms
+    See https://www.pivotaltracker.com/story/show/174608605 %>
 <div class="max-width-text">
   <%= form_for(:glossary_term, url: { action: :create },
                html: {multipart: true}) do |form| %>
@@ -20,6 +22,8 @@
                     "#{:glossary_term_description.t}:") %>
       <%= form.text_area(:description, rows: 20, class: "form-control") %>
     </div>
+    <%# Form should have link to Textile sandbox
+        See https://www.pivotaltracker.com/story/show/124382351 %>
 
     <div class="form-group push-down">
       <%= label_tag(:glossary_term_upload_image, "#{:Image.t}:") %>

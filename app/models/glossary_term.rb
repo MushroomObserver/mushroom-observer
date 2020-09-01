@@ -11,6 +11,9 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
+  # Add before_save validity check(s)
+  # See https://www.pivotaltracker.com/story/show/174606044
+
   after_destroy(:destroy_unused_images)
 
   ALL_TERM_FIELDS = [:name, :description].freeze

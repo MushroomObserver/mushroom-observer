@@ -25,6 +25,8 @@
       <%= @glossary_term.description.tpl %>
     </div>
   <% end %>
+  <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
+      See https://www.pivotaltracker.com/story/show/76992734 %>
 
   <div class="col-xs-12 max-width-text" style="margin-bottom:1em">
     <%= link_with_query(:show_glossary_term_reuse_image.t,
