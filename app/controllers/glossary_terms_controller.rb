@@ -2,13 +2,8 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
-  before_action :login_required, except: [
-    :index,
-    :show_past,
-    :show
-  ]
-  before_action :store_location, only: [:index, :show, :destroy]
-  before_action :pass_query_params, only: [:destroy, :show_past]
+  before_action :login_required, except: [:index, :show, :show_past]
+  before_action :store_location, except: [:index, :create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
