@@ -83,14 +83,16 @@ class GlossaryTermsController < ApplicationController
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
   def show_past
-    if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      if params[:version]
-        @glossary_term.revert_to(params[:version].to_i)
-      else
-        flash_error(:show_past_location_no_version.t)
-        redirect_to(glossary_term_path(@glossary_term.id))
-      end
+    unless (@glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s))
+      return
     end
+
+    unless params[:version]
+      flash_error(:show_past_location_no_version.t)
+      redirect_to(glossary_term_path(@glossary_term.id))
+    end
+
+    @glossary_term.revert_to(params[:version].to_i)
   end
 
   # ---------- Public methods (unrouted) ---------------------------------------
@@ -108,7 +110,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def strong_upload_image_param
-    args = {
+    {
       copyright_holder: params[:copyright_holder],
       when: Time.local(params[:date][:copyright_year]).utc,
       license: License.safe_find(params[:upload][:license_id]),
@@ -128,7 +130,7 @@ class GlossaryTermsController < ApplicationController
     return unless (upload = args[:image])
 
     if upload.respond_to?(:original_filename)
-      name = upload.original_filename.force_encoding("utf-8")
+      upload.original_filename.force_encoding("utf-8")
     end
 
     image = Image.new(args)
