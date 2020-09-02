@@ -51,7 +51,8 @@ class ArticlesControllerTest < FunctionalTestCase
     get(:show, params: { id: article.id })
     assert_select("a", text: :create_article_title.l)
     assert_select("a", text: :EDIT.l)
-    assert_select("a", text: :DESTROY.l)
+    assert_select("form input[value='Destroy']", true,
+                  "Page is missing Destroy button")
 
     # Prove that trying to show non-existent article provokes error & redirect
     get(:show, params: { id: 0 })
