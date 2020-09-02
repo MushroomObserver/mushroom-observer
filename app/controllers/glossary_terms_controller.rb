@@ -86,11 +86,6 @@ class GlossaryTermsController < ApplicationController
       return
     end
 
-    unless params[:version]
-      flash_error(:show_past_location_no_version.t)
-      redirect_to(glossary_term_path(@glossary_term.id))
-    end
-
     @glossary_term.revert_to(params[:version].to_i)
   end
 

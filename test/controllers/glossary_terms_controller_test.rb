@@ -217,13 +217,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Page should have link to last (current) version")
   end
 
-  def test_show_past_no_version
-    term = GlossaryTerm.first
-    get(:show_past, params: { id: term.id })
-
-    assert_response(:redirect)
-  end
-
   # ---------- helpers ---------------------------------------------------------
 
   def assert_title(title)
