@@ -2235,33 +2235,36 @@
   glossary_term_name: Name
   glossary_term_description: Description
   glossary_term_copyright_holder: Copyright holder and license for this image
-  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+  glossary_term_copyright_warning: Please upload only an image that you created or which you own the copyright of.
 
-  # glossary/show_glossary_term
+  # glossary_term#show
   show_glossary_term: Show Glossary Term
   show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
 
-  # glossary/show_past_glossary_term
+  # glossary_term#show_past_glossary_term
   show_past_glossary_term_title: "[:VERSION] [num]: [name]"
   show_past_glossary_term_no_version: No version specified
 
-  # glossary/create_glossary_term
+  # glossary_term#create_glossary_term
   create_glossary_term: Create New Glossary Term
   create_glossary_term_add: Add Glossary Term
   create_glossary_term_title: Create New Glossary Term
 
-  # glossary/index
+  # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. This release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
+  glossary_term_index_intro: In collaboration with the Rhode Island School of Design, Nathan Wilson worked with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. \nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">unofficial Mushroom Observer Facebook page</a>.
 
-  # glossary/edit_glossary_term
+  # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
+
+  # glossary_term#destroy
+  destroy_glossary_term: "[:destroy_object(type=:glossary_term)]"
 
   # news article fields
   article_title: Title
