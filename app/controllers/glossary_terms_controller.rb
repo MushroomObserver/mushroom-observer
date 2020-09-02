@@ -3,7 +3,7 @@
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [:index, :show, :show_past]
-  before_action :store_location, except: [:index, :create, :update, :destroy]
+  before_action :store_location, except: [:create, :update, :destroy]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
