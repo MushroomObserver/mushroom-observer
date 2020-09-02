@@ -26,10 +26,7 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def new
-    @copyright_holder = @user.name
-    @copyright_year = Time.now.utc.year
-    @upload_license_id = @user.license_id
-    @licenses = License.current_names_and_ids(@user.license)
+    init_image_form_instance_variables
   end
 
   def edit
@@ -46,8 +43,36 @@ class GlossaryTermsController < ApplicationController
     if params[:glossary_term][:upload_image]
       glossary_term.add_image(process_image(image_args))
     end
-    glossary_term.save
-    redirect_to(glossary_term_path(glossary_term.id))
+
+    unless glossary_term.save
+      return reload_form(term: glossary_term, form: "new")
+    else
+      redirect_to(glossary_term_path(glossary_term.id))
+    end
+  end
+
+  def reload_form(term:, form:)
+    load_flash_errors(term)
+    @name = params[:glossary_term][:name]
+    @description = params[:glossary_term][:description]
+    init_image_form_instance_variables
+    render(form)
+  end
+
+  def load_flash_errors(term)
+    errors = ""
+    term.errors.messages.each_value do |v|
+      errors = errors + "#{v.first}\n"
+    end
+    flash_error(errors)
+    # redirect_back_or_default(glossary_terms_path)
+  end
+
+  def init_image_form_instance_variables
+    @copyright_holder ||= @user.name
+    @copyright_year ||= Time.now.utc.year
+    @upload_license_id ||= @user.license_id
+    @licenses ||= License.current_names_and_ids(@user.license)
   end
 
   def update
@@ -99,6 +124,7 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
+  # Permit mass assignment of image arguments for testing purposes
   def image_args
     Rails.env.test? ? permit_upload_image_param : strong_upload_image_param
   end
