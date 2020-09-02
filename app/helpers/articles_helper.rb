@@ -19,9 +19,7 @@ module ArticlesHelper
 
     tabs.push(link_to(:create_article_title.t, new_article_path),
               link_to(:EDIT.t, edit_article_path(article.id)),
-              # Fix link_to DESTROY
-              # https://www.pivotaltracker.com/story/show/174524961
-              link_to(:DESTROY.t, action: :destroy, id: article.id))
+              destroy_button(object: article))
   end
 
   # Can user modify all articles
