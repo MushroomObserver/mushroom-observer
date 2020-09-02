@@ -13,6 +13,16 @@ class GlossaryTerm < AbstractModel
 
   # Add before_save validity check(s)
   # See https://www.pivotaltracker.com/story/show/174606044
+  validates :name, presence: {
+    message: ->(object, data) { :glossary_error_name_blank.t }
+  }
+  validates :name, uniqueness: {
+    case_sensitive: false,
+    message: ->(object, data) do
+      :glossary_error_duplicate_name.t(name: %{value})
+    end
+  }
+  validate :must_have_description_or_image
 
   after_destroy(:destroy_unused_images)
 
@@ -87,6 +97,12 @@ class GlossaryTerm < AbstractModel
   ##############################################################################
 
   private
+
+  def must_have_description_or_image
+    return if description.present? || thumb_image.present?
+
+    errors[:base] << :glossary_error_description_or_image.t
+  end
 
   def destroy_unused_images
     all_images.each do |image|
