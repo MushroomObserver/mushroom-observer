@@ -2,6 +2,8 @@
   @title = :edit_glossary_term_title.t(name: @glossary_term.name)
 
   tabs = [
+    # Replace these two links with a "Cancel" link
+    # See https://www.pivotaltracker.com/story/show/174614188
     link_to(:cancel_and_show.t(type: :glossary_term),
             glossary_term_path(@glossary_term.id)),
     link_to(:glossary_term_index.t, glossary_terms_path)
