@@ -224,20 +224,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # ---------- Routes ---------------------------------------------------
-
-  def test_routes
-    assert_generates("glossary_terms/1234/show_past",
-                     { controller: "glossary_terms",
-                       action: "show_past",
-                       id: "1234" })
-
-    assert_recognizes({ controller: "glossary_terms",
-                        action: "show_past",
-                        id: "1234" },
-                      "glossary_terms/1234/show_past")
-  end
-
   # ---------- helpers ---------------------------------------------------------
 
   def assert_title(title)
