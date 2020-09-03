@@ -112,45 +112,52 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_upload_image
-    login
     params = term_with_image_params
+    login
 
     assert_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.order(created_at: :desc).first
+    term = GlossaryTerm.last
     assert_equal(Image.last, term.thumb_image)
   end
 
   def test_create_no_name
-    params = create_term_params.merge({ glossary_term: { name: nil } })
+    params = create_term_params
+    params[:glossary_term][:name] = ""
     login
-    post(:create, params: params)
 
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
     assert_flash(/#{:glossary_error_name_blank.t}/)
     assert_response(:success)
   end
 
   def test_create_no_description_or_image
-    params = create_term_params.merge({ glossary_term: { description: nil } })
+    params = create_term_params
+    params[:glossary_term][:description] = ""
     login
-    post(:create, params: params)
 
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
     assert_flash(/#{:glossary_error_description_or_image.t}/)
-    assert_response(:success)
   end
 
   def test_create_duplicate_name
-    name = GlossaryTerm.first.name
-    params = create_term_params.merge({ glossary_term: { name: name} })
+    existing_name = GlossaryTerm.first.name
+    params = create_term_params
+    params[:glossary_term][:name] = existing_name
     login
-    post(:create, params: params)
 
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
     assert_flash(
-      # must be quoted because it contains Regexp metacharacters
+      # Must be quoted because it contains Regexp metacharacters "(" and ")"
       Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
     )
-    assert_response(:success)
   end
 
   def test_create_image_save_failure
@@ -186,38 +193,15 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_update_no_name
-    term = glossary_terms(:conic_glossary_term)
-    params = changes_to_conic.merge({ glossary_term: { name: nil } })
+    params = changes_to_conic.merge
+    params[:glossary_term][:name] = ""
     login
-    post(:update, params: params)
 
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
     assert_flash(/#{:glossary_error_name_blank.t}/)
-    assert_response(:success)
   end
-
-=begin
-  def test_update_no_description_or_image
-    params = update_term_params.merge({ glossary_term: { description: nil } })
-    login
-    post(:update, params: params)
-
-    assert_flash(/#{:glossary_error_description_or_image.t}/)
-    assert_response(:success)
-  end
-
-  def test_update_duplicate_name
-    name = GlossaryTerm.first.name
-    params = update_term_params.merge({ glossary_term: { name: name} })
-    login
-    post(:update, params: params)
-
-    assert_flash(
-      # must be quoted because it contains Regexp metacharacters
-      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
-    )
-    assert_response(:success)
-  end
-=end
 
   # ***** destroy *****
   def test_destroy_term_lacking_images
