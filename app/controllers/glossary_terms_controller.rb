@@ -26,6 +26,7 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def new
+    @glossary_term = GlossaryTerm.new
     init_image_form_instance_variables
   end
 
@@ -36,31 +37,31 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    glossary_term = \
+    @glossary_term = \
       GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
                        description: params[:glossary_term][:description])
 
     if params[:glossary_term][:upload_image]
-      glossary_term.add_image(process_image(image_args))
+      @glossary_term.add_image(process_image(image_args))
     end
 
-    unless glossary_term.save
-      return reload_form(term: glossary_term, form: "new")
+    unless @glossary_term.save
+      return reload_form("new")
     else
-      redirect_to(glossary_term_path(glossary_term.id))
+      redirect_to(glossary_term_path(@glossary_term.id))
     end
   end
 
   def update
-    glossary_term = GlossaryTerm.find(params[:id].to_s)
-    glossary_term.attributes = params[:glossary_term].
-                               permit(:name, :description)
-    glossary_term.user = @user
+    @glossary_term = GlossaryTerm.find(params[:id].to_s)
+    @glossary_term.attributes = params[:glossary_term].
+                                permit(:name, :description)
+    @glossary_term.user = @user
 
-    unless glossary_term.save
-      return reload_edit_form(term: glossary_term)
+    unless @glossary_term.save
+      return reload_form("edit")
     else
-      redirect_to(glossary_term_path(glossary_term.id))
+      redirect_to(glossary_term_path(@glossary_term.id))
     end
   end
 
@@ -104,26 +105,15 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
-  def reload_form(term:, form:)
-    flash_validation_errors(term)
-    @name = params[:glossary_term][:name]
-    @description = params[:glossary_term][:description]
+  def reload_form(form = "new")
+    add_validation_errors_to_flash
     init_image_form_instance_variables
     render(form)
   end
 
-  def reload_edit_form(term:)
-    flash_validation_errors(term)
-    @glossary_term = term
-    @glossary_term.name = params[:glossary_term][:name]
-    @glossary_term.description = params[:glossary_term][:description]
-    init_image_form_instance_variables
-    render("edit")
-  end
-
-  def flash_validation_errors(term)
+  def add_validation_errors_to_flash
     errors = ""
-    term.errors.messages.each_value do |v|
+    @glossary_term.errors.messages.each_value do |v|
       errors = errors + "#{v.first}\n"
     end
     flash_error(errors)
