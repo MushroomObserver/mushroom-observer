@@ -197,10 +197,30 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     params[:glossary_term][:name] = ""
     login
 
-    assert_no_difference("GlossaryTerm.count") do
-      post(:create, params: params)
-    end
+    post(:create, params: params)
     assert_flash(/#{:glossary_error_name_blank.t}/)
+  end
+
+  def test_update_no_description_or_image
+    params = changes_to_conic.merge
+    params[:glossary_term][:description] = ""
+    login
+
+    post(:create, params: params)
+    assert_flash(/#{:glossary_error_description_or_image.t}/)
+  end
+
+  def test_update_duplicate_name
+    existing_name = GlossaryTerm.where.not(name:"Conic").first.name
+    params = changes_to_conic.merge
+    params[:glossary_term][:name] = existing_name
+    login
+
+    post(:update, params: params)
+    assert_flash(
+      # Must be quoted because it contains Regexp metacharacters "(" and ")"
+      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
+    )
   end
 
   # ***** destroy *****
