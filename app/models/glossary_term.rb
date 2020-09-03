@@ -18,9 +18,7 @@ class GlossaryTerm < AbstractModel
   }
   validates :name, uniqueness: {
     case_sensitive: false,
-    message: ->(object, data) do
-      :glossary_error_duplicate_name.t(name: %{value})
-    end
+    message: ->(object, data) { :glossary_error_duplicate_name.t }
   }
   validate :must_have_description_or_image
 

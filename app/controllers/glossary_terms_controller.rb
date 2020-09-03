@@ -51,37 +51,17 @@ class GlossaryTermsController < ApplicationController
     end
   end
 
-  def reload_form(term:, form:)
-    load_flash_errors(term)
-    @name = params[:glossary_term][:name]
-    @description = params[:glossary_term][:description]
-    init_image_form_instance_variables
-    render(form)
-  end
-
-  def load_flash_errors(term)
-    errors = ""
-    term.errors.messages.each_value do |v|
-      errors = errors + "#{v.first}\n"
-    end
-    flash_error(errors)
-    # redirect_back_or_default(glossary_terms_path)
-  end
-
-  def init_image_form_instance_variables
-    @copyright_holder ||= @user.name
-    @copyright_year ||= Time.now.utc.year
-    @upload_license_id ||= @user.license_id
-    @licenses ||= License.current_names_and_ids(@user.license)
-  end
-
   def update
     glossary_term = GlossaryTerm.find(params[:id].to_s)
     glossary_term.attributes = params[:glossary_term].
                                permit(:name, :description)
     glossary_term.user = @user
-    glossary_term.save
-    redirect_to(glossary_term_path(glossary_term.id))
+
+    unless glossary_term.save
+      return reload_edit_form(term: glossary_term)
+    else
+      redirect_to(glossary_term_path(glossary_term.id))
+    end
   end
 
   def destroy
@@ -123,6 +103,38 @@ class GlossaryTermsController < ApplicationController
   # --------- Filters
 
   # --------- Other private methods
+
+  def reload_form(term:, form:)
+    flash_validation_errors(term)
+    @name = params[:glossary_term][:name]
+    @description = params[:glossary_term][:description]
+    init_image_form_instance_variables
+    render(form)
+  end
+
+  def reload_edit_form(term:)
+    flash_validation_errors(term)
+    @glossary_term = term
+    @glossary_term.name = params[:glossary_term][:name]
+    @glossary_term.description = params[:glossary_term][:description]
+    init_image_form_instance_variables
+    render("edit")
+  end
+
+  def flash_validation_errors(term)
+    errors = ""
+    term.errors.messages.each_value do |v|
+      errors = errors + "#{v.first}\n"
+    end
+    flash_error(errors)
+  end
+
+  def init_image_form_instance_variables
+    @copyright_holder ||= @user.name
+    @copyright_year ||= Time.now.utc.year
+    @upload_license_id ||= @user.license_id
+    @licenses ||= License.current_names_and_ids(@user.license)
+  end
 
   # Permit mass assignment of image arguments for testing purposes
   def image_args

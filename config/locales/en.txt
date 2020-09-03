@@ -2268,7 +2268,7 @@
 
   # glossary_term save errors
   glossary_error_name_blank: Name cannot be blank.
-  glossary_error_duplicate_name: "Name must be unique; [name] already in use."
+  glossary_error_duplicate_name: "Name must be unique; (Name is already in use.)"
   glossary_error_description_or_image: Glossary term needs description or image.
 
   # news article fields

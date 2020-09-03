@@ -102,7 +102,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.order(created_at: :desc).first
+
+    term = GlossaryTerm.last
     assert_equal(params[:glossary_term][:name], term.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_not_nil(term.rss_log)
@@ -119,6 +120,37 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     end
     term = GlossaryTerm.order(created_at: :desc).first
     assert_equal(Image.last, term.thumb_image)
+  end
+
+  def test_create_no_name
+    params = create_term_params.merge({ glossary_term: { name: nil } })
+    login
+    post(:create, params: params)
+
+    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_response(:success)
+  end
+
+  def test_create_no_description_or_image
+    params = create_term_params.merge({ glossary_term: { description: nil } })
+    login
+    post(:create, params: params)
+
+    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_response(:success)
+  end
+
+  def test_create_duplicate_name
+    name = GlossaryTerm.first.name
+    params = create_term_params.merge({ glossary_term: { name: name} })
+    login
+    post(:create, params: params)
+
+    assert_flash(
+      # must be quoted because it contains Regexp metacharacters
+      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
+    )
+    assert_response(:success)
   end
 
   def test_create_image_save_failure
@@ -152,6 +184,40 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(params[:glossary_term][:description], term.description)
     assert_redirected_to(glossary_term_path(term.id))
   end
+
+  def test_update_no_name
+    term = glossary_terms(:conic_glossary_term)
+    params = changes_to_conic.merge({ glossary_term: { name: nil } })
+    login
+    post(:update, params: params)
+
+    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_response(:success)
+  end
+
+=begin
+  def test_update_no_description_or_image
+    params = update_term_params.merge({ glossary_term: { description: nil } })
+    login
+    post(:update, params: params)
+
+    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_response(:success)
+  end
+
+  def test_update_duplicate_name
+    name = GlossaryTerm.first.name
+    params = update_term_params.merge({ glossary_term: { name: name} })
+    login
+    post(:update, params: params)
+
+    assert_flash(
+      # must be quoted because it contains Regexp metacharacters
+      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
+    )
+    assert_response(:success)
+  end
+=end
 
   # ***** destroy *****
   def test_destroy_term_lacking_images
@@ -226,7 +292,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def create_term_params
     {
-      glossary_term: { name: "Convex", description: "Boring old convex" },
+      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
       copyright_holder: "Insil Choi",
       date: { copyright_year: "2013" },
       upload: { license_id: licenses(:ccnc30).id }
@@ -236,8 +302,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def changes_to_conic
     {
       id: glossary_terms(:conic_glossary_term).id,
-      glossary_term: { name: "Convex", description: "Boring old convex" },
-      copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
+      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
+      copyright_holder: "Insil Choi",
+      date: { copyright_year: 2013 },
       upload: { license_id: licenses(:ccnc25).id }
     }.freeze
   end
