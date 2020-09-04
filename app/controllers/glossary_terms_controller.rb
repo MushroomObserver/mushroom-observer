@@ -37,19 +37,19 @@ class GlossaryTermsController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    @glossary_term = \
-      GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
-                       description: params[:glossary_term][:description])
+    @glossary_term = GlossaryTerm.new(
+      user: @user,
+      name: params[:glossary_term][:name],
+      description: params[:glossary_term][:description]
+  )
 
     if params[:glossary_term][:upload_image]
       @glossary_term.add_image(process_image(image_args))
     end
 
-    unless @glossary_term.save
-      return reload_form("new")
-    else
-      redirect_to(glossary_term_path(@glossary_term.id))
-    end
+    return reload_form("new") unless @glossary_term.save
+
+    redirect_to(glossary_term_path(@glossary_term.id))
   end
 
   def update
@@ -58,11 +58,9 @@ class GlossaryTermsController < ApplicationController
                                 permit(:name, :description)
     @glossary_term.user = @user
 
-    unless @glossary_term.save
-      return reload_form("edit")
-    else
-      redirect_to(glossary_term_path(@glossary_term.id))
-    end
+    return reload_form("edit") unless @glossary_term.save
+
+    redirect_to(glossary_term_path(@glossary_term.id))
   end
 
   def destroy

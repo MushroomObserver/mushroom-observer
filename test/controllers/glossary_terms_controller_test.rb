@@ -75,7 +75,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_title(:edit_glossary_term_title.l(name: term.name))
 
-
     assert_select(
       "form [name='glossary_term[name]']", { count: 1 },
       "Form should have one field for Name"
@@ -219,7 +218,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_update_duplicate_name
-    existing_name = GlossaryTerm.where.not(name:"Conic").first.name
+    existing_name = GlossaryTerm.where.not(name: "Conic").first.name
     params = changes_to_conic.merge
     params[:glossary_term][:name] = existing_name
     login

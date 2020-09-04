@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Glossary of mycological terms, with illustrations
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
@@ -14,11 +15,11 @@ class GlossaryTerm < AbstractModel
   # Add before_save validity check(s)
   # See https://www.pivotaltracker.com/story/show/174606044
   validates :name, presence: {
-    message: ->(object, data) { :glossary_error_name_blank.t }
+    message: Proc.new { :glossary_error_name_blank.t }
   }
   validates :name, uniqueness: {
     case_sensitive: false,
-    message: ->(object, data) { :glossary_error_duplicate_name.t }
+    message: Proc.new { :glossary_error_duplicate_name.t }
   }
   validate :must_have_description_or_image
 
