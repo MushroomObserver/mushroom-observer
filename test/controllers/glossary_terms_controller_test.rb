@@ -53,9 +53,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_title(:create_glossary_term_title.l)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
-      assert_select("form #glossary_term_#{attr}", { count: 1 },
-                    "Form is missing field for #{attr}")
+      assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
+                    "Form should have one field for #{attr}")
     end
+    assert_select("input#glossary_term_upload_image", { count: 1 },
+                  "Form should include upload image field")
   end
 
   def test_new_no_login
@@ -73,17 +75,23 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_title(:edit_glossary_term_title.l(name: term.name))
 
+
     assert_select(
-      "form #glossary_term_name[value='#{term.name}']", { count: 1 },
-      "Form lacks Name field that defaults to glossary term name"
-    )
+      "form [name='glossary_term[name]']", { count: 1 },
+      "Form should have one field for Name"
+    ) do
+      assert_select(
+        "[value='#{term.name}']", true,
+        "Name field should default to glossary term name"
+      )
+    end
     assert_select(
-      "form #glossary_term_description",
+      "form [name='glossary_term[description]']",
       { text: /#{term.description}/, count: 1 },
       "Form lacks Description field that defaults to glossary term description"
     )
-    assert_select("input#upload_image", false,
-                  "Edit GlossaryTerm form should omit image input form")
+    assert_select("input#glossary_term_upload_image", false,
+                  "Edit GlossaryTerm form should omit upload image field")
   end
 
   def test_edit_no_login
