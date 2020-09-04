@@ -2,17 +2,17 @@
 
   <div class="form-group push-down">
     <%= f.label(:name, "#{:glossary_term_name.t}:") %>
-    <%= f.text_field :name, class: "form-control" %>
+    <%= f.text_field(:name, class: "form-control") %>
   </div>
 
   <div class="form-group push-down">
-    <%= f.label :description, "#{:glossary_term_description.t}:" %>
-    <%= f.text_area :description, rows: 20, class: "form-control" %>
+    <%= f.label(:description, "#{:glossary_term_description.t}:") %>
+    <%= f.text_area(:description, rows: 16, class: "form-control") %>
+    <%= :field_textile_link.t %>
   </div>
   <%# Form should have link to Textile sandbox
       See https://www.pivotaltracker.com/story/show/124382351 %>
 
-  <%# Let calling view add more if needed %>
   <%= yield f %>
 
   <%= f.submit(:SAVE.t, class: "btn center-block push-down") %>
