@@ -105,18 +105,15 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
-  def reload_form(form = "new")
-    add_validation_errors_to_flash
+  def reload_form(form)
+    add_model_error_messages_to_flash
     init_image_form_instance_variables
     render(form)
   end
 
-  def add_validation_errors_to_flash
-    errors = ""
-    @glossary_term.errors.messages.each_value do |v|
-      errors = errors + "#{v.first}\n"
-    end
-    flash_error(errors)
+  def add_model_error_messages_to_flash
+    model_error_messages = @glossary_term.errors.messages.values.join("\n")
+    flash_error(model_error_messages)
   end
 
   def init_image_form_instance_variables
@@ -141,9 +138,10 @@ class GlossaryTermsController < ApplicationController
     }
   end
 
+  # Remove "permitted: false" from this param so that model can mass assign it
+  # Do this only in test environment
   def permit_upload_image_param
     args = strong_upload_image_param
-    # Remove "permitted: false" from this param so that model can mass assign it
     args[:image] = params[:glossary_term][:upload_image][:image]
     args
   end
