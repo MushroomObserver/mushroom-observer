@@ -41,7 +41,7 @@ class GlossaryTermsController < ApplicationController
       user: @user,
       name: params[:glossary_term][:name],
       description: params[:glossary_term][:description]
-  )
+    )
 
     if params[:glossary_term][:upload_image]
       @glossary_term.add_image(process_image(image_args))
@@ -118,7 +118,10 @@ class GlossaryTermsController < ApplicationController
     @copyright_holder ||= @user.name
     @copyright_year ||= Time.now.utc.year
     @upload_license_id ||= @user.license_id
+    # rubocop:disable Naming/MemoizedInstanceVariableName
+    # RuboCop wants to name the ivar "@update_image_form_instance_variables"
     @licenses ||= License.current_names_and_ids(@user.license)
+    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Permit mass assignment of image arguments for testing purposes
