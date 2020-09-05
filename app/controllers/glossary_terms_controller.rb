@@ -42,21 +42,25 @@ class GlossaryTermsController < ApplicationController
       name: params[:glossary_term][:name],
       description: params[:glossary_term][:description]
     )
-
-    # rubocop:disable Style/IfUnlessModifier
-    # RuboCop gives false positive -- modifier if doesn't fit on one line.
-    added_image = if params[:glossary_term][:upload_image]
-                    process_image(image_args)
-                  end
-    # rubocop:enable Style/IfUnlessModifier
-
+=begin
+    upload = params[:glossary_term][:upload_image]
+    added_image = process_upload(image_args) if upload
     @glossary_term.add_image(added_image)
 
     if @glossary_term.save
-      redirect_to(glossary_term_path(@glossary_term.id))
+      redirect_to(glossary_term_path(@glossary_term.id)) # happy path
     else
-      added_image.try(:destroy)
+      added_image.try(:destroy) # Don't leave orphaned image
       reload_form("new")
+    end
+=end
+
+    if upload?
+      process_image_and_term_together
+    else
+      return reload_form("new") unless @glossary_term.save
+
+      redirect_to(glossary_term_path(@glossary_term.id))
     end
   end
 
@@ -111,6 +115,28 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
+  def upload?
+    params[:glossary_term][:upload_image]
+  end
+
+  def process_image_and_term_together
+    added_image = process_upload(image_args)
+    return reload_form("new") unless added_image
+
+    process_term_with_added_image(added_image)
+  end
+
+  def process_term_with_added_image(added_image)
+    @glossary_term.add_image(added_image)
+
+    if @glossary_term.save
+      redirect_to(glossary_term_path(@glossary_term.id)) # happy path
+    else
+      added_image.try(:destroy) # Don't leave orphaned image
+      reload_form("new")
+    end
+  end
+
   def reload_form(form)
     add_model_error_messages_to_flash
     init_image_form_instance_variables
@@ -155,7 +181,7 @@ class GlossaryTermsController < ApplicationController
     args
   end
 
-  def process_image(args)
+  def process_upload(args)
     return unless (upload = args[:image])
 
     if upload.respond_to?(:original_filename)
@@ -164,23 +190,24 @@ class GlossaryTermsController < ApplicationController
 
     image = Image.new(args)
     save_or_flash(image)
-
-    image
   end
 
   def save_or_flash(image)
     if !image.save
       flash_object_errors(image)
+      nil
     elsif !image.process_image
       logger.error("Unable to upload image")
       name = image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))
       flash_object_errors(image)
+      nil
     else
       name = image.original_name
       name = "##{image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
+      image
     end
   end
 end
