@@ -43,13 +43,21 @@ class GlossaryTermsController < ApplicationController
       description: params[:glossary_term][:description]
     )
 
-    if params[:glossary_term][:upload_image]
-      @glossary_term.add_image(process_image(image_args))
+    # rubocop:disable Style/IfUnlessModifier
+    # RuboCop gives false positive -- modifier if doesn't fit on one line.
+    added_image = if params[:glossary_term][:upload_image]
+                    process_image(image_args)
+                  end
+    # rubocop:enable Style/IfUnlessModifier
+
+    @glossary_term.add_image(added_image)
+
+    if @glossary_term.save
+      redirect_to(glossary_term_path(@glossary_term.id))
+    else
+      added_image.try(:destroy)
+      reload_form("new")
     end
-
-    return reload_form("new") unless @glossary_term.save
-
-    redirect_to(glossary_term_path(@glossary_term.id))
   end
 
   def update
