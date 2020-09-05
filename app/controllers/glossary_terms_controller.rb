@@ -42,26 +42,9 @@ class GlossaryTermsController < ApplicationController
       name: params[:glossary_term][:name],
       description: params[:glossary_term][:description]
     )
-=begin
-    upload = params[:glossary_term][:upload_image]
-    added_image = process_upload(image_args) if upload
-    @glossary_term.add_image(added_image)
+    return reload_form("new") unless image_and_term_saves_smooth?
 
-    if @glossary_term.save
-      redirect_to(glossary_term_path(@glossary_term.id)) # happy path
-    else
-      added_image.try(:destroy) # Don't leave orphaned image
-      reload_form("new")
-    end
-=end
-
-    if upload?
-      process_image_and_term_together
-    else
-      return reload_form("new") unless @glossary_term.save
-
-      redirect_to(glossary_term_path(@glossary_term.id))
-    end
+    redirect_to(glossary_term_path(@glossary_term.id))
   end
 
   def update
@@ -115,39 +98,6 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
-  def upload?
-    params[:glossary_term][:upload_image]
-  end
-
-  def process_image_and_term_together
-    added_image = process_upload(image_args)
-    return reload_form("new") unless added_image
-
-    process_term_with_added_image(added_image)
-  end
-
-  def process_term_with_added_image(added_image)
-    @glossary_term.add_image(added_image)
-
-    if @glossary_term.save
-      redirect_to(glossary_term_path(@glossary_term.id)) # happy path
-    else
-      added_image.try(:destroy) # Don't leave orphaned image
-      reload_form("new")
-    end
-  end
-
-  def reload_form(form)
-    add_model_error_messages_to_flash
-    init_image_form_instance_variables
-    render(form)
-  end
-
-  def add_model_error_messages_to_flash
-    model_error_messages = @glossary_term.errors.messages.values.join("\n")
-    flash_error(model_error_messages)
-  end
-
   def init_image_form_instance_variables
     @copyright_holder ||= @user.name
     @copyright_year ||= Time.now.utc.year
@@ -158,27 +108,39 @@ class GlossaryTermsController < ApplicationController
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Permit mass assignment of image arguments for testing purposes
-  def image_args
-    Rails.env.test? ? permit_upload_image_param : strong_upload_image_param
+  def reload_form(form)
+    add_model_error_messages_to_flash
+    init_image_form_instance_variables
+    render(form)
   end
 
-  def strong_upload_image_param
-    {
-      copyright_holder: params[:copyright_holder],
-      when: Time.local(params[:date][:copyright_year]).utc,
-      license: License.safe_find(params[:upload][:license_id]),
-      user: @user,
-      image: params[:glossary_term][:upload_image]
-    }
+  # Process any image with @glossary_term,
+  # Return truthy if neither fails
+  # They must be processed together to correctly validate GlossaryTerm and
+  # allow backing out Image if GlossaryTerm is invalid
+  def image_and_term_saves_smooth?
+    # If no upload file specified, only issue is the term
+    return @glossary_term.save unless upload?
+
+    # return false if image processing fails
+    return unless (saved_image = process_upload(image_args))
+
+    # image saved; now to save term
+    @glossary_term.add_image(saved_image)
+    return if @glossary_term.save
+
+    # term failed, so clean up the orphaned (unassociated) image
+    added_image.try(:destroy)
+    false
   end
 
-  # Remove "permitted: false" from this param so that model can mass assign it
-  # Do this only in test environment
-  def permit_upload_image_param
-    args = strong_upload_image_param
-    args[:image] = params[:glossary_term][:upload_image][:image]
-    args
+  def upload?
+    params[:glossary_term][:upload_image]
+  end
+
+  def add_model_error_messages_to_flash
+    model_error_messages = @glossary_term.errors.messages.values.join("\n")
+    flash_error(model_error_messages)
   end
 
   def process_upload(args)
@@ -209,5 +171,30 @@ class GlossaryTermsController < ApplicationController
       flash_notice(:runtime_image_uploaded_image.t(name: name))
       image
     end
+  end
+
+  # --- Mass Assignment
+
+  # Permit mass assignment of image arguments for testing purposes
+  def image_args
+    Rails.env.test? ? permit_upload_image_param : strong_upload_image_param
+  end
+
+  def strong_upload_image_param
+    {
+      copyright_holder: params[:copyright_holder],
+      when: Time.local(params[:date][:copyright_year]).utc,
+      license: License.safe_find(params[:upload][:license_id]),
+      user: @user,
+      image: params[:glossary_term][:upload_image]
+    }
+  end
+
+  # Remove "permitted: false" from this param so that model can mass assign it
+  # Do this only in test environment
+  def permit_upload_image_param
+    args = strong_upload_image_param
+    args[:image] = params[:glossary_term][:upload_image][:image]
+    args
   end
 end
