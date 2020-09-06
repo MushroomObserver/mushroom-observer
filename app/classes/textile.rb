@@ -291,6 +291,8 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
+  # Textile should be able to create internal links to Glossary Terms
+  # See https://www.pivotaltracker.com/story/show/76993598
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
     gsub!(OTHER_LINK_PATTERN) do |orig|

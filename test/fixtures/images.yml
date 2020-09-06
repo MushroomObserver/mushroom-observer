@@ -125,3 +125,6 @@ query_second_image:
 
 locally_sequenced_obs_image:
   <<: *DEFAULTS
+
+unused_image: # not associated with any object
+  <<: *DEFAULTS
