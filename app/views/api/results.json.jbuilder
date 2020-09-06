@@ -13,16 +13,11 @@ unless @api.errors.any?(&:fatal)
   if @api.detail == :none
     json.results @api.result_ids
   else
-    json.results @api.results.map do |result|
-      render(
-        partial: result.class.type_tag.to_s,
-        locals: {
-          json:   json,
-          object: result,
-          detail: @api.detail == :high
-        }
-      )
-    end
+    type = @api.results.first.class.type_tag
+    json.results(@api.results,
+                 partial: "api/#{type}.json.builder",
+                 as: :object,
+                 locals: { detail: @api.detail == :high })
   end
 end
 

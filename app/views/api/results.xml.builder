@@ -20,17 +20,16 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
           xml_minimal_object(xml, :result, @api.model.type_tag, result_id)
         end
       else
-        @api.results.each do |result|
-          xml.target! << render(
-            partial: result.class.type_tag.to_s,
-            locals: {
-              xml:    xml,
-              tag:    :result,
-              object: result,
-              detail: @api.detail == :high
-            }
-          )
-        end
+        xml.target! << render(
+          partial: @api.results.first.class.type_tag.to_s,
+          collection: @api.results,
+          as: :object,
+          locals: {
+            xml:    xml,
+            tag:    :result,
+            detail: @api.detail == :high
+          }
+        )
       end
     end
   end
