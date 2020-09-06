@@ -5,7 +5,7 @@ xml.tag!(tag,
 ) do
   xml_string(xml, :name, object.name)
   if !detail
-    xml_minimal_object(xml, :project, Project, object.project_id)
+    xml_minimal_object(xml, :project, :project, object.project_id)
   else
     xml_detailed_object(xml, :project, object.project)
   end

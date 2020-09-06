@@ -5,7 +5,7 @@ class API
   class ExternalSiteAPI < ModelAPI
     self.model = ExternalSite
 
-    self.high_detail_page_length = 100
+    self.high_detail_page_length = 1000
     self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000

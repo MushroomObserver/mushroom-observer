@@ -6,27 +6,23 @@ class API
   class ObservationAPI < ModelAPI
     self.model = Observation
 
-    self.high_detail_page_length = 10
-    self.low_detail_page_length  = 100
+    self.high_detail_page_length = 100
+    self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
-      :comments,
-      { images: :license },
-      :location,
-      :name,
-      { namings: [:name, { votes: :user }] },
       :collection_numbers,
+      { comments: :user },
+      :external_links,
       { herbarium_records: :herbarium },
-      :sequences,
-      :user
-    ]
-
-    self.low_detail_includes = [
+      { images: [ :license, :user ] },
       :location,
       :name,
-      :user
+      { namings: [ :name, :user ] },
+      :sequences,
+      :user,
+      { votes: :user }
     ]
 
     # rubocop:disable Metrics/AbcSize

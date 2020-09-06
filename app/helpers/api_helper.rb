@@ -11,124 +11,89 @@ module ApiHelper
   def xml_boolean(xml, tag, val)
     str = val ? "true" : "false"
     xml.tag!(tag, type: "boolean", value: str)
-  rescue StandardError
   end
 
   def xml_integer(xml, tag, val)
-    str = begin
-            "%d" % val
-          rescue StandardError
-            ""
-          end
-    xml.tag!(tag, str, type: "integer")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:to_i)) &&
+      xml.tag!(tag, str.to_s, type: "integer")
   end
 
   def xml_float(xml, tag, val, places)
-    str = begin
-            "%.#{places}f" % val
-          rescue StandardError
-            ""
-          end
-    xml.tag!(tag, str, type: "float")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, places)) &&
+      xml.tag!(tag, str.to_s, type: "float")
   end
 
   def xml_string(xml, tag, val)
-    if val.present?
-      str = val.to_s
-      xml.tag!(tag, str, type: "string", content_type: "text/plain")
-    end
-  rescue StandardError
+    val.present? &&
+      xml.tag!(tag, val.to_s, type: "string", content_type: "text/plain")
   end
 
   def xml_html_string(xml, tag, val)
-    if val.present?
-      str = val.to_s
-      xml.tag!(tag, str, type: "string", content_type: "text/html")
-    end
-  rescue StandardError
+    val.present? &&
+      xml.tag!(tag, val.to_s, type: "string", content_type: "text/html")
   end
 
   def xml_sql_string(xml, tag, val)
-    if val.present?
-      str = val.to_s
-      xml.tag!(tag, str, type: "string", content_type: "application/x-sql")
-    end
-  rescue StandardError
+    val.present? &&
+      xml.tag!(tag, val.to_s, type: "string", content_type: "application/x-sql")
   end
 
   def xml_date(xml, tag, val)
-    if val
-      str = begin
-              val.api_date
-            rescue StandardError
-              ""
-            end
+    val.present? &&
+      (str = val.try(:api_date)) &&
       xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
-    end
-  rescue StandardError
   end
 
   def xml_datetime(xml, tag, val)
-    if val
-      str = val.utc.api_time
+    val.present? &&
+      (str = val.try(:utc).try(:api_time)) &&
       xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
-    end
-  rescue StandardError
   end
 
   def xml_ellapsed_time(xml, tag, val)
-    str = "%.4f" % val
-    xml.tag!(tag, str, type: "float", units: "seconds")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, 4)) &&
+      xml.tag!(tag, str.to_s, type: "float", units: "seconds")
   end
 
   def xml_latitude(xml, tag, val)
-    str = "%.4f" % val
-    xml.tag!(tag, str, type: "float", units: "degrees north")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, 4)) &&
+      xml.tag!(tag, str.to_s, type: "float", units: "degrees north")
   end
 
   def xml_longitude(xml, tag, val)
-    str = "%.4f" % val
-    xml.tag!(tag, str, type: "float", units: "degrees east")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, 4)) &&
+      xml.tag!(tag, str.to_s, type: "float", units: "degrees east")
   end
 
   def xml_altitude(xml, tag, val)
-    str = "%d" % val
-    xml.tag!(tag, str, type: "integer", units: "meters")
-  rescue StandardError
-  end
-
-  def xml_undefined_location(xml, tag, val)
-    if User.current_location_format == :scientific
-      val = Location.reverse_name(val)
-    end
-    xml.tag!(tag, val, type: "string")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:to_i)) &&
+      xml.tag!(tag, str.to_s, type: "integer", units: "meters")
   end
 
   def xml_naming_reason(xml, tag, val)
     if val.notes.blank?
       xml.tag!(tag, category: val.label.l)
     else
-      str = val.notes.to_s
-      xml.tag!(tag, str, category: val.label.l)
+      xml.tag!(tag, val.notes.to_s, category: val.label.l)
     end
   end
 
   def xml_confidence_level(xml, tag, val)
-    str = "%.2f" % val
-    xml.tag!(tag, str, type: "float", range: "-3.0 to 3.0")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, 2)) &&
+      xml.tag!(tag, str.to_s, type: "float", range: "-3.0 to 3.0")
   end
 
   def xml_image_quality(xml, tag, val)
-    str = "%.2f" % val
-    xml.tag!(tag, str, type: "float", range: "0.0 to 4.0")
-  rescue StandardError
+    val.present? &&
+      (str = val.try(:round, 2)) &&
+      xml.tag!(tag, str.to_s, type: "float", range: "0.0 to 4.0")
   end
 
   def xml_image_file(xml, image, size)
@@ -143,39 +108,250 @@ module ApiHelper
     )
   end
 
-  def xml_minimal_object(xml, tag, model, id)
-    if id.present?
-      model = model.constantize unless model.is_a?(Class)
-      url = begin
-              model.show_url(id)
-            rescue StandardError
-              nil
-            end
-      if url
-        xml.tag!(tag, id: id, url: url, type: model.type_tag.to_s)
-      else
-        xml.tag!(tag, id: id, type: model.type_tag.to_s)
-      end
+  def xml_minimal_object(xml, tag, type, id)
+    id.present? && xml.tag!(tag, id: id, type: type.to_s)
+  end
+
+  def xml_detailed_object(xml, tag, object)
+    return if object.blank?
+
+    type = object.type_tag.to_s
+    xml.tag!(tag, id: object.id, type: type) do |inner_xml|
+      send("xml_#{type}", inner_xml, object)
     end
   end
 
-  def xml_detailed_object(xml, tag, object, detail = false)
-    render_detailed_object(xml, object, detail, tag: tag)
+  def xml_minimal_location(xml, tag, location_id, where)
+    if location_id
+      xml.tag!(tag, id: location_id, name: where, type: "location")
+    else
+      xml.tag!(tag, name: where, type: "location")
+    end
   end
 
-  def json_detailed_object(json, object, detail = false)
-    render_detailed_object(json, object, detail, json: json)
+  def xml_detailed_location(xml, tag, location, where)
+    if location
+      xml_detailed_object(xml, tag, location)
+    else
+      xml.tag!(tag, name: where, type: "location")
+    end
   end
 
-  def render_detailed_object(builder, object, detail, args)
-    return unless object
+  # ---------------------------------------------
+  #  These helpers let us avoid using partials.
+  # ---------------------------------------------
 
-    builder.target! << render(
-      partial: object.class.type_tag.to_s,
-      locals: args.merge(
-        object: object,
-        detail: detail
-      )
-    )
+  def json_api_key(api_key)
+    strip_hash(id: api_key.id,
+               key: api_key.key.to_s,
+               notes: api_key.notes.to_s.tpl_nodiv,
+               created_at: api_key.created_at.try(:utc),
+               last_used: api_key.last_used.try(:utc),
+               verified: api_key.verified.try(:utc),
+               num_users: api_key.num_uses)
+  end
+
+  def xml_api_key(xml, api_key)
+    xml_string(xml, :key, api_key.key)
+    xml_html_string(xml, :notes, api_key.notes.to_s.tpl_nodiv)
+    xml_datetime(xml, :created_at, api_key.created_at)
+    xml_datetime(xml, :last_used, api_key.last_used)
+    xml_date(xml, :verified, api_key.verified)
+    xml_integer(xml, :num_users, api_key.num_uses)
+  end
+
+  def json_collection_number(collection_number)
+    strip_hash(id: collection_number.id,
+               collector: collection_number.name,
+               number: collection_number.number)
+  end
+
+  def xml_collection_number(xml, collection_number)
+    xml_string(xml, :collector, collection_number.name)
+    xml_string(xml, :number, collection_number.number)
+  end
+
+  def json_comment(comment)
+    strip_hash(id: comment.id,
+               summary: comment.summary.to_s.tl,
+               content: comment.comment.to_s.tpl_nodiv,
+               created_at: comment.created_at.try(:utc),
+               updated_at: comment.updated_at.try(:utc),
+               owner: json_user(comment.user))
+  end
+
+  def xml_comment(xml, comment)
+    xml_string(xml, :summary, comment.summary.to_s.tl)
+    xml_html_string(xml, :content, comment.comment.to_s.tpl_nodiv)
+    xml_datetime(xml, :created_at, comment.created_at)
+    xml_datetime(xml, :updated_at, comment.updated_at)
+    xml_detailed_object(xml, :owner, comment.user)
+  end
+
+  def json_external_link(external_link)
+    strip_hash(id: external_link.id,
+               url: external_link.url.to_s)
+  end
+
+  def xml_external_link(xml, external_link)
+    xml_string(xml, :url, external_link.url)
+  end
+
+  def json_external_site(external_site)
+    strip_hash(id: external_site.id,
+               name: external_site.name.to_s)
+  end
+
+  def xml_external_site(xml, external_site)
+    xml_string(xml, :name, external_site.name)
+  end
+
+  def json_herbarium(herbarium)
+    strip_hash(id: herbarium.id,
+               code: herbarium.code.to_s,
+               name: herbarium.name.to_s)
+  end
+
+  def xml_herbarium(xml, herbarium)
+    xml_string(xml, :code, herbarium.code)
+    xml_string(xml, :name, herbarium.name)
+  end
+
+  def json_herbarium_record(herbarium_record)
+    strip_hash(id: herbarium_record.id,
+               accession_number: herbarium_record.accession_number.to_s,
+               herbarium: json_herbarium(herbarium_record.herbarium))
+  end
+
+  def xml_herbarium_record(xml, herbarium_record)
+    xml_string(xml, :accession_number, herbarium_record.accession_number)
+    xml_detailed_object(xml, :herbarium, herbarium_record.herbarium)
+  end
+
+  def json_image(image)
+    strip_hash(id: image.id,
+               date: image.when,
+               license: image.license.try(:display_name).to_s,
+               notes: image.notes.to_s.tpl_nodiv,
+               quality: image.vote_cache,
+               owner: json_user(image.user))
+  end
+
+  def xml_image(xml, image)
+    xml_date(xml, :date, image.when)
+    xml_string(xml, :license, image.license.try(:display_name).to_s)
+    xml_html_string(xml, :notes, image.notes.to_s.tpl_nodiv)
+    xml_confidence_level(xml, :quality, image.vote_cache)
+    xml_detailed_object(xml, :owner, image.user)
+  end
+
+  def json_location(location)
+    strip_hash(id: location.id,
+               name: location.text_name.to_s,
+               latitude_north: location.north,
+               latitude_south: location.south,
+               longitude_east: location.east,
+               longitude_west: location.west,
+               altitude_maximum: location.high,
+               altitude_minimum: location.low)
+  end
+
+  def xml_location(xml, location)
+    xml_string(xml, :name, location.text_name)
+    xml_latitude(xml, :latitude_north, location.north)
+    xml_latitude(xml, :latitude_south, location.south)
+    xml_longitude(xml, :longitude_east, location.east)
+    xml_longitude(xml, :longitude_west, location.west)
+    xml_altitude(xml, :altitude_maximum, location.high)
+    xml_altitude(xml, :altitude_minimum, location.low)
+  end
+
+  def json_name(name)
+    strip_hash(id: name.id,
+               name: name.real_text_name.to_s,
+               author: name.author.to_s,
+               rank: name.rank.to_s.downcase,
+               deprecated: name.deprecated ? true : false,
+               misspelled: name.is_misspelling? ? true : false,
+               synonym_id: name.synonym_id)
+  end
+
+  def xml_name(xml, name)
+    xml_string(xml, :name, name.real_text_name)
+    xml_string(xml, :author, name.author)
+    xml_string(xml, :rank, name.rank.to_s.downcase)
+    xml_boolean(xml, :deprecated, name.deprecated)
+    xml_boolean(xml, :misspelled, name.is_misspelling?)
+    xml_integer(xml, :synonym_id, name.synonym_id)
+  end
+
+  def json_naming(naming)
+    strip_hash(id: naming.id,
+               name: json_name(naming.name),
+               owner: json_user(naming.user),
+               confidence: naming.vote_cache)
+  end
+
+  def xml_naming(xml, naming)
+    xml_detailed_object(xml, :name, naming.name)
+    xml_detailed_object(xml, :owner, naming.user)
+    xml_confidence_level(xml, :confidence, naming.vote_cache)
+  end
+
+  def json_project(project)
+    strip_hash(id: project.id,
+               title: project.title.to_s)
+  end
+
+  def xml_project(xml, project)
+    xml_string(xml, :title, project.title)
+  end
+
+  def json_sequence(sequence)
+    strip_hash(id: sequence.id,
+               locus: sequence.locus.to_s,
+               bases: sequence.bases.to_s,
+               archive: sequence.archive.to_s,
+               accession: sequence.accession.to_s)
+  end
+
+  def xml_sequence(xml, sequence)
+    xml_string(xml, :locus, sequence.locus)
+    xml_string(xml, :bases, sequence.bases)
+    xml_string(xml, :archive, sequence.archive)
+    xml_string(xml, :accession, sequence.accession)
+  end
+
+  def json_user(user)
+    strip_hash(id: user.id,
+               login_name: user.login.to_s,
+               legal_name: user.legal_name.to_s)
+  end
+
+  def xml_user(xml, user)
+    xml_string(xml, :login_name, user.login)
+    xml_string(xml, :legal_name, user.legal_name)
+  end
+
+  def json_vote(vote)
+    anonymous = vote.user == User.current || !vote.anonymous?
+    strip_hash(id: vote.id,
+               confidence: vote.value,
+               naming_id: vote.naming_id,
+               owner: anonymous ? json_user(vote.user) : :anonymous.l)
+  end
+
+  def xml_vote(xml, vote)
+    xml_confidence_level(xml, :confidence, vote.value)
+    xml_integer(xml, :naming_id, vote.naming_id)
+    if vote.user == User.current || !vote.anonymous?
+      xml_detailed_object(xml, :owner, vote.user)
+    else
+      xml_string(xml, :owner, :anonymous.l)
+    end
+  end
+
+  def strip_hash(hash)
+    hash.reject { |_key, val| val.blank? }
   end
 end

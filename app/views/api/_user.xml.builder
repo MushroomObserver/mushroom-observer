@@ -13,8 +13,8 @@ xml.tag!(tag,
   xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
   xml_string(xml, :mailing_address, object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
   if !detail
-    xml_minimal_object(xml, :location, Location, object.location_id)
-    xml_minimal_object(xml, :image, Image, object.image_id)
+    xml_minimal_object(xml, :location, :location, object.location_id)
+    xml_minimal_object(xml, :image, :image, object.image_id)
   else
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)

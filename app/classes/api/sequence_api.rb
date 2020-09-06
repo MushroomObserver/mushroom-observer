@@ -11,7 +11,6 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
-      :observation,
       :user
     ]
 

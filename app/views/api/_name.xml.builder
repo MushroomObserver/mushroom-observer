@@ -17,7 +17,7 @@ xml.tag!(tag,
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   if !detail
     if object.synonym_id
-      xml_minimal_object(xml, :synonym, Synonym, object.synonym_id)
+      xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
     end
   else
     if object.synonym_id
@@ -27,7 +27,7 @@ xml.tag!(tag,
         end
       end
     end
-    unless object.classification.blank?
+    if object.classification.present?
       parse = Name.parse_classification(object.classification)
       xml.parents(number: parse.length) do
         for rank, name in parse
@@ -35,6 +35,13 @@ xml.tag!(tag,
             xml_string(xml, :name, name)
             xml_string(xml, :rank, rank.to_s.downcase)
           end
+        end
+      end
+    end
+    if object.comments.any?
+      xml.comments(number: object.comments.length) do
+        object.comments.each do |comment|
+          xml_detailed_object(xml, :comment, comment)
         end
       end
     end

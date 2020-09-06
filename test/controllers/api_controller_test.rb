@@ -112,7 +112,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_num_of_pages
     get(:observations, detail: :high, format: :json)
     json = JSON.parse(response.body)
-    assert_equal((Observation.count / 10.0).ceil, json["number_of_pages"],
+    assert_equal((Observation.count / 100.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
 

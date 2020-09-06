@@ -12,6 +12,7 @@ class API
 
     self.high_detail_includes = [
       :comments,
+      :location,
       :user
     ]
 

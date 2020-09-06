@@ -4,23 +4,18 @@ xml.tag!(tag,
   type: "project"
 ) do
   xml_string(xml, :title, object.title)
+  xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
-  xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
   if !detail
-    xml_minimal_object(xml, :creator, User, object.user_id)
+    xml_minimal_object(xml, :creator, :user, object.user_id)
   else
     xml_detailed_object(xml, :creator, object.user)
-    admin_ids = object.admin_group.user_ids
-    member_ids = object.user_group.user_ids
-    xml.admins(number: admin_ids.length) do
-      for user_id in admin_ids
-        xml_minimal_object(xml, :admin, User, user_id)
-      end
-    end
-    xml.members(number: member_ids.length) do
-      for user_id in member_ids
-        xml_minimal_object(xml, :member, User, user_id)
+    if object.comments.any?
+      xml.comments(number: object.comments.length) do
+        object.comments.each do |comment|
+          xml_detailed_object(xml, :comment, comment)
+        end
       end
     end
   end

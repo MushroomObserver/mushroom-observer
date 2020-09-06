@@ -143,7 +143,6 @@ class Observation < AbstractModel
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
-  has_many   :external_links
 
   # Has to go before "has many interests" or interests will be destroyed
   # before it has a chance to notify the interested users of the destruction.
@@ -153,6 +152,7 @@ class Observation < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :sequences, dependent: :destroy
+  has_many :external_links, dependent: :destroy
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!

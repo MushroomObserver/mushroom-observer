@@ -3,7 +3,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
   if @api.user
-    xml_minimal_object(xml, :user, User, @api.user.id)
+    xml_minimal_object(xml, :user, :user, @api.user.id)
   end
 
   unless @api.errors.any?(&:fatal)
@@ -16,12 +16,20 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
 
     xml.results(number: @api.result_ids.length) do
       if @api.detail == :none
-        for result_id in @api.result_ids
-          xml_minimal_object(xml, :result, @api.model, result_id)
+        @api.result_ids.each do |result_id|
+          xml_minimal_object(xml, :result, @api.model.type_tag, result_id)
         end
       else
-        for result in @api.results
-          xml_detailed_object(xml, :result, result, @api.detail == :high)
+        @api.results.each do |result|
+          xml.target! << render(
+            partial: result.class.type_tag.to_s,
+            locals: {
+              xml:    xml,
+              tag:    :result,
+              object: result,
+              detail: @api.detail == :high
+            }
+          )
         end
       end
     end
@@ -30,13 +38,13 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   if @api.errors.length > 0
     xml.errors(number: @api.errors.length) do
       i = 1
-      for error in @api.errors
+      @api.errors.each do |error|
         xml.error(id: i) do
           xml.code    error.class.name
           xml.details error.to_s
           xml.fatal   error.fatal ? "true" : "false"
           unless Rails.env == "production" || !error.backtrace
-            xml.trace   error.backtrace.join("\n")
+            xml.trace error.backtrace.join("\n")
           end
         end
         i += 1
