@@ -98,6 +98,7 @@ class ApplicationController < ActionController::Base
   require "login_system"
   require "csv"
   include LoginSystem
+  include ObjectLinkHelper
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.

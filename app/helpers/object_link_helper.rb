@@ -135,8 +135,65 @@ module ObjectLinkHelper
   def link_to_object(object, name = nil)
     return nil unless object
 
-    link_to(name || object.title.t, object.show_link_args)
+    link_to(name || object.title.t, object_path(object))
   end
+
+  # Output path helpers. Useful when:
+  # - code permits different classes of objects, e.g., @back_object
+  # - can save space: object_path(@project) vs project_path(@project.id)
+  # - can accept params: object_path(@project, q: get_query_param)
+  def object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    add_object_path_params(obj, params)
+    send("#{objroute}_path", params)
+  end
+
+  def edit_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
+    send("edit_#{objroute}_path", params)
+  end
+
+  def new_object_path(obj, params = {})
+    objroute = object_route_s(obj)
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
+    send("new_#{objroute}_path", params)
+  end
+
+  def object_action_path(obj, action, params = {})
+    objroute = object_route_p(obj)
+    # params[:id] = obj.id
+    add_object_path_params(obj, params)
+    send("#{route}_#{action.to_s}_path", params)
+  end
+
+  # This is a replacement for model#show_controller
+  def model_index_path(model, params = {})
+    objroute = object_route_p(model)
+    send("#{objroute}_path", params)
+  end
+
+  # This is a replacement for model#show_controller
+  def model_show_path(model, params = {})
+    objroute = object_route_s(model)
+    send("#{objroute}_path", params)
+  end
+
+  # Note: could be dicey! Assumes plural controller name and default resources
+  def controller_index_path(controller, params)
+    send("#{controller.controller_name}_path", params)
+  end
+
+  def object_route_s(obj)
+    obj.model_name.singular_route_key
+  end
+
+  def object_route_p(obj)
+    obj.model_name.route_key
+  end
+
 
   # Wrap description title in link to show_description.
   #
