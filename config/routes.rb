@@ -125,13 +125,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  glossary: {
-    create_glossary_term: {},
-    edit_glossary_term: {},
-    index: {},
-    show_glossary_term: {},
-    show_past_glossary_term: {}
-  },
   herbarium: {
     create_herbarium: {},
     delete_curator: {},
@@ -520,30 +513,43 @@ ACTION_REDIRECTS = {
     from: "/%<old_controller>s/show_%<model>s/:id",
     to: "/%<new_controller>s/%<id>s",
     via: [:get]
+  },
+  show_past: {
+    from: "/%<old_controller>s/show_past_%<model>s/:id",
+    to: "/%<new_controller>s/%<id>s/show_past",
+    via: [:get]
   }
 }.freeze
 
-# redirect deleted MO controller's actions to equivalent actions in the
+# legacy actions that translate to standard CRUD actions
+LEGACY_CRUD_ACTIONS = [
+  :create, :edit, :destroy, :controller, :index, :list, :show
+].freeze
+
+# redirect legacy MO actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
-#  redirect_old_crud_actions(old_controller: "article")
-#  redirect_old_crud_actions(old_controller: "herbarium")
-#  redirect_old_crud_actions(old_controller: "glossary",
-#                            new_controller: "glossary_terms",
-#                            actions: [:create, :edit, :show])
+#  redirect_legacy_actions(old_controller: "article")
+#  redirect_legacy_actions(
+#    old_controller: "glossary",
+#    new_controller: "glossary_terms",
+#    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+#  )
 #
-def redirect_old_crud_actions(old_controller: "",
-                              new_controller: old_controller&.pluralize,
-                              model: new_controller&.singularize,
-                              actions: ACTION_REDIRECTS.keys)
+def redirect_legacy_actions(old_controller: "",
+                            new_controller: old_controller&.pluralize,
+                            model: new_controller&.singularize,
+                            actions: LEGACY_CRUD_ACTIONS)
   actions.each do |action|
     data = ACTION_REDIRECTS[action]
     to_url = format(data[:to],
+                    new_controller: new_controller,
+                    model: model,
                     # Rails routes currently only accept template tokens
-                    id: "%{id}", # rubocop:disable Style/FormatStringToken
-                    new_controller: new_controller)
+                    id: "%{id}") # rubocop:disable Style/FormatStringToken
+
     match(format(data[:from], old_controller: old_controller, model: model),
-          to: redirect(to_url),
+          to: redirect(path: to_url),
           via: data[:via])
   end
 end
@@ -623,19 +629,25 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  resources :articles, id: /\d+/
-  redirect_old_crud_actions(old_controller: "article")
-  # Or if you want to be explicit (but then why have a default argument?):
-  # actions: [:create, :edit, :destroy, :controller, :index, :list, :show]
-
-  get "publications/:id/destroy" => "publications#destroy"
-  resources :publications
-
   # Default page is /observer/list_rss_logs.
   root "observer#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/
+
+  resources :articles, id: /\d+/
+  redirect_legacy_actions(old_controller: "article")
+
+  resources :glossary_terms, id: /\d+/ do
+    get "show_past", on: :member
+  end
+  redirect_legacy_actions(
+    old_controller: "glossary", new_controller: "glossary_terms",
+    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+  )
+
+  get "publications/:id/destroy" => "publications#destroy"
+  resources :publications
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

@@ -47,8 +47,9 @@
         </div>
         <div class="col-xs-4">
           <%= select_year(@copyright_year,
-                {field_name: :copyright_year, start_year: 1980, end_year: Time.now.year},
-                {class: "form-control"}) %>
+                          { field_name: :copyright_year,
+                            start_year: 1980, end_year: Time.zone.now.year },
+                          { class: "form-control" }) %>
         </div>
       </div>
       <div class="push-down">

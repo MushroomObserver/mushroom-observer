@@ -72,7 +72,7 @@ class SpeciesListController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def index_species_list # :norobots:
+  def index_species_list
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s,
                                        always_index: true)
@@ -85,7 +85,7 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of user's species_lists, sorted by date.
-  def species_lists_by_user # :norobots:
+  def species_lists_by_user
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -103,14 +103,14 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of all species_lists, sorted by title.
-  def species_lists_by_title # :norobots:
+  def species_lists_by_title
     query = create_query(:SpeciesList, :all, by: :title)
     show_selected_species_lists(query)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string
   # pattern.
-  def species_list_search # :norobots:
+  def species_list_search
     pattern = params[:pattern].to_s
     spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if spl
@@ -160,7 +160,7 @@ class SpeciesListController < ApplicationController
   #
   ##############################################################################
 
-  def show_species_list # :prefetch:
+  def show_species_list
     store_location
     clear_query_in_session
     pass_query_params
@@ -178,11 +178,11 @@ class SpeciesListController < ApplicationController
                   [:user, :name, :location, { thumb_image: :image_votes }])
   end
 
-  def next_species_list # :norobots:
+  def next_species_list
     redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
   end
 
-  def prev_species_list # :norobots:
+  def prev_species_list
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
@@ -201,7 +201,7 @@ class SpeciesListController < ApplicationController
   ##############################################################################
 
   # Used by show_species_list.
-  def make_report # :norobots:
+  def make_report
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -274,7 +274,7 @@ class SpeciesListController < ApplicationController
 
   # Specialized javascripty form for creating a list of names, at Darvin's
   # request. Links into create_species_list.
-  def name_lister # :norobots:
+  def name_lister
     # Names are passed in as string, one name per line.
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
@@ -315,7 +315,7 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def create_species_list # :prefetch: :norobots:
+  def create_species_list
     @species_list = SpeciesList.new
     if request.method != "POST"
       init_name_vars_for_create
@@ -328,7 +328,7 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def edit_species_list # :prefetch: :norobots:
+  def edit_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -345,7 +345,7 @@ class SpeciesListController < ApplicationController
   end
 
   # Form to let user create/edit species_list from file.
-  def upload_species_list # :norobots:
+  def upload_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -367,7 +367,7 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def destroy_species_list # :norobots:
+  def destroy_species_list
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -381,13 +381,13 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def add_remove_observations # :prefetch: :norobots:
+  def add_remove_observations
     pass_query_params
     @id = params[:species_list].to_s
     @query = find_obs_query_or_redirect
   end
 
-  def post_add_remove_observations # :prefetch: :norobots:
+  def post_add_remove_observations
     pass_query_params
     id = params[:species_list].to_s
     spl = find_list_or_reload_form(id)
@@ -468,13 +468,13 @@ class SpeciesListController < ApplicationController
   end
 
   # Form to let user add/remove an observation from one of their species lists.
-  def manage_species_lists # :prefetch: :norobots:
+  def manage_species_lists
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     @all_lists = @user.all_editable_species_lists
   end
 
   # Used by manage_species_lists.
-  def remove_observation_from_species_list # :norobots:
+  def remove_observation_from_species_list
     species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless species_list
 
@@ -492,7 +492,7 @@ class SpeciesListController < ApplicationController
   end
 
   # Used by manage_species_lists.
-  def add_observation_to_species_list # :norobots:
+  def add_observation_to_species_list
     species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless species_list
 
@@ -511,7 +511,6 @@ class SpeciesListController < ApplicationController
 
   # Bulk-edit observations (at least the ones editable by this user) in a (any)
   # species list.
-  # :norobots:
   def bulk_editor
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
@@ -609,7 +608,7 @@ class SpeciesListController < ApplicationController
   #  :section: Manage Projects
   # ----------------------------
 
-  def manage_projects # :norobots:
+  def manage_projects
     return unless (@list = find_or_goto_index(SpeciesList, params[:id].to_s))
 
     if !check_permission!(@list)

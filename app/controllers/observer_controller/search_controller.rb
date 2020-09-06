@@ -12,7 +12,7 @@ class ObserverController
   #   observer/user_search
   #   project/project_search
   #   species_list/species_list_search
-  def pattern_search # :norobots:
+  def pattern_search
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
 
@@ -59,7 +59,7 @@ class ObserverController
   #   location/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
-  def advanced_search_form # :norobots:
+  def advanced_search_form
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
 
@@ -92,7 +92,7 @@ class ObserverController
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search # :norobots:
+  def advanced_search
     if params[:name] || params[:location] || params[:user] || params[:content]
       search = {}
       search[:name] = params[:name] if params[:name].present?

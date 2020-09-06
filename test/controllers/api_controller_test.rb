@@ -123,7 +123,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
-    assert_equal(Date.today.web_date, obs.when.web_date)
+    assert_equal(Time.zone.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
     assert_equal("Unknown", obs.where)
     assert_names_equal(names(:fungi), obs.name)
@@ -197,7 +197,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(count + 1, Image.count)
     img = Image.last
     assert_users_equal(rolf, img.user)
-    assert_equal(Date.today.web_date, img.when.web_date)
+    assert_equal(Time.zone.today.web_date, img.when.web_date)
     assert_equal("", img.notes)
     assert_equal(rolf.legal_name, img.copyright_holder)
     assert_objs_equal(rolf.license, img.license)

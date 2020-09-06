@@ -6,7 +6,7 @@ class ObserverController
   # Inputs: params[:naming], params[:observation]
   # Outputs:
   #   @notifications
-  def show_notifications # :norobots:
+  def show_notifications
     pass_query_params
     data = []
     @observation = find_or_goto_index(Observation, params[:id].to_s)

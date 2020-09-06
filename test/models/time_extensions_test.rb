@@ -49,7 +49,7 @@ class DateExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
 
   def setup
-    @object = Date.today
+    @object = Time.zone.today
   end
 end
 

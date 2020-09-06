@@ -1280,7 +1280,7 @@ class ApiTest < UnitTestCase
     setup_image_dirs
     @user   = rolf
     @proj   = nil
-    @date   = Time.now.in_time_zone("GMT").to_date
+    @date   = Time.zone.today
     @copy   = @user.legal_name
     @notes  = ""
     @orig   = nil
@@ -2261,7 +2261,7 @@ class ApiTest < UnitTestCase
     @img2 = nil
     @spl = nil
     @proj = nil
-    @date = Time.now.in_time_zone("GMT").to_date
+    @date = Time.zone.today
     @notes = Observation.no_notes
     @vote = Vote.maximum_vote
     @specimen = false
@@ -3254,7 +3254,7 @@ class ApiTest < UnitTestCase
     assert_last_species_list_correct
 
     @title    = "Minimal New Species List"
-    @date     = Date.today
+    @date     = Time.zone.today
     @location = Location.unknown
     @where    = Location.unknown.name
     @notes    = nil
@@ -3268,7 +3268,7 @@ class ApiTest < UnitTestCase
     assert_last_species_list_correct
 
     @title    = "New Species List with Undefined Location"
-    @date     = Date.today
+    @date     = Time.zone.today
     @location = nil
     @where    = "Bogus, Arkansas, USA"
     @notes    = nil

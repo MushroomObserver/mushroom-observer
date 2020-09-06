@@ -2,7 +2,7 @@
 
 # TODO: move this into a new EmailController
 class ObserverController
-  def email_features # :root: :norobots:
+  def email_features
     if in_admin_mode?
       @users = User.where("email_general_feature=1 && verified is not null")
       if request.method == "POST"
@@ -19,7 +19,7 @@ class ObserverController
     end
   end
 
-  def ask_webmaster_question # :norobots:
+  def ask_webmaster_question
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false
@@ -40,7 +40,7 @@ class ObserverController
     end
   end
 
-  def ask_user_question # :norobots:
+  def ask_user_question
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
                   email_question(@user) &&
                   request.method == "POST"
@@ -52,7 +52,7 @@ class ObserverController
     redirect_to(action: "show_user", id: @target.id)
   end
 
-  def ask_observation_question # :norobots:
+  def ask_observation_question
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation &&
                   email_question(@observation) &&
@@ -64,7 +64,7 @@ class ObserverController
     redirect_with_query(action: "show_observation", id: @observation.id)
   end
 
-  def commercial_inquiry # :norobots:
+  def commercial_inquiry
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
                   email_question(@image, :email_general_commercial) &&
                   request.method == "POST"

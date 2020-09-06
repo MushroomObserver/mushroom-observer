@@ -75,7 +75,7 @@ module ObservationReport
     end
 
     def mo_number(row)
-      "MO #{row.obs_id}"
+      "MO#{row.obs_id}"
     end
 
     def collector_numbers(row)
