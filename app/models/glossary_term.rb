@@ -11,6 +11,11 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
+  # Add before_save validity check(s)
+  # See https://www.pivotaltracker.com/story/show/174606044
+
+  after_destroy(:destroy_unused_images)
+
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
     table_name: "glossary_terms_versions",
@@ -30,11 +35,6 @@ class GlossaryTerm < AbstractModel
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
-
-  # Override the default show_controller
-  def self.show_controller
-    "glossary"
-  end
 
   def text_name
     name
@@ -75,11 +75,22 @@ class GlossaryTerm < AbstractModel
       images.delete(image)
       save
     end
-    if thumb_image == image
-      new_thumb = images[0]
-      self.thumb_image = images[0]
-      images.delete(new_thumb) if new_thumb
-      save
+
+    return unless thumb_image == image
+
+    new_thumb = images[0]
+    self.thumb_image = images[0]
+    images.delete(new_thumb) if new_thumb
+    save
+  end
+
+  ##############################################################################
+
+  private
+
+  def destroy_unused_images
+    all_images.each do |image|
+      image.destroy if image && !image.other_subjects?(self)
     end
   end
 end

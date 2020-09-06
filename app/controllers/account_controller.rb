@@ -40,8 +40,6 @@
 #  test_autologin::     <tt>(L V .)</tt>
 #  test_flash::         <tt>(. . .)</tt>
 #
-#  :all_norobots:
-#
 ################################################################################
 class AccountController < ApplicationController
   before_action :login_required, except: [
@@ -69,7 +67,6 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  # :prefetch:
   def signup
     @new_user = User.new(theme: MO.default_theme)
     return if request.method != "POST"
@@ -184,7 +181,6 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  # :prefetch:
   def login
     request.method == "POST" ? login_post : login_get
   end
@@ -318,7 +314,6 @@ class AccountController < ApplicationController
     end
   end
 
-  # :prefetch:
   def prefs
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
@@ -384,7 +379,6 @@ class AccountController < ApplicationController
     result
   end
 
-  # :prefetch:
   def profile
     @licenses = License.current_names_and_ids(@user.license)
     if request.method != "POST"
@@ -575,7 +569,6 @@ class AccountController < ApplicationController
     end
   end
 
-  # :login: :norobots:
   def api_keys
     @key = ApiKey.new
     return unless request.method == "POST"
@@ -612,7 +605,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def activate_api_key # :login: :norobots:
+  def activate_api_key
     if (key = find_or_goto_index(ApiKey, params[:id].to_s))
       if check_permission!(key)
         key.verify!
@@ -624,7 +617,7 @@ class AccountController < ApplicationController
     flash_error(e.to_s)
   end
 
-  def edit_api_key # :login: :norobots:
+  def edit_api_key
     if (@key = find_or_goto_index(ApiKey, params[:id].to_s))
       if check_permission!(@key)
         if request.method == "POST"
@@ -648,23 +641,23 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def turn_admin_on # :root:
+  def turn_admin_on
     session[:admin] = true if @user&.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
-  def turn_admin_off # :root:
+  def turn_admin_off
     session[:admin] = nil
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
-  def add_user_to_group # :root:
+  def add_user_to_group
     in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
   end
 
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
-  def destroy_user # :root:
+  def destroy_user
     if in_admin_mode?
       id = params["id"]
       if id.present?
@@ -675,7 +668,7 @@ class AccountController < ApplicationController
     redirect_back_or_default("/")
   end
 
-  def blocked_ips # :root:
+  def blocked_ips
     if in_admin_mode?
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)

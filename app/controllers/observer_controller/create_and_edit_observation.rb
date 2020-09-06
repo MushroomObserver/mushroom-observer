@@ -26,7 +26,7 @@ class ObserverController
   #   @new_image                        blank image object
   #   @good_images                      list of images already downloaded
   #
-  def create_observation # :prefetch: :norobots:
+  def create_observation
     # These are needed to create pulldown menus in form.
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.zone.now)
@@ -306,7 +306,7 @@ class ObserverController
   #   @new_image                        blank image object
   #   @good_images                      list of images already attached
   #
-  def edit_observation # :prefetch: :norobots:
+  def edit_observation
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
@@ -407,7 +407,7 @@ class ObserverController
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
-  def destroy_observation # :norobots:
+  def destroy_observation
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
 
@@ -442,7 +442,7 @@ class ObserverController
   # I'm tired of tweaking show_observation to call calc_consensus for
   # debugging.  I'll just leave this stupid action in and have it
   # forward to show_observation.
-  def recalc # :root: :norobots:
+  def recalc
     pass_query_params
     id = params[:id].to_s
     begin
@@ -458,7 +458,7 @@ class ObserverController
 
   ##############################################################################
   #
-  #  :section: helpers
+  #  :section: Helpers
   #
   #    create_observation_object(...)     create rough first-drafts.
   #
