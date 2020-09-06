@@ -42,6 +42,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Page should have link to prior version")
   end
 
+  def test_show_admin_delete
+    term = glossary_terms(:square_glossary_term)
+    login
+    make_admin
+    get(:show, params: { id: term.id })
+
+    assert_select("form input[value='delete']", { count: 1 },
+                  "Page is missing a way for admin to destroy glossary term")
+  end
+
   # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
 
   # ***** new *****
