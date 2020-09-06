@@ -54,7 +54,7 @@ class ProjectController < ApplicationController
   ##############################################################################
 
   # Show list of selected projects, based on current Query.
-  def index_project # :norobots:
+  def index_project
     query = find_or_create_query(:Project, by: params[:by])
     show_selected_projects(query, id: params[:id].to_s, always_index: true)
   end
@@ -66,7 +66,7 @@ class ProjectController < ApplicationController
   end
 
   # Display list of Project's whose title or notes match a string pattern.
-  def project_search # :norobots:
+  def project_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (project = Project.safe_find(pattern))
@@ -107,7 +107,7 @@ class ProjectController < ApplicationController
   # Linked from: show_observation, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
-  def show_project # :prefetch:
+  def show_project
     store_location
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
@@ -128,12 +128,12 @@ class ProjectController < ApplicationController
   end
 
   # Go to next project: redirects to show_project.
-  def next_project # :norobots:
+  def next_project
     redirect_to_next_object(:next, Project, params[:id].to_s)
   end
 
   # Go to previous project: redirects to show_project.
-  def prev_project # :norobots:
+  def prev_project
     redirect_to_next_object(:prev, Project, params[:id].to_s)
   end
 
@@ -148,7 +148,7 @@ class ProjectController < ApplicationController
   # Failure:
   #   Renders add_project again.
   #   Outputs: @project
-  def add_project # :norobots:
+  def add_project
     pass_query_params
     if request.method == "GET"
       @project = Project.new
@@ -209,7 +209,7 @@ class ProjectController < ApplicationController
   # Failure:
   #   Renders edit_project again.
   #   Outputs: @project
-  def edit_project # :prefetch: :norobots:
+  def edit_project
     pass_query_params
     return unless @project = find_or_goto_index(Project, params[:id].to_s)
 
@@ -238,7 +238,7 @@ class ProjectController < ApplicationController
   # Redirects to show_observation.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_project # :norobots:
+  def destroy_project
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
@@ -267,7 +267,7 @@ class ProjectController < ApplicationController
   # Outputs:
   #   @project
   # Posts to the same action.  Redirects back to show_project.
-  def admin_request # :prefetch: :norobots:
+  def admin_request
     sender = @user
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
@@ -292,7 +292,7 @@ class ProjectController < ApplicationController
   # Outputs:
   #   @project, @users
   # "Posts" to the same action.  Stays on this view until done.
-  def add_members # :norobots:
+  def add_members
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.where.not(verified: nil).order("login, name").to_a
@@ -313,7 +313,7 @@ class ProjectController < ApplicationController
   #   params[:commit]
   # Outputs: @project, @candidate
   # Posts to same action.  Redirects to show_project when done.
-  def change_member_status # :norobots:
+  def change_member_status
     pass_query_params
     if (@project = find_or_goto_index(Project, params[:id].to_s)) &&
        (@candidate = find_or_goto_index(User, params[:candidate]))

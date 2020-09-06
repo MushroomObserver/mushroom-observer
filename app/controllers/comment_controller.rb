@@ -56,7 +56,7 @@ class CommentController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment # :norobots:
+  def index_comment
     query = find_or_create_query(:Comment, by: params[:by])
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
   end
@@ -68,7 +68,7 @@ class CommentController < ApplicationController
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def show_comments_by_user # :norobots:
+  def show_comments_by_user
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :by_user, user: user)
       show_selected_comments(query)
@@ -76,7 +76,7 @@ class CommentController < ApplicationController
   end
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
-  def show_comments_for_user # :norobots:
+  def show_comments_for_user
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :for_user, user: user)
       show_selected_comments(query)
@@ -85,7 +85,7 @@ class CommentController < ApplicationController
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_target # :norobots:
+  def show_comments_for_target
     model = begin
               params[:type].to_s.constantize
             rescue StandardError
@@ -103,7 +103,7 @@ class CommentController < ApplicationController
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search # :norobots:
+  def comment_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
@@ -157,7 +157,7 @@ class CommentController < ApplicationController
   # Linked from: show_<object>, list_comments
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
-  def show_comment # :prefetch:
+  def show_comment
     store_location
     pass_query_params
     if @comment = find_or_goto_index(Comment, params[:id].to_s)
@@ -167,12 +167,12 @@ class CommentController < ApplicationController
   end
 
   # Go to next comment: redirects to show_comment.
-  def next_comment # :norobots:
+  def next_comment
     redirect_to_next_object(:next, Comment, params[:id].to_s)
   end
 
   # Go to previous comment: redirects to show_comment.
-  def prev_comment # :norobots:
+  def prev_comment
     redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
 
@@ -188,7 +188,7 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders add_comment again.
   #   Outputs: @comment, @object
-  def add_comment # :prefetch: :norobots:
+  def add_comment
     pass_query_params
     @target = Comment.find_object(params[:type], params[:id].to_s)
     if !allowed_to_see!(@target)
@@ -223,7 +223,7 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
-  def edit_comment # :prefetch: :norobots:
+  def edit_comment
     pass_query_params
     if @comment = find_or_goto_index(Comment, params[:id].to_s)
       @target = @comment.target
@@ -257,7 +257,7 @@ class CommentController < ApplicationController
   # Redirects to show_object.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_comment # :norobots:
+  def destroy_comment
     pass_query_params
     id = params[:id].to_s
     if @comment = find_or_goto_index(Comment, id)
