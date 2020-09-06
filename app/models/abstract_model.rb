@@ -163,7 +163,7 @@ class AbstractModel < ApplicationRecord
   def self.find_using_wildcards(col, str)
     return send("find_by_#{col}", str) unless str.include?("*")
 
-    matches = where("#{col} LIKE ?", str.tr("*", "%"))
+    matches = where("? LIKE ?", col, str.tr("*", "%"))
     matches.empty? ? nil : matches
   end
 
