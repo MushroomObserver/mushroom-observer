@@ -662,16 +662,11 @@ module DescriptionControllerHelpers
 
   # Return name of group or user if it's a one-user group.
   def group_name(group)
-    case group.name
-    when "all users"
-      :adjust_permissions_all_users.t
-    when "reviewers"
-      :REVIEWERS.t
-    when /^user \d+$/
-      group.users.first.legal_name
-    else
-      group.name
-    end
+    return :adjust_permissions_all_users.t if group.name == "all users"
+    return :REVIEWERS.t if group.name == "reviewers"
+    return group.users.first.legal_name if /^user \d+$/.match?(group.name)
+
+    group.name
   end
 
   # Attempt to merge one description into another, deleting the old one
