@@ -3,6 +3,10 @@
 require("test_helper")
 
 class RssLogTest < UnitTestCase
+  # Alert developer if normalization changes the path of an RssLogg'ed object
+  # The test should be deleted once controllers for all RssLog'ged objects are
+  # normalized.
+  # See https://www.pivotaltracker.com/story/show/174685402
   def test_url_for_normalized_controllers
     normalized_rss_log_types.each do |type|
       rss_log = create_rss_log(type)
