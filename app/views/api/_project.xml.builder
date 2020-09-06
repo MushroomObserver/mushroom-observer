@@ -12,7 +12,7 @@ xml.tag!(tag,
   else
     xml_detailed_object(xml, :creator, object.user)
     if object.comments.any?
-      xml.comments(number: object.comments.length) do
+      xml.comments(number: object.comments.count) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end
