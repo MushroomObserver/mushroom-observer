@@ -16,10 +16,10 @@ class API
       { comments: :user },
       :external_links,
       { herbarium_records: :herbarium },
-      { images: [ :license, :user ] },
+      { images: [:license, :user] },
       :location,
       :name,
-      { namings: [ :name, :user ] },
+      { namings: [:name, :user] },
       :sequences,
       :user,
       { votes: :user }
