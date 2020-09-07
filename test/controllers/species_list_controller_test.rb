@@ -99,7 +99,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_list_species_lists
-    get_with_dump(:list_species_lists)
+    get(:list_species_lists)
     assert_template(:list_species_lists)
   end
 
@@ -107,16 +107,16 @@ class SpeciesListControllerTest < FunctionalTestCase
     sl_id = species_lists(:first_species_list).id
 
     # Show empty list with no one logged in.
-    get_with_dump(:show_species_list, id: sl_id)
+    get(:show_species_list, id: sl_id)
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
-    get_with_dump(:show_species_list, id: sl_id)
+    get(:show_species_list, id: sl_id)
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show non-empty list with owner logged in.
-    get_with_dump(:show_species_list,
+    get(:show_species_list,
                   id: species_lists(:unknown_species_list).id)
     assert_template(:show_species_list, partial: "_show_comments")
   end
@@ -177,19 +177,43 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_by_title
-    get_with_dump(:species_lists_by_title)
+    get(:species_lists_by_title)
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_by_user
-    get_with_dump(:species_lists_by_user, id: rolf.id)
+    get(:species_lists_by_user, id: rolf.id)
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_for_project
-    get_with_dump(:species_lists_for_project,
+    get(:species_lists_for_project,
                   id: projects(:bolete_project).id)
     assert_template(:list_species_lists)
+  end
+
+  def test_species_list_search
+    spl = species_lists(:unknown_species_list)
+    get(:species_list_search, params: { pattern: spl.id.to_s })
+    assert_redirected_to(action: :show_species_list, id: spl.id)
+
+    get(:species_list_search, params: { pattern: "mysteries" })
+    assert_response(:redirect)
+  end
+
+  def test_list_species_list_by_user
+    query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
+    query_params = @controller.query_params(query)
+    get(:index_species_list, query_params)
+    assert_template(:list_species_lists)
+
+    get(:next_species_list, query_params.merge(id: query.result_ids[0]))
+    assert_redirected_to(query_params.merge(action: "show_species_list",
+                                            id: query.result_ids[1]))
+
+    get(:prev_species_list, query_params.merge(id: query.result_ids[1]))
+    assert_redirected_to(query_params.merge(action: "show_species_list",
+                                            id: query.result_ids[0]))
   end
 
   def test_destroy_species_list
@@ -223,6 +247,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(sp.reload.observations.member?(obs))
   end
 
+  def test_add_observation_to_species_list_no_permission
+    sp = species_lists(:first_species_list)
+    obs = observations(:coprinus_comatus_obs)
+    assert_not(sp.observations.member?(obs))
+    params = { species_list: sp.id, observation: obs.id }
+    login("dick")
+    get(:add_observation_to_species_list, params)
+    assert_redirected_to(action: :show_species_list, id: sp.id)
+    assert_not(sp.reload.observations.member?(obs))
+  end
+
   def test_remove_observation_from_species_list
     spl = species_lists(:unknown_species_list)
     obs = observations(:minimal_unknown_obs)
@@ -238,7 +273,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.member?(obs))
 
     login(owner)
-    get_with_dump(:remove_observation_from_species_list, params)
+    get(:remove_observation_from_species_list, params)
     assert_redirected_to(action: "manage_species_lists", id: obs.id)
     assert_not(spl.reload.observations.member?(obs))
   end
@@ -325,7 +360,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_unsuccessful_create_location_description
     user = login("spamspamspam")
     assert_false(user.is_successful_contributor?)
-    get_with_dump(:create_species_list)
+    get(:create_species_list)
     assert_response(:redirect)
   end
 
@@ -766,7 +801,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(sp_count, spl.reload.observations.size)
 
     login(owner)
-    post_with_dump(:edit_species_list, params)
+    post(:edit_species_list, params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
@@ -817,7 +852,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.size == sp_count)
 
     login(owner)
-    post_with_dump(:edit_species_list, params)
+    post(:edit_species_list, params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
@@ -1040,7 +1075,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post_with_dump(:upload_species_list, params)
+    post(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
@@ -1061,7 +1096,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post_with_dump(:upload_species_list, params)
+    post(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     new_data = @controller.instance_variable_get("@list_members")
@@ -1114,11 +1149,20 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response_equal_file("#{path}/test.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, "")
     end
+
+    get(:make_report, params: { id: list.id, type: "bogus" })
+    assert_response(:redirect)
+    assert_flash_error
   end
 
   def test_print_labels
     spl = species_lists(:one_genus_three_species_list)
+    query = Query.lookup_and_save(:Observation, :in_species_list,
+                                  species_list: spl)
+    query_params = @controller.query_params(query)
     get(:print_labels, id: spl.id)
+    assert_redirected_to(query_params.merge(controller: "observer",
+                                            action: "print_labels"))
   end
 
   def test_download
@@ -1177,6 +1221,10 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, "")
     end
+
+    post(:name_lister, params: { commit: "bogus" })
+    assert_flash_error
+    assert_template(:name_lister)
   end
 
   def test_name_resolution
@@ -1358,7 +1406,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # Owner of list always can.
     login("mary")
-    get_with_dump(:manage_projects, id: list.id)
+    get(:manage_projects, id: list.id)
     assert_response(:success)
   end
 
@@ -1382,6 +1430,19 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_checkbox_state("objects_img", :unchecked)
     assert_checkbox_state("projects_#{proj1.id}", :unchecked)
     assert_checkbox_state("projects_#{proj2.id}", :unchecked)
+
+    post(
+      :manage_projects,
+      params: {
+        id: list.id,
+        objects_list: "1",
+        "projects_#{proj1.id}" => "",
+        "projects_#{proj2.id}" => "",
+        commit: "bogus"
+      }
+    )
+    assert_flash_error # bogus commit button
+    assert_obj_list_equal([proj2], list.projects.reload)
 
     post(
       :manage_projects,
@@ -1721,6 +1782,13 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
+         params: params.merge(commit: "bogus", species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations,
          params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
@@ -1736,7 +1804,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(new_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
-         params: params.merge(commit: :REMOVE.l, species_list: spl.title))
+         params: params.merge(commit: :REMOVE.l, species_list: spl.id.to_s))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
     assert_flash_success

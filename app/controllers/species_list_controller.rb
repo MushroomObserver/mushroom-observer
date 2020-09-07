@@ -48,6 +48,7 @@ class SpeciesListController < ApplicationController
     :name_lister,
     :next_species_list,
     :prev_species_list,
+    :print_labels,
     :show_species_list,
     :species_list_search,
     :species_lists_by_title,
