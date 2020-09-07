@@ -23,7 +23,7 @@ if object.notes.present?
   json.notes                other_notes.to_s.tpl_nodiv if other_notes.present?
 end
 if !detail
-  json.owner                object.user_id
+  json.owner_id             object.user_id
   json.consensus_id         object.name_id if object.name_id
   json.consensus_name       object.text_name if object.text_name.present?
   json.location_id          object.location_id if object.location_id

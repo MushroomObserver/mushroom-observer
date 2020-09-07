@@ -8,5 +8,5 @@ xml.tag!(tag,
   xml_date(xml, :created_at, object.created_at)
   xml_date(xml, :last_used, object.last_used)
   xml_date(xml, :verified, object.verified)
-  xml_integer(xml, :num_users, object.num_uses)
+  xml_integer(xml, :num_uses, object.num_uses)
 end
