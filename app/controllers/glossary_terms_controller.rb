@@ -115,8 +115,8 @@ class GlossaryTermsController < ApplicationController
   end
 
   def add_glossary_term_error_messages_to_flash
-    @glossary_term.errors.messages.values.each do |val|
-      # flash_error takes a string; val is a hash, e.g. ["message"]
+    @glossary_term.errors.messages.each_value do |val|
+      # flash_error takes a string; val is an array of size 1, e.g. ["message"]
       flash_error(val.first)
     end
   end
