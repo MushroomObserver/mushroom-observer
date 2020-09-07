@@ -16,66 +16,77 @@ module ApiHelper
   end
 
   def xml_integer(xml, tag, val)
-    val.present? &&
-      (str = val.try(:to_i)) &&
-      xml.tag!(tag, str.to_s, type: "integer")
+    return if val.blank?
+    return unless str = val.try(:to_i)
+
+    xml.tag!(tag, str.to_s, type: "integer")
   end
 
   def xml_float(xml, tag, val, places)
-    val.present? &&
-      (str = val.try(:round, places)) &&
-      xml.tag!(tag, str.to_s, type: "float")
+    return if val.blank?
+    return unless str = val.try(:round, places)
+
+    xml.tag!(tag, str.to_s, type: "float")
   end
 
   def xml_string(xml, tag, val)
-    val.present? &&
-      xml.tag!(tag, val.to_s, type: "string", content_type: "text/plain")
+    return if val.blank?
+
+    xml.tag!(tag, val.to_s, type: "string", content_type: "text/plain")
   end
 
   def xml_html_string(xml, tag, val)
-    val.present? &&
-      xml.tag!(tag, val.to_s, type: "string", content_type: "text/html")
+    return if val.blank?
+
+    xml.tag!(tag, val.to_s, type: "string", content_type: "text/html")
   end
 
   def xml_sql_string(xml, tag, val)
-    val.present? &&
-      xml.tag!(tag, val.to_s, type: "string", content_type: "application/x-sql")
+    return if val.blank?
+
+    xml.tag!(tag, val.to_s, type: "string", content_type: "application/x-sql")
   end
 
   def xml_date(xml, tag, val)
-    val.present? &&
-      (str = val.try(:api_date)) &&
-      xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
+    return if val.blank?
+    return unless str = val.try(:api_date)
+
+    xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
   end
 
   def xml_datetime(xml, tag, val)
-    val.present? &&
-      (str = val.try(:utc).try(:api_time)) &&
-      xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
+    return if val.blank?
+    return unless str = val.try(:utc).try(:api_time)
+
+    xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
   end
 
   def xml_ellapsed_time(xml, tag, val)
-    val.present? &&
-      (str = val.try(:round, 4)) &&
-      xml.tag!(tag, str.to_s, type: "float", units: "seconds")
+    return if val.blank?
+    return unless str = val.try(:round, 4)
+
+    xml.tag!(tag, str.to_s, type: "float", units: "seconds")
   end
 
   def xml_latitude(xml, tag, val)
-    val.present? &&
-      (str = val.try(:round, 4)) &&
-      xml.tag!(tag, str.to_s, type: "float", units: "degrees north")
+    return if val.blank?
+    return unless str = val.try(:round, 4)
+
+    xml.tag!(tag, str.to_s, type: "float", units: "degrees north")
   end
 
   def xml_longitude(xml, tag, val)
-    val.present? &&
-      (str = val.try(:round, 4)) &&
-      xml.tag!(tag, str.to_s, type: "float", units: "degrees east")
+    return if val.blank?
+    return unless str = val.try(:round, 4)
+
+    xml.tag!(tag, str.to_s, type: "float", units: "degrees east")
   end
 
   def xml_altitude(xml, tag, val)
-    val.present? &&
-      (str = val.try(:to_i)) &&
-      xml.tag!(tag, str.to_s, type: "integer", units: "meters")
+    return if val.blank?
+    return unless str = val.try(:to_i)
+
+    xml.tag!(tag, str.to_s, type: "integer", units: "meters")
   end
 
   def xml_naming_reason(xml, tag, val)
@@ -87,15 +98,17 @@ module ApiHelper
   end
 
   def xml_confidence_level(xml, tag, val)
-    val.present? &&
-      (str = val.try(:round, 2)) &&
-      xml.tag!(tag, str.to_s, type: "float", range: "-3.0 to 3.0")
+    return if val.blank?
+    return unless str = val.try(:round, 2)
+
+    xml.tag!(tag, str.to_s, type: "float", range: "-3.0 to 3.0")
   end
 
   def xml_image_quality(xml, tag, val)
-    val.present? &&
-      (str = val.try(:round, 2)) &&
-      xml.tag!(tag, str.to_s, type: "float", range: "0.0 to 4.0")
+    return if val.blank?
+    return unless str = val.try(:round, 2)
+
+    xml.tag!(tag, str.to_s, type: "float", range: "0.0 to 4.0")
   end
 
   def xml_image_file(xml, image, size)
@@ -111,7 +124,9 @@ module ApiHelper
   end
 
   def xml_minimal_object(xml, tag, type, id)
-    id.present? && xml.tag!(tag, id: id, type: type.to_s)
+    return if id.blank?
+
+    xml.tag!(tag, id: id, type: type.to_s)
   end
 
   def xml_detailed_object(xml, tag, object)
