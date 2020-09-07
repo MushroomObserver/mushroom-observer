@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 #
-#  = Functional Test Case
+#  = Functional Integration Test Case
 #
 #  The test case class that all functional tests currently derive from.
+#  Adapted from previous controller test case
 #  Includes:
 #
 #  1. Some general-purpose helpers and assertions from GeneralExtensions.
@@ -14,7 +15,7 @@
 
 class FunctionalIntegrationTestCase < ActionDispatch::IntegrationTest
   include GeneralExtensions
-  include SessionExtensions
+  # include SessionExtensions # - These are for Capybara style tests - JH 09/20
   include FlashExtensions
   include CheckForUnsafeHtml
   include ControllerIntegrationExtensions

@@ -182,8 +182,20 @@ class ArticlesControllerIntegrationTest < FunctionalIntegrationTestCase
     }
     login(users(:zero_user).login)
     # post(:update, params: params)
-    patch(article_path(params))
+    # patch(article_path(params))
+    puts "-" * 80
+    puts '@controller.instance_variable_get("@last_notice")'
+    pp @controller.instance_variable_get("@last_notice")
+    puts '@controller.instance_variable_get(:@last_notice)'
+    pp @controller.instance_variable_get(:@last_notice)
+    puts '@controller.view_assigns[:@last_notice])'
+    pp @controller.view_assigns[:@last_notice]
+    puts '@controller.view_assigns["@last_notice"])'
+    pp @controller.view_assigns["@last_notice"]
+    byebug
     assert_flash_text(:permission_denied.l)
+    # byebug
+    # assert_equal(:permission_denied.l, session[:notice])
     assert_redirected_to(articles_path)
     # assert_equal(articles_path, path)
 
@@ -216,6 +228,7 @@ class ArticlesControllerIntegrationTest < FunctionalIntegrationTestCase
     # NOTE: The flash text is perplexing! It seems to give a Both/And!
     # <p>Successfully updated article #788338338.</p><p>No changes made.</p><p>Title Required</p>
     assert_flash_text(:article_title_required.l)
+    # assert_equal(:article_title_required.l, flash[:notice])
     # assert_template(:edit)
     assert_equal(edit_article_path(params), path)
     assert_form_action(action: :update) # "edit" form

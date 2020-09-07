@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
 #
-#  = Controller Test Helpers
+#  = Controller Integration Test Helpers
 #
-#  Methods in this class are available to all the functional tests.
+#  Methods in this class are available to all the functional integration tests.
+#
+#  == Request helpers added from original Functional Test Case
+#  get::                        Adds check_for_params, check_for_unsafe_html
+#  post::                       Adds check_for_params, check_for_unsafe_html
+#  put::                        Adds check_for_params, check_for_unsafe_html
+#  patch::                      Adds check_for_params, check_for_unsafe_html
+#  delete::                     Adds check_for_params, check_for_unsafe_html
+#  check_for_params::           Extracts params from args in above calls
+#  extract_body::               Extracts body from args in above calls
 #
 #  == Request helpers
 #  reget::                      Resets request and calls +get+.
@@ -53,6 +62,8 @@ module ControllerIntegrationExtensions
   ##############################################################################
   #
   #  :section: Request helpers
+  #     For get and post, note that SessionExtensions adds
+  #     follow_redirect! and process_with_error_checking
   #
   ##############################################################################
 
@@ -77,7 +88,7 @@ module ControllerIntegrationExtensions
   def patch(*args, &block)
     args = check_for_params(args)
     super(*args, &block)
-    check_for_unsafe_html! # Disabling, invalidates fixtures in forms -AN 8/20
+    check_for_unsafe_html!
   end
 
   def delete(*args, &block)
@@ -123,9 +134,11 @@ module ControllerIntegrationExtensions
     user = User.authenticate(user, password)
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
+    params = {
+      user: { login: user.login, password: password, remember_me: 1 }
+    }
     # new 8/20 AN, note it has to be user.login not just user (fixture)
-    post account_login_path,
-         params: { user: { login: user.login, password: password, remember_me: 1 } }
+    post(account_login_path(params))
     @request.session[:user_id] = user.id
     session[:user_id] = user.id
     User.current = user
@@ -134,7 +147,7 @@ module ControllerIntegrationExtensions
 
   # Log a user out (affects session only).
   def logout
-    post account_logout_user_path, params: { id: :user_id }
+    post(account_logout_user_path, params: { id: :user_id })
     @request.session[:user_id] = nil
     @request.session[:admin] = nil
     User.current = nil
@@ -148,7 +161,7 @@ module ControllerIntegrationExtensions
       user.save
     end
     # @request.session[:admin] = true
-    post account_turn_admin_on_path, params: { id: :user_id } # new 8/20 AN
+    post(account_turn_admin_on_path, params: { id: :user_id }) # new 8/20 AN
     user
   end
 
