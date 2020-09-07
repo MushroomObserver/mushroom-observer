@@ -109,23 +109,20 @@ class GlossaryTermsController < ApplicationController
   end
 
   def reload_form(form)
-    flash_error(format_model_error_messages)
+    add_glossary_term_error_messages_to_flash
     init_image_form_instance_variables
     render(form)
   end
 
-  # Convert model error messages to a form expected by #flash_error
-  # The model supplies messages like `["message"]``
-  # Change these to "<p>1st message</p><p>2nd message</p>"
-  def format_model_error_messages
-    flash_string = ""
+  def add_glossary_term_error_messages_to_flash
     @glossary_term.errors.messages.values.each do |val|
-      flash_string = flash_string + "<p>#{val.first}</p>"
+      # flash_error takes a string; val is a hash, e.g. ["message"]
+      flash_error(val.first)
     end
-    flash_string
   end
 
-  # Process any image with @glossary_term, returning truthy if neither fails
+  # Process any image together with @glossary_term,
+  # returning truthy if neither fails
   # They must be processed together to correctly validate GlossaryTerm and
   # allow backing out Image if GlossaryTerm is invalid
   def image_and_term_saves_smooth?

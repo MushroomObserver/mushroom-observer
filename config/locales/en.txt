@@ -2266,7 +2266,7 @@
   # glossary_term#destroy
   destroy_glossary_term: "[:destroy_object(type=:glossary_term)]"
 
-  # glossary_term save errors
+  # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
   glossary_error_duplicate_name: Name must be unique.
   glossary_error_description_or_image: Glossary term must have a description or image.
