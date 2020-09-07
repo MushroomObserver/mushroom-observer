@@ -2,11 +2,13 @@
   @title = :show_glossary_term_title.t(name: @glossary_term.name)
 
   tabs = [
-    link_to(:glossary_term_index.t, action: :index),
-    link_to(:create_glossary_term.t, action: :create_glossary_term),
-    link_to(:edit_glossary_term.t, action: :edit_glossary_term,
-            id: @glossary_term.id)
+    link_to(:glossary_term_index.t, glossary_terms_path),
+    link_to(:create_glossary_term.t, new_glossary_term_path),
+    link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
   ]
+  tabs << glossary_term_destroy_button(@glossary_term) if in_admin_mode?
+
+
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
@@ -23,12 +25,18 @@
       <%= @glossary_term.description.tpl %>
     </div>
   <% end %>
+  <%# Form should have links to MycoBank thesaurus and maybe Wikipedia
+      See https://www.pivotaltracker.com/story/show/76992734 %>
 
   <div class="col-xs-12 max-width-text" style="margin-bottom:1em">
     <%= link_with_query(:show_glossary_term_reuse_image.t,
-                        controller: :image, action: :reuse_image_for_glossary_term, id: @glossary_term.id) %><br/>
+                        controller: :image,
+                        action: :reuse_image_for_glossary_term,
+                        id: @glossary_term.id) %><br/>
     <%= link_with_query(:show_glossary_term_remove_image.t,
-                        controller: :image, action: :remove_images_for_glossary_term, id: @glossary_term.id) %><br/>
+                        controller: :image,
+                        action: :remove_images_for_glossary_term,
+                        id: @glossary_term.id) %><br/>
   </div>
 
   <% @objects.each do |image|  %>
