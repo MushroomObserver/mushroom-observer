@@ -109,13 +109,23 @@ class GlossaryTermsController < ApplicationController
   end
 
   def reload_form(form)
-    add_model_error_messages_to_flash
+    flash_error(format_model_error_messages)
     init_image_form_instance_variables
     render(form)
   end
 
-  # Process any image with @glossary_term,
-  # Return truthy if neither fails
+  # Convert model error messages to a form expected by #flash_error
+  # The model supplies messages like `["message"]``
+  # Change these to "<p>1st message</p><p>2nd message</p>"
+  def format_model_error_messages
+    flash_string = ""
+    @glossary_term.errors.messages.values.each do |val|
+      flash_string = flash_string + "<p>#{val.first}</p>"
+    end
+    flash_string
+  end
+
+  # Process any image with @glossary_term, returning truthy if neither fails
   # They must be processed together to correctly validate GlossaryTerm and
   # allow backing out Image if GlossaryTerm is invalid
   def image_and_term_saves_smooth?
@@ -125,9 +135,8 @@ class GlossaryTermsController < ApplicationController
     # return false if image processing fails
     return unless (saved_image = process_upload(image_args))
 
-    # image saved; now to save term
     @glossary_term.add_image(saved_image)
-    return if @glossary_term.save
+    return if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
     added_image.try(:destroy)
@@ -136,11 +145,6 @@ class GlossaryTermsController < ApplicationController
 
   def upload?
     params[:glossary_term][:upload_image]
-  end
-
-  def add_model_error_messages_to_flash
-    model_error_messages = @glossary_term.errors.messages.values.join("\n")
-    flash_error(model_error_messages)
   end
 
   def process_upload(args)
