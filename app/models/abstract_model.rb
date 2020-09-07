@@ -381,26 +381,6 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
-  # Return the path of the "show_<object>" action
-  #
-  #   # normalized controller
-  #   Article.index_action => "articles/12"
-  #
-  #   # unnormalized controller
-  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"	  #
-  def self.show_path(id)
-    if controller_normalized?(name)
-      "/#{show_controller}/#{id}"
-    else
-      "/#{show_controller}/#{show_action}/#{id}"
-    end
-  end
-
-  def show_path
-    self.class.show_url(id)
-  end
-
   # Return the URL of the "show_<object>" action
   #
   #   # normalized controller
