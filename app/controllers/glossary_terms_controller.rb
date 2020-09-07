@@ -136,7 +136,9 @@ class GlossaryTermsController < ApplicationController
     return if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
-    added_image.try(:destroy)
+    # and its flash notice ("Successfully uploaded image ...")
+    saved_image.try(:destroy)
+    flash_clear
     false
   end
 

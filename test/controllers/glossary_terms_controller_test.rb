@@ -167,6 +167,19 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_invalid_name_with_image
+    params = term_with_image_params
+    params[:glossary_term][:name] = ""
+    login
+
+    assert_no_difference("GlossaryTerm.count") do
+      assert_no_difference("Image.count") do
+        post(:create, params: params)
+      end
+    end
+    assert_flash(/#{:glossary_error_name_blank.t}/)
+  end
+
   def test_create_image_save_failure
     login
     # Simulate image.save failure.
