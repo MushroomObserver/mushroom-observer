@@ -127,7 +127,7 @@ class GlossaryTermsController < ApplicationController
   # allow backing out Image if GlossaryTerm is invalid
   def image_and_term_saves_smooth?
     # If no upload file specified, only issue is the term
-    return @glossary_term.save unless upload?
+    return @glossary_term.save unless upload_specified?
 
     # return false if image processing fails
     return unless (saved_image = process_upload(image_args))
@@ -142,7 +142,7 @@ class GlossaryTermsController < ApplicationController
     false
   end
 
-  def upload?
+  def upload_specified?
     params[:glossary_term][:upload_image]
   end
 
