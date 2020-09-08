@@ -12,17 +12,17 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
-  # rubocop disable:Rails/UniqueValidationWithoutIndex
-  # It's not worth indexing :name in the db;
-  # Uniqueness of this attribute is nice, but not critical
   validates :name, presence: {
     message: proc { :glossary_error_name_blank.t }
   }
-  # rubocop enable:Rails/UniqueValidationWithoutIndex
+  # rubocop disable:Rails/UniqueValidationWithoutIndex
+  # It's not worth indexing :name in the db;
+  # Uniqueness of this attribute is nice, but not critical
   validates :name, uniqueness: {
     case_sensitive: false,
     message: proc { :glossary_error_duplicate_name.t }
   }
+  # rubocop enable:Rails/UniqueValidationWithoutIndex
   validate :must_have_description_or_image
 
   after_destroy(:destroy_unused_images)
