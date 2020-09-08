@@ -13,7 +13,7 @@ class API
 
     self.high_detail_includes = [
       :comments,
-      { images: [ :license, :observations ] },
+      { images: [:license, :observations] },
       :location,
       :name,
       { namings: [:name, { votes: :user }] },
