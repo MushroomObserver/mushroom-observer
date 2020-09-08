@@ -33,7 +33,12 @@ File.open(FILE).readlines.each do |line|
   path = "/#{controller}/#{action}"
   rec = data[path] ||= [0, 0, 0, 0]
   rec[0] += time
-  rec[1] += time**2
+  # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
+  # x**2 is not identical to x * x
+  # x**2 does a complicated power function; x * x is a plain old multiplication.
+  # They don't even give the identical results. Usually x * x is more accurate.
+  rec[1] += time * time
+  # rubocop:enable Lint/BinaryOperatorWithIdenticalOperands
   rec[2] += 1
   rec[3] += 1 if robot
 end
@@ -41,7 +46,10 @@ end
 for path, rec in data
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
-  rec[1] = Math.sqrt(ssq / num - avg**2)
+  # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
+  # x**2 is not identical to x * x
+  rec[1] = Math.sqrt(ssq / num - avg * avg)
+  # rubocop:enable Lint/BinaryOperatorWithIdenticalOperands
 end
 
 n = 0
