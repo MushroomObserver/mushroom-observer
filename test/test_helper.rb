@@ -47,6 +47,7 @@ require("mocha/minitest")
 %w[
   general_extensions
   flash_extensions
+  flash_integration_extensions
   controller_extensions
   controller_integration_extensions
   integration_extensions

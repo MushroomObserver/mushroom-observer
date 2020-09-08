@@ -139,8 +139,9 @@ module ControllerIntegrationExtensions
     }
     # new 8/20 AN, note it has to be user.login not just user (fixture)
     post(account_login_path(params))
-    @request.session[:user_id] = user.id
-    session[:user_id] = user.id
+    @test_session_changes[:user_id] = user.id
+    # @request.session[:user_id] = user.id
+    # session[:user_id] = user.id
     User.current = user
     # check welcome page? - AN 08/20
   end
@@ -148,8 +149,10 @@ module ControllerIntegrationExtensions
   # Log a user out (affects session only).
   def logout
     post(account_logout_user_path, params: { id: :user_id })
-    @request.session[:user_id] = nil
-    @request.session[:admin] = nil
+    @test_session_changes[:user_id] = nil
+    @test_session_changes[:admin] = nil
+    # @request.session[:user_id] = nil
+    # @request.session[:admin] = nil
     User.current = nil
   end
 
@@ -160,6 +163,7 @@ module ControllerIntegrationExtensions
       user.admin = 1
       user.save
     end
+    @test_session_changes[:admin] = true
     # @request.session[:admin] = true
     post(account_turn_admin_on_path, params: { id: :user_id }) # new 8/20 AN
     user

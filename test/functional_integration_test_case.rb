@@ -16,7 +16,7 @@
 class FunctionalIntegrationTestCase < ActionDispatch::IntegrationTest
   include GeneralExtensions
   # include SessionExtensions # - These are for Capybara style tests - JH 09/20
-  include FlashExtensions
+  include FlashIntegrationExtensions
   include CheckForUnsafeHtml
   include ControllerIntegrationExtensions
 

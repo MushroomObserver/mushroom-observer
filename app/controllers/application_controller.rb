@@ -221,6 +221,11 @@ class ApplicationController < ActionController::Base
 
   # Catch errors for integration tests, and report stats re completed request.
   def catch_errors_and_log_request_stats
+    if Rails.env.test? && @test_session_changes.present?
+      session.merge!(@test_session_changes)
+    #   @test_session_changes.each { |k, v| session[key] = val }
+    #   @test_session_changes = nil
+    end
     clear_user_globals
     stats = request_stats
     yield
