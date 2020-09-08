@@ -13,7 +13,7 @@ class API
     self.high_detail_includes = [
       :api_keys,
       :location,
-      :image
+      { image: :observations }
     ]
 
     def query_params
