@@ -668,9 +668,9 @@ module DescriptionControllerHelpers
 
   # Return name of group or user if it's a one-user group.
   def group_name(group)
-    return :adjust_permissions_all_users.t if group.name == "all users"
-    return :REVIEWERS.t if group.name == "reviewers"
-    return group.users.first.legal_name if /^user \d+$/.match?(group.name)
+    return(:adjust_permissions_all_users.t) if group.name == "all users"
+    return(:REVIEWERS.t) if group.name == "reviewers"
+    return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
 
     group.name
   end
