@@ -117,7 +117,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # Show non-empty list with owner logged in.
     get(:show_species_list,
-                  id: species_lists(:unknown_species_list).id)
+        id: species_lists(:unknown_species_list).id)
     assert_template(:show_species_list, partial: "_show_comments")
   end
 
@@ -188,7 +188,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_species_lists_for_project
     get(:species_lists_for_project,
-                  id: projects(:bolete_project).id)
+        id: projects(:bolete_project).id)
     assert_template(:list_species_lists)
   end
 
