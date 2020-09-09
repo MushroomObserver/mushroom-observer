@@ -538,6 +538,9 @@ module DescriptionControllerHelpers
 
     # Just ignore illegal changes otherwise.  Form should prevent these,
     # anyway, but user could try to get sneaky and make changes via URL.
+    # check_description_edit_permission is partly broken.
+    # It, LocationController, and NameController need repairs.
+    # See https://www.pivotaltracker.com/story/show/174737948
     if params.is_a?(Hash)
       root = in_admin_mode?
       admin = desc.is_admin?(@user)
