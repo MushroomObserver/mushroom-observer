@@ -443,18 +443,23 @@ module LanguageExporter
     pass = true
 
     while value =~ /\S/
-      next if value.sub!(/^[^\[\]]+/, "") ||
-              value.sub!(/^\[\[/, "") ||
-              value.sub!(/^\]\]/, "") ||
-              value.sub!(/^\[\w+\]/, "") ||
-              value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "") &&
-                (!Regexp.last_match(1) ||
-                validate_square_brackets_args(Regexp.last_match(1)))
+      next if extracted_argument_valid?(value)
+
       pass = false
       break
     end
 
     pass
+  end
+
+  def extracted_argument_valid?(value)
+    value.sub!(/^[^\[\]]+/, "") ||
+      value.sub!(/^\[\[/, "") ||
+      value.sub!(/^\]\]/, "") ||
+      value.sub!(/^\[\w+\]/, "") ||
+      value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "") &&
+        (!Regexp.last_match(1) ||
+        validate_square_brackets_args(Regexp.last_match(1)))
   end
 
   def validate_square_brackets_args(args)
