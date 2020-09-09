@@ -127,6 +127,11 @@ Lint/SuppressedException:
     - 'script/make_eol_xml'
     - 'test/controllers/species_list_controller_test.rb'
 
+# Offense count: 1
+Lint/UnreachableLoop:
+  Exclude:
+    - 'test/unit/image_s3_test.rb'
+
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: ContextCreatingMethods, MethodCreatingMethods.
