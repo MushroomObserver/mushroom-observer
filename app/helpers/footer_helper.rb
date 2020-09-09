@@ -85,7 +85,6 @@ module FooterHelper
   #
   def show_object_footer(obj)
     html = []
-    type = obj.type_tag
     num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
 
     # Old version of versioned object.
@@ -137,6 +136,6 @@ module FooterHelper
     end
 
     html = html.safe_join(safe_br)
-    html = content_tag(:p, html, class: "small")
+    content_tag(:p, html, class: "small")
   end
 end
