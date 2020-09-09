@@ -14,7 +14,6 @@ module VersionHelper
   #   Previous Version: N-1<br/>
   #
   def show_previous_version(obj)
-    type = obj.type_tag
     html = "#{:VERSION.t}: #{obj.version}".html_safe
     latest_version = obj.versions.latest
     if latest_version.respond_to?(:merge_source_id) &&
@@ -112,7 +111,7 @@ module VersionHelper
     end
 
     table = make_table(table, style: "margin-left:20px")
-    html = content_tag(:p, :VERSIONS.t) + table + safe_br
+    content_tag(:p, :VERSIONS.t) + table + safe_br
   end
 
   ##############################################################################
