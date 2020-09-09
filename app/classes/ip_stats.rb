@@ -47,7 +47,7 @@ class IpStats
     end
 
     def add_one_line_to_stats(data, vals, now, do_activity)
-      time, ip, user, load, controller, action, api_key = *vals
+      time, ip, controller = *vals
       hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
       weight = calc_weight(now, Time.parse(time).utc)
       weight /= 2 if controller.to_s == "api"
