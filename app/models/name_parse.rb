@@ -73,8 +73,6 @@ class NameParse
   #   <synonym_search_name>
   #   <synonym_rank> <synonym_search_name>
   def initialize(spl_line)
-    result = []
-    name_str = ""
     @line_str = spl_line.strip_squeeze
     equal_pos = @line_str.index("=")
     if equal_pos
