@@ -213,7 +213,7 @@ class RssLog < AbstractModel
     name = notes.to_s.split("\n", 2).first
     if /^\d{14}/.match?(name)
       # This is an occasional error, when a log wasn't orphaned properly.
-      tag, args, time = parse_log.first
+      _tag, args, _time = parse_log.first
       args[:this] || :rss_log_of_deleted_item.l
     else
       RssLog.unescape(name)
