@@ -281,7 +281,7 @@ def write_sitemap_xml(name, pages)
   file = SITEMAP_FILE.sub("NAME", name)
   File.open(file, "w") do |fh|
     fh.write(SITEMAP_LEAF_HEADER)
-    for str, path, time in pages
+    pages.each do |_str, path, time|
       fh.puts("<url><loc>#{DOMAIN}/#{path}</loc>#{time}</url>")
     end
     fh.write(SITEMAP_LEAF_FOOTER)
@@ -292,7 +292,7 @@ def write_sitemap_html(name, pages)
   file = INDEX_FILE.sub("NAME", name)
   File.open(file, "w") do |fh|
     fh.write(INDEX_HEADER)
-    for str, path, time in pages
+    pages.each do |str, path, _time|
       fh.puts("<a href=\"/#{path}\">#{str}</a><br/>")
     end
     fh.write(INDEX_FOOTER)
@@ -314,7 +314,6 @@ def write_index_xml(sitemaps)
 end
 
 def write_index_html(sitemaps)
-  now = get_current_time
   file = INDEX_FILE.sub("NAME", "index")
   File.open(file, "w") do |fh|
     fh.write(INDEX_HEADER)
@@ -369,10 +368,10 @@ end
 
 def deduce_allowed_actions
   actions = {}
-  for table, type, path in OBJECT_TYPES
+  OBJECT_TYPES.each do |_table, _type, path|
     add_action(actions, path)
   end
-  for str, path, freq in STATIC_PAGES
+  STATIC_PAGES.each do |_str, path, _freq|
     add_action(actions, path)
   end
   actions
