@@ -949,7 +949,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name, params)
     assert_redirected_to(action: :show_name,
                          id: Name.find_by(text_name: text_name2).id)
-    assert(name = Name.find_by(text_name: text_name2))
+    assert(Name.find_by(text_name: text_name2)
     assert_equal(count + 5, Name.count)
   end
 
