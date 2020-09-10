@@ -111,7 +111,7 @@ class EolData
       synonyms[name.synonym_id] << name if name.synonym_id
     end
     names_to_keep = {}
-    synonyms.each do |synonym_id, name_list|
+    synonyms.each do |_synonym_id, name_list|
       name = most_desirable_name(name_list)
       names_to_keep[name.id] = true
     end
