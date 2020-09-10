@@ -217,7 +217,6 @@ class Observation
       return names.first if names.length == 1
       return best if names.blank?
 
-      synonyms = names.map(&:id).join(", ")
       votes = process_votes_for_synonyms
       find_best_synonym(names, votes)
     end
