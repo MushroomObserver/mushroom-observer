@@ -111,7 +111,7 @@ module VersionHelper
     end
 
     table = make_table(table, style: "margin-left:20px")
-    content_tag(:p, :VERSIONS.t) + table + safe_br
+    "#{tag.p(:VERSIONS.t)}#{table}#{safe_br}"
   end
 
   ##############################################################################

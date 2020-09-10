@@ -136,6 +136,6 @@ module FooterHelper
     end
 
     html = html.safe_join(safe_br)
-    content_tag(:p, html, class: "small")
+    tag.p(html, class: "small")
   end
 end
