@@ -39,7 +39,10 @@ class ApiKey < AbstractModel
 
   def self.new_key
     result = String.random(KEY_LENGTH)
+    # rubocop:disable Lint/UselessAssignment:
+    # RuboCop gives false positive
     key = String.random(KEY_LENGTH) while find_by_key(result)
+    # rubocop:enable Lint/UselessAssignment:
     result
   end
 
