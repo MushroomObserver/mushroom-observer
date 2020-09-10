@@ -1150,12 +1150,12 @@ class ApiTest < UnitTestCase
     )
     assert_api_results(imgs)
 
-    # Agaricus is an existing autonym
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_img = Image.create(
       # add notes to avoid breaking later, brittle assertion
       notes: "Agaricus image", user: rolf
     )
-    agaricus_obs = Observation.create(
+    Observation.create(
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
