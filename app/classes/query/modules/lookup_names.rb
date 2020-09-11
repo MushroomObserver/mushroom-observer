@@ -80,10 +80,7 @@ module Query
           if /^\d+$/.match?(val.to_s)
             result << minimal_name_data(Name.safe_find(val))
           else
-            # rubocop:disable Lint/UselessAssignment
-            # cop generates a false positive
-            result += find_matching_names(val)
-            # rubocop:enable Lint/UselessAssignment
+            result + find_matching_names(val)
           end
         end.uniq.reject(&:nil?)
       end
