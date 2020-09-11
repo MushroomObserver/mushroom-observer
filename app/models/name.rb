@@ -115,6 +115,8 @@
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
+#  icn_identifier     (V) numerical identifier issued by an
+#                         ICN-recognized registration repository
 #  text_name::        (V) "Xanthoparmelia" coloradoensis
 #  real_text_name::   (V) "Xanthoparmelia" coloradoënsis
 #  search_name::      (V) "Xanthoparmelia" coloradoensis Fries
@@ -321,6 +323,7 @@ class Name < AbstractModel
     table_name: "names_versions",
     if_changed: %w[
       rank
+      icn_identifier
       text_name
       search_name
       sort_name
