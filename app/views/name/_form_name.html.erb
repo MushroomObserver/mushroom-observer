@@ -16,7 +16,6 @@
       <%= form.select(
             :rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {},
             {class: "form-control"}) %>
-      <label for="name_rank"><%= :Rank.t %>:</label>
     </div>
 
     <div class="form-group indent">
@@ -24,12 +23,12 @@
       <%= form.select(
             :deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{
             class: "form-control"}) %>
-
-      <label for="name_text_name"><%= :form_names_icn_identifier.t %>:</label>
-      <%= form.text_field(:icn_identifier, class: "form-control") %>
-      <p class="help-block"><%= :form_names_icn_identifier_help.t %></p>
     </div>
-   </div>
+    <div class="form-group indent">
+      <label for="name_icn_identifier"><%= :form_names_icn_identifier.t %>: </label>
+      <%= form.text_field(:icn_identifier, class: "form-control", size: 8) %>
+    </div>
+  </div>
 
   <div class="form-group pad-top">
     <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
