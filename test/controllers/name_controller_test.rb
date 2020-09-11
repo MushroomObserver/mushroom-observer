@@ -470,14 +470,16 @@ class NameControllerTest < FunctionalTestCase
                          action: "advanced_search_form")
   end
 
-  def test_edit_name
+  def test_edit_name_get
     name = names(:coprinus_comatus)
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
     assert_form_action(action: "edit_name", id: name.id.to_s)
+    assert_select("form #name_icn_identifier", { count: 1 },
+                  "Form is missing field for icn_identifier")
   end
 
-  def test_create_name
+  def test_create_name_get
     requires_login(:create_name)
     assert_form_action(action: "create_name")
   end
