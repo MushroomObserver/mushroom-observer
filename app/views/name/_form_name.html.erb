@@ -13,11 +13,15 @@
   <div class="form-inline push-down">
     <div class="form-group">
       <label for="name_rank"><%= :Rank.t %>:</label>
-      <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {}, {class: "form-control"}) %>
+      <%= form.select(
+            :rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {},
+            {class: "form-control"}) %>
     </div>
     <div class="form-group indent">
       <label for="name_deprecated"><%= :Status.t %>:</label>
-      <%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{class: "form-control"}) %>
+      <%= form.select(
+            :deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{
+            class: "form-control"}) %>
     </div>
   </div>
 
