@@ -120,10 +120,6 @@ Lint/UselessAccessModifier:
     - 'app/models/rss_log.rb'
     - 'app/models/vote.rb'
 
-# Offense count: 61
-Lint/UselessAssignment:
-  Enabled: false
-
 # Offense count: 9
 # Configuration parameters: CheckForMethodsWithNoSideEffects.
 Lint/Void:

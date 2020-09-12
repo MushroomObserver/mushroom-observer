@@ -671,10 +671,6 @@ class Location < AbstractModel
 
     # Move over any remaining descriptions.
     old_loc.descriptions.each do |desc|
-      xargs = {
-        id: desc,
-        set_location: self
-      }
       desc.location_id = id
       desc.save
     end

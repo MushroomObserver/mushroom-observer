@@ -49,7 +49,6 @@ class RandomTest < IntegrationTestCase
 
   test "sessions" do
     rolf_session = open_session
-    app = rolf_session.app
     rolf_session.login(rolf)
     mary_session = open_session
     mary_session.login(mary)

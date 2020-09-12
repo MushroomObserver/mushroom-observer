@@ -213,7 +213,6 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_location_descriptions_by_author
-    descs = LocationDescription.all
     desc = location_descriptions(:albion_desc)
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(

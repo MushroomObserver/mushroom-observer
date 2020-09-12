@@ -203,7 +203,6 @@ class CommentController < ApplicationController
       if !@comment.save
         flash_object_errors(@comment)
       else
-        type = @target.type_tag
         @comment.log_create
         flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
         redirect_with_query(controller: @target.show_controller,
