@@ -79,7 +79,7 @@ class NameController
 
   def create_new_name
     @name = Name.new_name_from_parsed_name(@parse)
-    set_locked_citation_and_notes
+    set_unparsed_attrs
     unless @name.save_with_log(:log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     end
@@ -102,7 +102,7 @@ class NameController
   def perform_change_existing_name
     update_correct_spelling
     set_name_author_and_rank
-    set_locked_citation_and_notes
+    set_unparsed_attrs
     if !@name.changed?
       any_changes = false
     elsif !@name.save_with_log(:log_name_updated)
@@ -129,7 +129,7 @@ class NameController
   def perform_merge_names(new_name)
     old_display_name_for_log = @name[:display_name]
     @name.attributes = @parse.params
-    set_locked_citation_and_notes
+    set_unparsed_attrs
     # Only change deprecation status if user explicity requested it.
     if @name.deprecated != (params[:name][:deprecated] == "true")
       change_deprecated = !@name.deprecated
@@ -159,10 +159,11 @@ class NameController
     @name.attributes = @parse.params
   end
 
-  def set_locked_citation_and_notes
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes    = params[:name][:notes].to_s.strip
+  def set_unparsed_attrs
+    @name.locked         = params[:name][:locked].to_s == "1" if in_admin_mode?
+    @name.citation       = params[:name][:citation].to_s.strip_squeeze
+    @name.notes          = params[:name][:notes].to_s.strip
+    @name.icn_identifier = params[:name][:icn_identifier]
   end
 
   # Update the misspelling status.

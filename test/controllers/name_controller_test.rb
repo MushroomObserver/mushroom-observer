@@ -749,15 +749,16 @@ class NameControllerTest < FunctionalTestCase
 
   def test_create_name_post
     text_name = "Amanita velosa"
+    assert_not(Name.find_by(text_name: text_name))
     author = "(Peck) Lloyd"
-    name = Name.find_by(text_name: text_name)
-    assert_nil(name)
+    icn_identifier = 485288
     params = {
       name: {
+        icn_identifier: icn_identifier,
         text_name: text_name,
         author: author,
         rank: :Species,
-        citation: "__Mycol. Writ.__ 9(15). 1898."
+        citation: "??Mycol. Writ.?? 9(15). 1898."
       }
     }
     post_requires_login(:create_name, params)
@@ -765,6 +766,7 @@ class NameControllerTest < FunctionalTestCase
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(icn_identifier, name.icn_identifier)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
   end
