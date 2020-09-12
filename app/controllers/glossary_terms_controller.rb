@@ -27,7 +27,7 @@ class GlossaryTermsController < ApplicationController
 
   def new
     @glossary_term = GlossaryTerm.new
-    init_image_form_instance_variables
+    assign_image_form_ivars
   end
 
   def edit
@@ -98,19 +98,17 @@ class GlossaryTermsController < ApplicationController
 
   # --------- Other private methods
 
-  def init_image_form_instance_variables
-    @copyright_holder ||= @user.name
-    @copyright_year ||= Time.now.utc.year
-    @upload_license_id ||= @user.license_id
-    # rubocop:disable Naming/MemoizedInstanceVariableName
-    # RuboCop wants to name the ivar "@update_image_form_instance_variables"
-    @licenses ||= License.current_names_and_ids(@user.license)
-    # rubocop:enable Naming/MemoizedInstanceVariableName
+  def assign_image_form_ivars
+    @copyright_holder = params[:copyright_holder] || @user.name
+    @copyright_year = params.dig(:date, :copyright_year)&.to_i ||
+                      Time.now.utc.year
+    @licenses = License.current_names_and_ids(@user.license)
+    @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
   end
 
   def reload_form(form)
     add_glossary_term_error_messages_to_flash
-    init_image_form_instance_variables
+    assign_image_form_ivars
     render(form)
   end
 
