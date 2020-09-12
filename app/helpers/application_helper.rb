@@ -293,4 +293,17 @@ module ApplicationHelper
       action_name.tr("_", " ").titleize
     end
   end
+
+  # button to destroy object
+  # Used instead of link because DESTROY link requires js
+  # Sample usage:
+  #   destroy_button(object: article)
+  #   destroy_button(object: term, name: :destroy_glossary_term)
+  def destroy_button(object:, name: :DESTROY)
+    button_to(
+      name.t,
+      { action: "destroy", id: object.id },
+      method: :delete, data: { confirm: "Are you sure?" }
+    )
+  end
 end

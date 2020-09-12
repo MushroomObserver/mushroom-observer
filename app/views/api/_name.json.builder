@@ -16,7 +16,7 @@ if !detail
   json.synonym_id object.synonym_id if object.synonym_id
 else
   if object.synonym_id
-    json.synonyms (object.synonyms - [object]).map do |synonym|
+    json.synonyms((object.synonym.names - [object]).map do |synonym|
       {
         id:         synonym.id,
         name:       synonym.real_text_name,
@@ -25,7 +25,7 @@ else
         deprecated: synonym.deprecated ? true : false,
         misspelled: synonym.is_misspelling? ? true : false
       }
-    end
+    end)
   end
   unless object.classification.blank?
     parse = Name.parse_classification(object.classification)
