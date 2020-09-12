@@ -482,6 +482,8 @@ class NameControllerTest < FunctionalTestCase
   def test_create_name_get
     requires_login(:create_name)
     assert_form_action(action: "create_name")
+    assert_select("form #name_icn_identifier", { count: 1 },
+                  "Form is missing field for icn_identifier")
   end
 
   def test_show_name_description
