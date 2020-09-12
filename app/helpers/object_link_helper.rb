@@ -58,7 +58,7 @@ module ObjectLinkHelper
   end
 
   # Create link for name to search in MycoBank
-  def mycobank_url(name)
+  def mycobank_search_url(name)
     unescaped_str = (mycobank_path + mycobank_taxon(name) +
                      mycobank_language_suffix(locale).to_s)
     # CGI::escape.html(unescaped_str) should work, but throws error
