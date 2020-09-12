@@ -747,7 +747,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_create_name_post
     text_name = "Amanita velosa"
-    author = "Lloyd"
+    author = "(Peck) Lloyd"
     name = Name.find_by(text_name: text_name)
     assert_nil(name)
     params = {

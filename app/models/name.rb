@@ -323,7 +323,6 @@ class Name < AbstractModel
     table_name: "names_versions",
     if_changed: %w[
       rank
-      icn_identifier
       text_name
       search_name
       sort_name
@@ -347,7 +346,8 @@ class Name < AbstractModel
     "synonym_id",
     "description_id",
     "classification", # (versioned in the default desc)
-    "locked"
+    "locked",
+    "icn_identifier"
   )
 
   before_create :inherit_stuff
