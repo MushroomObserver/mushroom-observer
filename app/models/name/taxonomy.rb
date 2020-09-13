@@ -83,6 +83,34 @@ class Name < AbstractModel
     false
   end
 
+  # ----------------------------------------------------------------------------
+
+  # Is the Name (potentially) registrable in a fungal nomenclature repository?
+  def registrable?
+    # Almost all Names in MO are potentially registrable, so use a blacklist
+    # instead of a whitelist
+    !unregistrable?
+  end
+
+  # Boolean. True if definitely not registrable.
+  def unregistrable?
+    rank == :Group ||
+    rank == :Domain ||
+    # Use kingdom: Protozoa as a rough proxy for slime molds
+    # Slime molds, which are Protozoa, are in fungal nomenclature registries.
+    # While many Protozoa are not slime molds and there's no efficient way
+    # for MO to tell the difference. So err on the side of registrability.
+    kingdom.present? &&
+    /(Fungi|Protozoa)/ !~ kingdom
+  end
+
+  # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
+  def kingdom
+    parse_classification.find { |rank| rank.first == :Kingdom }&.last
+  end
+
+  # ----------------------------------------------------------------------------
+
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a
@@ -324,8 +352,12 @@ class Name < AbstractModel
     result
   end
 
-  # Parse a +classification+ string.  Returns an Array of pairs of values.
-  # Syntax is a bunch of lines of the form "rank: name":
+  # Parses the Classification String to eturns an Array of pairs of values.
+  #
+  #  [[:Kingdom, "Fungi"], [:Phylum, "Basidiomycota"],
+  #   [:Class, "Basidiomycetes"]]
+  #
+  # String syntax is a bunch of lines of the form "rank: name":
   #
   #   Kingdom: Fungi
   #   Order: Agaricales

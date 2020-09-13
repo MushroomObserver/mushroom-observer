@@ -2230,6 +2230,8 @@ class NameTest < UnitTestCase
     assert_equal("Ach.", name.author)
   end
 
+  # --------------------------------------
+
   # Prove that display_name_brief_authors is shortened correctly
   def test_display_name_brief_authors
     # Name 0 authors
@@ -2879,5 +2881,30 @@ class NameTest < UnitTestCase
     Name.make_sure_names_are_bolded_correctly
     name.reload
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
+
+  def test_unregistrable
+    name = names(:boletus_edulis_group)
+    assert(name.unregistrable?, "Groups should be 'unregistrable'")
+
+    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    assert(name.unregistrable?, "Domains should be 'unregistrable'")
+
+    name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
+    assert(name.unregistrable?,
+           "Taxa outside of Fungi and slime molds should be 'unregistrable'")
+
+    name = names(:coprinus)
+    assert(name.registrable?, "Non-group fungal names should be 'registrable'")
+
+    # Use Protozoa as a rough proxy for slime molds, which are included
+    # fungal nomenclature registries, even though they are not fungi.
+    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+                    classification: "Kingdom: Protozoa")
+    assert(name.registrable?, "Protozoa should be 'registrable'")
+
+    name = Name.new(text_name: "New species", rank: :Species)
+    assert(name.registrable?,
+           "Non-group, non-domain kingdom-less names should be 'registrable'")
   end
 end
