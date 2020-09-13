@@ -61,19 +61,10 @@ SQL relational database or an Excel spreadsheet.
 For more infomration see http://en.wikipedia.org/wiki/Model-view-controller.
 See also the section entitled *Transactions* below.
 
-= Progressive Enhancement
-
-Nathan strongly advocates "Progressive Enhancement" as opposed to "Graceful
-Degradation".  This means that user interface should be designed initially
-with a minimal, text-only browser, without any javascript.  Then you can
-start adding javascript, dynamic HTML and AJAX progressively to this basic
-page.  All features should be available to browsers without javascript.
-
 = Unit Tests
 
 We are very serious about this nowadays.  Every minute "wasted" writing and
-cleaning up unit tests pays for itself tenfold later.  Nathan is a fan of
-test-driven development.  Even if you don't go that far, no code is complete
+cleaning up unit tests pays for itself tenfold later.  No code is complete
 until it has a full suite of unit tests verifying its behavior thoroughly.
 
 A full test suite is critical to Agile software development, because it
