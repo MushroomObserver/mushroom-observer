@@ -119,6 +119,18 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(images_length, glossary_term.images.length)
   end
 
+  def test_validations
+    term = GlossaryTerm.new(name: nil, description: "xxx")
+    assert(term.invalid?, "GlossaryTerm must have a name")
+
+    term = GlossaryTerm.new(name: GlossaryTerm.first.name,
+                            description: "xxx")
+    assert(term.invalid?, "GlossaryTerm name must be unique")
+
+    term = GlossaryTerm.new(name: "xxx", description: nil, thumb_image: nil)
+    assert(term.invalid?, "GlossaryTerm must have description or image")
+  end
+
   # Remove an image from images
   # Remove nil
   # Remove an image that is not associated with this glossary_term
