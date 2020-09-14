@@ -259,6 +259,29 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
+  def test_show_name_icn_identifier_info
+    name = names(:coprinus_comatus) # has an icn-identifier
+    get(:show_name, id: name.id)
+    assert(/#{:ICN_IDENTIFIER.l}.*#{name.icn_identifier}/ =~ @response.body,
+           "Page is missing ICN identifier number")
+    # assert_select("body a[href = '']")
+
+    name = names(:coprinus) # missing its icn identifier
+    label = "#{:ICN_IDENTIFIER.l}"
+    # contains regexp meta characters (???)
+    number_missing = Regexp.escape(:show_name_icn_id_missing.l)
+    get(:show_name, id: name.id)
+    assert(/#{label}.*#{number_missing}/ =~ @response.body,
+           "Page is missing ICN identifier label")
+
+    name = names(:eukarya) # cannot have an icn number
+    get(:show_name, id: name.id)
+    assert(
+      /#{:ICN_IDENTIFIER.l}.*#{:show_name_icn_id_na.l}/ =~ @response.body,
+      "Page is missing ICN identifier n.a."
+    )
+  end
+
   def test_show_name_with_eol_link
     get(:show_name, id: names(:abortiporus_biennis_for_eol).id)
     assert_template(:show_name, partial: "_name")

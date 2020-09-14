@@ -1,3 +1,4 @@
+<p><%= :ICN_IDENTIFIER.t %>: <%= icn_identifier_number(name) %></p>
 <p><%= :RANK.t %>: <%= name.rank ? rank_as_string(name.rank) : :unknown.t %></p>
 <p><%= :STATUS.t %>: <%= name.status %>
   <% if name.is_misspelling? %>
