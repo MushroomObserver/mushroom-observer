@@ -89,7 +89,6 @@ module MapHelper
   end
 
   def mapset_marker_title(set)
-    result = ""
     strings = map_location_strings(set.objects)
     result = if strings.length > 1
                "#{strings.length} #{:locations.t}"

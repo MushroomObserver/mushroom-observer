@@ -15,7 +15,6 @@ class StudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    app = open_session.app
     rolf_session    = open_session.extend(AdminDsl)
     mary_session    = open_session.extend(CreatorDsl)
     katrina_session = open_session.extend(StudentDsl)

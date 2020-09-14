@@ -34,7 +34,6 @@ class Name < AbstractModel
   def change_author(new_author)
     return if rank == :Group
 
-    old_author = author
     new_author2 = new_author.blank? ? "" : " " + new_author
     self.author = new_author.to_s
     self.search_name  = text_name + new_author2

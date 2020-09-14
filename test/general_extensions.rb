@@ -336,7 +336,7 @@ module GeneralExtensions
   #
   def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       assert(nil, msg || "XML response should have \"#{key}\".") unless elem
       elem
