@@ -68,6 +68,7 @@ class NameController
   def reload_name_form_on_error(err)
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
+    @name.icn_identifier = params[:name][:icn_identifier]
     @name.locked     = params[:name][:locked]
     @name.rank       = params[:name][:rank]
     @name.author     = params[:name][:author]
