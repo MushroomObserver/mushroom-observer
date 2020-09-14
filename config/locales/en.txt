@@ -1950,6 +1950,7 @@
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
+  mycobank_search: "MycoBank search"
 
   # name/show_name - links to observations
   show_name_observations: More [:OBSERVATIONS]

@@ -56,7 +56,7 @@ coprinus:
   updated_at: 2007-02-27 20:48:00
   rank: <%= Name.ranks[:Genus] %>
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
-  icn_identifier:
+  icn_identifier:  # has no identifier in MO
 
 coprinus_comatus:
   <<: *DEFAULTS
@@ -92,6 +92,7 @@ stereum_hirsutum:
   sort_name: Stereum hirsutum (Willd.) Pers.
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
+  icn_identifier: # has no identifier in MO
 
 tubaria:
   <<: *DEFAULTS

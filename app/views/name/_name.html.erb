@@ -1,4 +1,21 @@
-<p><%= :ICN_IDENTIFIER.t %>: <%= icn_identifier_number(name) %></p>
+<% if name.icn_identifier? %>
+<p>
+  <%= :ICN_IDENTIFIER.t %>: <%= icn_identifier_number(name) %>
+  <%=
+    link_to("IndexFungorum", index_fungorum_record_url(name.icn_identifier),
+            { target: "_blank" })
+  %>/<%=
+    link_to("MycoBank", mycobank_record_url(name.icn_identifier),
+            { target: "_blank" })
+  %>
+<% elsif name.registrable? %>
+  <%= :ICN_IDENTIFIER.t %>: <%= icn_identifier_number(name) %>
+  <%=
+    link_to(:mycobank_search, mycobank_search_url(name), target: :_blank)
+  %>
+</p>
+<% end %>
+
 <p><%= :RANK.t %>: <%= name.rank ? rank_as_string(name.rank) : :unknown.t %></p>
 <p><%= :STATUS.t %>: <%= name.status %>
   <% if name.is_misspelling? %>

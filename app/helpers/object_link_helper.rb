@@ -51,13 +51,25 @@ module ObjectLinkHelper
     end
   end
 
+  # ----- links to names and records at external websites ----------------------
+
   # Create link for name to MyCoPortal website.
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" +
       name.text_name.tr(" ", "+")
   end
 
-  # Create link for name to search in MycoBank
+  # url for IF record
+  def index_fungorum_record_url(record_id)
+    "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
+  end
+
+  # url for IF record
+  def mycobank_record_url(record_id)
+    "http://www.mycobank.org/MB/#{record_id}"
+  end
+
+  # url for MycoBank name search
   def mycobank_search_url(name)
     unescaped_str = (mycobank_path + mycobank_taxon(name) +
                      mycobank_language_suffix(locale).to_s)
@@ -79,7 +91,7 @@ module ObjectLinkHelper
   # return html parameter of official Mycobank translation,
   # if such translation exists, else return pseudo-English parameter
   # Although MycoBank doesn't recognize &Lang=Eng, this (or another language
-  # parameter else which MycoBank does not recognize) must be be included when
+  # parameter which MycoBank does not recognize) must be be included when
   # switching to the default MycoBank language (English); otherwise MycoBank
   # keeps using the last language it did recognize.
   def mycobank_language_suffix(lang)
@@ -91,6 +103,8 @@ module ObjectLinkHelper
     { de: "Deu", es: "Spa", fr: "Fra", pt: "Por",
       ar: "Ara", fa: "Far", nl: "Nld", th: "Tha", zh: "Zho" }
   end
+
+  # ----------------------------------------------------------------------------
 
   # Wrap user name in link to show_user.
   #

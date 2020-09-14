@@ -3,6 +3,8 @@
 require("test_helper")
 
 class NameControllerTest < FunctionalTestCase
+  include ObjectLinkHelper
+
   def self.report_email(email)
     @@emails << email
   end
@@ -260,26 +262,40 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_show_name_icn_identifier_info
-    name = names(:coprinus_comatus) # has an icn-identifier
+    # Name's icn_identifier is filled in
+    name = names(:coprinus_comatus)
     get(:show_name, id: name.id)
-    assert(/#{:ICN_IDENTIFIER.l}.*#{name.icn_identifier}/ =~ @response.body,
-           "Page is missing ICN identifier number")
-    # assert_select("body a[href = '']")
+    assert(
+      /#{:ICN_IDENTIFIER.l}.*#{name.icn_identifier}/m =~ @response.body,
+      "Page is missing ICN identifier label and/or number"
+    )
+    assert_select(
+      "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", true,
+      "Page is missing a link to IF record"
+    )
+    assert_select(
+      "body a[href='#{mycobank_record_url(name.icn_identifier)}']", true,
+      "Page is missing a link to MB record"
+    )
 
-    name = names(:coprinus) # missing its icn identifier
+    # Name is registrable, but icn_identifier is not filled in
+    name = names(:coprinus)
     label = "#{:ICN_IDENTIFIER.l}"
     # contains regexp meta characters (???)
     number_missing = Regexp.escape(:show_name_icn_id_missing.l)
     get(:show_name, id: name.id)
     assert(/#{label}.*#{number_missing}/ =~ @response.body,
            "Page is missing ICN identifier label")
-
-    name = names(:eukarya) # cannot have an icn number
-    get(:show_name, id: name.id)
-    assert(
-      /#{:ICN_IDENTIFIER.l}.*#{:show_name_icn_id_na.l}/ =~ @response.body,
-      "Page is missing ICN identifier n.a."
+    assert_select(
+      "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", false,
+      "Page should not have link to IF record"
     )
+
+    # Name is not registrable (cannot have an icn number)
+    name = names(:eukarya)
+    get(:show_name, id: name.id)
+    assert(/#{:ICN_IDENTIFIER.l}/ !~ @response.body,
+           "Page should not have ICN identifier label")
   end
 
   def test_show_name_with_eol_link
@@ -292,15 +308,14 @@ class NameControllerTest < FunctionalTestCase
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
-    assert_select("a[href *= 'mycobank.org']")
   end
 
   def test_mycobank_url
-    get(:show_name, id: names(:coprinus_comatus).id)
+    get(:show_name, id: names(:stereum_hirsutum).id)
 
-    # There is a MycoBank link which includes taxon name and MycoBank language
+    # There is a MycoBank searchlink including taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
-      assert_select("a[href *= '/Coprinus%20comatus']")
+      assert_select("a[href *= 'Stereum%20hirsutum']")
       assert_select("a[href *= 'Lang=Eng']")
     end
   end
