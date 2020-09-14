@@ -353,6 +353,9 @@ class Name < AbstractModel
   before_create :inherit_stuff
   before_update :update_observation_cache
   after_update :notify_users
+  validates_uniqueness_of :icn_identifier, {
+    allow_nil: true,
+  }
 
   # Notify webmaster that a new name was created.
   after_create do |name|
