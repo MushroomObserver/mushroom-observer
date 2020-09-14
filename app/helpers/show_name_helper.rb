@@ -136,43 +136,4 @@ module ShowNameHelper
                  include_subtaxa: true,
                  exclude_original_names: true)
   end
-
-  #  ---------------------------------------------------------------------------
-
-  # return ICN identifier and appropriate links
-  # idenfier can be a number, "missing" or "n.a."
-  # links are:
-  # if identifier present, links to IF and MB
-  # if idenfifier missing, link to MB search
-  # else nothing
-  def icn_identifier_number(name)
-    (name.icn_identifier || icn_identifier_placeholder(name)).to_s
-  end
-
-  def icn_identifier_links(name)
-=begin
-    if name.icn_identifier
-      "<%= tag.p(link_to(
-        "IndexFungorum", index_fungorum_record_url(@name), target: :_blank
-      )) %>" +
-      "<%= tag.p(link_to(
-        "MycoBank", mycobank_record_url(@name), target: :_blank
-      )) %>"
-    else
-
-    end
-=end
-  end
-
-  # ============================================================================
-
-  private
-
-  def icn_identifier_placeholder(name)
-    if name.registrable?
-      :show_name_icn_id_missing.t
-    else
-      :show_name_icn_id_na.t
-   end
-  end
 end
