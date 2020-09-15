@@ -1285,7 +1285,7 @@
   # name/create_name
   create_name_title: "[:create_object(type=:name)]"
   create_name_multiple_names_match: There are already multiple names matching "[str]".
-  create_name_duplicate_identifier: "[id]" is used by another Name
+  create_name_duplicate_identifier: is used by another Name
 
   # naming/create
   create_naming_title: "Propose Name for Observation #[id]"
