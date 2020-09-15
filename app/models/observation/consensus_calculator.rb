@@ -164,9 +164,7 @@ class Observation
 
     def find_best_name(votes)
       # Now we can determine the winner among the set of
-      # synonym-groups.  (Nathan calls these synonym-groups "taxa",
-      # because it better uniquely represents the underlying mushroom
-      # taxon, while it might have multiple names.)
+      # synonym-groups.
       best_wv = VoteScale.new
       best_id = nil
       votes.each_key do |taxon_id|
