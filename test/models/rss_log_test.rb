@@ -16,6 +16,15 @@ class RssLogTest < UnitTestCase
     end
   end
 
+  def test_orphan_title
+    log = rss_logs(:location_rss_log)
+    assert_equal(log.notes, log.orphan_title)
+
+    # replace normal top line of log with yyyymmddhhmmss
+    log.notes = Time.zone.now.strftime("%Y%m%d%I%M%S")
+    assert_equal(:rss_log_of_deleted_item.l, log.orphan_title)
+  end
+
   # ---------- helpers ---------------------------------------------------------
 
   def normalized_rss_log_types

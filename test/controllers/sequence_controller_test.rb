@@ -456,7 +456,6 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
-    observer = obs.user
 
     # Prove admin can destroy Sequence
     make_admin("zero")

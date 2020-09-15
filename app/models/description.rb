@@ -238,7 +238,7 @@ class Description < AbstractModel
   #
   def note_status
     fieldCount = sizeCount = 0
-    for (k, v) in all_notes
+    all_notes.each_value do |v|
       if v.present?
         fieldCount += 1
         sizeCount += v.strip_squeeze.length

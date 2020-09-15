@@ -24,31 +24,24 @@ root> visudo
 
 # Create user accounts.
 root> useradd -m -s /bin/bash -G mo,sudo jason
-root> useradd -m -s /bin/bash -G mo,sudo nathan
 root> useradd -m -s /bin/bash -G mo,sudo jdcohenesq
 root> useradd -m -s /bin/bash -G mo,sudo alan
 root> mkdir /home/jason/.ssh
-root> mkdir /home/nathan/.ssh
 root> mkdir /home/jdcohenesq/.ssh
 root> mkdir /home/alan/.ssh
 root> vi /home/jason/.ssh/authorized_keys
-  # copy over from old server
-root> vi /home/nathan/.ssh/authorized_keys
   # copy over from old server
 root> vi /home/jdcohenesq/.ssh/authorized_keys
   # copy over from old server
 root> vi /home/alan/.ssh/authorized_keys
   # copy over from old server
 root> chmod 600 /home/jason/.ssh/authorized_keys
-root> chmod 600 /home/nathan/.ssh/authorized_keys
 root> chmod 600 /home/jdcohenesq/.ssh/authorized_keys
 root> chmod 600 /home/alan/.ssh/authorized_keys
 root> chmod 700 /home/jason/.ssh
-root> chmod 700 /home/nathan/.ssh
 root> chmod 700 /home/jdcohenesq/.ssh
 root> chmod 700 /home/alan/.ssh
 root> chown -R jason:jason /home/jason/.ssh
-root> chown -R nathan:nathan /home/nathan/.ssh
 root> chown -R jdcohenesq:jdcohenesq /home/jdcohenesq/.ssh
 root> chown -R alan:alan /home/alan/.ssh
 root> passwd $USER

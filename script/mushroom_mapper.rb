@@ -77,7 +77,7 @@ name_data.
     names[id] = [text_name, rank, deprecated]
     if ids[text_name]
       id2 = ids[text_name]
-      text_name2, rank2, deprecated2 = names[id2]
+      _text_name2, _rank2, deprecated2 = names[id2]
       if !deprecated && !deprecated2
         warn("Multiple accepted names match #{text_name}: #{id2}, #{id}")
       elsif !deprecated && deprecated2

@@ -231,9 +231,6 @@ module DescriptionControllerHelpers
     if draft = find_description(params[:id].to_s)
       parent = draft.parent
       old = parent.description
-      type = parent.type_tag
-      old_partial   = old.unique_partial_format_name if old
-      draft_partial = draft.unique_partial_format_name
 
       # Must be admin on the draft in order for this to work.  (Must be able
       # to delete the draft after publishing it.)
