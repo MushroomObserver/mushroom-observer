@@ -351,9 +351,6 @@ Understanding Helpers:: http://wiki.rubyonrails.org/rails/pages/UnderstandingHel
 
 == Testing
 
-Nathan has been very diligent writing unit tests for everything.  Just run
-<tt>rake test</tt> and go get something to eat.
-
 (TEMPORARY NOTE: due to a deficiency in +mysql2+ adapter, <tt>rake
 db:test:prepare</tt> must still be run with the old +myslq+ adapter.  To
 facilitate this, we've written a script, script/run_tests, to run the tests

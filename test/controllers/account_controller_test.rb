@@ -30,8 +30,8 @@ class AccountControllerTest < FunctionalTestCase
            login: "newbob",
            password: "newpassword",
            password_confirmation: "newpassword",
-           email: "nathan@collectivesource.com",
-           email_confirmation: "nathan@collectivesource.com",
+           email: "webmaster@mushroomobserver.org",
+           email_confirmation: "webmaster@mushroomobserver.org",
            name: "needs a name!",
            theme: "NULL"
          })
@@ -40,7 +40,7 @@ class AccountControllerTest < FunctionalTestCase
     user = User.last
     assert_equal("newbob", user.login)
     assert_equal("needs a name!", user.name)
-    assert_equal("nathan@collectivesource.com", user.email)
+    assert_equal("webmaster@mushroomobserver.org", user.email)
     assert_nil(user.verified)
     assert_equal(false, user.admin)
 

@@ -57,7 +57,4 @@ See [LICENSE][12] for further details.
 [4]: <https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master>
 [5]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer.png>
 [6]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer>
-[9]: <https://github.com/mo-nathan>
-[10]: <https://github.com/pellaea>
-[11]: <https://github.com/JoeCohen>
 [12]: <https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE>
