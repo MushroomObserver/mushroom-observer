@@ -109,6 +109,8 @@ class Name < AbstractModel
     parse_classification.find { |rank| rank.first == :Kingdom }&.last
   end
 
+  private :kingdom
+
   # ----------------------------------------------------------------------------
 
   # Returns an Array of all of this Name's ancestors, starting with its

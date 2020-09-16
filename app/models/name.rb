@@ -212,6 +212,8 @@
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.
 #  has_notes?::              Does it have notes discussing taxonomy?
+#  registrable?              Could it be registered in fungal nomenclature db?
+#  unregistrable?            Not registrable?
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
