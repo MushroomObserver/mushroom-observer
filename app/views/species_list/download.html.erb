@@ -1,0 +1,89 @@
+<%
+  @title = :species_list_download_title.t
+  
+  tabs = [
+    link_with_query(:species_list_download_back.t, action: :show_species_list)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_tag(add_query_param({ controller: "observer", action: "print_labels" },
+                             @query)) %>
+  <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
+  <%= submit_tag(:species_list_labels_button.l, class: "btn") %>
+</form>
+
+<%= form_tag(add_query_param({ action: "make_report", id: @list.id })) %>
+  <h3 class="margin-top:2em"><%= :species_list_report_header.t %>:</h3>
+
+  <p><%= :download_observations_format.t %>:</p>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:type, :txt, @type == "txt") %>
+      <%= :species_list_show_save_as_txt.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:type, :rtf, @type == "rtf") %>
+      <%= :species_list_show_save_as_rtf.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:type, :csv, @type == "csv") %>
+      <%= :species_list_show_save_as_csv.t %>
+    </li>
+  </ul>
+
+  <%= submit_tag(:species_list_report_button.l, class: "btn") %>
+</form>
+
+<%= form_tag(add_query_param({ controller: "observer",
+                               action: "download_observations" }, @query)) %>
+  <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
+
+  <p><%= :download_observations_format.t %>:</p>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:format, :raw, @format == "raw") %>
+      <%= :download_observations_raw.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :adolf, @format == "adolf") %>
+      <%= :download_observations_adolf.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :darwin, @format == "darwin") %>
+      <%= :download_observations_darwin.t %>
+      (<%= link_to(:download_observations_what_is_this.t, "http://rs.tdwg.org/dwc/index.htm",
+                   target: "_new") %>)
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :symbiota, @format == "symbiota") %>
+      <%= :download_observations_symbiota.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :fundis, @format == "fundis") %>
+      <%= :download_observations_fundis.t %>
+    </li>
+  </ul>
+
+  <p><%= :download_observations_encoding.t %>:</p>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:encoding, "ASCII", @encoding == "ASCII") %>
+      <%= :download_observations_ascii.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, "WINDOWS-1252", @encoding == "WINDOWS-1252") %>
+      <%= :download_observations_windows.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, "UTF-8", @encoding == "UTF-8") %>
+      <%= :download_observations_utf8.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, "UTF-16", @encoding == "UTF-16") %>
+      <%= :download_observations_utf16.t %>
+    </li>
+  </ul>
+
+  <%= submit_tag(:DOWNLOAD.l, class: "btn") %>
+</form>

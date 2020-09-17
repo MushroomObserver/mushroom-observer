@@ -150,7 +150,7 @@ class SiteData
   # approximate.  There are now nontrivial calculations, such as awarding extra
   # points for observations with vouchers, which won't be done right until
   # someone looks at that user's summary page.
-  def self.update_contribution(mode, obj, user_id = nil)
+  def self.update_contribution(mode, obj, user_id = nil, num = 1)
     # Two modes: 1) pass in object, 2) pass in field name
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
@@ -165,7 +165,7 @@ class SiteData
     end
     weight = FIELD_WEIGHTS[field]
     if weight&.positive? && user_id&.positive?
-      update_weight(calc_impact(weight, mode, obj, field), user_id)
+      update_weight(calc_impact(weight * num, mode, obj, field), user_id)
     end
   end
 

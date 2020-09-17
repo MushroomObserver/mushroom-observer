@@ -15,18 +15,20 @@
 #  prev_species_list::       Display previous species list in index.
 #  next_species_list::       Display next species list in index.
 #
-#  make_report::             Display contents of species list as report.
+#  download::                Download observation data.
+#  make_report::             Save observation data as report.
+#  print_labels::            Print observation data as labels.
 #
 #  name_lister::             Efficient javascripty way to build a list of names.
 #  create_species_list::     Create new list.
 #  edit_species_list::       Edit existing list.
 #  upload_species_list::     Same as edit_species_list but gets list from file.
 #  destroy_species_list::    Destroy list.
+#  clear_species_list::      Remove all observations from list.
 #  add_remove_observations:: Add/remove query results to/from a list.
 #  manage_species_lists::    Add/remove one observation from a user's lists.
 #  add_observation_to_species_list::      (post method)
 #  remove_observation_from_species_list:: (post method)
-#  bulk_editor::             Bulk edit observations in species list.
 #
 #  *NOTE*: There is some ambiguity between observations and names that makes
 #  this slightly confusing.  The end result of a species list is actually a
@@ -39,12 +41,14 @@ class SpeciesListController < ApplicationController
   # require "rtf"
 
   before_action :login_required, except: [
+    :download,
     :index_species_list,
     :list_species_lists,
     :make_report,
     :name_lister,
     :next_species_list,
     :prev_species_list,
+    :print_labels,
     :show_species_list,
     :species_list_search,
     :species_lists_by_title,
@@ -186,19 +190,30 @@ class SpeciesListController < ApplicationController
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
-  # For backwards compatibility.  Shouldn't be needed any more.
-  def print_labels
-    species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-    query = Query.lookup_and_save(:SpeciesList, :in_species_list,
-                                  species_list: species_list)
-    redirect_with_query({ controller: :observer, action: print_labels }, query)
-  end
-
   ##############################################################################
   #
   #  :section: Reports
   #
   ##############################################################################
+
+  def download
+    pass_query_params
+    @list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    @type = params[:type] || "txt"
+    @format = params[:format] || "raw"
+    @encoding = params[:encoding] || "UTF-8"
+    @query = lookup_species_list_query(@list)
+  end
+
+  def print_labels
+    species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    query = lookup_species_list_query(species_list)
+    redirect_with_query({ controller: :observer, action: :print_labels }, query)
+  end
+
+  def lookup_species_list_query(list)
+    Query.lookup_and_save(:Observation, :in_species_list, species_list: list)
+  end
 
   # Used by show_species_list.
   def make_report
@@ -381,6 +396,17 @@ class SpeciesListController < ApplicationController
     end
   end
 
+  def clear_species_list
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless @species_list
+
+    if check_permission!(@species_list)
+      @species_list.clear
+      flash_notice(:runtime_species_list_clear_success.t)
+    end
+    redirect_to(action: "show_species_list", id: @species_list)
+  end
+
   def add_remove_observations
     pass_query_params
     @id = params[:species_list].to_s
@@ -506,101 +532,6 @@ class SpeciesListController < ApplicationController
       redirect_to(action: "manage_species_lists", id: observation.id)
     else
       redirect_to(action: "show_species_list", id: species_list.id)
-    end
-  end
-
-  # Bulk-edit observations (at least the ones editable by this user) in a (any)
-  # species list.
-  def bulk_editor
-    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-    return unless @species_list
-
-    @query = create_query(:Observation, :in_species_list,
-                          by: :id,
-                          species_list: @species_list,
-                          where: "observations.user_id = #{@user.id}")
-    @pages = paginate_numbers(:page, 100)
-    @observations = @query.paginate(
-      @pages, include: [:comments, :images, :location, namings: :votes]
-    )
-    @observation = {}
-    @votes = {}
-    @observations.each do |obs|
-      @observation[obs.id] = obs
-      vote = begin
-               obs.consensus_naming.users_vote(@user)
-             rescue StandardError
-               nil
-             end
-      @votes[obs.id] = vote || Vote.new
-    end
-    @no_vote = Vote.new
-    @no_vote.value = 0
-    if @observation.empty?
-      flash_error(:species_list_bulk_editor_you_own_no_observations.t)
-      redirect_to(action: "show_species_list", id: @species_list.id)
-    elsif request.method == "POST"
-      updates = 0
-      stay_on_page = false
-      @observations.each do |obs|
-        args = begin
-                 params[:observation][obs.id.to_s] || {}
-               rescue StandardError
-                 {}
-               end
-        any_changes = false
-        old_vote = begin
-                     @votes[obs.id].value
-                   rescue StandardError
-                     0
-                   end
-        if !args[:value].nil? && args[:value].to_s != old_vote.to_s
-          if obs.namings.empty?
-            obs.namings.create!(user: @user, name_id: obs.name_id)
-          end
-          if (naming = obs.consensus_naming)
-            obs.change_vote(naming, args[:value].to_i, @user)
-            any_changes = true
-            @votes[obs.id].value = args[:value]
-          else
-            flash_warning(
-              :species_list_bulk_editor_ambiguous_namings.
-                t(id: obs.id, name: obs.name.display_name.t)
-            )
-          end
-        end
-        [:when_str, :place_name, :other_notes, :lat, :long, :alt,
-         :is_collection_location, :specimen].each do |method|
-          next if args[method].nil?
-
-          old_val = obs.send(method)
-          old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
-          new_val = bulk_editor_new_val(method, args[method])
-          if old_val != new_val
-            obs.send("#{method}=", new_val)
-            any_changes = true
-          end
-        end
-        if any_changes
-          if obs.save
-            updates += 1
-          else
-            flash_error("") if stay_on_page
-            flash_error("#{:Observation.t} ##{obs.id}:")
-            flash_object_errors(obs)
-            stay_on_page = true
-          end
-        end
-      end
-      return if stay_on_page
-
-      if updates.zero?
-        flash_warning(:runtime_no_changes.t)
-      else
-        flash_notice(:species_list_bulk_editor_success.t(n: updates))
-      end
-
-      redirect_to(action: :show_species_list, id: @species_list.id)
     end
   end
 
@@ -995,44 +926,60 @@ class SpeciesListController < ApplicationController
   # an Array of names where the values are [display_name, name_id].  This
   # is destined for the instance variable @checklist.
   def calc_checklist(query = nil)
-    results = []
-    if query || (query = query_from_session)
-      results = case query.model
-                when Name
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    limit: 1000
-                  )
-                when Observation
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: :names,
-                    limit: 1000
-                  )
-                when Image
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { images_observations: { observations: :names } },
-                    limit: 1000
-                  )
-                when Location
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { observations: :names },
-                    limit: 1000
-                  )
-                when RssLog
-                  query.select_rows(
-                    select: "DISTINCT names.display_name, names.id",
-                    join: { observations: :names },
-                    where: "rss_logs.observation_id > 0",
-                    limit: 1000
-                  )
-                else
-                  []
-                end
+    return unless query ||= query_from_session
+
+    case query.model.name
+    when "Name"
+      checklist_from_name_query(query)
+    when "Observation"
+      checklist_from_observation_query(query)
+    when "Image"
+      checklist_from_image_query(query)
+    when "Location"
+      checklist_from_location_query(query)
+    when "RssLog"
+      checklist_from_rss_log_query(query)
     end
-    results
+  end
+
+  def checklist_from_name_query(query)
+    query.select_rows(
+      select: "DISTINCT names.display_name, names.id",
+      limit: 1000
+    )
+  end
+
+  def checklist_from_observation_query(query)
+    query.select_rows(
+      select: "DISTINCT names.display_name, names.id",
+      join: :names,
+      limit: 1000
+    )
+  end
+
+  def checklist_from_image_query(query)
+    query.select_rows(
+      select: "DISTINCT names.display_name, names.id",
+      join: { images_observations: { observations: :names } },
+      limit: 1000
+    )
+  end
+
+  def checklist_from_location_query(query)
+    query.select_rows(
+      select: "DISTINCT names.display_name, names.id",
+      join: { observations: :names },
+      limit: 1000
+    )
+  end
+
+  def checklist_from_rss_log_query(query)
+    query.select_rows(
+      select: "DISTINCT names.display_name, names.id",
+      join: { observations: :names },
+      where: "rss_logs.observation_id > 0",
+      limit: 1000
+    )
   end
 
   def init_name_vars_for_create
