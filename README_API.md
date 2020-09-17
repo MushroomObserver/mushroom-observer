@@ -1,7 +1,6 @@
 Mushroom Observer API
 =====================
 
-
 Change Log
 ----------
 
@@ -15,23 +14,22 @@ significantly faster.  And a few result structures have been tweaked slightly:
 api_keys -- field names were wrong (created_at, last_used, num_uses)
 
 herbarium_records -- field names were wrong (initial_determination,
-accession_number) 
+accession_number)
 
-images -- moved observation_ids to high-detail response 
+images -- moved observation_ids to high-detail response
 
 observations -- full consensus, location and owner details moved to high detail
 response, now only consensus_id, consensus_name, location_id, location_name and
 owner_id are found in low detail response; votes moved up to top level of the
-structure for high detail response (used to be buried within namings) 
+structure for high detail response (used to be buried within namings)
 
 projects -- removed admin and member ids
 
 species_lists -- removed project_ids, full location details only available in
-high detail response now 
+high detail response now
 
 collection_numbers, comments, external_links, herbarium_records -- only
-includes observation ids now not full details 
-
+includes observation ids now not full details
 
 Overview
 --------
@@ -91,7 +89,7 @@ queries, for example:
 
 These return, respectively, (1) ids of all observations of the genus Tulostoma,
 (2) ids of all observations from Delaware posted in June (any year), and (3) a
-list of accepted query parameters. 
+list of accepted query parameters.
 
 POST Requests
 -------------
@@ -159,7 +157,7 @@ API key for them and post observations.
 All of this is still very unsecure.  If anyone gets hold of a user's API key
 they can readily POST things in their name.  Anyone interested in hooking us up
 with a more sophisticated authentication process is welcome to contribute.
-We'd be happy to help. 
+We'd be happy to help.
 
 Database Tables
 ---------------

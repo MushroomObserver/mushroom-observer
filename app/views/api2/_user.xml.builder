@@ -1,4 +1,7 @@
-xml.tag!(tag,
+# frozen_string_literal: true
+
+xml.tag!(
+  tag,
   id: object.id,
   url: object.show_url,
   type: "user"

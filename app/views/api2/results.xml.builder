@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 xml.instruct!(:xml, version: "1.0")
 xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
