@@ -15,6 +15,17 @@ class PatternSearchTest < UnitTestCase
     assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(str))
   end
 
+  def test_parse_pattern_order
+    parser = PatternSearch::Parser.new("")
+    # make str mutable because it is modified by parse_next_term
+    str = + "one two user:me three"
+    assert_equal([:pattern, "one"], parser.parse_next_term!(str, nil))
+    assert_equal([:pattern, "two"], parser.parse_next_term!(str, :pattern))
+    assert_equal([:user, "me"], parser.parse_next_term!(str, :pattern))
+    assert_raises(PatternSearch::PatternMustBeFirstError) \
+      { parser.parse_next_term!(str, :user) }
+  end
+
   def test_term
     x = PatternSearch::Term.new(:xxx)
     x << 2
@@ -117,82 +128,6 @@ class PatternSearchTest < UnitTestCase
     assert_equal("either", x.parse_yes_no_both)
   end
 
-  def test_parse_to_true_false_string
-    x = PatternSearch::Term.new(:xxx)
-    x.vals = []
-    assert_raises(
-      PatternSearch::MissingValueError
-    ) { x.parse_to_true_false_string }
-    x.vals = [1, 2]
-    assert_raises(
-      PatternSearch::TooManyValuesError
-    ) { x.parse_to_true_false_string }
-    x.vals = ["1"]
-    assert_equal("TRUE", x.parse_to_true_false_string)
-    x.vals = ["yes"]
-    assert_equal("TRUE", x.parse_to_true_false_string)
-    x.vals = ["true"]
-    assert_equal("TRUE", x.parse_to_true_false_string)
-    x.vals = ["TRUE"]
-    assert_equal("TRUE", x.parse_to_true_false_string)
-
-    x.vals = ["0"]
-    assert_equal("FALSE", x.parse_to_true_false_string)
-    x.vals = ["no"]
-    assert_equal("FALSE", x.parse_to_true_false_string)
-    x.vals = ["false"]
-    assert_equal("FALSE", x.parse_to_true_false_string)
-    x.vals = ["FALSE"]
-    assert_equal("FALSE", x.parse_to_true_false_string)
-
-    x.vals = ["xxx"]
-    assert_raises(
-      PatternSearch::BadBooleanError
-    ) { x.parse_to_true_false_string }
-    x.vals = ["no"]
-    assert_raises(
-      PatternSearch::BadYesError
-    ) { x.parse_to_true_false_string(:only_yes) }
-  end
-
-  def test_parse_to_null_not_null_string
-    x = PatternSearch::Term.new(:xxx)
-    x.vals = []
-    assert_raises(
-      PatternSearch::MissingValueError
-    ) { x.parse_to_null_not_null_string }
-    x.vals = [1, 2]
-    assert_raises(
-      PatternSearch::TooManyValuesError
-    ) { x.parse_to_null_not_null_string }
-    x.vals = ["1"]
-    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
-    x.vals = ["yes"]
-    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
-    x.vals = ["true"]
-    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
-    x.vals = ["TRUE"]
-    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
-
-    x.vals = ["0"]
-    assert_equal("NULL", x.parse_to_null_not_null_string)
-    x.vals = ["no"]
-    assert_equal("NULL", x.parse_to_null_not_null_string)
-    x.vals = ["false"]
-    assert_equal("NULL", x.parse_to_null_not_null_string)
-    x.vals = ["FALSE"]
-    assert_equal("NULL", x.parse_to_null_not_null_string)
-
-    x.vals = ["xxx"]
-    assert_raises(
-      PatternSearch::BadBooleanError
-    ) { x.parse_to_null_not_null_string }
-    x.vals = ["no"]
-    assert_raises(
-      PatternSearch::BadYesError
-    ) { x.parse_to_null_not_null_string(:only_yes) }
-  end
-
   def test_parse_float
     x = PatternSearch::Term.new(:xxx)
     x.vals = []
@@ -272,6 +207,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_herbaria)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_herbaria)
+    x.vals = ["*Herbarium"]
+    expect = Herbarium.where("name LIKE '%Herbarium'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_herbaria.sort)
   end
 
   def test_parse_list_of_locations
@@ -289,6 +228,12 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_locations)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
+    x.vals = ["*California, USA"]
+    expect = Location.where("name LIKE '%California, USA'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_locations.sort)
+    x.vals = ["USA, California*"]
+    assert_equal(expect, x.parse_list_of_locations.sort)
   end
 
   def test_parse_list_of_projects
@@ -302,6 +247,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_projects)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_projects)
+    x.vals = ["two*"]
+    expect = Project.where("title LIKE 'two%'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_projects.sort)
   end
 
   def test_parse_list_of_species_lists
@@ -318,6 +267,10 @@ class PatternSearchTest < UnitTestCase
     assert_equal([ids.first], x.parse_list_of_species_lists)
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_species_lists)
+    x.vals = ["query*"]
+    expect = SpeciesList.where("title LIKE 'query%'").map(&:id).sort
+    assert_operator(expect.count, :>, 1)
+    assert_equal(expect, x.parse_list_of_species_lists.sort)
   end
 
   def test_parse_list_of_users
@@ -332,6 +285,12 @@ class PatternSearchTest < UnitTestCase
     assert_equal([dick.id], x.parse_list_of_users)
     x.vals = [rolf.id.to_s, mary.id.to_s, dick.id.to_s]
     assert_equal([rolf.id, mary.id, dick.id], x.parse_list_of_users)
+    x.vals = ["me"]
+    assert_raises(PatternSearch::UserMeNotLoggedInError) \
+      { x.parse_list_of_users }
+    User.current = mary
+    x.vals = ["me"]
+    assert_equal([mary.id], x.parse_list_of_users)
   end
 
   def test_parse_date_range
@@ -362,6 +321,36 @@ class PatternSearchTest < UnitTestCase
     assert_equal(%w[03-12 05-01], x.parse_date_range)
     x.vals = ["1-2-3-4-5-6"]
     assert_raises(PatternSearch::BadDateRangeError) { x.parse_date_range }
+  end
+
+  def test_parse_date_range_english
+    today = Time.zone.parse("2020-09-03")
+    ActiveSupport::TimeZone.any_instance.stubs(:today).returns(today)
+    x = PatternSearch::Term.new(:xxx)
+    x.vals = ["today"]
+    assert_equal(%w[2020-09-03 2020-09-03], x.parse_date_range)
+    x.vals = ["yesterday"]
+    assert_equal(%w[2020-09-02 2020-09-02], x.parse_date_range)
+    x.vals = ["3 days ago-today"]
+    assert_equal(%w[2020-08-31 2020-09-03], x.parse_date_range)
+    x.vals = ["this week"]
+    assert_equal(%w[2020-08-31 2020-09-06], x.parse_date_range)
+    x.vals = ["last week"]
+    assert_equal(%w[2020-08-24 2020-08-30], x.parse_date_range)
+    x.vals = ["3_weeks_ago-yesterday"]
+    assert_equal(%w[2020-08-10 2020-09-02], x.parse_date_range)
+    x.vals = ["this_month"]
+    assert_equal(%w[2020-09-01 2020-09-30], x.parse_date_range)
+    x.vals = ["last month"]
+    assert_equal(%w[2020-08-01 2020-08-31], x.parse_date_range)
+    x.vals = ["3 months ago-2 months ago"]
+    assert_equal(%w[2020-06-01 2020-07-31], x.parse_date_range)
+    x.vals = ["this_year"]
+    assert_equal(%w[2020-01-01 2020-12-31], x.parse_date_range)
+    x.vals = ["last year"]
+    assert_equal(%w[2019-01-01 2019-12-31], x.parse_date_range)
+    x.vals = ["10 years ago"]
+    assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
   end
 
   def test_parse_rank_range
@@ -398,14 +387,24 @@ class PatternSearchTest < UnitTestCase
     assert_equal(:pattern, x.terms.first.var)
     assert_equal("abc", x.terms.first.parse_pattern)
 
-    x = PatternSearch::Parser.new(' abc  user:dick "tack  this  on"')
-    assert_equal('abc user:dick "tack this on"', x.clean_incoming_string)
+    x = PatternSearch::Parser.new(' abc   "tack  this  on"  user:dick  ')
+    assert_equal('abc "tack this on" user:dick', x.clean_incoming_string)
     assert_equal(2, x.terms.length)
     y, z = x.terms.sort_by(&:var)
     assert_equal(:pattern, y.var)
     assert_equal('abc "tack this on"', y.parse_pattern)
     assert_equal(:user, z.var)
     assert_equal([dick.id], z.parse_list_of_users)
+  end
+
+  def test_translated_parameter_names
+    # Ensure the translations are initialized
+    assert_equal("user", :search_term_user.t)
+    TranslationString.translations(:fr)[:search_term_user] = "utilisateur"
+    I18n.locale = "fr"
+    x = PatternSearch::Observation.new("")
+    assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
+    assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
   end
 
   def test_observation_search
@@ -529,6 +528,14 @@ class PatternSearchTest < UnitTestCase
     expect = projects(:bolete_project).observations
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
+    assert_obj_list_equal(expect, x.query.results, :sort)
+  end
+
+  def test_observation_search_project_lists
+    expect = projects(:bolete_project).species_lists.
+             map(&:observations).flatten
+    assert(expect.count.positive?)
+    x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 

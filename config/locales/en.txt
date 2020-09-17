@@ -1007,6 +1007,75 @@
   lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
+  # These are the search terms we look for, e.g. "date" in "date:today".
+  search_term_author: author
+  search_term_citation: citation
+  search_term_classification: classification
+  search_term_comments: comments
+  search_term_confidence: confidence
+  search_term_created: created
+  search_term_date: date
+  search_term_deprecated: deprecated
+  search_term_east: east
+  search_term_exclude_consensus: exclude_consensus
+  search_term_has_author: has_author
+  search_term_has_citation: has_citation
+  search_term_has_classification: has_classification
+  search_term_has_comments: has_comments
+  search_term_has_description: has_description
+  search_term_has_field: has_field
+  search_term_has_location: has_location
+  search_term_has_name: has_name
+  search_term_has_notes: has_notes
+  search_term_has_observations: has_observations
+  search_term_has_synonyms: has_synonyms
+  search_term_herbarium: herbarium
+  search_term_images: images
+  search_term_include_all_name_proposals: include_all_name_proposals
+  search_term_include_misspellings: include_misspellings
+  search_term_include_subtaxa: include_subtaxa
+  search_term_include_synonyms: include_synonyms
+  search_term_is_collection_location: is_collection_location
+  search_term_lichen: lichen
+  search_term_list: list
+  search_term_location: location
+  search_term_modified: modified
+  search_term_name: name
+  search_term_north: north
+  search_term_notes: notes
+  search_term_project: project
+  search_term_project_lists: project_lists
+  search_term_rank: rank
+  search_term_region: region
+  search_term_sequence: sequence
+  search_term_south: south
+  search_term_specimen: specimen
+  search_term_user: user
+  search_term_west: west
+
+  # Words recognized in search bar.
+  # e.g. "user:me"
+  search_value_me: me
+  # e.g. "has_images:yes"
+  search_value_true: "yes|true"
+  # e.g. "has_specimen:no"
+  search_value_false: "no|false"
+  # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
+  search_value_both: "both|either"
+  # e.g. "date:last month-today"
+  search_value_today: today
+  search_value_yesterday: yesterday
+  search_value_days_ago: N days ago
+  search_value_this_week: this week
+  search_value_last_week: last week
+  search_value_weeks_ago: N weeks ago
+  search_value_this_month: this month
+  search_value_last_month: last month
+  search_value_months_ago: N months ago
+  search_value_this_year: this year
+  search_value_last_year: last year
+  search_value_years_ago: N years ago
+
   # Rss log messages.
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
@@ -1573,7 +1642,7 @@
   list_observations_suggestions: Other Links
   list_observation_name: "[:NAME]"
   list_observation_observations: Observations of
-  list_observations_add_to_list: Add/Remove From Species List
+  list_observations_add_to_list: Add To / Remove From Species List
   list_observations_download_as_csv: Download Observations
 
   # location/list_place_names (list_locations)
@@ -2160,22 +2229,25 @@
 
   # species_list/show_species_list
   species_list_show_title: "[:SPECIES_LIST]: [name]"
+  species_list_show_download: Downloads, Reports, Print Labels
   species_list_show_save_as_txt: Save as Plain Text
   species_list_show_save_as_rtf: Save as Rich Text
   species_list_show_save_as_csv: Save as Spreadsheet
-  species_list_show_edit: Edit Species List
-  species_list_show_clone_list: Clone Species List
-  species_list_show_set_source: Save for Later
-  species_list_show_bulk_edit: Bulk Editor
-  species_list_show_members: Members
-  species_list_show_no_members: This list contains no observations.
-  species_list_show_clone_list_help: Create a new species list using this one as the template.
-  species_list_show_set_source_help: Save this species list for the next time you create or edit a species list. It will display a list of the species in this list for you to choose from.
-  species_list_show_bulk_edit_help: Bulk-edit any observations you own in this species list.
+  species_list_show_print_labels: Print Labels
+  species_list_show_set_source: Save This List for Later
+  species_list_show_set_source_help: Save this list for the next time you create or edit a species list. It will display a list of the species in this list for you to choose from.
+  species_list_show_clone_list: Make a Copy of This List
+  species_list_show_add_remove_from_another_list: Add To / Remove From Another List
   species_list_show_manage_projects: Manage Projects
   species_list_show_manage_projects_help: Change which projects this list and its observations and images are attached to.
   species_list_show_manage_observations_too: If you would like to attach/remove observations or images, too, please use the "[:species_list_show_manage_projects]" link.
-  species_list_show_print_labels: Print Labels
+  species_list_show_edit: Edit This List
+  species_list_show_clear_list: Clear This List
+  species_list_show_destroy: Destroy This List
+  species_list_show_members: Members
+  species_list_show_no_members: This list contains no observations.
+  species_list_show_regular_index: Regular Index
+  species_list_show_regular_index_help: Show observations in the "regular" index as a table of thumbnails.
 
   # species_list/species_lists_by_title
   species_list_by_title_title: "[:SPECIES_LISTS] by Title"
@@ -2188,6 +2260,15 @@
   species_list_upload_title: "[:UPLOAD] [:SPECIES_LIST]"
   species_list_upload_label: "[:UPLOAD] [:SPECIES_LIST]"
   species_list_upload_help: A species list can either be a simple text file with each name on its own line, or the 'list' format generated by the Name species listing program.
+
+  # species_list/download
+  species_list_download_title: Species List Reports and Downloads
+  species_list_download_back: Back to Species List
+  species_list_labels_header: Print Labels for Observation
+  species_list_labels_button: Print Labels
+  species_list_report_header: Save a Checklist of Names
+  species_list_report_button: Save Names
+  species_list_download_header: Download Observation Data
 
   # sequence/add_sequence
   sequence_add_title: Add [:SEQUENCE]
@@ -3267,6 +3348,7 @@
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
+  observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
@@ -3598,6 +3680,7 @@
   runtime_prefs_password_no_match: Password and confirmation did not match.
   runtime_search_has_expired: Your query has expired, please try again.
   runtime_show_observation_success: Successfully changed vote.
+  runtime_species_list_clear_success: Successfully removed all observations from list.
   runtime_suggest_one_alternate: No [types] match "[match]", maybe you meant this?
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
   runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
@@ -3732,6 +3815,7 @@
 
   # Pattern search error messages.
   pattern_search_syntax_error: Syntax error in pattern at [string].
+  pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
@@ -3748,6 +3832,7 @@
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
+  pattern_search_user_me_not_logged_in_error: "The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!"
 
   # content for html header title tag,
   # used when there are no hits for a list or search

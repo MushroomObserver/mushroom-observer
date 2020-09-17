@@ -3,11 +3,7 @@
 module PatternSearch
   # Base class for PatternSearch; handles everything but build_query
   class Base
-    attr_accessor :errors
-    attr_accessor :parser
-    attr_accessor :flavor
-    attr_accessor :args
-    attr_accessor :query
+    attr_accessor :errors, :parser, :flavor, :args, :query
 
     def initialize(string)
       self.errors = []
@@ -22,11 +18,10 @@ module PatternSearch
       self.flavor = :all
       self.args   = {}
       parser.terms.each do |term|
-        param = params[term.var]
         if term.var == :pattern
           self.flavor = :pattern_search
           args[:pattern] = term.parse_pattern
-        elsif param
+        elsif param = lookup_param(term.var)
           query_param, parse_method = param
           args[query_param] = term.send(parse_method)
         else
@@ -45,6 +40,17 @@ module PatternSearch
       params.keys.map do |arg|
         "* *#{arg}*: #{:"#{model.type_tag}_term_#{arg}".l}"
       end.join("\n")
+    end
+
+    def lookup_param(var)
+      # See if this var matches an English parameter name first.
+      return params[var] if params[var].present?
+
+      # Then check if any of the translated parameter names match.
+      params.each_key do |key|
+        return params[key] if var.to_s == :"search_term_#{key}".l.tr(" ", "_")
+      end
+      nil
     end
   end
 end

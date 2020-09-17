@@ -109,6 +109,23 @@ class SpeciesList < AbstractModel
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
 
+  def self.find_by_title_with_wildcards(str)
+    find_using_wildcards("title", str)
+  end
+
+  def clear
+    num = observations.count
+    SiteData.update_contribution(:del, :species_list_entries, user_id, num)
+
+    # "observations.delete_all" is very similar, however it requires loading
+    # all of the observations (and not just their ids).  Note also that we
+    # would still have to update the user's contribution anyway.
+    SpeciesList.connection.delete(%(
+      DELETE FROM observations_species_lists
+      WHERE species_list_id = #{id}
+    ))
+  end
+
   ##############################################################################
   #
   #  :section: Names
