@@ -1,12 +1,14 @@
-json.id                object.id
-json.type              "collection_number"
-json.collector         object.name.to_s if object.name.present?
-json.number            object.number.to_s if object.number.present?
-json.created_at        object.created_at.try(&:utc)
-json.updated_at        object.updated_at.try(&:utc)
+json.id         object.id
+json.type       "collection_number"
+json.collector  object.name
+json.number     object.number
+json.created_at object.created_at.try(&:utc)
+json.updated_at object.updated_at.try(&:utc)
 if !detail
-  json.user_id         object.user_id
+  json.user_id  object.user_id
 else
-  json.user            json_user(object.user)
-  json.observation_ids object.observation_ids if object.observation_ids.any?
+  json.user { json_detailed_object(json, object.user) }
+  json.observations object.observations.map do |observation|
+    json_detailed_object(json, observation)
+  end
 end

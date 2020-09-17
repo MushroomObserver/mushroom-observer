@@ -1,75 +1,58 @@
 json.id                     object.id
 json.type                   "observation"
 json.date                   object.when
-json.latitude               object.public_lat if object.lat.present?
-json.longitude              object.public_long if object.long.present?
-json.altitude               object.alt if object.alt.present?
-json.gps_hidden             object.gps_hidden ? true : false
+json.latitude               object.public_lat
+json.longitude              object.public_long
+json.altitude               object.alt
 json.specimen_available     object.specimen ? true : false
 json.is_collection_location object.is_collection_location ? true : false
-json.confidence             object.vote_cache if object.vote_cache.present?
-json.created_at             object.created_at.try(&:utc)
-json.updated_at             object.updated_at.try(&:utc)
-json.number_of_views        object.num_views
-json.last_viewed            object.last_view.try(&:utc)
-if object.notes.present?
+json.confidence             object.vote_cache
+unless object.notes.blank?
   notes_fields = object.notes.except(Observation.other_notes_key)
   other_notes  = object.notes_part_value(Observation.other_notes_key)
   notes_fields.each do |key, val|
     val.replace(val.to_s.tpl_nodiv)
-    notes_fields.delete_key(key) if val.blank?
   end
-  json.notes_fields         notes_fields if notes_fields.any?
-  json.notes                other_notes.to_s.tpl_nodiv if other_notes.present?
+  json.notes_fields         notes_fields
+  json.notes                other_notes.to_s.tpl_nodiv
 end
-if !detail
-  json.owner_id             object.user_id
-  json.consensus_id         object.name_id if object.name_id
-  json.consensus_name       object.text_name if object.text_name.present?
-  json.location_id          object.location_id if object.location_id
-  json.location_name        object.where if object.where.present?
-  json.primary_image_id     object.thumb_image_id if object.thumb_image_id
+json.created_at             object.created_at.try(&:utc)
+json.updated_at             object.updated_at.try(&:utc)
+json.number_of_views        object.num_views
+json.last_viewed            object.last_view.try(&:utc)
+json.owner                  { json_detailed_object(json, object.user) }
+json.consensus              { json_detailed_object(json, object.name) }
+if object.location
+  json.location { json_detailed_object(json, object.location) }
 else
-  json.owner                json_user(object.user)
-  json.consensus            json_name(object.name) if object.name
-  if object.namings.any?
-    json.namings(object.namings.map { |x| json_naming(x) })
+  json.location_name object.where
+end
+if detail
+  json.collection_numbers object.collection_numbers.map do |collection_number|
+    json_detailed_object(json, collection_number)
   end
-  if object.votes.any?
-    json.votes(object.votes.map { |x| json_vote(x) })
+  json.herbarium_records object.herbarium_records.map do |herbarium_record|
+    json_detailed_object(json, herbarium_record)
   end
-  if object.location
-    json.location           json_location(object.location)
-  else
-    json.location_name      object.where if object.where.present?
+  json.sequences object.sequences.map do |sequence|
+    json_detailed_object(json, sequence)
+  end
+  json.namings object.namings.map do |naming|
+    json_detailed_object(json, naming, true)
   end
   other_images = []
   object.images.each do |image|
     # Do it this way, else will not use eager-loaded image instance.
     if image.id == object.thumb_image_id
-      json.primary_image json_image(image)
+      json.primary_image { json_detailed_object(json, image) }
     else
       other_images << image
     end
   end
-  if other_images.any?
-    json.images(other_images.map { |x| json_image(x) })
+  json.images other_images.map do |image|
+    json_detailed_object(json, image)
   end
-  if object.comments.any?
-    json.comments(object.comments.map { |x| json_comment(x) })
-  end
-  if object.collection_numbers.any?
-    json.collection_numbers(object.collection_numbers.
-                            map { |x| json_collection_number(x) })
-  end
-  if object.herbarium_records.any?
-    json.herbarium_records(object.herbarium_records.
-                           map { |x| json_herbarium_record(x) })
-  end
-  if object.sequences.any?
-    json.sequences(object.sequences.map { |x| json_sequence(x) })
-  end
-  if object.external_links.any?
-    json.external_links(object.external_links.map { |x| json_external_link(x) })
+  json.comments object.comments.map do |comment|
+    json_detailed_object(json, comment)
   end
 end

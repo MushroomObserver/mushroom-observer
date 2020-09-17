@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = API Inline Partials
+#  = API2 Inline Partials
 #
 #  These "inline partials" speed up tests by half an order of magnitude.
 #  (High detail observations query with 1000 results went from 7.7 seconds
@@ -12,7 +12,7 @@
 #
 ################################################################################
 
-module ApiInlineHelper
+module Api2InlineHelper
   def json_api_key(api_key)
     strip_hash(id: api_key.id,
                key: api_key.key.to_s,

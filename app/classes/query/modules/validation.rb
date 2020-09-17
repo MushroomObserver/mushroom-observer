@@ -74,7 +74,7 @@ module Query
           val[0, MO.query_max_array].map do |val2|
             scalar_validate(arg, val2, arg_type)
           end
-        elsif val.is_a?(API::OrderedRange)
+        elsif val.is_a?(API2::OrderedRange)
           [scalar_validate(arg, val.begin, arg_type),
            scalar_validate(arg, val.end, arg_type)]
         else

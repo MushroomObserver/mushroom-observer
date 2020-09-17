@@ -1,25 +1,20 @@
-json.id                object.id
-json.type              "species_list"
-json.title             object.title.to_s
-json.notes             object.notes.to_s.tpl_nodiv if object.notes.present?
-json.date              object.when
-json.created_at        object.created_at.try(&:utc)
-json.updated_at        object.updated_at.try(&:utc)
-if !detail
-  if object.location_id
-    json.location_id   object.location_id
-  else
-    json.location_name object.where.to_s if object.where.present?
-  end
-  json.owner_id        object.user_id
+json.id         object.id
+json.type       "species_list"
+json.title      object.title
+json.date       object.when
+json.created_at object.created_at.try(&:utc)
+json.updated_at object.updated_at.try(&:utc)
+json.notes      object.notes.to_s.tpl_nodiv
+if object.location
+  json.location { json_detailed_object(json, object.location) }
 else
-  if object.location
-    json.location      json_location(object.location)
-  else
-    json.location_name object.where.to_s if object.where.present?
-  end
-  json.owner           json_user(object.user)
-  if object.comments.any?
-    json.comments(object.comments.map { |x| json_comment(x) })
-  end
+  json.location_name object.where
+end
+if !detail
+  json.owner_id object.user_id
+else
+  json.owner           { json_detailed_object(json, object.user) }
+  json.observation_ids object.observation_ids
+  json.comment_ids     object.comment_ids
+  json.project_ids     object.project_ids
 end

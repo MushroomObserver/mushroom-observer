@@ -8,107 +8,127 @@
 ################################################################################
 
 module ApiHelper
-  include ApiInlineHelper
-
   def xml_boolean(xml, tag, val)
     str = val ? "true" : "false"
     xml.tag!(tag, type: "boolean", value: str)
+  rescue StandardError
   end
 
   def xml_integer(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:to_i)
-
-    xml.tag!(tag, str.to_s, type: "integer")
+    str = begin
+            "%d" % val
+          rescue StandardError
+            ""
+          end
+    xml.tag!(tag, str, type: "integer")
+  rescue StandardError
   end
 
   def xml_float(xml, tag, val, places)
-    return if val.blank?
-    return unless str = val.try(:round, places)
-
-    xml.tag!(tag, str.to_s, type: "float")
+    str = begin
+            "%.#{places}f" % val
+          rescue StandardError
+            ""
+          end
+    xml.tag!(tag, str, type: "float")
+  rescue StandardError
   end
 
   def xml_string(xml, tag, val)
-    return if val.blank?
-
-    xml.tag!(tag, val.to_s, type: "string", content_type: "text/plain")
+    if val.present?
+      str = val.to_s
+      xml.tag!(tag, str, type: "string", content_type: "text/plain")
+    end
+  rescue StandardError
   end
 
   def xml_html_string(xml, tag, val)
-    return if val.blank?
-
-    xml.tag!(tag, val.to_s, type: "string", content_type: "text/html")
+    if val.present?
+      str = val.to_s
+      xml.tag!(tag, str, type: "string", content_type: "text/html")
+    end
+  rescue StandardError
   end
 
   def xml_sql_string(xml, tag, val)
-    return if val.blank?
-
-    xml.tag!(tag, val.to_s, type: "string", content_type: "application/x-sql")
+    if val.present?
+      str = val.to_s
+      xml.tag!(tag, str, type: "string", content_type: "application/x-sql")
+    end
+  rescue StandardError
   end
 
   def xml_date(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:api_date)
-
-    xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
+    if val
+      str = begin
+              val.api_date
+            rescue StandardError
+              ""
+            end
+      xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
+    end
+  rescue StandardError
   end
 
   def xml_datetime(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:utc).try(:api_time)
-
-    xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
+    if val
+      str = val.utc.api_time
+      xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
+    end
+  rescue StandardError
   end
 
   def xml_ellapsed_time(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:round, 4)
-
-    xml.tag!(tag, str.to_s, type: "float", units: "seconds")
+    str = "%.4f" % val
+    xml.tag!(tag, str, type: "float", units: "seconds")
+  rescue StandardError
   end
 
   def xml_latitude(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:round, 4)
-
-    xml.tag!(tag, str.to_s, type: "float", units: "degrees north")
+    str = "%.4f" % val
+    xml.tag!(tag, str, type: "float", units: "degrees north")
+  rescue StandardError
   end
 
   def xml_longitude(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:round, 4)
-
-    xml.tag!(tag, str.to_s, type: "float", units: "degrees east")
+    str = "%.4f" % val
+    xml.tag!(tag, str, type: "float", units: "degrees east")
+  rescue StandardError
   end
 
   def xml_altitude(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:to_i)
+    str = "%d" % val
+    xml.tag!(tag, str, type: "integer", units: "meters")
+  rescue StandardError
+  end
 
-    xml.tag!(tag, str.to_s, type: "integer", units: "meters")
+  def xml_undefined_location(xml, tag, val)
+    if User.current_location_format == :scientific
+      val = Location.reverse_name(val)
+    end
+    xml.tag!(tag, val, type: "string")
+  rescue StandardError
   end
 
   def xml_naming_reason(xml, tag, val)
     if val.notes.blank?
       xml.tag!(tag, category: val.label.l)
     else
-      xml.tag!(tag, val.notes.to_s, category: val.label.l)
+      str = val.notes.to_s
+      xml.tag!(tag, str, category: val.label.l)
     end
   end
 
   def xml_confidence_level(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:round, 2)
-
-    xml.tag!(tag, str.to_s, type: "float", range: "-3.0 to 3.0")
+    str = "%.2f" % val
+    xml.tag!(tag, str, type: "float", range: "-3.0 to 3.0")
+  rescue StandardError
   end
 
   def xml_image_quality(xml, tag, val)
-    return if val.blank?
-    return unless str = val.try(:round, 2)
-
-    xml.tag!(tag, str.to_s, type: "float", range: "0.0 to 4.0")
+    str = "%.2f" % val
+    xml.tag!(tag, str, type: "float", range: "0.0 to 4.0")
+  rescue StandardError
   end
 
   def xml_image_file(xml, image, size)
@@ -123,34 +143,39 @@ module ApiHelper
     )
   end
 
-  def xml_minimal_object(xml, tag, type, id)
-    return if id.blank?
-
-    xml.tag!(tag, id: id, type: type.to_s)
-  end
-
-  def xml_detailed_object(xml, tag, object)
-    return if object.blank?
-
-    type = object.type_tag.to_s
-    xml.tag!(tag, id: object.id, type: type) do |inner_xml|
-      send("xml_#{type}", inner_xml, object)
+  def xml_minimal_object(xml, tag, model, id)
+    if id.present?
+      model = model.constantize unless model.is_a?(Class)
+      url = begin
+              model.show_url(id)
+            rescue StandardError
+              nil
+            end
+      if url
+        xml.tag!(tag, id: id, url: url, type: model.type_tag.to_s)
+      else
+        xml.tag!(tag, id: id, type: model.type_tag.to_s)
+      end
     end
   end
 
-  def xml_minimal_location(xml, tag, location_id, where)
-    if location_id
-      xml.tag!(tag, id: location_id, name: where, type: "location")
-    else
-      xml.tag!(tag, name: where, type: "location")
-    end
+  def xml_detailed_object(xml, tag, object, detail = false)
+    render_detailed_object(xml, object, detail, tag: tag)
   end
 
-  def xml_detailed_location(xml, tag, location, where)
-    if location
-      xml_detailed_object(xml, tag, location)
-    else
-      xml.tag!(tag, name: where, type: "location")
-    end
+  def json_detailed_object(json, object, detail = false)
+    render_detailed_object(json, object, detail, json: json)
+  end
+
+  def render_detailed_object(builder, object, detail, args)
+    return unless object
+
+    builder.target! << render(
+      partial: object.class.type_tag.to_s,
+      locals: args.merge(
+        object: object,
+        detail: detail
+      )
+    )
   end
 end

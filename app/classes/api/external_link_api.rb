@@ -12,6 +12,7 @@ class API
 
     self.high_detail_includes = [
       :external_site,
+      { observation: [:location, :name, :user] },
       :user
     ]
 

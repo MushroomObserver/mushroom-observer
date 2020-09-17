@@ -5,7 +5,7 @@ class API
   class ApiKeyAPI < ModelAPI
     self.model = ApiKey
 
-    self.high_detail_page_length = 1000
+    self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000

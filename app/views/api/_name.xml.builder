@@ -17,31 +17,24 @@ xml.tag!(tag,
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   if !detail
     if object.synonym_id
-      xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
+      xml_minimal_object(xml, :synonym, Synonym, object.synonym_id)
     end
   else
     if object.synonym_id
-      xml.synonyms(number: object.synonyms.count - 1) do
-        for synonym in object.synonyms - [object]
+      xml.synonyms(number: object.synonym.names.length - 1) do
+        for synonym in object.synonym.names - [object]
           xml_detailed_object(xml, :synonym, synonym)
         end
       end
     end
-    if object.classification.present?
+    unless object.classification.blank?
       parse = Name.parse_classification(object.classification)
-      xml.parents(number: parse.count) do
+      xml.parents(number: parse.length) do
         for rank, name in parse
           xml.parent do
             xml_string(xml, :name, name)
             xml_string(xml, :rank, rank.to_s.downcase)
           end
-        end
-      end
-    end
-    if object.comments.any?
-      xml.comments(number: object.comments.count) do
-        object.comments.each do |comment|
-          xml_detailed_object(xml, :comment, comment)
         end
       end
     end
