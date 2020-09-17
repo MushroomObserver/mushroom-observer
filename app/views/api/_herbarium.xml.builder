@@ -11,10 +11,10 @@ xml.tag!(tag,
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   if !detail
-    xml_minimal_object(xml, :location, Location, object.location_id)
-    xml_minimal_object(xml, :personal_user, User, object.personal_user_id)
+    xml_minimal_object_old(xml, :location, Location, object.location_id)
+    xml_minimal_object_old(xml, :personal_user, User, object.personal_user_id)
   else
-    xml_detailed_object(xml, :location, object.location)
-    xml_detailed_object(xml, :personal_user, object.personal_user)
+    xml_detailed_object_old(xml, :location, object.location)
+    xml_detailed_object_old(xml, :personal_user, object.personal_user)
   end
 end

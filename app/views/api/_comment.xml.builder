@@ -8,10 +8,10 @@ xml.tag!(tag,
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   if !detail
-    xml_minimal_object(xml, :owner, User, object.user_id)
-    xml_minimal_object(xml, :object, object.target_type, object.target_id)
+    xml_minimal_object_old(xml, :owner, User, object.user_id)
+    xml_minimal_object_old(xml, :object, object.target_type, object.target_id)
   else
-    xml_detailed_object(xml, :owner, object.user)
-    xml_detailed_object(xml, :object, object.target)
+    xml_detailed_object_old(xml, :owner, object.user)
+    xml_detailed_object_old(xml, :object, object.target)
   end
 end

@@ -143,7 +143,7 @@ module ApiHelper
     )
   end
 
-  def xml_minimal_object(xml, tag, model, id)
+  def xml_minimal_object_old(xml, tag, model, id)
     if id.present?
       model = model.constantize unless model.is_a?(Class)
       url = begin
@@ -159,7 +159,7 @@ module ApiHelper
     end
   end
 
-  def xml_detailed_object(xml, tag, object, detail = false)
+  def xml_detailed_object_old(xml, tag, object, detail = false)
     render_detailed_object(xml, object, detail, tag: tag)
   end
 
