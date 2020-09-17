@@ -114,19 +114,19 @@
 #  pages::                Number of pages available.
 #
 class API2
-  require_dependency "api/errors"
-  require_dependency "api/base"
-  require_dependency "api/parameters"
-  require_dependency "api/results"
-  require_dependency "api/upload"
-  require_dependency "api/model_api"
-  require_dependency "api/parsers/base"
-  require_dependency "api/helpers"
+  require_dependency "api2/errors"
+  require_dependency "api2/base"
+  require_dependency "api2/parameters"
+  require_dependency "api2/results"
+  require_dependency "api2/upload"
+  require_dependency "api2/model_api"
+  require_dependency "api2/parsers/base"
+  require_dependency "api2/helpers"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|
-    next if file !~ %r{(api/\w+_api)\.rb$}
-    next if Regexp.last_match(1) == "api/model_api"
+  Dir.glob("#{::Rails.root}/app/classes/api2/*_api.rb").each do |file|
+    next if file !~ %r{(api2/\w+_api)\.rb$}
+    next if Regexp.last_match(1) == "api2/model_api"
 
     require_dependency Regexp.last_match(1)
   end
@@ -135,7 +135,7 @@ end
 # Sometimes the Rails router insists on trying to autoload the constant 'Api2'
 # and expects this file to do so.  It doesn't need to, but that doesn't seem
 # to matter, Rails insists on doing so anyway.  It's requests of the form
-# "/api/table/id" which cause this to happen.  Yes, they are poorly formed
+# "/api2/table/id" which cause this to happen.  Yes, they are poorly formed
 # requests, but people seem to try it all the time anyway.  I'm tired of
 # ignoring the error messages that result.  This stops the error message...
 # and in fact appears to cause these poorly-formed requests to work, too.

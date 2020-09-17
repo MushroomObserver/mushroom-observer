@@ -6,7 +6,8 @@ class API2
     attr_accessor :tag, :args, :fatal, :trace
 
     def initialize
-      self.tag = self.class.name.underscore.tr("/", "_").to_sym
+      self.tag = self.class.name.underscore.tr("/", "_").
+                 sub(/^api\d+/, "api").to_sym
       self.args = {}
       self.fatal = false
       self.trace = caller

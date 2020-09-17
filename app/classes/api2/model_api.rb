@@ -2,7 +2,7 @@
 
 class API2
   # API subclass for all model-based endpoints
-  class ModelAPI < API
+  class ModelAPI < API2
     def model_tag
       self.class.model.type_tag
     end
