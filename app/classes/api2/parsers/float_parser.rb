@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse floats for API2.
+    # Parse floats for API.
     class FloatParser < Base
       FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/.freeze
 

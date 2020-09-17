@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse species lists for API2.
+    # Parse species lists for API.
     class SpeciesListParser < ObjectBase
       def model
         SpeciesList

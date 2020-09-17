@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse notes for API2.
+    # Parse notes for API.
     class NotesParser < StringParser
       def parse(str)
         return Observation.no_notes if str.empty?

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-#  = API
+#  = API2
 #
 #  == Usage
 #
-#    api = API.execute(method: "GET", action: :observation, id: 12345)
+#    api = API2.execute(method: "GET", action: :observation, id: 12345)
 #    unless api.errors.any?
 #      render_results(api.results)
 #    else
@@ -15,27 +15,27 @@
 #  errors.  There are four basic types of request:
 #
 #    # GET: Retrieve all jason's observations:
-#    api = API.execute(method: "GET", action: :observation, user: 'jason')
+#    api = API2.execute(method: "GET", action: :observation, user: 'jason')
 #    observations = api.results
 #
 #    # POST: Post new observation:
-#    api = API.execute(method: "POST", action: :observation, when: 1.month.ago,
+#    api = API2.execute(method: "POST", action: :observation, when: 1.month.ago,
 #                      etc...)
 #    new_observation = api.results.first
 #
 #    # PATCH: Set the notes in all your observations from 23 May 2012:
-#    api = API.execute(method: "PATCH", action: :observation, when:
+#    api = API2.execute(method: "PATCH", action: :observation, when:
 #                      '2012-05-23', set_notes: 'on rock')
 #    updated_observations = api.results
 #
 #    # DELETE: Destroy all your observations from May 2012:
-#    api = API.execute(method: "DELETE", action: :observation, when: '2012-05')
+#    api = API2.execute(method: "DELETE", action: :observation, when: '2012-05')
 #    dead_observations = api.results
 #
 #  == Queries
 #
-#  The +action+ argument corresponds to a subclass of API.  For example,
-#  :observation corresponds to API::Observation.  The primary actions each
+#  The +action+ argument corresponds to a subclass of API2.  For example,
+#  :observation corresponds to API2::Observation.  The primary actions each
 #  correspond to one of the main object types:
 #
 #    :api_key               ApiKey's
@@ -95,10 +95,10 @@
 #  To find a full list of arguments allowed for each pair of (method, action)
 #  look at the documentation for that subclass.
 #
-#    API::UserAPI#get          Method used to GET users.
-#    API::NameAPI#patch        Method used to PATCH names.
-#    API::ObservationAPI#post  Method used to POST observations.
-#    API::ImageAPI#delete      Method used to DELETE images.
+#    API2::UserAPI#get          Method used to GET users.
+#    API2::NameAPI#patch        Method used to PATCH names.
+#    API2::ObservationAPI#post  Method used to POST observations.
+#    API2::ImageAPI#delete      Method used to DELETE images.
 #
 #  == Attributes
 #
@@ -113,7 +113,7 @@
 #  page::                 Current page number.
 #  pages::                Number of pages available.
 #
-class API
+class API2
   require_dependency "api/errors"
   require_dependency "api/base"
   require_dependency "api/parameters"

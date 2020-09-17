@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# TODO: naming API2
-# TODO: vote API2
-# TODO: image_vote API2
+# TODO: naming API
+# TODO: vote API
+# TODO: image_vote API
 
 require("test_helper")
 
@@ -2392,7 +2392,7 @@ class Api2Test < UnitTestCase
     assert_equal("Burbank, California, USA", obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
-    # API2 no longer pays attention to user's location format preference!  This
+    # API no longer pays attention to user's location format preference!  This
     # is supposed to make it more consistent for apps.  It would be a real
     # problem because apps don't have access to the user's prefs, so they have
     # no way of knowing how to pass in locations on the behalf of the user.
@@ -4080,7 +4080,7 @@ class Api2Test < UnitTestCase
   end
 
   def help_messages_file
-    Rails.root.join("README_API2_HELP_MESSAGES.txt").to_s
+    Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
   end
 
   def do_help_test(method, action, fail = false)

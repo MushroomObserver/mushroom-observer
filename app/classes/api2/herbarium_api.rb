@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for Herbarium
-  class HerbariumAPI2 < ModelAPI2
+  # API for Herbarium
+  class HerbariumAPI < ModelAPI
     self.model = Herbarium
 
     self.high_detail_page_length = 100

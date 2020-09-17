@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # API2 parser base class.
+    # API parser base class.
     class Base
       attr_accessor :api
       attr_accessor :key

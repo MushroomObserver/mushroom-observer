@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for CollectionNumber
-  class CollectionNumberAPI2 < ModelAPI2
+  # API for CollectionNumber
+  class CollectionNumberAPI < ModelAPI
     self.model = CollectionNumber
 
     self.high_detail_page_length = 100

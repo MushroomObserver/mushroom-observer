@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for Image
-  class ImageAPI2 < ModelAPI2
+  # API for Image
+  class ImageAPI < ModelAPI
     self.model = Image
 
     self.high_detail_page_length = 100

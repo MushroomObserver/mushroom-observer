@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Base class for API2 object parsers.
+    # Base class for API object parsers.
     class ObjectBase < Base
       def parse(str)
         raise(BadParameterValue.new(str, model.type_tag)) if str.blank?

@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse locations for API2.
+    # Parse locations for API.
     class LocationParser < ObjectBase
       def model
         Location

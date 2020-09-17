@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for ExternalLink
-  class ExternalLinkAPI2 < ModelAPI2
+  # API for ExternalLink
+  class ExternalLinkAPI < ModelAPI
     self.model = ExternalLink
 
     self.high_detail_page_length = 100

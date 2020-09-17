@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for User
-  class UserAPI2 < ModelAPI2
+  # API for User
+  class UserAPI < ModelAPI
     self.model = User
 
     self.high_detail_page_length = 100

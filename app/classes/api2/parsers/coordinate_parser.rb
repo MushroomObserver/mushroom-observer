@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse lat/longs and altitudes for API2.
+    # Parse lat/longs and altitudes for API.
     class CoordinateParser < Base
       def parse(type, str)
         Location.send("parse_#{type}", str) ||

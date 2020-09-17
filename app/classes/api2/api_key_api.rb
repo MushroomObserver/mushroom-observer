@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for ApiKey
-  class ApiKeyAPI2 < ModelAPI
+  # API for ApiKey
+  class ApiKeyAPI < ModelAPI
     self.model = ApiKey
 
     self.high_detail_page_length = 1000
@@ -26,7 +26,7 @@ class API2
     def after_create(api_key)
       return if @for_user == @user
 
-      VerifyAPI2KeyEmail.build(@for_user, @user, api_key).deliver_now
+      VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
     end
 
     def get

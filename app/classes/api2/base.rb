@@ -5,7 +5,7 @@
 #
 #  == Overview of class structure and interaction.
 #
-#  Each API2 request is encapsulated by a sinle instance of a subclass of API2.
+#  Each API request is encapsulated by a sinle instance of a subclass of API2.
 #  Most requests are tied one-to-one to an ActiveRecord model.  Thus most
 #  subclasses are derived from API2::ModelApi < API2.
 #
@@ -26,12 +26,11 @@
 #
 #    method           Method: :get, :post, :patch, :delete
 #    action           "Action": :comment, :name, :observation, etc.
-#    version          Version of API2 caller requests to use -- not used yet.
 #    user             User whose ApiKey was passed in for authentication.
 #    api_key          ApiKey passed in for authentication.
 #
 #    params           Validated hash of parameters you passed in.
-#    expected_params  Hash of parameters API2 tried to parse.  This is a full
+#    expected_params  Hash of parameters API tried to parse.  This is a full
 #                     set of available parameters for that method / action.
 #                     Values are API2::ParameterDeclaration instances.
 #
@@ -79,9 +78,9 @@
 #    build_setter     Returns "lambda" called on each object for PATCH.
 #    build_deleter    Returns "lambda" called on each object for DELETE.
 #
-#  Check out, for example, CommentAPI2 for a simple example.  Check out
-#  ObservationAPI2 or ProjectAPI2 for more involved examples.  You should
-#  generally let ModelAPI2 do most of the work and expend most of your effort
+#  Check out, for example, CommentAPI for a simple example.  Check out
+#  ObservationAPI or ProjectAPI for more involved examples.  You should
+#  generally let ModelAPI do most of the work and expend most of your effort
 #  in parsing/validating query_params, create_params and update_params.  This
 #  will do the vast majority of the work for you nicely.
 #
@@ -187,7 +186,7 @@
 #  delete every single record.  And errors or exceptions encountered during
 #  this process are added to the +errors+ Array.
 #
-#  Most exceptions originating from within API2 code (as opposed to Query or
+#  Most exceptions originating from within API code (as opposed to Query or
 #  ActiveRecord or elsewhere in the Rails app) are subclasses of API2::Error
 #  class.  Access the full error message via +to_s+ or +t+ methods (for
 #  unformatted and formatted, respectively).  The language "tag" is
@@ -215,10 +214,10 @@
 #  parsers looking for missing error message.
 #
 class API2
-  API2_VERSION = 1.0
+  API_VERSION = 2.0
 
   def self.version
-    API2_VERSION
+    API_VERSION
   end
 
   attr_accessor :params
@@ -250,7 +249,7 @@ class API2
   # :stopdoc:
   def self.instantiate_subclass(params)
     action = params[:action].to_s
-    subclass = "API2::#{action.camelize}API2"
+    subclass = "API2::#{action.camelize}API"
     subclass = subclass.constantize
     subclass.new(params)
   rescue StandardError

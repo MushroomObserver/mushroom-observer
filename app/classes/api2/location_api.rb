@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for Location
-  class LocationAPI2 < ModelAPI2
+  # API for Location
+  class LocationAPI < ModelAPI
     self.model = Location
 
     self.high_detail_page_length = 100
@@ -80,7 +80,7 @@ class API2
       raise(NoMethodForAction.new("DELETE", action))
     end
 
-    # Our restrictions on edit permissions for the API2 are much more strict
+    # Our restrictions on edit permissions for the API are much more strict
     # than on the website.  Revoke permission if anyone other than the creator
     # owns any attached objects: location versions, descriptions, observations,
     # species lists, users (i.e. profile location), or herbaria.

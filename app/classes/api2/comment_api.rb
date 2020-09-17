@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for Comment
-  class CommentAPI2 < ModelAPI2
+  # API for Comment
+  class CommentAPI < ModelAPI
     self.model = Comment
 
     self.high_detail_page_length = 1000

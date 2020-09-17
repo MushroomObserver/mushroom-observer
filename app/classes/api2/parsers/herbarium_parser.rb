@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse herbaria for API2.
+    # Parse herbaria for API.
     class HerbariumParser < ObjectBase
       def model
         Herbarium

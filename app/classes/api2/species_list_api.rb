@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 for SpeciesList
-  class SpeciesListAPI2 < ModelAPI2
+  # API for SpeciesList
+  class SpeciesListAPI < ModelAPI
     self.model = SpeciesList
 
     self.high_detail_page_length = 100

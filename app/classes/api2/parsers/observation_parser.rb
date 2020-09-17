@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse observations for API2.
+    # Parse observations for API.
     class ObservationParser < ObjectBase
       def model
         Observation

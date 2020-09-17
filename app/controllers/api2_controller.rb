@@ -11,7 +11,7 @@
 #
 ################################################################################
 #
-class ApiController < ApplicationController
+class Api2Controller < ApplicationController
   require "xmlrpc/client"
   require_dependency "api"
 

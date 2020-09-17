@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse licenses for API2.
+    # Parse licenses for API.
     class LicenseParser < ObjectBase
       def model
         License

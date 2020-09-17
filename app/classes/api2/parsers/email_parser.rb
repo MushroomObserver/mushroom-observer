@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse email addresses for API2.
+    # Parse email addresses for API.
     class EmailParser < StringParser
       EMAIL = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/.freeze
 

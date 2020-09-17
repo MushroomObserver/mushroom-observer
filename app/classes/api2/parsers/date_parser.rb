@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse dates for API2.
+    # Parse dates for API.
     class DateParser < Base
       include DateTimePatterns
 

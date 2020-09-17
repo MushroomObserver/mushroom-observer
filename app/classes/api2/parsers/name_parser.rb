@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse names for API2.
+    # Parse names for API.
     class NameParser < ObjectBase
       def model
         Name

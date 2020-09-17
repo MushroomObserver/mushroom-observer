@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse users for API2.
+    # Parse users for API.
     class UserParser < ObjectBase
       def model
         User

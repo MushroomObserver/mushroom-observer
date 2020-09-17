@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse enumerated lists for API2.
+    # Parse enumerated lists for API.
     class EnumParser < Base
       attr_accessor :limit
 

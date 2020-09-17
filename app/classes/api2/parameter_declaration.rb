@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class API2
-  # Information about an API2 parameter to provide automatic documentation
+  # Information about an API parameter to provide automatic documentation
   class ParameterDeclaration
     attr_accessor :key, :type, :args, :set_parameter, :deprecated
 

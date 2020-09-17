@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse booleans for API2.
+    # Parse booleans for API.
     class BooleanParser < Base
       def parse(str)
         val = positive?(str)

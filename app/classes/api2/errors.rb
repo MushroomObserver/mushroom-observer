@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 exception base class.
+  # API exception base class.
   class Error < ::StandardError
     attr_accessor :tag, :args, :fatal, :trace
 
@@ -25,7 +25,7 @@ class API2
     end
   end
 
-  # API2 exception base class for errors having to do with database records.
+  # API exception base class for errors having to do with database records.
   class ObjectError < Error
     def initialize(obj)
       super()
@@ -109,7 +109,7 @@ class API2
     end
   end
 
-  # Error rendering API2 request results.
+  # Error rendering API request results.
   class RenderFailed < Error
     def initialize(error)
       super()
@@ -208,7 +208,7 @@ class API2
   class UnexpectedUpload < Error
   end
 
-  # API2 auto-discover help message.
+  # API auto-discover help message.
   class HelpMessage < Error
     attr_accessor :params
 

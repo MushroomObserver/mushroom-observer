@@ -2,7 +2,7 @@
 
 class API2
   module Parsers
-    # Parse integer for API2.
+    # Parse integer for API.
     class IntegerParser < Base
       def parse(str)
         raise(BadParameterValue.new(str, :integer)) unless /^-?\d+$/.match?(str)

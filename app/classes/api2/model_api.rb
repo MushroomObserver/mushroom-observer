@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class API2
-  # API2 subclass for all model-based endpoints
-  class ModelAPI2 < API2
+  # API subclass for all model-based endpoints
+  class ModelAPI < API
     def model_tag
       self.class.model.type_tag
     end
@@ -160,7 +160,7 @@ class API2
     end
 
     # This is just here until the new version of Query comes on-line.
-    # I don't see any reason for API2 to know anything about SQL or tables.
+    # I don't see any reason for API to know anything about SQL or tables.
     def sql_id_condition
       ids = parse_ranges(:integer, :id)
       return nil unless ids
