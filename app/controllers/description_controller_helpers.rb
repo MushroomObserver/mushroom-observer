@@ -231,9 +231,6 @@ module DescriptionControllerHelpers
     if draft = find_description(params[:id].to_s)
       parent = draft.parent
       old = parent.description
-      type = parent.type_tag
-      old_partial   = old.unique_partial_format_name if old
-      draft_partial = draft.unique_partial_format_name
 
       # Must be admin on the draft in order for this to work.  (Must be able
       # to delete the draft after publishing it.)
@@ -538,14 +535,23 @@ module DescriptionControllerHelpers
 
     # Just ignore illegal changes otherwise.  Form should prevent these,
     # anyway, but user could try to get sneaky and make changes via URL.
+    # check_description_edit_permission is partly broken.
+    # It, LocationController, and NameController need repairs.
+    # See https://www.pivotaltracker.com/story/show/174737948
     if params.is_a?(Hash)
       root = in_admin_mode?
       admin = desc.is_admin?(@user)
       author = desc.is_author?(@user)
 
       params.delete(:source_type) unless root
-      params.delete(:source_name) unless root || ((admin || author) &&
-        (desc.source_type != :project && desc.source_type != :project))
+      unless root ||
+             ((admin || author) &&
+               # originally was
+               # (desc.source_type != :project && desc.source_type != :project))
+               # see https://www.pivotaltracker.com/story/show/174566300
+               desc.source_type != :project)
+        params.delete(:source_name)
+      end
       params.delete(:license_id) unless root || admin || author
     end
 
@@ -662,9 +668,9 @@ module DescriptionControllerHelpers
 
   # Return name of group or user if it's a one-user group.
   def group_name(group)
-    return :adjust_permissions_all_users.t if group.name == "all users"
-    return :REVIEWERS.t if group.name == "reviewers"
-    return group.users.first.legal_name if /^user \d+$/.match?(group.name)
+    return(:adjust_permissions_all_users.t) if group.name == "all users"
+    return(:REVIEWERS.t) if group.name == "reviewers"
+    return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
 
     group.name
   end

@@ -536,6 +536,9 @@ class NameController < ApplicationController
     @description = NameDescription.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
+    # check_description_edit_permission is partly broken.
+    # It, LocationController, and NameController need repairs.
+    # See https://www.pivotaltracker.com/story/show/174737948
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
 

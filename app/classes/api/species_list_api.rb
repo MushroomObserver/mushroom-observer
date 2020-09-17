@@ -5,13 +5,16 @@ class API
   class SpeciesListAPI < ModelAPI
     self.model = SpeciesList
 
-    self.high_detail_page_length = 100
+    self.high_detail_page_length = 10
     self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
       :comments,
+      :location,
+      :observations,
+      :projects,
       :user
     ]
 

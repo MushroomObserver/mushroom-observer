@@ -6,7 +6,7 @@
     link_to(:create_glossary_term.t, new_glossary_term_path),
     link_to(:edit_glossary_term.t, edit_glossary_term_path(@glossary_term.id))
   ]
-  tabs << destroy_button(@glossary_term) if in_admin_mode?
+  tabs << glossary_term_destroy_button(@glossary_term) if in_admin_mode?
 
 
   @tabsets = { right: draw_tab_set(tabs) }

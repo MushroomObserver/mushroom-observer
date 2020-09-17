@@ -21,8 +21,8 @@ xml.tag!(tag,
     end
   else
     if object.synonym_id
-      xml.synonyms(number: object.synonyms.length - 1) do
-        for synonym in object.synonyms - [object]
+      xml.synonyms(number: object.synonym.names.length - 1) do
+        for synonym in object.synonym.names - [object]
           xml_detailed_object(xml, :synonym, synonym)
         end
       end

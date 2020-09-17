@@ -441,23 +441,25 @@ module LanguageExporter
   def validate_square_brackets(value)
     value = value.to_s.dup
     pass = true
+
     while value =~ /\S/
-      if value.sub!(/^[^\[\]]+/, "")
-      elsif value.sub!(/^\[\[/, "")
-      elsif value.sub!(/^\]\]/, "")
-      elsif value.sub!(/^\[\w+\]/, "")
-      elsif value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "")
-        if Regexp.last_match(1) && \
-           !validate_square_brackets_args(Regexp.last_match(1))
-          pass = false
-          break
-        end
-      else
-        pass = false
-        break
-      end
+      next if extracted_argument_valid?(value)
+
+      pass = false
+      break
     end
+
     pass
+  end
+
+  def extracted_argument_valid?(value)
+    value.sub!(/^[^\[\]]+/, "") ||
+      value.sub!(/^\[\[/, "") ||
+      value.sub!(/^\]\]/, "") ||
+      value.sub!(/^\[\w+\]/, "") ||
+      value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "") &&
+        (!Regexp.last_match(1) ||
+        validate_square_brackets_args(Regexp.last_match(1)))
   end
 
   def validate_square_brackets_args(args)
