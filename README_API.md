@@ -1,7 +1,37 @@
 Mushroom Observer API
 =====================
 
-Last revised 2016 Aug 7.
+
+Change Log
+----------
+
+v1 -- First version 2016.
+v2 -- Latest version 2020.
+
+The endpoint is now "api2" instead of "api".  The old endpoint will be phased
+out some time in 2021.  The default format is now JSON not XML, since JSON is
+significantly faster.  And a few result structures have been tweaked slightly:
+
+api_keys -- field names were wrong (created_at, last_used, num_uses)
+
+herbarium_records -- field names were wrong (initial_determination,
+accession_number) 
+
+images -- moved observation_ids to high-detail response 
+
+observations -- full consensus, location and owner details moved to high detail
+response, now only consensus_id, consensus_name, location_id, location_name and
+owner_id are found in low detail response; votes moved up to top level of the
+structure for high detail response (used to be buried within namings) 
+
+projects -- removed admin and member ids
+
+species_lists -- removed project_ids, full location details only available in
+high detail response now 
+
+collection_numbers, comments, external_links, herbarium_records -- only
+includes observation ids now not full details 
+
 
 Overview
 --------
@@ -9,15 +39,26 @@ Overview
 Mushroom Observer supports a simple API based on sending GET, POST, PATCH and
 DELETE requests to URLs of the form:
 ```
-http://mushroomobserver.org/api/<database_table>
+http://mushroomobserver.org/api2/<database_table>
 ```
 GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
 
-Responses can be requested in either XML (default) or JSON. You can either
+Responses can be requested in either JSON (default) or XML. You can either
 set the appropriate HTTP request header, or you can request it explicitly with
 a parameter (see below).
+
+Rate and Load Restrictions
+--------------------------
+
+We limit anonymous traffic to MO, including API traffic, by restricting the
+rate of requests to 20 per minute (1 request every 5 seconds on average), and
+less than 50% of the resoures of a single server instance.  A good rule of
+thumb would be to read the "run_time" from the response, and make sure you wait
+at least 5 seconds or the last run_time before making a new request.  If you
+get locked out, please contact us and we can discuss your needs and perhaps
+better ways of achieving them.
 
 GET Requests
 ------------
@@ -34,24 +75,23 @@ accepted:
 * detail=none -- Return only record ids (default).
 * detail=low -- Return some basic data with each record.
 * detail=high -- Return a great deal of data with each record.
+* format=json -- Return JSON response (default).
 * format=xml -- Return XML response.
-* format=json -- Return JSON response.
 
 Note that the result will be paginated for detailed responses.  High detail
-responses in particular are intended for very small data sets.  For example,
-you might request a list of ids matching a set of parameters, then one by one
-request full detail records for each of the matching records.
+responses in particular are intended for very small data sets.  (High detail
+responses generally include 100 results per page, low detail 1000 per page).
 
 It is easy to play with this aspect of the API in a browser.  Try the following
 queries, for example:
 
-* GET <http://mushroomobserver.org/api/observations?children_of=Tulostoma>
-* GET <http://mushroomobserver.org/api/observations?locations=Delaware&date=6>
-* GET <http://mushroomobserver.org/api/observations?help=1>
+* GET <http://mushroomobserver.org/api2/observations?children_of=Tulostoma>
+* GET <http://mushroomobserver.org/api2/observations?locations=Delaware&date=6>
+* GET <http://mushroomobserver.org/api2/observations?help=1>
 
-These return the ids of, respectively, (1) all observations of the genus
-Tulostoma, (2) all observations from Delaware posted in June (any year), and
-(3) a list of accepted query parameters.
+These return, respectively, (1) ids of all observations of the genus Tulostoma,
+(2) ids of all observations from Delaware posted in June (any year), and (3) a
+list of accepted query parameters. 
 
 POST Requests
 -------------
@@ -59,7 +99,7 @@ POST Requests
 Most tables accept POST requests for creating new records.  Include data for
 the new record in parameters.  Example:
 
-* POST <http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=Pasadena,+California,+USA&date=2016-08-06&notes=growing+in+lawn>
+* POST <http://mushroomobserver.org/api2/observations?api_key=xxx&name=Agaricus&location=Pasadena,+California,+USA&date=2016-08-06&notes=growing+in+lawn>
 
 The response will include the id of the new record.
 
@@ -74,7 +114,7 @@ Structure your PATCH query the same as for GET requests, but also include
 example, this would be a way to change the location of a set of your
 observations:
 
-* PATCH <http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&id=12300-12400&set_location=Pasadena,+California,+USA>
+* PATCH <http://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&id=12300-12400&set_location=Pasadena,+California,+USA>
 
 DELETE Requests
 ---------------
@@ -83,7 +123,7 @@ Structure the query the same as for GET requests.  MO will destroy all matching
 records (that you have permission to destroy).  For example, this should delete
 all your observations from a given location:
 
-* DELETE <http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&locations=Madison+Heights>
+* DELETE <http://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&locations=Madison+Heights,+Pasadena,+California,+USA>
 
 API Keys
 -------------
@@ -100,7 +140,7 @@ directly via the website:
 For convenience, apps may also create a key on behalf of a user using a POST
 request:
 
-* POST <http://mushroomobserver.org/api/api_keys?api_key=xxx&user=xxx>
+* POST <http://mushroomobserver.org/api2/api_keys?api_key=xxx&user=xxx>
 
 In this latter case, the app creator must first create an API key by hand for
 that app.  This is the key that will be used in the request above to create a
@@ -117,10 +157,9 @@ will have to verify their email address like usual before the app can create an
 API key for them and post observations.
 
 All of this is still very unsecure.  If anyone gets hold of a user's API key
-they can readily POST things in their name.  Various users have suggested we
-look into using more secure authorization methods such as OAuth and https.
-Anyone interested in hooking us up is welcome to contribute.  We'd be happy to
-help.
+they can readily POST things in their name.  Anyone interested in hooking us up
+with a more sophisticated authentication process is welcome to contribute.
+We'd be happy to help. 
 
 Database Tables
 ---------------
