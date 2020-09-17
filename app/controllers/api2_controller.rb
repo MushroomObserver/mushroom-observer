@@ -148,8 +148,7 @@ class Api2Controller < ApplicationController
 
   def do_render
     set_cors_headers
-    # need to default to xml for backwards compatibility
-    request.format = "xml" if request.format == "html"
+    request.format = "json" if request.format == "html"
     respond_to do |format|
       format.xml  { do_render_xml  }
       format.json { do_render_json }

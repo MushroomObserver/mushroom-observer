@@ -249,7 +249,8 @@ class Api2ControllerTest < FunctionalTestCase
          email: "miles@davis.com",
          password: "sivadselim",
          create_key: "New API2 Key",
-         detail: :high)
+         detail: :high,
+         format: :xml)
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
