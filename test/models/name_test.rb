@@ -2886,26 +2886,41 @@ class NameTest < UnitTestCase
 
   def test_unregistrable
     name = names(:boletus_edulis_group)
-    assert(name.unregistrable?, "Groups should be 'unregistrable'")
+    assert(name.unregistrable?, "Groups should be unregistrable")
 
-    name = Name.new(text_name: "Eukaryota", rank: :Domain)
-    assert(name.unregistrable?, "Domains should be 'unregistrable'")
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    assert(name.unregistrable?,
+           "Names below genus with quotes should be unregistrable")
+
+    name = Name.new(text_name:"Agaricus pinyonensis",
+                    author: "Isaacs nom. prov.")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
+
+    name = Name.new(text_name:"Fulvifomes porrectus",
+                    author: "comb. prov.")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
+
+     name = Name.new(text_name:"Cortinarius calaisopus", author: "ined.")
+    assert(name.unregistrable?, "Unpublished names should be unregistrable")
+
+   name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    assert(name.unregistrable?, "Domains should be unregistrable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
     assert(name.unregistrable?,
-           "Taxa outside of Fungi and slime molds should be 'unregistrable'")
+           "Taxa outside of Fungi and slime molds should be unregistrable")
 
     name = names(:coprinus)
-    assert(name.registrable?, "Non-group fungal names should be 'registrable'")
+    assert(name.registrable?, "Non-group fungal names should be registrable")
 
     # Use Protozoa as a rough proxy for slime molds, which are included
     # fungal nomenclature registries, even though they are not fungi.
     name = Name.new(text_name: "Myxomycetes", rank: :Class,
                     classification: "Kingdom: Protozoa")
-    assert(name.registrable?, "Protozoa should be 'registrable'")
+    assert(name.registrable?, "Protozoa should be registrable")
 
     name = Name.new(text_name: "New species", rank: :Species)
     assert(name.registrable?,
-           "Non-group, non-domain kingdom-less names should be 'registrable'")
+           "Non-group, non-domain kingdom-less names should be registrable")
   end
 end

@@ -86,22 +86,36 @@ class Name < AbstractModel
   # ----------------------------------------------------------------------------
 
   # Is the Name (potentially) registrable in a fungal nomenclature repository?
+  # This and #unregistrable are used in the views to determine whether
+  # to display the ICN identifier, links to nomenclature records or searches
   def registrable?
     # Almost all Names in MO are potentially registrable, so use a blacklist
     # instead of a whitelist
     !unregistrable?
   end
 
-  # Boolean. True if definitely not registrable.
+  # Is name definitely in a fungal nomenclature repository?
+  # (A heuristic that works for almost all cases)
   def unregistrable?
     rank == :Group ||
     rank == :Domain ||
+    unpublished? ||
+    # name includes quote marks, but limit this to below Order in order to
+    # account for things like "Discomycetes", which is registered & quoted
+    /\"/ =~ text_name && rank >= :Class ||
     # Use kingdom: Protozoa as a rough proxy for slime molds
     # Slime molds, which are Protozoa, are in fungal nomenclature registries.
     # While many Protozoa are not slime molds and there's no efficient way
     # for MO to tell the difference. So err on the side of registrability.
-    kingdom.present? &&
-    /(Fungi|Protozoa)/ !~ kingdom
+    kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
+  end
+
+  ################
+
+  private
+
+  def unpublished?
+    /\b(nom prov|comb prov|ined)\b/i =~ author&.delete(".")
   end
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
@@ -109,7 +123,7 @@ class Name < AbstractModel
     parse_classification.find { |rank| rank.first == :Kingdom }&.last
   end
 
-  private :kingdom
+  public
 
   # ----------------------------------------------------------------------------
 
