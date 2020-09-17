@@ -4,9 +4,7 @@ xml.instruct!(:xml, version: "1.0")
 xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
-  if @api.user
-    xml_minimal_object(xml, :user, :user, @api.user.id)
-  end
+  xml_minimal_object(xml, :user, :user, @api.user.id) if @api.user
 
   unless @api.errors.any?(&:fatal)
     if @api.query
@@ -26,11 +24,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
           partial: @api.results.first.class.type_tag.to_s,
           collection: @api.results,
           as: :object,
-          locals: {
-            xml:    xml,
-            tag:    :result,
-            detail: @api.detail == :high
-          }
+          locals: { xml: xml, tag: :result, detail: @api.detail == :high }
         )
       end
     end
@@ -41,11 +35,11 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
       i = 1
       @api.errors.each do |error|
         xml.error(id: i) do
-          xml.code    error.class.name
-          xml.details error.to_s
-          xml.fatal   error.fatal ? "true" : "false"
-          unless Rails.env == "production" || !error.backtrace
-            xml.trace error.backtrace.join("\n")
+          xml.code(error.class.name)
+          xml.details(error.to_s)
+          xml.fatal(error.fatal ? "true" : "false")
+          unless Rails.env.production? || !error.backtrace
+            xml.trace(error.backtrace.join("\n"))
           end
         end
         i += 1

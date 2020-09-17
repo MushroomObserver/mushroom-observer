@@ -57,8 +57,8 @@ class API2
                 str.match(/^(#{YYYYMM3})\s*-\s*(#{YYYYMM3})$/)
         return unless match
 
-        from = strip_time(match[1]) + "01"
-        to   = strip_time(match[2]) + "01"
+        from = "#{strip_time(match[1])}01"
+        to   = "#{strip_time(match[2])}01"
         from = Date.parse(from)
         to   = Date.parse(to).next_month.prev_day
         OrderedRange.new(from, to)
@@ -72,8 +72,8 @@ class API2
         to   = strip_time(match[2])
         return if from < "1500"
 
-        from = Date.parse(from + "0101")
-        to   = Date.parse(to + "1231")
+        from = Date.parse("#{from}0101")
+        to   = Date.parse("#{to}1231")
         OrderedRange.new(from, to)
       end
 
@@ -115,7 +115,7 @@ class API2
         return unless match
 
         str  = strip_time(str)
-        from = Date.parse(str + "01")
+        from = Date.parse("#{str}01")
         to   = from.next_month.prev_day
         OrderedRange.new(from, to)
       end
@@ -125,8 +125,8 @@ class API2
         return unless match
         return if str < "1500"
 
-        from = Date.parse(str + "0101")
-        to   = Date.parse(str + "1231")
+        from = Date.parse("#{str}0101")
+        to   = Date.parse("#{str}1231")
         OrderedRange.new(from, to)
       end
 

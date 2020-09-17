@@ -2,8 +2,7 @@
 
 # API2
 class API2
-  attr_accessor :expected_params
-  attr_accessor :ignore_params
+  attr_accessor :expected_params, :ignore_params
 
   initializers << lambda do
     self.expected_params = {}
@@ -69,6 +68,7 @@ class API2
   private
 
   def parser(type, key, args = {})
-    "API2::Parsers::#{type.to_s.camelize}Parser".constantize.new(self, key, args)
+    klass = "API2::Parsers::#{type.to_s.camelize}Parser".constantize
+    klass.new(self, key, args)
   end
 end

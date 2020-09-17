@@ -220,13 +220,7 @@ class API2
     API_VERSION
   end
 
-  attr_accessor :params
-  attr_accessor :method
-  attr_accessor :action
-  attr_accessor :version
-  attr_accessor :user
-  attr_accessor :api_key
-  attr_accessor :errors
+  attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
 
   # Give other modules ability to do additional initialization.
   class_attribute :initializers
@@ -275,22 +269,27 @@ class API2
   end
 
   def authenticate_user
-    key_str = parse(:string, :api_key)
-    if !key_str
-      User.current = self.user = nil
-      User.current_location_format = :postal
-    else
-      key = ApiKey.find_by(key: key_str)
-      raise(BadApiKey.new(key_str))        unless key
-      raise(ApiKeyNotVerified.new(key))    unless key.verified
-      raise(UserNotVerified.new(key.user)) unless key.user.verified
+    clear_user && return unless key_str = parse(:string, :api_key)
 
-      User.current = self.user = key.user
-      User.current_location_format = :postal
-      # (that overrides user pref in order to make it more consistent for apps)
-      key.touch!
-      self.api_key = key
-    end
+    key = ApiKey.find_by(key: key_str)
+    raise(BadApiKey.new(key_str))        unless key
+    raise(ApiKeyNotVerified.new(key))    unless key.verified
+    raise(UserNotVerified.new(key.user)) unless key.user.verified
+
+    login_user(key)
+  end
+
+  def clear_user
+    User.current = self.user = nil
+    User.current_location_format = :postal
+  end
+
+  def login_user(key)
+    User.current = self.user = key.user
+    User.current_location_format = :postal
+    # (that overrides user pref in order to make it more consistent for apps)
+    key.touch!
+    self.api_key = key
   end
 
   def process_request

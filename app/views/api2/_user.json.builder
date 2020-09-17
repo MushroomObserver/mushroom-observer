@@ -18,8 +18,8 @@ if !detail
 else
   json.location(json_location(object.location)) if object.location
   json.image(json_image(object.image)) if object.image
-  if @user == object or
-     # (special exception: show API key of new user when API creates new user)
+  if @user == object ||
+     # (exception: show API key of new user when API creates new user)
      @show_api_keys_for_new_user
     if object.api_keys.any?
       json.api_keys(object.api_keys.map { |x| json_api_key(x) })

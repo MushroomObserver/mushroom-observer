@@ -14,15 +14,16 @@ xml.tag!(
   xml_datetime(xml, :last_activity, object.last_activity)
   xml_integer(xml, :contribution, object.contribution)
   xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
-  xml_string(xml, :mailing_address, object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
+  xml_string(xml, :mailing_address,
+             object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
   if !detail
     xml_minimal_object(xml, :location, :location, object.location_id)
     xml_minimal_object(xml, :image, :image, object.image_id)
   else
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)
-    if @user == object or
-       # (special exception: show API keys of new user when API creates new user)
+    if @user == object ||
+       # (exception: show API keys of new user when API creates new user)
        @show_api_keys_for_new_user
       if object.api_keys.any?
         xml.api_keys(number: object.api_keys.count) do

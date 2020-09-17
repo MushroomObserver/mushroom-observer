@@ -3,13 +3,13 @@
 json.id(object.id)
 json.type("observation")
 json.date(object.when)
-json.latitude(object.public_lat if object.lat.present?
-json.longitude(object.public_long if object.long.present?
-json.altitude(object.alt if object.alt.present?
+json.latitude(object.public_lat) if object.lat.present?
+json.longitude(object.public_long) if object.long.present?
+json.altitude(object.alt) if object.alt.present?
 json.gps_hidden(object.gps_hidden ? true : false)
 json.specimen_available(object.specimen ? true : false)
 json.is_collection_location(object.is_collection_location ? true : false)
-json.confidence(object.vote_cache if object.vote_cache.present?
+json.confidence(object.vote_cache) if object.vote_cache.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 json.number_of_views(object.num_views)
@@ -34,32 +34,28 @@ if !detail
 else
   json.owner(json_user(object.user))
   json.consensus(json_name(object.name)) if object.name
-  if object.namings.any?
-    json.namings(object.namings.map { |x| json_naming(x) })
-  end
-  if object.votes.any?
-    json.votes(object.votes.map { |x| json_vote(x) })
-  end
+  json.namings(object.namings.map { |x| json_naming(x) }) \
+    if object.namings.any?
+  json.votes(object.votes.map { |x| json_vote(x) }) \
+    if object.votes.any?
   if object.location
     json.location(json_location(object.location))
-  else
-    json.location_name(object.where) if object.where.present?
+  elsif object.where.present?
+    json.location_name(object.where)
   end
   other_images = []
   object.images.each do |image|
     # Do it this way, else will not use eager-loaded image instance.
     if image.id == object.thumb_image_id
-      json.primary_image json_image(image)
+      json.primary_image(json_image(image))
     else
       other_images << image
     end
   end
-  if other_images.any?
-    json.images(other_images.map { |x| json_image(x) })
-  end
-  if object.comments.any?
-    json.comments(object.comments.map { |x| json_comment(x) })
-  end
+  json.images(other_images.map { |x| json_image(x) }) \
+    if other_images.any?
+  json.comments(object.comments.map { |x| json_comment(x) }) \
+    if object.comments.any?
   if object.collection_numbers.any?
     json.collection_numbers(object.collection_numbers.
                             map { |x| json_collection_number(x) })
@@ -68,10 +64,8 @@ else
     json.herbarium_records(object.herbarium_records.
                            map { |x| json_herbarium_record(x) })
   end
-  if object.sequences.any?
-    json.sequences(object.sequences.map { |x| json_sequence(x) })
-  end
-  if object.external_links.any?
-    json.external_links(object.external_links.map { |x| json_external_link(x) })
-  end
+  json.sequences(object.sequences.map { |x| json_sequence(x) }) \
+    if object.sequences.any?
+  json.external_links(object.external_links.map { |x| json_external_link(x) }) \
+    if object.external_links.any?
 end

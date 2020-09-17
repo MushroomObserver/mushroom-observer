@@ -51,8 +51,8 @@ class API2
                 date_range_match(str, YYYYMMDDHHMMSS3)
         return unless match
 
-        from = strip_time(match[1]) + " UTC"
-        to   = strip_time(match[2]) + " UTC"
+        from = "#{strip_time(match[1])} UTC"
+        to   = "#{strip_time(match[2])} UTC"
         from = DateTime.parse(from)
         to   = DateTime.parse(to)
         OrderedRange.new(from, to)
@@ -64,8 +64,8 @@ class API2
                 date_range_match(str, YYYYMMDDHHMM3)
         return unless match
 
-        from = strip_time(match[1]) + "00 UTC"
-        to   = strip_time(match[2]) + "59 UTC"
+        from = "#{strip_time(match[1])}00 UTC"
+        to   = "#{strip_time(match[2])}59 UTC"
         from = DateTime.parse(from)
         to   = DateTime.parse(to)
         OrderedRange.new(from, to)
@@ -77,8 +77,8 @@ class API2
                 date_range_match(str, YYYYMMDDHH3)
         return unless match
 
-        from = strip_time(match[1]) + "0000 UTC"
-        to   = strip_time(match[2]) + "5959 UTC"
+        from = "#{strip_time(match[1])}0000 UTC"
+        to   = "#{strip_time(match[2])}5959 UTC"
         from = DateTime.parse(from)
         to   = DateTime.parse(to)
         OrderedRange.new(from, to)
@@ -90,8 +90,8 @@ class API2
                 date_range_match(str, YYYYMMDD3)
         return unless match
 
-        from = strip_time(match[1]) + "000000 UTC"
-        to   = strip_time(match[2]) + "235959 UTC"
+        from = "#{strip_time(match[1])}000000 UTC"
+        to   = "#{strip_time(match[2])}235959 UTC"
         from = DateTime.parse(from)
         to   = DateTime.parse(to)
         OrderedRange.new(from, to)
@@ -105,9 +105,9 @@ class API2
 
         from = strip_time(match[1])
         to   = strip_time(match[2])
-        to   = Date.parse(to + "01").next_month.prev_day.to_s
-        from = DateTime.parse(from + "01000000 UTC")
-        to   = DateTime.parse(strip_time(to) + "235959 UTC")
+        to   = Date.parse("#{to}01").next_month.prev_day.to_s
+        from = DateTime.parse("#{from}01000000 UTC")
+        to   = DateTime.parse("#{strip_time(to)}235959 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -115,8 +115,8 @@ class API2
         match = date_range_match(str, YYYY)
         return unless match
 
-        from = strip_time(match[1]) + "0101000000 UTC"
-        to   = strip_time(match[2]) + "1231235959 UTC"
+        from = "#{strip_time(match[1])}0101000000 UTC"
+        to   = "#{strip_time(match[2])}1231235959 UTC"
         from = DateTime.parse(from)
         to   = DateTime.parse(to)
         OrderedRange.new(from, to)
@@ -128,7 +128,7 @@ class API2
                 str.match(/^#{YYYYMMDDHHMMSS3}$/)
         return unless match
 
-        str  = strip_time(str) + " UTC"
+        str  = "#{strip_time(str)} UTC"
         time = DateTime.parse(str)
         OrderedRange.new(time, time)
       end
@@ -140,8 +140,8 @@ class API2
         return unless match
 
         str  = strip_time(str)
-        from = DateTime.parse(str + "00 UTC")
-        to   = DateTime.parse(str + "59 UTC")
+        from = DateTime.parse("#{str}00 UTC")
+        to   = DateTime.parse("#{str}59 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -152,8 +152,8 @@ class API2
         return unless match
 
         str  = strip_time(str)
-        from = DateTime.parse(str + "0000 UTC")
-        to   = DateTime.parse(str + "5959 UTC")
+        from = DateTime.parse("#{str}0000 UTC")
+        to   = DateTime.parse("#{str}5959 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -164,8 +164,8 @@ class API2
         return unless match
 
         str  = strip_time(str)
-        from = DateTime.parse(str + "000000 UTC")
-        to   = DateTime.parse(str + "235959 UTC")
+        from = DateTime.parse("#{str}000000 UTC")
+        to   = DateTime.parse("#{str}235959 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -175,11 +175,11 @@ class API2
                 str.match(/^#{YYYYMM3}$/)
         return unless match
 
-        str  = strip_time(str) + "01"
+        str  = "#{strip_time(str)}01"
         str2 = Date.parse(str).next_month.prev_day.to_s
         str2 = strip_time(str2)
-        from = DateTime.parse(str + "000000 UTC")
-        to   = DateTime.parse(str2 + "235959 UTC")
+        from = DateTime.parse("#{str}000000 UTC")
+        to   = DateTime.parse("#{str2}235959 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -188,8 +188,8 @@ class API2
         return unless match
 
         str  = strip_time(str)
-        from = DateTime.parse(str + "0101000000 UTC")
-        to   = DateTime.parse(str + "1231235959 UTC")
+        from = DateTime.parse("#{str}0101000000 UTC")
+        to   = DateTime.parse("#{str}1231235959 UTC")
         OrderedRange.new(from, to)
       end
 
@@ -199,7 +199,7 @@ class API2
                 str.match(/^#{YYYYMMDDHHMMSS3}$/)
         raise(ArgumentError) unless match
 
-        str = strip_time(str) + " UTC"
+        str = "#{strip_time(str)} UTC"
         DateTime.parse(str)
       end
     end

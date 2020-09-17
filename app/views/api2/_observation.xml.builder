@@ -18,7 +18,7 @@ xml.tag!(
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
-  unless object.notes.blank?
+  if object.notes.present?
     notes_fields = object.notes.except(Observation.other_notes_key)
     other_notes  = object.notes_part_value(Observation.other_notes_key)
     if notes_fields.any?
@@ -59,14 +59,14 @@ xml.tag!(
     xml_detailed_location(xml, :location, object.location, object.where)
     object.images.each do |image|
       # Do it this way, else will not use eager-loaded image instance.
-      next unless image.id == object.thumb_image_id
-      xml_detailed_object(xml, :primary_image, image)
+      xml_detailed_object(xml, :primary_image, image) \
+        if image.id == object.thumb_image_id
     end
     if object.images.count > 1
       xml.images(number: object.images.count - 1) do
         object.images.each do |image|
-          next if image.id == object.thumb_image_id
-          xml_detailed_object(xml, :image, image)
+          xml_detailed_object(xml, :image, image) \
+            if image.id != object.thumb_image_id
         end
       end
     end

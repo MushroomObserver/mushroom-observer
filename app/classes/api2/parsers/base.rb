@@ -4,9 +4,7 @@ class API2
   module Parsers
     # API parser base class.
     class Base
-      attr_accessor :api
-      attr_accessor :key
-      attr_accessor :args
+      attr_accessor :api, :key, :args
 
       def initialize(api, key, args)
         @api  = api
@@ -34,7 +32,7 @@ class API2
       # parameter was supplied, even if only one value given, else returns nil.
       def parse_array(parse_scalar_or_range)
         args[:list] = true
-        str = clean_param(:leave_slashes)
+        str = clean_param(leave_slashes: true)
         return args[:default] if str.blank?
 
         result = []
@@ -52,7 +50,7 @@ class API2
       # normal "scalar" value, returning nil if the parameter doesn't exist.
       def parse_range
         args[:range] = true
-        str = clean_param(:leave_slashes)
+        str = clean_param(leave_slashes: true)
         return args[:default] if str.blank?
 
         match = str.match(/^((\\.|[^\\-]+)+)-((\\.|[^\\-]+)+)$/)
@@ -73,7 +71,7 @@ class API2
 
       # Get value of parameter, strip out excess white space, and removing
       # backslashes.  Returns String if parameter was given, otherwise nil.
-      def clean_param(leave_slashes = false)
+      def clean_param(leave_slashes: false)
         return unless @val
 
         val = @val.to_s.strip

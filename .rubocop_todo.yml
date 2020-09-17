@@ -520,7 +520,7 @@ Style/InverseMethods:
     - 'test/models/api_test.rb'
 
 # Offense count: 2
-Style/MethodMissingSuper:
+Lint/MissingSuper:
   Exclude:
     - 'script/update_googlebots.rb'
     - 'script/update_ip_stats.rb'

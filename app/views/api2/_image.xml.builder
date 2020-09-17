@@ -12,7 +12,8 @@ xml.tag!(
   xml_image_quality(xml, :quality, object.vote_cache)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
-  xml_string(xml, :original_name, object.original_name) if check_permission(object)
+  xml_string(xml, :original_name, object.original_name) \
+    if check_permission(object)
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export

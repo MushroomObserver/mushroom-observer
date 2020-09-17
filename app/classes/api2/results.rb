@@ -2,28 +2,18 @@
 
 # API2
 class API2
-  class_attribute :model
-  class_attribute :table
-
-  class_attribute :high_detail_includes
-  class_attribute :low_detail_includes
-
-  class_attribute :high_detail_page_length
-  class_attribute :low_detail_page_length
-  class_attribute :put_page_length
-  class_attribute :delete_page_length
+  class_attribute :model, :table, :high_detail_includes, :low_detail_includes,
+                  :high_detail_page_length, :low_detail_page_length,
+                  :put_page_length, :delete_page_length
 
   self.high_detail_includes = []
   self.low_detail_includes  = []
-
   self.high_detail_page_length = 10
   self.low_detail_page_length  = 100
   self.put_page_length         = 1000
   self.delete_page_length      = 1000
 
-  attr_accessor :query
-  attr_accessor :detail
-  attr_accessor :page_number
+  attr_accessor :query, :detail, :page_number
 
   initializers << lambda do
     self.detail = parse(:enum, :detail, limit: [:none, :low, :high]) || :none
@@ -31,27 +21,19 @@ class API2
   end
 
   def includes
-    if detail == :high
-      high_detail_includes
-    elsif detail == :low
-      low_detail_includes
-    else
-      []
-    end
+    return high_detail_includes if detail == :high
+    return low_detail_includes if detail == :low
+
+    []
   end
 
   def page_length
-    if detail == :high
-      high_detail_page_length
-    elsif method == "PATCH"
-      put_page_length
-    elsif method == "DELETE"
-      delete_page_length
-    elsif detail == :low
-      low_detail_page_length
-    else
-      1e6
-    end
+    return high_detail_page_length if detail == :high
+    return put_page_length if method == "PATCH"
+    return delete_page_length if method == "DELETE"
+    return low_detail_page_length if detail == :low
+
+    1e6
   end
 
   def num_pages

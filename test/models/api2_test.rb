@@ -35,11 +35,11 @@ class Api2Test < UnitTestCase
   # This method renamed from "time"
   # minitest 5.11.1 throws ArgumentError with "time".
   def api_test_time(str)
-    DateTime.parse(str + " UTC")
+    DateTime.parse("#{str} UTC")
   end
 
   def assert_no_errors(api, msg = "API2 errors")
-    msg = "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>"
+    msg = "#{msg}: <\n#{api.errors.map(&:to_s).join("\n")}\n>"
     assert(api.errors.empty?, msg)
   end
 
@@ -99,9 +99,9 @@ class Api2Test < UnitTestCase
     when NilClass, TrueClass, FalseClass, String, Symbol, Integer, Float
       val.inspect
     when Array
-      "[" + val.map { |v| show_val(v) }.join(", ") + "]"
+      "[#{val.map { |v| show_val(v) }.join(", ")}]"
     when Hash
-      "{" + val.map { |k, v| show_val(k) + ": " + show_val(v) }.join(", ") + "}"
+      "{#{val.map { |k, v| "#{show_val(k)}: #{show_val(v)}" }.join(", ")}}"
     else
       "#{val.class}: #{val}"
     end
@@ -809,12 +809,12 @@ class Api2Test < UnitTestCase
     assert_api_pass(params)
     assert_equal(new_url, link.reload.url)
     @api_key.update!(user: mary)
-    assert_api_pass(params.merge(set_url: new_url + "2"))
-    assert_equal(new_url + "2", link.reload.url)
+    assert_api_pass(params.merge(set_url: "#{new_url}2"))
+    assert_equal("#{new_url}2", link.reload.url)
     @api_key.update!(user: dick)
     link.external_site.project.user_group.users << dick
-    assert_api_pass(params.merge(set_url: new_url + "3"))
-    assert_equal(new_url + "3", link.reload.url)
+    assert_api_pass(params.merge(set_url: "#{new_url}3"))
+    assert_equal("#{new_url}3", link.reload.url)
   end
 
   def test_deleting_external_links
@@ -1155,7 +1155,7 @@ class Api2Test < UnitTestCase
       # add notes to avoid breaking later, brittle assertion
       notes: "Agaricus image", user: rolf
     )
-    agaricus_obs = Observation.create(
+    Observation.create(
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
@@ -1265,7 +1265,7 @@ class Api2Test < UnitTestCase
     assert_equal(2, Name.where(text_name: "Agaricus").count)
 
     agaricus_img = Image.create(user: rolf)
-    agaricus_obs = Observation.create(
+    Observation.create(
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
@@ -1489,7 +1489,6 @@ class Api2Test < UnitTestCase
       low: @low,
       notes: @notes
     }
-    name = params[:name]
     assert_api_pass(params)
     assert_last_location_correct
     assert_api_fail(params)
@@ -1535,8 +1534,8 @@ class Api2Test < UnitTestCase
     assert_objs_equal(rolf, albion.user)
     assert_not_empty(albion.versions.select { |v| v.user_id == rolf.id })
     assert_not_empty(albion.descriptions.select { |v| v.user == rolf })
-    assert_empty(albion.versions.select { |v| v.user_id != rolf.id })
-    assert_empty(albion.descriptions.select { |v| v.user != rolf })
+    assert_empty(albion.versions.reject { |v| v.user_id == rolf.id })
+    assert_empty(albion.descriptions.reject { |v| v.user == rolf })
     assert_empty(albion.observations)
     assert_empty(albion.species_lists)
     assert_empty(albion.users)
@@ -1666,7 +1665,7 @@ class Api2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.where("classification like '%Fungi%'").each do |n|
+    names = Name.where("classification like '%Fungi%'").map do |n|
       genus = n.text_name.split.first
       Name.where("text_name like '#{genus} %'") + [n]
     end.flatten.uniq.sort_by(&:id).reject(&:correct_spelling_id)
@@ -1916,8 +1915,8 @@ class Api2Test < UnitTestCase
     assert_objs_equal(rolf, agaricus.user)
     assert_not_empty(agaricus.versions.select { |v| v.user_id == rolf.id })
     assert_not_empty(agaricus.descriptions.select { |v| v.user == rolf })
-    assert_empty(agaricus.versions.select { |v| v.user_id != rolf.id })
-    assert_empty(agaricus.descriptions.select { |v| v.user != rolf })
+    assert_empty(agaricus.versions.reject { |v| v.user_id == rolf.id })
+    assert_empty(agaricus.descriptions.reject { |v| v.user == rolf })
     assert_empty(agaricus.observations)
     assert_empty(agaricus.namings)
 
@@ -2835,11 +2834,11 @@ class Api2Test < UnitTestCase
     assert_api_results(seqs)
 
     # Make sure all observations have at least one sequence for the rest.
-    Observation.all.each do |obs|
-      next if obs.sequences.any?
+    Observation.all.each do |obs2|
+      next if obs2.sequences.any?
 
-      Sequence.create!(observation: obs, user: obs.user, locus: "ITS1F",
-                       archive: "GenBank", accession: "MO#{obs.id}")
+      Sequence.create!(observation: obs2, user: obs2.user, locus: "ITS1F",
+                       archive: "GenBank", accession: "MO#{obs2.id}")
     end
 
     obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
@@ -3702,7 +3701,8 @@ class Api2Test < UnitTestCase
     assert_parse(:longitude, 12.5760, "12 34.56 E")
     assert_parse(:longitude, -12.0094, "12deg 34sec W")
     assert_parse(:longitude, API2::BadParameterValue, "12 34.56 S")
-    assert_parse(:longitude, API2::BadParameterValue, "12 degrees 34.56 minutes")
+    assert_parse(:longitude, API2::BadParameterValue,
+                 "12 degrees 34.56 minutes")
     assert_parse(:longitude, API2::BadParameterValue, "12.56e")
     assert_parse(:longitude, 180.0000, "180d 0s E")
     assert_parse(:longitude, -180.0000, "180d 0s W")
@@ -4013,10 +4013,10 @@ class Api2Test < UnitTestCase
     file = help_messages_file
     File.open(file, "w") { |fh| fh.truncate(0) }
 
-    do_help_test(:get, :api_key, :fail)
+    do_help_test(:get, :api_key, fail: true)
     do_help_test(:post, :api_key)
-    do_help_test(:patch, :api_key, :fail)
-    do_help_test(:delete, :api_key, :fail)
+    do_help_test(:patch, :api_key, fail: true)
+    do_help_test(:delete, :api_key, fail: true)
 
     do_help_test(:get, :comment)
     do_help_test(:post, :comment)
@@ -4029,14 +4029,14 @@ class Api2Test < UnitTestCase
     do_help_test(:delete, :external_link)
 
     do_help_test(:get, :external_site)
-    do_help_test(:post, :external_site, :fail)
-    do_help_test(:patch, :external_site, :fail)
-    do_help_test(:delete, :external_site, :fail)
+    do_help_test(:post, :external_site, fail: true)
+    do_help_test(:patch, :external_site, fail: true)
+    do_help_test(:delete, :external_site, fail: true)
 
     do_help_test(:get, :herbarium)
-    do_help_test(:post, :herbarium, :fail)
-    do_help_test(:patch, :herbarium, :fail)
-    do_help_test(:delete, :herbarium, :fail)
+    do_help_test(:post, :herbarium, fail: true)
+    do_help_test(:patch, :herbarium, fail: true)
+    do_help_test(:delete, :herbarium, fail: true)
 
     do_help_test(:get, :image)
     do_help_test(:post, :image)
@@ -4046,12 +4046,12 @@ class Api2Test < UnitTestCase
     do_help_test(:get, :location)
     do_help_test(:post, :location)
     do_help_test(:patch, :location)
-    do_help_test(:delete, :location, :fail)
+    do_help_test(:delete, :location, fail: true)
 
     do_help_test(:get, :name)
     do_help_test(:post, :name)
     do_help_test(:patch, :name)
-    do_help_test(:delete, :name, :fail)
+    do_help_test(:delete, :name, fail: true)
 
     do_help_test(:get, :observation)
     do_help_test(:post, :observation)
@@ -4061,7 +4061,7 @@ class Api2Test < UnitTestCase
     do_help_test(:get, :project)
     do_help_test(:post, :project)
     do_help_test(:patch, :project)
-    do_help_test(:delete, :project, :fail)
+    do_help_test(:delete, :project, fail: true)
 
     do_help_test(:get, :sequence)
     do_help_test(:post, :sequence)
@@ -4076,14 +4076,14 @@ class Api2Test < UnitTestCase
     do_help_test(:get, :user)
     do_help_test(:post, :user)
     do_help_test(:patch, :user)
-    do_help_test(:delete, :user, :fail)
+    do_help_test(:delete, :user, fail: true)
   end
 
   def help_messages_file
     Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
   end
 
-  def do_help_test(method, action, fail = false)
+  def do_help_test(method, action, fail: false)
     params = {
       method: method,
       action: action,

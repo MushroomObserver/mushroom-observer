@@ -230,7 +230,7 @@ class API2
       parse_set_images!
       parse_set_projects!
       parse_set_species_lists!
-      @notes = parse_notes_fields!(:set)
+      @notes = parse_notes_fields!(set: true)
     end
 
     def parse_images_and_pick_thumbnail
@@ -241,11 +241,20 @@ class API2
       @images.unshift(@thumbnail)
     end
 
-    def parse_notes_fields!(set = false)
+    def parse_notes_fields!(set: false)
       prefix = set ? "set_" : ""
-      notes = Observation.no_notes
+      notes = look_for_note_field_parameters(prefix)
       other = parse(:string, :"#{prefix}notes")
       notes[Observation.other_notes_key] = other unless other.nil?
+      declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
+      return notes if set
+
+      notes.delete_if { |_key, val| val.blank? }
+      notes
+    end
+
+    def look_for_note_field_parameters(prefix)
+      notes = Observation.no_notes
       params.each do |key, val|
         next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
 
@@ -253,10 +262,6 @@ class API2
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
-      declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
-      return notes if set
-
-      notes.delete_if { |_key, val| val.blank? }
       notes
     end
 

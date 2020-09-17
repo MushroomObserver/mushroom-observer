@@ -38,7 +38,8 @@ class API2
       end
       return "" if hash.empty?
 
-      " (" + hash.map { |key, val| show_arg(key, val) }.join(", ") + ")"
+      body = hash.map { |key, val| show_arg(key, val) }.join(", ")
+      " (#{body})"
     end
 
     def show_arg(key, val)

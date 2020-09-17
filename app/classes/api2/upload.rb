@@ -33,10 +33,10 @@ class API2
 
   # Class holding info about an upload
   class Upload
-    attr_accessor :data, :length, :content_type, :checksum
-    attr_accessor :content, :content_length, :content_type, :content_md5
+    attr_accessor :data, :length, :content_type, :checksum, :content,
+                  :content_length, :content_md5
 
-    def initialize(args)
+    def initialize(args = {})
       @data         = args[:data]
       @length       = args[:length]
       @content_type = args[:content_type]
@@ -49,6 +49,7 @@ class API2
   # Class encapsulating an upload from a remote server
   class UploadFromURL < Upload
     def initialize(url)
+      super()
       fetch(url)
     rescue StandardError => e
       raise(CouldntDownloadURL.new(url, e))
@@ -103,6 +104,7 @@ class API2
     def initialize(file)
       raise(FileMissing.new(file)) unless File.exist?(file)
 
+      super()
       self.content = File.open(file, "rb")
       self.content_length = File.size(file)
       self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, "")
@@ -112,6 +114,7 @@ class API2
   # Class encapsulating an upload sent as an attachement to the HTTP request
   class UploadFromHTTPRequest < Upload
     def initialize(upload)
+      super()
       self.content        = upload.data
       self.content_length = upload.length
       self.content_type   = upload.content_type

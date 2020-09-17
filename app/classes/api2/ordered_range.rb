@@ -6,6 +6,7 @@ class API2
     attr_accessor :begin, :end
 
     def initialize(from, to)
+      super
       @begin = from
       @end = to
     end

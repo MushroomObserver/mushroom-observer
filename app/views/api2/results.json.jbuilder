@@ -24,11 +24,11 @@ unless @api.errors.any?(&:fatal)
 end
 
 unless @api.errors.empty?
-  json.errors @api.errors do |error|
+  json.errors(@api.errors) do |error|
     json.code(error.class.name)
     json.details(error.to_s)
     json.fatal(error.fatal ? "true" : "false")
-    if Rails.env != "production" && error.backtrace
+    if Rails.env.production? && error.backtrace
       json.trace(error.backtrace.join("\n"))
     end
   end

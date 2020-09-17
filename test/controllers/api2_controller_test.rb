@@ -15,7 +15,7 @@ class Api2ControllerTest < FunctionalTestCase
   def format_api_errors(api, msg)
     lines = [msg, "Caught API2 Errors:"]
     lines += api.errors.map do |error|
-      error.to_s + "\n" + error.trace.join("\n")
+      "#{error}\n#{error.trace.join("\n")}"
     end
     lines.reject(&:blank?).join("\n")
   end
@@ -338,7 +338,7 @@ class Api2ControllerTest < FunctionalTestCase
     get(:observations, id: obs.id, detail: :high, format: :xml)
     assert_match(/34.1622|118.3521/, @response.body)
 
-    obs.update_attribute(:gps_hidden, true)
+    obs.update(gps_hidden: true)
     get(:observations, id: obs.id, detail: :high, format: :json)
     assert_no_match(/34.1622|118.3521/, @response.body)
     get(:observations, id: obs.id, detail: :high, format: :xml)
