@@ -28,7 +28,7 @@ class API2
   end
 
   # Simplified "parser" for getting the HTTP request -- this is passed in
-  # specially by ApiController: it should not be processed in any way.
+  # specially by Api2Controller: it should not be processed in any way.
   def parse_upload
     expected_params[:upload] ||= ParameterDeclaration.new(:upload, :upload, {})
     params[:upload]

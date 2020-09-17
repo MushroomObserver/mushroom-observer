@@ -3,7 +3,7 @@
 require("test_helper")
 require("rexml/document")
 
-class ApiControllerTest < FunctionalTestCase
+class Api2ControllerTest < FunctionalTestCase
   def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
     return unless @api

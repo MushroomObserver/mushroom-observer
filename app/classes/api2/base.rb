@@ -7,7 +7,7 @@
 #
 #  Each API request is encapsulated by a sinle instance of a subclass of API2.
 #  Most requests are tied one-to-one to an ActiveRecord model.  Thus most
-#  subclasses are derived from API2::ModelApi < API2.
+#  subclasses are derived from API2::ModelAPI < API2.
 #
 #  The API2 instance is given the hash of (string) parameters verbatim from
 #  an HTTP request.  (Although note that the request could in principle come
@@ -119,7 +119,7 @@
 #  parameters "declaration" (that is, the expected syntax and limits).  The
 #  result is that the client can autodiscover all the available parameters (via
 #  the special "help" pseudoparameter).  Errors are raised as exceptions which
-#  must be caught by the client (or ApiController).
+#  must be caught by the client (or Api2Controller).
 #
 #  There are four standard parsing methods:
 #
