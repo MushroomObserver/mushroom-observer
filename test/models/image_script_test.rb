@@ -56,9 +56,6 @@ class ScriptTest < UnitTestCase
     # Need to reset any possible changes to database scripts might make because
     # they are external to the ActiveRecord test transanction which normally
     # rolls back any changes which occur inside a given test.
-    user = DATABASE_CONFIG["username"]
-    pass = DATABASE_CONFIG["password"]
-    db   = DATABASE_CONFIG["database"]
     cmd = "UPDATE images
            SET width=1000, height=1000, transferred=false
            WHERE id=#{in_situ_id}"
