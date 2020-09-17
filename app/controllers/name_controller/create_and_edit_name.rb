@@ -257,7 +257,11 @@ class NameController
   def minor_change?
     old_name = @name.real_search_name
     new_name = @parse.real_search_name
-    new_name.percent_match(old_name) > 0.9
+    new_name.percent_match(old_name) > 0.9 && icn_identifier_unchanged?
+  end
+
+  def icn_identifier_unchanged?
+    params[:name][:icn_identifier] == @name.icn_identifier
   end
 
   def just_adding_author?

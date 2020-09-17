@@ -1693,6 +1693,26 @@ class NameControllerTest < FunctionalTestCase
     assert_select("input[type=text]#name_correct_spelling", count: 1)
   end
 
+  def test_edit_add_identifier
+    name = names(:stereum_hirsutum)
+     params = {
+      id: name.id,
+      name: {
+        text_name: name.text_name,
+        author: name.author,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_identifier: 189826
+      }
+    }
+    user = name.user
+    login(user.login)
+    post(:edit_name, params)
+
+    assert_email_generated
+  end
+
   # ----------------------------
   #  Edit name -- with merge
   # ----------------------------
