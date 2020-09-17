@@ -19,6 +19,8 @@
 #                       then pass it to count_by_sql.
 #  revert_clone::       Clone and revert to old version
 #                       (or return nil if version not found).
+#  find_using_wildcards::
+#                       Lookup instances with a string that may contain "*"s.
 #
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
@@ -148,6 +150,22 @@ class AbstractModel < ApplicationRecord
   def self.count_by_sql_wrapping_select_query(sql)
     sql = sanitize_sql(sql)
     count_by_sql("select count(*) from (#{sql}) as my_table")
+  end
+
+  # Lookup all instances matching a given wildcard pattern.  If there are no
+  # "*" in the pattern, it just does a regular find_by_xxx lookup.  A number
+  # of convenience wrappers are included in the major models. Returns nil if
+  # none found.
+  #
+  #   Project.find_using_wildcards("title", "FunDiS *")
+  #   Project.find_by_title_with_wildcards("FunDiS *")
+  #
+  def self.find_using_wildcards(col, str)
+    return send("find_by_#{col}", str) unless str.include?("*")
+
+    safe_col = connection.quote_column_name(col)
+    matches = where("#{safe_col} LIKE ?", str.tr("*", "%"))
+    matches.empty? ? nil : matches
   end
 
   ##############################################################################
@@ -381,20 +399,6 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
-  # Return the name of the "show_past_<object>" action
-  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
-  # actions are normalized.
-  # See https://www.pivotaltracker.com/story/show/174440291
-  def self.show_past_action
-    return "show_past" if controller_normalized?(name) # Rails standard
-
-    "show_past_#{name.underscore}" # Old MO style
-  end
-
-  def show_past_action
-    self.class.show_past_action
-  end
-
   # Return the URL of the "show_<object>" action
   #
   #   # normalized controller
@@ -414,6 +418,20 @@ class AbstractModel < ApplicationRecord
 
   def show_url
     self.class.show_url(id)
+  end
+
+  # Return the name of the "show_past_<object>" action
+  # JDC 2020-08-22: This should be refactored once all tne show_past_<objects>
+  # actions are normalized.
+  # See https://www.pivotaltracker.com/story/show/174440291
+  def self.show_past_action
+    return "show_past" if controller_normalized?(name) # Rails standard
+
+    "show_past_#{name.underscore}" # Old MO style
+  end
+
+  def show_past_action
+    self.class.show_past_action
   end
 
   # Return the link_to args of the "show_<object>" action

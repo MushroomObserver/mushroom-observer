@@ -11,23 +11,23 @@ class API
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
-     self.high_detail_includes = [
-       :comments,
-       { images: [:license, :observations] },
-       :location,
-       :name,
-       { namings: [:name, { votes: :user }] },
-       :collection_numbers,
-       { herbarium_records: :herbarium },
-       :sequences,
-       :user
-     ]
+    self.high_detail_includes = [
+      :comments,
+      { images: [:license, :observations] },
+      :location,
+      :name,
+      { namings: [:name, { votes: :user }] },
+      :collection_numbers,
+      { herbarium_records: :herbarium },
+      :sequences,
+      :user
+    ]
 
-     self.low_detail_includes = [
-       :location,
-       :name,
-       :user
-     ]
+    self.low_detail_includes = [
+      :location,
+      :name,
+      :user
+    ]
 
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/MethodLength

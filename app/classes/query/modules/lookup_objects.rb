@@ -35,6 +35,18 @@ module Query
         end
       end
 
+      def lookup_lists_for_projects_by_name(vals)
+        return unless vals
+
+        project_ids = lookup_projects_by_name(vals)
+        return [] if project_ids.empty?
+
+        SpeciesList.connection.select_values(%(
+          SELECT DISTINCT species_list_id FROM projects_species_lists
+          WHERE project_id IN (#{project_ids.join(",")})
+        ))
+      end
+
       def lookup_species_lists_by_name(vals)
         lookup_objects_by_name(vals) do |name|
           SpeciesList.where(title: name)

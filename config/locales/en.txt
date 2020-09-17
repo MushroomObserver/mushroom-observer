@@ -1006,6 +1006,75 @@
   lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
+  # These are the search terms we look for, e.g. "date" in "date:today".
+  search_term_author: author
+  search_term_citation: citation
+  search_term_classification: classification
+  search_term_comments: comments
+  search_term_confidence: confidence
+  search_term_created: created
+  search_term_date: date
+  search_term_deprecated: deprecated
+  search_term_east: east
+  search_term_exclude_consensus: exclude_consensus
+  search_term_has_author: has_author
+  search_term_has_citation: has_citation
+  search_term_has_classification: has_classification
+  search_term_has_comments: has_comments
+  search_term_has_description: has_description
+  search_term_has_field: has_field
+  search_term_has_location: has_location
+  search_term_has_name: has_name
+  search_term_has_notes: has_notes
+  search_term_has_observations: has_observations
+  search_term_has_synonyms: has_synonyms
+  search_term_herbarium: herbarium
+  search_term_images: images
+  search_term_include_all_name_proposals: include_all_name_proposals
+  search_term_include_misspellings: include_misspellings
+  search_term_include_subtaxa: include_subtaxa
+  search_term_include_synonyms: include_synonyms
+  search_term_is_collection_location: is_collection_location
+  search_term_lichen: lichen
+  search_term_list: list
+  search_term_location: location
+  search_term_modified: modified
+  search_term_name: name
+  search_term_north: north
+  search_term_notes: notes
+  search_term_project: project
+  search_term_project_lists: project_lists
+  search_term_rank: rank
+  search_term_region: region
+  search_term_sequence: sequence
+  search_term_south: south
+  search_term_specimen: specimen
+  search_term_user: user
+  search_term_west: west
+
+  # Words recognized in search bar.
+  # e.g. "user:me"
+  search_value_me: me
+  # e.g. "has_images:yes"
+  search_value_true: "yes|true"
+  # e.g. "has_specimen:no"
+  search_value_false: "no|false"
+  # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
+  search_value_both: "both|either"
+  # e.g. "date:last month-today"
+  search_value_today: today
+  search_value_yesterday: yesterday
+  search_value_days_ago: N days ago
+  search_value_this_week: this week
+  search_value_last_week: last week
+  search_value_weeks_ago: N weeks ago
+  search_value_this_month: this month
+  search_value_last_month: last month
+  search_value_months_ago: N months ago
+  search_value_this_year: this year
+  search_value_last_year: last year
+  search_value_years_ago: N years ago
+
   # Rss log messages.
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
@@ -2255,7 +2324,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: In collaboration with the Rhode Island School of Design, Nathan Wilson worked with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. \nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">unofficial Mushroom Observer Facebook page</a>.
+  glossary_term_index_intro: In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created. \nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">unofficial Mushroom Observer Facebook page</a>.
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
@@ -2265,6 +2334,11 @@
 
   # glossary_term#destroy
   destroy_glossary_term: "[:destroy_object(type=:glossary_term)]"
+
+  # glossary_term errors
+  glossary_error_name_blank: Name cannot be blank.
+  glossary_error_duplicate_name: Name must be unique.
+  glossary_error_description_or_image: Glossary term must have a description or image.
 
   # news article fields
   article_title: Title
@@ -2441,7 +2515,7 @@
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
-  donate_explanation: "Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the \"Confirm\" button below or by check made payable to \"Mushroom Observer, Inc.\" and sent to:\n\nMushroom Observer\nc/o Nathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
+  donate_explanation: "Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the \"Confirm\" button below\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
   donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
@@ -2470,7 +2544,7 @@
 
   # support/wrapup_2012
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
-  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
   ##############################################################################
 
@@ -3173,7 +3247,7 @@
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/observer/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
-  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *nathan at collectivesource.com* so we can coordinate our efforts."
+  intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *webmaster @ mushroomobserver.org* so we can coordinate our efforts."
   intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
 
@@ -3255,6 +3329,7 @@
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
+  observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
@@ -3720,6 +3795,7 @@
 
   # Pattern search error messages.
   pattern_search_syntax_error: Syntax error in pattern at [string].
+  pattern_search_pattern_must_be_first_error: Filter terms come after the bare search pattern, [str].  Maybe you forgot to enclose the value for [var] in double quotes?
   pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
   pattern_search_missing_value_error: Missing value for the term [var].
   pattern_search_too_many_values_error: Search term [term] occurs more than once.
@@ -3736,6 +3812,7 @@
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
+  pattern_search_user_me_not_logged_in_error: "The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!"
 
   # content for html header title tag,
   # used when there are no hits for a list or search

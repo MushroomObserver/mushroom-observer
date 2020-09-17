@@ -113,10 +113,10 @@ class Checklist
     Name.connection.select_rows(query).each do |text_name, syn_id, deprecated|
       if syn_id && deprecated == 1
         # wait until we find an accepted synonym
-        text_name = synonyms[syn_id] ||= nil
+        synonyms[syn_id] ||= nil
       elsif syn_id
         # use the first accepted synonym we encounter
-        text_name = synonyms[syn_id] ||= text_name
+        synonyms[syn_id] ||= text_name
       else
         # count non-synonyms immediately
         count_species(text_name)

@@ -63,7 +63,7 @@ def test_host(host, port)
       http.use_ssl = true if port == 443
       result = true
     end
-  rescue Exception => e
+  rescue Exception
   end
   result
 end

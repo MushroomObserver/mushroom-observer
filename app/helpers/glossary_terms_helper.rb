@@ -2,11 +2,7 @@
 
 # View Helpers for GlossaryTerms
 module GlossaryTermsHelper
-  def destroy_button(term)
-    button_to(
-      :destroy_glossary_term.t,
-      { action: "destroy", id: term.id },
-      method: :delete, data: { confirm: "Are you sure?" }
-    )
+  def glossary_term_destroy_button(term)
+    destroy_button(object: term, name: :destroy_glossary_term)
   end
 end

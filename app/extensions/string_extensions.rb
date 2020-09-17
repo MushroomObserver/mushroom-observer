@@ -571,7 +571,7 @@ class String
       i = alphabet.index(char)
       raise("Character not in alphabet: '#{char}'") if i.nil?
 
-      num = num * len + i
+      num * len + i
     end
   end
 

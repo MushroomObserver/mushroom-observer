@@ -42,6 +42,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                   "Page should have link to prior version")
   end
 
+  def test_show_admin_delete
+    term = glossary_terms(:square_glossary_term)
+    login
+    make_admin
+    get(:show, params: { id: term.id })
+
+    assert_select("form input[value='delete']", { count: 1 },
+                  "Page is missing a way for admin to destroy glossary term")
+  end
+
   # ---------- Test actions that Display forms -- (new, edit, etc.) ------------
 
   # ***** new *****
@@ -53,9 +63,11 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_title(:create_glossary_term_title.l)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
-      assert_select("form #glossary_term_#{attr}", { count: 1 },
-                    "Form is missing field for #{attr}")
+      assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
+                    "Form should have one field for #{attr}")
     end
+    assert_select("input#glossary_term_upload_image", { count: 1 },
+                  "Form should include upload image field")
   end
 
   def test_new_no_login
@@ -74,16 +86,21 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_title(:edit_glossary_term_title.l(name: term.name))
 
     assert_select(
-      "form #glossary_term_name[value='#{term.name}']", { count: 1 },
-      "Form lacks Name field that defaults to glossary term name"
-    )
+      "form [name='glossary_term[name]']", { count: 1 },
+      "Form should have one field for Name"
+    ) do
+      assert_select(
+        "[value='#{term.name}']", true,
+        "Name field should default to glossary term name"
+      )
+    end
     assert_select(
-      "form #glossary_term_description",
+      "form [name='glossary_term[description]']",
       { text: /#{term.description}/, count: 1 },
       "Form lacks Description field that defaults to glossary term description"
     )
-    assert_select("input#upload_image", false,
-                  "Edit GlossaryTerm form should omit image input form")
+    assert_select("input#glossary_term_upload_image", false,
+                  "Edit GlossaryTerm form should omit upload image field")
   end
 
   def test_edit_no_login
@@ -102,7 +119,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.order(created_at: :desc).first
+
+    term = GlossaryTerm.last
     assert_equal(params[:glossary_term][:name], term.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_not_nil(term.rss_log)
@@ -111,14 +129,65 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_upload_image
-    login
     params = term_with_image_params
+    login
 
     assert_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.order(created_at: :desc).first
+    term = GlossaryTerm.last
     assert_equal(Image.last, term.thumb_image)
+  end
+
+  def test_create_no_name
+    params = create_term_params
+    params[:glossary_term][:name] = ""
+    login
+
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
+    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_response(:success)
+  end
+
+  def test_create_no_description_or_image
+    params = create_term_params
+    params[:glossary_term][:description] = ""
+    login
+
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
+    assert_flash(/#{:glossary_error_description_or_image.t}/)
+  end
+
+  def test_create_duplicate_name
+    existing_name = GlossaryTerm.first.name
+    params = create_term_params
+    params[:glossary_term][:name] = existing_name
+    login
+
+    assert_no_difference("GlossaryTerm.count") do
+      post(:create, params: params)
+    end
+    assert_flash(
+      # Must be quoted because it contains Regexp metacharacters "(" and ")"
+      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
+    )
+  end
+
+  def test_create_invalid_name_with_image
+    params = term_with_image_params
+    params[:glossary_term][:name] = ""
+    login
+
+    assert_no_difference("GlossaryTerm.count") do
+      assert_no_difference("Image.count") do
+        post(:create, params: params)
+      end
+    end
+    assert_flash(/#{:glossary_error_name_blank.t}/)
   end
 
   def test_create_image_save_failure
@@ -151,6 +220,37 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(params[:glossary_term][:name], term.reload.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_redirected_to(glossary_term_path(term.id))
+  end
+
+  def test_update_no_name
+    params = changes_to_conic.merge
+    params[:glossary_term][:name] = ""
+    login
+
+    post(:create, params: params)
+    assert_flash(/#{:glossary_error_name_blank.t}/)
+  end
+
+  def test_update_no_description_or_image
+    params = changes_to_conic.merge
+    params[:glossary_term][:description] = ""
+    login
+
+    post(:create, params: params)
+    assert_flash(/#{:glossary_error_description_or_image.t}/)
+  end
+
+  def test_update_duplicate_name
+    existing_name = GlossaryTerm.where.not(name: "Conic").first.name
+    params = changes_to_conic.merge
+    params[:glossary_term][:name] = existing_name
+    login
+
+    post(:update, params: params)
+    assert_flash(
+      # Must be quoted because it contains Regexp metacharacters "(" and ")"
+      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
+    )
   end
 
   # ***** destroy *****
@@ -226,7 +326,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def create_term_params
     {
-      glossary_term: { name: "Convex", description: "Boring old convex" },
+      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
       copyright_holder: "Insil Choi",
       date: { copyright_year: "2013" },
       upload: { license_id: licenses(:ccnc30).id }
@@ -236,8 +336,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def changes_to_conic
     {
       id: glossary_terms(:conic_glossary_term).id,
-      glossary_term: { name: "Convex", description: "Boring old convex" },
-      copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
+      glossary_term: { name: "Xevnoc", description: "Convex spelled backward" },
+      copyright_holder: "Insil Choi",
+      date: { copyright_year: 2013 },
       upload: { license_id: licenses(:ccnc25).id }
     }.freeze
   end

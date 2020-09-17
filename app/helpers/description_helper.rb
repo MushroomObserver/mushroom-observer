@@ -111,7 +111,6 @@ module DescriptionHelper
 
     # Turn each into a link to show_description, and add optional controls.
     list.map! do |desc|
-      any = true
       item = description_link(desc)
       writer = is_writer?(desc)
       admin  = is_admin?(desc)
@@ -174,7 +173,6 @@ module DescriptionHelper
     head += link_with_query(:show_name_create_description.t,
                             controller: obj.show_controller,
                             action: "create_#{type}_description", id: obj.id)
-    any = false
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(obj).map { |link| indent + link }

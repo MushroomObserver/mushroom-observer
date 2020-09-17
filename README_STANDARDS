@@ -1,15 +1,15 @@
-Last Revised: May 25, 2012
+Last Revised: 15 September 2020
 
 = Clean Code
 
 We are trying to apply what we believe are the best practices for code
-development.  Currently that means we like things like "agile methodology",
-"clean code" and "test driven development".  There is a great deal of
-information out on the web about all of these terms.  A good book about it
+development. Currently that means we like things like "agile methodology",
+"clean code" and "test driven development". There is a great deal of
+information out on the web about all of these terms. A good book about it
 "Clean Code: A Handbook of Agile Software Craftsmanship" by Robert C. Martin.
-We highly recommend finding a copy of this book.  It is very thought-provoking,
+We highly recommend finding a copy of this book. It is thought-provoking,
 and regardless of your philosophy, it is guaranteed to improve your
-understanding and application of clean coding practices.  (Note that the book
+understanding and application of clean coding practices. (Note that the book
 is written for Java, but it applies equally well to Ruby.)
 
 A short summary of the key guidelines are:
@@ -32,7 +32,7 @@ rules.
 
 8. Test Driven Development is encouraged, but not required.
 
-We are always happy to discuss the topic.  The present code is in need of a
+We are always happy to discuss the topic. The present code is in need of a
 great deal of work, however there are a few examples I think we can all
 agree exemplify where we're trying to move the code:
 
@@ -44,18 +44,18 @@ unit test::   test/integration/post_observation_test.rb
 = MVC Architecture
 
 MVC is all about separating data ("model"), logic ("control") and presentation
-("view").  In practice I find the separation is between each pair is fuzzy.
-But the principle is well worth keeping in mind during code design.  Here are
+("view"). In practice I find the separation is between each pair is fuzzy.
+But the principle is well worth keeping in mind during code design. Here are
 a few simple rules of thumb:
 
-1. The view templates should not be querying or modifying the database.
+1. The view templates should not query or modify the database.
 
-2. The controller should not know whether the view is writing HTML or XML or JSON.
+2. The controller should not know whether the view is writing HTML, XML, or JSON.
 
-3. The models shouldn't be able to distinguish whether the caller is a
+3. The models should not be able to distinguish whether the caller is a
 web server, the API, or a rake task.
 
-4.  Views and controllers should be unaware of whether the data is stored in a
+4. Views and controllers should be unaware whether the data is stored in a
 SQL relational database or an Excel spreadsheet.
 
 For more infomration see http://en.wikipedia.org/wiki/Model-view-controller.
@@ -63,45 +63,44 @@ See also the section entitled *Transactions* below.
 
 = Progressive Enhancement
 
-Nathan strongly advocates "Progressive Enhancement" as opposed to "Graceful
-Degradation".  This means that user interface should be designed initially
-with a minimal, text-only browser, without any javascript.  Then you can
+We have used "Progressive Enhancement" as opposed to "Graceful
+Degradation". This means that user interface should be designed initially
+with a minimal, text-only browser, without any javascript. Then you can
 start adding javascript, dynamic HTML and AJAX progressively to this basic
-page.  All features should be available to browsers without javascript.
+page. All features should be available to browsers without javascript.
 
-= Unit Tests
+= Tests
 
-We are very serious about this nowadays.  Every minute "wasted" writing and
-cleaning up unit tests pays for itself tenfold later.  Nathan is a fan of
-test-driven development.  Even if you don't go that far, no code is complete
-until it has a full suite of unit tests verifying its behavior thoroughly.
+We are serious about this. Every minute "wasted" writing and cleaning up
+unit tests pays for itself tenfold later. No code is complete until
+ it has a full suite of unit tests verifying its behavior thoroughly.
 
 A full test suite is critical to Agile software development, because it
 gives programmers the confidence to refactor code liberally without worrying
-about crashing the website.  If your modifications pass all of our tests,
+about crashing the website. If your modifications pass all of our tests,
 you can rest assured that you haven't broken anything.
 
 A related guideline is to force yourself to write a test for every bug you
-find.  Write the test first, ensure that it actually fails, *then* fix it.
+find. Write the test first, ensure that it actually fails, *then* fix it.
 
 = Comments
 
-Clean Code claims that good code requires no comments.  If a variable requires
-comments, then it is named poorly.  If a method requires comments, then it is
-too complex and should be broken up.  Extensive comments are virtually
-guaranteed to end up out of date and more harmful than helpful.  However, I
-personally (Jason) think complex classes benefit from overviews.  We're still
+Clean Code claims that good code requires no comments. If a variable requires
+comments, then it is named poorly. If a method requires comments, then it is
+too complex and should be broken up. Extensive comments are virtually
+guaranteed to end up out of date and more harmful than helpful. However, I
+personally (Jason) think complex classes benefit from overviews. We're still
 working out the appropriate level of compromise.
 
 Ruby provides a mechanism for extracting and compiling comments into a set of
 handy HTML documentation for your application (<tt>rake rdoc</tt>). If you do
 write comments for a class or method, it is worth ensuring that +rdoc+ can
-parse it correctly.  Place comments in the lines just above the applicable
+parse it correctly. Place comments in the lines just above the applicable
 +class+ or +def+ keyword.
 
 We've just started to implement a set of comment directives in the controllers
 to help us manage access to actions (+:nologin:+, +:norobots:+, +:prefetch:+,
-+:root:+).  Eventually we will write a +rake+ task that reads these and ensures
++:root:+). Eventually we will write a +rake+ task that reads these and ensures
 that the +requires_login+ and +requires_root+ filters are implemented
 correctly; that +robots.txt+ is complete; and that no dangerous methods allow
 prefetching.
@@ -109,52 +108,64 @@ prefetching.
 = Optimization
 
 Rails makes it very easy to write queries that bring the server grinding to a
-halt.  The practice we recommend is to write your code initially with clarity
-and readability foremost in mind.  Then do benchmark tests and start
+halt. The practice we recommend is to write your code initially with clarity
+and readability foremost in mind. Then do benchmark tests and start
 considering optimizations once you can demonstrate objectively whether they
 actually help.
 
 The class Query has proven to be extremely effective in separating out
-optimization from data requirements.  It encourages controllers to structure
+optimization from data requirements. It encourages controllers to structure
 themselves in terms of queries which return a set of a single type of object.
 Related data can then be eager-loaded efficiently using the <tt>:include =>
-:associations</tt> mechanism.  The query itself can then be optimized safely in
+:associations</tt> mechanism. The query itself can then be optimized safely in
 isolation from the control code, with access to the full capabilities of MySQL
-(not always available via ActiveRecord).  Results of such Query's can then
+(not always available via ActiveRecord). Results of such Query's can then
 automatically be handled by index/prev/next, modified and refined, and passed
 between actions just like any other query.
 
 = Transactions
 
 We have half-implemented a mechanism by which multiple instances of MO may
-collaborate.  It involves creating a way to describe and store all fundamental
+collaborate. It involves creating a way to describe and store all fundamental
 database operations (Transaction), as well as a way to reproduce those
-operations on other servers (API).  This has implications about how controllers
-and models are developed.  It encourages simplifying operations as much as
+operations on other servers (API). This has implications about how controllers
+and models are developed. It encourages simplifying operations as much as
 possible, and moving as much of the mechanics of the operations into the model,
 which API has access to, instead of the controller, which API doesn't have
 access to.
 
 For example, user creates an observation: It is okay to validate the species
 name in the controller, because that requires communication and feedback from
-the user.  But if creating the observation requires logging, notifications,
+the user. But if creating the observation requires logging, notifications,
 updating user contribution score, votes, etc. then all that should be moved
-into an appropriate method in Observation.  Otherwise we will have to duplicate
+into an appropriate method in Observation. Otherwise we will have to duplicate
 all that code again in the API.
 
 = Text / Strings
 
-RedCloth is a simple mark-up system.  It is used extensively throughout the
+RedCloth is a simple mark-up system. It is used extensively throughout the
 site, e.g. in user-supplied notes, in scientific names, and in
-"internationalization" strings (see below).  For more information see RedCloth
+"internationalization" strings (see below). For more information see RedCloth
 plug-in and Textile class in <tt>app/classes/textile.rb</tt>.
 
-All user-supplied text should be watched carefully.  We used to use the Rails
+All user-supplied text should be watched carefully. We used to use the Rails
 helper +sanitize+ and +html_escape+, however nowadays all user-supplied text
 gets processed by RedCloth instead.
 
 All text on the site, including error messages -- anything that the end user
-will see -- is kept in a set of YAML files in <tt>config/locales/xxx.yml</tt>.  For
-more information, see the documentation for Symbol#localize in
-app/extensions/symbol_extensions.rb.  See also README_TRANSLATIONS.
+will see -- is kept in a set of YAML files in <tt>config/locales/xxx.yml</tt>.
+For more information, see the documentation for Symbol#localize in
+app/extensions/symbol_extensions.rb. See also README_TRANSLATIONS.
+
+= Continuous Integration
+
+We use Travis CI for continuous integration. Travis will run on pushes to our
+GitHub repository. The Travis job runs:
+- our test suite,
+- Codeclimate, which uses RuboCop and Brakeman to provide style and code
+  quality information and metrics; and
+- Coveralls, which provides code coverage details.
+
+Developers should not only clean up test errors and failures, but also any new
+Codecllimate issues and any test coverage decreases.
 

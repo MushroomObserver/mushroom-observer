@@ -201,7 +201,7 @@ class Name < AbstractModel
   end
 
   def self.parse_group(str, deprecated = false)
-    return unless (match = GROUP_PAT.match(str))
+    return unless GROUP_PAT.match(str)
 
     result = parse_name(str_without_group(str),
                         rank: :Group, deprecated: deprecated)

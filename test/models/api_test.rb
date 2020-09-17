@@ -1155,7 +1155,7 @@ class ApiTest < UnitTestCase
       # add notes to avoid breaking later, brittle assertion
       notes: "Agaricus image", user: rolf
     )
-    agaricus_obs = Observation.create(
+    Observation.create(
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
@@ -1265,7 +1265,7 @@ class ApiTest < UnitTestCase
     assert_equal(2, Name.where(text_name: "Agaricus").count)
 
     agaricus_img = Image.create(user: rolf)
-    agaricus_obs = Observation.create(
+    Observation.create(
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
@@ -1489,7 +1489,6 @@ class ApiTest < UnitTestCase
       low: @low,
       notes: @notes
     }
-    name = params[:name]
     assert_api_pass(params)
     assert_last_location_correct
     assert_api_fail(params)
