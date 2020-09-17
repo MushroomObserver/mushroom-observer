@@ -6,8 +6,10 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
-    attr_accessor :var
-    attr_accessor :vals
+    require_dependency "pattern_search/term/dates"
+    include Dates
+
+    attr_accessor :var, :vals
 
     def initialize(var)
       self.var = var
@@ -37,20 +39,21 @@ module PatternSearch
       val.to_s.sub(/^['"](.*)['"]$/, '\1').gsub(/\\(.)/, '\1')
     end
 
-    def parse_pattern
-      raise(MissingValueError.new(var: var)) if vals.empty?
+    def first_val
+      vals.first
+    end
 
+    def parse_pattern
+      make_sure_values_not_empty!
       vals.map { |v| quote(v) }.join(" ")
     end
 
     def parse_boolean(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+      val = make_sure_there_is_one_value!
+      return true if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
 
-      val = vals.first
-      return true  if /^(1|yes|true)$/i.match?(val)
-      return false if /^(0|no|false)$/i.match?(val) && !only_yes
       raise(BadYesError.new(var: var, val: val)) if only_yes
+      return false if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
 
       raise(BadBooleanError.new(var: var, val: val))
     end
@@ -60,54 +63,16 @@ module PatternSearch
     end
 
     def parse_yes_no_both
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      return "only"   if /^(1|yes|true)$/i.match?(val)
-      return "no"     if /^(0|no|false)$/i.match?(val)
-      return "either" if /^(both|either)$/i.match?(val)
+      val = make_sure_there_is_one_value!
+      return "only"   if /^(1|yes|true|#{:search_value_true.l})$/i.match?(val)
+      return "no"     if /^(0|no|false|#{:search_value_false.l})$/i.match?(val)
+      return "either" if /^(both|either|#{:search_value_both.l})$/i.match?(val)
 
       raise(BadYesNoBothError.new(var: var, val: val))
     end
 
-    # Assure that param has only one value - a booleanish string -
-    #   returning "TRUE" or "FALSE" (rather than true/false).
-    # This is needed where the param interacts with user content filters and
-    #   and where the relevant sql string is TRUE / FALSE
-    #   e.g., :has_specimen
-    def parse_to_true_false_string(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      return "TRUE"  if /^(1|yes|true)$/i.match?(val)
-      return "FALSE" if /^(0|no|false)$/i.match?(val) && !only_yes
-      raise(BadYesError.new(var: var, val: val)) if only_yes
-
-      raise(BadBooleanError.new(var: var, val: val))
-    end
-
-    # Assure that param has only one value - a booleanish string -
-    #   returning "NULL" or "NOT NULL" (rather than true/false).
-    # This is needed where the param interacts with user content filters and
-    #   and where the relevant sql string is NULL / NOT NULL
-    #   e.g., :has_images
-    def parse_to_null_not_null_string(only_yes = false)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      return "NOT NULL" if /^(1|yes|true)$/i.match?(val)
-      return "NULL"     if /^(0|no|false)$/i.match?(val) && !only_yes
-      raise(BadYesError.new(var: var, val: val)) if only_yes
-
-      raise(BadBooleanError.new(var: var, val: val))
-    end
-
     def parse_list_of_names
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           ::Name.safe_find(val) ||
@@ -116,94 +81,89 @@ module PatternSearch
           ::Name.find_by_text_name(val) || ::Name.find_by_search_name(val) ||
             raise(BadNameError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_herbaria
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
-          Herbarium.find_by_code(val) ||
-            Herbarium.find_by_name(val) ||
+          Herbarium.find_by_code_with_wildcards(val) ||
+            Herbarium.find_by_name_with_wildcards(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_locations
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
-          Location.find_by_name(val) ||
-            Location.find_by_scientific_name(val) ||
+          Location.find_by_name_with_wildcards(val) ||
+            Location.find_by_scientific_name_with_wildcards(val) ||
             raise(BadLocationError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_projects
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
-          Project.find_by_title(val) ||
+          Project.find_by_title_with_wildcards(val) ||
             raise(BadProjectError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_species_lists
-      raise(MissingValueError.new(var: var)) if vals.empty?
-
+      make_sure_values_not_empty!
       vals.map do |val|
         if /^\d+$/.match?(val)
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else
-          SpeciesList.find_by_title(val) ||
+          SpeciesList.find_by_title_with_wildcards(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         end
-      end.map(&:id)
+      end.flatten.map(&:id).uniq
     end
 
     def parse_list_of_users
-      raise(MissingValueError.new(var: var)) if vals.empty?
+      make_sure_values_not_empty!
+      vals.map { |val| parse_one_user(val) }.flatten.map(&:id).uniq
+    end
 
-      vals.map do |val|
-        if /^\d+$/.match?(val)
-          User.safe_find(val) ||
-            raise(BadUserError.new(var: var, val: val))
-        else
-          User.find_by_login(val) ||
-            User.find_by_name(val) ||
-            raise(BadUserError.new(var: var, val: val))
-        end
-      end.map(&:id)
+    def parse_one_user(val)
+      case val
+      when "me" || :search_value_me.l
+        User.current ||
+          raise(UserMeNotLoggedInError.new)
+      when /^\d+$/
+        User.safe_find(val) ||
+          raise(BadUserError.new(var: var, val: val))
+      else
+        User.find_by_login(val) ||
+          User.find_by_name(val) ||
+          raise(BadUserError.new(var: var, val: val))
+      end
     end
 
     def parse_string
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      vals.first
+      make_sure_there_is_one_value!
     end
 
     def parse_float(min, max)
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
@@ -221,73 +181,22 @@ module PatternSearch
     end
 
     def parse_confidence
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+      val = make_sure_there_is_one_value!
+      from, to = val.to_s.split(/(?<=\d)-/, 2)
+      [parse_one_confidence_value(from),
+       parse_one_confidence_value(to || "100")]
+    end
 
-      val = vals.first
-      if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
-         (-100..100).cover?(val.to_f)
-        [val.to_f * 3 / 100, 3]
-      elsif val.to_s.
-            match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
-            (-100..100).cover?(Regexp.last_match(1).to_f) &&
-            (-100..100).cover?(Regexp.last_match(3).to_f) &&
-            Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
-        [Regexp.last_match(1).to_f * 3 / 100,
-         Regexp.last_match(3).to_f * 3 / 100]
-      else
+    def parse_one_confidence_value(val)
+      val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
+        (-100..100).cover?(val.to_f) ||
         raise(BadConfidenceError.new(var: var, val: val))
-      end
-    end
 
-    def parse_date_range
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
-      # rubocop:disable Style/CaseLikeIf
-      # case does not work if the code nested after "when /regex/" uses a
-      # named capture group
-      if /^(?<yr>\d{4})$/ =~ val
-        yyyymmdd([yr, 1, 1], [yr, 12, 31])
-      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)$/ =~ val
-        yyyymmdd([yr, mo, 1], [yr, mo, 31])
-      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)-(?<day>\d\d?)$/ =~ val
-        yyyymmdd([yr, mo, day], [yr, mo, day])
-      elsif /^(?<yr1>\d{4})-(?<yr2>\d{4})$/ =~ val
-        yyyymmdd([yr1, 1, 1], [yr2, 12, 31])
-      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<yr2>\d{4})-(?<mo2>\d\d?)$/ =~ val
-        yyyymmdd([yr1, mo1, 1], [yr2, mo2, 31])
-      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<dy1>\d\d?)-
-             (?<yr2>\d{4})-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/x =~ val
-        yyyymmdd([yr1, mo1, dy1], [yr2, mo2, dy2])
-      elsif /^(?<mo>\d\d?)$/ =~ val
-        mmdd([mo, 1], [mo, 31])
-      elsif /^(?<mo1>\d\d?)-(?<mo2>\d\d?)$/ =~ val
-        mmdd([mo1, 1], [mo2, 31])
-      elsif /^(?<mo1>\d\d?)-(?<dy1>\d\d?)-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/ =~ val
-        mmdd([mo1, dy1], [mo2, dy2])
-      else
-        raise(BadDateRangeError.new(var: var, val: val))
-      end
-      # rubocop:enable Style/CaseLikeIf
-    end
-
-    def yyyymmdd(from, to)
-      [format("%04d-%02d-%02d", from.first, from.second.to_i, from.third.to_i),
-       format("%04d-%02d-%02d", to.first, to.second.to_i, to.third.to_i)]
-    end
-
-    def mmdd(from, to)
-      [format("%02d-%02d", from.first.to_i, from.second.to_i),
-       format("%02d-%02d", to.first.to_i, to.second.to_i)]
+      val.to_f * 3 / 100
     end
 
     def parse_rank_range
-      raise(MissingValueError.new(var: var)) if vals.empty?
-      raise(TooManyValuesError.new(var: var)) if vals.length > 1
-
-      val = vals.first
+      val = make_sure_there_is_one_value!
       from, to = val.split("-", 2).map(&:strip)
       to ||= from
       from = lookup_rank(from)
@@ -315,6 +224,17 @@ module PatternSearch
       else
         false
       end
+    end
+
+    def make_sure_values_not_empty!
+      raise(MissingValueError.new(var: var)) if vals.empty?
+    end
+
+    def make_sure_there_is_one_value!
+      raise(MissingValueError.new(var: var)) if vals.empty?
+      raise(TooManyValuesError.new(var: var)) if vals.length > 1
+
+      vals.first
     end
   end
 end
