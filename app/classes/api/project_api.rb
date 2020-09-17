@@ -11,8 +11,10 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
+      { admin_group: :users },
       :comments,
-      :user
+      :user,
+      { user_group: :users }
     ]
 
     def query_params

@@ -12,9 +12,14 @@ class ImageS3Test < UnitTestCase
       stub: true # (makes Aws::S3 return empty responses for everything)
     )
     assert(s3.status("key"))
+    # rubocop:disable Lint/UnreachableCode
+    # The point of this loop is to ensure Results#each works or
+    # at least doesn't crash or something.
     s3.list.each do |_obj|
       break
     end
+    # rubocop:enable Lint/UnreachableCode
+
     file = Rails.root.join("test", "fixtures", "robots.txt")
 
     s3.upload("key", file, content_type: "text/plain")

@@ -321,8 +321,6 @@ class ProjectController < ApplicationController
         flash_error(:change_member_status_denied.t)
         redirect_with_query(action: :show_project, id: @project.id)
       elsif request.method == "POST"
-        user_group = @project.user_group
-        admin_group = @project.admin_group
         admin = member = :remove
         case params[:commit]
         when :change_member_status_make_admin.l

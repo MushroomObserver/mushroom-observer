@@ -41,7 +41,7 @@ end
 for path, rec in data
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
-  rec[1] = sig = Math.sqrt(ssq / num - avg * avg)
+  rec[1] = Math.sqrt(ssq / num - avg * avg)
 end
 
 n = 0

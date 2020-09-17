@@ -218,7 +218,7 @@ class Naming < AbstractModel
   # clear naming.observation -- otherwise it will recalculate the consensus for
   # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
-    if (user = User.current) &&
+    if User.current &&
        (obs = observation)
       obs.log(:log_naming_destroyed, name: format_name)
       obs.calc_consensus

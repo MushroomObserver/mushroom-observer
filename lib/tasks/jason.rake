@@ -9,8 +9,6 @@ namespace :jason do
   task(check_for_special_characters: :environment) do
     print "Writing file \"y\"...\n"
     out = ""
-    cd = Iconv.new("ISO-8859-1", "UTF-8")
-    # for name in Name.find(:all) # Rails 3
     for name in Name.all
       str = [
         name.id.to_s,

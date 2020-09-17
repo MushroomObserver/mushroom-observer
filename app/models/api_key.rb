@@ -39,7 +39,7 @@ class ApiKey < AbstractModel
 
   def self.new_key
     result = String.random(KEY_LENGTH)
-    key = String.random(KEY_LENGTH) while find_by_key(result)
+    result = String.random(KEY_LENGTH) while find_by(key: result)
     result
   end
 
