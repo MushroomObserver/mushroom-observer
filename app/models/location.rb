@@ -358,6 +358,20 @@ class Location < AbstractModel
     name&.split(/,\s*/)&.reverse&.join(", ")
   end
 
+  # Reverse a name string which might contain "*" wildcards.  Note that the
+  # "*" swaps front to back on some words but not all.  Just the ones at the
+  # beginning and end of the string.
+  #
+  #   "*California, USA"          → "USA, California*"
+  #   "*, Smokies, * Co., *, USA" → "USA, *, * Co., Smokies, *"
+  #
+  def self.reverse_name_with_wildcards(name)
+    name2 = name.to_s.dup
+    left  = "*" if name2.sub!(/^\*/, "")
+    right = "*" if name2.sub!(/\*$/, "")
+    "#{right}#{reverse_name(name2)}#{left}"
+  end
+
   # Reverse given name if required in order to make country last.
   def self.reverse_name_if_necessary(name)
     last_part = name.split(/,\s*/).last
@@ -607,6 +621,14 @@ class Location < AbstractModel
   def self.fix_country(name)
     c = country(name)
     name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
+  end
+
+  def self.find_by_name_with_wildcards(str)
+    find_using_wildcards("name", str)
+  end
+
+  def self.find_by_scientific_name_with_wildcards(str)
+    find_using_wildcards("name", reverse_name_with_wildcards(str))
   end
 
   ##############################################################################

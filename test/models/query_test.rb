@@ -2654,6 +2654,9 @@ class QueryTest < UnitTestCase
   def test_observation_all
     expect = Observation.all.order(when: :desc, id: :desc).to_a
     assert_query(expect, :Observation, :all)
+    project = projects(:bolete_project)
+    expect = project.species_lists.map(&:observations).flatten.to_a
+    assert_query(expect, :Observation, :all, project_lists: project.title)
   end
 
   def test_observation_at_location

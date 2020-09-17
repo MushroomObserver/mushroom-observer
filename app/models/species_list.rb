@@ -109,6 +109,10 @@ class SpeciesList < AbstractModel
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
 
+  def self.find_by_title_with_wildcards(str)
+    find_using_wildcards("title", str)
+  end
+
   ##############################################################################
   #
   #  :section: Names

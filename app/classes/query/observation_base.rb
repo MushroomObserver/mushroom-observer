@@ -24,6 +24,7 @@ module Query
         locations?: [:string],
         notes_has?: :string,
         projects?: [:string],
+        project_lists?: [:string],
         species_lists?: [:string],
         users?: [User],
 
@@ -64,6 +65,7 @@ module Query
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
       initialize_projects_parameter
+      initialize_project_lists_parameter
       initialize_species_lists_parameter
     end
 
@@ -88,6 +90,14 @@ module Query
         "observations_projects.project_id",
         lookup_projects_by_name(params[:projects]),
         :observations_projects
+      )
+    end
+
+    def initialize_project_lists_parameter
+      add_id_condition(
+        "observations_species_lists.species_list_id",
+        lookup_lists_for_projects_by_name(params[:project_lists]),
+        :observations_species_lists
       )
     end
 

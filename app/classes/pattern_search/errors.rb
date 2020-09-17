@@ -4,7 +4,8 @@ module PatternSearch
   class Error < ::StandardError
     attr_accessor :args
 
-    def initialize(args)
+    def initialize(args = {})
+      super
       self.args = args
     end
   end
@@ -12,6 +13,13 @@ module PatternSearch
   class SyntaxError < Error
     def to_s
       :pattern_search_syntax_error.t(string: args[:string].inspect)
+    end
+  end
+
+  class PatternMustBeFirstError < Error
+    def to_s
+      :pattern_search_pattern_must_be_first_error.t(str: args[:str].inspect,
+                                                    var: args[:var].inspect)
     end
   end
 
@@ -124,6 +132,12 @@ module PatternSearch
     def to_s
       :pattern_search_bad_rank_range_error.t(term: args[:var].inspect,
                                              value: args[:val].inspect)
+    end
+  end
+
+  class UserMeNotLoggedInError < Error
+    def to_s
+      :pattern_search_user_me_not_logged_in_error.t
     end
   end
 end

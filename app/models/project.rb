@@ -178,6 +178,10 @@ class Project < AbstractModel
     update_attribute(:updated_at, Time.zone.now)
   end
 
+  def self.find_by_title_with_wildcards(str)
+    find_using_wildcards("title", str)
+  end
+
   ##############################################################################
   #
   #  :section: Logging
