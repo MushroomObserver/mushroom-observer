@@ -7,9 +7,10 @@
     render(partial: "location/location_description", object: object)
 
   when "Name"
-    str = render(partial: "name/name", object: object, locals: {synonyms: true})
+    str = render(partial: "name/nomenclature",
+          locals: { name: object, synonyms: true })
     if object.has_notes?
-      str += content_tag(:p, :show_name_notes.t + ":")
+      str += tag.p("#{:show_name_notes.t}:")
       str += colored_notes_box(true, object.notes.tpl)
     end
     content_tag(:div, str, class: "name-section", style: "margin:1em")

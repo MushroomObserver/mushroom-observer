@@ -14,7 +14,8 @@
   <div class="col-sm-7 col-lg-9">
     <div class="list-group">
       <div class="list-group-item name-section">
-        <%= render(partial: "name", object: @name, locals: {synonyms: false}) %>
+        <%= render(partial: "nomenclature",
+                   locals: { name: @name, synonyms: false }) %>
       </div>
     </div>
   </div>
