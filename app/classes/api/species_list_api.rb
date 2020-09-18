@@ -6,7 +6,7 @@ class API
     self.model = SpeciesList
 
     self.high_detail_page_length = 10
-    self.low_detail_page_length  = 1000
+    self.low_detail_page_length  = 100
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 

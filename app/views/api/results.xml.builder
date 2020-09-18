@@ -3,7 +3,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
   if @api.user
-    xml_minimal_object(xml, :user, User, @api.user.id)
+    xml_minimal_object_old(xml, :user, User, @api.user.id)
   end
 
   unless @api.errors.any?(&:fatal)
@@ -17,11 +17,11 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
     xml.results(number: @api.result_ids.length) do
       if @api.detail == :none
         for result_id in @api.result_ids
-          xml_minimal_object(xml, :result, @api.model, result_id)
+          xml_minimal_object_old(xml, :result, @api.model, result_id)
         end
       else
         for result in @api.results
-          xml_detailed_object(xml, :result, result, @api.detail == :high)
+          xml_detailed_object_old(xml, :result, result, @api.detail == :high)
         end
       end
     end

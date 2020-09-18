@@ -17,6 +17,7 @@ class API
     ]
 
     self.low_detail_includes = [
+      :license,
       :observations
     ]
 

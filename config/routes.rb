@@ -98,6 +98,23 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
+  api2: {
+    api_keys: {},
+    collection_numbers: {},
+    comments: {},
+    external_links: {},
+    external_sites: {},
+    herbaria: {},
+    herbarium_records: {},
+    images: {},
+    locations: {},
+    names: {},
+    observations: {},
+    projects: {},
+    sequences: {},
+    species_lists: {},
+    users: {}
+  },
   collection_number: {
     collection_number_search: {},
     create_collection_number: {},
