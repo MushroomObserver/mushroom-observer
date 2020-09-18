@@ -349,7 +349,6 @@ class Name < AbstractModel
     "synonym_id",
     "description_id",
     "classification", # (versioned in the default desc)
-    "locked",
     "locked"
   )
 
