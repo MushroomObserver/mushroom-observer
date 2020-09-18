@@ -12,18 +12,19 @@ xml.tag!(tag,
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
-  xml_string(xml, :original_name, object.original_name) if check_permission(object)
+  xml_string(xml, :original_name, object.original_name) \
+    if check_permission(object)
   xml.observations(number: object.observations.length) do
     for id in object.observation_ids
-      xml_minimal_object(xml, :observation, Observation, id)
+      xml_minimal_object_old(xml, :observation, Observation, id)
     end
   end
   if !detail
-    xml_minimal_object(xml, :license, License, object.license_id)
-    xml_minimal_object(xml, :owner, User, object.user_id)
+    xml_minimal_object_old(xml, :license, License, object.license_id)
+    xml_minimal_object_old(xml, :owner, User, object.user_id)
   else
-    xml_detailed_object(xml, :license, object.license)
-    xml_detailed_object(xml, :owner, object.user)
+    xml_detailed_object_old(xml, :license, object.license)
+    xml_detailed_object_old(xml, :owner, object.user)
     xml.files(number: Image.all_sizes.length + 1) do
       for size in Image.all_sizes + [:original]
         xml_image_file(xml, object, size)

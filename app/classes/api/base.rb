@@ -7,7 +7,7 @@
 #
 #  Each API request is encapsulated by a sinle instance of a subclass of API.
 #  Most requests are tied one-to-one to an ActiveRecord model.  Thus most
-#  subclasses are derived from API::ModelApi < API.
+#  subclasses are derived from API::ModelAPI < API.
 #
 #  The API instance is given the hash of (string) parameters verbatim from
 #  an HTTP request.  (Although note that the request could in principle come

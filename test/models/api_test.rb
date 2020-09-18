@@ -4009,9 +4009,6 @@ class ApiTest < UnitTestCase
   end
 
   def test_api_key_help
-    file = help_messages_file
-    File.open(file, "w") { |fh| fh.truncate(0) }
-
     do_help_test(:get, :api_key, :fail)
     do_help_test(:post, :api_key)
     do_help_test(:patch, :api_key, :fail)
@@ -4078,10 +4075,6 @@ class ApiTest < UnitTestCase
     do_help_test(:delete, :user, :fail)
   end
 
-  def help_messages_file
-    Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
-  end
-
   def do_help_test(method, action, fail = false)
     params = {
       method: method,
@@ -4096,18 +4089,6 @@ class ApiTest < UnitTestCase
       assert_equal("API::NoMethodForAction", api.errors.first.class.name)
     else
       assert_equal("API::HelpMessage", api.errors.first.class.name)
-      file = help_messages_file
-      return unless File.exist?(file)
-
-      File.open(file, "a") do |fh|
-        fh.puts("#{method.to_s.upcase} #{action}")
-        fh.puts(api.errors.first.to_s.gsub(/; /, "\n  ").
-          sub(/^Usage: /, "  ").
-          sub(/^  query params: */, " query params\n  ").
-          sub(/^  update params: */, " update params\n  ").
-          gsub(/^(  [^:]*:) */, "\\1\t"))
-        fh.puts
-      end
     end
   end
 end

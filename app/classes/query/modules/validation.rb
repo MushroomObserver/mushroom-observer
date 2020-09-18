@@ -70,11 +70,12 @@ module Query
       end
 
       def array_validate(arg, val, arg_type)
-        if val.is_a?(Array)
+        case val
+        when Array
           val[0, MO.query_max_array].map do |val2|
             scalar_validate(arg, val2, arg_type)
           end
-        elsif val.is_a?(API::OrderedRange)
+        when API::OrderedRange, API2::OrderedRange
           [scalar_validate(arg, val.begin, arg_type),
            scalar_validate(arg, val.end, arg_type)]
         else
@@ -229,7 +230,7 @@ module Query
         else
           raise(
             "Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
-            "got: #{val.inspect}"
+            "got: #{val.class.name}::#{val.inspect}"
           )
         end
       end
