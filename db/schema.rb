@@ -427,6 +427,7 @@ ActiveRecord::Schema.define(version: 2020_09_11_183059) do
     t.text "notes"
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
+    t.integer "icn_identifier"
   end
 
   create_table "naming_reasons", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

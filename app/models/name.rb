@@ -335,6 +335,7 @@ class Name < AbstractModel
       correct_spelling
       notes
       lifeform
+      icn_identifier
     ]
   )
   non_versioned_columns.push(
@@ -349,7 +350,7 @@ class Name < AbstractModel
     "description_id",
     "classification", # (versioned in the default desc)
     "locked",
-    "icn_identifier"
+    "locked"
   )
 
   before_create :inherit_stuff
