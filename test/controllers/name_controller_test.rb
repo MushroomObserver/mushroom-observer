@@ -1693,13 +1693,14 @@ class NameControllerTest < FunctionalTestCase
     assert_select("input[type=text]#name_correct_spelling", count: 1)
   end
 
-  def test_edit_add_identifier
+  def test_post_edit_add_identifier
     name = names(:stereum_hirsutum)
-     params = {
+    params = {
       id: name.id,
       name: {
         text_name: name.text_name,
         author: name.author,
+        sort_name: name.sort_name,
         rank: name.rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
