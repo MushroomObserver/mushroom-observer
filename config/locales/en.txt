@@ -1473,6 +1473,7 @@
   form_names_locked: Lock this name so users cannot change name, author or rank?
   form_names_text_name: Scientific Name
   form_names_icn_identifier: 'ICN Identifier #'
+  form_names_identifier_help: Index Fungorum or MycoBank registration number, if known.
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy

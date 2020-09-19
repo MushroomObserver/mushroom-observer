@@ -12,6 +12,14 @@
 <% if !@name.locked || in_admin_mode? %>
   <div class="form-inline push-down">
     <div class="form-group">
+      <label for="name_icn_identifier"><%= :form_names_icn_identifier.t %>: </label>
+      <%= form.text_field(:icn_identifier, class: "form-control", size: 8) %>
+      <%= :form_names_identifier_help.t %>
+    </div>
+  </div>
+
+  <div class="form-inline push-down">
+    <div class="form-group">
       <label for="name_rank"><%= :Rank.t %>:</label>
       <%= form.select(
             :rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {},
@@ -23,10 +31,6 @@
       <%= form.select(
             :deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{
             class: "form-control"}) %>
-    </div>
-    <div class="form-group indent">
-      <label for="name_icn_identifier"><%= :form_names_icn_identifier.t %>: </label>
-      <%= form.text_field(:icn_identifier, class: "form-control", size: 8) %>
     </div>
   </div>
 
@@ -47,10 +51,8 @@
       <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
     <%= content_tag(:b, :Status.t) %>:
       <%= @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t %><br/>
-    <%= content_tag(:b, :Name.t) %>:
-      <%= @name.real_text_name.t %><br/>
-    <%= content_tag(:b, :Authority.t) %>:
-      <%= @name.author.t %><br/>
+    <%= content_tag(:b, :Name.t) %>:<%= @name.real_text_name.t %><br/>
+    <%= content_tag(:b, :Authority.t) %>:<%= @name.author.t %><br/>
     <div class="help-block"><%= :show_name_locked.tp %></div>
     <%= hidden_field(:name, :rank) %>
     <%= hidden_field(:name, :deprecated) %>
