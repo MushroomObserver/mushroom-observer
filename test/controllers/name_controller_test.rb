@@ -1698,6 +1698,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
+        version: name.version,
         text_name: name.text_name,
         author: name.author,
         sort_name: name.sort_name,
@@ -1709,8 +1710,13 @@ class NameControllerTest < FunctionalTestCase
     }
     user = name.user
     login(user.login)
-    post(:edit_name, params)
 
+    assert_difference("name.versions.count", 1) do
+      post(:edit_name, params)
+    end
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_equal(189826, name.reload.icn_identifier)
     assert_email_generated
   end
 
