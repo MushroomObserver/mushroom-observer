@@ -200,10 +200,9 @@
   </div>
 </div>
 
-<%
-   # ----------------------------------------
-   #  Show comments
-   # ----------------------------------------
+<%# ----------------------------------------
+  #  Show comments
+  # ----------------------------------------
 %>
 <%= render(partial: "comment/show_comments",
            locals: {object: @name, controls: true, limit: nil}) %>

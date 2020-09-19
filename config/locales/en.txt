@@ -2016,12 +2016,13 @@
   show_name_editors: "[:Editors]"
   show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
-  show_name_icn_id_missing: '???'
-  show_name_icn_id_na: n.a.
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
-  mycobank_search: "MycoBank search"
+  show_name_icn_id_missing: missing
+  index_fungorum_record: Index Fungorum record
+  mycobank_record: MycoBank record
+  mycobank_search: MycoBank search
 
   # name/show_name - links to observations
   show_name_observations: More [:OBSERVATIONS]
