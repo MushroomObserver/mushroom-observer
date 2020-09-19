@@ -267,7 +267,7 @@ class NameControllerTest < FunctionalTestCase
     get(:show_name, id: name.id)
     assert(
       /#{:ICN_IDENTIFIER.l}.*#{name.icn_identifier}/m =~ @response.body,
-      "Page is missing ICN identifier label and/or number"
+      "Page lacks ICN identifier label and/or number"
     )
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", true,
@@ -277,20 +277,26 @@ class NameControllerTest < FunctionalTestCase
       "body a[href='#{mycobank_record_url(name.icn_identifier)}']", true,
       "Page is missing a link to MB record"
     )
+  end
 
+  def test_show_name_icn_identifier_missing
     # Name is registrable, but icn_identifier is not filled in
     name = names(:coprinus)
     label = "#{:ICN_IDENTIFIER.l}"
-    # contains regexp meta characters (???)
-    number_missing = Regexp.escape(:show_name_icn_id_missing.l)
     get(:show_name, id: name.id)
-    assert(/#{label}.*#{number_missing}/ =~ @response.body,
-           "Page is missing ICN identifier label")
+
+    assert(
+      /#{label}.*#{:show_name_icn_id_missing.l}/m =~ @response.body,
+      "Page lacks ICN identifier label or " \
+      "'#{:show_name_icn_id_missing.l}' note"
+    )
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", false,
       "Page should not have link to IF record"
     )
+  end
 
+  def test_show_name_icn_identifier_unregistrable
     # Name is not registrable (cannot have an icn number)
     name = names(:eukarya)
     get(:show_name, id: name.id)
