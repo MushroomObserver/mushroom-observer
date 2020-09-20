@@ -16,16 +16,13 @@
     <% if name.icn_identifier? %>
       <p><%= :ICN_IDENTIFIER.t %>: [#<%= name.icn_identifier %>]</p>
       <p><%= link_to(:index_fungorum_record.t,
-                     index_fungorum_record_url(name.icn_identifier),
-                     { target: "_blank" }) %></p>
+                     index_fungorum_record_url(name.icn_identifier)) %></p>
       <p><%= link_to(:mycobank_record.t,
-                     mycobank_record_url(name.icn_identifier),
-                     { target: "_blank" }) %></p>
+                     mycobank_record_url(name.icn_identifier)) %></p>
     <% elsif name.registrable? %>
       <p><%= :ICN_IDENTIFIER.t %>:
         <em><%= :show_name_icn_id_missing.t %></em></p>
-      <p><%= link_to(:mycobank_search.t, mycobank_search_url(name),
-                     target: :_blank) %></p>
+      <p><%= link_to(:mycobank_search.t, mycobank_search_url(name)) %></p>
     <% end %>
   </div>
 
