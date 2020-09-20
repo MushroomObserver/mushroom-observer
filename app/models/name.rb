@@ -358,6 +358,7 @@ class Name < AbstractModel
   validates_uniqueness_of :icn_identifier, {
     allow_nil: true,
   }
+  validate :identifier_registrable
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -404,5 +405,16 @@ class Name < AbstractModel
     result = {}
     counts_and_ids.each { |row| result[row[1]] = row[0] }
     result
+  end
+
+  ##############################################################################
+
+  private
+
+  # prevent assigning ICN registration identifier to unregistrable Name
+  def identifier_registrable
+    return if icn_identifier.blank? || registrable?
+
+    errors.add(:base, :name_error_unregistrable.t)
   end
 end

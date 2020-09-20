@@ -1726,6 +1726,28 @@ class NameControllerTest < FunctionalTestCase
     assert_email_generated
   end
 
+  def test_post_edit_identifier_invalid
+    name = names(:authored_group)
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_identifier: 189826
+      }
+    }
+    login
+    post(:edit_name, params)
+
+    assert_flash_error(:name_error_unregistrable.l)
+  end
+
+
   # ----------------------------
   #  Edit name -- with merge
   # ----------------------------
