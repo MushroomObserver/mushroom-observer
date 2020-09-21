@@ -2177,8 +2177,11 @@ class NameControllerTest < FunctionalTestCase
   # Test merging two names, only one with observations.  Should work either
   # direction, but always keeping the name with observations.
   def test_update_name_merge_one_with_observations
-    old_name = names(:conocybe_filaris) # no observations
+    old_name = names(:mergeable_no_notes)  # mergeable, ergo no observation
+    assert(old_name.observations.none?, "Test needs a different fixture.")
     new_name = names(:coprinus_comatus) # has observations
+    assert(new_name.observations.any?, "Test needs a different fixture.")
+
     params = {
       id: old_name.id,
       name: {
@@ -2201,7 +2204,10 @@ class NameControllerTest < FunctionalTestCase
 
   def test_update_name_merge_one_with_observations_other_direction
     old_name = names(:coprinus_comatus) # has observations
-    new_name = names(:conocybe_filaris) # no observations
+    assert(old_name.observations.any?, "Test needs a different fixture.")
+    new_name = names(:mergeable_no_notes) # mergeable, ergo no observations
+    assert(new_name.observations.none?, "Test needs a different fixture.")
+
     params = {
       id: old_name.id,
       name: {
