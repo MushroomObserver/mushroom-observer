@@ -1749,10 +1749,10 @@ class NameControllerTest < FunctionalTestCase
 
 
   # ----------------------------
-  #  Edit name -- with merge
+  #  Update name -- with merge
   # ----------------------------
 
-  def test_edit_name_destructive_merge
+  def test_update_name_destructive_merge
     old_name = agaricus_campestrus = names(:agaricus_campestrus)
     new_name = agaricus_campestris = names(:agaricus_campestris)
     new_versions = new_name.versions.size
@@ -1798,7 +1798,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(agaricus_campestris, new_obs.reload.name)
   end
 
-  def test_edit_name_author_merge
+  def test_update_name_author_merge
     # Names differing only in author
     old_name = names(:amanita_baccata_borealis)
     new_name = names(:amanita_baccata_arora)
@@ -1827,7 +1827,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Prove that user can remove author if there's a match to desired Name,
   # and the merge is non-destructive
-  def test_edit_name_remove_author_nondestructive_merge
+  def test_update_name_remove_author_nondestructive_merge
     old_name   = names(:mergeable_epithet_authored)
     new_name   = names(:mergeable_epithet_unauthored)
     name_count = Name.count
@@ -1853,7 +1853,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Prove that user can add author if there's a match to desired Name,
   # and the merge is non-destructive
-  def test_edit_name_add_author_nondestructive_merge
+  def test_update_name_add_author_nondestructive_merge
     old_name   = names(:mergeable_epithet_unauthored)
     new_name   = names(:mergeable_epithet_authored)
     new_author = new_name.author
@@ -1878,7 +1878,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
   end
 
-  def test_edit_name_remove_author_destructive_merge
+  def test_update_name_remove_author_destructive_merge
     old_name = names(:authored_with_naming)
     new_name = names(:unauthored_with_naming)
     params = {
@@ -1905,7 +1905,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
   end
 
-  def test_edit_name_merge_author_with_notes
+  def test_update_name_merge_author_with_notes
     bad_name = names(:hygrocybe_russocoriacea_bad_author)
     bad_id = bad_name.id
     bad_notes = bad_name.notes
@@ -1937,7 +1937,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Make sure misspelling gets transferred when new name merges away.
-  def test_edit_name_misspelling_merge
+  def test_update_name_misspelling_merge
     old_name = names(:suilus)
     wrong_author_name = names(:suillus_by_white)
     new_name = names(:suillus)
@@ -1965,7 +1965,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Test that merged names end up as not deprecated if the
   # new name is not deprecated.
-  def test_edit_name_deprecated_merge
+  def test_update_name_deprecated_merge
     old_name = names(:lactarius_alpigenes)
     new_name = names(:lactarius_alpinus)
     new_author = new_name.author
@@ -1995,7 +1995,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Test that merged name doesn't change deprecated status
   # unless the user explicitly changes status in form.
-  def test_edit_name_deprecated2_merge
+  def test_update_name_deprecated2_merge
     good_name = names(:lactarius_alpinus)
     bad_name1 = names(:lactarius_alpigenes)
     bad_name2 = names(:lactarius_kuehneri)
@@ -2093,7 +2093,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Test merge two names where the new name has description notes.
-  def test_edit_name_merge_no_notes_into_description_notes
+  def test_update_name_merge_no_notes_into_description_notes
     old_name = names(:mergeable_no_notes)
     new_name = names(:mergeable_description_notes)
     notes = new_name.description.notes
@@ -2119,7 +2119,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Test merge two names where the old name had notes.
-  def test_edit_name_merge_matching_notes_2
+  def test_update_name_merge_matching_notes_2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
     old_citation = old_name.citation
@@ -2151,7 +2151,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_desc, new_name.description.notes)
   end
 
-  def test_edit_name_merged_notes_include_notes_from_both_names
+  def test_update_name_merged_notes_include_notes_from_both_names
     old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
     new_name = names(:russula_brevipes_author_notes)
     original_notes = new_name.notes
@@ -2176,7 +2176,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Test merging two names, only one with observations.  Should work either
   # direction, but always keeping the name with observations.
-  def test_edit_name_merge_one_with_observations
+  def test_update_name_merge_one_with_observations
     old_name = names(:conocybe_filaris) # no observations
     new_name = names(:coprinus_comatus) # has observations
     params = {
@@ -2199,7 +2199,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
   end
 
-  def test_edit_name_merge_one_with_observations_other_direction
+  def test_update_name_merge_one_with_observations_other_direction
     old_name = names(:coprinus_comatus) # has observations
     new_name = names(:conocybe_filaris) # no observations
     params = {
@@ -2223,7 +2223,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Test merge two names that both start with notes.
-  def test_edit_name_merge_both_notes
+  def test_update_name_merge_both_notes
     old_name = names(:mergeable_description_notes)
     new_name = names(:mergeable_second_description_notes)
     old_notes = old_name.description.notes
@@ -2296,7 +2296,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Prove that notification is moved to new_name
   # when old_name with notication is merged to new_name
-  def test_edit_name_merge_with_notification
+  def test_update_name_merge_with_notification
     note = notifications(:no_observation_notification)
     old_name = Name.find(note.obj_id)
     new_name = names(:fungi)
@@ -2319,7 +2319,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Test that misspellings are handle right when merging.
-  def test_edit_name_merge_with_misspellings
+  def test_update_name_merge_with_misspellings
     login("rolf")
     name1 = names(:lactarius_alpinus)
     name2 = names(:lactarius_alpigenes)
@@ -2413,7 +2413,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Found this in the wild, it seems to have been fixed already, though...
-  def test_edit_name_merge_authored_misspelt_into_unauthored_correctly_spelled
+  def test_update_name_merge_authored_misspelt_into_unauthored_correctly_spelled
     login("rolf")
 
     name2 = Name.create!(
@@ -2459,7 +2459,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_edit_name_merge_authored_with_old_style_unauthored
+  def test_update_name_merge_authored_with_old_style_unauthored
     login("rolf")
     # Obsolete intrageneric Name, :Genus with rank & author in the author field.
     # (NameController no longer allows this.)
@@ -2507,7 +2507,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_edit_name_merge_authored_with_old_style_deprecated
+  def test_update_name_merge_authored_with_old_style_deprecated
     login("rolf")
     syn = Synonym.create
     name1 = Name.create!(
