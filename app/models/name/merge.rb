@@ -8,6 +8,12 @@ class Name < AbstractModel
   # be okay, but there are cases where users unintentionally end up subscribed
   # notifications for every name in the database as a side-effect of merging an
   # unwanted name into Fungi, say. -JPH 20200120
+  #
+  # We should also prevent merger where name is:
+  # - Preferred Name of a Proposed Name
+  # - higher rank of a Proposed Name
+  # - group or name s.l. that includes, or is a higher rank of, a Proposed Name
+  # See https://www.pivotaltracker.com/story/show/171308819 for details
   def mergeable?
     namings.empty? && interests_plus_notifications.zero?
   end
