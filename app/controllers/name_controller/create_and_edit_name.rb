@@ -156,16 +156,21 @@ class NameController
     args = { this: @name.real_search_name, that: new_name.real_search_name }
     flash_notice(:runtime_edit_name_merge_success.t(args))
 
-    email_admin_name_change if new_name.icn_identifier != old_identifier
-
     @name = new_name
+    if new_name.icn_identifier != old_identifier
+      email_admin_name_change(old_identifier: old_identifier)
+    end
     @name.save
   end
 
   def set_name_author_and_rank
     return unless name_unlocked?
 
-    email_admin_name_change unless minor_change? || just_adding_author?
+    unless minor_change? || just_adding_author?
+      email_admin_name_change(
+        old_identifier: Name.find(@name.id).icn_identifier
+      )
+    end
     @name.attributes = @parse.params
   end
 
@@ -277,10 +282,12 @@ class NameController
     @name.author.blank? && @parse.text_name == @name.text_name
   end
 
-  def email_admin_name_change
+  def email_admin_name_change(old_identifier: nil)
     subject = "Nontrivial Name Change"
     content = :email_name_change.l(
       user: @user.login,
+      old_identifier: old_identifier,
+      new_identifier: @name.icn_identifier,
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,
