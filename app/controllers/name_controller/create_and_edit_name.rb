@@ -164,7 +164,7 @@ class NameController
     @name.locked         = params[:name][:locked].to_s == "1" if in_admin_mode?
     @name.citation       = params[:name][:citation].to_s.strip_squeeze
     @name.notes          = params[:name][:notes].to_s.strip
-    @name.icn_identifier = params[:name][:icn_identifier]
+    @name.icn_identifier = params[:name][:icn_identifier] if name_unlocked?
   end
 
   # Update the misspelling status.

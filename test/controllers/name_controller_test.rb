@@ -1638,12 +1638,13 @@ class NameControllerTest < FunctionalTestCase
     assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
   end
 
-  def test_post_edit_name_locked
+  def test_edit_and_update_locked_name
     name = names(:fungi)
     params = {
       id: name.id,
       name: {
         locked: "0",
+        icn_identifier: 666,
         rank: "Genus",
         deprecated: "true",
         text_name: "Foo",
@@ -1655,6 +1656,8 @@ class NameControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit_name, id: name.id)
+    # Rolf is not an admin, so form should not show locked fields as changeable
+    assert_select("input[type=text]#name_icn_identifier", count: 0)
     assert_select("select#name_rank", count: 0)
     assert_select("select#name_deprecated", count: 0)
     assert_select("input[type=text]#name_text_name", count: 0)
@@ -1664,17 +1667,21 @@ class NameControllerTest < FunctionalTestCase
 
     post(:edit_name, params)
     name.reload
+    # locked attributes should not change
     assert_true(name.locked)
+    assert_nil(name.icn_identifier)
     assert_equal(:Kingdom, name.rank)
     assert_false(name.deprecated)
     assert_equal("Fungi", name.text_name)
     assert_equal("", name.author)
     assert_nil(name.correct_spelling_id)
+    # unlocked attributes should change
     assert_equal("new citation", name.citation)
     assert_equal("new notes", name.notes)
 
     make_admin("mary")
     get(:edit_name, id: name.id)
+    assert_select("input[type=text]#name_icn_identifier", count: 1)
     assert_select("select#name_rank", count: 1)
     assert_select("select#name_deprecated", count: 1)
     assert_select("input[type=text]#name_text_name", count: 1)
@@ -1684,6 +1691,7 @@ class NameControllerTest < FunctionalTestCase
 
     post(:edit_name, params)
     name.reload
+    assert_equal(params[:name][:icn_identifier], name.icn_identifier)
     assert_false(name.locked)
     assert_equal(:Genus, name.rank)
     assert_true(name.deprecated)
