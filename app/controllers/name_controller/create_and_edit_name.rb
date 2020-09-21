@@ -129,6 +129,9 @@ class NameController
 
   def perform_merge_names(new_name)
     old_display_name_for_log = @name[:display_name]
+    old_identifier = new_name.icn_identifier
+
+    # set up @name attr's for merger into new_name
     @name.attributes = @parse.params
     set_unparsed_attrs
     # Only change deprecation status if user explicity requested it.
@@ -140,15 +143,21 @@ class NameController
       @name, new_name = new_name, @name
       old_display_name_for_log = @name[:display_name]
     end
+    @name.display_name = old_display_name_for_log
+
     # Fill in author if other has one.
     if new_name.author.blank? && @parse.author.present?
       new_name.change_author(@parse.author)
     end
     new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
-    @name.display_name = old_display_name_for_log
+
+    # move associations from @name to new_name and destroy @name
     new_name.merge(@name)
     args = { this: @name.real_search_name, that: new_name.real_search_name }
     flash_notice(:runtime_edit_name_merge_success.t(args))
+
+    email_admin_name_change if new_name.icn_identifier != old_identifier
+
     @name = new_name
     @name.save
   end

@@ -2569,6 +2569,37 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("", name1.author)
   end
 
+  # Merge, changing only identifier of surviving name
+  def test_update_name_merge_identifier
+    edited_name = names(:stereum_hirsutum)
+    surviving_name = names(:coprinus_comatus)
+    assert(surviving_name.icn_identifier)
+    new_identifier = surviving_name.icn_identifier + 1111111
+
+    params = {
+      id: edited_name.id,
+      name: {
+        icn_identifier: new_identifier,
+        text_name: surviving_name.text_name,
+        author: surviving_name.author,
+        rank: surviving_name.rank,
+        deprecated: (surviving_name.deprecated ? "true" : "false")
+      }
+    }
+
+    login("rolf")
+    assert_difference("surviving_name.version") do
+      post(:edit_name, params)
+      surviving_name.reload
+    end
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: surviving_name.id)
+    assert_email_generated
+    assert_not(Name.exists?(edited_name.id))
+    assert_equal(new_identifier, surviving_name.icn_identifier)
+  end
+
   # ----------------------------
   #  Bulk names.
   # ----------------------------
