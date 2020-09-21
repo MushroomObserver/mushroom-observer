@@ -166,7 +166,7 @@ class NameController
   def set_name_author_and_rank
     return unless name_unlocked?
 
-    unless minor_change? || just_adding_author?
+    unless minor_change?
       email_admin_name_change(
         old_identifier: Name.find(@name.id).icn_identifier
       )
@@ -269,13 +269,16 @@ class NameController
   end
 
   def minor_change?
+    return false if icn_identifier_changed?
+    return true if just_adding_author?
+
     old_name = @name.real_search_name
     new_name = @parse.real_search_name
-    new_name.percent_match(old_name) > 0.9 && icn_identifier_unchanged?
+    new_name.percent_match(old_name) > 0.9
   end
 
-  def icn_identifier_unchanged?
-    params[:name][:icn_identifier] == @name.icn_identifier
+  def icn_identifier_changed?
+    params[:name][:icn_identifier] != @name.icn_identifier
   end
 
   def just_adding_author?
