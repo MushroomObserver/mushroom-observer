@@ -794,7 +794,7 @@ class ApplicationController < ActionController::Base
   def flash_object_errors(obj)
     return unless obj&.errors && !obj.errors.empty?
 
-    flash_error(obj.formatted_errors)
+    obj.formatted_errors.each { |error| flash_error(error) }
   end
 
   def save_with_log(obj)
