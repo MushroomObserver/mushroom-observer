@@ -416,7 +416,7 @@ class Name < AbstractModel
     return if icn_id.blank? || registrable?
 
     errors[:base] << :name_error_unregistrable.t(
-      rank: rank.to_s, name: display_name
+      rank: rank.to_s, name: real_search_name
     )
   end
 end
