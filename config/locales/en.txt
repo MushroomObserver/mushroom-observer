@@ -453,6 +453,7 @@
   FULL_NAMES: Full Names
   full_names: full names
   ICN_IDENTIFIER: ICN Identifier
+  icn_identifier: ICN Fungal Identifier
   ID: ID
   id: ID
   IDS: IDs
