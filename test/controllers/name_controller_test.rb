@@ -1707,7 +1707,7 @@ class NameControllerTest < FunctionalTestCase
     assert_select("input[type=text]#name_correct_spelling", count: 1)
   end
 
-  def test_post_edit_add_identifier
+  def test_update_add_icn_id
     name = names(:stereum_hirsutum)
     params = {
       id: name.id,
@@ -1734,7 +1734,7 @@ class NameControllerTest < FunctionalTestCase
     assert_email_generated
   end
 
-  def test_post_edit_identifier_invalid
+  def test_update_icn_id_invalid
     name = names(:authored_group)
     params = {
       id: name.id,
@@ -1753,6 +1753,30 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
 
     assert_flash_error(:name_error_unregistrable.l)
+  end
+
+  def test_update_icn_id_duplicate
+    name = names(:stereum_hirsutum)
+    name_with_icn_id = names(:coprinus_comatus)
+    assert(name_with_icn_id.icn_id,
+           "Test needs a different fixture")
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_id: name_with_icn_id.icn_id
+      }
+    }
+    login
+    post(:edit_name, params)
+
+    assert_flash_error(:name_error_icn_id_in_use.l)
   end
 
 
