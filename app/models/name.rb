@@ -17,7 +17,7 @@
 #    search_name        "Xanthoparmelia" coloradoensis Fries
 #    (real_search_name) "Xanthoparmelia" coloradoënsis Fries
 #                         (derived on the fly from display_name)
-#    sort_name          Xanthoparmelia" coloradoensis Fries
+#    sort_name          "Xanthoparmelia" coloradoensis Fries
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
 #    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
@@ -415,6 +415,8 @@ class Name < AbstractModel
   def icn_id_registrable
     return if icn_id.blank? || registrable?
 
-    errors.add(:base, :name_error_unregistrable.t)
+    errors[:base] << :name_error_unregistrable.t(
+      rank: rank.to_s, name: display_name
+    )
   end
 end
