@@ -1502,6 +1502,7 @@
   form_names_notes_help: Please include notes about the validity of this name, common misuses of the name, and more appropriate names to be used when applicable.
   form_names_refs_help: Each line is considered a separate reference, but no other formatting is enforced.
   name_error_unregistrable: "The [rank] '[name]' is not eligible for an ICN identifier."
+  name_error_icn_id_in_use: "An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'."
 
   # observer/_form_naming
   form_naming_confidence: Confidence

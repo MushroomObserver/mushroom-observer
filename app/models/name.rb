@@ -355,10 +355,9 @@ class Name < AbstractModel
   before_create :inherit_stuff
   before_update :update_observation_cache
   after_update :notify_users
-  validates_uniqueness_of :icn_id, {
-    allow_nil: true,
-  }
+
   validate :icn_id_registrable
+  validate :icn_id_unique
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -418,5 +417,21 @@ class Name < AbstractModel
     errors[:base] << :name_error_unregistrable.t(
       rank: rank.to_s, name: real_search_name
     )
+  end
+
+  # Require icn_id to be unique
+  # Use validation method (rather than :validates_uniqueness_of)
+  # to get correct error message.
+  def icn_id_unique
+    return if icn_id.nil?
+    return if (conflicting_name = other_names.first).blank?
+
+    errors[:base] << :name_error_icn_id_in_use.t(
+      number: icn_id, name: conflicting_name.real_search_name
+    )
+  end
+
+  def other_names
+    Name.where(icn_id: icn_id).where.not(id: id)
   end
 end
