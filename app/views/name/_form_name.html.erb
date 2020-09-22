@@ -12,8 +12,8 @@
 <% if !@name.locked || in_admin_mode? %>
   <div class="form-inline push-down">
     <div class="form-group">
-      <label for="name_icn_identifier"><%= :form_names_icn_identifier.t %>: </label>
-      <%= form.text_field(:icn_identifier, class: "form-control", size: 8) %>
+      <label for="name_icn_id"><%= :form_names_icn_id.t %>: </label>
+      <%= form.text_field(:icn_id, class: "form-control", size: 8) %>
       <%= :form_names_identifier_help.t %>
     </div>
   </div>

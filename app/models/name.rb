@@ -115,7 +115,7 @@
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
-#  icn_identifier     (V) numerical identifier issued by an
+#  icn_id             (V) numerical identifier issued by an
 #                         ICN-recognized registration repository
 #  text_name::        (V) "Xanthoparmelia" coloradoensis
 #  real_text_name::   (V) "Xanthoparmelia" coloradoënsis
@@ -335,7 +335,7 @@ class Name < AbstractModel
       correct_spelling
       notes
       lifeform
-      icn_identifier
+      icn_id
     ]
   )
   non_versioned_columns.push(
@@ -355,10 +355,10 @@ class Name < AbstractModel
   before_create :inherit_stuff
   before_update :update_observation_cache
   after_update :notify_users
-  validates_uniqueness_of :icn_identifier, {
+  validates_uniqueness_of :icn_id, {
     allow_nil: true,
   }
-  validate :identifier_registrable
+  validate :icn_id_registrable
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -412,8 +412,8 @@ class Name < AbstractModel
   private
 
   # prevent assigning ICN registration identifier to unregistrable Name
-  def identifier_registrable
-    return if icn_identifier.blank? || registrable?
+  def icn_id_registrable
+    return if icn_id.blank? || registrable?
 
     errors.add(:base, :name_error_unregistrable.t)
   end

@@ -261,28 +261,28 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
-  def test_show_name_icn_identifier_info
-    # Name's icn_identifier is filled in
+  def test_show_name_icn_id_info
+    # Name's icn_id is filled in
     name = names(:coprinus_comatus)
     get(:show_name, id: name.id)
     assert(
-      /#{:ICN_IDENTIFIER.l}.*#{name.icn_identifier}/m =~ @response.body,
+      /#{:ICN_ID.l}.*#{name.icn_id}/m =~ @response.body,
       "Page lacks ICN identifier label and/or number"
     )
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", true,
+      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
       "Page is missing a link to IF record"
     )
     assert_select(
-      "body a[href='#{mycobank_record_url(name.icn_identifier)}']", true,
+      "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
       "Page is missing a link to MB record"
     )
   end
 
-  def test_show_name_icn_identifier_missing
-    # Name is registrable, but icn_identifier is not filled in
+  def test_show_name_icn_id_missing
+    # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
-    label = "#{:ICN_IDENTIFIER.l}"
+    label = "#{:ICN_ID.l}"
     get(:show_name, id: name.id)
 
     assert(
@@ -291,16 +291,16 @@ class NameControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_identifier)}']", false,
+      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
       "Page should not have link to IF record"
     )
   end
 
-  def test_show_name_icn_identifier_unregistrable
+  def test_show_name_icn_id_unregistrable
     # Name is not registrable (cannot have an icn number)
     name = names(:eukarya)
     get(:show_name, id: name.id)
-    assert(/#{:ICN_IDENTIFIER.l}/ !~ @response.body,
+    assert(/#{:ICN_ID.l}/ !~ @response.body,
            "Page should not have ICN identifier label")
   end
 
@@ -519,15 +519,15 @@ class NameControllerTest < FunctionalTestCase
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
     assert_form_action(action: "edit_name", id: name.id.to_s)
-    assert_select("form #name_icn_identifier", { count: 1 },
-                  "Form is missing field for icn_identifier")
+    assert_select("form #name_icn_id", { count: 1 },
+                  "Form is missing field for icn_id")
   end
 
   def test_create_name_get
     requires_login(:create_name)
     assert_form_action(action: "create_name")
-    assert_select("form #name_icn_identifier", { count: 1 },
-                  "Form is missing field for icn_identifier")
+    assert_select("form #name_icn_id", { count: 1 },
+                  "Form is missing field for icn_id")
   end
 
   def test_show_name_description
@@ -795,10 +795,10 @@ class NameControllerTest < FunctionalTestCase
     text_name = "Amanita velosa"
     assert_not(Name.find_by(text_name: text_name))
     author = "(Peck) Lloyd"
-    icn_identifier = 485288
+    icn_id = 485288
     params = {
       name: {
-        icn_identifier: icn_identifier,
+        icn_id: icn_id,
         text_name: text_name,
         author: author,
         rank: :Species,
@@ -810,7 +810,7 @@ class NameControllerTest < FunctionalTestCase
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(10 + @new_pts, rolf.reload.contribution)
-    assert_equal(icn_identifier, name.icn_identifier)
+    assert_equal(icn_id, name.icn_id)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
   end
@@ -1644,7 +1644,7 @@ class NameControllerTest < FunctionalTestCase
       id: name.id,
       name: {
         locked: "0",
-        icn_identifier: 666,
+        icn_id: 666,
         rank: "Genus",
         deprecated: "true",
         text_name: "Foo",
@@ -1657,7 +1657,7 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit_name, id: name.id)
     # Rolf is not an admin, so form should not show locked fields as changeable
-    assert_select("input[type=text]#name_icn_identifier", count: 0)
+    assert_select("input[type=text]#name_icn_id", count: 0)
     assert_select("select#name_rank", count: 0)
     assert_select("select#name_deprecated", count: 0)
     assert_select("input[type=text]#name_text_name", count: 0)
@@ -1669,7 +1669,7 @@ class NameControllerTest < FunctionalTestCase
     name.reload
     # locked attributes should not change
     assert_true(name.locked)
-    assert_nil(name.icn_identifier)
+    assert_nil(name.icn_id)
     assert_equal(:Kingdom, name.rank)
     assert_false(name.deprecated)
     assert_equal("Fungi", name.text_name)
@@ -1681,7 +1681,7 @@ class NameControllerTest < FunctionalTestCase
 
     make_admin("mary")
     get(:edit_name, id: name.id)
-    assert_select("input[type=text]#name_icn_identifier", count: 1)
+    assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
     assert_select("select#name_deprecated", count: 1)
     assert_select("input[type=text]#name_text_name", count: 1)
@@ -1691,7 +1691,7 @@ class NameControllerTest < FunctionalTestCase
 
     post(:edit_name, params)
     name.reload
-    assert_equal(params[:name][:icn_identifier], name.icn_identifier)
+    assert_equal(params[:name][:icn_id], name.icn_id)
     assert_false(name.locked)
     assert_equal(:Genus, name.rank)
     assert_true(name.deprecated)
@@ -1719,7 +1719,7 @@ class NameControllerTest < FunctionalTestCase
         rank: name.rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
-        icn_identifier: 189826
+        icn_id: 189826
       }
     }
     user = name.user
@@ -1730,7 +1730,7 @@ class NameControllerTest < FunctionalTestCase
     end
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_equal(189826, name.reload.icn_identifier)
+    assert_equal(189826, name.reload.icn_id)
     assert_email_generated
   end
 
@@ -1746,7 +1746,7 @@ class NameControllerTest < FunctionalTestCase
         rank: name.rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
-        icn_identifier: 189826
+        icn_id: 189826
       }
     }
     login
@@ -2573,13 +2573,13 @@ class NameControllerTest < FunctionalTestCase
   def test_update_name_merge_identifier
     edited_name = names(:stereum_hirsutum)
     surviving_name = names(:coprinus_comatus)
-    assert(surviving_name.icn_identifier)
-    new_identifier = surviving_name.icn_identifier + 1111111
+    assert(surviving_name.icn_id)
+    new_identifier = surviving_name.icn_id + 1111111
 
     params = {
       id: edited_name.id,
       name: {
-        icn_identifier: new_identifier,
+        icn_id: new_identifier,
         text_name: surviving_name.text_name,
         author: surviving_name.author,
         rank: surviving_name.rank,
@@ -2597,7 +2597,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: surviving_name.id)
     assert_email_generated
     assert_not(Name.exists?(edited_name.id))
-    assert_equal(new_identifier, surviving_name.icn_identifier)
+    assert_equal(new_identifier, surviving_name.reload.icn_id)
   end
 
   # ----------------------------

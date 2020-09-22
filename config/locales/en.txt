@@ -452,8 +452,8 @@
   full_name: full name
   FULL_NAMES: Full Names
   full_names: full names
-  ICN_IDENTIFIER: ICN Identifier
-  icn_identifier: ICN Fungal Identifier
+  ICN_ID: ICN Identifier
+  icn_id: ICN Fungal Identifier
   ID: ID
   id: ID
   IDS: IDs
@@ -1473,7 +1473,7 @@
   # observer/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
   form_names_text_name: Scientific Name
-  form_names_icn_identifier: 'ICN Identifier #'
+  form_names_icn_id: 'ICN Identifier #'
   form_names_identifier_help: Index Fungorum or MycoBank registration number, if known.
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be

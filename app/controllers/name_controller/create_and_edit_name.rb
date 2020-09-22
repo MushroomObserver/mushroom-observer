@@ -68,7 +68,7 @@ class NameController
   def reload_name_form_on_error(err)
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
-    @name.icn_identifier = params[:name][:icn_identifier]
+    @name.icn_id = params[:name][:icn_id]
     @name.locked     = params[:name][:locked]
     @name.rank       = params[:name][:rank]
     @name.author     = params[:name][:author]
@@ -129,7 +129,7 @@ class NameController
 
   def perform_merge_names(new_name)
     old_display_name_for_log = @name[:display_name]
-    old_identifier = new_name.icn_identifier
+    old_identifier = new_name.icn_id
 
     # set up @name attr's for merger into new_name
     @name.attributes = @parse.params
@@ -157,7 +157,7 @@ class NameController
     flash_notice(:runtime_edit_name_merge_success.t(args))
 
     @name = new_name
-    if new_name.icn_identifier != old_identifier
+    if new_name.icn_id != old_identifier
       email_admin_name_change(old_identifier: old_identifier)
     end
     @name.save
@@ -168,7 +168,7 @@ class NameController
 
     unless minor_change?
       email_admin_name_change(
-        old_identifier: Name.find(@name.id).icn_identifier
+        old_identifier: Name.find(@name.id).icn_id
       )
     end
     @name.attributes = @parse.params
@@ -178,7 +178,7 @@ class NameController
     @name.locked         = params[:name][:locked].to_s == "1" if in_admin_mode?
     @name.citation       = params[:name][:citation].to_s.strip_squeeze
     @name.notes          = params[:name][:notes].to_s.strip
-    @name.icn_identifier = params[:name][:icn_identifier] if name_unlocked?
+    @name.icn_id = params[:name][:icn_id] if name_unlocked?
   end
 
   # Update the misspelling status.
@@ -269,7 +269,7 @@ class NameController
   end
 
   def minor_change?
-    return false if icn_identifier_changed?
+    return false if icn_id_changed?
     return true if just_adding_author?
 
     old_name = @name.real_search_name
@@ -277,8 +277,8 @@ class NameController
     new_name.percent_match(old_name) > 0.9
   end
 
-  def icn_identifier_changed?
-    params[:name][:icn_identifier] != @name.icn_identifier
+  def icn_id_changed?
+    params[:name][:icn_id] != @name.icn_id
   end
 
   def just_adding_author?
@@ -290,7 +290,7 @@ class NameController
     content = :email_name_change.l(
       user: @user.login,
       old_identifier: old_identifier,
-      new_identifier: @name.icn_identifier,
+      new_identifier: @name.icn_id,
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,

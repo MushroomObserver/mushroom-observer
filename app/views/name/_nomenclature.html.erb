@@ -13,14 +13,14 @@
   </div>
 
   <div class="col-sm-5 name-section">
-    <% if name.icn_identifier? %>
-      <p><%= :ICN_IDENTIFIER.t %>: [#<%= name.icn_identifier %>]</p>
+    <% if name.icn_id? %>
+      <p><%= :ICN_ID.t %>: [#<%= name.icn_id %>]</p>
       <p><%= link_to(:index_fungorum_record.t,
-                     index_fungorum_record_url(name.icn_identifier)) %></p>
+                     index_fungorum_record_url(name.icn_id)) %></p>
       <p><%= link_to(:mycobank_record.t,
-                     mycobank_record_url(name.icn_identifier)) %></p>
+                     mycobank_record_url(name.icn_id)) %></p>
     <% elsif name.registrable? %>
-      <p><%= :ICN_IDENTIFIER.t %>:
+      <p><%= :ICN_ID.t %>:
         <em><%= :show_name_icn_id_missing.t %></em></p>
       <p><%= link_to(:mycobank_search.t, mycobank_search_url(name)) %></p>
     <% end %>

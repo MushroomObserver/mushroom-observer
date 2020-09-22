@@ -113,7 +113,7 @@ class Name < AbstractModel
     end
 
     # Update the identifier if user provided one
-    self.icn_identifier = old_name.icn_identifier if old_name.icn_identifier
+    self.icn_id = old_name.icn_id if old_name.icn_id
 
     # Save any notes the old name had.
     if old_name.has_notes? && (old_name.notes != notes)
