@@ -105,7 +105,7 @@ class Name < AbstractModel
     /\"/ =~ text_name && rank >= :Class ||
     # Use kingdom: Protozoa as a rough proxy for slime molds
     # Slime molds, which are Protozoa, are in fungal nomenclature registries.
-    # While many Protozoa are not slime molds and there's no efficient way
+    # But most Protozoa are not slime molds and there's no efficient way
     # for MO to tell the difference. So err on the side of registrability.
     kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
   end
@@ -114,8 +114,9 @@ class Name < AbstractModel
 
   private
 
+  # Not published in any sense, or not intended as an ICN publication of a name.
   def unpublished?
-    /\b(nom prov|comb prov|ined)\b/i =~ author&.delete(".")
+    /\b(nom prov|comb prov|sensu lato|ined)\b/i =~ author&.delete(".")
   end
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom

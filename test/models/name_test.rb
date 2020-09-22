@@ -2900,10 +2900,13 @@ class NameTest < UnitTestCase
                     author: "comb. prov.")
     assert(name.unregistrable?, "Provisional names should be unregistrable")
 
-     name = Name.new(text_name:"Cortinarius calaisopus", author: "ined.")
+    name = Name.new(text_name:"Cortinarius calaisopus", author: "ined.")
     assert(name.unregistrable?, "Unpublished names should be unregistrable")
 
-   name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    name = Name.new(text_name:"Agricales", author: "sensu lato")
+    assert(name.unregistrable?, "Names s.l. should be unregistrable")
+
+    name = Name.new(text_name: "Eukaryota", rank: :Domain)
     assert(name.unregistrable?, "Domains should be unregistrable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
