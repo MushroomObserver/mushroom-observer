@@ -285,11 +285,22 @@ class NameControllerTest < FunctionalTestCase
     label = "#{:ICN_ID.l}"
     get(:show_name, id: name.id)
 
-    assert(
-      /#{label}.*#{:show_name_icn_id_missing.l}/m =~ @response.body,
-      "Page lacks ICN identifier label or " \
+     assert_select(
+      "#nomenclature", /#{label}.*#{:show_name_icn_id_missing.l}/m,
+      "Nomenclature section missing an ICN id label and/or "\
       "'#{:show_name_icn_id_missing.l}' note"
     )
+    assert_select(
+      "div#nomenclature a:match('href',?)", /#{index_fungorum_search_url}/,
+      { count: 1 },
+      "Nomenclature section should have link to IF search"
+    )
+    assert_select(
+      "div#nomenclature a:match('href',?)", /#{mycobank_search_url(name)}/,
+      { count: 1 },
+      "Nomenclature section should have link to MB search"
+    )
+
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
       "Page should not have link to IF record"
@@ -310,13 +321,15 @@ class NameControllerTest < FunctionalTestCase
 
     # but it makes sense to search for the stripped
     # monomial, binomial, or combination
-    assert(
-      /#{index_fungorum_search_url}/ =~ @response.body,
-      "Page should have link to IF search"
+    assert_select(
+      "div#nomenclature a:match('href',?)", /#{index_fungorum_search_url}/,
+      { count: 1 },
+      "Nomenclature section should have link to IF search"
     )
-    assert(
-      /#{mycobank_search_url(name)}/ =~ @response.body,
-      "Page should have link to MB search"
+    assert_select(
+      "div#nomenclature a:match('href',?)", /#{mycobank_search_url(name)}/,
+      { count: 1 },
+      "Nomenclature section should have link to MB search"
     )
   end
 
@@ -338,15 +351,6 @@ class NameControllerTest < FunctionalTestCase
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
-  end
-
-  def test_mycobank_url
-    get(:show_name, id: names(:stereum_hirsutum).id)
-
-    # There is a MycoBank searchlink including taxon name
-    assert_select("a[href *= 'mycobank.org']") do
-      assert_select("a[href *= 'Stereum%20hirsutum']")
-    end
   end
 
   def test_show_name_locked
