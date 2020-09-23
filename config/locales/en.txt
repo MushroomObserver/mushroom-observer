@@ -2023,9 +2023,9 @@
   show_name_brief_description: Brief Description
   show_name_see_more: See More
   show_name_icn_id_missing: missing
-  index_fungorum_record: Index Fungorum record
+  index_fungorum: Index Fungorum
   index_fungorum_search: Index Fungorum search
-  mycobank_record: MycoBank record
+  mycobank: MycoBank
   mycobank_search: MycoBank search
 
   # name/show_name - links to observations

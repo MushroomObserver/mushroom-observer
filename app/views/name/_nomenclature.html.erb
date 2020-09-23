@@ -18,12 +18,14 @@
 
       <div class="col-sm-5 name-section">
         <% if name.icn_id? %>
-          <p><%= :ICN_ID.t %>: [#<%= name.icn_id %>]</p>
-          <p><%= link_to(:index_fungorum_record.t,
-                         index_fungorum_record_url(name.icn_id)) %></p>
-          <p><%= link_to(:mycobank_record.t,
-                         mycobank_record_url(name.icn_id)) %></p>
-        <% elsif name.registrable? %>
+          <p><%= :ICN_ID.t %>:</p>
+          <p><%= link_to("[##{name.icn_id}]",
+                         index_fungorum_record_url(name.icn_id)) %>
+             Index Fungorum</p>
+          <p><%= link_to("[##{name.icn_id}]",
+                         mycobank_record_url(name.icn_id)) %>
+             MycoBank</p>
+       <% elsif name.registrable? %>
           <p><%= :ICN_ID.t %>: <em><%= :show_name_icn_id_missing.t %></em></p>
           <p><%= link_to(:index_fungorum_search.t,
                          index_fungorum_search_url) %></p>

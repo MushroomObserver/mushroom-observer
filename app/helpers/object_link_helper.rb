@@ -55,8 +55,8 @@ module ObjectLinkHelper
 
   # Create link for name to MyCoPortal website.
   def mycoportal_url(name)
-    "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" +
-      name.stripped_text_name.tr(" ", "+")
+    "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
+      "#{name.stripped_text_name.tr(" ", "+")}"
   end
 
   # url for IF record
@@ -66,7 +66,8 @@ module ObjectLinkHelper
 
   # url for MB record
   def mycobank_record_url(record_id)
-    "http://www.mycobank.org/MB/#{record_id}"
+    "#{mycobank_host}page/Basic%20names%20search/field/MycoBank%20%23/" \
+      "#{record_id}"
   end
 
   # url for Index Fungorum search
@@ -84,7 +85,11 @@ module ObjectLinkHelper
   end
 
   def mycobank_search_path
-    "https://www.mycobank.org/page/Basic%20names%20search/field/Taxon%20name/"
+    "#{mycobank_host}page/Basic%20names%20search/field/Taxon%20name/"
+  end
+
+  def mycobank_host
+    "https://www.mycobank.org/"
   end
 
   # ----------------------------------------------------------------------------
