@@ -23,6 +23,10 @@
       <p><%= :ICN_ID.t %>:
         <em><%= :show_name_icn_id_missing.t %></em></p>
       <p><%= link_to(:mycobank_search.t, mycobank_search_url(name)) %></p>
+    <% elsif name.searchable_in_registry? %>
+      <p><%= link_to(:index_fungorum_search.t,
+                     index_fungorum_search_url) %></p>
+      <p><%= link_to(:mycobank_search.t, mycobank_search_url(name)) %></p>
     <% end %>
   </div>
 

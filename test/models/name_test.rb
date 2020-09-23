@@ -2344,6 +2344,11 @@ class NameTest < UnitTestCase
                  names(:authored_group).display_name_without_authors)
   end
 
+  def test_stripped_text_name
+    name = names(:boletus_edulis_group)
+    assert_equal("Boletus edulis", name.stripped_text_name)
+  end
+
   def test_format_autonym
     assert_equal("**__Acarospora__**",
                  Name.format_autonym("Acarospora", "", :Genus, false))
@@ -2884,7 +2889,7 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
-  def test_unregistrable
+  def test_registability
     name = names(:boletus_edulis_group)
     assert(name.unregistrable?, "Groups should be unregistrable")
 
@@ -2925,5 +2930,36 @@ class NameTest < UnitTestCase
     name = Name.new(text_name: "New species", rank: :Species)
     assert(name.registrable?,
            "Non-group, non-domain kingdom-less names should be registrable")
+  end
+
+  def test_searchability_in_registry
+    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    assert(name.unsearchable_in_registry?, "Domains should be unsearchable")
+
+    name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
+    assert(name.unsearchable_in_registry?,
+           "Taxa outside of Fungi and slime molds should be unsearchable")
+
+    name = Name.new(text_name: 'Amanita "sp-01"', author: "crypt. temp.")
+    assert(name.unsearchable_in_registry?,
+           "Cryptonyms should be unsearchable")
+
+    name = names(:boletus_edulis_group)
+    assert(name.searchable_in_registry?,
+           "Fungal `groups` can be searchable in registy")
+
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    assert(name.searchable_in_registry?,
+           "Names with quote marks can be searchable")
+
+    name = Name.new(text_name:"Agaricus pinyonensis",
+                    author: "Isaacs nom. prov.")
+    assert(name.searchable_in_registry?,
+           "Provisional names can be searchable in registry")
+
+    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+                    classification: "Kingdom: Protozoa")
+    assert(name.searchable_in_registry?,
+           "Protozoa should be searchable in registry")
   end
 end

@@ -296,6 +296,30 @@ class NameControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_name_searchable_in_registry
+    name = names(:boletus_edulis_group)
+    get(:show_name, id: name.id)
+
+    # Name isn't registrable; it shouldn't have an icn_id label or record link
+    assert(/#{:ICN_ID.l}/ !~ @response.body,
+           "Page should not have ICN identifier label")
+    assert_select(
+      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
+      "Page should not have link to IF record"
+    )
+
+    # but it makes sense to search for the stripped
+    # monomial, binomial, or combination
+    assert(
+      /#{index_fungorum_search_url}/ =~ @response.body,
+      "Page should have link to IF search"
+    )
+    assert(
+      /#{mycobank_search_url(name)}/ =~ @response.body,
+      "Page should have link to MB search"
+    )
+  end
+
   def test_show_name_icn_id_unregistrable
     # Name is not registrable (cannot have an icn number)
     name = names(:eukarya)
@@ -319,10 +343,9 @@ class NameControllerTest < FunctionalTestCase
   def test_mycobank_url
     get(:show_name, id: names(:stereum_hirsutum).id)
 
-    # There is a MycoBank searchlink including taxon name and MycoBank language
+    # There is a MycoBank searchlink including taxon name
     assert_select("a[href *= 'mycobank.org']") do
       assert_select("a[href *= 'Stereum%20hirsutum']")
-      assert_select("a[href *= 'Lang=Eng']")
     end
   end
 

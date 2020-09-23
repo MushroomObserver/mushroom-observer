@@ -110,6 +110,21 @@ class Name < AbstractModel
     kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
   end
 
+  # Name for which it makes sense to do a fungal nomenclature search
+  # for the stripped monomial, binomial, or combination,
+  # regardless whether name is registrable
+  # For example, Boletus edulis group; it make sense to search for B. edulis
+  def searchable_in_registry?
+    # Use blacklist instead of whitelist; almost all MO names are searchable
+    !unsearchable_in_registry?
+  end
+
+  def unsearchable_in_registry?
+    kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
+    rank == :Domain ||
+    /\bcrypt temp\b/i =~ author&.delete(".")
+  end
+
   ################
 
   private

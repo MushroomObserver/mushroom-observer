@@ -125,6 +125,8 @@
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
+#  stripped_text_name     binomial, combination, or monomial,
+#                         No "sp.", "group", etc.
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -193,6 +195,7 @@
 #  format_name::             "Xxx sp. Author"
 #  unique_text_name::        "Xxx (123)"
 #  unique_format_name::      "Xxx sp. Author (123)"
+#  stripped_text_name        text_name minus quotes, periods, sp, group, etc.
 #  display_name_brief_authors:: Marked up name with authors shortened:
 #                            **__"Xxx yyy__ author**
 #                            **__"Xxx yyy__ author1 & author2**
@@ -214,6 +217,9 @@
 #  has_notes?::              Does it have notes discussing taxonomy?
 #  registrable?              Could it be registered in fungal nomenclature db?
 #  unregistrable?            Not registrable?
+#  searchable_in_registry?   Stripped text_name searchable in
+#                            fungal nomenclature db
+#  unsearchable_in_registry? not searchable_in_registry?
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
