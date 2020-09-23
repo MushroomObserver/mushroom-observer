@@ -100,13 +100,8 @@
       </div>
     </div>
 
-    <strong><%= :show_name_nomenclature.t %>:</strong>
-    <div class="list-group">
-      <div class="list-group-item name-section">
-        <%= render(partial: "nomenclature",
-            locals: { name: @name, synonyms: true }) %>
-      </div>
-    </div>
+    <%= render(partial: "nomenclature",
+               locals: { name: @name, synonyms: true }) %>
 
     <div class="row">
       <div class="col-sm-6">

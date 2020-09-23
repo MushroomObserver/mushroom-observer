@@ -12,11 +12,8 @@
 
 <div class="row push-down">
   <div class="col-sm-7 col-lg-9">
-    <div class="list-group">
-      <div class="list-group-item name-section">
-        <%= render(partial: "nomenclature",
-                   locals: { name: @name, synonyms: false }) %>
-      </div>
+    <%= render(partial: "nomenclature",
+               locals: { name: @name, synonyms: false }) %>
     </div>
   </div>
   <div class="col-sm-5 col-lg-3">
