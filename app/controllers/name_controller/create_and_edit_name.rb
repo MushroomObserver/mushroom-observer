@@ -175,10 +175,10 @@ class NameController
   end
 
   def set_unparsed_attrs
-    @name.locked         = params[:name][:locked].to_s == "1" if in_admin_mode?
-    @name.citation       = params[:name][:citation].to_s.strip_squeeze
-    @name.notes          = params[:name][:notes].to_s.strip
-    @name.icn_id = params[:name][:icn_id] if name_unlocked?
+    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+    @name.citation = params[:name][:citation].to_s.strip_squeeze
+    @name.notes    = params[:name][:notes].to_s.strip
+    @name.icn_id   = params[:name][:icn_id] if name_unlocked?
   end
 
   # Update the misspelling status.
@@ -225,8 +225,7 @@ class NameController
   end
 
   def parse_name
-    text_name = params[:name][:text_name]
-    text_name = @name.real_text_name if text_name.blank? && @name
+    text_name = parsed_text_name
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank].to_sym
@@ -237,6 +236,14 @@ class NameController
       raise(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
     end
     parse
+  end
+
+  def parsed_text_name
+    if params[:name][:text_name].blank? && @name
+      @name.real_text_name
+    else
+      params[:name][:text_name]
+    end
   end
 
   def make_sure_name_doesnt_exist!
