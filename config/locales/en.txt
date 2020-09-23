@@ -1478,6 +1478,7 @@
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy
+  form_names_taxonomic_notes_warning: 'Please avoid duplicating information from <a href=\"http://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, enter the Index Fungorum Registration Identifier or the MycoBank number in the [:form_names_icn_id] field above. This will automatically create links to both IF and MB.'
   form_names_classification: Taxonomic Classification
   form_names_gen_desc: General Description
   form_names_diag_desc: Diagnostic Description
