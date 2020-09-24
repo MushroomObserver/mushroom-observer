@@ -30,7 +30,6 @@ class ObjectLinkHelperTest < ActionView::TestCase
   end
 
   def expected_link(path, obj, link_text)
-    #'<a href="' + path + obj.id.to_s + '">' + link_text + "</a>"
-    "<a href=\"#{path}#{obj.id.to_s}\">#{link_text}</a>"
+    "<a href=\"#{path}#{obj.id}\">#{link_text}</a>"
   end
 end
