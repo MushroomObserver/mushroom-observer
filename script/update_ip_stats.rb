@@ -94,6 +94,6 @@ bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
 # Removing then re-adding has effect of updating the time stamp on each bad IP.
 IpStats.remove_blocked_ips(bad_ips)
 IpStats.add_blocked_ips(bad_ips)
-IpStats.clean_blocked_ips # remove old blocked ips after a day
+# IpStats.clean_blocked_ips # remove old blocked ips after a day
 
 exit(0)

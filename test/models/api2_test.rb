@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
-# TODO: naming API
-# TODO: vote API
-# TODO: image_vote API
-
 require("test_helper")
+
+# Test naming API
+# See https://www.pivotaltracker.com/story/show/174886715
+
+# Test vote API
+# See https://www.pivotaltracker.com/story/show/174886762
+
+# Test image_vote API
+# See https://www.pivotaltracker.com/story/show/174886806
 
 class Hash
   def remove(*keys)
