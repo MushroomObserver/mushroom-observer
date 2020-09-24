@@ -175,10 +175,18 @@ class NameController
   end
 
   def set_unparsed_attrs
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+    set_locked_if_admin
+    set_icn_id_if_unlocked_or_admin
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes    = params[:name][:notes].to_s.strip
-    @name.icn_id   = params[:name][:icn_id] if name_unlocked?
+  end
+
+  def set_locked_if_admin
+    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+  end
+
+  def set_icn_id_if_unlocked_or_admin
+    @name.icn_id   = params[:name][:icn_id] if name_unlocked? || in_admin_mode?
   end
 
   # Update the misspelling status.
