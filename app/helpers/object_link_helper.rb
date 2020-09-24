@@ -74,7 +74,7 @@ module ObjectLinkHelper
   # This is a general search url that ignores questions.
   def index_fungorum_search_url
     "http://www.indexfungorum.org/Names/Names.asp"
-   end
+  end
 
   # url for MycoBank name search
   def mycobank_search_url(name)
