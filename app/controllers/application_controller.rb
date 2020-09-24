@@ -163,7 +163,10 @@ class ApplicationController < ActionController::Base
     logger.warn("BLOCKED #{request.remote_ip}")
     msg = "We have noticed an excessive amount of server-intensive " \
           "traffic from this IP address (#{request.remote_ip}). " \
-          "Please contact the webmaster (#{MO.webmaster_email_address})."
+          "Please contact the webmaster (#{MO.webmaster_email_address}) " \
+          "so that we can see if there is a better way to do what you are " \
+          "trying to do.  If you believe you have been mistakenly blocked, " \
+          "please contact us so that we can remove the block."
     render(plain: msg,
            status: :too_many_requests,
            layout: false)
