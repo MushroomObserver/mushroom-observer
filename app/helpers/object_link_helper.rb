@@ -43,7 +43,7 @@ module ObjectLinkHelper
   #
   def name_link(name, str = nil)
     if name.is_a?(Integer)
-      str ||= :NAME.t + " #" + name.to_s
+      str ||= "#{:NAME.t} ##{name}"
       link_to(str, Name.show_link_args(name))
     else
       str ||= name.display_name_brief_authors.t
@@ -74,7 +74,7 @@ module ObjectLinkHelper
   # This is a general search url that ignores questions.
   def index_fungorum_search_url
     "http://www.indexfungorum.org/Names/Names.asp"
-   end
+  end
 
   # url for MycoBank name search
   def mycobank_search_url(name)
@@ -104,7 +104,7 @@ module ObjectLinkHelper
   #
   def user_link(user, name = nil)
     if user.is_a?(Integer)
-      name ||= :USER.t + " #" + user.to_s
+      name ||= "#{:USER.t} ##{user}"
       link_to(name, User.show_link_args(user))
     elsif user
       name ||= user.unique_text_name
@@ -128,7 +128,7 @@ module ObjectLinkHelper
 
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
-    title + ": " + links.safe_join(", ")
+    "#{title}: #{links.safe_join(", ")}"
   end
 
   # Wrap object's name in link to the object, return nil if no object
