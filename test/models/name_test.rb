@@ -2897,18 +2897,18 @@ class NameTest < UnitTestCase
     assert(name.unregistrable?,
            "Names below genus with quotes should be unregistrable")
 
-    name = Name.new(text_name:"Agaricus pinyonensis",
+    name = Name.new(text_name: "Agaricus pinyonensis",
                     author: "Isaacs nom. prov.")
     assert(name.unregistrable?, "Provisional names should be unregistrable")
 
-    name = Name.new(text_name:"Fulvifomes porrectus",
+    name = Name.new(text_name: "Fulvifomes porrectus",
                     author: "comb. prov.")
     assert(name.unregistrable?, "Provisional names should be unregistrable")
 
-    name = Name.new(text_name:"Cortinarius calaisopus", author: "ined.")
+    name = Name.new(text_name: "Cortinarius calaisopus", author: "ined.")
     assert(name.unregistrable?, "Unpublished names should be unregistrable")
 
-    name = Name.new(text_name:"Agricales", author: "sensu lato")
+    name = Name.new(text_name: "Agricales", author: "sensu lato")
     assert(name.unregistrable?, "Names s.l. should be unregistrable")
 
     name = Name.new(text_name: "Eukaryota", rank: :Domain)
@@ -2952,7 +2952,7 @@ class NameTest < UnitTestCase
     assert(name.searchable_in_registry?,
            "Names with quote marks can be searchable")
 
-    name = Name.new(text_name:"Agaricus pinyonensis",
+    name = Name.new(text_name: "Agaricus pinyonensis",
                     author: "Isaacs nom. prov.")
     assert(name.searchable_in_registry?,
            "Provisional names can be searchable in registry")
