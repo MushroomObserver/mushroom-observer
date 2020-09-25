@@ -68,12 +68,8 @@ class NameController
   def reload_name_form_on_error(err)
     flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
-    @name.icn_id = params[:name][:icn_id]
-    @name.locked     = params[:name][:locked]
-    @name.rank       = params[:name][:rank]
-    @name.author     = params[:name][:author]
-    @name.citation   = params[:name][:citation]
-    @name.notes      = params[:name][:notes]
+
+    @name.attributes = name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
   end
@@ -331,5 +327,10 @@ class NameController
   def redirect_to_merge_request(new_name)
     redirect_with_query(controller: :observer, action: :email_merge_request,
                         type: :Name, old_id: @name.id, new_id: new_name.id)
+  end
+
+  # allow some mass assignment for purposes of reloading form
+  def name_params
+    params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
