@@ -2654,7 +2654,7 @@ class NameControllerTest < FunctionalTestCase
   def test_update_name_merge_identifier_was_blank
     edited_name = names(:coprinus_comatus)
     merged_name = names(:stereum_hirsutum) # has empty icn_id
-    assert_nil(merged_name.icn_id, "Test needs a fixture without icn_id" )
+    assert_nil(merged_name.icn_id, "Test needs a fixture without icn_id")
 
     params = {
       id: edited_name.id,
