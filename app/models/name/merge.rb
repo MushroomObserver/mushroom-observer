@@ -113,7 +113,7 @@ class Name < AbstractModel
     end
 
     # Update the identifier if it's blank
-    icn_id = old_name.icn_id if icn_id.blank?
+    self.icn_id = old_name.icn_id if icn_id.blank?
 
     # Save any notes the old name had.
     if old_name.has_notes? && (old_name.notes != notes)
