@@ -430,14 +430,14 @@ class Name < AbstractModel
   # to get correct error message.
   def icn_id_unique
     return if icn_id.nil?
-    return if (conflicting_name = other_names.first).blank?
+    return if (conflicting_name = other_names_with_same_icn_id.first).blank?
 
     errors[:base] << :name_error_icn_id_in_use.t(
       number: icn_id, name: conflicting_name.real_search_name
     )
   end
 
-  def other_names
+  def other_names_with_same_icn_id
     Name.where(icn_id: icn_id).where.not(id: id)
   end
 end
