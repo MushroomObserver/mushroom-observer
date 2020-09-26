@@ -112,8 +112,8 @@ class Name < AbstractModel
       self.citation = old_name.citation.strip_squeeze
     end
 
-    # Update the identifier if user provided one
-    self.icn_id = old_name.icn_id if old_name.icn_id
+    # Update the identifier if it's blank
+    self.icn_id = old_name.icn_id if self.icn_id.blank?
 
     # Save any notes the old name had.
     if old_name.has_notes? && (old_name.notes != notes)

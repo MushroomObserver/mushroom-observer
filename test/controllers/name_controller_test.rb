@@ -1785,8 +1785,7 @@ class NameControllerTest < FunctionalTestCase
   def test_update_icn_id_duplicate
     name = names(:stereum_hirsutum)
     name_with_icn_id = names(:coprinus_comatus)
-    assert(name_with_icn_id.icn_id,
-           "Test needs a different fixture")
+    assert(name_with_icn_id.icn_id, "Test needs a fixture with an icn_id")
     params = {
       id: name.id,
       name: {
@@ -2619,17 +2618,16 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("", name1.author)
   end
 
-  # Merge, changing only identifier of surviving name
-  def test_update_name_merge_identifier
+  # Merge, trying to change only identifier of surviving name
+  def test_update_name_merge_retain_identifier
     edited_name = names(:stereum_hirsutum)
     surviving_name = names(:coprinus_comatus)
-    assert(surviving_name.icn_id)
-    new_identifier = surviving_name.icn_id + 1_111_111
+    assert(old_identifier = surviving_name.icn_id)
 
     params = {
       id: edited_name.id,
       name: {
-        icn_id: new_identifier,
+        icn_id: old_identifier + 1_111_111,
         text_name: surviving_name.text_name,
         author: surviving_name.author,
         rank: surviving_name.rank,
@@ -2638,16 +2636,50 @@ class NameControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    assert_difference("surviving_name.version") do
+    assert_no_difference("surviving_name.version") do
       post(:edit_name, params: params)
       surviving_name.reload
     end
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: surviving_name.id)
-    assert_email_generated
+    assert_no_emails
     assert_not(Name.exists?(edited_name.id))
-    assert_equal(new_identifier, surviving_name.reload.icn_id)
+    assert_equal(
+      old_identifier, surviving_name.reload.icn_id,
+      "Merge should retain icn_id if it exists"
+    )
+  end
+
+  def test_update_name_merge_identifier_was_blank
+    edited_name = names(:coprinus_comatus)
+    merged_name = names(:stereum_hirsutum) # has empty icn_id
+    assert_nil(merged_name.icn_id, "Test needs a fixture without icn_id" )
+
+    params = {
+      id: edited_name.id,
+      name: {
+        icn_id: 189_826,
+        text_name: merged_name.text_name,
+        author: merged_name.author,
+        rank: merged_name.rank,
+        deprecated: (merged_name.deprecated ? "true" : "false")
+      }
+    }
+
+    login("rolf")
+    # merged_name is merged into edited_name because former has name proposals
+    # and the latter does not
+    assert_difference("edited_name.version") do
+      post(:edit_name, params: params)
+      edited_name.reload
+    end
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: edited_name.id)
+    assert_email_generated
+    assert_not(Name.exists?(merged_name.id))
+    assert_equal(189_826, edited_name.reload.icn_id)
   end
 
   # ----------------------------
