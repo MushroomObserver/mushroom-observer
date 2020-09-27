@@ -125,8 +125,6 @@
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
-#  stripped_text_name     binomial, combination, or monomial,
-#                         No "sp.", "group", etc.
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?

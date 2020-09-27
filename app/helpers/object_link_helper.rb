@@ -56,7 +56,7 @@ module ObjectLinkHelper
   # Create link for name to MyCoPortal website.
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{name.stripped_text_name.tr(" ", "+")}"
+      "#{name.text_name.tr(" ", "+")}"
   end
 
   # url for IF record
@@ -70,22 +70,24 @@ module ObjectLinkHelper
       "#{record_id}"
   end
 
-  # url for Index Fungorum search
-  # This is a general search url that ignores questions.
-  def index_fungorum_search_url
+  # url for Index Fungorum search. This is a general search.
+  # IF lacks an entry point that includes the name to be searched.
+  def index_fungorum_basic_search_url
     "http://www.indexfungorum.org/Names/Names.asp"
   end
 
-  # url for MycoBank name search
-  def mycobank_search_url(name)
-    unescaped_str = "#{mycobank_search_path}#{name.stripped_text_name}"
+  # url for MycoBank name search for text_name
+  def mycobank_name_search_url(name)
+    unescaped_str = "#{mycobank_basic_search_url}/field/Taxon%20name/" \
+                    "#{name.text_name}"
     # CGI::escape.html(unescaped_str) should work, but throws error
     #   ActionView::Template::Error: wrong number of arguments (0 for 1)
     unescaped_str.gsub(" ", "%20")
   end
 
-  def mycobank_search_path
-    "#{mycobank_host}page/Basic%20names%20search/field/Taxon%20name/"
+  #
+  def mycobank_basic_search_url
+    "#{mycobank_host}page/Basic%20names%20search"
   end
 
   def mycobank_host

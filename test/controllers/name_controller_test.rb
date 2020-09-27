@@ -291,12 +291,12 @@ class NameControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{index_fungorum_search_url}/,
+      "div#nomenclature a:match('href',?)", /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{mycobank_search_url(name)}/,
+      "div#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
@@ -319,15 +319,14 @@ class NameControllerTest < FunctionalTestCase
       "Page should not have link to IF record"
     )
 
-    # but it makes sense to search for the stripped
-    # monomial, binomial, or combination
+    # but it makes sense to link to search pages in fungal registies
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{index_fungorum_search_url}/,
+      "div#nomenclature a:match('href',?)", /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{mycobank_search_url(name)}/,
+      "div#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )

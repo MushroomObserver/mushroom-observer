@@ -71,10 +71,6 @@ class Name < AbstractModel
     Name.display_to_real_search(self)
   end
 
-  def stripped_text_name
-    text_name.gsub(/([."]|group|clade)/, "").strip.squeeze(" ")
-  end
-
   def self.display_to_real_text(name)
     name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
       gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').

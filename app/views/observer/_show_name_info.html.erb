@@ -11,7 +11,7 @@
                             action: :show_name, id: name.id)) %>
 <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
                             target: :_blank)) %>
-<%= content_tag(:p, link_to("Mycobank", mycobank_search_url(name),
+<%= content_tag(:p, link_to("Mycobank", mycobank_name_search_url(name),
                             target: :_blank)) %>
 
 <%= # links to approved MO synonyms

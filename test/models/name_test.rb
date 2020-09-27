@@ -2344,11 +2344,6 @@ class NameTest < UnitTestCase
                  names(:authored_group).display_name_without_authors)
   end
 
-  def test_stripped_text_name
-    name = names(:boletus_edulis_group)
-    assert_equal("Boletus edulis", name.stripped_text_name)
-  end
-
   def test_format_autonym
     assert_equal("**__Acarospora__**",
                  Name.format_autonym("Acarospora", "", :Genus, false))

@@ -31,7 +31,7 @@
 
 <div class="row">
   <div class="col-sm-5">
-    <% if @first_four and @first_four.length > 0 %>
+    <% if @first_four&.length&.positive? %>
       <strong><%= :show_name_most_confident.t %>:</strong>
       <div class="list-group">
         <% @first_four.each do |obs| %>
@@ -58,41 +58,39 @@
       <div class="list-group-item">
         <div class="row">
           <div class="col-sm-7 name-section">
-            <%= content_tag(:p, :show_observations_of.t) %>
+            <%= tag.p(:show_observations_of.t) %>
             <div class="indent-one-em">
               <%= # Observations of this name
-                content_tag(:p,
-                  obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
+                tag.p(obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
               <%= # Observations of taxon under other names
-                content_tag(:p,
-                  taxon_obss_other_names(@name) ||
-                    "#{:taxon_obss_other_names.t} (0)") %>
+                tag.p(taxon_obss_other_names(@name) ||
+                      "#{:taxon_obss_other_names.t} (0)") %>
               <%= # Observations of taxon under any name
-                content_tag(:p,
-                  taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
+                tag.p(taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
               <%= # Observations of other taxa where this taxon was proposed
-                content_tag(:p,
-                  taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
-               <%= # Observations where this Nae was proposed
-                content_tag(:p,
-                  name_proposed(@name) || "#{:obss_name_proposed.t} (0)") %>
+                tag.p(taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
+              <%= # Observations where this Nae was proposed
+                tag.p(name_proposed(@name) ||
+                      "#{:obss_name_proposed.t} (0)") %>
              <%= name_section_link(:show_subtaxa_obss.t,
                                     @has_subtaxa, @subtaxa_query) %>
             </div>
           </div>
           <div class="col-sm-5 name-section">
-            <%= content_tag(:p, link_to(
-                  "MyCoPortal", mycoportal_url(@name), target: :_blank
-                )) %>
-            <%= content_tag(:p, link_to(
+            <% if @name.searchable_in_registry? %>
+              <%= tag.p(link_to(
+                    "MyCoPortal", mycoportal_url(@name), target: :_blank
+                  )) %>
+            <% end %>
+            <%= tag.p(link_to(
                   "EOL", @name.eol_url, target: :_blank
                 )) if @name.eol_url %>
-            <%= content_tag(:p, link_to(
+            <%= tag.p(link_to(
                   :google_images.t,
                   "http://images.google.com/images?q=#{@name.real_text_name}",
                   target: :_blank
                 )) %>
-            <%= content_tag(:p, link_with_query(
+            <%= tag.p(link_with_query(
                   :show_name_distribution_map.t, action: :map, id: @name.id
                 )) %>
           </div>
