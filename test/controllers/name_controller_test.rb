@@ -1757,7 +1757,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(189_826, name.reload.icn_id)
-    assert_email_generated
+    assert_no_emails
   end
 
   def test_update_icn_id_invalid

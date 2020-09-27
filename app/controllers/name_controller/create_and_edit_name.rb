@@ -114,6 +114,9 @@ class NameController
     any_changes
   end
 
+  # ----------------------------------------------------------------------------
+  # merger
+
   def merge_names(new_name)
     if in_admin_mode? || @name.mergeable? || new_name.mergeable?
       perform_merge_names(new_name)
@@ -158,6 +161,8 @@ class NameController
     end
     @name.save
   end
+
+  # ----------------------------------------------------------------------------
 
   def set_name_author_and_rank
     return unless name_unlocked?
@@ -288,7 +293,10 @@ class NameController
     new_name.percent_match(old_name) > 0.9
   end
 
+  # Is icn_id being changed (as opposed to merely adding it)
   def icn_id_changed?
+    return false unless @name.icn_id
+
     params[:name][:icn_id] != @name.icn_id
   end
 
