@@ -134,7 +134,7 @@ class Name < AbstractModel
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
   def kingdom
-    return text_name if self.rank == :Kingdom
+    return text_name if rank == :Kingdom
 
     parse_classification.find { |rank| rank.first == :Kingdom }&.last
   end

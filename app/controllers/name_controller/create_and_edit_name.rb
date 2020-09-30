@@ -255,7 +255,7 @@ class NameController
 
   def icn_id_conflict?(new_icn_id)
     new_icn_id && @name.icn_id &&
-    new_icn_id != @name.icn_id
+      new_icn_id != @name.icn_id
   end
 
   def just_adding_author?
@@ -270,18 +270,20 @@ class NameController
 
   def email_admin_name_change
     subject = "Nontrivial Name Change"
-    content = :email_name_change.l(
-      user: @user.login,
+    content = :email_name_change.l(email_name_change_content)
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    NameControllerTest.report_email(content) if Rails.env.test?
+  end
+
+  def email_name_change_content
+    { user: @user.login,
       old_identifier: @name.icn_id,
       new_identifier: params[:name][:icn_id],
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
-    )
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
-    NameControllerTest.report_email(content) if Rails.env.test?
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}" }
   end
 
   # -------------

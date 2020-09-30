@@ -85,7 +85,6 @@ module ObjectLinkHelper
     unescaped_str.gsub(" ", "%20")
   end
 
-  #
   def mycobank_basic_search_url
     "#{mycobank_host}page/Basic%20names%20search"
   end

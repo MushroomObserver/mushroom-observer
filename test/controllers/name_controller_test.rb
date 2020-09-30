@@ -291,7 +291,8 @@ class NameControllerTest < FunctionalTestCase
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{index_fungorum_basic_search_url}/,
+      "div#nomenclature a:match('href',?)",
+      /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
@@ -319,9 +320,10 @@ class NameControllerTest < FunctionalTestCase
       "Page should not have link to IF record"
     )
 
-    # but it makes sense to link to search pages in fungal registies
+    # but it makes sense to link to search pages in fungal registries
     assert_select(
-      "div#nomenclature a:match('href',?)", /#{index_fungorum_basic_search_url}/,
+      "div#nomenclature a:match('href',?)",
+      /#{index_fungorum_basic_search_url}/,
       { count: 1 },
       "Nomenclature section should have link to IF search"
     )
