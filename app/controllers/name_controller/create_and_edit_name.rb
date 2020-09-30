@@ -240,16 +240,12 @@ class NameController
   def set_name_author_and_rank
     return unless name_unlocked?
 
-    unless minor_change?
-      email_admin_name_change(
-        old_identifier: Name.find(@name.id).icn_id
-      )
-    end
+    email_admin_name_change unless minor_change?
     @name.attributes = @parse.params
   end
 
   def minor_change?
-    return false if icn_id_changed?
+    return false if icn_id_conflict?(params[:name][:icn_id])
     return true if just_adding_author?
 
     old_name = @name.real_search_name
@@ -257,11 +253,9 @@ class NameController
     new_name.percent_match(old_name) > 0.9
   end
 
-  # Is icn_id being changed (as opposed to merely adding it)
-  def icn_id_changed?
-    return false unless @name.icn_id
-
-    params[:name][:icn_id] != @name.icn_id
+  def icn_id_conflict?(new_icn_id)
+    new_icn_id && @name.icn_id &&
+    new_icn_id != @name.icn_id
   end
 
   def just_adding_author?
@@ -274,12 +268,12 @@ class NameController
     end
   end
 
-  def email_admin_name_change(old_identifier: nil)
+  def email_admin_name_change
     subject = "Nontrivial Name Change"
     content = :email_name_change.l(
       user: @user.login,
-      old_identifier: old_identifier,
-      new_identifier: @name.icn_id,
+      old_identifier: @name.icn_id,
+      new_identifier: params[:name][:icn_id],
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,
@@ -305,7 +299,6 @@ class NameController
 
   def perform_merge_names(new_name)
     old_display_name_for_log = @name[:display_name]
-    old_identifier = new_name.icn_id
 
     # set up @name attr's for merger into new_name
     @name.attributes = @parse.params
@@ -331,12 +324,23 @@ class NameController
     new_name.merge(@name)
     args = { this: @name.real_search_name, that: new_name.real_search_name }
     flash_notice(:runtime_edit_name_merge_success.t(args))
+    email_admin_icn_id_conflict(new_name) if icn_id_conflict?(new_name.icn_id)
 
     @name = new_name
-    if new_name.icn_id != old_identifier
-      email_admin_name_change(old_identifier: old_identifier)
-    end
     @name.save
+  end
+
+  def email_admin_icn_id_conflict(new_name)
+    subject = "Merger identifier conflict"
+    content = :email_merger_icn_id_conflict.l(
+      name: new_name.real_search_name,
+      surviving_icn_id: new_name.icn_id,
+      deleted_icn_id: @name.icn_id,
+      user: @user.login,
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+    )
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    NameControllerTest.report_email(content) if Rails.env.test?
   end
 
   def redirect_to_merge_request(new_name)

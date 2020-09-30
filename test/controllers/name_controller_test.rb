@@ -2642,7 +2642,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: surviving_name.id)
-    assert_no_emails
+    assert_email_generated # email admin re icn_id conflict
     assert_not(Name.exists?(edited_name.id))
     assert_equal(
       old_identifier, surviving_name.reload.icn_id,
@@ -2676,7 +2676,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: edited_name.id)
-    assert_email_generated
+    assert_no_emails
     assert_not(Name.exists?(merged_name.id))
     assert_equal(189_826, edited_name.reload.icn_id)
   end

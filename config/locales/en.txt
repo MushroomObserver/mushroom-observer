@@ -3242,6 +3242,7 @@
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\n user : [user]\n old_identifier : [old_identifier]\n new_identifier : [new_identifier]\n old : [old]\n new : [new]\n observations : [observations]\n namings : [namings]\n name : [url]"
+  email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\n name : [name]\n surviving icn_id : [surviving_icn_id]\n deleted icn_id : [deleted_icn_id]\n user : [user]\n url : [url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
