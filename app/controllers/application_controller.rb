@@ -161,12 +161,12 @@ class ApplicationController < ActionController::Base
     return true if session[:user_id].present?
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    msg = "We have noticed an excessive amount of server-intensive " \
-          "traffic from this IP address (#{request.remote_ip}). " \
-          "Please contact the webmaster (#{MO.webmaster_email_address}) " \
-          "so that we can see if there is a better way to do what you are " \
-          "trying to do.  If you believe you have been mistakenly blocked, " \
-          "please contact us so that we can remove the block."
+    msg = "We have noticed a lot of server-intensive traffic from this IP" \
+          "address (#{request.remote_ip}).  There may be better ways of" \
+          "doing what you are trying to do.  Please contact the webmaster" \
+          "(#{MO.webmaster_email_address}) so that we can talk about it." \
+          "Please include a copy of this message in your email.  Apologies " \
+          "for the inconvenience."
     render(plain: msg,
            status: :too_many_requests,
            layout: false)
