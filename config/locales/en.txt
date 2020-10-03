@@ -2381,7 +2381,7 @@
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/observer/ask_webmaster_question.
   publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
-  publication_citation: "If you wish to cite the Mushroom Observer in a publication you are encouraged to use:\n\nWilson, N., Hollinger, J. 2006-present. Mushroom Observer. http://mushroomobserver.org\n\nHowever, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:"
+  publication_citation: "We encourage you to cite Mushroom Observer this way: \n\nWilson, N., Hollinger, J., et al. 2006-present. Mushroom Observer. https://mushroomobserver.org \n\nHowever, your publisher may restrict how or whether websites can be cited. If you need a published reference the best current citation we are aware of is:"
 
   # publication/edit
   edit_publication: Edit
