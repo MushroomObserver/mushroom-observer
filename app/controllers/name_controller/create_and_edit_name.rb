@@ -295,59 +295,72 @@ class NameController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_to_merge_request(new_name)
+      redirect_with_query(controller: :observer, action: :email_merge_request,
+                          type: :Name, old_id: @name.id, new_id: new_name.id)
     end
   end
 
-  def perform_merge_names(new_name)
-    old_display_name_for_log = @name[:display_name]
+  # Merge name being edited (@name) with the found name
+  # The presumptive surviving id is that of the found name,
+  # and the presumptive name to be destroyed is the name being edited.
+  def perform_merge_names(survivor)
+    prepare_presumptively_disappearing_name
+    deprecation = change_deprecation_iff_user_requested
 
-    # set up @name attr's for merger into new_name
-    @name.attributes = @parse.params
-    set_unparsed_attrs
-    # Only change deprecation status if user explicity requested it.
-    if @name.deprecated != (params[:name][:deprecated] == "true")
-      change_deprecated = !@name.deprecated
-    end
-    # Automatically swap names if that's a safer merge.
-    if !@name.mergeable? && new_name.mergeable?
-      @name, new_name = new_name, @name
-      old_display_name_for_log = @name[:display_name]
-    end
-    @name.display_name = old_display_name_for_log
+    # Reverse merger direciton if that's safer
+    @name, survivor = survivor, @name if reverse_merger_safer?(survivor)
+
+    # For log, ignore user Author filter
+    @name.display_name = @name[:display_name]
 
     # Fill in author if other has one.
-    if new_name.author.blank? && @parse.author.present?
-      new_name.change_author(@parse.author)
+    if survivor.author.blank? && @parse.author.present?
+      survivor.change_author(@parse.author)
     end
-    new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
+    survivor.change_deprecated(deprecation) unless deprecation.nil?
 
-    # move associations from @name to new_name and destroy @name
-    new_name.merge(@name)
-    args = { this: @name.real_search_name, that: new_name.real_search_name }
-    flash_notice(:runtime_edit_name_merge_success.t(args))
-    email_admin_icn_id_conflict(new_name) if icn_id_conflict?(new_name.icn_id)
+    survivor.merge(@name) # move associations to survivor, destroy @name
 
-    @name = new_name
+    send_merger_messages(survivor)
+
+    @name = survivor
     @name.save
   end
 
-  def email_admin_icn_id_conflict(new_name)
+  def prepare_presumptively_disappearing_name
+    @name.attributes = @parse.params
+    set_unparsed_attrs
+  end
+
+  # nil if user did not request change_existing_name
+  # else new deprecation status (true/false)
+  def change_deprecation_iff_user_requested
+    return nil unless @name.deprecated != (params[:name][:deprecated] == "true")
+
+    !@name.deprecated
+  end
+
+  def reverse_merger_safer?(presumptive_survivor)
+    !@name.mergeable? && presumptive_survivor.mergeable?
+  end
+
+  def send_merger_messages(survivor)
+    args = { this: @name.real_search_name, that: survivor.real_search_name }
+    flash_notice(:runtime_edit_name_merge_success.t(args))
+    email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
+  end
+
+  def email_admin_icn_id_conflict(survivor)
     subject = "Merger identifier conflict"
     content = :email_merger_icn_id_conflict.l(
-      name: new_name.real_search_name,
-      surviving_icn_id: new_name.icn_id,
+      name: survivor.real_search_name,
+      surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
       user: @user.login,
       url: "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
-  end
-
-  def redirect_to_merge_request(new_name)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
-                        type: :Name, old_id: @name.id, new_id: new_name.id)
   end
 
   # ----------------------------------------------------------------------------
