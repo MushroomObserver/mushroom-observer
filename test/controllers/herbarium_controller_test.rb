@@ -375,6 +375,47 @@ class HerbariumControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_post_invalid_personal_user
+    params = herbarium_params.merge(
+      name: "My Herbarium",
+      personal: "1",
+      personal_user_name: "non-user"
+    )
+    login("rolf")
+    make_admin("rolf")
+    post(:create_herbarium, herbarium: params)
+
+    assert_response(
+      :success,
+      "Response to :create_herbarium with invalid personal_user_name " \
+      "should be 'success' (re-displaying form), not redirect to new herbarium"
+    )
+    assert_flash_error(
+      ":create_herbarium with invalid personal_user_name should flash error"
+    )
+  end
+
+  def test_create_post_second_personal_herbarium
+    params = herbarium_params.merge(
+      name: "My Herbarium",
+      personal: "1",
+      personal_user_name: "dick"
+    )
+    login("rolf")
+    make_admin("rolf")
+    assert_nil(mary.personal_herbarium)
+    post(:create_herbarium, herbarium: params)
+
+    assert_response(
+      :success,
+      "Response to creating second personal herbarium for user " \
+      "should be 'success' (re-displaying form), not redirect to new herbarium"
+    )
+    assert_flash_error(
+      "Trying to create second personal herbarium for user should flash error"
+    )
+  end
+
   def test_edit_herbarium_without_curators
     nybg = herbaria(:nybg_herbarium)
     nybg.curators.delete(rolf)
