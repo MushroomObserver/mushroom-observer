@@ -43,7 +43,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_search_number
     herbarium = herbaria(:nybg_herbarium)
-    get(:herbarium_search, pattern: herbarium.id)
+    get(:herbarium_search, params: { pattern: herbarium.id })
 
     assert_redirected_to(
       "#{herbarium_show_herbarium_path}/#{herbarium.id}",
@@ -104,26 +104,26 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_true(herb2.can_edit?(rolf))  # no curators
     assert_false(herb3.can_edit?(rolf)) # someone else's personal herbarium
 
-    get(:list_herbaria, merge: source.id)
+    get(:list_herbaria, params: { merge: source.id })
     assert_select("a[href*=edit_herbarium]", count: 0)
     assert_select("a[href*=merge_herbaria]", count: 0)
 
     login("dick")
-    get(:list_herbaria, merge: source.id)
+    get(:list_herbaria, params: { merge: source.id })
     assert_select("a[href*='this=#{source.id}']", count: 0)
     assert_select("a[href*='this=#{herb1.id}']", count: 1)
     assert_select("a[href*='this=#{herb2.id}']", count: 1)
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
 
     login("rolf")
-    get(:list_herbaria, merge: source.id)
+    get(:list_herbaria, params: { merge: source.id })
     assert_select("a[href*='this=#{source.id}']", count: 0)
     assert_select("a[href*='this=#{herb1.id}']", count: 1)
     assert_select("a[href*='this=#{herb2.id}']", count: 1)
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
 
     make_admin("zero")
-    get(:list_herbaria, merge: source.id)
+    get(:list_herbaria, params: { merge: source.id })
     assert_select("a[href*='this=#{source.id}']", count: 0)
     assert_select("a[href*='this=#{herb1.id}']", count: 1)
     assert_select("a[href*='this=#{herb2.id}']", count: 1)
@@ -143,36 +143,36 @@ class HerbariumControllerTest < FunctionalTestCase
     id3 = herbaria(:nybg_herbarium).id
     id4 = herbaria(:field_museum).id
 
-    get(:merge_herbaria, this: id1, that: id2)
+    get(:merge_herbaria, params: { this: id1, that: id2 })
     assert_redirected_to(controller: :account, action: :login)
 
     login("rolf")
-    get(:merge_herbaria, this: id1, that: id2)
+    get(:merge_herbaria, params: { this: id1, that: id2 })
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: id1, new_id: id2)
 
     login("mary")
     get(:merge_herbaria)
     assert_flash_error
-    get(:merge_herbaria, this: id2, that: id2)
+    get(:merge_herbaria, params: { this: id2, that: id2 })
     assert_no_flash
-    get(:merge_herbaria, this: 666)
+    get(:merge_herbaria, params: { this: 666 })
     assert_flash_error
-    get(:merge_herbaria, this: id1, that: 666)
+    get(:merge_herbaria, params: { this: id1, that: 666 })
     assert_flash_error
-    get(:merge_herbaria, this: id3, that: id3)
+    get(:merge_herbaria, params: { this: id3, that: id3 })
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: id3, new_id: id3)
-    get(:merge_herbaria, this: id1, that: id3)
+    get(:merge_herbaria, params: { this: id1, that: id3 })
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: id1, new_id: id3)
-    get(:merge_herbaria, this: id1, that: id2)
+    get(:merge_herbaria, params: { this: id1, that: id2 })
     assert_flash_success
     # fundis ends up being the destination because it is older.
     assert_redirected_to(action: :index_herbarium, id: fundis.id)
 
     make_admin("mary")
-    get(:merge_herbaria, this: id3, that: id4)
+    get(:merge_herbaria, params: { this: id3, that: id4 })
     assert_flash_success
     assert_redirected_to(action: :index_herbarium,
                          id: herbaria(:nybg_herbarium).id)
@@ -192,15 +192,15 @@ class HerbariumControllerTest < FunctionalTestCase
     }
     curator_count = nybg.curators.count
 
-    post(:show_herbarium, params)
+    post(:show_herbarium, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
 
     login("mary")
-    post(:show_herbarium, params)
+    post(:show_herbarium, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
 
     login("rolf")
-    post(:show_herbarium, params)
+    post(:show_herbarium, params: params)
     assert_equal(curator_count + 1, nybg.reload.curators.count)
     assert_response(:success)
   end
@@ -218,12 +218,13 @@ class HerbariumControllerTest < FunctionalTestCase
       "herbarium.curators.count",
       "Curators should not change when trying to add non-user as curator"
     ) do
-      post(:show_herbarium, params)
+      post(:show_herbarium, params: params)
       herbarium.reload
     end
     assert_flash(
       /#{:show_herbarium_no_user.t(login: login)}/,
-      "Error should be flashed if trying to add non-user as curator")
+      "Error should be flashed if trying to add non-user as curator"
+    )
   end
 
   def test_next_and_prev
@@ -234,10 +235,10 @@ class HerbariumControllerTest < FunctionalTestCase
     q = query.record.id.alphabetize
 
     login
-    get(:next_herbarium, id: number1.id, q: q)
+    get(:next_herbarium, params: { id: number1.id, q: q })
     assert_redirected_to(action: :show_herbarium, id: number2.id, q: q)
 
-    get(:prev_herbarium, id: number2.id, q: q)
+    get(:prev_herbarium, params: { id: number2.id, q: q })
     assert_redirected_to(action: :show_herbarium, id: number1.id, q: q)
   end
 
@@ -260,12 +261,12 @@ class HerbariumControllerTest < FunctionalTestCase
       mailing_address: "New Herbarium\n1234 Figueroa\nBurbank, CA, 91234\n\n\n",
       description: "\nSpecializes in local macrofungi. <http:blah>\n"
     )
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:redirect)
 
     login("katrina")
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
     herbarium = Herbarium.last
@@ -297,7 +298,7 @@ class HerbariumControllerTest < FunctionalTestCase
       description: "  New Notes  ",
       personal: "1"
     )
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_equal(herbarium_count, Herbarium.count)
     assert_flash_text(/already exists/i)
     # Really means we go back to create_herbarium without having created one.
@@ -319,7 +320,7 @@ class HerbariumControllerTest < FunctionalTestCase
       name: "New Herbarium",
       place_name: "New Location"
     )
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_flash_text(/must define this location/i)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
@@ -344,14 +345,14 @@ class HerbariumControllerTest < FunctionalTestCase
 
     login("rolf")
     assert_not_nil(rolf.personal_herbarium)
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_flash_text(/already.*created.*personal herbarium/i)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success)
 
     login("mary")
     assert_nil(mary.personal_herbarium)
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
     herbarium = Herbarium.last
@@ -383,7 +384,7 @@ class HerbariumControllerTest < FunctionalTestCase
     )
     login("rolf")
     make_admin("rolf")
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
 
     assert_response(
       :success,
@@ -404,7 +405,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     make_admin("rolf")
     assert_nil(mary.personal_herbarium)
-    post(:create_herbarium, herbarium: params)
+    post(:create_herbarium, params: { herbarium: params })
 
     assert_response(
       :success,
@@ -421,7 +422,7 @@ class HerbariumControllerTest < FunctionalTestCase
     nybg.curators.delete(rolf)
     nybg.curators.delete(roy)
     assert_empty(nybg.reload.curators)
-    get(:edit_herbarium, id: nybg.id)
+    get(:edit_herbarium, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary")
@@ -431,12 +432,12 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_with_curators
     nybg = herbaria(:nybg_herbarium)
-    get(:edit_herbarium, id: nybg.id)
+    get(:edit_herbarium, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary")
     assert_not(nybg.curator?(mary))
-    get(:edit_herbarium, id: nybg.id)
+    get(:edit_herbarium, params: { id: nybg.id })
     assert_flash_text(/Permission denied/i)
     assert_response(:redirect)
 
@@ -445,7 +446,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_template("edit_herbarium")
 
     make_admin("mary")
-    get(:edit_herbarium, id: nybg.id)
+    get(:edit_herbarium, params: { id: nybg.id })
     assert_template("edit_herbarium")
   end
 
@@ -461,17 +462,17 @@ class HerbariumControllerTest < FunctionalTestCase
       description: " And  more  stuff. "
     )
 
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_redirected_to(action: :show_herbarium, id: nybg.id)
     assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_redirected_to(action: :show_herbarium, id: nybg.id)
     assert_no_flash
     assert_not_equal(last_update, nybg.reload.updated_at)
@@ -492,14 +493,14 @@ class HerbariumControllerTest < FunctionalTestCase
 
     # Roy can edit but does not own all the records.
     login("roy")
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_equal(last_update, nybg.reload.updated_at)
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
 
     # Rolf can both edit and does own all the records.  Should merge.
     login("rolf")
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_nil(Herbarium.safe_find(other.id))
     assert_not_nil(Herbarium.safe_find(nybg.id))
   end
@@ -508,7 +509,7 @@ class HerbariumControllerTest < FunctionalTestCase
     nybg = herbaria(:nybg_herbarium)
     params = herbarium_params.merge(place_name: "New Location")
     login("rolf")
-    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    post(:edit_herbarium, params: { herbarium: params, id: nybg.id })
     assert_nil(nybg.reload.location)
     assert_redirected_to(controller: :location, action: :create_location,
                          where: "New Location", set_herbarium: nybg.id)
@@ -526,21 +527,21 @@ class HerbariumControllerTest < FunctionalTestCase
 
     # Rolf doesn't own all the records, so can't make it his.
     login("rolf")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.reload.curators)
 
     # Make sure if Mary already has one she cannot make this one, too.
     login("mary")
     other = herbaria(:dick_herbarium)
-    other.update_columns(personal_user_id: mary.id)
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    other.update(personal_user_id: mary.id)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.reload.curators)
 
     # But if she owns all the records and doesn't have one, then she can.
-    other.update_columns(personal_user_id: dick.id)
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    other.update(personal_user_id: dick.id)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.reload.curators)
   end
@@ -565,7 +566,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = herbarium_params.merge(name: herbarium.name, personal: "1")
     login(user.login)
 
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
 
     assert_response(
       :success,
@@ -579,20 +580,19 @@ class HerbariumControllerTest < FunctionalTestCase
     )
   end
 
-
   def test_edit_herbarium_post_admin_set_personal_user
     herbarium = herbaria(:fundis_herbarium)
     params = herbarium_params.merge(
       name: herbarium.name,
       personal_user_name: "mary"
     )
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     login("mary")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     make_admin("rolf")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.curators)
   end
@@ -603,16 +603,16 @@ class HerbariumControllerTest < FunctionalTestCase
       name: herbarium.name,
       personal_user_name: "mary"
     )
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("mary")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("dick")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     make_admin("rolf")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(mary, herbarium.reload.personal_user)
     assert_user_list_equal([mary], herbarium.curators)
   end
@@ -623,16 +623,16 @@ class HerbariumControllerTest < FunctionalTestCase
       name: herbarium.name,
       personal_user_name: ""
     )
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("mary")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     login("dick")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_users_equal(dick, herbarium.reload.personal_user)
     make_admin("rolf")
-    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    post(:edit_herbarium, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.curators)
   end
@@ -640,9 +640,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_edit_herbarium_put
     herbarium = herbaria(:rolf_herbarium)
     back = "#{herbarium_show_herbarium_path}/#{herbarium.id}"
-    params = {
-      id: herbarium.id,
-      back: back }
+    params = { id: herbarium.id, back: back }
     login("rolf")
     put(:edit_herbarium, { params: params })
 
@@ -660,27 +658,27 @@ class HerbariumControllerTest < FunctionalTestCase
     curator_count = nybg.curators.count
     params = { id: nybg.id, user: roy.id }
 
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
     login("mary")
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
     login("rolf")
-    post(:delete_curator, params.except(:user))
+    post(:delete_curator, params: params.except(:user))
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count - 1, nybg.reload.curators.count)
     assert_not(nybg.curator?(roy))
     assert_response(:redirect)
 
     make_admin("mary")
-    post(:delete_curator, params.merge(user: rolf.id))
+    post(:delete_curator, params: params.merge(user: rolf.id))
     assert_equal(curator_count - 2, nybg.reload.curators.count)
     assert_not(nybg.curator?(rolf))
     assert_response(:redirect)
@@ -688,7 +686,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_request_to_be_curator
     nybg = herbaria(:nybg_herbarium)
-    get(:request_to_be_curator, id: nybg.id)
+    get(:request_to_be_curator, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary")
@@ -702,14 +700,14 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_request_to_be_curator_post
     email_count = ActionMailer::Base.deliveries.count
     nybg = herbaria(:nybg_herbarium)
-    post(:request_to_be_curator, id: nybg.id)
+    post(:request_to_be_curator, params: { id: nybg.id })
     assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
     login("mary")
     post(:request_to_be_curator)
     assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
-    post(:request_to_be_curator, id: nybg.id, notes: "ZZYZX")
+    post(:request_to_be_curator, params: { id: nybg.id, notes: "ZZYZX" })
     assert_response(:redirect)
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
     assert_match(/ZZYZX/, ActionMailer::Base.deliveries.last.to_s)
@@ -722,17 +720,17 @@ class HerbariumControllerTest < FunctionalTestCase
     record_ids = records.map(&:id)
 
     # Must be logged in.
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_not_nil(Herbarium.safe_find(herbarium.id))
 
     # Must be curator or admin.
     login("mary")
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_not_nil(Herbarium.safe_find(herbarium.id))
 
     # Curator can do it.
     login("roy")
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_nil(Herbarium.safe_find(herbarium.id))
     assert_empty(HerbariumRecord.where(herbarium_id: herbarium.id))
     assert_empty(Herbarium.connection.select_values(%(
@@ -749,14 +747,14 @@ class HerbariumControllerTest < FunctionalTestCase
     # Make sure noncurator can do it only if there are no curators.
     login("mary")
     herbarium.add_curator(dick)
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_flash_error
     assert_not_nil(Herbarium.safe_find(herbarium.id))
 
     # But if there are no curators and the user owns all the records.
     # (Note that this means anyone can destroy any uncurated empty herbaria.)
     herbarium.curators.clear
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_no_flash
     assert_nil(Herbarium.safe_find(herbarium.id))
   end
@@ -764,7 +762,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_destroy_herbarium_admin
     herbarium = herbaria(:nybg_herbarium)
     make_admin("mary")
-    get(:destroy_herbarium, id: herbarium.id)
+    get(:destroy_herbarium, params: { id: herbarium.id })
     assert_nil(Herbarium.safe_find(herbarium.id))
   end
 end
