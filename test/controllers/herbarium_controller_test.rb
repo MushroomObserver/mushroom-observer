@@ -16,6 +16,18 @@ class HerbariumControllerTest < FunctionalTestCase
     }
   end
 
+  def test_index_herbarium
+    get(:index_herbarium)
+
+    assert_response(:success)
+    Herbarium.find_each do |herbarium|
+      assert_select(
+        "a[href *= '#{herbarium_show_herbarium_path}/#{herbarium.id}']", true,
+        "Herbarium Index missing link to #{herbarium.name} (##{herbarium.id})"
+      )
+    end
+  end
+
   def test_index
     get_with_dump(:index)
     assert_template(:list_herbaria)
@@ -27,6 +39,17 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_herbarium_search
     get_with_dump(:herbarium_search, pattern: "Personal Herbarium")
+  end
+
+  def test_search_number
+    herbarium = herbaria(:nybg_herbarium)
+    get(:herbarium_search, pattern: herbarium.id)
+
+    assert_redirected_to(
+      "#{herbarium_show_herbarium_path}/#{herbarium.id}",
+      "Herbarium search for ##{herbarium.id} should show " \
+        "#{herbarium.name} herbarium"
+    )
   end
 
   def test_list_herbaria_merge_source
@@ -182,6 +205,42 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_show_add_nonuser_curator
+    herbarium = herbaria(:rolf_herbarium)
+    login = "non-user"
+    params = {
+      id: herbarium.id,
+      add_curator: login
+    }
+    login("rolf")
+
+    assert_no_difference(
+      "herbarium.curators.count",
+      "Curators should not change when trying to add non-user as curator"
+    ) do
+      post(:show_herbarium, params)
+      herbarium.reload
+    end
+    assert_flash(
+      /#{:show_herbarium_no_user.t(login: login)}/,
+      "Error should be flashed if trying to add non-user as curator")
+  end
+
+  def test_next_and_prev
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    login
+    get(:next_herbarium, id: number1.id, q: q)
+    assert_redirected_to(action: :show_herbarium, id: number2.id, q: q)
+
+    get(:prev_herbarium, id: number2.id, q: q)
+    assert_redirected_to(action: :show_herbarium, id: number1.id, q: q)
+  end
+
   def test_create_herbarium
     get(:create_herbarium)
     assert_response(:redirect)
@@ -303,6 +362,17 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal("", herbarium.mailing_address)
     assert_equal("", herbarium.description)
     assert_user_list_equal([mary], herbarium.curators)
+  end
+
+  def test_create_herbarium_put
+    login
+    put(:create_herbarium)
+
+    assert_redirected_to(
+      { action: :index_herbarium },
+      "Non-GET or -POST :create_herbarium request should " \
+        "redirect to referrer or index"
+    )
   end
 
   def test_edit_herbarium_without_curators
@@ -489,6 +559,19 @@ class HerbariumControllerTest < FunctionalTestCase
     post(:edit_herbarium, id: herbarium.id, herbarium: params)
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.curators)
+  end
+
+  def test_edit_herbarium_put
+    herbarium = herbaria(:rolf_herbarium)
+    params = { id: herbarium.id }
+    login("rolf")
+    put(:edit_herbarium, { params: params })
+
+    assert_redirected_to(
+      "#{herbarium_show_herbarium_path}/#{herbarium.id}",
+      "Non-GET or -POST :edit_herbarium request should " \
+        "redirect to referrer or show_herbarium"
+    )
   end
 
   def test_delete_curator
