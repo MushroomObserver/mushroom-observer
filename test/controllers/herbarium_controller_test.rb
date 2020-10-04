@@ -545,6 +545,41 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_user_list_equal([mary], herbarium.reload.curators)
   end
 
+  def test_edit_herbarium_cannot_make_personal
+    herbarium = herbaria(:fundis_herbarium)
+    assert_empty(
+      herbarium.curators,
+      "Use different fixture: #{herbarium.name} already has curator"
+    )
+    assert_nil(
+      herbarium.personal_user_id,
+      "Use different fixture: #{herbarium.name} is already someone's " \
+        " personal herbarium"
+    )
+    user = users(:zero_user)
+    assert_false(
+      herbarium.can_make_personal?(user),
+      "Use different fixture: #{herbarium.name} cannot be made " \
+        " #{user}'s personal herbarium"
+    )
+    params = herbarium_params.merge(name: herbarium.name, personal: "1")
+    login(user.login)
+
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+
+    assert_response(
+      :success,
+      "Response to edit unowned herbarium to make it personal herbarium " \
+      "of user who doesn't own all its records should be 'success' " \
+      "(re-display form), not redirect to new herbarium"
+    )
+    assert_flash_error(
+      "Trying to edit unowned herbarium to make it personal herbarium " \
+      "of user who doesn't own all its records should flash error"
+    )
+  end
+
+
   def test_edit_herbarium_post_admin_set_personal_user
     herbarium = herbaria(:fundis_herbarium)
     params = herbarium_params.merge(
@@ -604,12 +639,15 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_put
     herbarium = herbaria(:rolf_herbarium)
-    params = { id: herbarium.id }
+    back = "#{herbarium_show_herbarium_path}/#{herbarium.id}"
+    params = {
+      id: herbarium.id,
+      back: back }
     login("rolf")
     put(:edit_herbarium, { params: params })
 
     assert_redirected_to(
-      "#{herbarium_show_herbarium_path}/#{herbarium.id}",
+      back,
       "Non-GET or -POST :edit_herbarium request should " \
         "redirect to referrer or show_herbarium"
     )
