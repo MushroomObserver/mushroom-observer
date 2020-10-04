@@ -15,7 +15,7 @@ json.ok_for_export   object.ok_for_export ? true : false
 if !detail
   json.synonym_id object.synonym_id if object.synonym_id
 else
-  if object.synonym_id
+  if object.synonym
     json.synonyms((object.synonym.names - [object]).map do |synonym|
       {
         id:         synonym.id,
