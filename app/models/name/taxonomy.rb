@@ -83,6 +83,66 @@ class Name < AbstractModel
     false
   end
 
+  # ----------------------------------------------------------------------------
+
+  # Is the Name (potentially) registrable in a fungal nomenclature repository?
+  # This and #unregistrable are used in the views to determine whether
+  # to display the ICN identifier, links to nomenclature records or searches
+  def registrable?
+    # Almost all Names in MO are potentially registrable, so use a blacklist
+    # instead of a whitelist
+    !unregistrable?
+  end
+
+  # Is name definitely in a fungal nomenclature repository?
+  # (A heuristic that works for almost all cases)
+  def unregistrable?
+    rank == :Group ||
+      rank == :Domain ||
+      unpublished? ||
+      # name includes quote marks, but limit this to below Order in order to
+      # account for things like "Discomycetes", which is registered & quoted
+      /"/ =~ text_name && rank >= :Class ||
+      # Use kingdom: Protozoa as a rough proxy for slime molds
+      # Slime molds, which are Protozoa, are in fungal nomenclature registries.
+      # But most Protozoa are not slime molds and there's no efficient way
+      # for MO to tell the difference. So err on the side of registrability.
+      kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom
+  end
+
+  # Name for which it makes sense to have links to search pages in fungal
+  # databases,though the name might be unregistrable. Ex: Boletus edulis group
+  def searchable_in_registry?
+    # Use blacklist instead of whitelist; almost all MO names are searchable
+    !unsearchable_in_registry?
+  end
+
+  def unsearchable_in_registry?
+    kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
+      rank == :Domain ||
+      /\bcrypt temp\b/i =~ author&.delete(".")
+  end
+
+  ################
+
+  private
+
+  # Not published in any sense, or not intended as an ICN publication of a name.
+  def unpublished?
+    /\b(nom prov|comb prov|sensu lato|ined)\b/i =~ author&.delete(".")
+  end
+
+  # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
+  def kingdom
+    return text_name if rank == :Kingdom
+
+    parse_classification.find { |rank| rank.first == :Kingdom }&.last
+  end
+
+  public
+
+  # ----------------------------------------------------------------------------
+
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a
@@ -324,8 +384,12 @@ class Name < AbstractModel
     result
   end
 
-  # Parse a +classification+ string.  Returns an Array of pairs of values.
-  # Syntax is a bunch of lines of the form "rank: name":
+  # Parses the Classification String to eturns an Array of pairs of values.
+  #
+  #  [[:Kingdom, "Fungi"], [:Phylum, "Basidiomycota"],
+  #   [:Class, "Basidiomycetes"]]
+  #
+  # String syntax is a bunch of lines of the form "rank: name":
   #
   #   Kingdom: Fungi
   #   Order: Agaricales
@@ -377,7 +441,7 @@ class Name < AbstractModel
   end
 
   def text_before_rank
-    text_name.split(" " + rank.to_s.downcase).first
+    text_name.split(" #{rank.to_s.downcase}").first
   end
 
   # This is called before a name is created to let us populate things like

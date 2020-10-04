@@ -12,19 +12,32 @@
 <% if !@name.locked || in_admin_mode? %>
   <div class="form-inline push-down">
     <div class="form-group">
-      <label for="name_rank"><%= :Rank.t %>:</label>
-      <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {}, {class: "form-control"}) %>
+      <label for="name_icn_id"><%= :form_names_icn_id.t %>: </label>
+      <%= form.text_field(:icn_id, class: "form-control", size: 8) %>
+      <%= :form_names_identifier_help.t %>
     </div>
+  </div>
+
+  <div class="form-inline push-down">
+    <div class="form-group">
+      <label for="name_rank"><%= :Rank.t %>:</label>
+      <%= form.select(
+            :rank, Name.all_ranks.map { |r| [rank_as_string(r), r] },
+            {}, { class: "form-control" }) %>
+    </div>
+
     <div class="form-group indent">
       <label for="name_deprecated"><%= :Status.t %>:</label>
-      <%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{class: "form-control"}) %>
+      <%= form.select(
+            :deprecated, [[:ACCEPTED.t, false], [:DEPRECATED.t, true]],
+            {}, { class: "form-control" }) %>
     </div>
   </div>
 
   <div class="form-group pad-top">
     <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
     <%= form.text_field(:text_name, value: @name_string, class: "form-control",
-                        data: {autofocus: true}) %>
+                        data: { autofocus: true }) %>
     <p class="help-block"><%= :form_names_text_name_help.t %></p>
   </div>
 
@@ -38,10 +51,8 @@
       <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
     <%= content_tag(:b, :Status.t) %>:
       <%= @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t %><br/>
-    <%= content_tag(:b, :Name.t) %>:
-      <%= @name.real_text_name.t %><br/>
-    <%= content_tag(:b, :Authority.t) %>:
-      <%= @name.author.t %><br/>
+    <%= content_tag(:b, :Name.t) %>:<%= @name.real_text_name.t %><br/>
+    <%= content_tag(:b, :Authority.t) %>:<%= @name.author.t %><br/>
     <div class="help-block"><%= :show_name_locked.tp %></div>
     <%= hidden_field(:name, :rank) %>
     <%= hidden_field(:name, :deprecated) %>
@@ -61,16 +72,19 @@
   <div style="margin:1.5em 0em">
     <%= form.check_box(:misspelling, checked: @misspelling) %>
     <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
-    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <label for="name_correct_spelling">
+      <%= :form_names_misspelling_it_should_be.t %>:</label>
     <%= form.text_field(:correct_spelling, class: "form-control",
                         value: @correct_spelling) %>
     <p class="help-block"><%= :form_names_misspelling_note.t %></p>
-    <% turn_into_name_auto_completer(:name_correct_spelling, primer: Name.primer) %>
+    <% turn_into_name_auto_completer(:name_correct_spelling,
+                                     primer: Name.primer) %>
   </div>
 <% end %>
 
 <p>
   <label for="notes"><%= :form_names_taxonomic_notes.t %>:</label><br/>
+  <span class="mark"><%= :form_names_taxonomic_notes_warning.t %></span>
   <%= form.text_area(:notes, rows: 6, class: "form-control") %>
   <%= render(partial: "shared/textilize_help") %>
 </p>

@@ -17,7 +17,7 @@
 #    search_name        "Xanthoparmelia" coloradoensis Fries
 #    (real_search_name) "Xanthoparmelia" coloradoënsis Fries
 #                         (derived on the fly from display_name)
-#    sort_name          Xanthoparmelia" coloradoensis Fries
+#    sort_name          "Xanthoparmelia" coloradoensis Fries
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
 #    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
@@ -115,6 +115,8 @@
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
+#  icn_id             (V) numerical identifier issued by an
+#                         ICN-recognized registration repository
 #  text_name::        (V) "Xanthoparmelia" coloradoensis
 #  real_text_name::   (V) "Xanthoparmelia" coloradoënsis
 #  search_name::      (V) "Xanthoparmelia" coloradoensis Fries
@@ -191,6 +193,7 @@
 #  format_name::             "Xxx sp. Author"
 #  unique_text_name::        "Xxx (123)"
 #  unique_format_name::      "Xxx sp. Author (123)"
+#  stripped_text_name        text_name minus quotes, periods, sp, group, etc.
 #  display_name_brief_authors:: Marked up name with authors shortened:
 #                            **__"Xxx yyy__ author**
 #                            **__"Xxx yyy__ author1 & author2**
@@ -210,6 +213,11 @@
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.
 #  has_notes?::              Does it have notes discussing taxonomy?
+#  registrable?              Could it be registered in fungal nomenclature db?
+#  unregistrable?            Not registrable?
+#  searchable_in_registry?   Stripped text_name searchable in
+#                            fungal nomenclature db
+#  unsearchable_in_registry? not searchable_in_registry?
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
@@ -331,6 +339,7 @@ class Name < AbstractModel
       correct_spelling
       notes
       lifeform
+      icn_id
     ]
   )
   non_versioned_columns.push(
@@ -350,6 +359,9 @@ class Name < AbstractModel
   before_create :inherit_stuff
   before_update :update_observation_cache
   after_update :notify_users
+
+  validate :icn_id_registrable
+  validate :icn_id_unique
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -396,5 +408,34 @@ class Name < AbstractModel
     result = {}
     counts_and_ids.each { |row| result[row[1]] = row[0] }
     result
+  end
+
+  ##############################################################################
+
+  private
+
+  # prevent assigning ICN registration identifier to unregistrable Name
+  def icn_id_registrable
+    return if icn_id.blank? || registrable?
+
+    errors[:base] << :name_error_unregistrable.t(
+      rank: rank.to_s, name: real_search_name
+    )
+  end
+
+  # Require icn_id to be unique
+  # Use validation method (rather than :validates_uniqueness_of)
+  # to get correct error message.
+  def icn_id_unique
+    return if icn_id.nil?
+    return if (conflicting_name = other_names_with_same_icn_id.first).blank?
+
+    errors[:base] << :name_error_icn_id_in_use.t(
+      number: icn_id, name: conflicting_name.real_search_name
+    )
+  end
+
+  def other_names_with_same_icn_id
+    Name.where(icn_id: icn_id).where.not(id: id)
   end
 end

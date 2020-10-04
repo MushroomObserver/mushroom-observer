@@ -72,12 +72,12 @@ class Name < AbstractModel
   end
 
   def self.display_to_real_text(name)
-    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, "").
-      gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
+    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
+      gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
       # (this part should be unnecessary)
       # Because "group" was removed by the 1st gsub above,
       # tack it back on (if it was part of display_name)
-      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " ").
+      gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
       concat(group_suffix(name))
   end
 
@@ -116,7 +116,7 @@ class Name < AbstractModel
 
   # Get an instance of the Name that means "unknown".
   def self.unknown
-    Name.find_by_text_name("Fungi")
+    Name.find_by(text_name: "Fungi")
   end
 
   # Is this the "unknown" name?
@@ -156,6 +156,6 @@ class Name < AbstractModel
   # Relies on name.author having a comma only if there are > 2 authors
   def brief_author
     author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
-      sub(/\,.*/, " et al.") # then shorten any remaining > 2 authors
+      sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
   end
 end

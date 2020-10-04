@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_22_171600) do
+ActiveRecord::Schema.define(version: 2020_09_11_183059) do
 
   create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "created_at"
@@ -408,6 +408,7 @@ ActiveRecord::Schema.define(version: 2019_07_22_171600) do
     t.string "author", limit: 100
     t.string "lifeform", limit: 1024, default: " ", null: false
     t.boolean "locked", default: false, null: false
+    t.integer "icn_id"
   end
 
   create_table "names_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -426,6 +427,7 @@ ActiveRecord::Schema.define(version: 2019_07_22_171600) do
     t.text "notes"
     t.integer "rank"
     t.string "lifeform", limit: 1024, default: " ", null: false
+    t.integer "icn_id"
   end
 
   create_table "naming_reasons", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

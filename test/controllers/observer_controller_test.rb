@@ -918,7 +918,6 @@ class ObserverControllerTest < FunctionalTestCase
     # There is a MycoBank link which includes taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
       assert_select("a[href *= '/Coprinus%20comatus']")
-      assert_select("a[href *= 'Lang=Eng']")
     end
   end
 

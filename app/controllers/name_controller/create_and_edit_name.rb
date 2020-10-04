@@ -50,6 +50,15 @@ class NameController
     @name_string = ""
   end
 
+  def reload_name_form_on_error(err)
+    flash_error(err.to_s) if err.present?
+    flash_object_errors(@name)
+
+    @name.attributes = name_params[:name]
+    @name.deprecated = params[:name][:deprecated] == "true"
+    @name_string     = params[:name][:text_name]
+  end
+
   def init_edit_name_form
     if !params[:name]
       @misspelling      = @name.is_misspelling?
@@ -65,21 +74,23 @@ class NameController
     @name_string = @name.real_text_name
   end
 
-  def reload_name_form_on_error(err)
-    flash_error(err.to_s) if err.present?
-    flash_object_errors(@name)
-    @name.locked     = params[:name][:locked]
-    @name.rank       = params[:name][:rank]
-    @name.author     = params[:name][:author]
-    @name.citation   = params[:name][:citation]
-    @name.notes      = params[:name][:notes]
-    @name.deprecated = params[:name][:deprecated] == "true"
-    @name_string     = params[:name][:text_name]
+  # ------
+  # create
+  # ------
+
+  def make_sure_name_doesnt_exist!
+    matches = Name.names_matching_desired_new_name(@parse)
+    if matches.one?
+      raise(:runtime_name_create_already_exists.
+              t(name: matches.first.display_name))
+    elsif matches.many?
+      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
+    end
   end
 
   def create_new_name
     @name = Name.new_name_from_parsed_name(@parse)
-    set_locked_citation_and_notes
+    set_unparsed_attrs
     unless @name.save_with_log(:log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     end
@@ -87,6 +98,40 @@ class NameController
     flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
     update_ancestors
     redirect_to_show_name
+  end
+
+  def set_unparsed_attrs
+    set_locked_if_admin
+    set_icn_id_if_unlocked_or_admin
+    @name.citation = params[:name][:citation].to_s.strip_squeeze
+    @name.notes    = params[:name][:notes].to_s.strip
+  end
+
+  def set_locked_if_admin
+    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
+  end
+
+  def set_icn_id_if_unlocked_or_admin
+    @name.icn_id   = params[:name][:icn_id] if name_unlocked? || in_admin_mode?
+  end
+
+  # ------
+  # update
+  # ------
+
+  def name_unlocked?
+    in_admin_mode? || !@name.locked
+  end
+
+  def check_for_matches
+    matches = Name.where(search_name: @parse.search_name) - [@name]
+    return matches.first unless matches.many?
+
+    args = {
+      str: @parse.real_search_name,
+      matches: new_name.map(&:search_name).join(" / ")
+    }
+    raise(:edit_name_multiple_names_match.t(args))
   end
 
   def change_existing_name
@@ -99,10 +144,26 @@ class NameController
     end
   end
 
+  def status_changing?
+    params[:name][:deprecated].to_s != @name.deprecated.to_s
+  end
+
+  def redirect_to_show_name
+    redirect_with_query(@name.show_link_args)
+  end
+
+  def redirect_to_approve_or_deprecate
+    if params[:name][:deprecated].to_s == "true"
+      redirect_with_query(action: :deprecate_name, id: @name.id)
+    else
+      redirect_with_query(action: :approve_name, id: @name.id)
+    end
+  end
+
   def perform_change_existing_name
     update_correct_spelling
     set_name_author_and_rank
-    set_locked_citation_and_notes
+    set_unparsed_attrs
     if !@name.changed?
       any_changes = false
     elsif !@name.save_with_log(:log_name_updated)
@@ -115,54 +176,6 @@ class NameController
     # missing ancestors in case database is messed up
     update_ancestors
     any_changes
-  end
-
-  def merge_names(new_name)
-    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
-      perform_merge_names(new_name)
-      redirect_to_show_name
-    else
-      redirect_to_merge_request(new_name)
-    end
-  end
-
-  def perform_merge_names(new_name)
-    old_display_name_for_log = @name[:display_name]
-    @name.attributes = @parse.params
-    set_locked_citation_and_notes
-    # Only change deprecation status if user explicity requested it.
-    if @name.deprecated != (params[:name][:deprecated] == "true")
-      change_deprecated = !@name.deprecated
-    end
-    # Automatically swap names if that's a safer merge.
-    if !@name.mergeable? && new_name.mergeable?
-      @name, new_name = new_name, @name
-      old_display_name_for_log = @name[:display_name]
-    end
-    # Fill in author if other has one.
-    if new_name.author.blank? && @parse.author.present?
-      new_name.change_author(@parse.author)
-    end
-    new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
-    @name.display_name = old_display_name_for_log
-    new_name.merge(@name)
-    args = { this: @name.real_search_name, that: new_name.real_search_name }
-    flash_notice(:runtime_edit_name_merge_success.t(args))
-    @name = new_name
-    @name.save
-  end
-
-  def set_name_author_and_rank
-    return unless name_unlocked?
-
-    email_admin_name_change unless minor_change? || just_adding_author?
-    @name.attributes = @parse.params
-  end
-
-  def set_locked_citation_and_notes
-    @name.locked   = params[:name][:locked].to_s == "1" if in_admin_mode?
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes    = params[:name][:notes].to_s.strip
   end
 
   # Update the misspelling status.
@@ -202,15 +215,8 @@ class NameController
     params[:name][:deprecated] = "true"
   end
 
-  def update_ancestors
-    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
-      name.save_with_log(:log_name_created) if name&.new_record?
-    end
-  end
-
   def parse_name
-    text_name = params[:name][:text_name]
-    text_name = @name.real_text_name if text_name.blank? && @name
+    text_name = parsed_text_name
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank].to_sym
@@ -223,73 +229,144 @@ class NameController
     parse
   end
 
-  def make_sure_name_doesnt_exist!
-    matches = Name.names_matching_desired_new_name(@parse)
-    if matches.one?
-      raise(:runtime_name_create_already_exists.
-              t(name: matches.first.display_name))
-    elsif matches.many?
-      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
+  def parsed_text_name
+    if params[:name][:text_name].blank? && @name
+      @name.real_text_name
+    else
+      params[:name][:text_name]
     end
   end
 
-  def check_for_matches
-    matches = Name.where(search_name: @parse.search_name) - [@name]
-    return matches.first unless matches.many?
+  def set_name_author_and_rank
+    return unless name_unlocked?
 
-    args = {
-      str: @parse.real_search_name,
-      matches: new_name.map(&:search_name).join(" / ")
-    }
-    raise(:edit_name_multiple_names_match.t(args))
-  end
-
-  def status_changing?
-    params[:name][:deprecated].to_s != @name.deprecated.to_s
-  end
-
-  def name_unlocked?
-    in_admin_mode? || !@name.locked
+    email_admin_name_change unless minor_change?
+    @name.attributes = @parse.params
   end
 
   def minor_change?
+    return false if icn_id_conflict?(params[:name][:icn_id])
+    return true if just_adding_author?
+
     old_name = @name.real_search_name
     new_name = @parse.real_search_name
     new_name.percent_match(old_name) > 0.9
+  end
+
+  def icn_id_conflict?(new_icn_id)
+    new_icn_id && @name.icn_id &&
+      new_icn_id != @name.icn_id
   end
 
   def just_adding_author?
     @name.author.blank? && @parse.text_name == @name.text_name
   end
 
+  def update_ancestors
+    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
+      name.save_with_log(:log_name_created) if name&.new_record?
+    end
+  end
+
   def email_admin_name_change
     subject = "Nontrivial Name Change"
-    content = :email_name_change.l(
-      user: @user.login,
+    content = :email_name_change.l(email_name_change_content)
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    NameControllerTest.report_email(content) if Rails.env.test?
+  end
+
+  def email_name_change_content
+    { user: @user.login,
+      old_identifier: @name.icn_id,
+      new_identifier: params[:name][:icn_id],
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}" }
+  end
+
+  # -------------
+  # update: merge
+  # -------------
+
+  def merge_names(new_name)
+    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
+      perform_merge_names(new_name)
+      redirect_to_show_name
+    else
+      redirect_with_query(controller: :observer, action: :email_merge_request,
+                          type: :Name, old_id: @name.id, new_id: new_name.id)
+    end
+  end
+
+  # Merge name being edited (@name) with the found name
+  # The presumptive surviving id is that of the found name,
+  # and the presumptive name to be destroyed is the name being edited.
+  def perform_merge_names(survivor)
+    prepare_presumptively_disappearing_name
+    deprecation = change_deprecation_iff_user_requested
+
+    # Reverse merger direciton if that's safer
+    @name, survivor = survivor, @name if reverse_merger_safer?(survivor)
+
+    # For log, ignore user Author filter
+    @name.display_name = @name[:display_name]
+
+    # Fill in author if other has one.
+    if survivor.author.blank? && @parse.author.present?
+      survivor.change_author(@parse.author)
+    end
+    survivor.change_deprecated(deprecation) unless deprecation.nil?
+
+    survivor.merge(@name) # move associations to survivor, destroy @name
+
+    send_merger_messages(survivor)
+
+    @name = survivor
+    @name.save
+  end
+
+  def prepare_presumptively_disappearing_name
+    @name.attributes = @parse.params
+    set_unparsed_attrs
+  end
+
+  # nil if user did not request change_existing_name
+  # else new deprecation status (true/false)
+  def change_deprecation_iff_user_requested
+    return nil unless @name.deprecated != (params[:name][:deprecated] == "true")
+
+    !@name.deprecated
+  end
+
+  def reverse_merger_safer?(presumptive_survivor)
+    !@name.mergeable? && presumptive_survivor.mergeable?
+  end
+
+  def send_merger_messages(survivor)
+    args = { this: @name.real_search_name, that: survivor.real_search_name }
+    flash_notice(:runtime_edit_name_merge_success.t(args))
+    email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
+  end
+
+  def email_admin_icn_id_conflict(survivor)
+    subject = "Merger identifier conflict"
+    content = :email_merger_icn_id_conflict.l(
+      name: survivor.real_search_name,
+      surviving_icn_id: survivor.icn_id,
+      deleted_icn_id: @name.icn_id,
+      user: @user.login,
       url: "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
-  def redirect_to_show_name
-    redirect_with_query(@name.show_link_args)
-  end
+  # ----------------------------------------------------------------------------
 
-  def redirect_to_approve_or_deprecate
-    if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(action: :deprecate_name, id: @name.id)
-    else
-      redirect_with_query(action: :approve_name, id: @name.id)
-    end
-  end
-
-  def redirect_to_merge_request(new_name)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
-                        type: :Name, old_id: @name.id, new_id: new_name.id)
+  # allow some mass assignment for purposes of reloading form
+  def name_params
+    params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end

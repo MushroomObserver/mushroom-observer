@@ -2230,6 +2230,8 @@ class NameTest < UnitTestCase
     assert_equal("Ach.", name.author)
   end
 
+  # --------------------------------------
+
   # Prove that display_name_brief_authors is shortened correctly
   def test_display_name_brief_authors
     # Name 0 authors
@@ -2880,5 +2882,79 @@ class NameTest < UnitTestCase
     Name.make_sure_names_are_bolded_correctly
     name.reload
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
+
+  def test_registability
+    name = names(:boletus_edulis_group)
+    assert(name.unregistrable?, "Groups should be unregistrable")
+
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    assert(name.unregistrable?,
+           "Names below genus with quotes should be unregistrable")
+
+    name = Name.new(text_name: "Agaricus pinyonensis",
+                    author: "Isaacs nom. prov.")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
+
+    name = Name.new(text_name: "Fulvifomes porrectus",
+                    author: "comb. prov.")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
+
+    name = Name.new(text_name: "Cortinarius calaisopus", author: "ined.")
+    assert(name.unregistrable?, "Unpublished names should be unregistrable")
+
+    name = Name.new(text_name: "Agricales", author: "sensu lato")
+    assert(name.unregistrable?, "Names s.l. should be unregistrable")
+
+    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    assert(name.unregistrable?, "Domains should be unregistrable")
+
+    name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
+    assert(name.unregistrable?,
+           "Taxa outside of Fungi and slime molds should be unregistrable")
+
+    name = names(:coprinus)
+    assert(name.registrable?, "Non-group fungal names should be registrable")
+
+    # Use Protozoa as a rough proxy for slime molds, which are included
+    # fungal nomenclature registries, even though they are not fungi.
+    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+                    classification: "Kingdom: Protozoa")
+    assert(name.registrable?, "Protozoa should be registrable")
+
+    name = Name.new(text_name: "New species", rank: :Species)
+    assert(name.registrable?,
+           "Non-group, non-domain kingdom-less names should be registrable")
+  end
+
+  def test_searchability_in_registry
+    name = Name.new(text_name: "Eukaryota", rank: :Domain)
+    assert(name.unsearchable_in_registry?, "Domains should be unsearchable")
+
+    name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
+    assert(name.unsearchable_in_registry?,
+           "Taxa outside of Fungi and slime molds should be unsearchable")
+
+    name = Name.new(text_name: 'Amanita "sp-01"', author: "crypt. temp.")
+    assert(name.unsearchable_in_registry?,
+           "Cryptonyms should be unsearchable")
+
+    name = names(:boletus_edulis_group)
+    assert(name.searchable_in_registry?,
+           "Fungal `groups` can be searchable in registy")
+
+    name = Name.new(text_name: 'Cortinarus "quoted"', rank: :Species)
+    assert(name.searchable_in_registry?,
+           "Names with quote marks can be searchable")
+
+    name = Name.new(text_name: "Agaricus pinyonensis",
+                    author: "Isaacs nom. prov.")
+    assert(name.searchable_in_registry?,
+           "Provisional names can be searchable in registry")
+
+    name = Name.new(text_name: "Myxomycetes", rank: :Class,
+                    classification: "Kingdom: Protozoa")
+    assert(name.searchable_in_registry?,
+           "Protozoa should be searchable in registry")
   end
 end
