@@ -37,7 +37,7 @@ class ObserverController
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
-      redirect_to(controller: ctrlr, action: "list_#{type}s")
+      redirect_to(controller: ctrlr, action: "list_#{type.to_s.pluralize}")
     else
       redirect_to(controller: ctrlr, action: "#{type}_search",
                   pattern: pattern)
