@@ -127,7 +127,8 @@ module ObjectLinkHelper
 
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
-    "#{title}: #{links.safe_join(", ")}".html_safe
+    # sanitize because interpolation makes the string html unsafe
+    sanitize("#{title}: #{links.safe_join(", ")}")
   end
 
   # Wrap object's name in link to the object, return nil if no object
