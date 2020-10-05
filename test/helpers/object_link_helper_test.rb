@@ -4,6 +4,18 @@ require("test_helper")
 
 # test helper for links in views
 class ObjectLinkHelperTest < ActionView::TestCase
+  def test_name_link
+    name = names(:suillus)
+    path = "#{name_show_name_path}/"
+    obj = name
+
+    link_text = "#{:NAME.l} ##{name.id}"
+    assert_equal(expected_link(path, obj, link_text), name_link(name.id))
+
+    link_text = name.display_name_brief_authors.t
+    assert_equal(expected_link(path, obj, link_text), name_link(name))
+end
+
   def test_link_if_object
     # link to project, name not supplied
     # pre  = '<a href="/project/show_project/'
@@ -28,6 +40,10 @@ class ObjectLinkHelperTest < ActionView::TestCase
     assert_nil(link_to_object(nil, "Nada"),
                "Non-existent object should lack link.")
   end
+
+  ##############################################################################
+
+  private
 
   def expected_link(path, obj, link_text)
     "<a href=\"#{path}#{obj.id}\">#{link_text}</a>"
