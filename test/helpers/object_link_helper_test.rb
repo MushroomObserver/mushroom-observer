@@ -14,7 +14,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
     link_text = name.display_name_brief_authors.t
     assert_equal(expected_link(path, obj, link_text), name_link(name))
-end
+  end
 
   def test_link_if_object
     # link to project, name not supplied
