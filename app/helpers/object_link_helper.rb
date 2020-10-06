@@ -127,7 +127,8 @@ module ObjectLinkHelper
 
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
-    # interpolation would require `sanitize` or similar
+    # interpolating would require inefficient #sanitize
+    # or dangerous #html_safe
     # rubocop:disable Style/StringConcatenation
     title + ": " + links.safe_join(", ")
     # rubocop:enable Style/StringConcatenation

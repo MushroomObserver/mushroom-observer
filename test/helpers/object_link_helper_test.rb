@@ -41,9 +41,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
                "Non-existent object should lack link.")
   end
 
-  ##############################################################################
-
-  private
+  # - Helper Methods -----------------------------------------------------------
 
   def expected_link(path, obj, link_text)
     "<a href=\"#{path}#{obj.id}\">#{link_text}</a>"
