@@ -10,4 +10,6 @@ MAILTO=webmaster@mushroomobserver.org
 13  5 * * * /var/web/mo/script/run_script refresh_sitemap
 13  6 * * * /var/web/mo/script/run_script make_eol_xml /var/web/mushroom-observer/public/eol.xml
 13  7 * * * /var/web/mo/script/run_script update_googlebots.rb
-13  8 * * * sudo /usr/bin/certbot renew --quiet
+13  8 * * * /var/web/mo/script/run_script update_snapshots9
+13  9 * * * sudo /usr/bin/certbot renew --quiet
+
