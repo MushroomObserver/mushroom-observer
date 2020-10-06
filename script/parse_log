@@ -23,6 +23,7 @@ grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
 grep -v 'ActionController::RoutingError' |
 grep -v 'ActiveRecord::RecordNotFound' |
+grep -v 'Rack::QueryParser::InvalidParameterError' |
 grep -v 'ActionView::Template::Error .Character not in alphabet' \
   > $new_errors || true
 
