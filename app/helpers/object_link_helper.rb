@@ -43,7 +43,7 @@ module ObjectLinkHelper
   #
   def name_link(name, str = nil)
     if name.is_a?(Integer)
-      str ||= :NAME.t + " #" + name.to_s
+      str ||= "#{:NAME.t} ##{name}"
       link_to(str, Name.show_link_args(name))
     else
       str ||= name.display_name_brief_authors.t
@@ -53,21 +53,9 @@ module ObjectLinkHelper
 
   # ----- links to names and records at external websites ----------------------
 
-  # Create link for name to MyCoPortal website.
-  def mycoportal_url(name)
-    "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{name.text_name.tr(" ", "+")}"
-  end
-
   # url for IF record
   def index_fungorum_record_url(record_id)
     "http://www.indexfungorum.org/Names/NamesRecord.asp?RecordID=#{record_id}"
-  end
-
-  # url for MB record
-  def mycobank_record_url(record_id)
-    "#{mycobank_host}page/Basic%20names%20search/field/MycoBank%20%23/" \
-      "#{record_id}"
   end
 
   # url for Index Fungorum search. This is a general search.
@@ -76,13 +64,17 @@ module ObjectLinkHelper
     "http://www.indexfungorum.org/Names/Names.asp"
   end
 
+  # url for MB record by number
+  # as of 2020-10-05 actually links to search results, rather than the record
+  def mycobank_record_url(record_id)
+    "#{mycobank_basic_search_url}/field/MycoBank%20number/#{record_id}"
+  end
+
   # url for MycoBank name search for text_name
   def mycobank_name_search_url(name)
-    unescaped_str = "#{mycobank_basic_search_url}/field/Taxon%20name/" \
-                    "#{name.text_name}"
-    # CGI::escape.html(unescaped_str) should work, but throws error
-    #   ActionView::Template::Error: wrong number of arguments (0 for 1)
-    unescaped_str.gsub(" ", "%20")
+    "#{mycobank_basic_search_url}/field/Taxon%20name/#{
+      name.text_name.gsub(" ", "%20")
+    }"
   end
 
   def mycobank_basic_search_url
@@ -91,6 +83,12 @@ module ObjectLinkHelper
 
   def mycobank_host
     "https://www.mycobank.org/"
+  end
+
+  # url for name search on MyCoPortal
+  def mycoportal_url(name)
+    "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
+      "#{name.text_name.tr(" ", "+")}"
   end
 
   # ----------------------------------------------------------------------------
@@ -105,7 +103,7 @@ module ObjectLinkHelper
   #
   def user_link(user, name = nil)
     if user.is_a?(Integer)
-      name ||= :USER.t + " #" + user.to_s
+      name ||= "#{:USER.t} ##{user}"
       link_to(name, User.show_link_args(user))
     elsif user
       name ||= user.unique_text_name
@@ -129,7 +127,11 @@ module ObjectLinkHelper
 
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
+    # interpolating would require inefficient #sanitize
+    # or dangerous #html_safe
+    # rubocop:disable Style/StringConcatenation
     title + ": " + links.safe_join(", ")
+    # rubocop:enable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object
