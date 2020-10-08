@@ -21,6 +21,7 @@ new_errors=$app_root/log/errors.new
 grep 'FATAL.* [A-Za-z:]*Error \|ENOMEM' $rails_log |
 grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
+grep -v 'SMTP To address may not contain CR or LF line breaks' |
 grep -v 'ActionController::RoutingError' |
 grep -v 'ActiveRecord::RecordNotFound' |
 grep -v 'Rack::QueryParser::InvalidParameterError' |
