@@ -9,8 +9,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 col-sm-8 max-width-text">
+<div class="col-xs-12 col-sm-8 max-width-text">
+  <div class="row">
     <%= form_tag(add_query_param(action: :add_comment,
                                  id: @comment.target_id,
                                  type: @comment.target_type)) do %>
@@ -23,16 +23,14 @@
     <% end %>
   </div>
 
-  <% if @target.is_a?(Observation) %>
-    <div class="hidden-xs col-sm-4">
-      <%= render(partial: "observer/show_images",
-                 locals: { observation: @target, thumb_size_control: false }) %>
-    </div>
-  <% end %>
-</div>
-
-<div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="row">
     <%= render(partial: "object", object: @target) %>
   </div>
 </div>
+
+<% if @target.is_a?(Observation) %>
+  <div class="col-xs-12 col-sm-4">
+    <%= render(partial: "observer/show_images",
+               locals: { observation: @target, thumb_size_control: false }) %>
+  </div>
+<% end %>
