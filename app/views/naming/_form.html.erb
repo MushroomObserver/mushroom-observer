@@ -39,7 +39,7 @@
     <div class="form-group">
       <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
       <%= select(:vote, :value,
-                 options_for_select(Vote.confidence_menu, vote.value),
+                 options_for_select(Vote.confidence_menu, vote&.value),
                  { include_blank: (action == :create ||
                                    action == :create_observation) } ,
                  class: "form-control",
