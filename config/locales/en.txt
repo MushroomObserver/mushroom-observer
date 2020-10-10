@@ -2028,6 +2028,7 @@
   index_fungorum_search: Index Fungorum search
   mycobank: MycoBank
   mycobank_search: MycoBank search
+  gsd_species_synonymy: GSD Species Synonymy
 
   # name/show_name - links to observations
   show_name_observations: More [:OBSERVATIONS]

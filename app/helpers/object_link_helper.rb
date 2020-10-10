@@ -91,6 +91,11 @@ module ObjectLinkHelper
       "#{name.text_name.tr(" ", "+")}"
   end
 
+  # url for IF record
+  def species_fungorum_gsd_synonymy(record_id)
+    "http://www.speciesfungorum.org/Names/GSDspecies.asp?RecordID=#{record_id}"
+  end
+
   # ----------------------------------------------------------------------------
 
   # Wrap user name in link to show_user.

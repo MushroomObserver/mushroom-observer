@@ -277,6 +277,10 @@ class NameControllerTest < FunctionalTestCase
       "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
       "Page is missing a link to MB record"
     )
+    assert_select(
+      "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
+      "Page is missing a link to SF GSD Species Synonymy record"
+    )
   end
 
   def test_show_name_icn_id_missing
