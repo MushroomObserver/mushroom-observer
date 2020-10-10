@@ -2704,7 +2704,9 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:edit_name, params: params)
+    assert_difference("survivor.versions.count", 1) do
+      post(:edit_name, params: params)
+    end
 
     assert_redirected_to(action: :show_name, id: survivor.id)
     assert_flash_text(/Successfully merged name #{destroyed_real_search_name}/,
@@ -2712,8 +2714,6 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
-    assert_equal(survivor_old_version + 1, survivor.version,
-                 "Name version should incrememt upon merger")
   end
 
   def test_update_name_reverse_merge_add_identifier
