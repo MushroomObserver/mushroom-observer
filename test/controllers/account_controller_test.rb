@@ -820,5 +820,10 @@ class AccountControllerTest < FunctionalTestCase
     rolf.save!
     get(:switch_users)
     assert_response(:success)
+    assert_users_equal(rolf, User.current)
+    post(:switch_users, params: { id: mary.id })
+    assert_users_equal(mary, User.current)
+    post(:switch_users, params: { id: dick.login })
+    assert_users_equal(dick, User.current)
   end
 end
