@@ -14,14 +14,14 @@ class AdminTest < IntegrationTestCase
     assert_select("form")
   end
 
-  def test_sudo
+  def test_switch_users
     rolf.admin = true
     rolf.save!
     login!(rolf)
     assert_equal(rolf.id, User.current_id)
     click(href: /turn_admin_on/)
     assert_match(/DANGER: You are in administrator mode/, response.body)
-    click(href: /sudo/)
+    click(href: /switch_users/)
     open_form do |form|
       form.change("id", "mary")
       form.submit

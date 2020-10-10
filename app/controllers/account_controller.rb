@@ -31,7 +31,7 @@
 #  ==== Admin utilities
 #  turn_admin_on::      <tt>(R . .)</tt>
 #  turn_admin_off::     <tt>(R . .)</tt>
-#  sudo::               <tt>(R V .)</tt>
+#  switch_users::       <tt>(R V .)</tt>
 #  add_user_to_group::  <tt>(R V .)</tt>
 #  create_alert::       <tt>(R V .)</tt>
 #  destroy_user::       <tt>(R . .)</tt>
@@ -658,7 +658,7 @@ class AccountController < ApplicationController
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
-  def sudo
+  def switch_users
     @id = params[:id].to_s
     new_user = find_user_by_id_login_or_email(@id)
     if !@user&.admin && session[:real_user_id].blank?

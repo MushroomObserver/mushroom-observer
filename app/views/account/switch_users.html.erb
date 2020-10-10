@@ -1,11 +1,11 @@
 <%
-  @title = "Login as Another User"
+  @title = :app_switch_users.l
 %>
 
 <div class="max-width-text">
   <%= form_tag({}, { class: "push-down pad-bottom-2x"}) %>
-    <big>ID, login or email:</big><br/>
+    <big><%= :LOGIN_NAME.t %>:</big><br/>
     <%= text_field_tag(:id, @id, size: 40, data: {autofocus: true}, class: "form-control") %><br/>
-    <%= submit_tag("SUDO", class: "btn", style: "margin-left: 1em") %>
+    <%= submit_tag(:SUBMIT.t, class: "btn", style: "margin-left: 1em") %>
   </form>
 </div>

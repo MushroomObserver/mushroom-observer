@@ -795,4 +795,30 @@ class AccountControllerTest < FunctionalTestCase
     assert_no_flash
     assert_false(IpStats.blocked?(new_ip))
   end
+
+  def test_turn_admin_on
+    get(:turn_admin_on)
+    assert_false(session[:admin])
+    login(:rolf)
+    get(:turn_admin_on)
+    assert_false(session[:admin])
+    rolf.admin = true
+    rolf.save!
+    get(:turn_admin_on)
+    assert_true(session[:admin])
+    get(:turn_admin_off)
+    assert_false(session[:admin])
+  end
+
+  def test_switch_users
+    get(:switch_users)
+    assert_response(:redirect)
+    login(:rolf)
+    get(:switch_users)
+    assert_response(:redirect)
+    rolf.admin = true
+    rolf.save!
+    get(:switch_users)
+    assert_response(:success)
+  end
 end
