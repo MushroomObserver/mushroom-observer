@@ -17,6 +17,8 @@
     css = MO.default_theme
     if in_admin_mode?
       css = "Admin"
+    elsif session[:real_user_id].present? 
+      css = "Sudo"
     elsif browser.bot?
       css = MO.default_theme
     elsif MO.themes.member?(controller.action_name)
@@ -46,6 +48,10 @@
       <% if in_admin_mode? %>
         <div class="Admin">
           DANGER: You are in administrator mode. Proceed with caution.
+        </div>
+      <% elsif session[:real_user_id].present? %>
+        <div class="Admin">
+          DANGER: You are currently logged in as <%= User.current.login %>.
         </div>
       <% end
 

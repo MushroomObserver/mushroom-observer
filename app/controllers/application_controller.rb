@@ -499,7 +499,7 @@ class ApplicationController < ActionController::Base
   # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
   # is available to views.)
   def in_admin_mode?
-    @user&.admin && session[:admin]
+    session[:admin]
   end
   helper_method :in_admin_mode?
 

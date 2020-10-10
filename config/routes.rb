@@ -59,6 +59,7 @@ ACTIONS = {
     reverify: {},
     send_verify: {},
     signup: {},
+    sudo: {},
     test_autologin: {},
     test_flash: {},
     turn_admin_off: {},
