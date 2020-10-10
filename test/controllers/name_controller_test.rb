@@ -1762,6 +1762,34 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
   end
 
+  def test_update_icn_id_unchanged
+    name = names(:coprinus_comatus)
+    assert(name.icn_id, "Test needs a fixture with an icn_id")
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_id: name.icn_id,
+        notes: "A zillion synonyms and other stuff copied from Index Fungorum"
+      }
+    }
+    user = name.user
+    login(user.login)
+
+    assert_difference("name.versions.count", 1) do
+      post(:edit_name, params: params)
+    end
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+  end
+
   def test_update_icn_id_invalid
     name = names(:authored_group)
     params = {
