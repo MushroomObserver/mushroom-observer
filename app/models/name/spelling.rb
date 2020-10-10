@@ -105,15 +105,9 @@ class Name < AbstractModel
     conds = patterns.map do |pat|
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(" OR ")
-    all_conds = "(LENGTH(text_name) BETWEEN :a AND :b) AND (#{conds}) " \
+    all_conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds}) " \
                 "AND correct_spelling_id IS NULL"
-    names = where(all_conds, a: a, b: b).limit(10).to_a
-
-    # Screen out ones way too different.
-    names = names.reject do |x|
-      (x.text_name.length < a) ||
-        (x.text_name.length > b)
-    end
+    names = where(all_conds).limit(10).to_a
 
     names
   end
