@@ -191,8 +191,9 @@ class AccountController < ApplicationController
   end
 
   def logout_user
-    if session[:real_user_id]
-      new_user = User.safe_find(session[:real_user_id])
+    if session[:real_user_id].present? &&
+       (new_user = User.safe_find(session[:real_user_id])) &&
+       new_user.admin
       switch_to_user(new_user)
       redirect_back_or_default(controller: :observer, action: :index)
     else
@@ -647,9 +648,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on
-    if (@user&.admin || session[:real_user_id].present?) && !in_admin_mode?
-      session[:admin] = true
-    end
+    session[:admin] = true if @user&.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
