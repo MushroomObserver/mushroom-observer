@@ -28,6 +28,13 @@ class NamingControllerTest < FunctionalTestCase
     )
   end
 
+  def test_edit_naming_no_votes
+    nam = namings(:minimal_unknown_naming)
+    assert_empty(nam.votes)
+    login(nam.user.login)
+    get(:edit, params: { id: nam.id })
+  end
+
   def test_update_observation_new_name
     login("rolf")
     nam = namings(:coprinus_comatus_naming)
