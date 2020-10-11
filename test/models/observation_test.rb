@@ -994,4 +994,40 @@ class ObservationTest < UnitTestCase
     end
     assert_match(:runtime_date_should_be_yyyymmdd.t, exception.message)
   end
+
+  def test_update_view_stats
+    obs = observations(:minimal_unknown_obs)
+    assert_nil(obs.last_view)
+    assert_equal(0, obs.num_views)
+    assert_nil(obs.old_last_view)
+    assert_equal(0, obs.old_num_views)
+    assert_nil(obs.last_viewed_by(dick))
+    assert_nil(obs.old_last_viewed_by(dick))
+
+    User.current = dick
+    obs.update_view_stats
+    assert_operator(obs.last_view, :>=, 2.seconds.ago)
+    assert_equal(1, obs.num_views)
+    assert_nil(obs.old_last_view)
+    assert_equal(0, obs.old_num_views)
+    assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
+    assert_nil(obs.old_last_viewed_by(dick))
+
+    time = 1.day.ago
+    obs.update_attributes!(last_view: time)
+    obs.observation_views.where(user: dick).first.
+        update_attributes!(last_view: time)
+    # Make sure this is a totally fresh instance.
+    obs = Observation.find(obs.id)
+
+    obs.update_view_stats
+    assert_operator(obs.last_view, :>=, 2.seconds.ago)
+    assert_equal(2, obs.num_views)
+    assert_operator(obs.old_last_view, :>=, time - 2.seconds)
+    assert_operator(obs.old_last_view, :<=, time + 2.seconds)
+    assert_equal(1, obs.old_num_views)
+    assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
+    assert_operator(obs.old_last_viewed_by(dick), :>=, time - 2.seconds)
+    assert_operator(obs.old_last_viewed_by(dick), :<=, time + 2.seconds)
+  end
 end

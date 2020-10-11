@@ -271,14 +271,27 @@ class AbstractModel < ApplicationRecord
   # *NOTE*: this turns off timestamp updating for this class and avoids touching
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
+  # *NOTE*: this saves the old stats for the page footer of show_observation,
+  # show_name, etc. otherwise the footer will always show the last view as now!
+  #
   def update_view_stats
     return unless respond_to?("num_views=") || respond_to?("last_view=")
 
+    @old_num_views = num_views
+    @old_last_view = last_view
     self.class.record_timestamps = false
     self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
     self.last_view = Time.zone.now        if respond_to?("last_view=")
     save_without_our_callbacks
     self.class.record_timestamps = true
+  end
+
+  def old_num_views
+    @old_num_views.to_i
+  end
+
+  def old_last_view
+    @old_last_view
   end
 
   ##############################################################################
