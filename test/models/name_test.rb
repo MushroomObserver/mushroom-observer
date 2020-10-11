@@ -2957,4 +2957,12 @@ class NameTest < UnitTestCase
     assert(name.searchable_in_registry?,
            "Protozoa should be searchable in registry")
   end
+
+  # The ":Fr" in this used to raise an ActiveRecord error because it was
+  # interpreting it as a named variable.
+  def test_guess_name_with_colon_in_pattern
+    # Apparently assert_nothing_raised hides debug information but gives
+    # nothing useful in return.
+    Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
+  end
 end

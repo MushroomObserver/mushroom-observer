@@ -253,8 +253,10 @@ class Naming < AbstractModel
     result
   end
 
-  def first_vote
-    Vote.where(naming_id: id, user_id: user_id).first
+  # It is rare, but a single user can end up with multiple votes, for example,
+  # if two names are merged and a user had voted for both names.
+  def owners_vote
+    Vote.where(naming_id: id, user_id: user_id).order("value desc").first
   end
 
   ##############################################################################

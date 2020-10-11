@@ -255,7 +255,7 @@ class NameController
 
   def icn_id_conflict?(new_icn_id)
     new_icn_id && @name.icn_id &&
-      new_icn_id != @name.icn_id
+      new_icn_id != @name.icn_id.to_s
   end
 
   def just_adding_author?
