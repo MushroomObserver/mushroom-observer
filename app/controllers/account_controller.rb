@@ -200,6 +200,7 @@ class AccountController < ApplicationController
       @user = nil
       User.current = nil
       session_user_set(nil)
+      session[:admin] = false
       clear_autologin_cookie
     end
   end
