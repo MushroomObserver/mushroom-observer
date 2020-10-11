@@ -91,7 +91,7 @@ module ObjectLinkHelper
       "#{name.text_name.tr(" ", "+")}"
   end
 
-  # url for IF record
+  # url of SF page with "official" synonyms
   def species_fungorum_gsd_synonymy(record_id)
     "http://www.speciesfungorum.org/Names/GSDspecies.asp?RecordID=#{record_id}"
   end
