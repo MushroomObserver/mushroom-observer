@@ -2691,7 +2691,6 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(survivor.icn_id, "Test needs fixtures without icn_id")
 
     destroyed_real_search_name = edited_name.real_search_name
-    survivor_old_version = survivor.version
 
     params = {
       id: edited_name.id,
