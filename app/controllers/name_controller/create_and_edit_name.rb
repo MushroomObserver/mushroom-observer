@@ -255,7 +255,7 @@ class NameController
 
   def icn_id_conflict?(new_icn_id)
     new_icn_id && @name.icn_id &&
-      new_icn_id != @name.icn_id.to_s
+      new_icn_id.to_s != @name.icn_id.to_s
   end
 
   def just_adding_author?
@@ -304,10 +304,11 @@ class NameController
   # The presumptive surviving id is that of the found name,
   # and the presumptive name to be destroyed is the name being edited.
   def perform_merge_names(survivor)
+    destroyed = @name.dup
     prepare_presumptively_disappearing_name
     deprecation = change_deprecation_iff_user_requested
 
-    # Reverse merger direciton if that's safer
+    # Reverse merger directidon if that's safer
     @name, survivor = survivor, @name if reverse_merger_safer?(survivor)
 
     # For log, ignore user Author filter
@@ -321,7 +322,7 @@ class NameController
 
     survivor.merge(@name) # move associations to survivor, destroy @name
 
-    send_merger_messages(survivor)
+    send_merger_messages(destroyed: destroyed, survivor: survivor)
 
     @name = survivor
     @name.save
@@ -344,8 +345,8 @@ class NameController
     !@name.mergeable? && presumptive_survivor.mergeable?
   end
 
-  def send_merger_messages(survivor)
-    args = { this: @name.real_search_name, that: survivor.real_search_name }
+  def send_merger_messages(destroyed:, survivor:)
+    args = { this: destroyed.real_search_name, that: survivor.real_search_name }
     flash_notice(:runtime_edit_name_merge_success.t(args))
     email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
   end

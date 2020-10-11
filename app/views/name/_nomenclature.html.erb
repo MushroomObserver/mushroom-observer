@@ -25,6 +25,8 @@
           <p><%= link_to("[##{name.icn_id}]",
                          mycobank_record_url(name.icn_id)) %>
              MycoBank</p>
+          <p><%= link_to(:gsd_species_synonymy.t,
+                         species_fungorum_gsd_synonymy(name.icn_id)) %></p>
        <% elsif name.registrable? %>
           <p><%= :ICN_ID.t %>: <em><%= :show_name_icn_id_missing.t %></em></p>
           <p><%= link_to(:index_fungorum_search.t,
