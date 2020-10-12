@@ -1014,9 +1014,8 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.old_last_viewed_by(dick))
 
     time = 1.day.ago
-    obs.update_attributes!(last_view: time)
-    obs.observation_views.where(user: dick).first.
-        update_attributes!(last_view: time)
+    obs.update!(last_view: time)
+    obs.observation_views.where(user: dick).first.update!(last_view: time)
     # Make sure this is a totally fresh instance.
     obs = Observation.find(obs.id)
 

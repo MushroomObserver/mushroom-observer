@@ -144,7 +144,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
 
     last_view = 1.hour.ago
-    obs.update_attributes!(last_view: last_view)
+    obs.update!(last_view: last_view)
     login("dick")
     get(:show_observation, params: { id: obs.id })
     assert_equal(1, ObservationView.where(observation: obs).count)
@@ -156,9 +156,8 @@ class ObserverControllerTest < FunctionalTestCase
     end
 
     last_view = 2.months.ago
-    obs.update_attributes!(last_view: last_view)
-    obs.observation_views.where(user: dick).first.
-        update_attributes!(last_view: last_view)
+    obs.update!(last_view: last_view)
+    obs.observation_views.where(user: dick).first.update!(last_view: last_view)
     get(:show_observation, params: { id: obs.id })
     assert_equal(1, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)

@@ -165,8 +165,9 @@ class Observation < AbstractModel
   has_and_belongs_to_many :collection_numbers
   has_and_belongs_to_many :herbarium_records
   has_many :observation_views
-  has_many :viewers, class_name: "User", through: :observation_views,
-           source: :user
+  has_many :viewers, class_name: "User",
+                     through: :observation_views,
+                     source: :user
 
   before_destroy { destroy_orphaned_collection_numbers }
   before_save :cache_content_filter_data
@@ -288,11 +289,11 @@ class Observation < AbstractModel
 
     @old_last_viewed_by ||= {}
     @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.touch(self, User.current)
+    ObservationView.update_view_stats(self, User.current)
   end
 
   def last_viewed_by(user)
-    observation_views.where(user: user).first&.last_view
+    observation_views.find_by(user: user)&.last_view
   end
 
   def old_last_viewed_by(user)

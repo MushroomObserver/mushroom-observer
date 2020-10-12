@@ -5,7 +5,7 @@ class ObservationView < AbstractModel
   belongs_to :observation
   belongs_to :user
 
-  def self.touch(observation, user)
+  def self.update_view_stats(observation, user)
     return if observation.blank? || user.blank?
 
     if view = where(observation: observation, user: user).first

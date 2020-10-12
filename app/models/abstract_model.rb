@@ -290,9 +290,7 @@ class AbstractModel < ApplicationRecord
     @old_num_views.to_i
   end
 
-  def old_last_view
-    @old_last_view
-  end
+  attr_reader :old_last_view
 
   ##############################################################################
   #
