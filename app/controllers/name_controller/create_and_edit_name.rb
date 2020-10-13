@@ -304,15 +304,18 @@ class NameController
   # The presumptive surviving id is that of the found name,
   # and the presumptive name to be destroyed is the name being edited.
   def perform_merge_names(survivor)
-    destroyed = @name.dup
+    # Name to displayed in the log "Name Destroyed" entry
+    logged_destroyed_name = display_name_without_user_filter(@name)
+    destroyed_real_search_name = @name.real_search_name
+
     prepare_presumptively_disappearing_name
     deprecation = change_deprecation_iff_user_requested
 
     # Reverse merger directidon if that's safer
     @name, survivor = survivor, @name if reverse_merger_safer?(survivor)
 
-    # For log, ignore user Author filter
-    @name.display_name = @name[:display_name]
+    # Force log to display the destroyed name
+    @name.display_name = logged_destroyed_name
 
     # Fill in author if other has one.
     if survivor.author.blank? && @parse.author.present?
@@ -320,12 +323,20 @@ class NameController
     end
     survivor.change_deprecated(deprecation) unless deprecation.nil?
 
+
     survivor.merge(@name) # move associations to survivor, destroy @name
 
-    send_merger_messages(destroyed: destroyed, survivor: survivor)
+    send_merger_messages(destroyed_real_search_name: destroyed_real_search_name,
+                         survivor: survivor)
 
     @name = survivor
     @name.save
+  end
+
+  # User can filter out author in display name
+  # But for logging and message purposes, we should include author
+  def display_name_without_user_filter(name)
+    name[:display_name]
   end
 
   def prepare_presumptively_disappearing_name
@@ -345,8 +356,8 @@ class NameController
     !@name.mergeable? && presumptive_survivor.mergeable?
   end
 
-  def send_merger_messages(destroyed:, survivor:)
-    args = { this: destroyed.real_search_name, that: survivor.real_search_name }
+  def send_merger_messages(destroyed_real_search_name:, survivor:)
+    args = { this: destroyed_real_search_name, that: survivor.real_search_name }
     flash_notice(:runtime_edit_name_merge_success.t(args))
     email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
   end
