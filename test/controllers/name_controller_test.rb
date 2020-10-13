@@ -277,6 +277,10 @@ class NameControllerTest < FunctionalTestCase
       "body a[href='#{mycobank_record_url(name.icn_id)}']", true,
       "Page is missing a link to MB record"
     )
+    assert_select(
+      "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
+      "Page is missing a link to SF GSD Species Synonymy record"
+    )
   end
 
   def test_show_name_icn_id_missing
@@ -2680,7 +2684,38 @@ class NameControllerTest < FunctionalTestCase
     )
   end
 
-  def test_update_name_merge_identifier_was_blank
+  def test_update_name_merge_add_identifier
+    edited_name = names(:amanita_boudieri_var_beillei)
+    survivor = names(:amanita_boudieri)
+    assert_nil(edited_name.icn_id, "Test needs fixtures without icn_id")
+    assert_nil(survivor.icn_id, "Test needs fixtures without icn_id")
+
+    destroyed_real_search_name = edited_name.real_search_name
+
+    params = {
+      id: edited_name.id,
+      name: {
+        icn_id: 208_785,
+        text_name: survivor.text_name,
+        author: edited_name.author,
+        rank: survivor.rank,
+        deprecated: (survivor.deprecated ? "true" : "false")
+      }
+    }
+    login("rolf")
+    assert_difference("survivor.versions.count", 1) do
+      post(:edit_name, params: params)
+    end
+
+    assert_redirected_to(action: :show_name, id: survivor.id)
+    assert_flash_text(/Successfully merged name #{destroyed_real_search_name}/,
+                      "Flash should include destroyed name")
+    assert_no_emails
+    assert_not(Name.exists?(edited_name.id))
+    assert_equal(208_785, survivor.reload.icn_id)
+  end
+
+  def test_update_name_reverse_merge_add_identifier
     edited_name = names(:coprinus_comatus)
     merged_name = names(:stereum_hirsutum) # has empty icn_id
     assert_nil(merged_name.icn_id, "Test needs a fixture without icn_id")
