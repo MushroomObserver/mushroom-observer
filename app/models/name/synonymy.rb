@@ -9,30 +9,12 @@ class Name < AbstractModel
 
   # Same as synonyms, but returns ids.
   def synonym_ids
-    @synonym_ids ||= begin
-      if @synonyms
-        @synonyms.map(&:id)
-      elsif synonym_id
-        Name.where(synonym_id: synonym_id).pluck(:id)
-      else
-        [id]
-      end
-    end
+    synonym_id.blank? ? [id] : synonym.name_ids
   end
 
   # Returns an Array of all synonym Name's, including itself and misspellings.
   def synonyms
-    @synonyms ||= begin
-      if @synonym_ids
-        # Slightly faster than below since id is primary index.
-        Name.where(id: @synonym_ids).to_a
-      elsif synonym_id
-        # This is apparently faster than synonym.names.
-        Name.where(synonym_id: synonym_id).to_a
-      else
-        [self]
-      end
-    end
+    synonym_id.blank? ? [self] : synonym.names
   end
 
   # Returns an Array of all _approved_ Synonym Name's, potentially including
