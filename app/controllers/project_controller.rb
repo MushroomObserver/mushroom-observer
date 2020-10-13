@@ -110,21 +110,16 @@ class ProjectController < ApplicationController
   def show_project
     store_location
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
-      @is_member = @project.is_member?(@user)
-      @is_admin = @project.is_admin?(@user)
+    return unless @project = find_or_goto_index(Project, params[:id].to_s)
 
-      @draft_data = Project.connection.select_all(%(
-        SELECT n.display_name, nd.id, nd.user_id
-        FROM names n, name_descriptions nd, name_descriptions_admins nda
-        WHERE nda.user_group_id = #{@project.admin_group_id}
-          AND nd.id = nda.name_description_id
-          AND n.id = nd.name_id
-        ORDER BY n.sort_name ASC, n.author ASC
-      ))
-      @draft_data = @draft_data.to_a
-    end
+    @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
+    @is_member = @project.is_member?(@user)
+    @is_admin = @project.is_admin?(@user)
+    @drafts = NameDescription.
+              joins(:admin_groups).
+              where("name_descriptions_admins.user_group_id":
+                    @project.admin_group_id).
+              includes(:name, :user)
   end
 
   # Go to next project: redirects to show_project.
