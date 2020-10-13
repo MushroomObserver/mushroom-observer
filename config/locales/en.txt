@@ -2112,6 +2112,9 @@
   show_observation_no_sequences: No [:sequences]
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
+  show_observation_more_like_this: More like this
+  show_observation_look_alikes: Look-alikes
+  show_observation_related_taxa: Related taxa
   map_observation_title: "Map of Observation #[ID]"
 
   # observer/suggestions

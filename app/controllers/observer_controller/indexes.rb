@@ -20,13 +20,41 @@ class ObserverController
     show_selected_observations(query)
   end
 
+  # Displays matrix of Observations with the given name proposed but not
+  # actually that name.
+  def observations_of_look_alikes
+    query = create_query(:Observation,  :all,
+                         names: [params[:name]],
+                         include_synonyms: true,
+                         include_all_name_proposals: true,
+                         exclude_consensus: true,
+                         by: :confidence)
+    show_selected_observations(query)
+  end
+
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name
     query = create_query(:Observation,  :all,
                          names: [params[:name]],
                          include_synonyms: true,
-                         by: :created_at)
+                         by: :confidence)
     show_selected_observations(query)
+  end
+
+  # Displays matrix of Observations of subtaxa of the parent of the given name.
+  def observations_of_related_taxa
+    query = create_query(:Observation,  :all,
+                         names: [parents(params[:name])],
+                         include_subtaxa: true,
+                         by: :confidence)
+    show_selected_observations(query)
+  end
+
+  def parents(name_str)
+    names = Name.where(id: name_str).to_a
+    names = Name.where(search_name: name_str).to_a if names.empty?
+    names = Name.where(text_name: name_str).to_a if names.empty?
+    names.map(&:parent)
   end
 
   # Displays matrix of User's Observation's, by date.
