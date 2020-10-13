@@ -8,7 +8,7 @@ class ObservationView < AbstractModel
   def self.update_view_stats(observation, user)
     return if observation.blank? || user.blank?
 
-    if view = find_by(observation: observation, user: user)
+    if (view = find_by(observation: observation, user: user))
       view.update!(last_view: Time.zone.now)
     else
       create!(observation: observation, user: user, last_view: Time.zone.now)
