@@ -2711,19 +2711,21 @@ class NameControllerTest < FunctionalTestCase
     end
 
     assert_redirected_to(action: :show_name, id: survivor.id)
-    assert_flash_text(/Successfully merged name #{destroyed_real_search_name}/,
-                      "Flash should include destroyed name")
+
+    expect = "Successfully merged name #{destroyed_real_search_name} " \
+             "into #{survivor.real_search_name}"
+    assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
+
     assert_no_emails
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
-
 
     expect = "log_name_merged" \
       # change spaces to %20 because display_name in the log is URI escaped
       " that #{survivor.display_name.gsub(" ", "%20")}" \
       " this #{destroyed_display_name.gsub(" ", "%20")}".
         gsub("*", "\*") # escape regex metacharacters
-    assert_match(expect, RssLog.last.notes, "Merger logged incorrectly")
+    assert_match(expect, RssLog.last.notes, "Merger was logged incorrectly")
   end
 
   def test_update_name_reverse_merge_add_identifier
