@@ -6,7 +6,6 @@ var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCV0pi0
 // ./observer/create_observation
 $(document).ready(function() {
   $('.map-open').click(function() {
-    console.log("Opening map...");
     $('#observationFormMap').removeClass("hidden").text("Loading...");
     $('.map-clear').removeClass("hidden");
     $('.map-open').hide();
