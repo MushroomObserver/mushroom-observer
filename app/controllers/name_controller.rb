@@ -715,9 +715,7 @@ class NameController < ApplicationController
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      check_for_new_synonym(
-        @name, @name.synonyms, params[:existing_synonyms] || {}
-      )
+      check_for_new_synonym(@name, params[:existing_synonyms] || {})
 
       # Deprecate everything if that check-box has been marked.
       success = true
@@ -895,22 +893,25 @@ class NameController < ApplicationController
   # boxes.  They all start out checked.  If the user unchecks one, then that
   # name is removed from this synonym.  If the user unchecks several, then a
   # new synonym is created to synonymize all those names.
-  def check_for_new_synonym(name, candidates, checks)
-    new_synonym_members = []
+  def check_for_new_synonym(name, checks)
+    old_synonyms = name.synonyms
+    new_synonyms = []
     # Gather all names with un-checked checkboxes.
-    candidates.each do |n|
-      new_synonym_members.push(n) if (name != n) && (checks[n.id.to_s] == "0")
+    old_synonyms.each do |n|
+      new_synonyms.push(n) if (name != n) && (checks[n.id.to_s] == "0")
     end
-    len = new_synonym_members.length
-    if len > 1
-      name = new_synonym_members.shift
-      name.synonym = Synonym.create
-      name.save
-      new_synonym_members.each do |n|
-        name.transfer_synonym(n)
+    if new_synonyms.length > 1
+      name2 = new_synonyms.first
+      name2.synonym = Synonym.create
+      name2.save
+      new_synonyms.each do |n|
+        name2.transfer_synonym(n)
       end
-    elsif len == 1
-      name = new_synonym_members.first
+    elsif new_synonyms.length == 1
+      name2 = new_synonyms.first
+      name2.clear_synonym
+    end
+    if name.synonym.present? && old_synonyms.length - new_synonyms.length <= 1
       name.clear_synonym
     end
   end
