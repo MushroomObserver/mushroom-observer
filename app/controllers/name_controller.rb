@@ -689,13 +689,6 @@ class NameController < ApplicationController
     elsif !sorter.only_approved_synonyms
       flash_notice(:name_change_synonyms_confirm.t)
     else
-      # Create synonym and add this name to it if this name not already
-      # associated with a synonym.
-      unless @name.synonym_id
-        @name.synonym = Synonym.create
-        @name.save
-      end
-
       # Go through list of all synonyms for this name and written-in names.
       # Exclude any names that have un-checked check-boxes: newly written-in
       # names will not have a check-box yet, names written-in in previous
@@ -703,11 +696,9 @@ class NameController < ApplicationController
       # be checked to proceed -- the default initial state.
       proposed_synonyms = params[:proposed_synonyms] || {}
       sorter.all_synonyms.each do |n|
-        # Synonymize all names that have been checked, or that don't have
-        # checkboxes.
-        if proposed_synonyms[n.id.to_s] != "0"
-          @name.transfer_synonym(n) if n.synonym_id != @name.synonym_id
-        end
+        # It is possible these names may be changed by transfer_synonym,
+        # but these *instances* will not reflect those changes, so reload.
+        @name.transfer_synonym(n.reload) if proposed_synonyms[n.id.to_s] != "0"
       end
 
       # De-synonymize any old synonyms in the "existing synonyms" list that
@@ -1076,11 +1067,7 @@ class NameController < ApplicationController
     @new_names    = nil
     return unless request.method == "POST"
 
-    list = begin
-             params[:list][:members].strip_squeeze
-           rescue StandardError
-             ""
-           end
+    list = params[:list][:members]&.strip_squeeze if params[:list]
     construct_approved_names(list, params[:approved_names])
     sorter = NameSorter.new
     sorter.sort_names(list)

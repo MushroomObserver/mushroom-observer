@@ -3249,7 +3249,7 @@ class NameControllerTest < FunctionalTestCase
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
-    start_size = add_synonym.names.size
+    start_count = add_synonym.names.count
 
     selected_name = names(:lepiota_rachodes)
     assert_not(selected_name.deprecated)
@@ -3278,7 +3278,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
 
-    assert_equal(start_size + 1, add_synonym.names.size)
+    assert_equal(start_count + 1, add_synonym.names.count)
     assert_not(names(:lepiota).reload.deprecated)
     assert_not(names(:chlorophyllum).reload.deprecated)
   end
@@ -3291,7 +3291,7 @@ class NameControllerTest < FunctionalTestCase
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
-    start_size = add_synonym.names.size
+    start_count = add_synonym.names.count
 
     selected_name = names(:lepiota_rachodes)
     assert_not(selected_name.deprecated)
@@ -3319,7 +3319,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
 
-    assert_equal(start_size + 1, add_synonym.names.size)
+    assert_equal(start_count + 1, add_synonym.names.count)
     assert_not(names(:lepiota).reload.deprecated)
     assert_not(names(:chlorophyllum).reload.deprecated)
   end

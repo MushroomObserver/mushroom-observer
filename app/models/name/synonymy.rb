@@ -9,12 +9,17 @@ class Name < AbstractModel
 
   # Same as synonyms, but returns ids.
   def synonym_ids
-    synonym_id.blank? ? [id] : synonym.name_ids.to_a
+    synonym ? synonym.name_ids.to_a : [id]
   end
 
-  # Returns an Array of all synonym Name's, including itself and misspellings.
+  # Returns an Array of all synonym Name's including itself at front of list.
+  # (This looks screwy, but I think it is the safest way to handle it.
+  # Note that synonym.names does include self, but it's a different instance.
+  # So if you make changes to the self that synonym.names returns, it will
+  # not show up in self itself.  So this ensures that self itself will be
+  # included at the beginning of the list of synonyms.)
   def synonyms
-    synonym_id.blank? ? [self] : synonym.names.to_a
+    synonym ? [self] + (synonym.names.to_a - [self]) : [self]
   end
 
   # Returns an Array of all _approved_ Synonym Name's, potentially including
@@ -82,28 +87,27 @@ class Name < AbstractModel
   #   after 3:  2, 3
   #
   def clear_synonym
-    return if synonym_id.blank?
+    return unless synonym
 
     names = synonyms
 
     # Get rid of the synonym if only one's going to be left in it.
     if names.count <= 2
-      synonym.destroy
+      synonym&.destroy
       names.each do |n|
-        n.synonym_id = nil
-        # n.accepted_name = n
+        n.synonym = nil
         n.save
       end
 
     # Otherwise, just detach this name.
     else
-      self.synonym_id = nil
+      self.synonym = nil
       save
     end
 
     # This has to apply to names that are misspellings of this name, too.
     Name.where(correct_spelling: self).find_each do |n|
-      n.correct_spelling_id = nil
+      n.correct_spelling = nil
       n.save
     end
   end
@@ -125,21 +129,27 @@ class Name < AbstractModel
   #   after 2:  1, 2, 3
   #
   def merge_synonyms(name)
-    # Other name has no synonyms, just transfer it over.
-    if !name.synonym_id
-      transfer_synonym(name)
+    if !self.synonym && !name.synonym
+      self.synonym = name.synonym = Synonym.create
+      self.save
+      name.save
 
-    # *This* name has no synonyms, transfer us over to it.
-    elsif !synonym_id
-      name.transfer_synonym(self)
+    elsif !name.synonym
+      name.synonym = self.synonym
+      name.save
 
-    # Both have synonyms -- merge them.
-    # (Make sure they aren't already synonymized!)
-    elsif synonym_id != name.synonym_id
-      name.synonyms.each { |n| transfer_synonym(n) }
+    elsif !self.synonym
+      self.synonym = name.synonym
+      self.save
+
+    elsif self.synonym != name.synonym
+      names = name.synonyms
+      name.synonym&.destroy
+      names.each do |n|
+        n.synonym = self.synonym
+        n.save
+      end
     end
-
-    # synonym.choose_accepted_name
   end
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
@@ -151,27 +161,10 @@ class Name < AbstractModel
   #
   def transfer_synonym(name)
     return if self == name
+    return if self.synonym && self.synonym == name.synonym
 
-    # Make sure this name is attached to a synonym, creating one if necessary.
-    unless synonym_id
-      self.synonym = Synonym.create
-      save
-    end
-
-    # Only transfer it over if it's not already a synonym!
-    return if synonym_id == name.synonym_id
-
-    # Destroy old synonym if only one name left in it.
-    if (old_synonyms = name.synonyms).count == 2
-      other_name = (old_synonyms - [name]).first
-      other_name&.synonym_id = nil
-      other_name&.save
-      name.synonym.destroy
-    end
-
-    # Attach name to our synonym.
-    name.synonym_id = synonym_id
-    name.save
+    name.clear_synonym
+    self.merge_synonyms(name)
   end
 
   def observation_count
