@@ -2721,10 +2721,10 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(208_785, survivor.reload.icn_id)
 
     expect = "log_name_merged" \
-      # change spaces to %20 because display_name in the log is URI escaped
-      " that #{survivor.display_name.gsub(" ", "%20")}" \
-      " this #{destroyed_display_name.gsub(" ", "%20")}".
-        gsub("*", "\*") # escape regex metacharacters
+    # change spaces to %20 because display_name in the log is URI escaped
+    " that #{survivor.display_name.gsub(" ", "%20")}" \
+    " this #{destroyed_display_name.gsub(" ", "%20")}".
+      tr("*", "\*") # escape regex metacharacters
     assert_match(expect, RssLog.last.notes, "Merger was logged incorrectly")
   end
 

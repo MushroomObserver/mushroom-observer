@@ -323,12 +323,10 @@ class NameController
     end
     survivor.change_deprecated(deprecation) unless deprecation.nil?
 
-
     survivor.merge(@name) # move associations to survivor, destroy @name
 
     send_merger_messages(destroyed_real_search_name: destroyed_real_search_name,
                          survivor: survivor)
-
     @name = survivor
     @name.save
   end
