@@ -904,15 +904,19 @@ class NameController < ApplicationController
       name2 = new_synonyms.first
       name2.synonym = Synonym.create
       name2.save
-      new_synonyms.each do |n|
-        name2.transfer_synonym(n)
+      (new_synonyms - [name2]).each do |n|
+        n.synonym_id = name2.synonym_id
+        n.save
       end
     elsif new_synonyms.length == 1
       name2 = new_synonyms.first
-      name2.clear_synonym
+      name2.synonym_id = nil
+      name2.save
     end
-    if name.synonym.present? && old_synonyms.length - new_synonyms.length <= 1
-      name.clear_synonym
+    if old_synonyms.length - new_synonyms.length == 1
+      name.synonym.destroy
+      name.synonym_id = nil
+      name.save
     end
   end
 

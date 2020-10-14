@@ -9,12 +9,12 @@ class Name < AbstractModel
 
   # Same as synonyms, but returns ids.
   def synonym_ids
-    synonym_id.blank? ? [id] : synonym.name_ids
+    synonym_id.blank? ? [id] : synonym.name_ids.to_a
   end
 
   # Returns an Array of all synonym Name's, including itself and misspellings.
   def synonyms
-    synonym_id.blank? ? [self] : synonym.names
+    synonym_id.blank? ? [self] : synonym.names.to_a
   end
 
   # Returns an Array of all _approved_ Synonym Name's, potentially including
@@ -82,12 +82,12 @@ class Name < AbstractModel
   #   after 3:  2, 3
   #
   def clear_synonym
-    return unless synonym_id
+    return if synonym_id.blank?
 
     names = synonyms
 
-    # Get rid of the synonym if only one going to be left in it.
-    if names.length <= 2
+    # Get rid of the synonym if only one's going to be left in it.
+    if names.count <= 2
       synonym.destroy
       names.each do |n|
         n.synonym_id = nil
@@ -103,7 +103,8 @@ class Name < AbstractModel
 
     # This has to apply to names that are misspellings of this name, too.
     Name.where(correct_spelling: self).find_each do |n|
-      n.update_attribute!(correct_spelling: nil)
+      n.correct_spelling_id = nil
+      n.save
     end
   end
 
@@ -149,6 +150,8 @@ class Name < AbstractModel
   #   correct_name.transfer_synonym(incorrect_name)
   #
   def transfer_synonym(name)
+    return if self == name
+
     # Make sure this name is attached to a synonym, creating one if necessary.
     unless synonym_id
       self.synonym = Synonym.create
@@ -156,10 +159,15 @@ class Name < AbstractModel
     end
 
     # Only transfer it over if it's not already a synonym!
-    return unless synonym_id != name.synonym_id
+    return if synonym_id == name.synonym_id
 
     # Destroy old synonym if only one name left in it.
-    name.synonym.destroy if name.synonym && (name.synonyms.length <= 2)
+    if (old_synonyms = name.synonyms).count == 2
+      other_name = (old_synonyms - [name]).first
+      other_name&.synonym_id = nil
+      other_name&.save
+      name.synonym.destroy
+    end
 
     # Attach name to our synonym.
     name.synonym_id = synonym_id
@@ -167,7 +175,7 @@ class Name < AbstractModel
   end
 
   def observation_count
-    observations.length
+    observations.count
   end
 
   # Returns either self or name,
