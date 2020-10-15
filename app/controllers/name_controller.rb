@@ -1165,6 +1165,7 @@ class NameController < ApplicationController
         @notification.note_template = note_template
         flash_notice(:email_tracking_updated_messages.t)
       end
+      notify_admins_of_notification(@notification)
       @notification.save
     when :DISABLE.l
       @notification.destroy
@@ -1173,6 +1174,21 @@ class NameController < ApplicationController
       )
     end
     redirect_with_query(action: "show_name", id: name_id)
+  end
+
+  def notify_admins_of_notification(notification)
+    return if notification.note_template.blank?
+    return if !notification.new_record? &&
+              notification.note_template_before_last_save.blank?
+
+    user = notification.user
+    name = Name.find(notification.obj_id)
+    note = notification.note_template
+    subject = "New Notification with Template"
+    content = "User: ##{user.id} / #{user.login}\n" \
+              "Name: ##{name.id} / #{name.search_name}\n" \
+              "Note: [[#{note}]]"
+    WebmasterEmail.build(user.email, content, subject).deliver_now
   end
 
   def edit_lifeform
