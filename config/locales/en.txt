@@ -854,6 +854,8 @@
   footer_last_updated_at: "*Last [:modified]:* [date]"
   footer_last_updated_by: "*Last [:modified]:* [date] *by* [user]"
   footer_viewed: "*[:Viewed]:* [times], *last [:viewed]:* [date]"
+  footer_last_you_viewed: "*Last viewed by you:* [date]"
+  footer_never: never
   footer_version_out_of: "*[:Version]:* [num] *of* [total]"
 
   # Taxonomic ranks.
@@ -1258,6 +1260,7 @@
   app_logout: Logout
   app_admin: Admin
   app_blocked_ips: Blocked IPs
+  app_switch_users: Switch Users
   app_users: "[:list_objects(type=:user)]"
   app_email_all_users: Email All Users
   app_add_to_group: Add to Group
@@ -1534,6 +1537,8 @@
   form_observations_lat_long_help: "Optional GPS location. Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
+  form_observations_open_map: Open Interactive Map
+  form_observations_clear_map: Clear Map
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.

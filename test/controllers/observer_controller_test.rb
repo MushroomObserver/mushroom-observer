@@ -83,17 +83,6 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_observation_with_unrecognized_name
-    text_name = "Elfin saddle"
-    params = { name: { name: text_name },
-               user: rolf,
-               where: locations.first.name }
-    post_requires_login(:create_observation, params)
-
-    assert_select("div[id='name_messages']",
-                  /MO does not recognize the name.*#{text_name}/)
-  end
-
   ##############################################################################
 
   # ----------------------------
@@ -142,6 +131,42 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_obs,
         params: { id: obs.id })
     assert_redirected_to(action: :show_observation, id: obs.id)
+  end
+
+  def test_show_obs_view_stats
+    obs = observations(:minimal_unknown_obs)
+    assert_empty(ObservationView.where(observation: obs))
+    get(:show_observation, params: { id: obs.id })
+    assert_empty(ObservationView.where(observation: obs))
+    assert_select("p.footer-view-stats") do |p|
+      assert_includes(p.to_s, :footer_viewed.t(date: :footer_never.l,
+                                               times: :many_times.l(num: 0)))
+    end
+
+    last_view = 1.hour.ago
+    obs.update!(last_view: last_view)
+    login("dick")
+    get(:show_observation, params: { id: obs.id })
+    assert_equal(1, ObservationView.where(observation: obs).count)
+    assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
+    assert_select("p.footer-view-stats") do |p|
+      assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
+                                               times: :one_time.l))
+      assert_includes(p.to_s, :footer_last_you_viewed.t(date: :footer_never.l))
+    end
+
+    last_view = 2.months.ago
+    obs.update!(last_view: last_view)
+    obs.observation_views.where(user: dick).first.update!(last_view: last_view)
+    get(:show_observation, params: { id: obs.id })
+    assert_equal(1, ObservationView.where(observation: obs).count)
+    assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
+    assert_select("p.footer-view-stats") do |p|
+      assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
+                                               times: :many_times.l(num: 2)))
+      assert_includes(p.to_s,
+                      :footer_last_you_viewed.t(date: last_view.web_time))
+    end
   end
 
   def test_page_loads
@@ -1710,6 +1735,17 @@ class ObserverControllerTest < FunctionalTestCase
     users(:rolf).update(location_format: :scientific)
     get(:create_observation)
     assert_true(@response.body.include?("California, Mendocino Co., Albion"))
+  end
+
+  def test_create_observation_with_unrecognized_name
+    text_name = "Elfin saddle"
+    params = { name: { name: text_name },
+               user: rolf,
+               where: locations.first.name }
+    post_requires_login(:create_observation, params)
+
+    assert_select("div[id='name_messages']",
+                  /MO does not recognize the name.*#{text_name}/)
   end
 
   def test_construct_observation_approved_place_name

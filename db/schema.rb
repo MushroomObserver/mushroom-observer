@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_11_183059) do
+ActiveRecord::Schema.define(version: 2020_10_11_132400) do
 
   create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "created_at"
@@ -453,6 +453,12 @@ ActiveRecord::Schema.define(version: 2020_09_11_183059) do
     t.text "note_template"
     t.datetime "updated_at"
     t.boolean "require_specimen", default: false, null: false
+  end
+
+  create_table "observation_views", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "observation_id"
+    t.integer "user_id"
+    t.datetime "last_view"
   end
 
   create_table "observations", id: :integer, unsigned: true, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

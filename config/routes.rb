@@ -59,6 +59,7 @@ ACTIONS = {
     reverify: {},
     send_verify: {},
     signup: {},
+    switch_users: {},
     test_autologin: {},
     test_flash: {},
     turn_admin_off: {},
