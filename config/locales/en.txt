@@ -3021,6 +3021,15 @@
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
+  add_members_not_found: User "<str>" not found.
+  add_members_added_admin: Successfully added [user] to admins.
+  add_members_added_member: Successfully added [user] to members.
+  add_members_removed_admin: Successfully removed [user] from admins.
+  add_members_removed_member: Successfully removed [user] from members.
+  add_members_already_added_admin: Already added [user] to admins.
+  add_members_already_added_member: Already added [user] to members.
+  add_members_already_removed_admin: Already removed [user] from admins.
+  add_members_already_removed_member: Already removed [user] from members.
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.

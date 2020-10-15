@@ -7,6 +7,17 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
+<div class="max-width-text">
+  <%= form_tag({ id: @project.id }, { class: "push-down pad-bottom-2x"}) %>
+    <big><%= :LOGIN_NAME.t %>:</big><br/>
+    <%= text_field_tag(:candidate, @candidate, size: 40,
+                                               data: {autofocus: true},
+                                               class: "form-control") %><br/>
+    <% turn_into_user_auto_completer(:candidate) %>
+    <%= submit_tag(:ADD.t, class: "btn", style: "margin-left: 1em") %>
+  </form>
+</div>
+
 <table class="table-striped table-project-members push-down">
   <thead>
     <tr>
@@ -16,7 +27,7 @@
     </tr>
   </thead>
   <tbody>
-    <% for user in @users %>
+    <% @users.sort_by(&:login).each do |user| %>
       <tr>
         <td>
           <%= user_link(user, user.login) %>
