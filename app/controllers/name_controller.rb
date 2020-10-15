@@ -706,7 +706,7 @@ class NameController < ApplicationController
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      check_for_new_synonym(@name, params[:existing_synonyms] || {})
+      split_synonyms(@name, params[:existing_synonyms] || {})
 
       # Deprecate everything if that check-box has been marked.
       success = true
@@ -884,16 +884,17 @@ class NameController < ApplicationController
   # boxes.  They all start out checked.  If the user unchecks one, then that
   # name is removed from this synonym.  If the user unchecks several, then a
   # new synonym is created to synonymize all those names.
-  def check_for_new_synonym(name, checks)
-    new_synonyms = name.synonyms.select do |n|
-      (n != name) && (checks[n.id.to_s] == "0")
+  def split_synonyms(main_name, checks)
+    first_group = main_name.synonyms
+    other_group = first_group.select do |n|
+      (n != main_name) && (checks[n.id.to_s] == "0")
     end
-    return if new_synonyms.empty?
+    return if other_group.empty?
 
-    pick_one = new_synonyms.shift
+    pick_one = other_group.shift
     pick_one.clear_synonym
-    new_synonyms.each { |n| pick_one.transfer_synonym(n) }
-    name.clear_synonym if name.reload.synonyms.count == 1
+    other_group.each { |n| pick_one.transfer_synonym(n) }
+    main_name.clear_synonym if main_name.reload.synonyms.count <= 1
   end
 
   def dump_sorter(sorter)
