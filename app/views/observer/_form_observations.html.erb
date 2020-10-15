@@ -73,8 +73,11 @@
 <div class="row push-down max-width-text-times-two">
   <div class="col-sm-6">
     <label>Location:</label>
-    <div id="observationFormMap" class="form-observation-map"></div>
-    <span class="map-clear map-btn">Clear Map</span>
+    <div id="observationFormMap" class="form-observation-map hidden"></div>
+    <div>
+      <span class="map-open map-btn"><%= :form_observations_open_map.t %></span>
+      <span class="map-clear map-btn hidden"><%= :form_observations_clear_map.t %></span>
+    </div>
   </div>
   <div class="col-sm-6">
     <div class="well well-sm help-block">
