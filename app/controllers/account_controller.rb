@@ -31,6 +31,7 @@
 #  ==== Admin utilities
 #  turn_admin_on::      <tt>(R . .)</tt>
 #  turn_admin_off::     <tt>(R . .)</tt>
+#  switch_users::       <tt>(R V .)</tt>
 #  add_user_to_group::  <tt>(R V .)</tt>
 #  create_alert::       <tt>(R V .)</tt>
 #  destroy_user::       <tt>(R . .)</tt>
@@ -190,10 +191,18 @@ class AccountController < ApplicationController
   end
 
   def logout_user
-    @user = nil
-    User.current = nil
-    session_user_set(nil)
-    clear_autologin_cookie
+    if session[:real_user_id].present? &&
+       (new_user = User.safe_find(session[:real_user_id])) &&
+       new_user.admin
+      switch_to_user(new_user)
+      redirect_back_or_default(controller: :observer, action: :index)
+    else
+      @user = nil
+      User.current = nil
+      session_user_set(nil)
+      session[:admin] = false
+      clear_autologin_cookie
+    end
   end
 
   # ========= private Login section methods ==========
@@ -410,7 +419,7 @@ class AccountController < ApplicationController
       # Check if we need to upload an image.
       upload = params["user"]["upload_image"]
       if upload.present?
-        date = Date.parse(params["date"]["copyright_year"].to_s + "0101")
+        date = Date.parse("#{params["date"]["copyright_year"]}0101")
         license = License.safe_find(params["upload"]["license_id"])
         holder = params["copyright_holder"]
         image = Image.new(
@@ -618,21 +627,19 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key
-    if (@key = find_or_goto_index(ApiKey, params[:id].to_s))
-      if check_permission!(@key)
-        if request.method == "POST"
-          if params[:commit] == :UPDATE.l
-            @key.update!(params[:key].permit!)
-            flash_notice(:account_api_keys_updated.t)
-          end
-          redirect_to(action: :api_keys)
-        end
-      else
-        redirect_to(action: :api_keys)
-      end
-    end
+    return unless @key = find_or_goto_index(ApiKey, params[:id].to_s)
+    return redirect_to(action: :api_keys) unless check_permission!(@key)
+    return if request.method != "POST"
+
+    update_api_key if params[:commit] == :UPDATE.l
+    redirect_to(action: :api_keys)
   rescue StandardError => e
     flash_error(e.to_s)
+  end
+
+  def update_api_key
+    @key.update!(params[:key].permit(:notes))
+    flash_notice(:account_api_keys_updated.t)
   end
 
   ##############################################################################
@@ -649,6 +656,39 @@ class AccountController < ApplicationController
   def turn_admin_off
     session[:admin] = nil
     redirect_back_or_default(controller: :observer, action: :index)
+  end
+
+  def switch_users
+    @id = params[:id].to_s
+    new_user = find_user_by_id_login_or_email(@id)
+    if !@user&.admin && session[:real_user_id].blank?
+      redirect_back_or_default(controller: :observer, action: :index)
+    elsif new_user.present?
+      switch_to_user(new_user)
+      redirect_back_or_default(controller: :observer, action: :index)
+    end
+  end
+
+  def find_user_by_id_login_or_email(str)
+    if str.blank?
+      nil
+    elsif str.match?(/^\d+$/)
+      User.safe_find(str)
+    else
+      User.where(login: str).first
+    end
+  end
+
+  def switch_to_user(new_user)
+    if session[:real_user_id].blank?
+      session[:real_user_id] = User.current_id
+      session[:admin] = nil
+    elsif session[:real_user_id] == new_user.id
+      session[:real_user_id] = nil
+      session[:admin] = true
+    end
+    User.current = new_user
+    session_user_set(new_user)
   end
 
   def add_user_to_group
@@ -689,6 +729,10 @@ class AccountController < ApplicationController
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
+  # I think this is as good as it gets: just a simple switch statement of
+  # one-line commands.  Breaking this up doesn't make sense to me.
+  # -JPH 2020-10-09
   def process_blocked_ips_commands
     if validate_ip!(params[:add_okay])
       IpStats.add_okay_ips([params[:add_okay]])
@@ -706,6 +750,7 @@ class AccountController < ApplicationController
       @ip = params[:report]
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   def validate_ip!(ip)
     return false if ip.blank?
