@@ -661,6 +661,8 @@ class AccountController < ApplicationController
   def switch_users
     @id = params[:id].to_s
     new_user = find_user_by_id_login_or_email(@id)
+    flash_error("Couldn't find \"#{@id}\".  Play again?") \
+      if new_user.blank? && @id.present?
     if !@user&.admin && session[:real_user_id].blank?
       redirect_back_or_default(controller: :observer, action: :index)
     elsif new_user.present?
@@ -675,7 +677,7 @@ class AccountController < ApplicationController
     elsif str.match?(/^\d+$/)
       User.safe_find(str)
     else
-      User.where(login: str).first
+      User.find_by_login(str.sub(/ <.*>$/, ""))
     end
   end
 

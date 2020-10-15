@@ -5,7 +5,10 @@
 <div class="max-width-text">
   <%= form_tag({}, { class: "push-down pad-bottom-2x"}) %>
     <big><%= :LOGIN_NAME.t %>:</big><br/>
-    <%= text_field_tag(:id, @id, size: 40, data: {autofocus: true}, class: "form-control") %><br/>
+    <%= text_field_tag(:id, @id, size: 40,
+                                 data: {autofocus: true},
+                                 class: "form-control") %><br/>
+    <% turn_into_user_auto_completer(:id) %>
     <%= submit_tag(:SUBMIT.t, class: "btn", style: "margin-left: 1em") %>
   </form>
 </div>
