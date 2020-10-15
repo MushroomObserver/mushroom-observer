@@ -128,6 +128,10 @@ class Name < AbstractModel
   #   after 1:  1, 2, 3
   #   after 2:  1, 2, 3
   #
+  # rubocop:disable Style/RedundantSelf
+  # I think these methods read much better with self explicitly included. -JPH
+  # rubocop:disable Metrics/AbcSize
+  # This is the best I can do. I think splitting it up will make it worse. -JPH
   def merge_synonyms(name)
     if !self.synonym && !name.synonym
       self.synonym = name.synonym = Synonym.create
@@ -151,6 +155,7 @@ class Name < AbstractModel
       end
     end
   end
+  # rubocop:enable Metrics/AbcSize
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
   # Delete the other Name's old Synonym if there aren't any Name's in it
@@ -166,6 +171,7 @@ class Name < AbstractModel
     name.clear_synonym
     self.merge_synonyms(name)
   end
+  # rubocop:enable Style/RedundantSelf
 
   def observation_count
     observations.count
