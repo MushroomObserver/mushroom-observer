@@ -350,7 +350,7 @@ class ProjectController < ApplicationController
 
   def must_be_project_admin!(id)
     flash_error(:change_member_status_denied.t)
-    redirect_with_query(action: :show_project, id: @project.id)
+    redirect_with_query(action: :show_project, id: id)
   end
 
   # Add/remove a given User to/from a given UserGroup.
