@@ -885,30 +885,15 @@ class NameController < ApplicationController
   # name is removed from this synonym.  If the user unchecks several, then a
   # new synonym is created to synonymize all those names.
   def check_for_new_synonym(name, checks)
-    old_synonyms = name.synonyms
-    new_synonyms = []
-    # Gather all names with un-checked checkboxes.
-    old_synonyms.each do |n|
-      new_synonyms.push(n) if (name != n) && (checks[n.id.to_s] == "0")
+    new_synonyms = name.synonyms.select do |n|
+      (n != name) && (checks[n.id.to_s] == "0")
     end
-    if new_synonyms.length > 1
-      name2 = new_synonyms.first
-      name2.synonym = Synonym.create
-      name2.save
-      (new_synonyms - [name2]).each do |n|
-        n.synonym_id = name2.synonym_id
-        n.save
-      end
-    elsif new_synonyms.length == 1
-      name2 = new_synonyms.first
-      name2.synonym_id = nil
-      name2.save
-    end
-    if old_synonyms.length - new_synonyms.length == 1
-      name.synonym.destroy
-      name.synonym_id = nil
-      name.save
-    end
+    return if new_synonyms.empty?
+
+    pick_one = new_synonyms.shift
+    pick_one.clear_synonym
+    new_synonyms.each { |n| pick_one.transfer_synonym(n) }
+    name.clear_synonym if name.reload.synonyms.count == 1
   end
 
   def dump_sorter(sorter)
