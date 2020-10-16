@@ -298,8 +298,9 @@ class ProjectController < ApplicationController
     return must_be_project_admin!(@project.id) unless @project.is_admin?(@user)
 
     @users = User.order("last_login desc").limit(100).to_a
-    @candidate = params[:candidate]
-    add_member(@candidate, @project) if @candidate.present?
+    return unless (@candidate = params[:candidate])
+
+    add_member(@candidate, @project)
   end
 
   def add_member(str, project)
