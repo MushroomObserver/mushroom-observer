@@ -410,12 +410,12 @@ class ProjectControllerTest < FunctionalTestCase
     assert_not(target_user.in_group?(eol_project.user_group.name))
     params = {
       id: eol_project.id,
-      candidate: "dick <Tricky Dick>"
+      candidate: "#{target_user.login} <Should Ignore This>"
     }
     requires_login(:add_members, params, mary.login)
     assert_response(:success)
-    target_user = User.find(target_user.id)
-    assert_not(target_user.in_group?(eol_project.admin_group.name))
+    target_user.reload
+    assert_not(target_user.reload.in_group?(eol_project.admin_group.name))
     assert(target_user.in_group?(eol_project.user_group.name))
   end
 
