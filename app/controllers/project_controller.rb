@@ -294,7 +294,7 @@ class ProjectController < ApplicationController
   # "Posts" to the same action.  Stays on this view until done.
   def add_members
     pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
     return must_be_project_admin!(@project.id) unless @project.is_admin?(@user)
 
     @users = User.order("last_login desc").limit(100).to_a
