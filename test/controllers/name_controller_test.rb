@@ -2690,7 +2690,10 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(edited_name.icn_id, "Test needs fixtures without icn_id")
     assert_nil(survivor.icn_id, "Test needs fixtures without icn_id")
 
+    edited_name.log("create edited_name log")
+
     destroyed_real_search_name = edited_name.real_search_name
+    destroyed_display_name = edited_name.display_name
 
     params = {
       id: edited_name.id,
@@ -2708,11 +2711,21 @@ class NameControllerTest < FunctionalTestCase
     end
 
     assert_redirected_to(action: :show_name, id: survivor.id)
-    assert_flash_text(/Successfully merged name #{destroyed_real_search_name}/,
-                      "Flash should include destroyed name")
+
+    expect = "Successfully merged name #{destroyed_real_search_name} " \
+             "into #{survivor.real_search_name}"
+    assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
+
     assert_no_emails
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
+
+    expect = "log_name_merged" \
+    # change spaces to %20 because display_name in the log is URI escaped
+    " that #{survivor.display_name.gsub(" ", "%20")}" \
+    " this #{destroyed_display_name.gsub(" ", "%20")}".
+      tr("*", "\*") # escape regex metacharacters
+    assert_match(expect, RssLog.last.notes, "Merger was logged incorrectly")
   end
 
   def test_update_name_reverse_merge_add_identifier
