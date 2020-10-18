@@ -32,15 +32,13 @@ class Name < AbstractModel
     results = []
 
     while results.empty?
-      conditions = []
-      conditions_args = {}
-      if author.present?
-        conditions << "search_name = :name"
-        conditions_args[:name] = search_name
-      else
-        conditions << "text_name = :name"
-        conditions_args[:name] = text_name
-      end
+      conditions, conditions_args =
+        if author.present?
+          [["search_name = :name"], { name: search_name }]
+        else
+          [["text_name = :name"], { name: text_name }]
+        end
+
       conditions << "deprecated = 0" unless ignore_deprecated
 
       if rank
