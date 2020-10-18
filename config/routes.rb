@@ -666,22 +666,6 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  resources :glossary_terms, id: /\d+/ do
-    collection do
-      get  :index_herbarium
-      get  :index_institutional
-      get  :index_selected
-      post :merge
-      get  :search
-    end
-    member do
-      post  :delete_curator
-      get   :next
-      get   :prev
-      match :request_to_be_curator, via: [:get, :post]
-    end
-   end
-
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
