@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("set")
 
 class NameControllerTest < FunctionalTestCase
   include ObjectLinkHelper
@@ -694,8 +695,6 @@ class NameControllerTest < FunctionalTestCase
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
-    #    l_names = Name.all(conditions: 'text_name LIKE "L%"', # Rails 3
-    #      order: 'text_name, author')
     l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
@@ -703,9 +702,8 @@ class NameControllerTest < FunctionalTestCase
     assert_select("div#content")
     name_links = css_select(".table a")
     assert_equal(l_names.size, name_links.length)
-    # (Mysql and ruby sort "Kuhner" and "Kühner" oppositely. Just ignore them.)
-    assert_equal(l_names.map(&:id) - [35, 36],
-                 ids_from_links(name_links) - [35, 36])
+    assert_equal(Set.new(l_names.map(&:id)),
+                 Set.new(ids_from_links(name_links)))
 
     url = @controller.url_with_query(action: "show_name",
                                      id: l_names.first.id, only_path: true)
@@ -719,8 +717,6 @@ class NameControllerTest < FunctionalTestCase
 
   def test_pagination_letter_with_page
     query_params = pagination_query_params
-    #    l_names = Name.all(conditions: 'text_name LIKE "L%"', # Rails 3
-    #      order: 'text_name, author')
     l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
@@ -730,8 +726,8 @@ class NameControllerTest < FunctionalTestCase
     name_links = css_select(".table a")
 
     assert_equal(l_names.size, name_links.length)
-    assert_equal(l_names.map(&:id) - [35, 36],
-                 ids_from_links(name_links) - [35, 36])
+    assert_equal(Set.new(l_names.map(&:id)),
+                 Set.new(ids_from_links(name_links)))
 
     assert_select("a", text: "1", count: 0)
 
