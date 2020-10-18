@@ -701,8 +701,8 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("rank:genus")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("rank > #{Name.ranks[:Genus]} AND " \
-                        "rank != #{Name.ranks[:Group]}").
+    expect = Name.where("`rank` > #{Name.ranks[:Genus]} AND " \
+                        "`rank` != #{Name.ranks[:Group]}").
              reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:family-domain")

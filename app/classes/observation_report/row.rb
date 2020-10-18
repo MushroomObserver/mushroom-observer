@@ -21,7 +21,7 @@ module ObservationReport
   # 14:: names.id
   # 15:: names.text_name
   # 16:: names.author
-  # 17:: names.rank
+  # 17:: names.`rank`
   # 18:: locations.id
   # 19:: locations.name
   # 20:: locations.north

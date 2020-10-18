@@ -306,7 +306,7 @@ class Name < AbstractModel
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
+      matches = Name.where("`rank` = #{Name.ranks[rank2]} AND #{sql}")
       return matches.to_a if matches.any?
     end
     []
@@ -520,7 +520,7 @@ class Name < AbstractModel
       UPDATE names n, name_descriptions nd
       SET n.classification = nd.classification
       WHERE nd.id = n.description_id
-        AND n.rank <= #{Name.ranks[:Genus]}
+        AND n.`rank` <= #{Name.ranks[:Genus]}
         AND nd.classification != n.classification
         AND COALESCE(nd.classification, "") != ""
     ))
@@ -539,7 +539,7 @@ class Name < AbstractModel
   #     UPDATE names n, name_descriptions nd
   #     SET n.classification = nd.classification
   #     WHERE nd.id = n.description_id
-  #       AND n.rank = #{Name.ranks[:Genus]}
+  #       AND n.`rank` = #{Name.ranks[:Genus]}
   #       AND nd.classification != n.classification
   #       AND nd.updated_at > n.updated_at
   #   ))
@@ -592,7 +592,7 @@ class Name < AbstractModel
   #   msgs = Name.connection.select_rows(%(
   #     SELECT n1.search_name
   #     FROM names n1, temp t, names n2
-  #     WHERE n1.rank < #{Name.ranks[:Genus]}
+  #     WHERE n1.`rank` < #{Name.ranks[:Genus]}
   #       AND t.name_id = n1.id
   #       AND n2.id = t.genus_id
   #       AND n1.classification != n2.classification
@@ -604,7 +604,7 @@ class Name < AbstractModel
   #   Name.connection.execute(%(
   #     UPDATE names n1, temp t, names n2
   #     SET n1.classification = n2.classification
-  #     WHERE n1.rank < #{Name.ranks[:Genus]}
+  #     WHERE n1.`rank` < #{Name.ranks[:Genus]}
   #       AND t.name_id = n1.id
   #       AND n2.id = t.genus_id
   #   ))
@@ -617,7 +617,7 @@ class Name < AbstractModel
   #     SET nd.classification = n.classification
   #     WHERE nd.id = n.description_id
   #       AND COALESCE(n.classification, "") != ""
-  #       AND n.rank > #{Name.ranks[:Genus]}
+  #       AND n.`rank` > #{Name.ranks[:Genus]}
   #   ))
   #
   #   # Refresh observation cache.

@@ -119,7 +119,7 @@ module Query
         b = all_ranks.index(max) || (all_ranks.length - 1)
         a, b = b, a if a > b
         ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
-        @where << "names.rank IN (#{ranks.join(",")})"
+        @where << "names.`rank` IN (#{ranks.join(",")})"
         add_joins(*joins)
       end
 

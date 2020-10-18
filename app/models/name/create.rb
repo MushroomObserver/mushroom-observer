@@ -42,7 +42,7 @@ class Name < AbstractModel
         conditions_args[:name] = text_name
       end
       conditions << "deprecated = 0" unless ignore_deprecated
-      conditions << "rank = #{Name.ranks[rank]}" if rank
+      conditions << "`rank` = #{Name.ranks[rank]}" if rank
 
       results = Name.where(conditions.join(" AND "), conditions_args).to_a
 

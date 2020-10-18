@@ -172,7 +172,7 @@ class NameController < ApplicationController
       WHERE names.id = name_counts.name_id
         # include "to_i" to avoid Brakeman "SQL injection" false positive.
         # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
-        AND names.rank = #{Name.ranks[:Species].to_i}
+        AND names.`rank` = #{Name.ranks[:Species].to_i}
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}

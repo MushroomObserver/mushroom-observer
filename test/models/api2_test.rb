@@ -2185,7 +2185,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("rank <= #{genus} or rank = #{group}")
+    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2956,7 +2956,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("rank <= #{genus} or rank = #{group}")
+    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)

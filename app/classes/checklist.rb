@@ -130,7 +130,7 @@ class Checklist
       text_name ||= Name.connection.select_values(%(
         SELECT text_name FROM names
         WHERE synonym_id = #{syn_id}
-          AND rank IN (#{ranks_to_consider})
+          AND `rank` IN (#{ranks_to_consider})
         ORDER BY deprecated ASC
       )).first
       count_species(text_name)
@@ -156,7 +156,7 @@ class Checklist
     ]
     conditions = [
       "n.id = o.name_id",
-      "n.rank IN (#{ranks_to_consider})"
+      "n.`rank` IN (#{ranks_to_consider})"
     ]
     tables += args[:tables] || []
     conditions += args[:conditions] || []

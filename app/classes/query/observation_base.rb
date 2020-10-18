@@ -139,8 +139,8 @@ module Query
       genus = Name.ranks[:Genus]
       group = Name.ranks[:Group]
       add_boolean_condition(
-        "names.rank <= #{genus} or names.rank = #{group}",
-        "names.rank > #{genus} and names.rank < #{group}",
+        "names.`rank` <= #{genus} or names.`rank` = #{group}",
+        "names.`rank` > #{genus} and names.`rank` < #{group}",
         params[:has_name],
         :names
       )
