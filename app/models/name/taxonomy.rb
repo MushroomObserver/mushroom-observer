@@ -296,25 +296,20 @@ class Name < AbstractModel
   #
   def children(all = false)
     if at_or_below_genus?
-      sql_conditions = "text_name LIKE ?"
+      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
       sql_args = "#{text_name} %"
     else
-      sql_conditions = "classification LIKE ?"
+      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
       sql_args = "%#{rank}: _#{text_name}_%"
     end
 
-    if all
-      return Name.where(sql_conditions, sql_args).
-             where("correct_spelling_id IS NULL").to_a
-    end
+    return Name.where(sql_conditions, sql_args).to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      # matches = Name.where("`rank` = #{Name.ranks[rank2]} AND #{sql}")
       matches = Name.where(rank: Name.ranks[rank2]).
-                where(sql_conditions, sql_args).
-                where("correct_spelling_id IS NULL")
+                where(sql_conditions, sql_args)
       return matches.to_a if matches.any?
     end
     []
