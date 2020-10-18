@@ -81,9 +81,6 @@ class RedirectsTest < IntegrationTestCase
 
   #######
 
-  TERM_ID = GlossaryTerm.first.id
-  GLOSSARY_USER_LOGIN = User.first.login
-
   def test_controller_glossary
     get("/glossary")
     assert_equal(glossary_terms_path,
@@ -103,42 +100,46 @@ class RedirectsTest < IntegrationTestCase
   end
 
   def test_show_glossary_term
-    get("/glossary/show_glossary_term/#{TERM_ID}")
-    assert_equal(glossary_term_path(TERM_ID),
+    term = glossary_terms(:conic_glossary_term)
+    get("/glossary/show_glossary_term/#{term.id}")
+    assert_equal(glossary_term_path(term.id),
                  @response.request.fullpath)
   end
 
   def test_create_glossary_get
-    login(GLOSSARY_USER_LOGIN)
+    login(users(:rolf).login)
     get("/glossary/create_glossary_term")
     assert_equal(new_glossary_term_path,
                  @response.request.fullpath)
   end
 
   def test_create_glossary_post
-    login(GLOSSARY_USER_LOGIN)
+    login(users(:rolf).login)
     post("/glossary/create_glossary_term")
     assert_equal(new_glossary_term_path,
                  @response.request.fullpath)
   end
 
   def test_edit_glossary_get
-    login(GLOSSARY_USER_LOGIN)
-    get("/glossary/edit_glossary_term/#{TERM_ID}")
-    assert_equal(edit_glossary_term_path(TERM_ID),
+    login(users(:rolf).login)
+    term = glossary_terms(:conic_glossary_term)
+    get("/glossary/edit_glossary_term/#{term.id}")
+    assert_equal(edit_glossary_term_path(term.id),
                  @response.request.fullpath)
   end
 
   def test_edit_glossary_post
-    login(GLOSSARY_USER_LOGIN)
-    post("/glossary/edit_glossary_term/#{TERM_ID}")
-    assert_equal(edit_glossary_term_path(TERM_ID),
+    login(users(:rolf).login)
+    term = glossary_terms(:conic_glossary_term)
+    post("/glossary/edit_glossary_term/#{term.id}")
+    assert_equal(edit_glossary_term_path(term.id),
                  @response.request.fullpath)
   end
 
   def test_show_past_glossary_term
-    get("/glossary/show_past_glossary_term/#{TERM_ID}?version=1")
-    assert_equal(show_past_glossary_term_path(TERM_ID, version: 1),
+    term = glossary_terms(:conic_glossary_term)
+    get("/glossary/show_past_glossary_term/#{term.id}?version=1")
+    assert_equal(show_past_glossary_term_path(term.id, version: 1),
                  @response.request.fullpath)
   end
 end
