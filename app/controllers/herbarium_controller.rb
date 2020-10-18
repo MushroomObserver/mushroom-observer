@@ -1,7 +1,27 @@
 # frozen_string_literal: true
 
-# Controls viewing and modifying herbaria.
-class HerbariumController < ApplicationController
+# Controls viewing and modifying Fungariiam
+#  Actions
+#
+#  create                  was POST create_herbarium
+#  delete_curator
+#  destroy                 was #destroy_herbarium
+#  edit                    was GET edit_herbarium
+#  index                   List all fungaria (was #list_herbaria)
+#  index_selected          (was index_herbarium) List fungaria selected
+#                          by current Query)
+#  index_institutional     ??? (was #index)
+#  merge                   (was #merge_herbaria)
+#  next                    was #next_herbarium display next result of Query
+#  new                     was GET create_herbarium
+#  prev                    was #prev_herbarium display previous result of Query
+#  request_to_be_curator
+#  search                  List Herbaria whose text matches string pattern
+#                          (was #herbarium_search)
+#  show                    was #show_herbarium
+#  update                  was POST edit_herbarium
+#
+class HerbariaController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_herbarium,
@@ -10,7 +30,8 @@ class HerbariumController < ApplicationController
     :show_herbarium
   ]
 
-  # Displays selected Herbarium's (based on current Query).
+  # ---------- Actions to Display data (index, show, etc.) ---------------------
+
   def index_herbarium
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
@@ -66,6 +87,9 @@ class HerbariumController < ApplicationController
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
+
+  # Displays selected Herbarium's (based on current Query).
   def create_herbarium
     store_location
     pass_query_params
@@ -98,6 +122,8 @@ class HerbariumController < ApplicationController
     end
   end
 
+  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
+
   def merge_herbaria
     pass_query_params
     keep_track_of_referrer
@@ -122,22 +148,6 @@ class HerbariumController < ApplicationController
     redirect_to_referrer || redirect_to_show_herbarium
   end
 
-  def request_to_be_curator
-    pass_query_params
-    keep_track_of_referrer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium && request.method == "POST"
-
-    subject = "Herbarium Curator Request"
-    content =
-      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
-      "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
-      "Notes: #{params[:notes]}"
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
-    flash_notice(:show_herbarium_request_sent.t)
-    redirect_to_referrer || redirect_to_show_herbarium
-  end
-
   def destroy_herbarium
     pass_query_params
     keep_track_of_referrer
@@ -155,9 +165,33 @@ class HerbariumController < ApplicationController
     end
   end
 
+  # ---------- ??? ---------------------------------------
+
+  def request_to_be_curator
+    pass_query_params
+    keep_track_of_referrer
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium && request.method == "POST"
+
+    subject = "Herbarium Curator Request"
+    content =
+      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
+      "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
+      "Notes: #{params[:notes]}"
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    flash_notice(:show_herbarium_request_sent.t)
+    redirect_to_referrer || redirect_to_show_herbarium
+  end
+
+  # ---------- Public methods (unrouted) ---------------------------------------
+
   ##############################################################################
 
   private
+
+  # --------- Filters
+
+  # --------- Other private methods
 
   def show_selected_herbaria(query, args = {})
     args = {
