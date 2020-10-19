@@ -519,16 +519,14 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    statement = ActiveRecord::Base.connection.raw_connection.prepare(%(
+    Name.connection.execute(%(
       UPDATE names n, name_descriptions nd
       SET n.classification = nd.classification
       WHERE nd.id = n.description_id
-        AND n.`rank` <= ?
+        AND n.`rank` <= #{Name.ranks[:Genus]}
         AND nd.classification != n.classification
         AND COALESCE(nd.classification, "") != ""
     ))
-    statement.execute(Name.ranks[:Genus])
-    statement.close
     []
   end
 
