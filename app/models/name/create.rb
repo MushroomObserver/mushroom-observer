@@ -31,26 +31,34 @@ class Name < AbstractModel
     conditions = calc_conditions(author, rank, ignore_deprecated)
     conditions_args = { name: author.present? ? parse.search_name : text_name }
 
-    while results.empty?
+    results = Name.where(conditions.join(" AND "), conditions_args).to_a
+    return results unless results.empty?
+
+    if author.present?
+      conditions_args[:name] = text_name
       results = Name.where(conditions.join(" AND "), conditions_args).to_a
-
-      # If user provided author, check if name already exists without author.
-      if author.present? && results.empty?
-        conditions_args[:name] = text_name
-        results = Name.where(conditions.join(" AND "), conditions_args).to_a
-        # (this should never return more than one result)
-        if fill_in_authors && results.length == 1
-          results.first.change_author(author)
-          results.first.save
-        end
+      # (this should never return more than one result)
+      if fill_in_authors && results.length == 1
+        results.first.change_author(author)
+        results.first.save
+        return results
       end
+    end
 
-      # Try again, looking for deprecated names
-      # if didn't find any matching approved names.
-      break if ignore_deprecated
+    conditions.pop
 
-      conditions.pop
-      ignore_deprecated = true
+    results = Name.where(conditions.join(" AND "), conditions_args).to_a
+    return results unless results.empty?
+
+    if author.present?
+      conditions_args[:name] = text_name
+      results = Name.where(conditions.join(" AND "), conditions_args).to_a
+      # (this should never return more than one result)
+      if fill_in_authors && results.length == 1
+        results.first.change_author(author)
+        results.first.save
+        return results
+      end
     end
 
     results
