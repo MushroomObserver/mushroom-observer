@@ -32,7 +32,7 @@ class Name < AbstractModel
 
     results = names_from_conditions(conditions, conditions_args,
                                     author, text_name, fill_in_authors)
-    return results unless results.empty?
+    return results if results.present? || ignore_deprecated
 
     conditions.pop
     names_from_conditions(conditions, conditions_args,
