@@ -25,28 +25,22 @@ class Name < AbstractModel
                       fill_in_authors = false)
     return [] unless parse = parse_name(in_str)
 
-    results = []
     author = parse.author
     text_name = parse.text_name
     conditions = calc_conditions(author, rank, ignore_deprecated)
     conditions_args = { name: author.present? ? parse.search_name : text_name }
 
-    results = Name.where(conditions.join(" AND "), conditions_args).to_a
+    results = names_from_conditions(conditions, conditions_args,
+                                    author, text_name, fill_in_authors)
     return results unless results.empty?
-
-    if author.present?
-      conditions_args[:name] = text_name
-      results = Name.where(conditions.join(" AND "), conditions_args).to_a
-      # (this should never return more than one result)
-      if fill_in_authors && results.length == 1
-        results.first.change_author(author)
-        results.first.save
-        return results
-      end
-    end
 
     conditions.pop
+    names_from_conditions(conditions, conditions_args,
+                          author, text_name, fill_in_authors)
+  end
 
+  def self.names_from_conditions(conditions, conditions_args,
+                                 author, text_name, fill_in_authors)
     results = Name.where(conditions.join(" AND "), conditions_args).to_a
     return results unless results.empty?
 
@@ -57,10 +51,8 @@ class Name < AbstractModel
       if fill_in_authors && results.length == 1
         results.first.change_author(author)
         results.first.save
-        return results
       end
     end
-
     results
   end
 
