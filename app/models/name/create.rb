@@ -23,27 +23,15 @@ class Name < AbstractModel
   #
   def self.find_names(in_str, rank = nil, ignore_deprecated = false,
                       fill_in_authors = false)
-
     return [] unless parse = parse_name(in_str)
 
-    text_name = parse.text_name
-    search_name = parse.search_name
-    author = parse.author
     results = []
+    author = parse.author
+    text_name = parse.text_name
+    conditions = calc_conditions(author, rank, ignore_deprecated)
+    conditions_args = { name: author.present? ? parse.search_name : text_name }
 
     while results.empty?
-      conditions = []
-      conditions_args = {}
-      if author.present?
-        conditions << "search_name = :name"
-        conditions_args[:name] = search_name
-      else
-        conditions << "text_name = :name"
-        conditions_args[:name] = text_name
-      end
-      conditions << "deprecated = 0" unless ignore_deprecated
-      conditions << "`rank` = #{Name.ranks[rank]}" if rank
-
       results = Name.where(conditions.join(" AND "), conditions_args).to_a
 
       # If user provided author, check if name already exists without author.
@@ -61,10 +49,23 @@ class Name < AbstractModel
       # if didn't find any matching approved names.
       break if ignore_deprecated
 
+      conditions.pop
       ignore_deprecated = true
     end
 
     results
+  end
+
+  def self.calc_conditions(author, rank, ignore_deprecated)
+    conditions = []
+    if author.present?
+      conditions << "search_name = :name"
+    else
+      conditions << "text_name = :name"
+    end
+    conditions << "`rank` = #{Name.ranks[rank]}" if rank
+    conditions << "deprecated = 0" unless ignore_deprecated
+    conditions
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
