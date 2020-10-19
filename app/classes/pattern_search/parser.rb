@@ -26,9 +26,9 @@ module PatternSearch
       str = + clean_incoming_string
       last_var = nil
       until str.blank?
-        (var, val) = parse_next_term!(str, last_var)
+        (var, vals) = parse_next_term!(str, last_var)
         term = hash[var] ||= Term.new(var)
-        term << val
+        vals.each { |val| term << val }
         last_var = var
       end
       hash.values
@@ -39,14 +39,24 @@ module PatternSearch
       str.sub!(TERM_REGEX, "") ||
         raise(SyntaxError.new(string: str))
       var = Regexp.last_match(1)
-      val = Regexp.last_match(2)
+      vals = Regexp.last_match(2)
       if var.blank?
         last_var && last_var != :pattern &&
           raise(PatternMustBeFirstError.new(str: str, var: last_var))
         var = "pattern"
       end
       var = var.sub(/:$/, "").to_sym
-      [var, val]
+      [var, parse_vals(vals)]
+    end
+
+    def parse_vals(str)
+      vals = []
+      while str.present?
+        str.sub!(VAL_REGEX, "")
+        vals << Regexp.last_match.to_s
+        str.sub!(/^,/, "")
+      end
+      vals
     end
   end
 end

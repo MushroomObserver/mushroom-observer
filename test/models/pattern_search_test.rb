@@ -7,21 +7,21 @@ class PatternSearchTest < UnitTestCase
     parser = PatternSearch::Parser.new("")
     # make str mutable because it is modified by parse_next_term
     str = + 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
-    assert_equal([:pattern, "test"], parser.parse_next_term!(str))
-    assert_equal([:name, "blah"], parser.parse_next_term!(str))
-    assert_equal([:two, "1,2,3"], parser.parse_next_term!(str))
-    assert_equal([:foo, '"quote"'], parser.parse_next_term!(str))
-    assert_equal([:bar, '\'a\',"b"'], parser.parse_next_term!(str))
-    assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(str))
+    assert_equal([:pattern, ["test"]], parser.parse_next_term!(str))
+    assert_equal([:name, ["blah"]], parser.parse_next_term!(str))
+    assert_equal([:two, ["1","2","3"]], parser.parse_next_term!(str))
+    assert_equal([:foo, ['"quote"']], parser.parse_next_term!(str))
+    assert_equal([:bar, ["'a'",'"b"']], parser.parse_next_term!(str))
+    assert_equal([:slash, ['\\,','"\\""']], parser.parse_next_term!(str))
   end
 
   def test_parse_pattern_order
     parser = PatternSearch::Parser.new("")
     # make str mutable because it is modified by parse_next_term
     str = + "one two user:me three"
-    assert_equal([:pattern, "one"], parser.parse_next_term!(str, nil))
-    assert_equal([:pattern, "two"], parser.parse_next_term!(str, :pattern))
-    assert_equal([:user, "me"], parser.parse_next_term!(str, :pattern))
+    assert_equal([:pattern, ["one"]], parser.parse_next_term!(str, nil))
+    assert_equal([:pattern, ["two"]], parser.parse_next_term!(str, :pattern))
+    assert_equal([:user, ["me"]], parser.parse_next_term!(str, :pattern))
     assert_raises(PatternSearch::PatternMustBeFirstError) \
       { parser.parse_next_term!(str, :user) }
   end
