@@ -3,32 +3,7 @@
 class Name < AbstractModel
   # Is this Name misspelled?
   def is_misspelling?
-    !!correct_spelling_id
-  end
-
-  # Same as +misspellings+, but returns ids.
-  def misspelling_ids
-    @misspelling_ids ||= begin
-      if @misspellings
-        @misspellings.map(&:id)
-      else
-        Name.connection.select_values(%(
-          SELECT id FROM names WHERE correct_spelling_id = '#{id}'
-        )).map(&:to_i)
-      end
-    end
-  end
-
-  # Array of Name's which are considered to be incorrect spellings of this one.
-  def misspellings
-    @misspellings ||= begin
-      if @misspelling_ids
-        # Slightly faster since id is primary index.
-        Name.where(id: @misspelling_ids).to_a
-      else
-        Name.where(correct_spelling_id: id).to_a
-      end
-    end
+    correct_spelling_id.present?
   end
 
   # Do some simple queries to try to find alternate spellings of the given

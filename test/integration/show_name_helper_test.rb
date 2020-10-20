@@ -13,13 +13,5 @@ class ShowNameHelperTest < IntegrationTestCase
     assert_match(:obss_of_taxon.l, response.body)
     assert_match(:obss_taxon_proposed.l, response.body)
     assert_match(:obss_name_proposed.l, response.body)
-
-    # on ShowName page
-    get("/#{observations(:chlorophyllum_rachodes_obs).id}")
-    assert_match(:obss_of_this_name.l, response.body)
-    assert_match(:show_observation_alternative_names.l, response.body)
-    assert_match(:obss_of_taxon.l, response.body)
-    assert_match(:obss_taxon_proposed.l, response.body)
-    assert_match(:obss_name_proposed.l, response.body)
   end
 end

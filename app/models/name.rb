@@ -307,9 +307,8 @@ class Name < AbstractModel
           source: :rank,
           accessor: :whiny)
 
-  belongs_to :correct_spelling,
-             class_name: "Name",
-             foreign_key: "correct_spelling_id"
+  belongs_to :correct_spelling, class_name: "Name",
+                                foreign_key: "correct_spelling_id"
   belongs_to :description, class_name: "NameDescription",
                            inverse_of: :name # (main one)
   belongs_to :rss_log
@@ -317,6 +316,8 @@ class Name < AbstractModel
 
   belongs_to :user
 
+  has_many :misspellings, class_name: "Name",
+                          foreign_key: "correct_spelling_id"
   has_many :descriptions, -> { order "num_views DESC" },
            class_name: "NameDescription",
            inverse_of: :name

@@ -2020,7 +2020,8 @@ class ApiTest < UnitTestCase
     assert(syns.include?(name2))
     assert_api_pass(params.merge(id: name1.id, clear_synonyms: "yes"))
     assert_obj_list_equal([name1], Name.find(name1.id).synonyms)
-    assert_obj_list_equal(syns - [name1], Name.find(name2.id).synonyms)
+    assert_obj_list_equal((syns - [name1]).sort_by(&:id),
+                          Name.find(name2.id).synonyms.sort_by(&:id))
     assert_api_fail(params.merge(id: name2.id, synonymize_with: name1.id))
     assert_api_pass(params.merge(id: name1.id, synonymize_with: name2.id))
     assert_obj_list_equal(syns, Name.find(name1.id).synonyms)
