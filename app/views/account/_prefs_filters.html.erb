@@ -11,9 +11,11 @@
   <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
     <%= render partial: "prefs_filter_radiobox",
                locals: { filter: filter, form: form } %>
-  <% elsif filter.type == :string %>
+  <% elsif filter.type == [:string] %>
     <%= render partial: "prefs_filter_text_field",
                locals: { filter: filter, form: form } %>
+  <% else %>
+    <% raise "unrecognized content filter type #{filter.type.inspect}" %>
   <% end %>
 <% end %>
 

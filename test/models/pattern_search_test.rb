@@ -667,6 +667,16 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
+  def test_observation_search_multiple_regions
+    expect = Observation.where("`where` LIKE '%California, USA' OR " \
+                               "`where` LIKE '%New York, USA'").to_a
+    assert(expect.any? { |obs| obs.where.include?("California, USA") })
+    assert(expect.any? { |obs| obs.where.include?("New York, USA") })
+    str = 'region:"USA, California","USA, New York"'
+    x = PatternSearch::Observation.new(str)
+    assert_obj_list_equal(expect, x.query.results, :sort)
+  end
+
   def test_observation_search_lichen
     lichens = Name.where("lifeform LIKE '%lichen%'")
     expect = Observation.where(name: lichens)

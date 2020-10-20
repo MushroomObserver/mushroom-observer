@@ -545,7 +545,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("", query.params[:has_images])
     assert_true(query.params[:has_specimen])
     assert_false(query.params[:lichen])
-    assert_equal("California", query.params[:region])
+    assert_equal(["California"], query.params[:region])
     assert_equal("", query.params[:clade])
   end
 
