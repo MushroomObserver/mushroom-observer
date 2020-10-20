@@ -44,7 +44,7 @@ class ObserverController
   # Displays matrix of Observations of subtaxa of the parent of the given name.
   def observations_of_related_taxa
     query = create_query(:Observation, :all,
-                         names: [parents(params[:name])],
+                         names: parents(params[:name]),
                          include_subtaxa: true,
                          by: :confidence)
     show_selected_observations(query)
@@ -54,7 +54,7 @@ class ObserverController
     names = Name.where(id: name_str).to_a
     names = Name.where(search_name: name_str).to_a if names.empty?
     names = Name.where(text_name: name_str).to_a if names.empty?
-    names.map(&:parent)
+    names.map(&:parents).flatten.map(&:id).uniq
   end
 
   # Displays matrix of User's Observation's, by date.
