@@ -35,7 +35,7 @@ class Name < AbstractModel
     text_name = parse.text_name
     conditions = calc_conditions(author, ignore_deprecated)
     search_name = parse.search_name
-    conditions_args = { name: author.present? ? search_name : text_name }
+    conditions_args = { name: search_name }
 
     results = Name.where(conditions.join(" AND "), conditions_args).
               with_rank(rank).to_a
