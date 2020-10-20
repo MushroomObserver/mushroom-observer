@@ -217,6 +217,14 @@ class ObserverControllerTest < FunctionalTestCase
         params: { name: names(:boletus_edulis).text_name })
     assert_template(:list_observations, partial: :_rss_log)
 
+    get(:observations_of_look_alikes,
+        params: { name: names(:tremella_mesenterica).text_name })
+    assert_template(:list_observations)
+
+    get(:observations_of_related_taxa,
+        params: { name: names(:tremella_mesenterica).text_name })
+    assert_template(:list_observations)
+
     get_with_dump(:rss)
     assert_template(:rss)
 

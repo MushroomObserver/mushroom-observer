@@ -32,6 +32,12 @@ class CommentControllerTest < FunctionalTestCase
     assert_form_action(action: "add_comment", id: obs_id, type: "Observation")
   end
 
+  def test_add_comment_no_id
+    login("dick")
+    get(:add_comment)
+    assert_response(:redirect)
+  end
+
   def test_add_comment_to_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
     requires_login(:add_comment, id: name_id, type: "Name")

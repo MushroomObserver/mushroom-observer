@@ -110,21 +110,16 @@ class ProjectController < ApplicationController
   def show_project
     store_location
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
-      @is_member = @project.is_member?(@user)
-      @is_admin = @project.is_admin?(@user)
+    return unless @project = find_or_goto_index(Project, params[:id].to_s)
 
-      @draft_data = Project.connection.select_all(%(
-        SELECT n.display_name, nd.id, nd.user_id
-        FROM names n, name_descriptions nd, name_descriptions_admins nda
-        WHERE nda.user_group_id = #{@project.admin_group_id}
-          AND nd.id = nda.name_description_id
-          AND n.id = nd.name_id
-        ORDER BY n.sort_name ASC, n.author ASC
-      ))
-      @draft_data = @draft_data.to_a
-    end
+    @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
+    @is_member = @project.is_member?(@user)
+    @is_admin = @project.is_admin?(@user)
+    @drafts = NameDescription.
+              joins(:admin_groups).
+              where("name_descriptions_admins.user_group_id":
+                    @project.admin_group_id).
+              includes(:name, :user)
   end
 
   # Go to next project: redirects to show_project.
@@ -294,15 +289,28 @@ class ProjectController < ApplicationController
   # "Posts" to the same action.  Stays on this view until done.
   def add_members
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      @users = User.where.not(verified: nil).order("login, name").to_a
-      if !@project.is_admin?(@user)
-        redirect_with_query(action: "show_project", id: @project.id)
-      elsif params[:candidate].present?
-        @candidate = User.find(params[:candidate])
-        set_status(@project, :member, @candidate, :add)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return must_be_project_admin!(@project.id) unless @project.is_admin?(@user)
+
+    @users = User.order("last_login desc").limit(100).to_a
+    return unless (@candidate = params[:candidate])
+
+    add_member(@candidate, @project)
+  end
+
+  def add_member(str, project)
+    if (user = find_member(str))
+      set_status(project, :member, user, :add)
+      @candidate = nil
+    else
+      flash_error(:add_members_not_found.t(str))
     end
+  end
+
+  def find_member(str)
+    return User.safe_find(str) if str.to_s.match?(/^\d+$/)
+
+    User.find_by_login(str.to_s.sub(/ <.*>$/, ""))
   end
 
   # Form to make a given User either a member or an admin.
@@ -315,40 +323,57 @@ class ProjectController < ApplicationController
   # Posts to same action.  Redirects to show_project when done.
   def change_member_status
     pass_query_params
-    if (@project = find_or_goto_index(Project, params[:id].to_s)) &&
-       (@candidate = find_or_goto_index(User, params[:candidate]))
-      if !@project.is_admin?(@user)
-        flash_error(:change_member_status_denied.t)
-        redirect_with_query(action: :show_project, id: @project.id)
-      elsif request.method == "POST"
-        admin = member = :remove
-        case params[:commit]
-        when :change_member_status_make_admin.l
-          admin = member = :add
-        when :change_member_status_make_member.l
-          member = :add
-        end
-        set_status(@project, :admin, @candidate, admin)
-        set_status(@project, :member, @candidate, member)
-        redirect_with_query(action: :show_project, id: @project.id)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return unless (@candidate = find_or_goto_index(User, params[:candidate]))
+    return must_be_project_admin!(@project.id) unless @project.is_admin?(@user)
+    return unless request.method == "POST"
+
+    post_change_member_status(@project, @candidate)
+  end
+
+  def post_change_member_status(project, candidate)
+    admin = member = :remove
+    case params[:commit]
+    when :change_member_status_make_admin.l
+      admin = member = :add
+    when :change_member_status_make_member.l
+      member = :add
     end
+    set_status(project, :admin, candidate, admin)
+    set_status(project, :member, candidate, member)
+    redirect_with_query(action: :show_project, id: project.id)
+  end
+
+  def must_be_project_admin!(id)
+    flash_error(:change_member_status_denied.t)
+    redirect_with_query(action: :show_project, id: id)
   end
 
   # Add/remove a given User to/from a given UserGroup.
   # TODO: Changes should get logged
   def set_status(project, type, user, mode)
     group = project.send(type == :member ? :user_group : :admin_group)
-    if mode == :add
-      unless group.users.include?(user)
-        group.users << user unless group.users.member?(user)
-        project.send("log_add_#{type}", user)
-      end
+    set_status_add(project, type, user, group) if mode == :add
+    set_status_remove(project, type, user, group) if mode == :remove
+  end
+
+  def set_status_add(project, type, user, group)
+    if group.users.include?(user)
+      flash_notice(:"add_members_already_added_#{type}".t(user: user.login))
     else
-      if group.users.include?(user)
-        group.users.delete(user)
-        project.send("log_remove_#{type}", user)
-      end
+      group.users << user unless group.users.member?(user)
+      project.send("log_add_#{type}", user)
+      flash_notice(:"add_members_added_#{type}".t(user: user.login))
+    end
+  end
+
+  def set_status_remove(project, type, user, group)
+    if group.users.include?(user)
+      group.users.delete(user)
+      project.send("log_remove_#{type}", user)
+      flash_notice(:"add_members_removed_#{type}".t(user: user.login))
+    else
+      flash_notice(:"add_members_already_removed_#{type}".t(user: user.login))
     end
   end
 

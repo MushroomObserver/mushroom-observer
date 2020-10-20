@@ -403,6 +403,35 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
   end
 
+  def test_add_member_writein
+    eol_project = projects(:eol_project)
+    target_user = dick
+    assert_not(target_user.in_group?(eol_project.admin_group.name))
+    assert_not(target_user.in_group?(eol_project.user_group.name))
+    params = {
+      id: eol_project.id,
+      candidate: "#{target_user.login} <Should Ignore This>"
+    }
+    requires_login(:add_members, params, mary.login)
+    assert_response(:success)
+    target_user.reload
+    assert_not(target_user.in_group?(eol_project.admin_group.name))
+    assert(target_user.in_group?(eol_project.user_group.name))
+  end
+
+  def test_add_member_bad_writein
+    eol_project = projects(:eol_project)
+    num_before = eol_project.user_group.users.count
+    params = {
+      id: eol_project.id,
+      candidate: "freddymercury"
+    }
+    requires_login(:add_members, params, mary.login)
+    assert_response(:success)
+    assert_flash_error
+    assert_equal(num_before, eol_project.reload.user_group.users.count)
+  end
+
   def test_changing_project_name
     proj = projects(:eol_project)
     login("rolf")
