@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_rank,
+        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
   def self.find_names_filling_in_authors(in_str, rank = nil,
                                          ignore_deprecated = false)
@@ -43,22 +46,17 @@ class Name < AbstractModel
       end
       conditions << "deprecated = 0" unless ignore_deprecated
 
-      if rank
-        conditions << "`rank` = :rank"
-        conditions_args[:rank] = Name.ranks[rank]
-      end
-
-      results = Name.where(conditions.join(" AND "), conditions_args).to_a
+      results = Name.where(conditions.join(" AND "), conditions_args).
+                with_rank(rank).to_a
 
       # If user provided author, check if name already exists without author.
       if author.present? && results.empty?
         conditions_args[:name] = text_name
-        results = Name.where(conditions.join(" AND "), conditions_args).to_a
+        results = Name.where(conditions.join(" AND "), conditions_args).
+                  with_rank(rank).to_a
+
         # (this should never return more than one result)
-        if fill_in_authors && results.length == 1
-          results.first.change_author(author)
-          results.first.save
-        end
+        update_author(results, author) if fill_in_authors && results.length == 1
       end
 
       # Try again, looking for deprecated names
@@ -69,6 +67,11 @@ class Name < AbstractModel
     end
 
     results
+  end
+
+  def self.update_author(results, author)
+    results.first.change_author(author)
+    results.first.save
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
@@ -201,4 +204,6 @@ class Name < AbstractModel
         where(author: [parsed_name.author, ""])
     end
   end
+
+  ##############################################################################
 end
