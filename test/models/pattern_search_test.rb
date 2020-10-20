@@ -9,10 +9,10 @@ class PatternSearchTest < UnitTestCase
     str = + 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
     assert_equal([:pattern, ["test"]], parser.parse_next_term!(str))
     assert_equal([:name, ["blah"]], parser.parse_next_term!(str))
-    assert_equal([:two, ["1","2","3"]], parser.parse_next_term!(str))
+    assert_equal([:two, %w[1 2 3]], parser.parse_next_term!(str))
     assert_equal([:foo, ['"quote"']], parser.parse_next_term!(str))
-    assert_equal([:bar, ["'a'",'"b"']], parser.parse_next_term!(str))
-    assert_equal([:slash, ['\\,','"\\""']], parser.parse_next_term!(str))
+    assert_equal([:bar, ["'a'", '"b"']], parser.parse_next_term!(str))
+    assert_equal([:slash, ['\\,', '"\\""']], parser.parse_next_term!(str))
   end
 
   def test_parse_pattern_order
