@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_rank,
+        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
   def self.find_names_filling_in_authors(in_str, rank = nil,
                                          ignore_deprecated: false)
@@ -30,24 +33,27 @@ class Name < AbstractModel
 
     author = parse.author
     text_name = parse.text_name
-    conditions = calc_conditions(author, rank, ignore_deprecated)
+    conditions = calc_conditions(author, ignore_deprecated)
     search_name = parse.search_name
     conditions_args = { name: author.present? ? search_name : text_name }
 
-    results = Name.where(conditions.join(" AND "), conditions_args).to_a
+    results = Name.where(conditions.join(" AND "), conditions_args).
+              with_rank(rank).to_a
     return results if results.present? || ignore_deprecated
 
     conditions.pop
-    results = Name.where(conditions.join(" AND "), conditions_args).to_a
+    results = Name.where(conditions.join(" AND "), conditions_args).
+              with_rank(rank).to_a
     return results if results.present?
 
-    add_author(author, fill_in_authors, conditions, text_name)
+    add_author(author, fill_in_authors, conditions, text_name, rank)
   end
 
-  def self.add_author(author, fill_in_authors, conditions, text_name)
+  def self.add_author(author, fill_in_authors, conditions, text_name, rank)
     return [] if author.blank?
 
-    names = Name.where(conditions.join(" AND "), { name: text_name }).to_a
+    names = Name.where(conditions.join(" AND "), { name: text_name }).
+            with_rank(rank).to_a
     if fill_in_authors && names.length == 1
       names.first.change_author(author)
       names.first.save
@@ -55,9 +61,8 @@ class Name < AbstractModel
     names
   end
 
-  def self.calc_conditions(author, rank, ignore_deprecated)
+  def self.calc_conditions(author, ignore_deprecated)
     conditions = ["#{author.present? ? "search_name" : "text_name"} = :name"]
-    conditions << "`rank` = #{Name.ranks[rank]}" if rank
     conditions << "deprecated = 0" unless ignore_deprecated
   end
 
