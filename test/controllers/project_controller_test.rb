@@ -415,7 +415,7 @@ class ProjectControllerTest < FunctionalTestCase
     requires_login(:add_members, params, mary.login)
     assert_response(:success)
     target_user.reload
-    assert_not(target_user.reload.in_group?(eol_project.admin_group.name))
+    assert_not(target_user.in_group?(eol_project.admin_group.name))
     assert(target_user.in_group?(eol_project.user_group.name))
   end
 
