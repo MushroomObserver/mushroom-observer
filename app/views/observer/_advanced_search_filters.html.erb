@@ -12,9 +12,11 @@
         <% if filter.type == :boolean %>
           <%= render partial: "advanced_search_filter_radio_buttons",
                      locals: { filter: filter } %>
-        <% elsif filter.type == :string %>
+        <% elsif filter.type == [:string] %>
           <%= render partial: "advanced_search_filter_text_field",
                      locals: { filter: filter } %>
+        <% else %>
+          <% raise "Unexpected filter type #{filter.type.inspect}" %>
         <% end %>
       </div>
     <% end %>
