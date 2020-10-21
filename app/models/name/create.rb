@@ -30,12 +30,18 @@ class Name < AbstractModel
                       fill_in_authors: false)
     return [] unless parse = parse_name(in_str)
 
-    results = Name.where(calc_conditions(parse.author, ignore_deprecated),
-                         { name: parse.search_name }).
-              with_rank(rank).to_a
-    return results if results.present? || ignore_deprecated
+    if ignore_deprecated
+      return Name.where(calc_conditions(parse.author, false),
+                        { name: parse.search_name }).
+               with_rank(rank).to_a
+    end
 
     results = Name.where(calc_conditions(parse.author, true),
+                         { name: parse.search_name }).
+                with_rank(rank).to_a
+    return results if results.present?
+
+    results = Name.where(calc_conditions(parse.author, false),
                          { name: parse.search_name }).
               with_rank(rank).to_a
     return results if results.present?
@@ -46,7 +52,7 @@ class Name < AbstractModel
   def self.add_author(author, fill_in_authors, text_name, rank)
     return [] if author.blank?
 
-    names = Name.where(calc_conditions(author, true), { name: text_name }).
+    names = Name.where(calc_conditions(author, false), { name: text_name }).
             with_rank(rank).to_a
     if fill_in_authors && names.length == 1
       names.first.change_author(author)
@@ -55,9 +61,9 @@ class Name < AbstractModel
     names
   end
 
-  def self.calc_conditions(author, ignore_deprecated)
+  def self.calc_conditions(author, deprecated)
     conditions = ["#{author.present? ? "search_name" : "text_name"} = :name"]
-    conditions << "deprecated = 0" unless ignore_deprecated
+    conditions << "deprecated = 0" if deprecated
     conditions.join(" AND ")
   end
 
