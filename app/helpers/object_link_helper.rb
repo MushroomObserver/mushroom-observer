@@ -65,9 +65,8 @@ module ObjectLinkHelper
   end
 
   # url for MB record by number
-  # as of 2020-10-05 actually links to search results, rather than the record
   def mycobank_record_url(record_id)
-    "#{mycobank_basic_search_url}/field/MycoBank%20number/#{record_id}"
+    "#{mycobank_host}/MB/#{record_id}"
   end
 
   # url for MycoBank name search for text_name

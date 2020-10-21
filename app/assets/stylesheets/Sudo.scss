@@ -1,0 +1,39 @@
+@import "defaults";
+
+$BODY_BG_COLOR:               #DD7700;
+
+$LOGO_BORDER_COLOR:           black;
+$LOGO_BORDER_WIDTH:           2px;
+$LOGO_FG_COLOR:               black;
+$LOGO_BG_COLOR:               #66FF44;
+$LOGO_HOVER_FG_COLOR:         #DD7700;
+$LOGO_HOVER_BG_COLOR:         #66FF44;
+
+$LEFT_BAR_BORDER_COLOR:       gray;
+$LEFT_BAR_BORDER_RADIUS:      0px;
+$LEFT_BAR_HEADER_FG_COLOR:    black;
+$LEFT_BAR_HEADER_BG_COLOR:    #66FF44;
+$LEFT_BAR_FG_COLOR:           #DD7700;
+$LEFT_BAR_BG_COLOR:           #66FF44;
+$LEFT_BAR_HOVER_FG_COLOR:     #66FF44;
+$LEFT_BAR_HOVER_BG_COLOR:     #DD7700;
+
+$TOP_BAR_BG_COLOR:            #DD7700;
+
+$TOP_BAR_BORDER_COLOR:        none;
+$TOP_BAR_BORDER_WIDTH:        0;
+$TOP_BAR_BORDER_STYLE:        none;
+$TOP_BAR_BORDER_RADIUS:       0;
+$TOP_BAR_FG_COLOR:            $BODY_FG_COLOR;
+$TOP_BAR_BG_COLOR:            $BODY_BG_COLOR;
+
+$VOTE_METER_FG_COLOR:         #000000;
+
+@import "mushroom_observer";
+
+.Admin {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
+}

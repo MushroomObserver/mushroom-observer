@@ -295,18 +295,21 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    sql = if at_or_below_genus?
-            "text_name LIKE '#{text_name} %'"
-          else
-            "classification LIKE '%#{rank}: _#{text_name}_%'"
-          end
-    sql += " AND correct_spelling_id IS NULL"
-    return Name.where(sql).to_a if all
+    if at_or_below_genus?
+      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
+      sql_args = "#{text_name} %"
+    else
+      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
+      sql_args = "%#{rank}: _#{text_name}_%"
+    end
+
+    return Name.where(sql_conditions, sql_args).to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.where("`rank` = #{Name.ranks[rank2]} AND #{sql}")
+      matches = Name.where(rank: Name.ranks[rank2]).
+                where(sql_conditions, sql_args)
       return matches.to_a if matches.any?
     end
     []

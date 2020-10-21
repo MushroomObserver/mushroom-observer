@@ -689,13 +689,6 @@ class NameController < ApplicationController
     elsif !sorter.only_approved_synonyms
       flash_notice(:name_change_synonyms_confirm.t)
     else
-      # Create synonym and add this name to it if this name not already
-      # associated with a synonym.
-      unless @name.synonym_id
-        @name.synonym = Synonym.create
-        @name.save
-      end
-
       # Go through list of all synonyms for this name and written-in names.
       # Exclude any names that have un-checked check-boxes: newly written-in
       # names will not have a check-box yet, names written-in in previous
@@ -703,11 +696,9 @@ class NameController < ApplicationController
       # be checked to proceed -- the default initial state.
       proposed_synonyms = params[:proposed_synonyms] || {}
       sorter.all_synonyms.each do |n|
-        # Synonymize all names that have been checked, or that don't have
-        # checkboxes.
-        if proposed_synonyms[n.id.to_s] != "0"
-          @name.transfer_synonym(n) if n.synonym_id != @name.synonym_id
-        end
+        # It is possible these names may be changed by transfer_synonym,
+        # but these *instances* will not reflect those changes, so reload.
+        @name.transfer_synonym(n.reload) if proposed_synonyms[n.id.to_s] != "0"
       end
 
       # De-synonymize any old synonyms in the "existing synonyms" list that
@@ -715,9 +706,7 @@ class NameController < ApplicationController
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      check_for_new_synonym(
-        @name, @name.synonyms, params[:existing_synonyms] || {}
-      )
+      split_off_desynonymized_names(@name, params[:existing_synonyms] || {})
 
       # Deprecate everything if that check-box has been marked.
       success = true
@@ -895,24 +884,17 @@ class NameController < ApplicationController
   # boxes.  They all start out checked.  If the user unchecks one, then that
   # name is removed from this synonym.  If the user unchecks several, then a
   # new synonym is created to synonymize all those names.
-  def check_for_new_synonym(name, candidates, checks)
-    new_synonym_members = []
-    # Gather all names with un-checked checkboxes.
-    candidates.each do |n|
-      new_synonym_members.push(n) if (name != n) && (checks[n.id.to_s] == "0")
+  def split_off_desynonymized_names(main_name, checks)
+    first_group = main_name.synonyms
+    other_group = first_group.select do |n|
+      (n != main_name) && (checks[n.id.to_s] == "0")
     end
-    len = new_synonym_members.length
-    if len > 1
-      name = new_synonym_members.shift
-      name.synonym = Synonym.create
-      name.save
-      new_synonym_members.each do |n|
-        name.transfer_synonym(n)
-      end
-    elsif len == 1
-      name = new_synonym_members.first
-      name.clear_synonym
-    end
+    return if other_group.empty?
+
+    pick_one = other_group.shift
+    pick_one.clear_synonym
+    other_group.each { |n| pick_one.transfer_synonym(n) }
+    main_name.clear_synonym if main_name.reload.synonyms.count <= 1
   end
 
   def dump_sorter(sorter)
@@ -1071,11 +1053,7 @@ class NameController < ApplicationController
     @new_names    = nil
     return unless request.method == "POST"
 
-    list = begin
-             params[:list][:members].strip_squeeze
-           rescue StandardError
-             ""
-           end
+    list = params[:list][:members]&.strip_squeeze if params[:list]
     construct_approved_names(list, params[:approved_names])
     sorter = NameSorter.new
     sorter.sort_names(list)
@@ -1165,6 +1143,7 @@ class NameController < ApplicationController
         @notification.note_template = note_template
         flash_notice(:email_tracking_updated_messages.t)
       end
+      notify_admins_of_notification(@notification)
       @notification.save
     when :DISABLE.l
       @notification.destroy
@@ -1173,6 +1152,21 @@ class NameController < ApplicationController
       )
     end
     redirect_with_query(action: "show_name", id: name_id)
+  end
+
+  def notify_admins_of_notification(notification)
+    return if notification.note_template.blank?
+    return if !notification.new_record? &&
+              notification.note_template_before_last_save.blank?
+
+    user = notification.user
+    name = Name.find(notification.obj_id)
+    note = notification.note_template
+    subject = "New Notification with Template"
+    content = "User: ##{user.id} / #{user.login}\n" \
+              "Name: ##{name.id} / #{name.search_name}\n" \
+              "Note: [[#{note}]]"
+    WebmasterEmail.build(user.email, content, subject).deliver_now
   end
 
   def edit_lifeform

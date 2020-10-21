@@ -191,7 +191,9 @@ class CommentController < ApplicationController
   def add_comment
     pass_query_params
     @target = Comment.find_object(params[:type], params[:id].to_s)
-    if !allowed_to_see!(@target)
+    if !@target
+      redirect_back_or_default("/")
+    elsif !allowed_to_see!(@target)
       # redirected already
     elsif request.method == "GET"
       @comment = Comment.new

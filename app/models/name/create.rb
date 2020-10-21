@@ -67,6 +67,11 @@ class Name < AbstractModel
     conditions.join(" AND ")
   end
 
+  def self.update_author(results, author)
+    results.first.change_author(author)
+    results.first.save
+  end
+
   # Parses a String, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an Array (genus first, then species, etc.  If
   # there is ambiguity at any level (due to different authors), then +nil+ is
@@ -197,4 +202,6 @@ class Name < AbstractModel
         where(author: [parsed_name.author, ""])
     end
   end
+
+  ##############################################################################
 end

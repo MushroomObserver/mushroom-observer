@@ -7,21 +7,21 @@ class PatternSearchTest < UnitTestCase
     parser = PatternSearch::Parser.new("")
     # make str mutable because it is modified by parse_next_term
     str = + 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
-    assert_equal([:pattern, "test"], parser.parse_next_term!(str))
-    assert_equal([:name, "blah"], parser.parse_next_term!(str))
-    assert_equal([:two, "1,2,3"], parser.parse_next_term!(str))
-    assert_equal([:foo, '"quote"'], parser.parse_next_term!(str))
-    assert_equal([:bar, '\'a\',"b"'], parser.parse_next_term!(str))
-    assert_equal([:slash, '\\,,"\\""'], parser.parse_next_term!(str))
+    assert_equal([:pattern, ["test"]], parser.parse_next_term!(str))
+    assert_equal([:name, ["blah"]], parser.parse_next_term!(str))
+    assert_equal([:two, %w[1 2 3]], parser.parse_next_term!(str))
+    assert_equal([:foo, ['"quote"']], parser.parse_next_term!(str))
+    assert_equal([:bar, ["'a'", '"b"']], parser.parse_next_term!(str))
+    assert_equal([:slash, ['\\,', '"\\""']], parser.parse_next_term!(str))
   end
 
   def test_parse_pattern_order
     parser = PatternSearch::Parser.new("")
     # make str mutable because it is modified by parse_next_term
     str = + "one two user:me three"
-    assert_equal([:pattern, "one"], parser.parse_next_term!(str, nil))
-    assert_equal([:pattern, "two"], parser.parse_next_term!(str, :pattern))
-    assert_equal([:user, "me"], parser.parse_next_term!(str, :pattern))
+    assert_equal([:pattern, ["one"]], parser.parse_next_term!(str, nil))
+    assert_equal([:pattern, ["two"]], parser.parse_next_term!(str, :pattern))
+    assert_equal([:user, ["me"]], parser.parse_next_term!(str, :pattern))
     assert_raises(PatternSearch::PatternMustBeFirstError) \
       { parser.parse_next_term!(str, :user) }
   end
@@ -664,6 +664,16 @@ class PatternSearchTest < UnitTestCase
     assert_not_nil(cal)
     assert_includes(expect, cal)
     x = PatternSearch::Observation.new('region:"USA, California"')
+    assert_obj_list_equal(expect, x.query.results, :sort)
+  end
+
+  def test_observation_search_multiple_regions
+    expect = Observation.where("`where` LIKE '%California, USA' OR " \
+                               "`where` LIKE '%New York, USA'").to_a
+    assert(expect.any? { |obs| obs.where.include?("California, USA") })
+    assert(expect.any? { |obs| obs.where.include?("New York, USA") })
+    str = 'region:"USA, California","USA, New York"'
+    x = PatternSearch::Observation.new(str)
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 

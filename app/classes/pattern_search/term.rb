@@ -158,6 +158,10 @@ module PatternSearch
       end
     end
 
+    def parse_list_of_strings
+      vals
+    end
+
     def parse_string
       make_sure_there_is_one_value!
     end
