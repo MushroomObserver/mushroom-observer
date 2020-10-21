@@ -10,7 +10,7 @@ class ContentFilter
       )
     end
 
-    def sql_conditions(_query, model, val)
+    def sql_condition(_query, model, val)
       table = model == Name ? "names" : "observations"
       name, rank = parse_name(val)
       if Name.ranks_above_genus.include?(rank)

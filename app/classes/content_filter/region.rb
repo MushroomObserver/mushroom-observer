@@ -10,7 +10,7 @@ class ContentFilter
       )
     end
 
-    def sql_conditions(query, model, val)
+    def sql_condition(query, model, val)
       val = Location.reverse_name_if_necessary(val)
       expr = make_regexp(query, val)
       field = model == Location ? "locations.name" : "observations.where"

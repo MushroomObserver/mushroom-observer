@@ -83,12 +83,14 @@
         <br/>
 
         <b><%= :show_project_drafts.t %>:</b>
-        <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
+        <%= @drafts.any? ? @drafts.length : :NONE.t %><br/>
         <div style="margin-left:1em">
-          <% @draft_data.each do |datum| %>
-            <%= link_with_query(datum["display_name"].t, {controller: :name,
-                                action: :show_name_description, id: datum["id"]}) %>
-            (<%= user_link(User.find(datum["user_id"])) %>)<br/>
+          <% @drafts.each do |draft| %>
+            <%= link_with_query(draft.name.display_name.t,
+                                { controller: :name,
+                                  action: :show_name_description,
+                                  id: draft.id }) %>
+            (<%= user_link(draft.user) %>)<br/>
           <% end %>
         </div>
       </div>
