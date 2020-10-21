@@ -6,9 +6,9 @@ class Name < AbstractModel
 
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
   def self.find_names_filling_in_authors(in_str, rank = nil,
-                                         ignore_deprecated: false)
+                                         include_deprecated: false)
     find_names(in_str, rank,
-               ignore_deprecated: ignore_deprecated,
+               include_deprecated: include_deprecated,
                fill_in_authors: true)
   end
 
@@ -18,7 +18,7 @@ class Name < AbstractModel
   #
   # +in_str+::              String to parse.
   # +rank+::                Accept only names of this rank (optional).
-  # +ignore_deprecated+::   If +true+, return all matching names,
+  # +include_deprecated+::  If +true+, return all matching names,
   #                         even if deprecated.
   # +fill_in_authors+::     If +true+, will fill in author for Name's missing
   #                         authors
@@ -26,33 +26,32 @@ class Name < AbstractModel
   #
   #  names = Name.find_names('Letharia vulpina')
   #
-  def self.find_names(in_str, rank = nil, ignore_deprecated: false,
+  def self.find_names(in_str, rank = nil, include_deprecated: false,
                       fill_in_authors: false)
     return [] unless parse = parse_name(in_str)
 
-    if ignore_deprecated
-      return Name.where(calc_conditions(parse.author, false),
-                        { name: parse.search_name }).
-               with_rank(rank).to_a
+    if include_deprecated
+      return name_finder(parse.author, true, parse.search_name, rank)
     end
 
-    results = Name.where(calc_conditions(parse.author, true),
-                         { name: parse.search_name }).
-                with_rank(rank).to_a
+    results = name_finder(parse.author, false, parse.search_name, rank)
     return results if results.present?
 
-    results = Name.where(calc_conditions(parse.author, false),
-                         { name: parse.search_name }).
-              with_rank(rank).to_a
+    results = name_finder(parse.author, true, parse.search_name, rank)
     return results if results.present?
 
     add_author(parse.author, fill_in_authors, parse.text_name, rank)
   end
 
+  def self.name_finder(author, include_deprecated, name, rank)
+    Name.where(calc_conditions(author, include_deprecated), { name: name }).
+      with_rank(rank).to_a
+  end
+
   def self.add_author(author, fill_in_authors, text_name, rank)
     return [] if author.blank?
 
-    names = Name.where(calc_conditions(author, false), { name: text_name }).
+    names = Name.where(calc_conditions(author, true), { name: text_name }).
             with_rank(rank).to_a
     if fill_in_authors && names.length == 1
       names.first.change_author(author)
@@ -61,9 +60,9 @@ class Name < AbstractModel
     names
   end
 
-  def self.calc_conditions(author, deprecated)
+  def self.calc_conditions(author, include_deprecated)
     conditions = ["#{author.present? ? "search_name" : "text_name"} = :name"]
-    conditions << "deprecated = 0" if deprecated
+    conditions << "deprecated = 0" unless include_deprecated
     conditions.join(" AND ")
   end
 
