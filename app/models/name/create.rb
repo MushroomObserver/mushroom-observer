@@ -26,37 +26,30 @@ class Name < AbstractModel
   #
   #  names = Name.find_names('Letharia vulpina')
   #
-
   def self.find_names(in_str, rank = nil, ignore_deprecated: false,
                       fill_in_authors: false)
     return [] unless parse = parse_name(in_str)
 
-    results = name_search(parse.search_name, rank, ignore_deprecated, true)
+    finder = Name.with_rank(rank)
+    results = name_search(finder.where("search_name = :name",
+                                       { name: parse.search_name }),
+                          ignore_deprecated)
     return results if results.present?
 
-    results = name_search(parse.text_name, rank, ignore_deprecated, false)
+    results = name_search(finder.where("text_name = :name",
+                                       { name: parse.text_name }),
+                          ignore_deprecated)
     set_author(results, parse.author, fill_in_authors)
 
     results
   end
 
-  def self.name_search(name, rank, ignore_deprecated, exact)
+  def self.name_search(finder, ignore_deprecated)
     unless ignore_deprecated
-      results = simple_finder(name, rank, false, exact)
-      return results if results.present?
+      results = finder.where("deprecated = 0")
+      return results.to_a if results.present?
     end
-    return simple_finder(name, rank, true, exact)
-  end
-
-  def self.simple_finder(name, rank, include_deprecated, exact)
-    Name.where(simple_conditions(include_deprecated, exact), { name: name }).
-      with_rank(rank).to_a
-  end
-
-  def self.simple_conditions(include_deprecated, exact)
-    conditions = ["#{exact ? "search_name" : "text_name"} = :name"]
-    conditions << "deprecated = 0" unless include_deprecated
-    conditions.join(" AND ")
+    finder.to_a
   end
 
   def self.set_author(names, author, fill_in_authors)
