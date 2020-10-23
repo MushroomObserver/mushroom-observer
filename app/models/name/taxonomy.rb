@@ -523,7 +523,7 @@ class Name < AbstractModel
       UPDATE names n, name_descriptions nd
       SET n.classification = nd.classification
       WHERE nd.id = n.description_id
-        AND n.`rank` <= #{Name.ranks[:Genus]}
+        AND n.`rank` <= #{Name.connection.quote(Name.ranks[:Genus])}
         AND nd.classification != n.classification
         AND COALESCE(nd.classification, "") != ""
     ))
