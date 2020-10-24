@@ -3985,8 +3985,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
-    expect = Name.joins(:observations).
-             where(rank: Name.ranks[:Species]).distinct
+    expect = Name.joins(:observations).with_rank(:Species).distinct
 
     get(:checklist)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,

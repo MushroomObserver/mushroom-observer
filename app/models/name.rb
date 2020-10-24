@@ -390,6 +390,9 @@ class Name < AbstractModel
     end
   end
 
+  scope :with_rank,
+        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+
   def <=>(other)
     sort_name <=> other.sort_name
   end

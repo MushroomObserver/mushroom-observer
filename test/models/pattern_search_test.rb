@@ -706,7 +706,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_rank
-    expect = Name.where(rank: Name.ranks[:Genus], correct_spelling: nil)
+    expect = Name.with_rank(:Genus).where(correct_spelling: nil)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:genus")
     assert_name_list_equal(expect, x.query.results, :sort)

@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
-  scope :with_rank,
-        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
-
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
   def self.find_names_filling_in_authors(in_str, rank = nil,
                                          ignore_deprecated: false)
@@ -53,10 +50,10 @@ class Name < AbstractModel
   end
 
   def self.set_author(names, author, fill_in_authors)
-    if author.present? && fill_in_authors && names.length == 1
-      names.first.change_author(author)
-      names.first.save
-    end
+    return unless author.present? && fill_in_authors && names.length == 1
+
+    names.first.change_author(author)
+    names.first.save
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
