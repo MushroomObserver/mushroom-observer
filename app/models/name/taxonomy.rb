@@ -295,18 +295,20 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    sql = if at_or_below_genus?
-            "text_name LIKE '#{text_name} %'"
-          else
-            "classification LIKE '%#{rank}: _#{text_name}_%'"
-          end
-    sql += " AND correct_spelling_id IS NULL"
-    return Name.where(sql).to_a if all
+    if at_or_below_genus?
+      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
+      sql_args = "#{text_name} %"
+    else
+      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
+      sql_args = "%#{rank}: _#{text_name}_%"
+    end
+
+    return Name.where(sql_conditions, sql_args).to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
+      matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
       return matches.to_a if matches.any?
     end
     []
@@ -520,114 +522,10 @@ class Name < AbstractModel
       UPDATE names n, name_descriptions nd
       SET n.classification = nd.classification
       WHERE nd.id = n.description_id
-        AND n.rank <= #{Name.ranks[:Genus]}
+        AND n.`rank` <= #{Name.connection.quote(Name.ranks[:Genus])}
         AND nd.classification != n.classification
         AND COALESCE(nd.classification, "") != ""
     ))
     []
   end
-
-  # # This is meant to be run nightly to ensure that all the infrageneric
-  # # classifications are up-to-date with respect to their genera.  This is
-  # # important because there is no way to edit this on-line.  (Although there
-  # # will be a "propagate classification" button on the genera, and maybe we
-  # # can add that to the children, as well.)
-  # def self.propagate_generic_classifications
-  #
-  #   # Refresh classification for genera from descriptions.
-  #   Name.connection.execute(%(
-  #     UPDATE names n, name_descriptions nd
-  #     SET n.classification = nd.classification
-  #     WHERE nd.id = n.description_id
-  #       AND n.rank = #{Name.ranks[:Genus]}
-  #       AND nd.classification != n.classification
-  #       AND nd.updated_at > n.updated_at
-  #   ))
-  #
-  #   # Grab all genera with classifications.
-  #   genera = {}
-  #   Name.where(rank: Name.ranks[:Genus],
-  #              correct_spelling_id: nil).each do |name|
-  #     next if name.classification.blank?
-  #     genera[name.text_name] ||= []
-  #     genera[name.text_name] << name
-  #   end
-  #
-  #   # Choose best name to use for each genus.
-  #   best = {}
-  #   genera.each do |genus, names|
-  #     names2 = names.reject(&:deprecated)
-  #     names  = names2 if names2.any?
-  #     names2 = names.reject { |n| n.author.match(/^sensu/ }
-  #     names  = names2 if names2.any?
-  #     if names.count > 1
-  #       names.sort_by! do |n|
-  #         Name.connection.select_value(%(
-  #           SELECT COUNT(id) FROM observations WHERE name_id = #{n.id}
-  #         )).to_i * -1
-  #       end
-  #     end
-  #     best[names.first.text_name] = names.first
-  #   end
-  #
-  #   # Create map from subtaxa to genus.
-  #   rows = []
-  #   Name.where(correct_spelling_id: nil).each do |name|
-  #     next unless name.below_genus?
-  #     genus = best[name.text_name.split(" ", 2).first]
-  #     rows << [name.id, genus.id] if genus
-  #   end
-  #
-  #   # Create temporary table.
-  #   create_table :temp, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-  #     t.integer :name_id
-  #     t.integer :genus_id
-  #   end
-  #   Name.connection.execute(%(
-  #     INSERT INTO temp (name_id, genus_id) VALUES
-  #     #{ rows.map { |r| "(#{r[0]},#{r[1]})" }.join(",\n") }
-  #   ))
-  #
-  #   # Get list of errors.
-  #   msgs = Name.connection.select_rows(%(
-  #     SELECT n1.search_name
-  #     FROM names n1, temp t, names n2
-  #     WHERE n1.rank < #{Name.ranks[:Genus]}
-  #       AND t.name_id = n1.id
-  #       AND n2.id = t.genus_id
-  #       AND n1.classification != n2.classification
-  #   )).map do |name|
-  #     "Classification wrong for #{name}."
-  #   end
-  #
-  #   # Propagate generic classifications.
-  #   Name.connection.execute(%(
-  #     UPDATE names n1, temp t, names n2
-  #     SET n1.classification = n2.classification
-  #     WHERE n1.rank < #{Name.ranks[:Genus]}
-  #       AND t.name_id = n1.id
-  #       AND n2.id = t.genus_id
-  #   ))
-  #
-  #   drop_table :temp
-  #
-  #   # Push classifications for subtaxa to descriptions.
-  #   Name.connection.execute(%(
-  #     UPDATE names n, name_descriptions nd
-  #     SET nd.classification = n.classification
-  #     WHERE nd.id = n.description_id
-  #       AND COALESCE(n.classification, "") != ""
-  #       AND n.rank > #{Name.ranks[:Genus]}
-  #   ))
-  #
-  #   # Refresh observation cache.
-  #   Observation.connection.execute(%(
-  #     UPDATE observations o, names n
-  #     SET o.classification = n.classification
-  #     WHERE o.name_id = n.id
-  #       AND o.classification != n.classification
-  #   ))
-  #
-  #   msgs
-  # end
 end

@@ -35,7 +35,7 @@ end
 genera = Name.connection.select_all(%(
   SELECT text_name as n, deprecated as d
   FROM names
-  WHERE rank = #{Name.ranks[:Genus]} AND correct_spelling_id IS NULL
+  WHERE `rank` = #{Name.ranks[:Genus]} AND correct_spelling_id IS NULL
   ORDER BY sort_name
 ))
 genera = genera.to_a
@@ -43,10 +43,10 @@ genera = genera.to_a
 species = Name.connection.select_all(%(
   SELECT text_name as n, author as a, deprecated as d, synonym_id as s
   FROM names
-  WHERE (rank = #{Name.ranks[:Species]} OR
-         rank = #{Name.ranks[:Subspecies]} OR
-         rank = #{Name.ranks[:Variety]} OR
-         rank = #{Name.ranks[:Form]})
+  WHERE (`rank` = #{Name.ranks[:Species]} OR
+         `rank` = #{Name.ranks[:Subspecies]} OR
+         `rank` = #{Name.ranks[:Variety]} OR
+         `rank` = #{Name.ranks[:Form]})
         AND correct_spelling_id IS NULL
   ORDER BY sort_name
 ))

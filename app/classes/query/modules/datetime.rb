@@ -57,18 +57,22 @@ module Query::Modules::Datetime
     end
   end
 
+  DATE_FORMAT = "STR_TO_DATE('%04d-%02d-%02d %02d:%02d:%02d', %s)"
+  SQL_DATE_FORMAT = "'%Y-%m-%d %H:%i:%s'"
+
   def add_half_time_condition(min, col, val)
     return if val.blank?
 
     y, m, d, h, n, s = val.split("-")
     @where << format(
-      "#{col} #{min ? ">" : "<"}= '%04d-%02d-%02d %02d:%02d:%02d'",
+      "#{col} #{min ? ">" : "<"}= #{DATE_FORMAT}",
       y.to_i,
       (m || (min ? 1 : 12)).to_i,
       (d || (min ? 1 : 31)).to_i,
-      (h || (min ? 0 : 24)).to_i,
-      (n || (min ? 0 : 60)).to_i,
-      (s || (min ? 0 : 60)).to_i
+      (h || (min ? 0 : 23)).to_i,
+      (n || (min ? 0 : 59)).to_i,
+      (s || (min ? 0 : 59)).to_i,
+      SQL_DATE_FORMAT
     )
   end
 end

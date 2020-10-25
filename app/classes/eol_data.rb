@@ -172,7 +172,7 @@ class EolData
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN (#{Name.ranks.values_at(
+    AND names.`rank` IN (#{Name.ranks.values_at(
       :Form, :Variety, :Subspecies, :Species, :Genus
     ).join(",")})
   )

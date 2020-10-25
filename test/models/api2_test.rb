@@ -1727,8 +1727,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.id))
     assert_api_results(names)
 
-    names = Name.where(rank: Name.ranks[:Variety]).
-            reject(&:correct_spelling_id)
+    names = Name.with_rank(:Variety).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
@@ -2186,7 +2185,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("rank <= #{genus} or rank = #{group}")
+    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2957,7 +2956,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("rank <= #{genus} or rank = #{group}")
+    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)

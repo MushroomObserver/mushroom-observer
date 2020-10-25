@@ -58,7 +58,7 @@ aliases  = {}
 names    = {}
 ids      = {}
 name_data = Name.connection.select_rows(%(
-  SELECT id, text_name, rank, deprecated, synonym_id, correct_spelling_id
+  SELECT id, text_name, `rank`, deprecated, synonym_id, correct_spelling_id
   FROM names
 ))
 
@@ -111,7 +111,7 @@ classifications = {}
 for id, genus, classification in Name.connection.select_rows(%(
   SELECT id as i, text_name as n, classification as c
   FROM names
-  WHERE rank = #{Name.ranks[:Genus]}
+  WHERE `rank` = #{Name.ranks[:Genus]}
     AND !deprecated
     AND correct_spelling_id IS NULL
 )) do
@@ -151,7 +151,7 @@ genus_to_species = {}
 for species in Name.connection.select_values(%(
   SELECT text_name as n
   FROM names
-  WHERE rank = #{Name.ranks[:Species]}
+  WHERE `rank` = #{Name.ranks[:Species]}
     AND !deprecated
     AND correct_spelling_id IS NULL
   ORDER BY sort_name

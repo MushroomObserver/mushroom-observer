@@ -55,5 +55,5 @@ project_rss_log:
 
 article_rss_log:
   article: premier_article
-  updated_at: 2016-08-08 12:00:00
+  updated_at: 2016-08-08 12:00:01
   notes: "Updated Article"
