@@ -9,12 +9,15 @@
 #
 ###############################################################################
 
+On DigitalOcean:
+Create droplet and set the root password in the initial creation screen.
+
 local> ssh root@$IP_ADDR
 root> passwd -l root
 
 # Create user accounts.
 root> useradd -m -s /bin/bash -G sudo $USER
-root> passwd $USER
+root> passwd $USER  # Technically only need for one user
 root> mkdir /home/$USER/.ssh
 root> vi /home/$USER/.ssh/authorized_keys
   # paste in appropriate id_rsa.pub
@@ -41,8 +44,10 @@ root> apt-get upgrade -y
 root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 25=smtp, 3306=mysql, 53=dns)
-root> iptables-restore
-  # Run "sudo iptables-save" on old server, then copy into here.
+root-on-old-server> iptables-save > ~/iptables.txt
+root-on-old-server> scp ~/iptables.txt root@IP_ADDR
+
+root> iptables-restore ~/iptables.txt
 root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
@@ -52,6 +57,8 @@ root> vi /etc/rc.local
 # Install and configure database.
 root> apt-get install -y mysql-server mysql-client
 root> mysql -u root -p
+  # Default root password is `root`
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
   create database mo_production;
   create user 'mo'@'localhost' identified by '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
