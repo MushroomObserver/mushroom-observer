@@ -4,12 +4,13 @@ update donations set email = 'webmaster@mushroomobserver.org';
 update donations set who = 'anonymous' where anonymous = true;
 
 update herbaria set email = 'webmaster@mushroomobserver.org';
+update collection_numbers set name = 'xxx';
 
 update image_votes set user_id = 0 where anonymous = true;
 
 update images set original_name = 'xxx';
 
-update observations set lat = null, long = null where gps_hidden = true;
+update observations set `lat` = null, `long` = null where `gps_hidden` = true;
 
 # delete from interests;
 
