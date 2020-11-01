@@ -15,7 +15,12 @@ class Name < AbstractModel
   # - group or name s.l. that includes, or is a higher rank of, a Proposed Name
   # See https://www.pivotaltracker.com/story/show/171308819 for details
   def mergeable?
-    namings.empty? && interests_plus_notifications.zero?
+    namings.empty? && interests_plus_notifications.zero? &&
+      !approved_synonyn_of_name_with_namings?
+  end
+
+  def approved_synonyn_of_name_with_namings?
+    !deprecated && (synonym_ids & Naming.all.pluck(:id)).empty?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
