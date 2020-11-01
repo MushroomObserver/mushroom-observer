@@ -2965,30 +2965,4 @@ class NameTest < UnitTestCase
     # nothing useful in return.
     Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
   end
-
-  def test_mergeable
-    # Prove that Name that's Approved Synonym of a Name with Namings
-    # is not `mergeable?`
-    approved_synonym = names(:lactarius_alpinus)
-    deprecated_name = names(:lactarius_alpigenes)
-    Naming.new(user: mary,
-               name: deprecated_name,
-               observation: observations(:minimal_unknown_obs)
-    )
-    assert(
-      !approved_synonym.deprecated &&
-        Naming.where(name: approved_synonym).none? &&
-        deprecated_name.synonym == approved_synonym.synonym,
-     "Test needs different fixture: " \
-     "an aproved Name without Namings, with a synonym having Naming(s)"
-    )
-
-    assert_false(
-      approved_synonym.mergeable?,
-      "Name that's an Approved Synonym of a Name with Namings " \
-      "should not be mergeable."
-    )
-
-
-  end
 end
