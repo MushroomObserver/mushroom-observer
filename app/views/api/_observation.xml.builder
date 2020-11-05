@@ -13,6 +13,7 @@ xml.tag!(tag,
   xml_latitude(xml, :latitude, object.public_lat)
   xml_longitude(xml, :longitude, object.public_long)
   xml_altitude(xml, :altitude, object.alt)
+  xml_boolean(xml, :gps_hidden, true) if object.gps_hidden
   xml_boolean(xml, :specimen_available, true) if object.specimen
   if object.is_collection_location
     xml_boolean(xml, :is_collection_location, true)
