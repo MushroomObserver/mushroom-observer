@@ -43,6 +43,13 @@ class Api2ControllerTest < FunctionalTestCase
 
   ##############################################################################
 
+  def test_robot_permissions
+    @request.user_agent = "Googlebot"
+    obs = Observation.first
+    get(:observations, id: obs.id)
+    assert_equal(200, @response.status)
+  end
+
   def test_basic_collection_number_get_request
     do_basic_get_request_for_model(CollectionNumber)
   end
