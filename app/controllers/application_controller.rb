@@ -1525,6 +1525,11 @@ class ApplicationController < ActionController::Base
       # in user's content filter?
       next unless fltr.on?(filters[key])
 
+      # This is a "private" method used by Query#validate_params.
+      # It would be better to add these parameters before the query is
+      # instantiated. Or alternatively, make query validation lazy so
+      # we can continue to add parameters up until we first ask it to
+      # execute the query.
       query.params[key] = query.validate_value(fltr.type, fltr.sym,
                                                filters[key].to_s)
       @any_content_filters_applied = true
