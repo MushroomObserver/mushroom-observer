@@ -257,10 +257,6 @@ module Query
         @params_cache[arg]
       end
 
-      # ------------------------------------------------------------------------
-
-      private
-
       def validate_value(arg_type, arg_sym, val)
         if arg_type.is_a?(Array)
           array_validate(arg_sym, val, arg_type.first)
