@@ -13,7 +13,7 @@ echo "id  name  north south east  west  high  low" > $public/locations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name, north, south, east, west, high, low from locations' >> $public/locations.csv
 
 echo "id  text_name author  deprecated  correct_spelling_id synonym_id  rank" > $public/names.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select id, text_name, author, deprecated, correct_spelling_id, synonym_id, rank from names' >> $public/names.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, text_name, author, deprecated, correct_spelling_id, synonym_id, `rank` from names' >> $public/names.csv
 
 echo "id  name_id when  location_id lat long  alt vote_cache  is_collection_location" > $public/observations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location from observations' >> $public/observations.csv

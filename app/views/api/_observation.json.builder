@@ -4,6 +4,7 @@ json.date                   object.when
 json.latitude               object.public_lat
 json.longitude              object.public_long
 json.altitude               object.alt
+json.gps_hidden             object.gps_hidden ? true : false
 json.specimen_available     object.specimen ? true : false
 json.is_collection_location object.is_collection_location ? true : false
 json.confidence             object.vote_cache

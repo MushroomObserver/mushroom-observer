@@ -785,6 +785,14 @@ class ObserverControllerTest < FunctionalTestCase
            "No results should be lichens")
   end
 
+  def test_observations_with_region_filter
+    login(users(:californian).name)
+    get(:list_observations)
+    expect = Observation.where("`where` LIKE '%California, USA'").to_a
+    results = @controller.instance_variable_get("@objects")
+    assert_obj_list_equal(expect.sort_by(&:id), results.sort_by(&:id))
+  end
+
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: { controller: :observer,

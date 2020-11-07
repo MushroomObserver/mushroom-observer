@@ -139,3 +139,7 @@ antilichenologist:
   <<: *DEFAULTS
   content_filter: <%= { lichen: "no" }.to_yaml.inspect %>
 
+californian:
+  <<: *DEFAULTS
+  content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
+
