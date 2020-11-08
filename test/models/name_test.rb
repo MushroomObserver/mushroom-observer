@@ -2751,6 +2751,30 @@ class NameTest < UnitTestCase
                  deprecated_name.best_preferred_synonym)
   end
 
+  def test_dependency
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      !approved_synonym.deprecated &&
+        deprecated_name.synonym == approved_synonym.synonym,
+      "Test needs different fixture: " \
+      "an Approved Name, with a Synonym having Naming(s)"
+    )
+
+    assert(
+      approved_synonym.dependency?,
+      "Approved Synonym of a Proposed Name should be a `dependency`."
+    )
+
+    assert(
+      names(:basidiomycetes).dependency?,
+      "Ancestor of a Proposed Name should be a `dependency`."
+    )
+  end
+
   def test_imageless
     assert_true(names(:imageless).imageless?)
     assert_false(names(:fungi).imageless?)
