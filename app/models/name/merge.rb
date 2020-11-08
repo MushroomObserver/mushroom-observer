@@ -145,7 +145,7 @@ class Name < AbstractModel
 
   def ancestor_of_proposed_name?
     Name.joins(:namings).where(
-      "classification LIKE ?", "%#{rank}: #{display_name_without_authors}%"
-    )
+      "classification LIKE ?", "%#{rank}: #{classification_name}%"
+    ).present?
   end
 end

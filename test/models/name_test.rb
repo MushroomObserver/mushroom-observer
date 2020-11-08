@@ -2231,6 +2231,8 @@ class NameTest < UnitTestCase
   end
 
   # --------------------------------------
+  #  formatting
+  # --------------------------------------
 
   # Prove that display_name_brief_authors is shortened correctly
   def test_display_name_brief_authors
@@ -2398,6 +2400,22 @@ class NameTest < UnitTestCase
       )
     )
   end
+
+  def test_make_sure_names_are_bolded_correctly
+    name = names(:suilus)
+    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
+    Name.make_sure_names_are_bolded_correctly
+    name.reload
+    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
+
+  def test_classification_name
+    name = names(:suilus)
+
+    assert_equal("_#{name.text_name}_", name.classification_name)
+  end
+
+  # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
@@ -2757,12 +2775,10 @@ class NameTest < UnitTestCase
     Naming.create(user: mary,
                   name: deprecated_name,
                   observation: observations(:minimal_unknown_obs))
-    assert(
-      !approved_synonym.deprecated &&
-        deprecated_name.synonym == approved_synonym.synonym,
-      "Test needs different fixture: " \
-      "an Approved Name, with a Synonym having Naming(s)"
-    )
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym,
+           "Test needs different fixture: " \
+           "an Approved Name, with a Synonym having Naming(s)")
 
     assert(
       approved_synonym.dependency?,
@@ -2898,14 +2914,6 @@ class NameTest < UnitTestCase
     assert_nil(good.correct_spelling)
     assert_not_nil(good.synonym_id)
     assert_objs_equal(good.synonym, bad.synonym)
-  end
-
-  def test_make_sure_names_are_bolded_correctly
-    name = names(:suilus)
-    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
-    Name.make_sure_names_are_bolded_correctly
-    name.reload
-    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
   def test_registability

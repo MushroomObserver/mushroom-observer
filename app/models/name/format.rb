@@ -63,6 +63,11 @@ class Name < AbstractModel
     real_text_name + " (#{id || "?"})"
   end
 
+  # Name as input in classification (Textilized text_name)
+  def classification_name
+    "_#{text_name}_"
+  end
+
   def real_text_name
     Name.display_to_real_text(self)
   end
