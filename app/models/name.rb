@@ -222,6 +222,7 @@
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
 #  synonym_ids:              List of IDs of all synonyms, including this Name
+#  other_synonym_ids         List of IDs of all synonyms, excluding this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  best_approved_synonym::   Single "best" approved synonym
@@ -257,6 +258,7 @@
 #  ==== Merging
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
+#  dependency?::             A dependency of a proposed Name
 #
 #  == Callbacks
 #

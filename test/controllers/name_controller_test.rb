@@ -2702,6 +2702,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
+
     assert_difference("survivor.versions.count", 1) do
       post(:edit_name, params: params)
     end
@@ -2753,6 +2754,41 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     assert_not(Name.exists?(merged_name.id))
     assert_equal(189_826, edited_name.reload.icn_id)
+  end
+
+  def test_update_merge_destroy_approved_synonym
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      !approved_synonym.deprecated &&
+        Naming.where(name: approved_synonym).none? &&
+        deprecated_name.synonym == approved_synonym.synonym,
+      "Test needs different fixture: " \
+      "an Approved Name without Namings, with a synonym having Naming(s)"
+    )
+    survivor = names(:agaricus_campestris)
+
+    params = {
+      id: approved_synonym.id,
+      name: {
+        text_name: survivor.text_name,
+        author: survivor.author,
+        rank: survivor.rank,
+        deprecated: survivor.deprecated
+      }
+    }
+    login("rolf")
+
+    post(:edit_name, params: params)
+
+    assert_redirected_to(
+      { controller: :observer, action: :email_merge_request,
+        type: :Name, old_id: approved_synonym.id, new_id: survivor.id },
+      "User should be unable to merge an approved synonym of a Naming"
+    )
   end
 
   # ----------------------------

@@ -18,6 +18,10 @@ class Name < AbstractModel
     namings.empty? && interests_plus_notifications.zero?
   end
 
+  def dependency?
+    approved_synonym_of_proposed_name?
+  end
+
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
   # changes are made to +self+, however it might update the +classification+
   # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
@@ -129,5 +133,13 @@ class Name < AbstractModel
 
     # Finally destroy the name.
     old_name.destroy
+  end
+
+  ##############################################################################
+
+  private
+
+  def approved_synonym_of_proposed_name?
+    !deprecated && (other_synonym_ids & Naming.all.pluck(:name_id)).present?
   end
 end
