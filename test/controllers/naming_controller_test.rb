@@ -625,8 +625,8 @@ class NamingControllerTest < FunctionalTestCase
     name.reload
     assert_equal(old_author, name.author)
     assert_flash_error
-    assert_response(:success, "Was expecting it to re-serve the form because "
-                              "the name wasn't recognized.")
+    assert_response(:success, "Was expecting it to re-serve the form " \
+                              "because the name wasn't recognized.")
   end
 
   def test_automatic_case_correction
