@@ -167,7 +167,6 @@ class Name < AbstractModel
   # interpreted as an author, and it *is* recognized if changed to lowercase,
   # this method changes the second word to lowercase.  Returns fixed string.
   def self.fix_capitalized_species_epithet(str)
-
     # Is second word capitalized?
     return str unless str.match?(/^\S+ [A-Z]/)
 
@@ -175,13 +174,13 @@ class Name < AbstractModel
     return str if Name.find_by_search_name(str).present?
 
     # Try converting second word to lowercase.
-    str2 = str.sub(/ [A-Z]/) { |match| match.downcase }
+    str2 = str.sub(/ [A-Z]/, &:downcase)
 
     # Return corrected name if that name exists, else keep original name.
     if Name.where("search_name = ? OR text_name = ?", str2, str2).present?
-      return str2
+      str2
     else
-      return str
+      str
     end
   end
 end

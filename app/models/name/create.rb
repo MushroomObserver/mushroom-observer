@@ -52,7 +52,7 @@ class Name < AbstractModel
   end
 
   def self.set_author(names, author, fill_in_authors)
-    return unless author.blank? && fill_in_authors && names.length == 1
+    return unless author.present? && fill_in_authors && names.length == 1
 
     names.first.change_author(author)
     names.first.save
