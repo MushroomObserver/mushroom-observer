@@ -19,7 +19,7 @@ class Name < AbstractModel
   #   what            params[:name][:name]            Text field.
   #   approved_name   params[:approved_name]          Last name user entered.
   #   chosen_name     params[:chosen_name][:name_id]  Name id from radio boxes.
-  #   (@user -- might be used by one or more things)
+  #   (User.current -- might be used by one or more things)
   #
   # RETURNS:
   #   success       true: okay to use name; false: user needs to approve name.
@@ -45,6 +45,8 @@ class Name < AbstractModel
       # Has user chosen among multiple matching names or among
       # multiple approved names?
       if chosen_name.blank?
+        what2 = fix_capitalized_species_epithet(what2)
+
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
         names = find_names_filling_in_authors(what2)
@@ -158,5 +160,28 @@ class Name < AbstractModel
     args = { touch: altered? }.merge(args)
     log(log, args)
     save
+  end
+
+  # A common mistake is capitalizing the species epithet. If the second word
+  # is capitalized, and the name isn't recognized if the second word is
+  # interpreted as an author, and it *is* recognized if changed to lowercase,
+  # this method changes the second word to lowercase.  Returns fixed string.
+  def self.fix_capitalized_species_epithet(str)
+
+    # Is second word capitalized?
+    return str unless str.match?(/^\S+ [A-Z]/)
+
+    # Trust it if there is actually a name with that author present.
+    return str if Name.find_by_search_name(str).present?
+
+    # Try converting second word to lowercase.
+    str2 = str.sub(/ [A-Z]/) { |match| match.downcase }
+
+    # Return corrected name if that name exists, else keep original name.
+    if Name.where("search_name = ? OR text_name = ?", str2, str2).present?
+      return str2
+    else
+      return str
+    end
   end
 end

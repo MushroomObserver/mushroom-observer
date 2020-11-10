@@ -36,8 +36,10 @@ class Name < AbstractModel
     results = name_search(finder.where("text_name = :name",
                                        { name: parse.text_name }),
                           ignore_deprecated)
-    set_author(results, parse.author, fill_in_authors)
+    return results if parse.author.blank?
+    return [] if results.any? { |n| n.author.present? }
 
+    set_author(results, parse.author, fill_in_authors)
     results
   end
 
@@ -50,7 +52,7 @@ class Name < AbstractModel
   end
 
   def self.set_author(names, author, fill_in_authors)
-    return unless author.present? && fill_in_authors && names.length == 1
+    return unless author.blank? && fill_in_authors && names.length == 1
 
     names.first.change_author(author)
     names.first.save
