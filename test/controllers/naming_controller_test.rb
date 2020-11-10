@@ -606,4 +606,28 @@ class NamingControllerTest < FunctionalTestCase
                     _show_images
                   ])
   end
+
+  def test_automatic_author_bug
+    obs = observations(:minimal_unknown_obs)
+    name = names(:peltigera)
+    assert_equal(:Genus, name.rank)
+    assert_not_empty(name.author)
+    name.locked = true
+    name.save!
+    old_author = name.author
+
+    params = {
+      id: obs.id,
+      name: {
+        name: "#{name.text_name} Seneca #{name.author}",
+        approved_name: "#{name.text_name} #{name.author}"
+      }
+    }
+    login("dick")
+    post(:create, params)
+
+    name.reload
+    assert_equal(old_author, name.author)
+    assert_response(:success, "Was expecting it to re-serve the form because the name wasn't recognized.")
+  end
 end
