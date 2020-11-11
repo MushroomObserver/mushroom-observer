@@ -266,10 +266,6 @@ class NameControllerTest < FunctionalTestCase
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
     get(:show_name, params: { id: name.id })
-    assert(
-      /#{:ICN_ID.l}.*#{name.icn_id}/m =~ @response.body,
-      "Page lacks ICN identifier label and/or number"
-    )
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
       "Page is missing a link to IF record"
