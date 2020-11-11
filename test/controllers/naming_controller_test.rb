@@ -606,4 +606,40 @@ class NamingControllerTest < FunctionalTestCase
                     _show_images
                   ])
   end
+
+  def test_automatic_author_bug
+    obs = observations(:minimal_unknown_obs)
+    name = names(:peltigera)
+    assert_equal(:Genus, name.rank)
+    assert_not_empty(name.author)
+    old_author = name.author
+
+    params = {
+      id: obs.id,
+      name: { name: "#{name.text_name} Seneca #{name.author}" },
+      approved_name: "#{name.text_name} #{name.author}"
+    }
+    login("dick")
+    post(:create, params)
+
+    name.reload
+    assert_equal(old_author, name.author)
+    assert_flash_error
+    assert_response(:success, "Was expecting it to re-serve the form " \
+                              "because the name wasn't recognized.")
+  end
+
+  def test_automatic_case_correction
+    obs = observations(:minimal_unknown_obs)
+    name = names(:coprinus_comatus)
+    params = {
+      id: obs.id,
+      name: { name: "Coprinus Comatus" }
+    }
+    login("dick")
+    post(:create, params)
+    assert_flash_success
+    naming = obs.namings.where(user: dick).first
+    assert_names_equal(name, naming.name)
+  end
 end
