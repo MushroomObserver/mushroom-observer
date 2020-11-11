@@ -35,6 +35,12 @@ class Name < AbstractModel
     [:Form, :Variety, :Subspecies]
   end
 
+  # Does this Name have a rank above genus that's in MO's Classification scheme
+  # Currently all ranks above :Genus except :Group
+  def classified_above_genus?
+    [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain].freeze.include?(rank)
+  end
+
   def at_or_below_genus?
     rank == :Genus || below_genus?
   end

@@ -145,8 +145,14 @@ class Name < AbstractModel
   end
 
   def correctly_spelled_ancestor_of_proposed_name?
-    Name.joins(:namings).where(
-      "classification LIKE ?", "%#{rank}: #{classification_name}%"
-    ).any?
+    if classified_above_genus?
+      Name.joins(:namings).where(
+        "classification LIKE ?", "%#{rank}: #{classification_name}%"
+      ).any?
+    elsif rank == :Genus
+      Name.joins(:namings).where("text_name LIKE ?" "#{text_name}%")
+    elsif rank == :Species
+      Name.joins(:namings).where("text_name LIKE ?" "#{text_name}%")
+    end
   end
 end
