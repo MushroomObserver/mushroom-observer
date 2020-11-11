@@ -149,10 +149,8 @@ class Name < AbstractModel
       Name.joins(:namings).where(
         "classification LIKE ?", "%#{rank}: #{classification_name}%"
       ).any?
-    elsif rank == :Genus
-      Name.joins(:namings).where("text_name LIKE ?" "#{text_name}%")
-    elsif rank == :Species
-      Name.joins(:namings).where("text_name LIKE ?" "#{text_name}%")
+    elsif [:Genus, :Species].include?(rank)
+      Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").any?
     end
   end
 end
