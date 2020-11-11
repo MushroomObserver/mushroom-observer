@@ -19,7 +19,8 @@ class Name < AbstractModel
   end
 
   def dependency?
-    approved_synonym_of_proposed_name? || ancestor_of_proposed_name?
+    approved_synonym_of_proposed_name? ||
+    correctly_spelled_ancestor_of_proposed_name?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
@@ -143,9 +144,9 @@ class Name < AbstractModel
     !deprecated && (other_synonym_ids & Naming.all.pluck(:name_id)).present?
   end
 
-  def ancestor_of_proposed_name?
+  def correctly_spelled_ancestor_of_proposed_name?
     Name.joins(:namings).where(
       "classification LIKE ?", "%#{rank}: #{classification_name}%"
-    ).present?
+    ).any?
   end
 end

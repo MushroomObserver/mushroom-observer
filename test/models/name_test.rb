@@ -2410,7 +2410,7 @@ class NameTest < UnitTestCase
   end
 
   def test_classification_name
-    name = names(:suilus)
+    name = names(:suillus)
 
     assert_equal("_#{name.text_name}_", name.classification_name)
   end
@@ -2769,7 +2769,7 @@ class NameTest < UnitTestCase
                  deprecated_name.best_preferred_synonym)
   end
 
-  def test_dependency
+  def test_dependency_approved_synonym_of_proposed_name
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
     Naming.create(user: mary,
@@ -2782,12 +2782,44 @@ class NameTest < UnitTestCase
 
     assert(
       approved_synonym.dependency?,
-      "Approved Synonym of a Proposed Name should be a `dependency`."
+      "Approved synonym of Name having Namings should be a 'dependency'."
+    )
+  end
+
+  def test_dependency_correctly_spelled_ancestor
+    ancestor = names(:basidiomycetes)
+    assert(
+      ancestor.correct_spelling.empty? &&
+      Name.joins(:namings).where(
+      "classification LIKE ?", "%#{ancestor.rank}: _#{ancestor.text_name}_%"
+      ).any?,
+      "Test needs different fixture: A correctly spelled Name " \
+      "at a rank that has Namings classified with that rank."
     )
 
     assert(
-      names(:basidiomycetes).dependency?,
-      "Ancestor of a Proposed Name should be a `dependency`."
+      ancestor.dependency?,
+      "Correctly spelled ancestor of a Proposed Name should be a 'dependency'."
+    )
+  end
+
+  def test_dependency_misspelt_ancestor
+    misspelt_genus = names(:suilus)
+    species_of_missplet_genus = Name.create(
+      text_name:    "#{misspelt_genus.text_name} lakei",
+      display_name: "__#{misspelt_genus.text_name} lakei__",
+      rank:         :Species,
+      user:         dick,
+      version:      1
+    )
+    Naming.create(user: mary,
+                  name: species_of_missplet_genus,
+                  observation: observations(:minimal_unknown_obs))
+
+    assert_not(
+      misspelt_genus.dependency?,
+      "Misspelt Ancestor of correctly spelled Proposed Name " \
+      "should not be a `dependency`."
     )
   end
 
