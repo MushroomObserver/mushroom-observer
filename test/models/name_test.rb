@@ -2787,31 +2787,37 @@ class NameTest < UnitTestCase
   end
 
   def test_dependency_correctly_spelled_ancestor
-    above_genus_ancestor = names(:basidiomycetes)
+    ancestor = names(:basidiomycetes)
     assert(
-      above_genus_ancestor.correct_spelling.empty? &&
+      ancestor.correct_spelling.empty? &&
       Name.joins(:namings).where(
         "classification LIKE ?",
-        "%#{above_genus_ancestor.rank}: _#{above_genus_ancestor.text_name}_%"
+        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
       ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
     assert(
-      above_genus_ancestor.dependency?,
+      ancestor.dependency?,
       "Correctly spelled ancestor of a Proposed Name should be a 'dependency'."
     )
 
-    genus_ancestor = names(:boletus)
-    assert(genus_ancestor.dependency?,
-           "Genus ancestor of a Proposed Name should be a 'dependency'.")
+    ancestor = names(:boletus)
+    assert(ancestor.dependency?,
+           "Genus that is ancestor of a Proposed Name should be a 'dependency'.")
 
-    species_ancestor  = names(:amanita_boudieri)
+    species_ancestor = names(:amanita_boudieri)
     Naming.create(user: mary,
                   name: names(:amanita_boudieri_var_beillei),
                   observation: observations(:minimal_unknown_obs))
-    assert(species_ancestor.dependency?,
-           "Species ancestor of a Proposed Name should be a 'dependency'.")
+    assert(
+      species_ancestor.dependency?,
+      "Species that is ancestor of a Proposed Name should be a 'dependency'."
+    )
+
+    ancestor = names(:boletus_edulis_group)
+    assert(ancestor.dependency?,
+       "Group that is ancestor of a Proposed Name should be a 'dependency'.")
     end
 
   def test_dependency_misspelt_ancestor

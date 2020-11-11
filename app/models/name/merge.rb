@@ -151,6 +151,12 @@ class Name < AbstractModel
       ).any?
     elsif [:Genus, :Species].include?(rank)
       Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").any?
+    elsif rank == :Group
+      # This works only in a few cases, but it's better than nothing
+      # for preventing accidental deletion of the Group name
+      Name.joins(:namings).where(
+        "text_name LIKE ?", "#{text_name.sub(/ (group|clade|complex)/, "")}%"
+      ).any?
     end
   end
 end
