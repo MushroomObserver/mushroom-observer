@@ -28,7 +28,7 @@ xml.tag!(tag,
       end
     end
     xml.projects(number: object.projects.to_a.count) do
-      object.project_ids.each do |proj|
+      object.projects.each do |proj|
         xml_minimal_object_old(xml, :project, Project, proj.id)
       end
     end
