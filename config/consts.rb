@@ -191,4 +191,8 @@ MushroomObserver::Application.configure do
 
   # Filter(s) to apply to all Querys
   config.default_content_filter = nil
+
+  # List of User ids of users that can see the image recognition
+  # "Suggest Names" button on the observation page.
+  config.image_model_beta_testers = []
 end
