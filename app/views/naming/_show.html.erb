@@ -4,7 +4,7 @@
   any_names = observation.namings && observation.namings.count > 0
 
   do_suggestions = logged_in && observation.thumb_image_id.present? &&
-                   (@user.admin || [123, 40148, 48075].include?(@user.id))
+                   (@user.admin || MO.image_model_beta_testers.include?(@user.id))
 %>
 
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
