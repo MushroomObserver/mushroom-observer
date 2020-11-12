@@ -19,7 +19,7 @@ class Name < AbstractModel
   # (Users should be unable to merge dependencies.)
   def dependency?
     approved_synonym_of_proposed_name? ||
-    correctly_spelled_ancestor_of_proposed_name?
+      correctly_spelled_ancestor_of_proposed_name?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
@@ -152,7 +152,7 @@ class Name < AbstractModel
       ).any?
     elsif [:Genus, :Species].include?(rank)
       Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").
-       ranked_below(rank).any?
+        ranked_below(rank).any?
     elsif rank == :Group
       # Better than nothing for preventing accidental deletion of a Group.
       # although it catches only a few cases

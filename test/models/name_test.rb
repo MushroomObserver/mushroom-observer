@@ -2820,18 +2820,20 @@ class NameTest < UnitTestCase
     )
 
     ancestor = names(:boletus_edulis_group)
-    assert(ancestor.dependency?,
-       "Group that is ancestor of a Proposed Name should be a 'dependency'.")
-    end
+    assert(
+      ancestor.dependency?,
+      "Group that is ancestor of a Proposed Name should be a 'dependency'."
+    )
+  end
 
   def test_dependency_misspelt_ancestor
     misspelt_genus = names(:suilus)
     species_of_missplet_genus = Name.create(
-      text_name:    "#{misspelt_genus.text_name} lakei",
+      text_name: "#{misspelt_genus.text_name} lakei",
       display_name: "__#{misspelt_genus.text_name} lakei__",
-      rank:         :Species,
-      user:         dick,
-      version:      1
+      rank: :Species,
+      user: dick,
+      version: 1
     )
     Naming.create(user: mary,
                   name: species_of_missplet_genus,
