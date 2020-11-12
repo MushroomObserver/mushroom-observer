@@ -8,7 +8,7 @@ json.updated_at(object.updated_at.try(&:utc))
 json.observation_id(object.observation_id)
 if !detail
   json.owner_id(object.user_id)
-  json.external_site_id(object.external_site.id)
+  json.external_site_id(object.external_site_id)
 else
   json.owner(json_user(object.user))
   json.external_site(json_external_site(object.external_site))

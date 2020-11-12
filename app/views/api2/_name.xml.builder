@@ -24,8 +24,8 @@ xml.tag!(
     end
   else
     if object.synonym_id
-      xml.synonyms(number: object.synonyms.count - 1) do
-        for synonym in object.synonyms - [object]
+      xml.synonyms(number: object.synonyms.to_a.count - 1) do
+        (object.synonyms - [object]).each do |synonym|
           xml_detailed_object(xml, :synonym, synonym)
         end
       end
@@ -33,7 +33,7 @@ xml.tag!(
     if object.classification.present?
       parse = Name.parse_classification(object.classification)
       xml.parents(number: parse.count) do
-        for rank, name in parse
+        parse.each do |rank, name|
           xml.parent do
             xml_string(xml, :name, name)
             xml_string(xml, :rank, rank.to_s.downcase)
@@ -42,7 +42,7 @@ xml.tag!(
       end
     end
     if object.comments.any?
-      xml.comments(number: object.comments.count) do
+      xml.comments(number: object.comments.to_a.count) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end
