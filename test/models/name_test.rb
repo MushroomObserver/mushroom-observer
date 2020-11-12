@@ -2769,6 +2769,8 @@ class NameTest < UnitTestCase
                  deprecated_name.best_preferred_synonym)
   end
 
+  # --------------------------------------
+
   def test_dependency_approved_synonym_of_proposed_name
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
@@ -2792,7 +2794,7 @@ class NameTest < UnitTestCase
       ancestor.correct_spelling.empty? &&
       Name.joins(:namings).where(
         "classification LIKE ?",
-        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
+        "%#{ancestor.rank}: #{ancestor.classification_name}%"
       ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
@@ -2803,8 +2805,10 @@ class NameTest < UnitTestCase
     )
 
     ancestor = names(:boletus)
-    assert(ancestor.dependency?,
-           "Genus that is ancestor of a Proposed Name should be a 'dependency'.")
+    assert(
+      ancestor.dependency?,
+      "Genus that is ancestor of a Proposed Name should be a 'dependency'."
+    )
 
     species_ancestor = names(:amanita_boudieri)
     Naming.create(user: mary,
@@ -2839,6 +2843,8 @@ class NameTest < UnitTestCase
       "should not be a `dependency`."
     )
   end
+
+  # --------------------------------------
 
   def test_imageless
     assert_true(names(:imageless).imageless?)

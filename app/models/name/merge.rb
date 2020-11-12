@@ -1,23 +1,22 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
-  # Is it safe to merge this Name with another?  If any information will get
+  scope :ranked_below,
+        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+
+  # Is it safe to merge this Name with another? If any information will get
   # lost we return false.  In practice only if it has Namings.
   # UPDATE: I'm also forbidding merges if users have registered interest in
   # or otherwise requested notifications for this name.  In some cases it will
   # be okay, but there are cases where users unintentionally end up subscribed
   # notifications for every name in the database as a side-effect of merging an
   # unwanted name into Fungi, say. -JPH 20200120
-  #
-  # We should also prevent merger where name is:
-  # - Preferred Name of a Proposed Name
-  # - higher rank of a Proposed Name
-  # - group or name s.l. that includes, or is a higher rank of, a Proposed Name
-  # See https://www.pivotaltracker.com/story/show/171308819 for details
   def mergeable?
     namings.empty? && interests_plus_notifications.zero?
   end
 
+  # Is the Name a dependency of another for purposes of merger?
+  # (Users should be unable to merge dependencies.)
   def dependency?
     approved_synonym_of_proposed_name? ||
     correctly_spelled_ancestor_of_proposed_name?
@@ -145,18 +144,21 @@ class Name < AbstractModel
   end
 
   def correctly_spelled_ancestor_of_proposed_name?
+    return false if correct_spelling.present?
+
     if classified_above_genus?
       Name.joins(:namings).where(
         "classification LIKE ?", "%#{rank}: #{classification_name}%"
       ).any?
     elsif [:Genus, :Species].include?(rank)
-      Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").any?
+      Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").
+       ranked_below(rank).any?
     elsif rank == :Group
-      # This works only in a few cases, but it's better than nothing
-      # for preventing accidental deletion of the Group name
+      # Better than nothing for preventing accidental deletion of a Group.
+      # although it catches only a few cases
       Name.joins(:namings).where(
         "text_name LIKE ?", "#{text_name.sub(/ (group|clade|complex)/, "")}%"
-      ).any?
+      ).where("`rank` != ?", Name.ranks[rank]).any?
     end
   end
 end
