@@ -26,14 +26,14 @@ xml.tag!(
   else
     xml_detailed_object(xml, :owner, object.user)
     xml.files(number: Image.all_sizes.count + 1) do
-      for size in Image.all_sizes + [:original]
+      (Image.all_sizes + [:original]).each do |size|
         xml_image_file(xml, object, size)
       end
     end
-    if object.observation_ids.any?
-      xml.observations(number: object.observation_ids.count) do
-        object.observation_ids.each do |observation_id|
-          xml_minimal_object(xml, :observation, :observation, observation_id)
+    if object.observations.any?
+      xml.observations(number: object.observations.to_a.count) do
+        object.observations.each do |observation|
+          xml_minimal_object(xml, :observation, :observation, observation.id)
         end
       end
     end

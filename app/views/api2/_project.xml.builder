@@ -15,7 +15,7 @@ xml.tag!(
   else
     xml_detailed_object(xml, :creator, object.user)
     if object.comments.any?
-      xml.comments(number: object.comments.count) do
+      xml.comments(number: object.comments.to_a.count) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end

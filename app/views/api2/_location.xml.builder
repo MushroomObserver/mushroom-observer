@@ -20,7 +20,7 @@ xml.tag!(
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   if detail && object.comments.any?
-    xml.comments(number: object.comments.count) do
+    xml.comments(number: object.comments.to_a.count) do
       object.comments.each do |comment|
         xml_detailed_object(xml, :comment, comment)
       end

@@ -16,11 +16,11 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
 
     xml.results(number: @api.result_ids.length) do
       if @api.detail == :none
-        for result_id in @api.result_ids
+        @api.result_ids.each do |result_id|
           xml_minimal_object_old(xml, :result, @api.model, result_id)
         end
       else
-        for result in @api.results
+        @api.results.each do |result|
           xml_detailed_object_old(xml, :result, result, @api.detail == :high)
         end
       end
@@ -30,7 +30,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   if @api.errors.length > 0
     xml.errors(number: @api.errors.length) do
       i = 1
-      for error in @api.errors
+      @api.errors.each do |error|
         xml.error(id: i) do
           xml.code    error.class.name
           xml.details error.to_s

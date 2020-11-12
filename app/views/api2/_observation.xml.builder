@@ -43,14 +43,14 @@ xml.tag!(
     xml_detailed_object(xml, :owner, object.user)
     xml_detailed_object(xml, :consensus_name, object.name)
     if object.namings.any?
-      xml.namings(number: object.namings.count) do
+      xml.namings(number: object.namings.to_a.count) do
         object.namings.each do |naming|
           xml_detailed_object(xml, :naming, naming)
         end
       end
     end
     if object.votes.any?
-      xml.votes(number: object.votes.count) do
+      xml.votes(number: object.votes.to_a.count) do
         object.votes.each do |vote|
           xml_detailed_object(xml, :vote, vote)
         end
@@ -62,8 +62,8 @@ xml.tag!(
       xml_detailed_object(xml, :primary_image, image) \
         if image.id == object.thumb_image_id
     end
-    if object.images.count > 1
-      xml.images(number: object.images.count - 1) do
+    if object.images.to_a.count > 1
+      xml.images(number: object.images.to_a.count - 1) do
         object.images.each do |image|
           xml_detailed_object(xml, :image, image) \
             if image.id != object.thumb_image_id
@@ -71,35 +71,35 @@ xml.tag!(
       end
     end
     if object.comments.any?
-      xml.comments(number: object.comments.count) do
+      xml.comments(number: object.comments.to_a.count) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end
       end
     end
     if object.collection_numbers.any?
-      xml.collection_numbers(number: object.collection_numbers.count) do
+      xml.collection_numbers(number: object.collection_numbers.to_a.count) do
         object.collection_numbers.each do |collection_number|
           xml_detailed_object(xml, :collection_number, collection_number)
         end
       end
     end
     if object.herbarium_records.any?
-      xml.herbarium_records(number: object.herbarium_records.count) do
+      xml.herbarium_records(number: object.herbarium_records.to_a.count) do
         object.herbarium_records.each do |herbarium_record|
           xml_detailed_object(xml, :herbarium_record, herbarium_record)
         end
       end
     end
     if object.sequences.any?
-      xml.sequences(number: object.sequences.count) do
+      xml.sequences(number: object.sequences.to_a.count) do
         object.sequences.each do |sequence|
           xml_detailed_object(xml, :sequence, sequence)
         end
       end
     end
     if object.external_links.any?
-      xml.external_links(number: object.external_links.count) do
+      xml.external_links(number: object.external_links.to_a.count) do
         object.external_links.each do |external_link|
           xml_detailed_object(xml, :external_link, external_link)
         end
