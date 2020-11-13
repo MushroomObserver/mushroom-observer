@@ -17,17 +17,17 @@ xml.tag!(tag,
     xml_minimal_object_old(xml, :owner, User, object.user_id)
   else
     xml_detailed_object_old(xml, :owner, object.user)
-    xml.observations(number: object.observations.to_a.count) do
+    xml.observations(number: object.observations.size) do
       object.observations.each do |obs|
         xml_minimal_object_old(xml, :observation, Observation, obs.id)
       end
     end
-    xml.comments(number: object.comments.to_a.count) do
+    xml.comments(number: object.comments.size) do
       object.comments.each do |comment|
         xml_detailed_object_old(xml, :comment, comment)
       end
     end
-    xml.projects(number: object.projects.to_a.count) do
+    xml.projects(number: object.projects.size) do
       object.projects.each do |proj|
         xml_minimal_object_old(xml, :project, Project, proj.id)
       end

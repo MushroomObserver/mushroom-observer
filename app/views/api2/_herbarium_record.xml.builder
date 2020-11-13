@@ -18,7 +18,7 @@ xml.tag!(
     xml_detailed_object(xml, :herbarium, object.herbarium)
     xml_detailed_object(xml, :user, object.user)
     if object.observations.any?
-      xml.observations(number: object.observations.to_a.count) do
+      xml.observations(number: object.observations.size) do
         object.observations.each do |observation|
           xml_minimal_object(xml, :observation, :observation, observation.id)
         end

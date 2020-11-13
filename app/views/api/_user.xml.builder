@@ -24,7 +24,7 @@ xml.tag!(tag,
        # user)
        @show_api_keys_for_new_user
       if object.api_keys.any?
-        xml.api_keys(number: object.api_keys.to_a.count) do
+        xml.api_keys(number: object.api_keys.size) do
           object.api_keys.each do |api_key|
             xml_detailed_object_old(xml, :api_key, api_key)
           end

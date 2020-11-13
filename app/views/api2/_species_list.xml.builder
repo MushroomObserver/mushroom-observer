@@ -18,7 +18,7 @@ xml.tag!(
     xml_detailed_location(xml, :location, object.location, object.where)
     xml_detailed_object(xml, :owner, object.user)
     if object.comments.any?
-      xml.comments(number: object.comments.to_a.count) do
+      xml.comments(number: object.comments.size) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end
