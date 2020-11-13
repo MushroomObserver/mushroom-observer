@@ -145,14 +145,14 @@ class Name < AbstractModel
 
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
-    return name_above_genus_is_ancestor? if classified_above_genus?
+    return above_genus_is_ancestor? if classified_above_genus?
     return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
     return group_is_ancestor? if rank == :Group
 
     false
   end
 
-  def name_above_genus_is_ancestor?
+  def above_genus_is_ancestor?
     Name.joins(:namings).where(
       "classification LIKE ?", "%#{rank}: #{classification_name}%"
     ).any?
