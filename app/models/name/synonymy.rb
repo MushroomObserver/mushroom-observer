@@ -45,7 +45,7 @@ class Name < AbstractModel
   #
   def sort_synonyms
     all = synonyms - [self]
-    accepted_synonyms   = all.reject(&:deprecated)
+    accepted_synonyms = all.reject(&:deprecated)
     deprecated_synonyms = all.select(&:deprecated)
     [accepted_synonyms, deprecated_synonyms]
   end
@@ -135,7 +135,8 @@ class Name < AbstractModel
   #
   # rubocop:disable Style/RedundantSelf
   # I think these methods read much better with self explicitly included. -JPH
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+  # rubucop:disable Metrics/PerceivedComplexity
   # This is the best I can do. I think splitting it up will make it worse. -JPH
   def merge_synonyms(name)
     if !self.synonym && !name.synonym
@@ -160,7 +161,8 @@ class Name < AbstractModel
       end
     end
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubucop:enable Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
   # Delete the other Name's old Synonym if there aren't any Name's in it
