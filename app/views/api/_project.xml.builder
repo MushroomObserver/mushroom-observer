@@ -14,12 +14,12 @@ xml.tag!(tag,
     admin_ids = object.admin_group.user_ids
     member_ids = object.user_group.user_ids
     xml.admins(number: admin_ids.length) do
-      for user_id in admin_ids
+      admin_ids.each do |user_id|
         xml_minimal_object_old(xml, :admin, User, user_id)
       end
     end
     xml.members(number: member_ids.length) do
-      for user_id in member_ids
+      member_ids.each do |user_id|
         xml_minimal_object_old(xml, :member, User, user_id)
       end
     end

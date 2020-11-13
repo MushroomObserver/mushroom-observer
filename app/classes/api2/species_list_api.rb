@@ -11,7 +11,7 @@ class API2
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
-      :comments,
+      { comments: :user },
       :location,
       :user
     ]

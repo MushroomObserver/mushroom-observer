@@ -14,9 +14,9 @@ xml.tag!(tag,
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   xml_string(xml, :original_name, object.original_name) \
     if check_permission(object)
-  xml.observations(number: object.observations.length) do
-    for id in object.observation_ids
-      xml_minimal_object_old(xml, :observation, Observation, id)
+  xml.observations(number: object.observations.to_a.count) do
+    object.observations.each do |obs|
+      xml_minimal_object_old(xml, :observation, Observation, obs.id)
     end
   end
   if !detail
@@ -26,7 +26,7 @@ xml.tag!(tag,
     xml_detailed_object_old(xml, :license, object.license)
     xml_detailed_object_old(xml, :owner, object.user)
     xml.files(number: Image.all_sizes.length + 1) do
-      for size in Image.all_sizes + [:original]
+      (Image.all_sizes + [:original]).each do |size|
         xml_image_file(xml, object, size)
       end
     end

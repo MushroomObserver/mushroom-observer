@@ -10,6 +10,10 @@ class API
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
+    self.low_detail_includes = [
+      :location
+    ]
+
     self.high_detail_includes = [
       :comments,
       :location,
