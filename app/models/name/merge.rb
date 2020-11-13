@@ -145,20 +145,29 @@ class Name < AbstractModel
 
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
+    return name_above_genus_is_ancestor? if classified_above_genus?
+    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+    return group_is_ancestor? if rank == :Group
 
-    if classified_above_genus?
-      Name.joins(:namings).where(
-        "classification LIKE ?", "%#{rank}: #{classification_name}%"
-      ).any?
-    elsif [:Genus, :Species].include?(rank)
-      Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").
-        ranked_below(rank).any?
-    elsif rank == :Group
-      # Better than nothing for preventing accidental deletion of a Group.
-      # although it catches only a few cases
-      Name.joins(:namings).where(
-        "text_name LIKE ?", "#{text_name.sub(/ (group|clade|complex)/, "")}%"
-      ).where("`rank` != ?", Name.ranks[rank]).any?
-    end
+    false
+  end
+
+  def name_above_genus_is_ancestor?
+    Name.joins(:namings).where(
+      "classification LIKE ?", "%#{rank}: #{classification_name}%"
+    ).any?
+  end
+
+  def genus_or_species_is_ancestor?
+    Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").
+      ranked_below(rank).any?
+  end
+
+  # Better than nothing for preventing accidental deletion of a Group.
+  # although it catches only a few cases
+  def group_is_ancestor?
+    Name.joins(:namings).where(
+      "text_name LIKE ?", "#{text_name.sub(/ (group|clade|complex)/, "")}%"
+    ).where("`rank` != ?", Name.ranks[rank]).any?
   end
 end
