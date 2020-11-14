@@ -4,8 +4,28 @@ require("test_helper")
 
 class SiteDataTest < UnitTestCase
   def test_create
+    # Create unverified user so that counts of users, verfied users,
+    # and contributing users are different
+    unverified_user = User.new(
+      login: "mkcwqwv",
+      email: "anastasiyaskakun93@rambler.ru",
+      password: "UveBeenPwned",
+      password_confirmation: "UveBeenPwned"
+    )
+    assert(unverified_user.save)
+    assert_not(unverified_user.verified)
+
+    site_data = SiteData.new.get_site_data
+    assert_equal(
+      User.where.not(verified: nil).count,
+      site_data[:users]
+    )
+    assert_equal(
+      User.where.not(contribution: 0).count,
+      site_data[:contributing_users]
+    )
+
     obj = SiteData.new
-    obj.get_site_data
     obj.get_user_data(rolf.id)
     obj.get_all_user_data
   end
