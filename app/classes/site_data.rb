@@ -92,6 +92,7 @@ class SiteData
   # Relative score for each category.
   FIELD_WEIGHTS = {
     comments: 1,
+    contributing_users: 0,
     images: 10,
     location_descriptions_authors: 50,
     location_descriptions_editors: 5,
@@ -107,6 +108,7 @@ class SiteData
     #     observations_without_voucher:  1,
     species_list_entries: 1,
     species_lists: 5,
+    users: 0,
     votes: 1
   }.freeze
 
@@ -286,7 +288,7 @@ class SiteData
         if field.to_s =~ /^(\w+)_versions$/
           data[field] -= data[Regexp.last_match(1)] || 0
         end
-        metric += FIELD_WEIGHTS[field] * data[field] if FIELD_WEIGHTS[field]
+        metric += FIELD_WEIGHTS[field] * data[field]
       end
       metric += data[:languages].to_i
       metric += data[:bonuses].to_i
