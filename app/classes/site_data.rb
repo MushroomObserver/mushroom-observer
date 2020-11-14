@@ -85,7 +85,8 @@ class SiteData
     :comments,
     :namings,
     :votes,
-    :users
+    :users,
+    :contributing_users
   ].freeze
 
   # Relative score for each category.
@@ -106,7 +107,6 @@ class SiteData
     #     observations_without_voucher:  1,
     species_list_entries: 1,
     species_lists: 5,
-    users: 0,
     votes: 1
   }.freeze
 
@@ -115,7 +115,8 @@ class SiteData
   FIELD_TABLES = {
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
-    species_list_entries: "observations_species_lists"
+    species_list_entries: "observations_species_lists",
+    contributing_users: "users"
   }.freeze
 
   # Additional conditions to use for each category.
@@ -125,7 +126,8 @@ class SiteData
     observations_without_voucher:
       "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
       "AND thumb_image_id IS NOT NULL )",
-    users: "`verified` IS NOT NULL"
+    users: "`verified` IS NOT NULL",
+    contributing_users: "contribution > 0"
   }.freeze
 
   # Call these procs to determine if a given object qualifies for a given field.
@@ -284,7 +286,7 @@ class SiteData
         if field.to_s =~ /^(\w+)_versions$/
           data[field] -= data[Regexp.last_match(1)] || 0
         end
-        metric += FIELD_WEIGHTS[field] * data[field]
+        metric += FIELD_WEIGHTS[field] * data[field] if FIELD_WEIGHTS[field]
       end
       metric += data[:languages].to_i
       metric += data[:bonuses].to_i
@@ -302,7 +304,7 @@ class SiteData
   #   count = get_field_count(:users)
   #   # SELECT COUNT(*) FROM `users` WHERE `verified` IS NOT NULL
   #
-  def get_field_count(field) # :doc:
+  def get_field_count(field)
     table = FIELD_TABLES[field] || field.to_s
     query = []
     query << "SELECT COUNT(*)"
@@ -335,12 +337,16 @@ class SiteData
   #     num_images = @user_data[user_id][:images]
   #   end
   #
-  def load_field_counts(field, user_id = nil) # :doc:
+  def load_field_counts(field, user_id = nil)
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
-    conditions = "t.user_id " + (user_id ? "= #{user_id}" : "> 0")
-
+    t_user_id = if table == "users"
+                  "t.id "
+                else
+                  "t.user_id "
+                end
+    conditions = t_user_id + (user_id ? "= #{user_id}" : "> 0")
     # Exception for species list entries.
     if field == :species_list_entries
       tables = "species_lists t, #{table} os"
@@ -353,7 +359,7 @@ class SiteData
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"
       conditions += " AND t.#{parent}_id = p.id"
-      conditions += " AND t.user_id != p.user_id"
+      conditions += " AND #{t_user_id} != p.user_id"
     end
 
     if extra_conditions = FIELD_CONDITIONS[field]
@@ -361,10 +367,10 @@ class SiteData
     end
 
     query = %(
-      SELECT COUNT(#{count}) AS cnt, t.user_id
+      SELECT COUNT(#{count}) AS cnt, #{t_user_id}
       FROM #{tables}
       WHERE #{conditions}
-      GROUP BY t.user_id
+      GROUP BY #{t_user_id}
       ORDER BY cnt DESC
     )
 
