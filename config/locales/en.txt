@@ -950,6 +950,7 @@
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
+  site_stats_contributing_users: Contributing Users
   site_stats_images: "[:IMAGES]"
   site_stats_listed_taxa: Listed Taxa
   site_stats_location_descriptions_authors: Authored [:LOCATION_DESCRIPTIONS]

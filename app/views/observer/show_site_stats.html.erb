@@ -43,12 +43,13 @@
           :comments,
           :votes,
           :users,
-        ]
+          :contributing_users
+        ].freeze
 
         fields.each do |field|
           label = "site_stats_#{field}".to_sym.t
           count = @site_data[field]
-          if count and !label.blank? %>
+          if count && label.present? %>
             <tr>
               <td><%= "site_stats_#{field}".to_sym.t %></td>
               <td align="right"><%= count %></td>

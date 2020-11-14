@@ -237,9 +237,6 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_user, id: rolf.id)
     assert_template(:show_user)
 
-    get_with_dump(:show_site_stats)
-    assert_template(:show_site_stats)
-
     get_with_dump(:observations_by_user, id: rolf.id)
     assert_template(:list_observations, partial: :_rss_log)
 
@@ -3878,6 +3875,16 @@ class ObserverControllerTest < FunctionalTestCase
     @controller.instance_variable_set("@user", user)
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
+  end
+
+  def test_site_stats
+    get(:show_site_stats)
+
+    assert_select("title").text.include?(:show_site_stats_title.l)
+    assert_select("#title", { text: :show_site_stats_title.l },
+                  "Displayed title should be #{:show_site_stats_title.l}")
+    assert(/#{:site_stats_contributing_users.l}/ =~ @response.body,
+           "Page is missing #{:site_stats_contributing_users.l}")
   end
 
   # ------------------------------------------------------------
