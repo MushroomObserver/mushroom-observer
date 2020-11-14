@@ -14,7 +14,7 @@ xml.tag!(tag,
   else
     xml_detailed_object_old(xml, :herbarium, object.herbarium)
     xml_detailed_object_old(xml, :user, object.user)
-    xml.observations(number: object.observations.size) do
+    xml.observations(number: object.observations.length) do
       object.observations.each do |observation|
         xml_detailed_object_old(xml, :observation, observation)
       end

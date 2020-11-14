@@ -14,7 +14,7 @@ xml.tag!(tag,
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   xml_string(xml, :original_name, object.original_name) \
     if check_permission(object)
-  xml.observations(number: object.observations.size) do
+  xml.observations(number: object.observations.length) do
     object.observations.each do |obs|
       xml_minimal_object_old(xml, :observation, Observation, obs.id)
     end

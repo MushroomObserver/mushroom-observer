@@ -24,7 +24,7 @@ xml.tag!(
     end
   else
     if object.synonym_id
-      xml.synonyms(number: object.synonyms.size - 1) do
+      xml.synonyms(number: object.synonyms.length - 1) do
         (object.synonyms - [object]).each do |synonym|
           xml_detailed_object(xml, :synonym, synonym)
         end
@@ -32,7 +32,7 @@ xml.tag!(
     end
     if object.classification.present?
       parse = Name.parse_classification(object.classification)
-      xml.parents(number: parse.size) do
+      xml.parents(number: parse.length) do
         parse.each do |rank, name|
           xml.parent do
             xml_string(xml, :name, name)
@@ -42,7 +42,7 @@ xml.tag!(
       end
     end
     if object.comments.any?
-      xml.comments(number: object.comments.size) do
+      xml.comments(number: object.comments.length) do
         object.comments.each do |comment|
           xml_detailed_object(xml, :comment, comment)
         end
