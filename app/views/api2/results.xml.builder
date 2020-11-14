@@ -14,7 +14,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
       xml_integer(xml, :page_number, @api.page_number)
     end
 
-    xml.results(number: @api.result_ids.count) do
+    xml.results(number: @api.result_ids.length) do
       if @api.detail == :none
         @api.result_ids.each do |result_id|
           xml_minimal_object(xml, :result, @api.model.type_tag, result_id)
@@ -31,7 +31,7 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   end
 
   if @api.errors.any?
-    xml.errors(number: @api.errors.count) do
+    xml.errors(number: @api.errors.length) do
       i = 1
       @api.errors.each do |error|
         xml.error(id: i) do

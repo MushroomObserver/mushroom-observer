@@ -10,7 +10,7 @@ xml.tag!(tag,
   xml_minimal_object_old(xml, :owner, User, object.user_id)
   xml_minimal_object_old(xml, :observation, Observation, object.observation_id)
   if detail
-    xml.votes(number: object.votes.to_a.count) do
+    xml.votes(number: object.votes.length) do
       object.votes.each do |vote|
         xml_detailed_object_old(xml, :vote, vote)
       end
