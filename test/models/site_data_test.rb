@@ -23,6 +23,7 @@ class SiteDataTest < UnitTestCase
       User.where.not(contribution: 0).count,
       site_data[:contributing_users]
     )
+    assert_equal(Sequence.count, site_data[:sequences])
   end
 
   def test_user_data
