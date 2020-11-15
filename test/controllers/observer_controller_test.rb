@@ -113,15 +113,15 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
-    get(:show_observation, id: obs.id)
+    get(:show_observation, params: { id: obs.id })
     assert_match(/34.1622|118.3521/, @response.body)
 
     obs.update(gps_hidden: true)
-    get(:show_observation, id: obs.id)
+    get(:show_observation, params: { id: obs.id })
     assert_no_match(/34.1622|118.3521/, @response.body)
 
     login("mary")
-    get(:show_observation, id: obs.id)
+    get(:show_observation, params: { id: obs.id })
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
@@ -623,7 +623,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make sure this redirects correctly to list_herbaria not list_herariums.
     params = { search: { pattern: "", type: :herbarium } }
-    get(:pattern_search, params)
+    get(:pattern_search, params: params)
     assert_redirected_to(controller: :herbarium, action: :list_herbaria)
   end
 
@@ -1342,7 +1342,7 @@ class ObserverControllerTest < FunctionalTestCase
     params = { id: id.to_s }
     assert_equal("mary", obs.user.login)
     requires_user(:destroy_observation,
-                  [action: :show_observation],
+                  [{ action: :show_observation }],
                   params, "mary")
     assert_redirected_to(action: :list_observations)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1574,9 +1574,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not(mary.in_group?("reviewers"))
     assert(rolf.in_group?("reviewers"))
     requires_user(:review_authors,
-                  [controller: :location,
-                   action: :show_location,
-                   id: desc.location_id],
+                  [{ controller: :location,
+                     action: :show_location,
+                     id: desc.location_id }],
                   params)
     assert_template(:review_authors)
 
@@ -1939,7 +1939,8 @@ class ObserverControllerTest < FunctionalTestCase
     nam = assigns(:naming)
     assert_equal(where, obs.where)
     assert_equal(names(:coprinus_comatus).id, nam.name_id)
-    assert_equal("2.03659", format("%.5f", obs.vote_cache))
+    assert_equal("2.03659",
+                 format("%<vote_cache>.5f", vote_cache: obs.vote_cache))
     assert_not_nil(obs.rss_log)
     # This was getting set to zero instead of nil if no images were uploaded
     # when obs was created.
@@ -1973,8 +1974,8 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_approved_name_and_extra_space
     generic_construct_observation(
-      { name: { name: "Another new-name" + "  " },
-        approved_name: "Another new-name" + "  " },
+      { name: { name: "Another new-name  " },
+        approved_name: "Another new-name  " },
       1, 1, 2
     )
   end
@@ -2572,24 +2573,26 @@ class ObserverControllerTest < FunctionalTestCase
 
     post(
       :create_observation,
-      observation: {
-        when: Time.zone.now,
-        place_name: "Burbank, California, USA",
-        lat: "45.4545",
-        long: "-90.1234",
-        alt: "456",
-        specimen: "0",
-        thumb_image_id: "0",
-        gps_hidden: "1"
-      },
-      image: {
-        "0" => {
-          image: fixture,
-          copyright_holder: "me",
-          when: Time.zone.now
-        }
-      },
-      good_images: "#{old_img1.id} #{old_img2.id}"
+      params: {
+        observation: {
+          when: Time.zone.now,
+          place_name: "Burbank, California, USA",
+          lat: "45.4545",
+          long: "-90.1234",
+          alt: "456",
+          specimen: "0",
+          thumb_image_id: "0",
+          gps_hidden: "1"
+        },
+        image: {
+          "0" => {
+            image: fixture,
+            copyright_holder: "me",
+            when: Time.zone.now
+          }
+        },
+        good_images: "#{old_img1.id} #{old_img2.id}"
+      }
     )
 
     obs = Observation.last
@@ -2620,8 +2623,9 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
     params = { id: obs.id.to_s }
-    requires_user(:edit_observation, [controller: :observer,
-                                      action: :show_observation], params)
+    requires_user(:edit_observation,
+                  [{ controller: :observer, action: :show_observation }],
+                  params)
 
     assert_form_action(action: :edit_observation, id: obs.id.to_s)
 
@@ -2663,9 +2667,10 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation],
-                       params, "mary")
+    post_requires_user(:edit_observation,
+                       [{ controller: :observer, action: :show_observation }],
+                       params,
+                       "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(/#{ url_for(controller: :location,
                                      action: :create_location) }/)
@@ -2701,8 +2706,9 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(
       :edit_observation,
-      [controller: :observer, action: :show_observation],
-      params, "mary"
+      [{ controller: :observer, action: :show_observation }],
+      params,
+      "mary"
     )
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
@@ -2732,8 +2738,9 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(
       :edit_observation,
-      [controller: :observer, action: :show_observation],
-      params, "mary"
+      [{ controller: :observer, action: :show_observation }],
+      params,
+      "mary"
     )
     assert_response(:success) # Which really means failure
   end
@@ -2836,15 +2843,17 @@ class ObserverControllerTest < FunctionalTestCase
 
     post(
       :edit_observation,
-      id: obs.id,
-      observation: {
-        gps_hidden: "1"
-      },
-      image: {
-        "0" => {
-          image: fixture,
-          copyright_holder: "me",
-          when: Time.zone.now
+      params: {
+        id: obs.id,
+        observation: {
+          gps_hidden: "1"
+        },
+        image: {
+          "0" => {
+            image: fixture,
+            copyright_holder: "me",
+            when: Time.zone.now
+          }
         }
       }
     )
@@ -4084,7 +4093,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_suggestions
     obs = observations(:detailed_unknown_obs)
-    name1  = names(:coprinus_comatus)
+    name1 = names(:coprinus_comatus)
     name2a = names(:lentinellus_ursinus_author1)
     name2b = names(:lentinellus_ursinus_author2)
     obs.name = name2b
