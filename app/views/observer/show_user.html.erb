@@ -61,7 +61,11 @@
 
   # These are roughly in decreasing order of importance.
   rows = []
-  for field in SiteData::ALL_FIELDS - [:users] - [:contributing_users]
+  for field in SiteData::ALL_FIELDS - [
+    :contributing_users,
+    :sequences,
+    :users
+  ]
     rows << {
       field: field,
       label: "user_stats_#{field}".to_sym.t,

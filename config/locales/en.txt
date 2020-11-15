@@ -944,6 +944,7 @@
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
   user_stats_observations_without_voucher: All Other Observations
+  user_stats_sequences: ""
   user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
@@ -967,6 +968,7 @@
   site_stats_observations_with_voucher: Observations with Full Data
   site_stats_observations_without_voucher: Other Observations
   site_stats_observed_taxa: Observed Taxa
+  site_stats_sequences: "[:SEQUENCES]"
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
   site_stats_users: Members
