@@ -82,6 +82,7 @@ class SiteData
     :observations,
     #     :observations_with_voucher,
     #     :observations_without_voucher,
+    :sequenced_observations,
     :sequences,
     :comments,
     :namings,
@@ -108,6 +109,7 @@ class SiteData
     #     observations_with_voucher:     10,
     #     observations_without_voucher:  1,
     sequences: 0,
+    sequenced_observations: 0,
     species_list_entries: 1,
     species_lists: 5,
     users: 0,
@@ -119,9 +121,14 @@ class SiteData
   FIELD_TABLES = {
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
+    sequenced_observations: "sequences",
     species_list_entries: "observations_species_lists",
     contributing_users: "users"
   }.freeze
+
+  FIELD_COUNTS = {
+    sequenced_observations: "SELECT COUNT(DISTINCT observation_id) "
+  }
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
@@ -311,7 +318,7 @@ class SiteData
   def get_field_count(field)
     table = FIELD_TABLES[field] || field.to_s
     query = []
-    query << "SELECT COUNT(*)"
+    query << (FIELD_COUNTS[field] || "SELECT COUNT(*) ")
     query << "FROM `#{table}`"
     if cond = FIELD_CONDITIONS[field]
       query << "WHERE #{cond}"
