@@ -61,12 +61,12 @@
 
   # These are roughly in decreasing order of importance.
   rows = []
-  for field in SiteData::ALL_FIELDS - [
+  SiteData::ALL_FIELDS - [
     :contributing_users,
     :sequences,
     :sequenced_observations,
     :users
-  ]
+  ].each do |field|
     rows << {
       field: field,
       label: "user_stats_#{field}".to_sym.t,
