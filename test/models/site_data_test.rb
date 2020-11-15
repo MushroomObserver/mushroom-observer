@@ -28,6 +28,11 @@ class SiteDataTest < UnitTestCase
 
   def test_user_data
     user_data = SiteData.new.get_user_data(rolf.id)
+
+    assert_not(
+      user_data.key?(:contributing_users),
+      "Single user data should not include #{:site_stats_contributing_users.l}"
+    )
   end
 
   def test_all_user_data

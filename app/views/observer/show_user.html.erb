@@ -61,12 +61,11 @@
 
   # These are roughly in decreasing order of importance.
   rows = []
-  (SiteData::ALL_FIELDS - [
-    :contributing_users,
-    :sequences,
-    :sequenced_observations,
-    :users
-  ]).each do |field|
+  (SiteData::ALL_FIELDS -
+   SiteData::SITE_WIDE_FIELDS -
+   # omit sequence stuff because it has no weight
+   [:sequences, :sequenced_observations]).
+  each do |field|
     rows << {
       field: field,
       label: "user_stats_#{field}".to_sym.t,

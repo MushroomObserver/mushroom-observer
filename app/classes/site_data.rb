@@ -90,6 +90,8 @@ class SiteData
     :contributing_users
   ].freeze
 
+  SITE_WIDE_FIELDS = [:users, :contributing_users].freeze
+
   # Relative score for each category.
   FIELD_WEIGHTS = {
     comments: 1,
@@ -350,12 +352,9 @@ class SiteData
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
-    t_user_id = if table == "users"
-                  "t.id "
-                else
-                  "t.user_id "
-                end
+    t_user_id = (table == "users" ? "t.id " : "t.user_id ")
     conditions = t_user_id + (user_id ? "= #{user_id}" : "> 0")
+
     # Exception for species list entries.
     if field == :species_list_entries
       tables = "species_lists t, #{table} os"
@@ -424,9 +423,8 @@ class SiteData
       add_language_contributions(user)
     end
 
-    # Load record counts for each category.
-    # (The :users category only applies to site-wide stats.)
-    (ALL_FIELDS - [:users]).each { |field| load_field_counts(field) }
+    # Load record counts for each category of individual user data.
+    (ALL_FIELDS - SITE_WIDE_FIELDS).each { |field| load_field_counts(field) }
 
     # Calculate full contribution for each user.  This will also correct some
     # double-counting of versioned records.
