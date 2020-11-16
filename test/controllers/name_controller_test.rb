@@ -1807,7 +1807,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_error(:name_error_unregistrable.l)
   end
 
-  def test_update_icn_id_invalid
+  def test_update_icn_id_non_numeric
     name = names(:stereum_hirsutum)
     params = {
       id: name.id,
@@ -1819,13 +1819,14 @@ class NameControllerTest < FunctionalTestCase
         rank: name.rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
-        icn_id: "abcdefg"
+        icn_id: "MB12345"
       }
     }
+    default_validates_numericality_of_error_message = "is not a number"
     login
     post(:edit_name, params: params)
 
-    assert_flash_error(:name_error_icn_id_non_numeric.l)
+    assert_flash_text(/#{default_validates_numericality_of_error_message}/)
   end
 
   def test_update_icn_id_duplicate
