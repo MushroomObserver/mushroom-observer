@@ -100,7 +100,8 @@ module PatternSearch
     def any_taxa_modifiers_present?
       !args[:include_subtaxa].nil? ||
       !args[:include_synonyms].nil? ||
-      !args[:include_all_name_proposals].nil?
+      !args[:include_all_name_proposals].nil? ||
+      !args[:exclude_consensus].nil?
     end
   end
 end
