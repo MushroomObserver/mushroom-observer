@@ -95,14 +95,14 @@ module PatternSearch
 
     def is_pattern_a_name?
       ::Name.where("text_name = ? OR search_name = ?",
-                   [args[:pattern].to_s, args[:pattern].to_s]).any?
+                   args[:pattern].to_s, args[:pattern].to_s).any?
     end
 
     def any_taxa_modifiers_present?
       !args[:include_subtaxa].nil? ||
-      !args[:include_synonyms].nil? ||
-      !args[:include_all_name_proposals].nil? ||
-      !args[:exclude_consensus].nil?
+        !args[:include_synonyms].nil? ||
+        !args[:include_all_name_proposals].nil? ||
+        !args[:exclude_consensus].nil?
     end
   end
 end
