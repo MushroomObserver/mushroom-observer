@@ -408,18 +408,34 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_name_hack
+    # "Turkey" is not a name, and no taxa modifiers present, so no reason to
+    # suspect that this is a name query.  Should leave it completely alone.
     x = PatternSearch::Observation.new("Turkey")
     assert_equal(:pattern_search, x.flavor)
     assert_equal({ pattern: "Turkey" }, x.args)
 
+    # "Agaricus" is a name, so let's assume this is a name query.  Note that
+    # it will include synonyms and subtaxa by default.
     x = PatternSearch::Observation.new("Agaricus")
     assert_equal(:all, x.flavor)
     assert_equal({ names: "Agaricus", include_subtaxa: true,
                    include_synonyms: true }, x.args)
 
+    # "Turkey" is not a name, true, but user asked for synonyms to be included,
+    # so they must have expected "Turkey" to be a name.  Note that it will also
+    # include subtaxa by default, because that behavior was not specified.
     x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
     assert_equal(:all, x.flavor)
-    assert_equal({ names: "Turkey", include_synonyms: true }, x.args)
+    assert_equal({ names: "Turkey", include_synonyms: true,
+                   include_subtaxa: true }, x.args)
+
+    # Just make sure the user is allowed to explicitly turn off synonyms and
+    # subtaxa in any names query.
+    x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
+                                       "include_subtaxa:no")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Foo bar", include_synonyms: false,
+                   include_subtaxa: false }, x.args)
   end
 
   def test_observation_search
