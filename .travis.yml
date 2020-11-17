@@ -1,4 +1,4 @@
-dist: focal # use Ubuntu 20.04
+dist: bionic
 services:
   - mysql
 
