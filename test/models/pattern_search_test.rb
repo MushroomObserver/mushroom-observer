@@ -407,6 +407,21 @@ class PatternSearchTest < UnitTestCase
     assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
   end
 
+  def test_observation_search_name_hack
+    x = PatternSearch::Observation.new("Turkey")
+    assert_equal(:pattern_search, x.flavor)
+    assert_equal({ pattern: "Turkey" }, x.args)
+
+    x = PatternSearch::Observation.new("Agaricus")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Agaricus", include_subtaxa: true,
+                   include_synonyms: true }, x.args)
+
+    x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
+    assert_equal(:all, x.flavor)
+    assert_equal({ names: "Turkey", include_synonyms: true }, x.args)
+  end
+
   def test_observation_search
     x = PatternSearch::Observation.new("Amanita")
     assert_obj_list_equal([], x.query.results)

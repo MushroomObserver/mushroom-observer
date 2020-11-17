@@ -66,16 +66,42 @@ module PatternSearch
 
     def build_query
       super
+      hack_name_query
+      default_to_including_synonyms_and_subtaxa
+    end
 
-      # Temporary hack to get include_subtaxa/synonyms to work.
-      # Will rip out when we do away with pattern search query flavor.
-      if flavor == :pattern_search &&
-         (!args[:include_subtaxa].nil? || !args[:include_synonyms].nil? ||
-          !args[:include_all_name_proposals].nil?)
-        self.flavor = :all
-        args[:names] = args[:pattern]
-        args.delete(:pattern)
-      end
+    private
+
+    # Temporary hack to get include_subtaxa/synonyms to work.
+    # Will rip out when we do away with pattern search query flavor.
+    # This converts any search that *looks like* a name search into
+    # an actual name search.
+    def hack_name_query
+      return unless flavor == :pattern_search &&
+                    args[:names].empty? &&
+                    (is_pattern_a_name? || any_taxa_modifiers_present?)
+
+      self.flavor = :all
+      args[:names] = args[:pattern]
+      args.delete(:pattern)
+    end
+
+    def default_to_including_synonyms_and_subtaxa
+      return if args[:names].empty? ||
+                any_taxa_modifiers_present?
+
+      args[:include_subtaxa] = true
+      args[:include_synonyms] = true
+    end
+
+    def is_pattern_a_name?
+      Name.where(search_name: args[:pattern].to_s).any?
+    end
+
+    def any_taxa_modifiers_present?
+      !args[:include_subtaxa].nil? ||
+      !args[:include_synonyms].nil? ||
+      !args[:include_all_name_proposals].nil?
     end
   end
 end
