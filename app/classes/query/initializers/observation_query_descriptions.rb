@@ -64,7 +64,7 @@ module Query
 
       def map_join_and_truncate(arg, model, method)
         str = params[arg].map do |val|
-          model.find(Integer(x)).send(method) rescue val
+          model.find(Integer(val)).send(method) rescue val
         end.join(", ")
         str = "#{str[0...97]}..." if str.length > 100
         str
