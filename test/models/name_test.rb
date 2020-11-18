@@ -2815,12 +2815,6 @@ class NameTest < UnitTestCase
       species_ancestor.dependency?,
       "Species that is ancestor of a Proposed Name should be a 'dependency'."
     )
-
-    ancestor = names(:boletus_edulis_group)
-    assert(
-      ancestor.dependency?,
-      "Group that is ancestor of a Proposed Name should be a 'dependency'."
-    )
   end
 
   def test_dependency_misspelt_ancestor

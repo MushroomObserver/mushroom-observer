@@ -147,7 +147,6 @@ class Name < AbstractModel
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
     return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
-    return group_is_ancestor? if rank == :Group
 
     false
   end
@@ -161,13 +160,5 @@ class Name < AbstractModel
   def genus_or_species_is_ancestor?
     Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
       ranked_below(rank).any?
-  end
-
-  # Better than nothing for preventing accidental deletion of a Group.
-  # although it catches only a few cases
-  def group_is_ancestor?
-    Name.joins(:namings).where(
-      "text_name LIKE ?", "#{text_name.sub(/ (group|clade|complex)/, "")}%"
-    ).where("`rank` != ?", Name.ranks[rank]).any?
   end
 end
