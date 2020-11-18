@@ -154,7 +154,7 @@ class Name < AbstractModel
 
   def above_genus_is_ancestor?
     Name.joins(:namings).where(
-      "classification LIKE ?", "%#{rank}: #{classification_name}%"
+      "classification LIKE ?", "%#{rank}: _#{text_name}_%"
     ).any?
   end
 

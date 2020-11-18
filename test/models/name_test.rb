@@ -2412,12 +2412,6 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
-  def test_classification_name
-    name = names(:suillus)
-
-    assert_equal("_#{name.text_name}_", name.classification_name)
-  end
-
   # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.
