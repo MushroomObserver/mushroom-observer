@@ -22,6 +22,6 @@ class QuerySupplementalTest < IntegrationTestCase
 
     title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
 
-    title.assert_text("‘#{obs.name.text_name}’")
+    title.assert_text(obs.name.text_name)
   end
 end

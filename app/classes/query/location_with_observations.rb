@@ -5,6 +5,7 @@ module Query
   class LocationWithObservations < Query::LocationBase
     include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
       super.merge(
@@ -120,6 +121,11 @@ module Query
 
     def coerce_into_observation_query
       Query.lookup(:Observation, :all, params_with_old_by_restored)
+    end
+
+    def title
+      default = super
+      with_observations_query_description || default
     end
   end
 end

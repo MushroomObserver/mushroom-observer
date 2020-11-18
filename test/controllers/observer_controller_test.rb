@@ -640,7 +640,7 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
     assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      :query_title_of_name.t(types: "Observations", name: pattern),
       @controller.instance_variable_get("@title")
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
@@ -648,7 +648,7 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:observation_search, pattern: pattern, page: 2)
     assert_template(:list_observations)
     assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      :query_title_of_name.t(types: "Observations", name: pattern),
       @controller.instance_variable_get("@title")
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
