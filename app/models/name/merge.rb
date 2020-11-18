@@ -159,7 +159,7 @@ class Name < AbstractModel
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).where("text_name LIKE ?", "#{text_name}%").
+    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
       ranked_below(rank).any?
   end
 
