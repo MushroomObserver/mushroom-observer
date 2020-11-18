@@ -140,7 +140,7 @@ class Name < AbstractModel
   private
 
   def approved_synonym_of_proposed_name?
-    !deprecated && (other_synonym_ids & Naming.all.pluck(:name_id)).present?
+    !deprecated && Naming.where(name: other_synonyms).any?
   end
 
   def correctly_spelled_ancestor_of_proposed_name?
