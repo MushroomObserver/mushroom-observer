@@ -28,37 +28,37 @@ module Query
       private
 
       def title_for_herbaria
-        str = map_join_and_truncate(:herbaria, Herbarium, name)
+        str = map_join_and_truncate(:herbaria, Herbarium, :name)
         :query_title_in_herbarium.t(type: :observation, herbarium: str)
       end
 
       def title_for_locations
-        str = map_join_and_truncate(:locations, Location, display_name)
+        str = map_join_and_truncate(:locations, Location, :display_name)
         :query_title_at_location.t(type: :observation, location: str)
       end
 
       def title_for_names
-        str = map_join_and_truncate(:names, Name, text_name)
+        str = map_join_and_truncate(:names, Name, :text_name)
         :query_title_of_name.t(type: :observation, name: str)
       end
 
       def title_for_projects
-        str = map_join_and_truncate(:projects, Project, title)
+        str = map_join_and_truncate(:projects, Project, :title)
         :query_title_for_project.t(type: :observation, project: str)
       end
 
       def title_for_project_lists
-        str = map_join_and_truncate(:project_lists, Project, title)
+        str = map_join_and_truncate(:project_lists, Project, :title)
         :query_title_in_lists_for_project.t(type: :observation, project: str)
       end
 
       def title_for_species_lists
-        str = map_join_and_truncate(:species_lists, SpeciesList, title)
+        str = map_join_and_truncate(:species_lists, SpeciesList, :title)
         :query_title_in_species_list.t(type: :observation, species_list: str)
       end
 
       def title_for_users
-        str = map_join_and_truncate(:users, User, login)
+        str = map_join_and_truncate(:users, User, :login)
         :query_title_for_user.t(type: :observation, user: str)
       end
 
