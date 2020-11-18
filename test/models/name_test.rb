@@ -2791,7 +2791,7 @@ class NameTest < UnitTestCase
       ancestor.correct_spelling.empty? &&
       Name.joins(:namings).where(
         "classification LIKE ?",
-        "%#{ancestor.rank}: #{ancestor.classification_name}%"
+        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
       ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
