@@ -64,7 +64,12 @@ module Query
 
       def map_join_and_truncate(arg, model, method)
         str = params[arg].map do |val|
-          model.find(Integer(val)).send(method) rescue val
+          # Integer(val) throws ArgumentError if val is not an integer.
+          # This is the most efficient way to test if a string is an
+          # integer according to a very thorough and detailed blog post!
+          model.find(Integer(val)).send(method)
+        rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
+          val
         end.join(", ")
         str = "#{str[0...97]}..." if str.length > 100
         str
