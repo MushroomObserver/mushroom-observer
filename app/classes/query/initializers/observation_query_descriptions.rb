@@ -28,56 +28,44 @@ module Query
       private
 
       def title_for_herbaria
-        str = map_join_and_truncate(params[:herbaria]) do |id|
-          Herbarium.find(id).name
-        end
+        str = map_join_and_truncate(:herbaria, Herbarium, name)
         :query_title_in_herbarium.t(type: :observation, herbarium: str)
       end
 
       def title_for_locations
-        str = map_join_and_truncate(params[:locations]) do |id|
-          Location.find(id).display_name
-        end
+        str = map_join_and_truncate(:locations, Location, display_name)
         :query_title_at_location.t(type: :observation, location: str)
       end
 
       def title_for_names
-        str = map_join_and_truncate(params[:names]) do |id|
-          Name.find(id).text_name
-        end
+        str = map_join_and_truncate(:names, Name, text_name)
         :query_title_of_name.t(type: :observation, name: str)
       end
 
       def title_for_projects
-        str = map_join_and_truncate(params[:projects]) do |id|
-          Project.find(id).title
-        end
+        str = map_join_and_truncate(:projects, Project, title)
         :query_title_for_project.t(type: :observation, project: str)
       end
 
       def title_for_project_lists
-        str = map_join_and_truncate(params[:project_lists]) do |id|
-          Project.find(id).title
-        end
+        str = map_join_and_truncate(:project_lists, Project, title)
         :query_title_in_lists_for_project.t(type: :observation, project: str)
       end
 
       def title_for_species_lists
-        str = map_join_and_truncate(params[:species_lists]) do |id|
-          SpeciesList.find(id).title
-        end
+        str = map_join_and_truncate(:species_lists, SpeciesList, title)
         :query_title_in_species_list.t(type: :observation, species_list: str)
       end
 
       def title_for_users
-        str = map_join_and_truncate(params[:users]) do |id|
-          User.find(id).login
-        end
+        str = map_join_and_truncate(:users, User, login)
         :query_title_for_user.t(type: :observation, user: str)
       end
 
-      def map_join_and_truncate(vals)
-        str = vals.map { |x| yield(Integer(x)) rescue x }.join(", ")
+      def map_join_and_truncate(arg, model, method)
+        str = params[arg].map do |val|
+          model.find(Integer(x)).send(method) rescue val
+        end.join(", ")
         str = "#{str[0...97]}..." if str.length > 100
         str
       end
