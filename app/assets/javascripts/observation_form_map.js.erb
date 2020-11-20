@@ -6,7 +6,11 @@ var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
 
 // ./observer/create_observation
 $(document).ready(function() {
-  $('.map-open').click(function() {
+  var opened = false;
+
+  var open_map = function(focus_immediately) {
+    opened = true;
+
     $('#observationFormMap').removeClass("hidden").css({
       "background-position": "center center",
       "background-image": "url('<%= asset_path('indicator.gif') %>')",
@@ -141,6 +145,18 @@ $(document).ready(function() {
           updateFields();
         });
       }
+
+      if (focus_immediately) {
+        focusMap();
+      }
     });
+  };
+
+  $('.map-open').click(function() {
+    if (!opened) open_map();
+  });
+
+  $('.map-locate').click(function() {
+    if (!opened) open_map("focus_immediately");
   });
 });
