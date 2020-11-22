@@ -930,6 +930,7 @@
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
+  user_stats_contributing_users: ""
   user_stats_images: "[:IMAGES]"
   user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] Authored"
   user_stats_location_descriptions_editors: "[:LOCATION_DESCRIPTIONS] Edited"
@@ -943,6 +944,8 @@
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
   user_stats_observations_without_voucher: All Other Observations
+  user_stats_sequences: ""
+  user_stats_sequenced_observations: ""
   user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
@@ -950,6 +953,7 @@
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
+  site_stats_contributing_users: Contributing Users
   site_stats_images: "[:IMAGES]"
   site_stats_listed_taxa: Listed Taxa
   site_stats_location_descriptions_authors: Authored [:LOCATION_DESCRIPTIONS]
@@ -965,6 +969,8 @@
   site_stats_observations_with_voucher: Observations with Full Data
   site_stats_observations_without_voucher: Other Observations
   site_stats_observed_taxa: Observed Taxa
+  site_stats_sequences: "[:SEQUENCES]"
+  site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
   site_stats_users: Members

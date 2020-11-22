@@ -19,7 +19,7 @@
     [ :observations,                  :observer,     :observations_by_user            ],
     [ :species_lists,                 :species_list, :species_lists_by_user           ],
     [ :life_list,                     :observer,     :checklist                       ]
-  ] 
+  ]
     links[key] = url_for(controller: controller, action: action, id: id)
   end
 
@@ -61,7 +61,11 @@
 
   # These are roughly in decreasing order of importance.
   rows = []
-  for field in SiteData::ALL_FIELDS - [:users]
+  (SiteData::ALL_FIELDS -
+   SiteData::SITE_WIDE_FIELDS -
+   # omit sequence stuff because it has no weight
+   [:sequences, :sequenced_observations]).
+  each do |field|
     rows << {
       field: field,
       label: "user_stats_#{field}".to_sym.t,
