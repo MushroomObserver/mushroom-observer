@@ -3,13 +3,13 @@
 module ObservationReport
   # base class
   class Base
-    attr_accessor :query
-    attr_accessor :encoding
+    attr_accessor :encoding, :query
 
     class_attribute :default_encoding
     class_attribute :mime_type
     class_attribute :extension
     class_attribute :header
+    class_attribute :separator
 
     def initialize(args)
       self.query    = args[:query]
