@@ -72,7 +72,7 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Adolf, obs, expect, &:text_name)
   end
 
-  def test_darwin
+  def test_darwin_csv
     obs = observations(:detailed_unknown_obs)
     expect = [
       obs.id.to_s,
@@ -102,7 +102,7 @@ class ObservationReportTest < UnitTestCase
       "294",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::Darwin, obs, expect, &:id)
+    do_csv_test(ObservationReport::DarwinCSV, obs, expect, &:id)
   end
 
   def test_fundis_no_exact_lat_long

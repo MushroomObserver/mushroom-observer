@@ -287,7 +287,7 @@ class ObserverController
     when "adolf"
       ObservationReport::Adolf.new(args)
     when "darwin"
-      ObservationReport::Darwin.new(args)
+      ObservationReport::DarwinCSV.new(args)
     when "symbiota"
       ObservationReport::Symbiota.new(args)
     when "fundis"

@@ -2,7 +2,7 @@
 
 module ObservationReport
   # Provides rendering ability for TSV-type reports.
-  class TSV < ObservationReport::Base
+  class TSV < ObservationReport::BaseTable
     self.default_encoding = "UTF-8"
     self.mime_type = "text/tsv"
     self.extension = "tsv"
