@@ -1733,6 +1733,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_update_add_icn_id
     name = names(:stereum_hirsutum)
+    rank = name.rank
     params = {
       id: name.id,
       name: {
@@ -1740,7 +1741,7 @@ class NameControllerTest < FunctionalTestCase
         text_name: name.text_name,
         author: name.author,
         sort_name: name.sort_name,
-        rank: name.rank,
+        rank: rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
         icn_id: 189_826
@@ -1756,6 +1757,9 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(189_826, name.reload.icn_id)
     assert_no_emails
+
+    assert_equal(rank, name.versions.first.rank,
+                 "Rank versioned incorrectly.")
   end
 
   def test_update_icn_id_unchanged
