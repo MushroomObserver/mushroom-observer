@@ -1758,7 +1758,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(189_826, name.reload.icn_id)
     assert_no_emails
 
-    assert_equal(rank, name.versions.first.rank,
+    assert_equal(rank, Name.ranks.key(name.versions.first.rank),
                  "Rank versioned incorrectly.")
   end
 
