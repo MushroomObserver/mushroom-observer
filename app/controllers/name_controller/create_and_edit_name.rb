@@ -129,7 +129,7 @@ class NameController
 
     args = {
       str: @parse.real_search_name,
-      matches: new_name.map(&:search_name).join(" / ")
+      matches: matches.map(&:unique_search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
   end
