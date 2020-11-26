@@ -3045,4 +3045,19 @@ class NameTest < UnitTestCase
     # nothing useful in return.
     Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
   end
+
+  def test_merge_interests
+    old_name = names(:agaricus_campestros)
+    interests = old_name.interests
+    assert(interests.any?, "Test needs a fixture with an interest")
+    target = names(:agaricus_campestras)
+    assert(target.interests.none?, "Test needs a fixture without interests")
+
+    target.merge(old_name)
+    assert_equal(
+      interests, target.interests,
+      "Old name (#{old_name.text_name}) interests " \
+      "were not moved to target (#{target.text_name})"
+    )
+  end
 end
