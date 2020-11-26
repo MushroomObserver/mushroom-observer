@@ -190,9 +190,10 @@
 #
 #  ==== Formatting
 #  text_name::               "Xxx"
-#  format_name::             "Xxx sp. Author"
+#  format_name::             "**_Xxx sp.__** Author"
 #  unique_text_name::        "Xxx (123)"
-#  unique_format_name::      "Xxx sp. Author (123)"
+#  unique_format_name::      "**__Xxx sp.__** Author (123)"
+#  unique_search_name::      Xxx yyy Author (123)
 #  stripped_text_name        text_name minus quotes, periods, sp, group, etc.
 #  display_name_brief_authors:: Marked up name with authors shortened:
 #                            **__"Xxx yyy__ author**

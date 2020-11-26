@@ -2787,6 +2787,31 @@ class NameControllerTest < FunctionalTestCase
     )
   end
 
+  def test_update_name_multiple_matches
+    old_name = names(:agaricus_campestrus)
+    new_name = names(:agaricus_campestris)
+    duplicate = new_name.dup
+    duplicate.save(validate: false)
+
+    params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        deprecated: new_name.deprecated
+      }
+    }
+    login("rolf")
+    make_admin
+
+    assert_no_difference("Name.count") do
+      post(:edit_name, params: params)
+    end
+    assert_response(:success) # form reloaded
+    assert_flash_error(:edit_name_multiple_names_match.l)
+  end
+
   # ----------------------------
   #  Bulk names.
   # ----------------------------
