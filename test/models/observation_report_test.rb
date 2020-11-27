@@ -23,7 +23,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal(expect, rows[idx + 1].split("\t"))
   end
 
-  def do_zip_test(report_type, obs, expect)
+  def do_zip_test(report_type, expect)
     query = Query.lookup(:Observation, :all)
     report = report_type.new(query: query).body
     assert_not_empty(report)
@@ -118,9 +118,8 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_darwin
-    obs = observations(:detailed_unknown_obs)
     expect = ["meta.xml", "observations.csv"]
-    do_zip_test(ObservationReport::Darwin, obs, expect)
+    do_zip_test(ObservationReport::Darwin, expect)
   end
 
   def test_fundis_no_exact_lat_long

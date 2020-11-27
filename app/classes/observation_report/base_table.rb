@@ -9,8 +9,8 @@ module ObservationReport
 
     def initialize(args)
       super(args)
-      self.query    = args[:query]
-      raise("ObservationReport initialized without query!")    unless query
+      self.query = args[:query]
+      raise("ObservationReport initialized without query!") unless query
     end
 
     # Stub for subclasses which need to add other columns to table.
