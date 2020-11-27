@@ -12,8 +12,9 @@ module ObservationReport
 
     # generate CSV & meta.xml and bundle into a Zip
     def render
-      self.content << ["meta.xml", File.open("#{::Rails.root}/public/dwca/meta.xml").read]
-      self.content << ["observations.csv", self.csv.render]
+      filename = "#{::Rails.root}/public/dwca/meta.xml"
+      content << ["meta.xml", File.open(filename).read]
+      content << ["observations.csv", csv.render]
       super
     end
   end

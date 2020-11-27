@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'zip'
+require("zip")
 
 module ObservationReport
   # Provides rendering ability for ZIP-type reports.
@@ -24,7 +24,7 @@ module ObservationReport
     def render
       # generate a Zip from a set of steams
       stringio = Zip::OutputStream.write_buffer do |zio|
-        self.content.each do |name, data|
+        content.each do |name, data|
           zio.put_next_entry(name)
           zio.write(data)
         end
