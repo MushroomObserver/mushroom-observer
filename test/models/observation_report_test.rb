@@ -23,6 +23,18 @@ class ObservationReportTest < UnitTestCase
     assert_equal(expect, rows[idx + 1].split("\t"))
   end
 
+  def do_zip_test(report_type, obs, expect)
+    query = Query.lookup(:Observation, :all)
+    report = report_type.new(query: query).body
+    assert_not_empty(report)
+    zio = Zip::InputStream.new(StringIO.new(report))
+    contents = []
+    while (entry = zio.get_next_entry)
+      contents << entry.name
+    end
+    assert_equal(expect, contents)
+  end
+
   # ----------------------------------------------------------------------------
 
   def test_adolf
@@ -103,6 +115,12 @@ class ObservationReportTest < UnitTestCase
       "Found in a strange place... & with śtrangè characters™"
     ]
     do_csv_test(ObservationReport::DarwinCSV, obs, expect, &:id)
+  end
+
+  def test_darwin
+    obs = observations(:detailed_unknown_obs)
+    expect = ["meta.xml", "observations.csv"]
+    do_zip_test(ObservationReport::Darwin, obs, expect)
   end
 
   def test_fundis_no_exact_lat_long
