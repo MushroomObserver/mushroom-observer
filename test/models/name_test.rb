@@ -2780,7 +2780,7 @@ class NameTest < UnitTestCase
            "an Approved Name, with a Synonym having Naming(s)")
 
     assert(
-      approved_synonym.dependency?,
+      approved_synonym.referenced_by_proposed_name?,
       "Approved synonym of Name having Namings should be a 'dependency'."
     )
   end
@@ -2797,13 +2797,13 @@ class NameTest < UnitTestCase
       "at a rank that has Namings classified with that rank."
     )
     assert(
-      ancestor.dependency?,
+      ancestor.referenced_by_proposed_name?,
       "Correctly spelled ancestor of a Proposed Name should be a 'dependency'."
     )
 
     ancestor = names(:boletus)
     assert(
-      ancestor.dependency?,
+      ancestor.referenced_by_proposed_name?,
       "Genus that is ancestor of a Proposed Name should be a 'dependency'."
     )
 
@@ -2812,7 +2812,7 @@ class NameTest < UnitTestCase
                   name: names(:amanita_boudieri_var_beillei),
                   observation: observations(:minimal_unknown_obs))
     assert(
-      species_ancestor.dependency?,
+      species_ancestor.referenced_by_proposed_name?,
       "Species that is ancestor of a Proposed Name should be a 'dependency'."
     )
   end
@@ -2831,7 +2831,7 @@ class NameTest < UnitTestCase
                   observation: observations(:minimal_unknown_obs))
 
     assert_not(
-      misspelt_genus.dependency?,
+      misspelt_genus.referenced_by_proposed_name?,
       "Misspelt Ancestor of correctly spelled Proposed Name " \
       "should not be a `dependency`."
     )

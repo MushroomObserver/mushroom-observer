@@ -15,9 +15,8 @@ class Name < AbstractModel
     namings.empty? && interests_plus_notifications.zero?
   end
 
-  # Is the Name a dependency of another for purposes of merger?
-  # (Users should be unable to merge dependencies.)
-  def dependency?
+  # Called to determine if a name can be destroyed
+  def referenced_by_proposed_name?
     approved_synonym_of_proposed_name? ||
       correctly_spelled_ancestor_of_proposed_name?
   end

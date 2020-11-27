@@ -259,7 +259,8 @@
 #  ==== Merging
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
-#  dependency?::             A dependency of a proposed Name
+#  referenced_by_proposed_name?::
+#                            Does a proposed Name reference this Name?
 #
 #  == Callbacks
 #
