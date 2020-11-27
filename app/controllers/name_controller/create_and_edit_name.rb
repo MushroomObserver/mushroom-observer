@@ -317,14 +317,9 @@ class NameController
 
     # Force log to display the destroyed name
     @name.display_name = logged_destroyed_name
-
-    # Fill in author if other has one.
-    if survivor.author.blank? && @parse.author.present?
-      survivor.change_author(@parse.author)
-    end
     survivor.change_deprecated(deprecation) unless deprecation.nil?
 
-    survivor.merge(@name) # move associations to survivor, destroy @name
+    survivor.merge(@name) # move associations to survivor, destroy @name object
 
     send_merger_messages(destroyed_real_search_name: destroyed_real_search_name,
                          survivor: survivor)
