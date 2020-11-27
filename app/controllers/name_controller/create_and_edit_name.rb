@@ -292,7 +292,8 @@ class NameController
 
   def merge_names(new_name)
     if in_admin_mode? ||
-       ((@name.mergeable? || new_name.mergeable?) && !@name.referenced_by_proposed_name?)
+       ((@name.mergeable? || new_name.mergeable?) &&
+       !@name.referenced_by_proposed_name?)
       perform_merge_names(new_name)
       redirect_to_show_name
     else
