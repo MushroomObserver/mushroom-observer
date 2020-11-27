@@ -10,6 +10,10 @@ module ObservationReport
       self.csv = DarwinCSV.new(args)
     end
 
+    def filename
+      "dwca.#{extension}"
+    end
+
     # generate CSV & meta.xml and bundle into a Zip
     def render
       filename = "#{::Rails.root}/public/dwca/meta.xml"

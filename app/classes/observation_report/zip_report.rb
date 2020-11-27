@@ -17,10 +17,6 @@ module ObservationReport
       self.content = []
     end
 
-    def filename
-      "test.#{extension}"
-    end
-
     def render
       # generate a Zip from a set of steams
       stringio = Zip::OutputStream.write_buffer do |zio|
