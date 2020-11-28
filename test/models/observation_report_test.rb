@@ -84,7 +84,7 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Adolf, obs, expect, &:text_name)
   end
 
-  def test_darwin_csv
+  def test_darwin_observations
     obs = observations(:detailed_unknown_obs)
     expect = [
       obs.id.to_s,
@@ -114,12 +114,12 @@ class ObservationReportTest < UnitTestCase
       "294",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::DarwinCSV, obs, expect, &:id)
+    do_csv_test(ObservationReport::Darwin::Observations, obs, expect, &:id)
   end
 
-  def test_darwin
+  def test_dwca
     expect = ["meta.xml", "observations.csv"]
-    do_zip_test(ObservationReport::Darwin, expect)
+    do_zip_test(ObservationReport::Dwca, expect)
   end
 
   def test_fundis_no_exact_lat_long
