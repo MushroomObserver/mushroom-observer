@@ -207,6 +207,7 @@ GEM
       rack (>= 1.1)
       rubocop (>= 0.72.0)
     ruby-progressbar (1.10.1)
+    rubyzip (2.3.0)
     safe_yaml (1.0.5)
     sassc (2.3.0)
       ffi (~> 1.9)
@@ -297,6 +298,7 @@ DEPENDENCIES
   rubocop (= 0.89)
   rubocop-performance
   rubocop-rails
+  rubyzip
   sassc-rails
   simple_enum
   sprockets

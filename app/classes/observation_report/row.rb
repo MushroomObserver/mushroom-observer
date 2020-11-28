@@ -31,7 +31,7 @@ module ObservationReport
   # 24:: locations.high
   # 25:: locations.low
   #
-  # Subclasses of ObservationReport::Base can add/access added columns with
+  # Subclasses of ObservationReport::BaseTable can access added columns with
   # +row.val(N) = "valN"+ where N is 1, 2, and so on.
   #
   class Row

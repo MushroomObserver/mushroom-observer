@@ -2,7 +2,7 @@
 
 module ObservationReport
   # Provides rendering ability for CSV-type reports.
-  class CSV < ObservationReport::Base
+  class CSV < ObservationReport::BaseTable
     require "csv"
 
     self.default_encoding = "UTF-8"
