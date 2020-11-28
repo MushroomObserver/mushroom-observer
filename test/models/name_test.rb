@@ -2768,7 +2768,7 @@ class NameTest < UnitTestCase
 
   # --------------------------------------
 
-  def test_dependency_approved_synonym_of_proposed_name
+  def test_referenced_by_proposed_name_approved_synonym
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
     Naming.create(user: mary,
@@ -2781,11 +2781,12 @@ class NameTest < UnitTestCase
 
     assert(
       approved_synonym.referenced_by_proposed_name?,
-      "Approved synonym of Name having Namings should be a 'dependency'."
+      "Approved synonym of Name having Namings should be "\
+      "`referenced_by_proposed_name`."
     )
   end
 
-  def test_dependency_correctly_spelled_ancestor
+  def test_referenced_by_proposed_name_correctly_spelled_ancestor
     ancestor = names(:basidiomycetes)
     assert(
       ancestor.correct_spelling.empty? &&
@@ -2798,13 +2799,15 @@ class NameTest < UnitTestCase
     )
     assert(
       ancestor.referenced_by_proposed_name?,
-      "Correctly spelled ancestor of a Proposed Name should be a 'dependency'."
+      "Correctly spelled ancestor of a Proposed Name should be" \
+      "`referenced_by_proposed_name`."
     )
 
     ancestor = names(:boletus)
     assert(
       ancestor.referenced_by_proposed_name?,
-      "Genus that is ancestor of a Proposed Name should be a 'dependency'."
+      "Genus that is ancestor of a Proposed Name should be " \
+      "`referenced_by_proposed_name`."
     )
 
     species_ancestor = names(:amanita_boudieri)
@@ -2813,11 +2816,12 @@ class NameTest < UnitTestCase
                   observation: observations(:minimal_unknown_obs))
     assert(
       species_ancestor.referenced_by_proposed_name?,
-      "Species that is ancestor of a Proposed Name should be a 'dependency'."
+      "Species that is ancestor of a Proposed Name should be " \
+      "`referenced_by_proposed_name`."
     )
   end
 
-  def test_dependency_misspelt_ancestor
+  def test_referenced_by_proposed_name_misspelt_ancestor
     misspelt_genus = names(:suilus)
     species_of_missplet_genus = Name.create(
       text_name: "#{misspelt_genus.text_name} lakei",
@@ -2833,7 +2837,7 @@ class NameTest < UnitTestCase
     assert_not(
       misspelt_genus.referenced_by_proposed_name?,
       "Misspelt Ancestor of correctly spelled Proposed Name " \
-      "should not be a `dependency`."
+      "should not be a `referenced_by_proposed_name`."
     )
   end
 
