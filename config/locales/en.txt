@@ -2731,9 +2731,6 @@
   list_users_joined: Joined
   list_users_contribution: Contribution
 
-  # location/add_to_location
-  location_merge_success: Successfully merged [this] with [that].
-
   # species_list/make_report
   make_report_not_supported: We don't support report filetype *.[type].
 
