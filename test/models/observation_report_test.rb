@@ -7,7 +7,7 @@ class ObservationReportTest < UnitTestCase
     query = Query.lookup(:Observation, :all)
     report = report_type.new(query: query).body
     assert_not_empty(report)
-    table = CSV.parse(report)
+    table = CSV.parse(report, col_sep: report_type.separator)
     assert_equal(query.num_results + 1, table.count)
     idx = query.results.sort_by(&block).index(obs)
     assert_equal(expect, table[idx + 1])
@@ -75,10 +75,12 @@ class ObservationReportTest < UnitTestCase
   def test_darwin
     obs = observations(:detailed_unknown_obs)
     expect = [
+      obs.id.to_s,
+      "#{MO.http_domain}/#{obs.id}",
+      "HumanObservation",
       "2006-05-12 17:21:00 UTC",
       "MushroomObserver",
       nil,
-      obs.id.to_s,
       "Fungi",
       nil,
       "Kingdom",

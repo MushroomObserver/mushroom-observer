@@ -9,9 +9,10 @@ module ObservationReport
     self.mime_type = "text/csv"
     self.extension = "csv"
     self.header = { header: :present }
+    self.separator = ","
 
     def render
-      ::CSV.generate do |csv|
+      ::CSV.generate(col_sep: separator) do |csv|
         csv << labels
         formatted_rows.each { |row| csv << row }
       end.force_encoding("UTF-8")

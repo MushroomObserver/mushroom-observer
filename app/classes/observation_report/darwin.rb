@@ -3,12 +3,16 @@
 module ObservationReport
   # Darwin format.
   class Darwin < ObservationReport::CSV
+    self.separator = "\t"
+
     def labels
       %w[
+        CatalogNumber
+        OccurrenceID
+        BasisOfRecord
         DateLastModified
         InstitutionCode
         CollectionCode
-        CatalogNumber
         ScientificName
         ScientificNameAuthor
         ScientificNameRank
@@ -35,12 +39,15 @@ module ObservationReport
     # rubocop:disable Metrics/AbcSize
     def format_row(row)
       [
+        row.obs_id,
+        "#{MO.http_domain}/#{row.obs_id}",
+        "HumanObservation",
         row.obs_updated_at,
         "MushroomObserver",
         nil,
-        row.obs_id,
+        # row.obs_id,
         row.name_text_name,
-        row.name_author,
+        clean_value(row.name_author),
         row.name_rank,
         row.genus,
         row.species,
@@ -58,12 +65,16 @@ module ObservationReport
         row.best_long,
         row.best_low,
         row.best_high,
-        row.obs_notes
+        clean_value(row.obs_notes)
       ]
     end
 
+    def clean_value(value)
+      value&.tr("\t", " ")&.gsub("\n", "  ")&.gsub("\r", "  ")
+    end
+
     def sort_after(rows)
-      rows.sort_by { |row| row[3].to_i }
+      rows.sort_by { |row| row[0].to_i }
     end
   end
 end
