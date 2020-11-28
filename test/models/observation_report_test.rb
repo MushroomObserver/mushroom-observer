@@ -118,8 +118,26 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_dwca
-    expect = ["meta.xml", "observations.csv"]
+    expect = ["meta.xml", "observations.csv", "taxa.csv"]
     do_zip_test(ObservationReport::Dwca, expect)
+  end
+
+  def test_taxa_report
+    taxa_report = build_taxa_report
+    report_content = taxa_report.body
+    assert_not_empty(report_content)
+    table = CSV.parse(report_content, col_sep: taxa_report.separator)
+    assert_equal(Observation.all.pluck(:name_id).uniq.length + 1, table.count)
+    obs = Observation.first
+    assert(table.include?([obs.name_id.to_s, obs.text_name]))
+  end
+
+  def build_taxa_report
+    query = Query.lookup(:Observation, :all)
+    observations = ObservationReport::Darwin::Observations.new(query: query)
+    return if observations.body.empty?
+    report_type = ObservationReport::Darwin::Taxa
+    report_type.new(query: query, observations: observations)
   end
 
   def test_fundis_no_exact_lat_long

@@ -4,6 +4,8 @@ module ObservationReport
   module Darwin
     # Darwin Core Observations format.
     class Observations < ObservationReport::CSV
+      attr_accessor :taxon_set
+
       self.separator = "\t"
 
       def labels
@@ -39,6 +41,8 @@ module ObservationReport
 
       # rubocop:disable Metrics/AbcSize
       def format_row(row)
+        self.taxon_set ||= Set.new
+        self.taxon_set.add([row.name_id, row.name_text_name])
         [
           row.obs_id,
           "#{MO.http_domain}/#{row.obs_id}",
@@ -46,7 +50,6 @@ module ObservationReport
           row.obs_updated_at,
           "MushroomObserver",
           nil,
-          # row.obs_id,
           row.name_text_name,
           clean_value(row.name_author),
           row.name_rank,
@@ -77,6 +80,10 @@ module ObservationReport
 
       def sort_after(rows)
         rows.sort_by { |row| row[0].to_i }
+      end
+
+      def taxa
+        taxon_set.to_a
       end
     end
   end
