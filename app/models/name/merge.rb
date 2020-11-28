@@ -4,15 +4,16 @@ class Name < AbstractModel
   scope :ranked_below,
         ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
 
-  # Is it safe to merge this Name with another? If any information will get
-  # lost we return false.  In practice only if it has Namings.
-  # UPDATE: I'm also forbidding merges if users have registered interest in
-  # or otherwise requested notifications for this name.  In some cases it will
+  # Would merger into another Name destroy data in the sense that the
+  # merger could not be uncrambled? If any information will get
+  # lost we return true.
+  # It is "destrutive" if: it has Namings, or if users have registered interest
+  # in or otherwise requested notifications for this name. In some cases it will
   # be okay, but there are cases where users unintentionally end up subscribed
-  # notifications for every name in the database as a side-effect of merging an
-  # unwanted name into Fungi, say. -JPH 20200120
-  def mergeable?
-    namings.empty? && interests_plus_notifications.zero?
+  # to notifications for every name in the database as a side-effect of merging
+  # an unwanted name into Fungi, say. -JPH 20200120, - JDC 20201127
+  def merger_destructive?
+    namings.any? || interests_plus_notifications.positive?
   end
 
   # Called to determine if a name can be destroyed

@@ -257,7 +257,7 @@
 #  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  ==== Merging
-#  mergeable?::              Is it safe to merge this Name into another?
+#  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
 #  referenced_by_proposed_name?::
 #                            Does a proposed Name reference this Name?

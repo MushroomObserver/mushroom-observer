@@ -292,7 +292,7 @@ class NameController
 
   def merge_names(new_name)
     if in_admin_mode? ||
-       ((@name.mergeable? || new_name.mergeable?) &&
+       ((!@name.merger_destructive? || !new_name.merger_destructive?) &&
        !@name.referenced_by_proposed_name?)
       perform_merge_names(new_name)
       redirect_to_show_name
@@ -348,7 +348,7 @@ class NameController
   end
 
   def reverse_merger_safer?(presumptive_survivor)
-    !@name.mergeable? && presumptive_survivor.mergeable?
+    @name.merger_destructive? && !presumptive_survivor.merger_destructive?
   end
 
   def send_merger_messages(destroyed_real_search_name:, survivor:)
