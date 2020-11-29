@@ -126,5 +126,4 @@ class Name < AbstractModel
     # Finally destroy the name.
     old_name.destroy
   end
-
 end
