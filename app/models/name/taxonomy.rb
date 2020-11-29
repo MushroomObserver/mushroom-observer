@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :ranked_below,
+        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+
   def self.all_ranks
     [:Form, :Variety, :Subspecies, :Species,
      :Stirps, :Subsection, :Section, :Subgenus, :Genus,
@@ -527,5 +530,51 @@ class Name < AbstractModel
         AND COALESCE(nd.classification, "") != ""
     ))
     []
+  end
+
+  # ----------------------------------------------------------------------------
+
+  # Does another Name "depend" on this Name?
+  def dependents?
+    approved_synonym_of_proposed_name? ||
+      correctly_spelled_ancestor_of_proposed_name? ||
+      ancestor_of_correctly_spelled_name?
+  end
+
+  ################
+
+  private
+
+  def approved_synonym_of_proposed_name?
+    !deprecated && Naming.where(name: other_synonyms).any?
+  end
+
+  def ancestor_of_correctly_spelled_name?
+    if at_or_below_genus?
+      Name.where("text_name LIKE ?", "#{text_name} %").
+        where(correct_spelling: nil).any?
+    else
+      Name.where("classification LIKE ?", "%#{rank}: _#{text_name}_%").
+        where(correct_spelling: nil).any?
+    end
+  end
+
+  def correctly_spelled_ancestor_of_proposed_name?
+    return false if correct_spelling.present?
+    return above_genus_is_ancestor? unless at_or_below_genus?
+    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+
+    false
+  end
+
+  def above_genus_is_ancestor?
+    Name.joins(:namings).where(
+      "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+    ).any?
+  end
+
+  def genus_or_species_is_ancestor?
+    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
+      ranked_below(rank).any?
   end
 end
