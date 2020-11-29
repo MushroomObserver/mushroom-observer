@@ -16,10 +16,11 @@ class Name < AbstractModel
     namings.any? || interests_plus_notifications.positive?
   end
 
-  # Called to determine if a name can be destroyed
-  def referenced_by_proposed_name?
+  # Does another Name "depend" on this Name?
+  def has_dependents?
     approved_synonym_of_proposed_name? ||
-      correctly_spelled_ancestor_of_proposed_name?
+      correctly_spelled_ancestor_of_proposed_name? ||
+      ancestor_of_correctly_spelled_name?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
@@ -141,6 +142,16 @@ class Name < AbstractModel
 
   def approved_synonym_of_proposed_name?
     !deprecated && Naming.where(name: other_synonyms).any?
+  end
+
+  def ancestor_of_correctly_spelled_name?
+    if at_or_below_genus?
+      Name.where("text_name LIKE ?", "#{text_name} %").
+      where(correct_spelling: nil).any?
+    else
+      Name.where("classification LIKE ?", "%#{rank}: _#{text_name}_%").
+           where(correct_spelling: nil).any?
+    end
   end
 
   def correctly_spelled_ancestor_of_proposed_name?

@@ -2581,6 +2581,8 @@ class NameControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
+
+    make_admin(old_style_name.user.login)
     post(:edit_name, params: params)
 
     assert_flash_success
@@ -2621,7 +2623,6 @@ class NameControllerTest < FunctionalTestCase
       correct_spelling: nil,
       synonym: syn
     )
-
     params = {
       id: name2.id,
       name: {
@@ -2631,7 +2632,9 @@ class NameControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
+    make_admin(name1.user.login)
     post(:edit_name, params: params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails

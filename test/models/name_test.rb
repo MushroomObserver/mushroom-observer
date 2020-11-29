@@ -2768,7 +2768,7 @@ class NameTest < UnitTestCase
 
   # --------------------------------------
 
-  def test_referenced_by_proposed_name_approved_synonym
+  def test_approved_synonym_of_proposed_name_has_dependents
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
     Naming.create(user: mary,
@@ -2780,16 +2780,16 @@ class NameTest < UnitTestCase
            "an Approved Name, with a Synonym having Naming(s)")
 
     assert(
-      approved_synonym.referenced_by_proposed_name?,
-      "Approved synonym of Name having Namings should be "\
-      "`referenced_by_proposed_name`."
+      approved_synonym.has_dependents?,
+      "`has_dependents?` should be true for an approved synonym " \
+      "(#{approved_synonym}) of a Proposed Name (#deprecated_name)"
     )
   end
 
-  def test_referenced_by_proposed_name_correctly_spelled_ancestor
+  def test_correctly_spelled_ancestor_of_proposed_name_has_dependents
     ancestor = names(:basidiomycetes)
     assert(
-      ancestor.correct_spelling.empty? &&
+      !ancestor.is_misspelling? &&
       Name.joins(:namings).where(
         "classification LIKE ?",
         "%#{ancestor.rank}: _#{ancestor.text_name}_%"
@@ -2798,47 +2798,82 @@ class NameTest < UnitTestCase
       "at a rank that has Namings classified with that rank."
     )
     assert(
-      ancestor.referenced_by_proposed_name?,
-      "Correctly spelled ancestor of a Proposed Name should be" \
-      "`referenced_by_proposed_name`."
+      ancestor.has_dependents?,
+      "`has_dependents?` should be true for a Name above genus " \
+      "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
+      "of a Proposed Name"
     )
 
     ancestor = names(:boletus)
     assert(
-      ancestor.referenced_by_proposed_name?,
-      "Genus that is ancestor of a Proposed Name should be " \
-      "`referenced_by_proposed_name`."
+      ancestor.has_dependents?,
+      "`has_dependents?` should be true for a Genus (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
     )
 
-    species_ancestor = names(:amanita_boudieri)
+    ancestor = names(:amanita_boudieri)
     Naming.create(user: mary,
                   name: names(:amanita_boudieri_var_beillei),
                   observation: observations(:minimal_unknown_obs))
     assert(
-      species_ancestor.referenced_by_proposed_name?,
-      "Species that is ancestor of a Proposed Name should be " \
-      "`referenced_by_proposed_name`."
+      ancestor.has_dependents?,
+      "`has_dependents?` should be true for Species (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
     )
   end
 
-  def test_referenced_by_proposed_name_misspelt_ancestor
+  def test_misspelt_ancestor_of_misspelt_proposed_name_has_no_dependents
     misspelt_genus = names(:suilus)
     species_of_missplet_genus = Name.create(
       text_name: "#{misspelt_genus.text_name} lakei",
       display_name: "__#{misspelt_genus.text_name} lakei__",
       rank: :Species,
       user: dick,
-      version: 1
+      correct_spelling: names(:boletus_edulis) # anything will do
     )
     Naming.create(user: mary,
                   name: species_of_missplet_genus,
                   observation: observations(:minimal_unknown_obs))
 
     assert_not(
-      misspelt_genus.referenced_by_proposed_name?,
-      "Misspelt Ancestor of correctly spelled Proposed Name " \
-      "should not be a `referenced_by_proposed_name`."
+      misspelt_genus.has_dependents?,
+      "`has_dependents?` should be false for " \
+      "misspelt genus of misspelt Proposed Name " \
     )
+  end
+
+  def test_ancestor_of_correctly_spelled_unproposed_name_has_dependents
+    ancestor = Name.create(
+        text_name: "Phyllotopsidaceae",
+        search_name: "Phyllotopsidaceae",
+        sort_name: "Phyllotopsidaceae",
+        display_name: '**__Phyllotopsidaceae__**',
+        rank: Name.ranks[:Family],
+        user: dick
+    )
+    descendant = Name.create(
+        text_name: "Macrotyphula",
+        search_name: "Macrotyphula",
+        sort_name: "Macrotyphula",
+        display_name: '**__Macrotyphula__**',
+        rank: Name.ranks[:Genus],
+        classification: "Family: _#{ancestor.text_name}_",
+        user: dick
+    )
+    assert(ancestor.has_dependents?,
+           "`has_dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
+
+
+    ancestor = names(:tubaria)
+    descendant = names(:tubaria_furfuracea)
+    assert(
+      Naming.where(name: descendant).none? && !descendant.is_misspelling?,
+      "Test needs different fixture: correctly spelled, without Namings"
+    )
+    assert(ancestor.has_dependents?,
+           "`has_dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
   end
 
   # --------------------------------------

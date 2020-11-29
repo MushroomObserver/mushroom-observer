@@ -259,8 +259,7 @@
 #  ==== Merging
 #  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
-#  referenced_by_proposed_name?::
-#                            Does a proposed Name reference this Name?
+#  has_dependents?::         Does another Name depend from this Name?
 #
 #  == Callbacks
 #
