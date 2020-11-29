@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Combine two Name objects (and associations) into one
 class Name < AbstractModel
   scope :ranked_below,
         ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
@@ -17,7 +18,7 @@ class Name < AbstractModel
   end
 
   # Does another Name "depend" on this Name?
-  def has_dependents?
+  def dependents?
     approved_synonym_of_proposed_name? ||
       correctly_spelled_ancestor_of_proposed_name? ||
       ancestor_of_correctly_spelled_name?
@@ -147,10 +148,10 @@ class Name < AbstractModel
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
       Name.where("text_name LIKE ?", "#{text_name} %").
-      where(correct_spelling: nil).any?
+        where(correct_spelling: nil).any?
     else
       Name.where("classification LIKE ?", "%#{rank}: _#{text_name}_%").
-           where(correct_spelling: nil).any?
+        where(correct_spelling: nil).any?
     end
   end
 

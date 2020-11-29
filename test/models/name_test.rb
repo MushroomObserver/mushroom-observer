@@ -2780,8 +2780,8 @@ class NameTest < UnitTestCase
            "an Approved Name, with a Synonym having Naming(s)")
 
     assert(
-      approved_synonym.has_dependents?,
-      "`has_dependents?` should be true for an approved synonym " \
+      approved_synonym.dependents?,
+      "`dependents?` should be true for an approved synonym " \
       "(#{approved_synonym}) of a Proposed Name (#deprecated_name)"
     )
   end
@@ -2798,16 +2798,16 @@ class NameTest < UnitTestCase
       "at a rank that has Namings classified with that rank."
     )
     assert(
-      ancestor.has_dependents?,
-      "`has_dependents?` should be true for a Name above genus " \
+      ancestor.dependents?,
+      "`dependents?` should be true for a Name above genus " \
       "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
       "of a Proposed Name"
     )
 
     ancestor = names(:boletus)
     assert(
-      ancestor.has_dependents?,
-      "`has_dependents?` should be true for a Genus (#{ancestor.text_name}) " \
+      ancestor.dependents?,
+      "`dependents?` should be true for a Genus (#{ancestor.text_name}) " \
       "that is an ancestor of a Proposed Name."
     )
 
@@ -2816,8 +2816,8 @@ class NameTest < UnitTestCase
                   name: names(:amanita_boudieri_var_beillei),
                   observation: observations(:minimal_unknown_obs))
     assert(
-      ancestor.has_dependents?,
-      "`has_dependents?` should be true for Species (#{ancestor.text_name}) " \
+      ancestor.dependents?,
+      "`dependents?` should be true for Species (#{ancestor.text_name}) " \
       "that is an ancestor of a Proposed Name."
     )
   end
@@ -2836,34 +2836,33 @@ class NameTest < UnitTestCase
                   observation: observations(:minimal_unknown_obs))
 
     assert_not(
-      misspelt_genus.has_dependents?,
-      "`has_dependents?` should be false for " \
+      misspelt_genus.dependents?,
+      "`dependents?` should be false for " \
       "misspelt genus of misspelt Proposed Name " \
     )
   end
 
   def test_ancestor_of_correctly_spelled_unproposed_name_has_dependents
     ancestor = Name.create(
-        text_name: "Phyllotopsidaceae",
-        search_name: "Phyllotopsidaceae",
-        sort_name: "Phyllotopsidaceae",
-        display_name: '**__Phyllotopsidaceae__**',
-        rank: Name.ranks[:Family],
-        user: dick
+      text_name: "Phyllotopsidaceae",
+      search_name: "Phyllotopsidaceae",
+      sort_name: "Phyllotopsidaceae",
+      display_name: "**__Phyllotopsidaceae__**",
+      rank: Name.ranks[:Family],
+      user: dick
     )
     descendant = Name.create(
-        text_name: "Macrotyphula",
-        search_name: "Macrotyphula",
-        sort_name: "Macrotyphula",
-        display_name: '**__Macrotyphula__**',
-        rank: Name.ranks[:Genus],
-        classification: "Family: _#{ancestor.text_name}_",
-        user: dick
+      text_name: "Macrotyphula",
+      search_name: "Macrotyphula",
+      sort_name: "Macrotyphula",
+      display_name: "**__Macrotyphula__**",
+      rank: Name.ranks[:Genus],
+      classification: "Family: _#{ancestor.text_name}_",
+      user: dick
     )
-    assert(ancestor.has_dependents?,
-           "`has_dependents?` should be true because " \
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
            "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
-
 
     ancestor = names(:tubaria)
     descendant = names(:tubaria_furfuracea)
@@ -2871,8 +2870,8 @@ class NameTest < UnitTestCase
       Naming.where(name: descendant).none? && !descendant.is_misspelling?,
       "Test needs different fixture: correctly spelled, without Namings"
     )
-    assert(ancestor.has_dependents?,
-           "`has_dependents?` should be true because " \
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
            "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
   end
 
