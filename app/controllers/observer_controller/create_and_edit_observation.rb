@@ -117,7 +117,7 @@ class ObserverController
                                         @observation, @good_images)
   end
 
-  def choose_location_suggestion(observation, args)
+  def choose_location_suggestion(observation)
     suggested_location = param_lookup([:location_suggestions, :name], "").to_s
     return if suggested_location.blank?
 
@@ -490,8 +490,7 @@ class ObserverController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.zone.now
-    args ||= {}
-    observation = Observation.new(args.permit(whitelisted_observation_args))
+    observation = Observation.new(args&.permit(whitelisted_observation_args))
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
