@@ -16,13 +16,22 @@
 <!-- /WHEN -->
 
 <!-- WHERE_REASONS -->
-<% if @dubious_where_reasons.any? %>
+<% if @dubious_where_reasons.any? || @location_suggestions.any? %>
   <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
   <div class="alert alert-warning max-width-text" id="location_messages">
-    <%= @dubious_where_reasons.safe_join(safe_br) %>
-    <p class="help-block max-width-text">
-      <%= :form_observations_dubious_help.t(button: button_name) %>
-    </p>
+    <% if @dubious_where_reasons.any? %>
+      <%= @dubious_where_reasons.safe_join(safe_br) %>
+      <p class="help-block max-width-text">
+        <%= :form_observations_dubious_help.t(button: button_name) %>
+      </p>
+    <% end %>
+    <% if @location_suggestions.any? %>
+      <%= :form_observations_location_suggestions.t %>
+      <% @location_suggestions.each do |name| %>
+        <%= indent + radio_button(:location_suggestions, :name, name) %>
+        <%= name.t %><br/>
+      <% end %>
+    <% end %>
   </div>
 <% end %>
 <!-- /WHERE_REASONS -->

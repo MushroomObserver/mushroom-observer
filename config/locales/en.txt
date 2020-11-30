@@ -1546,6 +1546,7 @@
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\n[loc1]\n[loc2]\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
+  form_observations_location_suggestions: Here are some similar locations, did you mean one of these?
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
   form_observations_edit_specimens_help: Please add, edit and remove specimen data from the main observation page.

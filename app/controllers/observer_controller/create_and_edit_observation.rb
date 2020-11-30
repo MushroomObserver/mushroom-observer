@@ -108,12 +108,20 @@ class ObserverController
 
   def rough_cut(params)
     @observation = create_observation_object(params[:observation])
+    choose_location_suggestion(@observation)
     @observation.notes = notes_to_sym_and_compact
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
+  end
+
+  def choose_location_suggestion(observation, args)
+    suggested_location = param_lookup([:location_suggestions, :name], "").to_s
+    return if suggested_location.blank?
+
+    observation.place_name = suggested_location
   end
 
   # Symbolize keys; delete key/value pair if value blank
@@ -143,10 +151,13 @@ class ObserverController
     success = true
     @place_name = @observation.place_name
     @dubious_where_reasons = []
+    @location_suggestions = []
     if @place_name != params[:approved_where] && @observation.location.nil?
       db_name = Location.user_name(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      success = false if @dubious_where_reasons != []
+      @location_suggestions = Location.suggestions(db_name)
+      success = false if @dubious_where_reasons.any? ||
+                         @location_suggestions.any?
     end
     success
   end
@@ -479,21 +490,24 @@ class ObserverController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.zone.now
-    observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
-                  else
-                    Observation.new
-                  end
+    args ||= {}
+    observation = Observation.new(args.permit(whitelisted_observation_args))
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
-    if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.long && observation.place_name.blank?)
-      observation.location = Location.unknown
-      observation.where = nil
-    end
+    clear_location(observation) if is_location_unknown?(observation)
     observation
+  end
+
+  def is_location_unknown?(observation)
+    Location.is_unknown?(observation.place_name) ||
+      (observation.lat && observation.long && observation.place_name.blank?)
+  end
+
+  def clear_location(observation)
+    observation.location = Location.unknown
+    observation.where = nil
   end
 
   def init_specimen_vars_for_create
