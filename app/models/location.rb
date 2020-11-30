@@ -633,7 +633,6 @@ class Location < AbstractModel
 
   # Return some locations that are close to the given name.
   def self.suggestions(str)
-    str = reverse_name(str) if User.current_location_format == :scientific
     locations_close_to(str) +
       locations_with_additional_word(str) +
       locations_missing_a_word(str)
