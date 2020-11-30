@@ -591,46 +591,7 @@ class String
   # strings are equal, and 0.0 means every character is different.
   def percent_match(other)
     max = [length, other.length].max
-    1.0 - levenshtein_distance_to(other).to_f / max
-  end
-
-  # Returns number of character edits required to transform +self+ into +other+.
-  def levenshtein_distance_to(other)
-    levenshtein_distance(self, other)
-  end
-
-  # This definition copied from Rails::Generators, Which is based directly on
-  # the Text gem implementation.
-  def levenshtein_distance(str1, str2)
-    s = str1
-    t = str2
-    n = s.length
-    m = t.length
-
-    return m if n.zero?
-    return n if m.zero?
-
-    d = (0..m).to_a
-    x = nil
-
-    str1.each_char.each_with_index do |char1, i|
-      e = i + 1
-
-      str2.each_char.each_with_index do |char2, j|
-        cost = (char1 == char2 ? 0 : 1)
-        x = [
-          d[j + 1] + 1, # insertion
-          e + 1,        # deletion
-          d[j] + cost   # substitution
-        ].min
-        d[j] = e
-        e = x
-      end
-
-      d[m] = x
-    end
-
-    x
+    1.0 - Levenshtein.distance(self, other).to_f / max
   end
 
   # Returns the MD5 sum.
