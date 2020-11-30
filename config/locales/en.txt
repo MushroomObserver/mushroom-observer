@@ -1682,7 +1682,6 @@
   location_dubious_bad_term: For consistency, we prefer '[good]' instead of '[bad]'.
   location_dubious_commas: All commas should be followed by a space and another word
   location_dubious_empty: Empty location given
-  location_dubious_redundant_county: County may not be required in this name; for greatest consistency we prefer that you not include the county for towns and cities.
   location_dubious_redundant_state: Both '[state]' and '[country]' are on the list of countries and continents.  A common mistake is to include the continent in addition to the country; this is unnecessary.
   location_dubious_unknown_country: Unknown country '[country]'
   location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.

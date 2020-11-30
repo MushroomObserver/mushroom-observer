@@ -489,7 +489,6 @@ class Location < AbstractModel
     unless check_db && location_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
-      reasons += check_for_dubious_county(name)
       reasons += check_for_bad_country_or_state(name)
       reasons += check_for_bad_terms(name)
       reasons += check_for_bad_chars(name)
@@ -507,14 +506,6 @@ class Location < AbstractModel
     return [] unless comma_test(name)
 
     [:location_dubious_commas.l]
-  end
-
-  def self.check_for_dubious_county(name)
-    return [] if name.blank?
-    return [] if /Forest,|Park,|near /.match?(name)
-    return [] unless has_dubious_county?(name)
-
-    [:location_dubious_redundant_county.l]
   end
 
   def self.check_for_bad_country_or_state(name)
@@ -606,16 +597,6 @@ class Location < AbstractModel
 
   def self.dubious_country?(name)
     !understood_country?(country(name))
-  end
-
-  def self.has_dubious_county?(name)
-    tokens = name.split(", ")
-    return if tokens.length < 2
-
-    alt = [tokens[0]]
-    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
-    result = alt.join(", ")
-    result == name ? nil : result
   end
 
   def self.fix_country(name)
