@@ -631,6 +631,54 @@ class Location < AbstractModel
     find_using_wildcards("name", reverse_name_with_wildcards(str))
   end
 
+  # Return some locations that are close to the given name.
+  def self.suggestions(str)
+    str = reverse_name(str) if User.current_location_format == :scientific
+    locations_close_to(str) +
+      locations_with_additional_word(str) +
+      locations_missing_a_word(str)
+  end
+
+  private
+
+  def self.locations_close_to(str)
+    min = str.length - 5
+    max = str.length + 5
+    Location.where("LENGTH(name) BETWEEN ? AND ?", min, max).to_a.
+             sort_by { |l| -str.percent_match(l.name) }[0..4]
+  end
+
+  def self.locations_with_additional_word(str)
+    words1 = []
+    words2 = str.split(", ")
+    num_words = words2.length
+    return [] if num_words < 3
+
+    conditions = (0..num_words).map do
+      pattern = (words1 + ["%"] + words2).join(", ")
+      words1.push(words2.shift)
+      "name LIKE #{connection.quote(pattern)}"
+    end.join(" OR ")
+    Location.where(conditions).to_a
+  end
+
+  def self.locations_missing_a_word(str)
+    words1 = []
+    words2 = str.split(", ")
+    num_words = words2.length
+    return [] if num_words < 4
+
+    names = (1..num_words).map do
+      omit = words2.shift
+      name = (words1 + words2).join(", ")
+      words1.push(omit)
+      name
+    end
+    Location.where(name: names)
+  end
+
+  public
+
   ##############################################################################
   #
   #  :section: Merging
