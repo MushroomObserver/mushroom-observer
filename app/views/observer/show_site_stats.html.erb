@@ -15,7 +15,8 @@
       <div class="row">
         <% @observations[0,3].each do |obs| %>
           <div class="col-xs-12 pad-bottom">
-            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+            <%= thumbnail(obs.thumb_image,
+                          link: { action: :show_observation, id: obs.id},
                           votes: true) %><br/><br/>
 
           </div>
@@ -24,39 +25,39 @@
     <% end %>
   </div>
 
-  <div class="col-md-6">
-    <center>
-      <table class="table">
-        <% fields = [
-          :images,
-          :observations,
-          :observations_with_voucher,
-          :observations_without_voucher,
-          :listed_taxa,
-          :observed_taxa,
-          :name_descriptions_authors,
-          :locations,
-          :location_descriptions_authors,
-          :species_lists,
-          :species_list_entries,
-          :namings,
-          :comments,
-          :votes,
-          :users,
-        ]
+  <div class="col-md-6 center-block">
+    <table class="table">
+      <% fields = [
+        :images,
+        :observations,
+        :observations_with_voucher,
+        :observations_without_voucher,
+        :sequences,
+        :sequenced_observations,
+        :listed_taxa,
+        :observed_taxa,
+        :name_descriptions_authors,
+        :locations,
+        :location_descriptions_authors,
+        :species_lists,
+        :species_list_entries,
+        :namings,
+        :comments,
+        :votes,
+        :contributing_users
+      ].freeze
 
-        fields.each do |field|
-          label = "site_stats_#{field}".to_sym.t
-          count = @site_data[field]
-          if count and !label.blank? %>
-            <tr>
-              <td><%= "site_stats_#{field}".to_sym.t %></td>
-              <td align="right"><%= count %></td>
-            </tr>
-          <% end %>
+      fields.each do |field|
+        label = "site_stats_#{field}".to_sym.t
+        count = @site_data[field]
+        if count && label.present? %>
+          <tr>
+            <td><%= "site_stats_#{field}".to_sym.t %></td>
+            <td class="text-right"><%= count %></td>
+          </tr>
         <% end %>
-      </table>
-    </center>
+      <% end %>
+    </table>
   </div>
 
   <div class="hidden-xs col-md-3">
@@ -64,7 +65,8 @@
       <div class="row">
         <div class="col-xs-12">
           <% @observations[3,3].each do |obs| %>
-            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+            <%= thumbnail(obs.thumb_image,
+                          link: { action: :show_observation, id: obs.id },
                           votes: true) %><br/><br/>
           <% end %>
         </div>

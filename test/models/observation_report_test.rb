@@ -7,7 +7,7 @@ class ObservationReportTest < UnitTestCase
     query = Query.lookup(:Observation, :all)
     report = report_type.new(query: query).body
     assert_not_empty(report)
-    table = CSV.parse(report)
+    table = CSV.parse(report, col_sep: report_type.separator)
     assert_equal(query.num_results + 1, table.count)
     idx = query.results.sort_by(&block).index(obs)
     assert_equal(expect, table[idx + 1])
@@ -21,6 +21,18 @@ class ObservationReportTest < UnitTestCase
     assert_equal(query.num_results + 1, rows.length)
     idx = query.results.sort_by(&block).index(obs)
     assert_equal(expect, rows[idx + 1].split("\t"))
+  end
+
+  def do_zip_test(report_type, expect)
+    query = Query.lookup(:Observation, :all)
+    report = report_type.new(query: query).body
+    assert_not_empty(report)
+    zio = Zip::InputStream.new(StringIO.new(report))
+    contents = []
+    while (entry = zio.get_next_entry)
+      contents << entry.name
+    end
+    assert_equal(expect, contents)
   end
 
   # ----------------------------------------------------------------------------
@@ -72,13 +84,15 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Adolf, obs, expect, &:text_name)
   end
 
-  def test_darwin
+  def test_darwin_csv
     obs = observations(:detailed_unknown_obs)
     expect = [
+      obs.id.to_s,
+      "#{MO.http_domain}/#{obs.id}",
+      "HumanObservation",
       "2006-05-12 17:21:00 UTC",
       "MushroomObserver",
       nil,
-      obs.id.to_s,
       "Fungi",
       nil,
       "Kingdom",
@@ -100,7 +114,12 @@ class ObservationReportTest < UnitTestCase
       "294",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::Darwin, obs, expect, &:id)
+    do_csv_test(ObservationReport::DarwinCSV, obs, expect, &:id)
+  end
+
+  def test_darwin
+    expect = ["meta.xml", "observations.csv"]
+    do_zip_test(ObservationReport::Darwin, expect)
   end
 
   def test_fundis_no_exact_lat_long
