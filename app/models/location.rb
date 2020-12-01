@@ -79,6 +79,8 @@
 class Location < AbstractModel
   require "acts_as_versioned"
 
+  require_dependency "location/suggestions"
+
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
   belongs_to :user
@@ -244,7 +246,6 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     names_for_unknown.each do |name|
-      # location = Location.find(:first, :conditions => ['name like ?', name])
       location = Location.where("name LIKE ?", name).first
       return location if location
     end
@@ -401,6 +402,7 @@ class Location < AbstractModel
   UNDERSTOOD_CONTINENTS = load_param_hash(MO.location_continents_file)
   UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
+  STATE_ABBREVIATIONS  = load_param_hash(MO.location_state_abbreviations_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})"
@@ -415,6 +417,11 @@ class Location < AbstractModel
 
   def self.understood_states(country)
     UNDERSTOOD_STATES[country]
+  end
+
+  def self.unabbreviate_state(state, country)
+    map = STATE_ABBREVIATIONS[country] || return state
+    map[state] || state
   end
 
   # Returns a member of understood_places if the candidate is either a member
@@ -611,53 +618,6 @@ class Location < AbstractModel
   def self.find_by_scientific_name_with_wildcards(str)
     find_using_wildcards("name", reverse_name_with_wildcards(str))
   end
-
-  # Return some locations that are close to the given name.
-  def self.suggestions(str)
-    locations_close_to(str) +
-      locations_with_additional_word(str) +
-      locations_missing_a_word(str)
-  end
-
-  private
-
-  def self.locations_close_to(str)
-    min = str.length - 5
-    max = str.length + 5
-    Location.where("LENGTH(name) BETWEEN ? AND ?", min, max).to_a.
-             sort_by { |l| -str.percent_match(l.name) }[0..4]
-  end
-
-  def self.locations_with_additional_word(str)
-    words1 = []
-    words2 = str.split(", ")
-    num_words = words2.length
-    return [] if num_words < 3
-
-    conditions = (0..num_words).map do
-      pattern = (words1 + ["%"] + words2).join(", ")
-      words1.push(words2.shift)
-      "name LIKE #{connection.quote(pattern)}"
-    end.join(" OR ")
-    Location.where(conditions).to_a
-  end
-
-  def self.locations_missing_a_word(str)
-    words1 = []
-    words2 = str.split(", ")
-    num_words = words2.length
-    return [] if num_words < 4
-
-    names = (1..num_words).map do
-      omit = words2.shift
-      name = (words1 + words2).join(", ")
-      words1.push(omit)
-      name
-    end
-    Location.where(name: names)
-  end
-
-  public
 
   ##############################################################################
   #
