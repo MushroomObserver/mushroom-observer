@@ -25,10 +25,7 @@ module ObservationReport
       end
 
       def format_row(row)
-        [
-          row[0],
-          row[1]
-        ]
+        row
       end
 
       def sort_after(rows)

@@ -4,13 +4,13 @@ module ObservationReport
   # Darwin Core Archive format.
   class Dwca < ObservationReport::ZipReport
     attr_accessor :observations
-    attr_accessor :taxa
+    attr_accessor :images
 
     def initialize(args)
       super(args)
       self.observations = Darwin::Observations.new(args)
       args[:observations] = self.observations
-      self.taxa = Darwin::Taxa.new(args)
+      self.images = Darwin::Images.new(args)
     end
 
     def filename
@@ -22,7 +22,7 @@ module ObservationReport
       filename = "#{::Rails.root}/public/dwca/meta.xml"
       content << ["meta.xml", File.open(filename).read]
       content << ["observations.csv", observations.render]
-      content << ["taxa.csv", taxa.render]
+      content << ["multimedia.csv", images.render]
       super
     end
   end
