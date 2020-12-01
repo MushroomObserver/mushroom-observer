@@ -27,23 +27,7 @@ class NameController
     return unless @name
 
     init_edit_name_form
-    if request.method == "POST"
-      @parse = parse_name
-      if @name.dependents? && !in_admin_mode?
-        redirect_with_query(
-          controller: :observer, action: :email_name_change_request,
-          name_id: @name.id, new_name: @parse.search_name
-        )
-        return
-      end
-
-      match = check_for_matches if name_unlocked?
-      if match
-        merge_names(match)
-      else
-        change_existing_name
-      end
-    end
+    update if request.method == "POST"
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
@@ -126,6 +110,24 @@ class NameController
   # ------
   # update
   # ------
+
+  def update
+    @parse = parse_name
+    if @name.dependents? && !in_admin_mode?
+      redirect_with_query(
+        controller: :observer, action: :email_name_change_request,
+        name_id: @name.id, new_name: @parse.search_name
+      )
+      return
+    end
+
+    match = check_for_matches if name_unlocked?
+    if match
+      merge_names(match)
+    else
+      change_existing_name
+    end
+  end
 
   def name_unlocked?
     in_admin_mode? || !@name.locked

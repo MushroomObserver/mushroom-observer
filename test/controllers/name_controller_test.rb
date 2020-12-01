@@ -1664,7 +1664,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_and_update_locked_name
     name = names(:stereum_hirsutum)
-    name.update_columns(locked: true)
+    name.update(locked: true)
     params = {
       id: name.id,
       name: {

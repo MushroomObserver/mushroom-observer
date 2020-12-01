@@ -157,7 +157,7 @@ class ObserverController
       name: @name.search_name,
       name_url: @name.show_url,
       new_text_name: @new_text_name,
-      notes:  params[:notes].to_s.strip_html.strip_squeeze
+      notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:email_change_name_request_success.t)
