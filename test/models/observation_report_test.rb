@@ -118,7 +118,7 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_dwca
-    expect = ["meta.xml", "observations.csv", "taxa.csv"]
+    expect = ["meta.xml", "observations.csv", "multimedia.csv"]
     do_zip_test(ObservationReport::Dwca, expect)
   end
 
