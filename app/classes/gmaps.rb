@@ -33,7 +33,7 @@
 #    %>
 #
 #    <head>
-#      <%= GM::GMap.header(:host => MO.domain) %>
+#      <%= GM::GMap.header %>
 #      <%= javascript_tag(gmap.to_html) %>
 #    </head>
 #    <body>
@@ -54,9 +54,15 @@ module GM
         gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
     end
 
+    def self.key
+      keys = GMAPS_API_KEYS[::Rails.env]
+      return keys if keys.is_a?(String)
+
+      keys[MO.domain]
+    end
+
     def self.header(args)
       url = GMAPS_API_URL
-      key = GMAPS_API_KEYS[::Rails.env][args[:host]]
       "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>"\
       "</script>
       <script type='text/javascript'>
