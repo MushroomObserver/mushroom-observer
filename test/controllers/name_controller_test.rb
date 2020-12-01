@@ -1663,22 +1663,23 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_and_update_locked_name
-    name = names(:fungi)
+    name = names(:stereum_hirsutum)
+    name.update_columns(locked: true)
     params = {
       id: name.id,
       name: {
         locked: "0",
         icn_id: 666,
         rank: "Genus",
-        deprecated: "true",
+        deprecated: true,
         text_name: "Foo",
         author: "Bar",
         citation: "new citation",
         notes: "new notes"
       }
     }
-
     login("rolf")
+
     get(:edit_name, params: { id: name.id })
     # Rolf is not an admin, so form should not show locked fields as changeable
     assert_select("input[type=text]#name_icn_id", count: 0)
@@ -1694,16 +1695,16 @@ class NameControllerTest < FunctionalTestCase
     # locked attributes should not change
     assert_true(name.locked)
     assert_nil(name.icn_id)
-    assert_equal(:Kingdom, name.rank)
+    assert_equal(:Species, name.rank)
     assert_false(name.deprecated)
-    assert_equal("Fungi", name.text_name)
-    assert_equal("", name.author)
+    assert_equal("Stereum hirsutum", name.text_name)
+    assert_equal("(Willd.) Pers.", name.author)
     assert_nil(name.correct_spelling_id)
     # unlocked attributes should change
     assert_equal("new citation", name.citation)
     assert_equal("new notes", name.notes)
 
-    make_admin("mary")
+    make_admin("rolf")
     get(:edit_name, params: { id: name.id })
     assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
@@ -1716,11 +1717,11 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
     name.reload
     assert_equal(params[:name][:icn_id], name.icn_id)
-    assert_false(name.locked)
-    assert_equal(:Genus, name.rank)
-    assert_true(name.deprecated)
     assert_equal("Foo", name.text_name)
     assert_equal("Bar", name.author)
+    assert_equal(:Genus, name.rank)
+    assert_false(name.locked)
+    assert_redirected_to("#{name_deprecate_name_path}/#{name.id}")
   end
 
   def test_edit_misspelled_name
@@ -1729,6 +1730,58 @@ class NameControllerTest < FunctionalTestCase
     get(:edit_name, params: { id: misspelled_name.id })
     assert_select("input[type=checkbox]#name_misspelling", count: 1)
     assert_select("input[type=text]#name_correct_spelling", count: 1)
+  end
+
+  def test_update_change_text_name_of_ancestor
+    name = names(:boletus)
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Superboletus",
+        author: name.author,
+        rank: name.rank
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params: params)
+
+    assert_redirected_to(
+      { controller: :observer, action: :email_name_change_request,
+        name_id: name.id, new_name: "Superboletus" },
+      "User should be unable to change text_name of Name with dependents"
+    )
+  end
+
+  def test_update_change_text_name_of_approved_synonym
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    login("rolf")
+    Naming.create(name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      !approved_synonym.deprecated &&
+        Naming.where(name: approved_synonym).none? &&
+        deprecated_name.synonym == approved_synonym.synonym,
+      "Test needs different fixture: " \
+      "an Approved Name without Namings, with a synonym having Naming(s)"
+    )
+    changed_name = names(:agaricus_campestris) # can be any other name
+
+    params = {
+      id: approved_synonym.id,
+      name: {
+        text_name: changed_name.text_name,
+        author: changed_name.author,
+        rank: changed_name.rank,
+        deprecated: changed_name.deprecated
+      }
+    }
+    post(:edit_name, params: params)
+
+    assert_redirected_to(
+      /#{observer_email_name_change_request_path}/,
+      "User should be unable to change an approved synonym of a Naming"
+    )
   end
 
   def test_update_add_icn_id
@@ -2753,41 +2806,6 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     assert_not(Name.exists?(merged_name.id))
     assert_equal(189_826, edited_name.reload.icn_id)
-  end
-
-  def test_update_merge_destroy_approved_synonym
-    approved_synonym = names(:lactarius_alpinus)
-    deprecated_name = names(:lactarius_alpigenes)
-    Naming.create(user: mary,
-                  name: deprecated_name,
-                  observation: observations(:minimal_unknown_obs))
-    assert(
-      !approved_synonym.deprecated &&
-        Naming.where(name: approved_synonym).none? &&
-        deprecated_name.synonym == approved_synonym.synonym,
-      "Test needs different fixture: " \
-      "an Approved Name without Namings, with a synonym having Naming(s)"
-    )
-    survivor = names(:agaricus_campestris)
-
-    params = {
-      id: approved_synonym.id,
-      name: {
-        text_name: survivor.text_name,
-        author: survivor.author,
-        rank: survivor.rank,
-        deprecated: survivor.deprecated
-      }
-    }
-    login("rolf")
-
-    post(:edit_name, params: params)
-
-    assert_redirected_to(
-      { controller: :observer, action: :email_merge_request,
-        type: :Name, old_id: approved_synonym.id, new_id: survivor.id },
-      "User should be unable to merge an approved synonym of a Naming"
-    )
   end
 
   def test_update_name_multiple_matches

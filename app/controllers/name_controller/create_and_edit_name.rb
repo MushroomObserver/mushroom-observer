@@ -29,6 +29,14 @@ class NameController
     init_edit_name_form
     if request.method == "POST"
       @parse = parse_name
+      if @name.dependents? && !in_admin_mode?
+        redirect_with_query(
+          controller: :observer, action: :email_name_change_request,
+          name_id: @name.id, new_name: @parse.search_name
+        )
+        return
+      end
+
       match = check_for_matches if name_unlocked?
       if match
         merge_names(match)
@@ -112,7 +120,7 @@ class NameController
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if name_unlocked? || in_admin_mode?
+    @name.icn_id   = params[:name][:icn_id] if name_unlocked?
   end
 
   # ------
@@ -173,8 +181,10 @@ class NameController
       any_changes = true
     end
     # Update ancestors regardless whether name changed; maybe this will add
-    # missing ancestors in case database is messed up
-    update_ancestors
+    # missing ancestors in case database is messed up. But don't update
+    # ancestors if non-admin is changing locked namge because that would create
+    # bogus name and ancestors if @parse.search_name differs from @name
+    update_ancestors if name_unlocked?
     any_changes
   end
 
@@ -292,8 +302,7 @@ class NameController
 
   def merge_names(new_name)
     if in_admin_mode? ||
-       ((!@name.merger_destructive? || !new_name.merger_destructive?) &&
-       !@name.dependents?)
+       !@name.merger_destructive? || !new_name.merger_destructive?
       perform_merge_names(new_name)
       redirect_to_show_name
     else
