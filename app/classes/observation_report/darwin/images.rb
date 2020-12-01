@@ -4,9 +4,7 @@ module ObservationReport
   module Darwin
     # Darwin Core Observations format.
     class Images < ObservationReport::CSV
-      attr_accessor :observations
-      attr_accessor :query
-      attr_accessor :tables
+      attr_accessor :observations, :query, :tables
 
       self.separator = "\t"
 
@@ -29,7 +27,7 @@ module ObservationReport
           users: User.arel_table,
           licenses: License.arel_table
         }
-        self.query = self.tables[:images]
+        self.query = tables[:images]
         join_table(:images_observations, :image_id, attribute(:images, :id))
         io_attribute = attribute(:images_observations, :observation_id)
         join_table(:observations, :id, io_attribute)

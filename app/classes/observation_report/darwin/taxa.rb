@@ -11,10 +11,10 @@ module ObservationReport
       def initialize(args)
         super(args)
         self.observations = args[:observations]
-    end
+      end
 
       def formatted_rows
-        sort_after(self.observations.taxa)
+        sort_after(observations.taxa)
       end
 
       def labels

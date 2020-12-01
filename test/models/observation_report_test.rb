@@ -136,6 +136,7 @@ class ObservationReportTest < UnitTestCase
     query = Query.lookup(:Observation, :all)
     observations = ObservationReport::Darwin::Observations.new(query: query)
     return if observations.body.empty?
+
     report_type = ObservationReport::Darwin::Taxa
     report_type.new(query: query, observations: observations)
   end

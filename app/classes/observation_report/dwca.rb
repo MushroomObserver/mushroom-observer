@@ -3,13 +3,12 @@
 module ObservationReport
   # Darwin Core Archive format.
   class Dwca < ObservationReport::ZipReport
-    attr_accessor :observations
-    attr_accessor :images
+    attr_accessor :images, :observations
 
     def initialize(args)
       super(args)
       self.observations = Darwin::Observations.new(args)
-      args[:observations] = self.observations
+      args[:observations] = observations
       self.images = Darwin::Images.new(args)
     end
 
