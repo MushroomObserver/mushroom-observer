@@ -32,7 +32,7 @@
   </core>
   <extension encoding="UTF-8" fieldsTerminatedBy="\t" linesTerminatedBy="\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Multimedia">
     <files>
-      <location>multimedia.txt</location>
+      <location>multimedia.csv</location>
     </files>
     <coreid index="0" />
     <field index="0" term="http://rs.gbif.org/terms/1.0/gbifID"/>
