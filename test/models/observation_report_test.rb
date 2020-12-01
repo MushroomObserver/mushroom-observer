@@ -128,8 +128,6 @@ class ObservationReportTest < UnitTestCase
     assert_not_empty(report_content)
     table = CSV.parse(report_content, col_sep: taxa_report.separator)
     assert_equal(Observation.select(:name_id).distinct.count + 1, table.count)
-
-
     obs = Observation.first
     assert(table.include?([obs.name_id.to_s, obs.text_name]))
   end
