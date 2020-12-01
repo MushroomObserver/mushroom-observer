@@ -155,7 +155,7 @@ class ObserverController
     if @place_name != params[:approved_where] && @observation.location.nil?
       db_name = Location.user_name(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      @location_suggestions = Location.suggestions(db_name)
+      @location_suggestions = Location.suggestions(db_name, geolocation)
       success = false if @dubious_where_reasons.any? ||
                          @location_suggestions.any?
     end
@@ -804,5 +804,16 @@ class ObserverController
     return unless params[:observation]
 
     params[:observation].permit(whitelisted_observation_args)
+  end
+
+  def geolocation_args
+    [:country, :state, :county, :city]
+  end
+
+  def geolocation
+    (params.permit(geolocation_args) || {}).merge({
+      latitude:  @observaton.lat,
+      longitude: @observaton.long
+    })
   end
 end

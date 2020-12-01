@@ -36,6 +36,9 @@ $(document).ready(function() {
       // init elevation service
       var elevation = new google.maps.ElevationService();
 
+      // init geocoding service
+      var geocoder = new google.maps.Geocoder();
+
       addGmapsListener(map, 'click');
 
       // adjust marker on field input
@@ -77,7 +80,6 @@ $(document).ready(function() {
 
       // use the geocoder to focus on a specific region on the map
       function focusMap() {
-        var geocoder = new google.maps.Geocoder();
 
         // even a single letter will return a result
         if ( $(searchInput).val().length <= 0 ) {
@@ -128,6 +130,42 @@ $(document).ready(function() {
             } else {
               $(elvInput).val('');
             }
+          }
+        });
+
+        geocoder.geocode({
+          'location': marker.position
+        }, function(results, status) {
+          var country, state, county, city, park, feature;
+          if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+            for (var i=0; i<results.length; i++) {
+              var addrs = results[i].address_components;
+              for (var j=0; j<addrs.length; j++) {
+                var types = addrs[j].types;
+                for (var k=0; k<types.length; k++) {
+                  if (types[k] == "country")
+                    country = addrs[j].long_name;
+                  else if (types[k] == "administrative_area_level_1")
+                    state = addrs[j].long_name;
+                  else if (types[k] == "administrative_area_level_2")
+                    county = addrs[j].long_name;
+                  else if (types[k] == "locality")
+                    city = addrs[j].long_name;
+                  else if (types[k] == "park")
+                    park = addrs[j].long_name;
+                  else if (types[k] == "natural_feature")
+                    feature = addrs[j].long_name;
+                  else if (types[k] == "point_of_interest")
+                    feature = addrs[j].long_name;
+                }
+              }
+            if (park) city = park + ", " + city;
+            if (feature) city = feature + ", " + city;
+            if (city) city = city.replace(/, $/, "");
+            $("#country").val(country);
+            $("#state").val(state);
+            $("#county").val(county);
+            $("#city").val(city);
           }
         });
       }
