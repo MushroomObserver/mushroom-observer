@@ -102,7 +102,7 @@ class Location < AbstractModel
   # Return locations which match except have county added.
   def self.suggestions_with_county(head_terms, tail_terms)
     return [] if head_terms.empty? || tail_terms.last != "USA" ||
-                 head_terms.last.match?(/ Co(\.|unty)$/
+                 head_terms.last.match?(/ Co(\.|unty)$/)
 
     head = head_terms.join(", ")
     tail = tail_terms.join(", ")
@@ -112,7 +112,7 @@ class Location < AbstractModel
   # Return locations which are close except lack county.
   def self.suggestions_without_county(head_terms, tail_terms)
     return [] if head_terms.length < 2 ||
-                 !head_terms.last.match?(/ Co(\.|unty)$/
+                 !head_terms.last.match?(/ Co(\.|unty)$/)
 
     suggestions_with_tail(head_terms[0..-2], tail_terms)
   end
@@ -124,7 +124,7 @@ class Location < AbstractModel
     return Location.where(name: tail) if head.blank?
 
     str = "#{head}, #{tail}"
-    r = (head.length / * 0.10).to_i + 1
+    r = (head.length * 0.10).to_i + 1
     min = str.length - r
     max = str.length + r
     Location.where("name LIKE ? AND LENGTH(name) BETWEEN ? AND ?",

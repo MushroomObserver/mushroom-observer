@@ -402,7 +402,7 @@ class Location < AbstractModel
   UNDERSTOOD_CONTINENTS = load_param_hash(MO.location_continents_file)
   UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
-  STATE_ABBREVIATIONS  = load_param_hash(MO.location_state_abbreviations_file)
+  STATE_ABBREVIATIONS  = load_param_hash(MO.location_state_abbrs_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})"
@@ -420,7 +420,7 @@ class Location < AbstractModel
   end
 
   def self.unabbreviate_state(state, country)
-    map = STATE_ABBREVIATIONS[country] || return state
+    map = STATE_ABBREVIATIONS[country] or return state
     map[state] || state
   end
 
