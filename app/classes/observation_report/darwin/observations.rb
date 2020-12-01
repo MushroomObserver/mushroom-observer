@@ -42,7 +42,7 @@ module ObservationReport
           MinimumElevation
           MaximumElevation
           Notes
-        ]
+        ].freeze
       end
 
       # rubocop:disable Metrics/AbcSize

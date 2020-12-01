@@ -21,7 +21,7 @@ module ObservationReport
         %w[
           taxonID
           scientificName
-        ]
+        ].freeze
       end
 
       def format_row(row)
