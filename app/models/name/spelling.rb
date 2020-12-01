@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
   # Is this Name misspelled?
   def is_misspelling?
     correct_spelling_id.present?

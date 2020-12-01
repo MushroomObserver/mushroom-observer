@@ -145,6 +145,11 @@
 #  ranks_below_species::     Ranks: below :Species.
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
+#  ==== Scopes
+#  with_correct_spelling
+#  with_classification_like(rank, text_name)
+#  with_rank_below(rank)
+#
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.

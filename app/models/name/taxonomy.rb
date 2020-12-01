@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
-  scope :ranked_below,
+  scope :with_classification_like,
+        ->(rank, text_name) {
+          where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+        }
+  scope :with_rank_below,
         ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
 
   def self.all_ranks
@@ -196,7 +200,7 @@ class Name < AbstractModel
       return unless text_name.include?(" ")
 
       genus_name = text_name.split(" ", 2).first
-      genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
+      genera     = Name.with_correct_spelling.where(text_name: genus_name)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
       nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
@@ -260,10 +264,10 @@ class Name < AbstractModel
   # arbitrarily where there is still ambiguity.  Useful if you just need a
   # name and it's not so critical that it be the exactly correct one.
   def self.best_match(name)
-    matches = Name.where(search_name: name, correct_spelling_id: nil)
+    matches = Name.with_correct_spelling.where(search_name: name)
     return matches.first if matches.any?
 
-    matches  = Name.where(text_name: name, correct_spelling_id: nil)
+    matches  = Name.with_correct_spelling.where(text_name: name)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
     nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
@@ -551,11 +555,9 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.where("text_name LIKE ?", "#{text_name} %").
-        where(correct_spelling: nil).any?
+      Name.where("text_name LIKE ?", "#{text_name} %").with_correct_spelling.any?
     else
-      Name.where("classification LIKE ?", "%#{rank}: _#{text_name}_%").
-        where(correct_spelling: nil).any?
+      Name.with_classification_like(rank, text_name).with_correct_spelling.any?
     end
   end
 
@@ -568,13 +570,11 @@ class Name < AbstractModel
   end
 
   def above_genus_is_ancestor?
-    Name.joins(:namings).where(
-      "classification LIKE ?", "%#{rank}: _#{text_name}_%"
-    ).any?
+    Name.joins(:namings).with_classification_like(rank, text_name).any?
   end
 
   def genus_or_species_is_ancestor?
     Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
-      ranked_below(rank).any?
+      with_rank_below(rank).any?
   end
 end
