@@ -39,6 +39,18 @@ $(document).ready(function() {
       // init geocoding service
       var geocoder = new google.maps.Geocoder();
 
+      // Have the submit buttons wait until geocoder returns.
+      var wait_for_geocoder = 0;
+      $('form[name="observation_form"]').submit(function (e) {
+        if (wait_for_geocoder <= 0) return;
+        wait_for_geocoder--;
+        e.preventDefault();
+        $(this).find('input[type="submit"]').attr("disabled", "disabled");
+        window.setTimeout(function() {
+          this.submit();
+        }, 500);
+      });
+
       addGmapsListener(map, 'click');
 
       // adjust marker on field input
@@ -159,6 +171,7 @@ $(document).ready(function() {
                     feature = addrs[j].long_name;
                 }
               }
+            }
             if (park) city = park + ", " + city;
             if (feature) city = feature + ", " + city;
             if (city) city = city.replace(/, $/, "");
@@ -167,7 +180,11 @@ $(document).ready(function() {
             $("#county").val(county);
             $("#city").val(city);
           }
+          wait_for_geocoder = 0;
         });
+
+        // Tell submit buttons to wait up to 10 seconds for geocoder to return.
+        wait_for_geocoder = 10;
       }
 
       function clearMap() {
