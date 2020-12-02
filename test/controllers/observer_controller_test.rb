@@ -2091,9 +2091,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
-                                    observation: { place_name: "",
+                                    observation: { place_name: "Unknown",
                                                    lat: lat, long: long },
-                                    name: { name: "Unknown" }
+                                    name: { name: "Unknown" },
+                                    approved_where: "Unknown"
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
@@ -2107,9 +2108,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat2 = "34°9’43.92”N"
     long2 = "118°21′7.56″W"
     generic_construct_observation({
-                                    observation: { place_name: "",
+                                    observation: { place_name: "Unknown",
                                                    lat: lat2, long: long2 },
-                                    name: { name: "Unknown" }
+                                    name: { name: "Unknown" },
+                                    approved_where: "Unknown"
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
@@ -2129,12 +2131,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observations_with_unknown_location_and_empty_geolocation
-    # But create observation if explicitly tell it "unknown" location.
+    # No longer accepts "Earth" until you approve it.
     generic_construct_observation({
                                     observation: { place_name: "Earth",
                                                    lat: "", long: "" },
                                     name: { name: "Unknown" }
-                                  }, 1, 0, 0)
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_with_various_altitude_formats
@@ -2144,15 +2146,13 @@ class ObserverControllerTest < FunctionalTestCase
       ["500 ft.", 152],
       [" 500' ", 152]
     ].each do |input, output|
-      where = "Unknown, Massachusetts, USA"
-
+      where = "California, USA"
       generic_construct_observation({
                                       observation: { place_name: where,
                                                      alt: input },
                                       name: { name: "Unknown" }
                                     }, 1, 0, 0)
       obs = assigns(:observation)
-
       assert_equal(output, obs.alt)
       assert_equal(where, obs.where) # Make sure it's the right observation
       assert_not_nil(obs.rss_log)
@@ -2161,7 +2161,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_class
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "California, USA", lat: "", long: "" },
         name: { name: "Lecanoromycetes L." },
         approved_name: "Lecanoromycetes L." },
       1, 1, 1
@@ -2174,7 +2174,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_family
     params = {
-      observation: { place_name: "Earth", lat: "", long: "" },
+      observation: { place_name: "California, USA", lat: "", long: "" },
       name: { name: "Acarosporaceae" },
       approved_name: "Acarosporaceae"
     }
@@ -2211,9 +2211,10 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_group
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "Unknown", lat: "", long: "" },
         name: { name: "Morchella elata group" },
-        approved_name: "Morchella elata group" },
+        approved_name: "Morchella elata group",
+        approved_where: "Unknown" },
       1, 1, 2
     )
     name = Name.last
@@ -2241,9 +2242,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
 
     generic_construct_observation({
-                                    observation: { place_name: "Earth" },
+                                    observation: { place_name: "Unknown" },
                                     name: { name: "Cladina pictum" },
-                                    approved_name: "Cladina pictum"
+                                    approved_name: "Cladina pictum",
+                                    approved_where: "Unknown"
                                   }, 1, 1, 1, roy)
 
     name = Name.last
@@ -2251,98 +2253,173 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(name.deprecated)
   end
 
-  def test_construct_observation_dubious_place_names
-    # Test a reversed name with a scientific user
+  def assert_no_dubious_reasons
+    assert_empty(@controller.instance_variable_get("@dubious_where_reasons"))
+  end
+
+  def assert_dubious_reasons_present
+    assert_not_empty(
+      @controller.instance_variable_get("@dubious_where_reasons")
+    )
+  end
+
+  def test_construct_observation_dubious_place_names_1
+    # Name reversed, not dubious, and since it has no suggestions of
+    # similar names, it will go ahead and create it.
     where = "USA, Massachusetts, Reversed"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test missing space.
+  def test_construct_observation_dubious_place_names_2
+    # Missing space.
     where = "Reversible, Massachusetts,USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
-    # (This is accepted now for some reason.)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_3
+    # This missing space is auto-corrected when the name is reversed.
+    # No suggestions of similar names, so it creates it.
     where = "USA,Massachusetts, Reversible"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test a bogus country name
+  def test_construct_observation_dubious_place_names_4
+    # Bogus country is dubious.
     where = "Bogus, Massachusetts, UAS"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_5
+    # Bogus country is dubious.
     where = "UAS, Massachusetts, Bogus"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_dubious_reasons_present
+  end
 
-    # Test a bad state name
+  def test_construct_observation_dubious_place_names_6
+    # Bogus state is dubious.
     where = "Bad State Name, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_7
+    # Bogus state is dubious.
     where = "USA, Bad State Name"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_dubious_reasons_present
+  end
 
-    # Test mix of city and county
+  def test_construct_observation_dubious_place_names_8
+    # County is now allowed, so this is not dubious, but it will
+    # suggest the existing name which has no county.
     where = "Burbank, Los Angeles Co., California, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_no_dubious_reasons
+  end
+
+  def test_construct_observation_dubious_place_names_9
+    # County is now allowed, so this is not dubious, but it will
+    # suggest the existing name which has no county.
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test mix of city and county
+  def test_construct_observation_dubious_place_names_10
+    # County is now allowed, so this is not dubious, and since there
+    # are no similar names, it will go ahead and create it.
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
+    assert_no_dubious_reasons
+  end
+
+  def test_construct_observation_dubious_place_names_11
+    # County is now allowed, so this is not dubious, and since there
+    # are no similar names, it will go ahead and create it.
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test some bad terms
+  def test_construct_observation_dubious_place_names_12
+    # "County" should be abbreviated, so this is dubious.
     where = "Some County, Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_13
+    # "Rd" should have period, so this is dubious.
     where = "Old Rd, Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_14
+    # "Rd." is correct, so this is not dubious, and since there are
+    # no similar locations, it should create this.
     where = "Old Rd., Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
+    assert_no_dubious_reasons
+  end
 
-    # Test some acceptable additions
+  def test_construct_observation_dubious_place_names_15
+    # Adding "near" and "Southern" are fair, so not dubious, and since
+    # it the existing "Burbank, California, USA" is so different, it
+    # won't suggest it, and thus it should create this.
     where = "near Burbank, Southern California, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
+    assert_no_dubious_reasons
   end
 
   def test_name_resolution
@@ -2554,6 +2631,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_strip_images
     login("rolf")
+    loc = locations(:burbank)
 
     setup_image_dirs
     fixture = "#{MO.root}/test/images/geotagged.jpg"
@@ -2576,9 +2654,9 @@ class ObserverControllerTest < FunctionalTestCase
       params: {
         observation: {
           when: Time.zone.now,
-          place_name: "Burbank, California, USA",
-          lat: "45.4545",
-          long: "-90.1234",
+          place_name: loc.name,
+          lat: loc.center.first,
+          long: loc.center.last,
           alt: "456",
           specimen: "0",
           thumb_image_id: "0",
