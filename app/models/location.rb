@@ -217,8 +217,12 @@ class Location < AbstractModel
 
   def center
     center_lat = (north + south) / 2
-    center_lon = east > west ? (east + west) / 2 : west + (east + 360 - west) / 2
-    center_lon -= 360 if center_lon > 180
+    if east >= west
+      center_lon = (east + west) / 2
+    else
+      center_lon = west + (east + 360 - west) / 2
+      center_lon -= 360 if center_lon > 180
+    end
     [center_lat, center_lon]
   end
 
@@ -227,7 +231,7 @@ class Location < AbstractModel
     return false if lat > north + h
     return false if lat < south - h
 
-    if east > west
+    if east >= west
       w = (east - west) * pct
       return false if long > east + w
       return false if long < west - w
@@ -241,7 +245,7 @@ class Location < AbstractModel
   # Calculate rough area in "square degrees", making no attempt at correcting
   # for a degree of longitude being much smaller near the poles.
   def pseudoarea
-    (east > west ? east - west : 360 + east - west) * (north - south)
+    (east >= west ? east - west : 360 + east - west) * (north - south)
   end
 
   ##############################################################################

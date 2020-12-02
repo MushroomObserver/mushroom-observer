@@ -24,7 +24,7 @@ class Location < AbstractModel
   # Return most specific locations containing the given lat/long.
   def self.suggestions_for_latlong(lat, long)
     all = Location.where("(south <= ? AND north >= ?) AND " \
-                         "IF(east > west, west <= ? AND east >= ?, " \
+                         "IF(east >= west, west <= ? AND east >= ?, " \
                          "west <= ? OR east >= ?)",
                          lat, lat, long, long, long, long).to_a
     # Return only most specific locations.
