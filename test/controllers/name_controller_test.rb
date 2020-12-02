@@ -37,7 +37,7 @@ class NameControllerTest < FunctionalTestCase
   ].freeze
 
   # Create a draft for a project.
-  def create_draft_tester(project, name, user = nil, success = true)
+  def create_draft_tester(project, name, user = nil, success: true)
     count = NameDescription.count
     params = {
       id: name.id,
@@ -56,7 +56,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Edit a draft for a project (GET).
-  def edit_draft_tester(draft, user = nil, success = true, reader = true)
+  def edit_draft_tester(draft, user = nil, success: true, reader: true)
     if user
       assert_not_equal(user, draft.user)
     else
@@ -113,7 +113,7 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
-  def publish_draft_helper(draft, user = nil, merged = true, conflict = false)
+  def publish_draft_helper(draft, user = nil, merged: true, conflict: false)
     if user
       assert_not_equal(draft.user, user)
     else
@@ -161,7 +161,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Destroy a draft of a project.
-  def destroy_draft_helper(draft, user, success = true)
+  def destroy_draft_helper(draft, user, success: true)
     assert(draft)
     count = NameDescription.count
     params = {
@@ -4248,7 +4248,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_create_draft_not_member
     create_draft_tester(projects(:eol_project),
-                        names(:agaricus_campestris), dick, false)
+                        names(:agaricus_campestris), dick, success: false)
   end
 
   def test_edit_draft
@@ -4267,7 +4267,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("EOL Project",
                  name_descriptions(:draft_agaricus_campestris).source_name)
     edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
-                      katrina, false)
+                      katrina, success: false)
   end
 
   def test_edit_draft_non_member
@@ -4275,7 +4275,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("EOL Project",
                  name_descriptions(:draft_coprinus_comatus).source_name)
     edit_draft_tester(name_descriptions(:draft_coprinus_comatus),
-                      dick, false, false)
+                      dick, success: false, reader: false)
   end
 
   def test_edit_draft_post_owner
@@ -4328,25 +4328,26 @@ class NameControllerTest < FunctionalTestCase
   # Owner can publish.
   def test_publish_draft
     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil,
-                         :merged, false)
+                         merged: :merged, conflict: false)
   end
 
   # Admin can, too.
   def test_publish_draft_admin
     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary,
-                         :merged, false)
+                         merged: :merged, conflict: false)
   end
 
   # Other members cannot.
   def test_publish_draft_member
     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina,
-                         false, false)
+                         merged: false, conflict: false)
   end
 
   # Non-members certainly can't.
   def test_publish_draft_non_member
     publish_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), dick, false, false
+      name_descriptions(:draft_agaricus_campestris), dick, merged: false,
+      conflict: false
     )
   end
 
@@ -4370,7 +4371,7 @@ class NameControllerTest < FunctionalTestCase
     # It should make the draft both public and default, "true" below tells it
     # that the default gen_desc should look like the draft's after done.  No
     # more conflicts.
-    publish_draft_helper(draft.reload, nil, true, false)
+    publish_draft_helper(draft.reload, nil, merged: true, conflict: false)
   end
 
   def test_destroy_draft_owner
@@ -4383,13 +4384,13 @@ class NameControllerTest < FunctionalTestCase
 
   def test_destroy_draft_member
     destroy_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), katrina, false
+      name_descriptions(:draft_agaricus_campestris), katrina, success: false
     )
   end
 
   def test_destroy_draft_non_member
     destroy_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), dick, false
+      name_descriptions(:draft_agaricus_campestris), dick, success: false
     )
   end
 

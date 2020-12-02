@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: move this into a new EmailController
+# Send emails directly to webmaster and users via the application
 class ObserverController
   def email_features
     if in_admin_mode?
