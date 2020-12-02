@@ -2,7 +2,10 @@
 
 class Name < AbstractModel
   scope :with_classification_like,
-        ->(rank, text_name) {
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
           where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
         }
   scope :with_rank_below,
@@ -555,7 +558,8 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.where("text_name LIKE ?", "#{text_name} %").with_correct_spelling.any?
+      Name.where("text_name LIKE ?", "#{text_name} %").
+        with_correct_spelling.any?
     else
       Name.with_classification_like(rank, text_name).with_correct_spelling.any?
     end
