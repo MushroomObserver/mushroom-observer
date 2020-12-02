@@ -369,6 +369,9 @@ class Name < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
+  validates :icn_id, numericality: { allow_nil: true,
+                                     only_integer: true,
+                                     greater_than_or_equal_to: 1 }
   validate :icn_id_registrable
   validate :icn_id_unique
 

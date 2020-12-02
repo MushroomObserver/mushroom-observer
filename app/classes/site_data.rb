@@ -35,8 +35,7 @@
 #      },
 #    }
 #
-################################################################################
-
+#
 class SiteData
   ##############################################################################
   #
@@ -82,15 +81,21 @@ class SiteData
     :observations,
     #     :observations_with_voucher,
     #     :observations_without_voucher,
+    :sequenced_observations,
+    :sequences,
     :comments,
     :namings,
     :votes,
-    :users
+    :users,
+    :contributing_users
   ].freeze
+
+  SITE_WIDE_FIELDS = [:users, :contributing_users].freeze
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
     comments: 1,
+    contributing_users: 0,
     images: 10,
     location_descriptions_authors: 50,
     location_descriptions_editors: 5,
@@ -104,6 +109,8 @@ class SiteData
     observations: 1,
     #     observations_with_voucher:     10,
     #     observations_without_voucher:  1,
+    sequences: 0,
+    sequenced_observations: 0,
     species_list_entries: 1,
     species_lists: 5,
     users: 0,
@@ -115,7 +122,13 @@ class SiteData
   FIELD_TABLES = {
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
-    species_list_entries: "observations_species_lists"
+    sequenced_observations: "sequences",
+    species_list_entries: "observations_species_lists",
+    contributing_users: "users"
+  }.freeze
+
+  FIELD_COUNTS = {
+    sequenced_observations: "SELECT COUNT(DISTINCT observation_id) "
   }.freeze
 
   # Additional conditions to use for each category.
@@ -125,7 +138,8 @@ class SiteData
     observations_without_voucher:
       "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
       "AND thumb_image_id IS NOT NULL )",
-    users: "`verified` IS NOT NULL"
+    users: "`verified` IS NOT NULL",
+    contributing_users: "contribution > 0"
   }.freeze
 
   # Call these procs to determine if a given object qualifies for a given field.
@@ -164,29 +178,30 @@ class SiteData
       user_id ||= User.current_id
     end
     weight = FIELD_WEIGHTS[field]
-    if weight&.positive? && user_id&.positive?
-      update_weight(calc_impact(weight * num, mode, obj, field), user_id)
-    end
+    return unless weight&.positive? && user_id&.positive?
+
+    update_weight(calc_impact(weight * num, mode, obj, field), user_id)
   end
 
   def self.calc_impact(weight, mode, obj, field)
-    if mode == :del
-      return -weight
-    elsif mode == :chg
-      return get_weight_change(obj, field)
+    case mode
+    when :del
+      -weight
+    when :chg
+      get_weight_change(obj, field)
+    else
+      weight
     end
-
-    weight
   end
 
   def self.update_weight(impact, user_id)
-    unless impact.zero?
-      User.connection.update(%(
-        UPDATE users SET contribution =
-          IF(contribution IS NULL, #{impact}, contribution + #{impact})
-        WHERE id = #{user_id}
-      ))
-    end
+    return if impact.zero?
+
+    User.connection.update(%(
+      UPDATE users SET contribution =
+        IF(contribution IS NULL, #{impact}, contribution + #{impact})
+      WHERE id = #{user_id}
+    ))
   end
 
   def self.get_applicable_field(obj)
@@ -211,7 +226,7 @@ class SiteData
     old_field = new_field
     if FIELD_STATE_PROCS[new_field]
       obj_copy = obj.clone
-      for attr, val_pair in obj.changes
+      obj.changes.each do |attr, val_pair|
         obj_copy[attr] = val_pair.first
       end
       old_field = get_applicable_field(obj_copy)
@@ -219,18 +234,16 @@ class SiteData
     FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
   end
 
-  # Return stats for entire site.  Returns simple hash mapping category to
+  # Return stats for entire site. Returns simple hash mapping category to
   # number of records of that category.
   #
   #   data = SiteData.new.get_site_data
   #   num_images = data[:images]
   #
   def get_site_data
-    result = {}
-    for field in ALL_FIELDS
-      result[field] = get_field_count(field)
+    ALL_FIELDS.each_with_object({}) do |field, site_data|
+      site_data[field] = get_field_count(field)
     end
-    result
   end
 
   # Return stats for a single User.  Returns simple hash mapping category to
@@ -277,7 +290,7 @@ class SiteData
   def calc_metric(data)
     metric = 0
     if data
-      for field in ALL_FIELDS
+      ALL_FIELDS.each do |field|
         next unless data[field]
 
         # This fixes the double-counting of created records.
@@ -302,12 +315,12 @@ class SiteData
   #   count = get_field_count(:users)
   #   # SELECT COUNT(*) FROM `users` WHERE `verified` IS NOT NULL
   #
-  def get_field_count(field) # :doc:
+  def get_field_count(field)
     table = FIELD_TABLES[field] || field.to_s
     query = []
-    query << "SELECT COUNT(*)"
+    query << (FIELD_COUNTS[field] || "SELECT COUNT(*) ")
     query << "FROM `#{table}`"
-    if cond = FIELD_CONDITIONS[field]
+    if (cond = FIELD_CONDITIONS[field])
       query << "WHERE #{cond}"
     end
     if /^(\w+)s_versions/.match?(field.to_s)
@@ -335,11 +348,12 @@ class SiteData
   #     num_images = @user_data[user_id][:images]
   #   end
   #
-  def load_field_counts(field, user_id = nil) # :doc:
+  def load_field_counts(field, user_id = nil)
     count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
-    conditions = "t.user_id " + (user_id ? "= #{user_id}" : "> 0")
+    t_user_id = (table == "users" ? "t.id " : "t.user_id ")
+    conditions = t_user_id + (user_id ? "= #{user_id}" : "> 0")
 
     # Exception for species list entries.
     if field == :species_list_entries
@@ -353,18 +367,18 @@ class SiteData
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"
       conditions += " AND t.#{parent}_id = p.id"
-      conditions += " AND t.user_id != p.user_id"
+      conditions += " AND #{t_user_id} != p.user_id"
     end
 
-    if extra_conditions = FIELD_CONDITIONS[field]
+    if (extra_conditions = FIELD_CONDITIONS[field])
       conditions += " AND (#{extra_conditions})"
     end
 
     query = %(
-      SELECT COUNT(#{count}) AS cnt, t.user_id
+      SELECT COUNT(#{count}) AS cnt, #{t_user_id}
       FROM #{tables}
       WHERE #{conditions}
-      GROUP BY t.user_id
+      GROUP BY #{t_user_id}
       ORDER BY cnt DESC
     )
 
@@ -389,7 +403,7 @@ class SiteData
   #   load_user_data(user.id)
   #   user.contribution = @user_data[user.id][:metric]
   #
-  def load_user_data(id = nil) # :doc:
+  def load_user_data(id = nil)
     if !id
       @user_id = nil
       users = User.all
@@ -400,7 +414,7 @@ class SiteData
 
     # Prime @user_data structure.
     @user_data = {}
-    for user in users
+    users.each do |user|
       @user_data[user.id] = {
         id: user.id,
         name: user.unique_text_name,
@@ -409,15 +423,12 @@ class SiteData
       add_language_contributions(user)
     end
 
-    # Load record counts for each category.
-    # (The :users category only applies to site-wide stats.)
-    for field in ALL_FIELDS - [:users]
-      load_field_counts(field)
-    end
+    # Load record counts for each category of individual user data.
+    (ALL_FIELDS - SITE_WIDE_FIELDS).each { |field| load_field_counts(field) }
 
     # Calculate full contribution for each user.  This will also correct some
     # double-counting of versioned records.
-    for user in users
+    users.each do |user|
       contribution = calc_metric(@user_data[user.id])
       # Make sure contribution caches are correct.
       if user.contribution != contribution

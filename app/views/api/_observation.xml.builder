@@ -38,22 +38,22 @@ xml.tag!(tag,
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   if detail
-    xml.collection_numbers(number: object.collection_numbers.to_a.count) do
+    xml.collection_numbers(number: object.collection_numbers.length) do
       object.collection_numbers.each do |collection_number|
         xml_detailed_object_old(xml, :collection_number, collection_number)
       end
     end
-    xml.herbarium_records(number: object.herbarium_records.to_a.count) do
+    xml.herbarium_records(number: object.herbarium_records.length) do
       object.herbarium_records.each do |herbarium_record|
         xml_detailed_object_old(xml, :herbarium_record, herbarium_record)
       end
     end
-    xml.sequences(number: object.sequences.to_a.count) do
+    xml.sequences(number: object.sequences.length) do
       object.sequences.each do |sequence|
         xml_detailed_object_old(xml, :sequence, sequence)
       end
     end
-    xml.namings(number: object.namings.to_a.count) do
+    xml.namings(number: object.namings.length) do
       object.namings.each do |naming|
         xml_detailed_object_old(xml, :naming, naming, true)
       end
@@ -63,13 +63,13 @@ xml.tag!(tag,
       next unless image.id == object.thumb_image_id
       xml_detailed_object_old(xml, :primary_image, image)
     end
-    xml.images(number: object.images.to_a.count - 1) do
+    xml.images(number: object.images.length - 1) do
       object.images.each do |image|
         next if image.id == object.thumb_image_id
         xml_detailed_object_old(xml, :image, image)
       end
     end
-    xml.comments(number: object.comments.to_a.count) do
+    xml.comments(number: object.comments.length) do
       object.comments.each do |comment|
         xml_detailed_object_old(xml, :comment, comment)
       end

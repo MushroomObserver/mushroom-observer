@@ -91,6 +91,9 @@ gem("mail", "= 2.7.0")
 # for detecting file type of uploaded images
 gem("mimemagic")
 
+# for creating zip files
+gem("rubyzip")
+
 ########## Development, Testing, and Analysis ##################################
 
 # Use byebug as debugging gem

@@ -1,69 +1,25 @@
 # frozen_string_literal: true
 
 module ObservationReport
-  # Darwin format.
-  class Darwin < ObservationReport::CSV
-    def labels
-      %w[
-        DateLastModified
-        InstitutionCode
-        CollectionCode
-        CatalogNumber
-        ScientificName
-        ScientificNameAuthor
-        ScientificNameRank
-        Genus
-        Species
-        Subspecies
-        Collector
-        DateCollected
-        YearCollected
-        MonthCollected
-        DayCollected
-        Country
-        StateProvince
-        County
-        Locality
-        Latitude
-        Longitude
-        MinimumElevation
-        MaximumElevation
-        Notes
-      ]
+  # Darwin Core Archive format.
+  class Darwin < ObservationReport::ZipReport
+    attr_accessor :csv
+
+    def initialize(args)
+      super(args)
+      self.csv = DarwinCSV.new(args)
     end
 
-    # rubocop:disable Metrics/AbcSize
-    def format_row(row)
-      [
-        row.obs_updated_at,
-        "MushroomObserver",
-        nil,
-        row.obs_id,
-        row.name_text_name,
-        row.name_author,
-        row.name_rank,
-        row.genus,
-        row.species,
-        row.form_or_variety_or_subspecies,
-        row.user_name_or_login,
-        row.obs_when,
-        row.year,
-        row.month,
-        row.day,
-        row.country,
-        row.state,
-        row.county,
-        row.locality,
-        row.best_lat,
-        row.best_long,
-        row.best_low,
-        row.best_high,
-        row.obs_notes
-      ]
+    def filename
+      "dwca.#{extension}"
     end
 
-    def sort_after(rows)
-      rows.sort_by { |row| row[3].to_i }
+    # generate CSV & meta.xml and bundle into a Zip
+    def render
+      filename = "#{::Rails.root}/public/dwca/meta.xml"
+      content << ["meta.xml", File.open(filename).read]
+      content << ["observations.csv", csv.render]
+      super
     end
   end
 end

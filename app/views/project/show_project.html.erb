@@ -86,7 +86,7 @@
         <%= @drafts.any? ? @drafts.length : :NONE.t %><br/>
         <div style="margin-left:1em">
           <% @drafts.each do |draft| %>
-            <%= link_with_query(draft.name.display_name.t,
+            <%= link_with_query(draft.name&.display_name&.t,
                                 { controller: :name,
                                   action: :show_name_description,
                                   id: draft.id }) %>

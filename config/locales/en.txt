@@ -453,7 +453,7 @@
   FULL_NAMES: Full Names
   full_names: full names
   ICN_ID: ICN Identifier
-  icn_id: ICN Fungal Identifier
+  icn_id: ICN Identifier
   ID: ID
   id: ID
   IDS: IDs
@@ -930,6 +930,7 @@
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
+  user_stats_contributing_users: ""
   user_stats_images: "[:IMAGES]"
   user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] Authored"
   user_stats_location_descriptions_editors: "[:LOCATION_DESCRIPTIONS] Edited"
@@ -943,6 +944,8 @@
   user_stats_observations: "[:OBSERVATIONS]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
   user_stats_observations_without_voucher: All Other Observations
+  user_stats_sequences: ""
+  user_stats_sequenced_observations: ""
   user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   user_stats_species_lists: "[:SPECIES_LISTS]"
   user_stats_users: ""
@@ -950,6 +953,7 @@
 
   # Site statistics field names.
   site_stats_comments: "[:COMMENTS]"
+  site_stats_contributing_users: Contributing Users
   site_stats_images: "[:IMAGES]"
   site_stats_listed_taxa: Listed Taxa
   site_stats_location_descriptions_authors: Authored [:LOCATION_DESCRIPTIONS]
@@ -965,6 +969,8 @@
   site_stats_observations_with_voucher: Observations with Full Data
   site_stats_observations_without_voucher: Other Observations
   site_stats_observed_taxa: Observed Taxa
+  site_stats_sequences: "[:SEQUENCES]"
+  site_stats_sequenced_observations: Sequenced Observations
   site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   site_stats_species_lists: "[:SPECIES_LISTS]"
   site_stats_users: Members
@@ -1060,11 +1066,11 @@
   # e.g. "user:me"
   search_value_me: me
   # e.g. "has_images:yes"
-  search_value_true: "yes|true"
+  search_value_true: yes|true
   # e.g. "has_specimen:no"
-  search_value_false: "no|false"
+  search_value_false: no|false
   # e.g. "include_misspellings:either" meaning include both correctly and incorrectly spelled names
-  search_value_both: "both|either"
+  search_value_both: both|either
   # e.g. "date:last month-today"
   search_value_today: today
   search_value_yesterday: yesterday
@@ -1220,7 +1226,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "We're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nWe have started work on some changes to the MO naming system.  See <a href=\"https://docs.google.com/document/d/185sbHDRpfdwO2C4ygK3dXRboR1WjjyHZG7d30JmdQKU/edit\">this Google doc</a> for more details and feel free to leave comments.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
+  app_banner_box: "Image server is back online!<br/>\nWe're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1417,16 +1423,10 @@
   email_new_password_title: Email New Password
   email_new_password_login: Login
 
-  # observer/email_name_change_request
-  email_name_change_request_title: Send Name Change Request
-  email_name_change_request_help: "Changing this Name will indirectly affect other Names that depend on this Name. For instance, another Name may: include this Name as part of its Classification; or have this Name as an approved synonym. If you really want to change this Name, please explain why. This will send a request to the admins, and if we agree with you, we will make the change."
-  new_name: New Name
-  email_change_name_request_success: Your request has been sent. Thank you!
-
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
   email_merge_request_help: By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types].
-  email_merge_request_success: Your request has been sent. Thank you!
+  email_merge_request_success: Your request has been sent.  Thank you!
 
   # observer/_form_comments
   form_comments_comment: "[:Comment]"
@@ -1482,12 +1482,12 @@
   # observer/_form_name
   form_names_locked: Lock this name so users cannot change name, author or rank?
   form_names_text_name: Scientific Name
-  form_names_icn_id: 'ICN Identifier #'
+  form_names_icn_id: "ICN Identifier #"
   form_names_identifier_help: Index Fungorum or MycoBank registration number, if known.
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
   form_names_taxonomic_notes: Notes on Taxonomy
-  form_names_taxonomic_notes_warning: 'Please avoid duplicating information from <a href=\"http://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, enter the Index Fungorum Registration Identifier or the MycoBank number in the [:form_names_icn_id] field above. This will automatically create links to both IF and MB.'
+  form_names_taxonomic_notes_warning: Please avoid duplicating information from <a href=\"http://www.indexfungorum.org/\">Index Fungorum</a> (IF) or  <a href=\"https://www.mycobank.org/\">MycoBank</a> (MB) in the [:form_names_taxonomic_notes]. Instead, enter the Index Fungorum Registration Identifier or the MycoBank number in the [:form_names_icn_id] field above. This will automatically create links to both IF and MB.
   form_names_classification: Taxonomic Classification
   form_names_gen_desc: General Description
   form_names_diag_desc: Diagnostic Description
@@ -1511,8 +1511,8 @@
   form_names_uses_help: How has this taxon been used by people?
   form_names_notes_help: Please include notes about the validity of this name, common misuses of the name, and more appropriate names to be used when applicable.
   form_names_refs_help: Each line is considered a separate reference, but no other formatting is enforced.
-  name_error_unregistrable: "The [rank] '[name]' is not eligible for an ICN identifier."
-  name_error_icn_id_in_use: "An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'."
+  name_error_unregistrable: The [rank] '[name]' is not eligible for an ICN identifier.
+  name_error_icn_id_in_use: An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'.
 
   # observer/_form_naming
   form_naming_confidence: Confidence
@@ -2365,7 +2365,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_intro: In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created. \nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">unofficial Mushroom Observer Facebook page</a>.
+  glossary_term_index_intro: "In collaboration with the Rhode Island School of Design, students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, this new glossary feature for Mushroom Observer was created.\nThis release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-general\">mo-general@googlegroups.com</a>) or the <a href=\"https://www.facebook.com/groups/105230049528087/\">unofficial Mushroom Observer Facebook page</a>."
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
@@ -2410,7 +2410,7 @@
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/observer/ask_webmaster_question.
   publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
-  publication_citation: "We encourage you to cite Mushroom Observer this way: \n\nWilson, N., Hollinger, J., et al. 2006-present. Mushroom Observer. https://mushroomobserver.org \n\nHowever, your publisher may restrict how or whether websites can be cited. If you need a published reference the best current citation we are aware of is:"
+  publication_citation: "We encourage you to cite Mushroom Observer this way:\n\nWilson, N., Hollinger, J., et al. 2006-present. Mushroom Observer. https://mushroomobserver.org\n\nHowever, your publisher may restrict how or whether websites can be cited. If you need a published reference the best current citation we are aware of is:"
 
   # publication/edit
   edit_publication: Edit
@@ -2730,9 +2730,6 @@
   # observer/list_users
   list_users_joined: Joined
   list_users_contribution: Contribution
-
-  # location/add_to_location
-  location_merge_success: Successfully merged [this] with [that].
 
   # species_list/make_report
   make_report_not_supported: We don't support report filetype *.[type].
@@ -3265,13 +3262,9 @@
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
-  email_name_change: "User made nontrivial change to a name:\n\n user : [user]\n old_identifier : [old_identifier]\n new_identifier : [new_identifier]\n old : [old]\n new : [new]\n observations : [observations]\n namings : [namings]\n name : [url]"
-  email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\n name : [name]\n surviving icn_id : [surviving_icn_id]\n deleted icn_id : [deleted_icn_id]\n user : [user]\n url : [url]"
-
+  email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold_identifier : [old_identifier]\nnew_identifier : [new_identifier]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
+  email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nurl : [url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
-
-  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nname : [name] \nurl : [name_url] \nnew text name : [new_text_name] \nnotes : [notes]"
-
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
@@ -3868,7 +3861,7 @@
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
-  pattern_search_user_me_not_logged_in_error: "The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!"
+  pattern_search_user_me_not_logged_in_error: The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!
 
   # content for html header title tag,
   # used when there are no hits for a list or search
@@ -4018,7 +4011,7 @@
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
-  api_help_region: "matches locations which end in this, e.g. \"California, USA\""
+  api_help_region: matches locations which end in this, e.g. "California, USA"
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?

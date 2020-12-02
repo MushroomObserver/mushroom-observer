@@ -11,7 +11,7 @@ xml.tag!(tag,
     xml_minimal_object_old(xml, :user, User, object.user_id)
   else
     xml_detailed_object_old(xml, :user, object.user)
-    xml.observations(number: object.observations.to_a.count) do
+    xml.observations(number: object.observations.length) do
       object.observations.each do |observation|
         xml_detailed_object_old(xml, :observation, observation)
       end
