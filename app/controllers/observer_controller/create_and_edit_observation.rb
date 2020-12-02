@@ -870,8 +870,8 @@ class ObserverController
       state:     params[:state],
       county:    params[:county],
       city:      params[:city],
-      latitude:  params[:observation] ? params[:observation][:lat] : nil,
-      longitude: params[:observation] ? params[:observation][:long] : nil,
+      latitude:  @observation.lat, # already parsed
+      longitude: @observation.long
     }
   end
 end
