@@ -3609,7 +3609,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Submit a location with a county that lacks the county in the database.
-  def test_create_observation_
+  def test_create_observation_bad_location_00
     loc = locations(:burbank)
     assert_equal("Burbank, California, USA", loc.name)
     str = "Burbank, Los Angeles Co., California, USA"
@@ -3620,7 +3620,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Approve it and try again.
-  def test_create_observation_
+  def test_create_observation_bad_location_0
     str = "Burbank, Los Angeles Co., California, USA"
     do_loc_test(str: str, approved: true, succeed: true)
   end
