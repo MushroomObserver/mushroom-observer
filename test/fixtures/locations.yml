@@ -244,3 +244,14 @@ california:
   south: 32.54
   high: 4421
   low: -86
+
+birgu:
+  <<: *DEFAULTS
+  name: Birgu, Malta
+  scientific_name: Malta, Birgu
+  north: 35.8934
+  south: 35.8819
+  east: 14.5292
+  west: 14.5147
+  low: 0
+  high: 100
