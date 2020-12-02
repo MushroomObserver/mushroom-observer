@@ -206,8 +206,10 @@ class Location < AbstractModel
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
     self.west = Location.parse_longitude(west) || -90
-    return if north > south
+    center_box! if north <= south
+  end
 
+  def center_box!
     center_lat, center_lon = center
     self.north = center_lat + 0.0001
     self.south = center_lat - 0.0001
@@ -227,19 +229,24 @@ class Location < AbstractModel
   end
 
   def close?(lat, long, pct = 0.10)
-    h = (north - south) * pct
-    return false if lat > north + h
-    return false if lat < south - h
+    east >= west ? close1(lat, long, pct) : close2(lat, long, pct)
+  end
 
-    if east >= west
-      w = (east - west) * pct
-      return false if long > east + w
-      return false if long < west - w
-    else
-      w = (east - west + 360) * pct
-      return false if long > east + w && long < west - w
-    end
-    true
+  def close1(lat, long, pct)
+    h = (north - south) * pct
+    w = (east - west) * pct
+    lat < north + h &&
+      lat > south - h &&
+      long < east + w &&
+      long > west - w
+  end
+
+  def close2(lat, long, pct)
+    h = (north - south) * pct
+    w = (east - west + 360) * pct
+    (long < east + w || long > west - w) &&
+      lat < north + h &&
+      lat > south - h
   end
 
   # Calculate rough area in "square degrees", making no attempt at correcting
