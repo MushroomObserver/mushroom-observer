@@ -44,12 +44,9 @@
 #  users::              Users who have claimed this as their profile location.
 #
 #  ==== Lat/long methods
-#  north_west::         [north, west]
-#  north_east::         [north, east]
-#  south_west::         [south, west]
-#  south_east::         [south, east]
+#  close?::             Is a given lat/long close to this location?
 #  center::             [n+s/2, e+w/2]
-#  tweak::              Expand extents to include the given point.
+#  pseudoarea::         Rough measure of area covered by bounding box.
 #  parse_latitude::     Validate and parse latitude from a string.
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
@@ -211,12 +208,40 @@ class Location < AbstractModel
     self.west = Location.parse_longitude(west) || -90
     return if north > south
 
-    center_lat = (north + south) / 2
-    center_lon = (east + west) / 2
+    center_lat, center_lon = center
     self.north = center_lat + 0.0001
     self.south = center_lat - 0.0001
     self.east = center_lon + 0.0001
     self.west = center_lon - 0.0001
+  end
+
+  def center
+    center_lat = (north + south) / 2
+    center_lon = east > west ? (east + west) / 2 : west + (east + 360 - west) / 2
+    center_lon -= 360 if center_lon > 180
+    [center_lat, center_lon]
+  end
+
+  def close?(lat, long, pct = 0.10)
+    h = (north - south) * pct
+    return false if lat > north + h
+    return false if lat < south - h
+
+    if east > west
+      w = (east - west) * pct
+      return false if long > east + w
+      return false if long < west - w
+    else
+      w = (east - west + 360) * pct
+      return false if long > east + w && long < west - w
+    end
+    true
+  end
+
+  # Calculate rough area in "square degrees", making no attempt at correcting
+  # for a degree of longitude being much smaller near the poles.
+  def pseudoarea
+    (east > west ? east - west : 360 + east - west) * (north - south)
   end
 
   ##############################################################################
@@ -420,8 +445,8 @@ class Location < AbstractModel
   end
 
   def self.unabbreviate_state(state, country)
-    map = STATE_ABBREVIATIONS[country] or return state
-    map[state] || state
+    map = STATE_ABBREVIATIONS[country]
+    map && map[state] || state
   end
 
   # Returns a member of understood_places if the candidate is either a member
