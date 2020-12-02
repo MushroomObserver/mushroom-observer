@@ -3400,6 +3400,355 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def do_loc_test(str: "", gps: [], geo: [], approved: false, succeed: false)
+    params = {
+      observation: {
+        place_name: str.to_s,
+        lat: gps[0].to_s,
+        long: gps[1].to_s
+      },
+      country: geo[0].to_s,
+      state: geo[1].to_s,
+      county: geo[2].to_s,
+      city: geo[3].to_s,
+      approved_where: approved ? str : "something else"
+    }
+    login("rolf") unless User.current
+    post(:create_observation, modified_generic_params(params, User.current))
+    if succeed
+      expect_obs_form_to_succeed
+    else
+      expect_obs_form_to_fail
+    end
+  end
+
+  def expect_obs_form_to_succeed
+    assert_empty(
+      @controller.instance_variable_get("@dubious_where_reasons") +
+      @controller.instance_variable_get("@location_suggestion_reasons") +
+      @controller.instance_variable_get("@location_suggestions")
+    )
+    assert_response(:redirect, "expected it to accept this submission")
+  end
+
+  def expect_obs_form_to_fail
+    assert_response(:success, "expected it to reload the form")
+    @reasons = \
+      @controller.instance_variable_get("@location_suggestion_reasons")
+    @suggestions = @controller.instance_variable_get("@location_suggestions")
+    @place_name = @controller.instance_variable_get("@place_name")
+  end
+
+  def assert_suggestions_include(loc)
+    assert_includes(@suggestions.map(&:name), loc.name)
+  end
+
+  # First submit with nothing: no place_name, lat/long or geolocation.
+  def test_create_observation_without_location_latlong_or_geolocation
+    do_loc_test()
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_empty(@suggestions)
+    assert_blank(@place_name)
+  end
+
+  # Now add lat/long to see if it finds a location which contains it.
+  def test_create_observation_with_just_latlong
+    loc = locations(:burbank)
+    do_loc_test(gps: loc.center)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_blank(@place_name)
+  end
+
+  # Now add reverse geolocation to make sure it fills in place_name.
+  def test_create_observation_with_just_geolocation
+    loc = locations(:burbank)
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    do_loc_test(geo: geolocation)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("Burbank, Los Angeles Co., California, USA", @place_name)
+  end
+
+  # Same thing but reverse location order (and explicitly enter "Earth"
+  # for the place name to make sure it catches that, too).
+  def test_create_observation_with_just_geolocation_reversed
+    loc = locations(:burbank)
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    users(:rolf).update(location_format: :scientific)
+    do_loc_test(str: "Earth", geo: geolocation)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("USA, California, Los Angeles Co., Burbank", @place_name)
+  end
+
+  # And submit again with "Earth" approved to prove that user can override
+  # our whinging.
+  def test_create_observation_with_no_location_but_approved
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    str = Location.unknown.name
+    do_loc_test(str: str, geo: geolocation, approved: true, succeed: true)
+  end
+
+  # Submit a point within Burbank, but only list location as "California".
+  def test_create_observation_with_inaccurate_location
+    loc = locations(:burbank)
+    str = "California, USA"
+    do_loc_test(str: str, gps: loc.center)
+    assert_includes(@reasons, :form_observations_location_inaccurate.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # Submit a point that's not even close to Burbank while listing it
+  # erroneously as "Burbank".
+  def test_create_observation_with_pin_way_off
+    loc = locations(:burbank)
+    lat2 = loc.north + (loc.north - loc.south)
+    long2 = loc.west - (loc.east - loc.west)
+    assert_false(loc.close?(lat2, long2))
+    do_loc_test(str: loc.name, gps: [lat2, long2])
+    assert_includes(@reasons, :form_observations_location_outside.t)
+    # Should at least see that this point is in California!
+    assert_suggestions_include(locations(:california))
+    assert_equal(loc.name, @place_name)
+  end
+
+  # Submit a point that's close but not actually in Burbank (off by 9%),
+  # listing it as "Burbank".
+  def test_create_observation_with_pin_at_least_close
+    loc = locations(:burbank)
+    lat2 = loc.north + (loc.north - loc.south) * 0.09
+    long2 = loc.west - (loc.east - loc.west) * 0.09
+    assert_true(loc.close?(lat2, long2))
+    do_loc_test(str: loc.name, gps: [lat2, long2], succeed: true)
+  end
+
+  # Try a point within Burbank and actually list it as "Burbank".
+  def test_create_observation_with_correct_pin
+    loc = locations(:burbank)
+    do_loc_test(str: loc.name, gps: loc.center, succeed: true)
+  end
+
+  # Submit a location with a county that lacks the county in the database.
+  def test_create_observation_
+    loc = locations(:burbank)
+    assert_equal("Burbank, California, USA", loc.name)
+    str = "Burbank, Los Angeles Co., California, USA"
+    do_loc_test(str: str)
+    assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # Approve it and try again.
+  def test_create_observation_
+    str = "Burbank, Los Angeles Co., California, USA"
+    do_loc_test(str: str, approved: true, succeed: true)
+  end
+
+  # Submit a location without a county that has a county in the database.
+  def test_create_observation_bad_location_1
+    loc = locations(:brett_woods)
+    assert_equal("Brett Woods, Fairfield Co., Connecticut, USA", loc.name)
+    str = "Brett Woods, Connecticut, USA"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but omitting the country.
+  def test_create_observation_bad_location_2
+    loc = locations(:brett_woods)
+    str = "Brett Woods, CT"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but with misspelled country.
+  def test_create_observation_bad_location_3
+    loc = locations(:elgin_co)
+    assert_equal("Elgin Co., Ontario, Canada", loc.name)
+    str = "Elgin Co., Ontario, KKanada"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with badly misspelled country, but google
+  # provides a correct country.
+  def test_create_observation_bad_location_4
+    loc = locations(:elgin_co)
+    str = "Elgin Co., Ontario, Oops"
+    do_loc_test(str: str, geo: ["Canada"])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but with misspelled country and abbreviated
+  # state.
+  def test_create_observation_bad_location_5
+    loc = locations(:elgin_co)
+    str = "Elgin Co., ON, Kanada"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with misspelled state in country without
+  # states.
+  def test_create_observation_bad_location_6
+    loc = locations(:birgu)
+    assert_equal("Birgu, Malta", loc.name)
+    do_loc_test(str: "Bigru, Malta")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with misspelled state in country with states.
+  def test_create_observation_bad_location_7
+    loc = locations(:burbank)
+    assert_equal("Burbank, California, USA", loc.name)
+    do_loc_test(str: "Burbank, Calfiornia, USA")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with badly misspelled state in country with
+  # states, but google provides correct state.
+  def test_create_observation_bad_location_8
+    loc = locations(:burbank)
+    do_loc_test(str: "Burbank, Cali, USA",
+                geo: ["USA", "California", "Los Angeles Co."])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location that has county misspelled.
+  def test_create_observation_bad_location_9
+    loc = locations(:brett_woods)
+    assert_equal("Brett Woods, Fairfield Co., Connecticut, USA", loc.name)
+    str = "Brett Woods, Connecticut, USA"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location that has city misspelled.
+  def test_create_observation_bad_location_10
+    loc = locations(:brett_woods)
+    str = "Brett's Woods, CT"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location omitting a name below county but above
+  # the final term.
+  def test_create_observation_bad_location_11
+    loc = locations(:mitrula_marsh)
+    assert_equal(
+      '"Mitrula Marsh", Sand Lake, Bassetts, Yuba Co., California, USA',
+      loc.name
+    )
+    do_loc_test(str: "Mitrula Marsh, Bassetts, CA")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit something totally wonky, but google gives something we can work
+  # with.
+  def test_create_observation_bad_location_12
+    loc = locations(:burbank)
+    do_loc_test(str: "Burbank",
+                geo: ["USA", "California", "Los Angeles Co.", "Burbank"])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit something totally wonky and google is no help.
+  def test_create_observation_bad_location_13
+    do_loc_test(str: "Willy Wonka's Toy Factory",
+                geo: ["unknown", "unknown", "unknown"])
+    assert_empty(@suggestions)
+  end
+
+  def test_create_observation_choosing_location_suggestion
+    user = rolf
+    login(user.login)
+    loc = locations(:burbank)
+    params = {
+      observation: { place_name: "whatever" },
+      approved_where: "something else",
+      location_suggestions: { name: loc.name }
+    }
+    post(:create_observation, modified_generic_params(params, user))
+    assert_response(:redirect, "expected this to submit successfully")
+    obs = Observation.last
+    assert_objs_equal(loc, obs.location)
+  end
+
+  # User tries to remove the place name, but google comes to the rescue.
+  def test_edit_observation_try_to_remove_location
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:gualala)
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: Location.unknown.name },
+      country: "USA",
+      state: "California",
+      county: "Mendocino Co.",
+      city: "Gualala",
+    }
+    post(:edit_observation, params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("Gualala, Mendocino Co., California, USA", @place_name)
+  end
+
+  # User tries to change place name to something less accurate.
+  def test_edit_observation_try_to_change_to_less_accurate
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:burbank)
+    lat, long = loc.center
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: "California, USA", lat: lat, long: long },
+    }
+    post(:edit_observation, params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_inaccurate.t)
+    assert_suggestions_include(loc)
+    assert_equal("California, USA", @place_name)
+  end
+
+  # User tries to change place name to something screwy that we can correct.
+  def test_edit_observation_try_to_change_location_to_something_screwy
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:brett_woods)
+    str = "Brett's Woods, CT"
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: str }
+    }
+    post(:edit_observation, params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # User moves the pin way outside of chosen location.
+  def test_edit_observation_try_to_move_pin_outside_of_location
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = obs.reload.location
+    lat = loc.south - (loc.north - loc.south) * 0.5
+    long = loc.east + (loc.east - loc.west) * 0.5
+    params = {
+      id: obs.id.to_s,
+      observation: { lat: lat, long: long }
+    }
+    post(:edit_observation, params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_outside.t)
+    assert_suggestions_include(locations(:california))
+    assert_equal(loc.name, @place_name)
+  end
+
   # ----------------------------
   #  Interest.
   # ----------------------------
