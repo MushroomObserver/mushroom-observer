@@ -63,7 +63,7 @@ class PostObservationTest < IntegrationTestCase
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes)
     assert_template(CREATE_LOCATION_PAGE)
-    assert_has_location_warning(/County may not be required/)
+    assert_has_location_warning(/For consistency, we prefer/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes
     )
@@ -333,7 +333,7 @@ class PostObservationTest < IntegrationTestCase
 
   def create_location_form_first_changes
     {
-      "location_display_name" => "Pasadena, Some Co., California, USA",
+      "location_display_name" => "Pasadena, Some County, California, USA",
       "location_high" => 8765,
       "location_low" => 4321,
       "location_notes" => "oops"
@@ -354,7 +354,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_when_1i" => 2010,
       "observation_when_2i" => 3,
       "observation_when_3i" => 14,
-      "observation_place_name" => "Pasadena, Some Co., California, USA",
+      "observation_place_name" => "Pasadena, Some County, California, USA",
       "observation_lat" => "12.576",
       "observation_long" => "-123.7519",
       "observation_alt" => "17",
@@ -375,8 +375,8 @@ class PostObservationTest < IntegrationTestCase
       "observation_when_1i" => "2011",
       "observation_when_2i" => "4",
       "observation_when_3i" => "15",
-      "observation_lat" => "23.4567",
-      "observation_long" => "-123.4567",
+      "observation_lat" => "34.1234",
+      "observation_long" => "-118.1234",
       "observation_alt" => "987m",
       "is_collection_location" => true,
       other_notes_id => "New notes for observation",
@@ -408,7 +408,7 @@ class PostObservationTest < IntegrationTestCase
   def expected_values_after_location
     expected_values_after_create.merge(
       where: nil,
-      location: "Pasadena, Some Co., California, USA",
+      location: "Pasadena, Some County, California, USA",
       north: PASADENA_EXTENTS[:north],
       south: PASADENA_EXTENTS[:south],
       east: PASADENA_EXTENTS[:east],
@@ -422,8 +422,8 @@ class PostObservationTest < IntegrationTestCase
   def expected_values_after_edit
     expected_values_after_location.merge(
       when: Date.parse("2011-04-15"),
-      lat: 23.4567,
-      long: -123.4567,
+      lat: 34.1234,
+      long: -118.1234,
       alt: 987,
       is_collection_location: true,
       specimen: false,
