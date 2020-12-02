@@ -148,18 +148,82 @@ class ObserverController
   end
 
   def validate_place_name(params)
-    success = true
     @place_name = @observation.place_name
     @dubious_where_reasons = []
+    @location_suggestion_reasons = []
     @location_suggestions = []
-    if @place_name != params[:approved_where] && @observation.location.nil?
-      db_name = Location.user_name(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      @location_suggestions = Location.suggestions(db_name, geolocation)
-      success = false if @dubious_where_reasons.any? ||
-                         @location_suggestions.any?
+    return true if @place_name.present? &&
+                   @place_name == params[:approved_where]
+    return false if (@place_name.blank? || Location.is_unknown?(@place_name)) &&
+                    location_missing
+    return false if @observation.location.nil? && location_doesnt_exist
+    return false if @observation.location && location_inaccurate?
+
+    true
+  end
+
+  # Location not given at all.  If geolocation data available, suggest a name
+  # for the location based on geolocation info, and suggest existing locations
+  # which contain the lat/long given.  If geolocation data not available, gripe
+  # about it.  Always return true to tell parent not to create observation
+  # yet.  User can still opt to resubmit without changes to override this.
+  def location_missing
+    @location_suggestion_reasons << :form_observations_location_missing.t
+    geo = geolocation(params)
+    if geo[:country].present?
+      @place_name = Location.geolocation_to_name(geo)
+      @location_suggestions = Location.suggestions(@place_name, geo)
+      @place_name = Location.user_name(@user, @place_name)
     end
-    success
+    if geo[:latitude].present?
+      @location_suggestions += Location.suggestions_for_latlong(geo[:latitude],
+                                                                geo[:longitude])
+    end
+    true
+  end
+
+  # Location doesn't exist.  If we can come up with any suggestions for fixing
+  # it, return true to tell parent not to create observation yet, so user has
+  # a chance to fix it or choose an existing location.
+  def location_doesnt_exist
+    db_name = Location.user_name(@user, @place_name)
+    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @location_suggestion_reasons << :form_observations_location_doesnt_exist.t
+    @location_suggestions = Location.suggestions(db_name, geolocation(params))
+    @dubious_where_reasons.any? || @location_suggestions.any?
+  end
+
+  # The user's given Location already exists and could be fine.  However, if
+  # geolocation data is available, check if there are more accurate locations
+  # available.  If so, return true to tell parent not to create observation
+  # yet, so user has a chance to choose one of the more accurate locations.
+  def location_inaccurate?
+    lat = @observation.lat
+    long = @observation.long
+    return false if lat.blank? || long.blank?
+
+    close = @observation.location&.close?(lat, long)
+    area = close ? @observation.location.pseudoarea : 360*360
+    @location_suggestions = Location.suggestions_for_latlong(lat, long).
+                                     select { |loc| loc.pseudoarea <= area }
+    @location_suggestions -= [@observation.location]
+    if @location_suggestions.any?
+      @location_suggestion_reasons << :form_observations_location_inaccurate.t
+    end
+    unless close
+      @location_suggestion_reasons << :form_observations_location_outside.t
+    end
+    @location_suggestion_reasons.any?
+  end
+
+  # If user changes the lat/long of an existing observation make sure the
+  # new coordinates are still close to the location's bounding box, and
+  # suggest some alternatives if not.
+  def validate_lat_long_if_changed
+    return true unless @observation.lat_changed? || @observation.long_changed?
+    return false if @observation.location && location_inaccurate?
+
+    true
   end
 
   def save_everything_else(reason)
@@ -342,15 +406,8 @@ class ObserverController
       @observation.notes = notes_to_sym_and_compact
       warn_if_unchecking_specimen_with_records_present!
       strip_images! if @observation.gps_hidden
-
-      # Validate place name
-      @place_name = @observation.place_name
-      @dubious_where_reasons = []
-      if @place_name != params[:approved_where] && @observation.location.nil?
-        db_name = Location.user_name(@user, @place_name)
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        any_errors = true if @dubious_where_reasons.any?
-      end
+      any_errors = true unless validate_place_name(params)
+      any_errors = true unless validate_lat_long_if_changed
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
@@ -495,19 +552,20 @@ class ObserverController
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
-    clear_location(observation) if is_location_unknown?(observation)
+    # clear_location(observation) if is_location_unknown?(observation)
     observation
   end
 
-  def is_location_unknown?(observation)
-    Location.is_unknown?(observation.place_name) ||
-      (observation.lat && observation.long && observation.place_name.blank?)
-  end
-
-  def clear_location(observation)
-    observation.location = Location.unknown
-    observation.where = nil
-  end
+  # I really don't understand what the purpose of this was!
+  # def is_location_unknown?(observation)
+  #   Location.is_unknown?(observation.place_name) ||
+  #     (observation.lat && observation.long && observation.place_name.blank?)
+  # end
+  #
+  # def clear_location(observation)
+  #   observation.location = Location.unknown
+  #   observation.where = nil
+  # end
 
   def init_specimen_vars_for_create
     @collectors_name   = @user.legal_name
@@ -806,14 +864,14 @@ class ObserverController
     params[:observation].permit(whitelisted_observation_args)
   end
 
-  def geolocation_args
-    [:country, :state, :county, :city]
-  end
-
-  def geolocation
-    (params.permit(geolocation_args) || {}).merge({
-      latitude:  @observaton.lat,
-      longitude: @observaton.long
-    })
+  def geolocation(params)
+    {
+      country:   params[:country],
+      state:     params[:state],
+      county:    params[:county],
+      city:      params[:city],
+      latitude:  params[:observation] ? params[:observation][:lat] : nil,
+      longitude: params[:observation] ? params[:observation][:long] : nil,
+    }
   end
 end
