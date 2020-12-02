@@ -61,7 +61,7 @@ module GM
       keys[MO.domain]
     end
 
-    def self.header(args)
+    def self.header
       url = GMAPS_API_URL
       "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>"\
       "</script>
