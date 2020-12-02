@@ -16,7 +16,8 @@
 <!-- /WHEN -->
 
 <!-- WHERE_REASONS -->
-<% if @dubious_where_reasons.any? || @location_suggestions.any? %>
+<% if @dubious_where_reasons.any? || @location_suggestions.any? ||
+      @location_suggestion_reasons.any? %>
   <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
   <div class="alert alert-warning max-width-text" id="location_messages">
     <% if @dubious_where_reasons.any? %>
@@ -24,6 +25,9 @@
       <p class="help-block max-width-text">
         <%= :form_observations_dubious_help.t(button: button_name) %>
       </p>
+    <% end %>
+    <% if @location_suggestion_reasons.any? %>
+      <%= @location_suggestion_reasons.safe_join(safe_br) %>
     <% end %>
     <% if @location_suggestions.any? %>
       <%= :form_observations_location_suggestions.t %>
