@@ -104,7 +104,7 @@ class NameController
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if name_unlocked?
+    @name.icn_id   = params[:name][:icn_id] if editable_in_session?
   end
 
   # ------
@@ -121,7 +121,7 @@ class NameController
       return
     end
 
-    match = check_for_matches if name_unlocked?
+    match = check_for_matches if editable_in_session?
     if match
       merge_names(match)
     else
@@ -129,7 +129,7 @@ class NameController
     end
   end
 
-  def name_unlocked?
+  def editable_in_session?
     in_admin_mode? || !@name.locked
   end
 
@@ -186,7 +186,7 @@ class NameController
     # missing ancestors in case database is messed up. But don't update
     # ancestors if non-admin is changing locked namge because that would create
     # bogus name and ancestors if @parse.search_name differs from @name
-    update_ancestors if name_unlocked?
+    update_ancestors if editable_in_session?
     any_changes
   end
 
@@ -206,7 +206,7 @@ class NameController
   # changes nothing and raises a RuntimeError.
   #
   def update_correct_spelling
-    return unless name_unlocked?
+    return unless editable_in_session?
 
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
@@ -250,7 +250,7 @@ class NameController
   end
 
   def set_name_author_and_rank
-    return unless name_unlocked?
+    return unless editable_in_session?
 
     email_admin_name_change unless minor_change?
     @name.attributes = @parse.params
