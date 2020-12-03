@@ -866,11 +866,11 @@ class ObserverController
 
   def geolocation(params)
     {
-      country:   params[:country],
-      state:     params[:state],
-      county:    params[:county],
-      city:      params[:city],
-      latitude:  @observation.lat, # already parsed
+      country: params[:country],
+      state: params[:state],
+      county: params[:county],
+      city: params[:city],
+      latitude: @observation.lat, # already parsed
       longitude: @observation.long
     }
   end
