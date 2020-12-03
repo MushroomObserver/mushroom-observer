@@ -157,7 +157,7 @@ class ObserverController
     return false if (@place_name.blank? || Location.is_unknown?(@place_name)) &&
                     location_missing
     return false if @observation.location.nil? && location_doesnt_exist
-    return false if @observation.location && location_inaccurate?
+    return false if @observation.location && location_inaccurate?(@observation)
 
     true
   end
@@ -197,23 +197,28 @@ class ObserverController
   # geolocation data is available, check if there are more accurate locations
   # available.  If so, return true to tell parent not to create observation
   # yet, so user has a chance to choose one of the more accurate locations.
-  def location_inaccurate?
-    lat = @observation.lat
-    long = @observation.long
-    return false if lat.blank? || long.blank?
+  def location_inaccurate?(obs)
+    return false if obs.lat.blank?
 
-    close = @observation.location&.close?(lat, long)
-    area = close ? @observation.location.pseudoarea : 360*360
-    @location_suggestions = Location.suggestions_for_latlong(lat, long).
-                                     select { |loc| loc.pseudoarea <= area }
-    @location_suggestions -= [@observation.location]
+    @location_suggestions = more_accurate_suggestions(obs)
     if @location_suggestions.any?
       @location_suggestion_reasons << :form_observations_location_inaccurate.t
     end
-    unless close
+    unless obs.location&.close?(obs.lat, obs.long)
       @location_suggestion_reasons << :form_observations_location_outside.t
     end
     @location_suggestion_reasons.any?
+  end
+
+  # Suggest more accurate locations that contain the given lat/long.
+  def more_accurate_suggestions(obs)
+    close = obs.location&.close?(obs.lat, obs.long)
+    # If current location isn't even close, then suggest *any* location that
+    # contains the point, otherwise restrict to more accurate locations.
+    area = close ? obs.location.pseudoarea : 360*360
+    Location.suggestions_for_latlong(obs.lat, obs.long).
+      select { |loc| loc.pseudoarea <= area }.
+      reject { |loc| loc == obs.location }
   end
 
   # If user changes the lat/long of an existing observation make sure the
@@ -221,7 +226,7 @@ class ObserverController
   # suggest some alternatives if not.
   def validate_lat_long_if_changed
     return true unless @observation.lat_changed? || @observation.long_changed?
-    return false if @observation.location && location_inaccurate?
+    return false if @observation.location && location_inaccurate?(@observation)
 
     true
   end
