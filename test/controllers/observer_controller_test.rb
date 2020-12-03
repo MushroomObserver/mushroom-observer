@@ -3523,7 +3523,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # First submit with nothing: no place_name, lat/long or geolocation.
   def test_create_observation_without_location_latlong_or_geolocation
-    do_loc_test()
+    do_loc_test(str: "")
     assert_includes(@reasons, :form_observations_location_missing.t)
     assert_empty(@suggestions)
     assert_blank(@place_name)
@@ -3736,7 +3736,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Submit something totally wonky and google is no help.
   def test_create_observation_bad_location_13
     do_loc_test(str: "Willy Wonka's Toy Factory",
-                geo: ["unknown", "unknown", "unknown"])
+                geo: %w[unknown unknown unknown])
     assert_empty(@suggestions)
   end
 
@@ -3766,7 +3766,7 @@ class ObserverControllerTest < FunctionalTestCase
       country: "USA",
       state: "California",
       county: "Mendocino Co.",
-      city: "Gualala",
+      city: "Gualala"
     }
     post(:edit_observation, params)
     expect_obs_form_to_fail
@@ -3783,7 +3783,7 @@ class ObserverControllerTest < FunctionalTestCase
     lat, long = loc.center
     params = {
       id: obs.id.to_s,
-      observation: { place_name: "California, USA", lat: lat, long: long },
+      observation: { place_name: "California, USA", lat: lat, long: long }
     }
     post(:edit_observation, params)
     expect_obs_form_to_fail
