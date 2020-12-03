@@ -4346,7 +4346,9 @@ class NameControllerTest < FunctionalTestCase
   # Non-members certainly can't.
   def test_publish_draft_non_member
     publish_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), dick, merged: false,
+      name_descriptions(:draft_agaricus_campestris),
+      dick,
+      merged: false,
       conflict: false
     )
   end

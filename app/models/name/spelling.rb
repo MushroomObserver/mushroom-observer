@@ -133,7 +133,6 @@ class Name < AbstractModel
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
         conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-#                      synonym.text_name + " " + child_pat]
                       "#{synonym.text_name} #{child_pat}"]
         result += Name.where(conditions).select do |name|
           # name = <Lepiota boga var. nama>
