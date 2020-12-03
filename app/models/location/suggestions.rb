@@ -37,12 +37,11 @@ class Location < AbstractModel
     # Return suggested locations if country is unrecognized.
     def suggestions_for_country(str, geolocation)
       terms = str.split(",").map(&:strip)
-      given_country = terms[-1]
-      geo_country = geolocation[:country]
+      given_country = terms.last
       suggestions = \
         suggestions_if_country_is_state(given_country, terms) ||
         suggestions_if_geo_country_good(str, geolocation) ||
-        suggestions_if_country_misspelled(given_country, geo_country)
+        suggestions_if_country_misspelled(given_country, geolocation[:country])
       if suggestions.first.is_a?(Location)
         suggestions
       else
@@ -62,6 +61,7 @@ class Location < AbstractModel
     # Did google provide the name of a country we recognize?
     def suggestions_if_geo_country_good(str, geolocation)
       return unless geo_country = geolocation[:country]
+      return unless Location.understood_country?(geo_country)
 
       # Just see if maybe the user omitted the country...
       suggestions = suggestions_for_state("#{str}, #{geo_country}", geolocation)
