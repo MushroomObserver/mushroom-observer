@@ -39,21 +39,43 @@ class Location < AbstractModel
       terms = str.split(",").map(&:strip)
       given_country = terms[-1]
       geo_country = geolocation[:country]
-      # Is country missing? (That is, the term in the country position is a
-      # recognized state of some country.)
-      if (alt_countries = countries_with_state(given_country)).any?
-        terms.push("")
-      # Did google provide the name of a country we recognize?
-      elsif understood_country?(geo_country)
-        alt_countries = [geo_country]
-        # Just see if maybe the user omitted the country...
-        temp = suggestions_for_state("#{str}, #{geo_country}", geolocation)
-        return temp if temp.any?
-      # Find closest matches to the names the user and google provided.
+      suggestions = \
+        suggestions_if_country_is_state(given_country, terms) ||
+        suggestions_if_geo_country_good(str, geolocation) ||
+        suggestions_if_country_misspelled(given_country, geo_country)
+      if suggestions.first.is_a?(Location)
+        suggestions
       else
-        alt_countries = similar_countries(given_country) |
-                        similar_countries(geo_country)
+        suggestions_for_alt_countries(suggestions, terms, geolocation)
       end
+    end
+
+    # Is "country" actually a recognized state?
+    def suggestions_if_country_is_state(given_country, terms)
+      alt_countries = countries_with_state(given_country)
+      return unless alt_countries.any?
+
+      terms.push("") # move terms to left to make room for country
+      alt_countries
+    end
+
+    # Did google provide the name of a country we recognize?
+    def suggestions_if_geo_country_good(str, geolocation)
+      return unless geo_country = geolocation[:country]
+
+      # Just see if maybe the user omitted the country...
+      suggestions = suggestions_for_state("#{str}, #{geo_country}", geolocation)
+      suggestions.any? ? suggestions : [geo_country]
+    end
+
+    # Find closest matches to the country names the user and google provided.
+    def suggestions_if_country_misspelled(given_country, geo_country)
+      similar_countries(given_country) | similar_countries(geo_country)
+    end
+
+    # Mash together any suggestions for any of the suggested alternative
+    # countries we put together above.
+    def suggestions_for_alt_countries(alt_countries, terms, geolocation)
       alt_countries.map do |alt_country|
         terms[-1] = alt_country
         alt_str = terms.join(", ")
@@ -69,23 +91,54 @@ class Location < AbstractModel
     def suggestions_for_state(str, geolocation)
       terms = str.split(",").map(&:strip)
       given_country = terms.pop
+      # There's nothing we can really do if we don't have the list of states
+      # for this country, so just treat it like a normal string. This method
+      # is all about taking advantage of knowing the set of available states.
       good_states = understood_states(given_country)
       return suggestions_with_tail(terms, [given_country]) if good_states.empty?
 
       given_state = unabbreviate_state(terms.pop, given_country)
       geo_state = geolocation[:state]
-      if good_states.member?(given_state)
-        alt_states = [given_state]
-      elsif good_states.member?(geo_state)
-        alt_states = [geo_state]
-        # Just see if maybe the user omitted the state...
-        alt_str = (terms + [given_state, geo_state, given_country]).join(", ")
-        temp = suggestions_for_the_rest(alt_str)
-        return temp if temp.any?
+      suggestions = \
+        suggestions_if_given_state_is_good(given_state, given_country) ||
+        suggestions_if_geo_state_is_good(geo_state, terms, given_state,
+                                         given_country) ||
+        suggestions_if_state_misspelled(given_state, geo_state, given_country)
+      if suggestions.first.is_a?(Location)
+        suggestions
       else
-        alt_states = similar_states(given_state, given_country) |
-                     similar_states(geo_state, given_country)
+        suggestions_for_alt_states(suggestions, terms, given_country)
       end
+    end
+
+    # List of "suggestions" is trivial if the given (unabbreviated) state
+    # is already known to be good.
+    def suggestions_if_given_state_is_good(given_state, given_country)
+      return unless understood_states(given_country).member?(given_state)
+
+      [given_state]
+    end
+
+    # Did google provide the name of a state we recognize?
+    def suggestions_if_geo_state_is_good(geo_state, terms, given_state,
+                                         given_country)
+      return unless understood_states(given_country).member?(geo_state)
+
+      # Just see if maybe the user omitted the state...
+      alt_str = (terms + [given_state, geo_state, given_country]).join(", ")
+      suggestions = suggestions_for_the_rest(alt_str)
+      suggestions.any? ? suggestions : [geo_state]
+    end
+
+    # Find closest matches to the state names the user and google provided.
+    def suggestions_if_state_misspelled(given_state, geo_state, given_country)
+      similar_states(given_state, given_country) |
+        similar_states(geo_state, given_country)
+    end
+
+    # Mash together any suggestions for any of the suggested alternative
+    # states we put together above.
+    def suggestions_for_alt_states(alt_states, terms, given_country)
       alt_states.map do |alt_state|
         suggestions_with_tail(terms, [alt_state, given_country]) |
           suggestions_without_county(terms, [alt_state, given_country])
