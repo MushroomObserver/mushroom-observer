@@ -4,7 +4,7 @@ module ObservationReport
   module Darwin
     # Darwin Core Observations format.
     class Images < ObservationReport::CSV
-      attr_accessor :observations, :query, :tables
+      attr_accessor :observations, :query
 
       self.separator = "\t"
 
@@ -15,22 +15,22 @@ module ObservationReport
       end
 
       def initialize_query
+        self.query = tables[:images]
         add_joins
         add_project
       end
 
-      def add_joins
-        self.tables = {
+      def tables
+        @tables ||= {
           images: Image.arel_table,
           images_observations: Arel::Table.new(:images_observations),
-          observations: Observation.arel_table,
           users: User.arel_table,
           licenses: License.arel_table
         }
-        self.query = tables[:images]
+      end
+
+      def add_joins
         join_table(:images_observations, :image_id, attribute(:images, :id))
-        io_attribute = attribute(:images_observations, :observation_id)
-        join_table(:observations, :id, io_attribute)
         join_table(:users, :id, attribute(:images, :user_id))
         join_table(:licenses, :id, attribute(:images, :license_id))
       end
@@ -43,7 +43,8 @@ module ObservationReport
 
       def add_project
         query.project(attribute(:images, :id),
-                      attribute(:observations, :id).as("obs_id"),
+                      attribute(:images_observations,
+                                :observation_id).as("obs_id"),
                       attribute(:images, :when),
                       attribute(:users, :name),
                       attribute(:users, :login),
@@ -56,7 +57,8 @@ module ObservationReport
       end
 
       def formatted_rows
-        query.where(tables[:observations][:id].in(observations.ids))
+        obs_attr = tables[:images_observations][:observation_id]
+        query.where(obs_attr.in(observations.ids))
         rows = ActiveRecord::Base.connection.exec_query(query.to_sql)
         sort_after(rows.map { |row| format_image_row(row) })
       end
@@ -74,10 +76,6 @@ module ObservationReport
         ]
       end
 
-      def format_row(row)
-        row
-      end
-
       def sort_after(rows)
         rows.sort_by { |row| row[0].to_i }
       end
@@ -85,7 +83,7 @@ module ObservationReport
       private
 
       def image_url(id)
-        "https://images.mushroomobserver.org/1280/#{id}.jpg"
+        "https://mushroomobserver.org/images/320/#{id}.jpg"
       end
 
       def format_image_row(row)
