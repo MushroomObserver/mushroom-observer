@@ -24,10 +24,6 @@ module ObservationReport
         ].freeze
       end
 
-      def format_row(row)
-        row
-      end
-
       def sort_after(rows)
         rows.sort_by { |row| row[0].to_i }
       end

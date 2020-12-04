@@ -3,40 +3,6 @@
 require("test_helper")
 
 class ObservationReportTest < UnitTestCase
-  def do_csv_test(report_type, obs, expect, &block)
-    query = Query.lookup(:Observation, :all)
-    report = report_type.new(query: query).body
-    assert_not_empty(report)
-    table = CSV.parse(report, col_sep: report_type.separator)
-    assert_equal(query.num_results + 1, table.count)
-    idx = query.results.sort_by(&block).index(obs)
-    assert_equal(expect, table[idx + 1])
-  end
-
-  def do_tsv_test(report_type, obs, expect, &block)
-    query = Query.lookup(:Observation, :all)
-    report = report_type.new(query: query).body
-    assert_not_empty(report)
-    rows = report.split("\n")
-    assert_equal(query.num_results + 1, rows.length)
-    idx = query.results.sort_by(&block).index(obs)
-    assert_equal(expect, rows[idx + 1].split("\t"))
-  end
-
-  def do_zip_test(report_type, expect)
-    query = Query.lookup(:Observation, :all)
-    report = report_type.new(query: query).body
-    assert_not_empty(report)
-    zio = Zip::InputStream.new(StringIO.new(report))
-    contents = []
-    while (entry = zio.get_next_entry)
-      contents << entry.name
-    end
-    assert_equal(expect, contents)
-  end
-
-  # ----------------------------------------------------------------------------
-
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
     expect = [
@@ -130,15 +96,6 @@ class ObservationReportTest < UnitTestCase
     assert_equal(Observation.select(:name_id).distinct.count + 1, table.count)
     obs = Observation.first
     assert(table.include?([obs.name_id.to_s, obs.text_name]))
-  end
-
-  def build_taxa_report
-    query = Query.lookup(:Observation, :all)
-    observations = ObservationReport::Darwin::Observations.new(query: query)
-    return if observations.body.empty?
-
-    report_type = ObservationReport::Darwin::Taxa
-    report_type.new(query: query, observations: observations)
   end
 
   def test_fundis_no_exact_lat_long
@@ -418,6 +375,13 @@ class ObservationReportTest < UnitTestCase
     assert_equal("3", row.day)
   end
 
+  def test_loc_name_sci
+    row = ObservationReport::Row.new(vals = [])
+    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    assert_equal("USA, California, Alameda Co., Some, Random, Park",
+                 row.loc_name_sci)
+  end
+
   def test_split_location
     row = ObservationReport::Row.new(vals = [])
     vals[19] = "Park, Random, Some, Alameda Co., California, USA"
@@ -442,23 +406,6 @@ class ObservationReportTest < UnitTestCase
     assert_nil(row.county)
     assert_equal("Los Angeles, Central Park", row.locality)
     assert_equal("Los Angeles, Central Park", row.locality_with_county)
-  end
-
-  def do_split_test(name, author, rank, expect)
-    row = ObservationReport::Row.new(vals = [])
-    vals[15] = name
-    vals[16] = author
-    vals[17] = Name.ranks[rank]
-    assert_equal(expect[:genus].to_s, row.genus.to_s)
-    assert_equal(expect[:species].to_s, row.species.to_s)
-    assert_equal(expect[:subspecies].to_s, row.subspecies.to_s)
-    assert_equal(expect[:variety].to_s, row.variety.to_s)
-    assert_equal(expect[:form].to_s, row.form.to_s)
-    assert_equal(expect[:species_author].to_s, row.species_author.to_s)
-    assert_equal(expect[:subspecies_author].to_s, row.subspecies_author.to_s)
-    assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
-    assert_equal(expect[:form_author].to_s, row.form_author.to_s)
-    assert_equal(expect[:cf].to_s, row.cf.to_s)
   end
 
   def test_split_name
@@ -505,5 +452,85 @@ class ObservationReportTest < UnitTestCase
                   form: "other",
                   form_author: "Seuss",
                   cf: "cf.")
+  end
+
+  def test_ascii_encoding
+    query = Query.lookup(:Observation, :all)
+    report = ObservationReport::Raw.new(query: query)
+    report.encoding = "ASCII"
+    body = report.body
+    assert_not_empty(body)
+  end
+
+  def test_utf_16_encoding
+    query = Query.lookup(:Observation, :all)
+    report = ObservationReport::Raw.new(query: query)
+    report.encoding = "UTF-16"
+    body = report.body
+    assert_not_empty(body)
+  end
+
+  private
+
+  def do_csv_test(report_type, obs, expect, &block)
+    query = Query.lookup(:Observation, :all)
+    body = report_body(report_type, query)
+    table = CSV.parse(body, col_sep: report_type.separator)
+    assert_equal(query.num_results + 1, table.count)
+    idx = query.results.sort_by(&block).index(obs)
+    assert_equal(expect, table[idx + 1])
+  end
+
+  def report_body(report_type, query)
+    report = report_type.new(query: query)
+    assert_not_empty(report.filename)
+    body = report.body
+    assert_not_empty(body)
+    body
+  end
+
+  def do_tsv_test(report_type, obs, expect, &block)
+    query = Query.lookup(:Observation, :all)
+    body = report_body(report_type, query)
+    rows = body.split("\n")
+    assert_equal(query.num_results + 1, rows.length)
+    idx = query.results.sort_by(&block).index(obs)
+    assert_equal(expect, rows[idx + 1].split("\t"))
+  end
+
+  def do_zip_test(report_type, expect)
+    body = report_body(report_type, Query.lookup(:Observation, :all))
+    zio = Zip::InputStream.new(StringIO.new(body))
+    contents = []
+    while (entry = zio.get_next_entry)
+      contents << entry.name
+    end
+    assert_equal(expect, contents)
+  end
+
+  def build_taxa_report
+    query = Query.lookup(:Observation, :all)
+    observations = ObservationReport::Darwin::Observations.new(query: query)
+    return if observations.body.empty?
+
+    report_type = ObservationReport::Darwin::Taxa
+    report_type.new(query: query, observations: observations)
+  end
+
+  def do_split_test(name, author, rank, expect)
+    row = ObservationReport::Row.new(vals = [])
+    vals[15] = name
+    vals[16] = author
+    vals[17] = Name.ranks[rank]
+    assert_equal(expect[:genus].to_s, row.genus.to_s)
+    assert_equal(expect[:species].to_s, row.species.to_s)
+    assert_equal(expect[:subspecies].to_s, row.subspecies.to_s)
+    assert_equal(expect[:variety].to_s, row.variety.to_s)
+    assert_equal(expect[:form].to_s, row.form.to_s)
+    assert_equal(expect[:species_author].to_s, row.species_author.to_s)
+    assert_equal(expect[:subspecies_author].to_s, row.subspecies_author.to_s)
+    assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
+    assert_equal(expect[:form_author].to_s, row.form_author.to_s)
+    assert_equal(expect[:cf].to_s, row.cf.to_s)
   end
 end
