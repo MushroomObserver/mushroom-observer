@@ -72,13 +72,6 @@ Lint/NonLocalExitFromIterator:
   Exclude:
     - 'test/general_extensions.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Lint/RedundantCopDisableDirective:
-  Exclude:
-    - 'app/classes/image_s3.rb'
-    - 'test/unit/image_s3_test.rb'
-
 # Offense count: 1
 Lint/RescueException:
   Exclude:
