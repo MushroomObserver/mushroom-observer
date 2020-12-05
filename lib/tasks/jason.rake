@@ -653,18 +653,20 @@ namespace :jason do
 
       elsif /^[A-Z]/.match?(line)
         puts(">>>>>>>> unrecognized object type")
-        begin
+        loop do
           line.chomp!
           puts(line)
           line = $stdin.gets
-        end while line && !line.match(/^[A-Z]/)
+        break unless line && !line.match(/^[A-Z]/)
+        end
 
       else
         puts(">>>>>>>> expected object type")
-        begin
+        loop do
           line.chomp!
           puts(line)
-        end while line = $stdin.gets
+        break unless line = $stdin.gets
+        end
       end
     end
   end

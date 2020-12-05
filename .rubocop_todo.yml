@@ -42,12 +42,6 @@ Lint/LiteralAsCondition:
     - 'test/models/pivotal_test.rb'
     - 'test/test_helper.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Lint/Loop:
-  Exclude:
-    - 'lib/tasks/jason.rake'
-
 # Offense count: 7
 # Configuration parameters: MaximumRangeSize.
 Lint/MissingCopEnableDirective:
