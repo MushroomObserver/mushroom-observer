@@ -211,13 +211,6 @@ Naming/VariableName:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/StartWith:
-  Exclude:
-    - 'app/classes/robots.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
 Rails/ApplicationMailer:
   Exclude:
     - 'app/models/account_mailer.rb'
