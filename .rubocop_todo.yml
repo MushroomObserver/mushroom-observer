@@ -556,12 +556,6 @@ Style/OptionalBooleanParameter:
 
 # Offense count: 1
 # Cop supports --auto-correct.
-Style/RedundantAssignment:
-  Exclude:
-    - 'app/models/name/spelling.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
 Style/RedundantFileExtensionInRequire:
   Exclude:
     - 'test/language_extensions.rb'
