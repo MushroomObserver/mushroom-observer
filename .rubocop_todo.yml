@@ -6,15 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: consistent, consistent_relative_to_receiver, special_for_inner_method_call, special_for_inner_method_call_in_parentheses
-Layout/FirstArgumentIndentation:
-  Exclude:
-    - 'app/helpers/javascript_helper.rb'
-    - 'test/controller_extensions.rb'
-
 # Offense count: 27
 # Cop supports --auto-correct.
 # Configuration parameters: AllowForAlignment, EnforcedStyleForExponentOperator.

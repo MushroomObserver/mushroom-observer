@@ -38,7 +38,7 @@ module JavascriptHelper
   def javascript_include(*args)
     if args.reject { |arg| arg.class == String } != []
       raise(ArgumentError.new(
-        "javascript_include doesn't take symbols like :default, etc."
+              "javascript_include doesn't take symbols like :default, etc."
       ))
     end
 
