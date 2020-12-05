@@ -108,16 +108,6 @@ Lint/UnreachableLoop:
   Exclude:
     - 'test/unit/image_s3_test.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: ContextCreatingMethods, MethodCreatingMethods.
-Lint/UselessAccessModifier:
-  Exclude:
-    - 'app/models/name/spelling.rb'
-    - 'app/models/queued_email/observation_change.rb'
-    - 'app/models/rss_log.rb'
-    - 'app/models/vote.rb'
-
 # Offense count: 9
 # Configuration parameters: CheckForMethodsWithNoSideEffects.
 Lint/Void:
