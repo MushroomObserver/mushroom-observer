@@ -6,13 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 27
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, EnforcedStyleForExponentOperator.
-# SupportedStylesForExponentOperator: space, no_space
-Layout/SpaceAroundOperators:
-  Enabled: false
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.

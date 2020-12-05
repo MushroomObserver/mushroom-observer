@@ -312,7 +312,7 @@ namespace :jason do
         sight  = nil
         refs   = nil
         chem   = nil
-        micro = nil
+        micro  = nil
         spec   = nil
         is_co  = nil
         notes  = nil

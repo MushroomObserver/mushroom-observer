@@ -2181,6 +2181,7 @@ class ApiTest < UnitTestCase
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
     names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
+
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2206,8 +2207,8 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     no_notes = Observation.no_notes_persisted
-    with    = Observation.where("notes != ?", no_notes)
-    without = Observation.where("notes = ?", no_notes)
+    with     = Observation.where("notes != ?", no_notes)
+    without  = Observation.where("notes = ?", no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -2949,9 +2950,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    genus = Name.ranks[:Genus]
-    group = Name.ranks[:Group]
-    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
+    genus   = Name.ranks[:Genus]
+    group   = Name.ranks[:Group]
+    names   = Name.where("`rank` <= #{genus} or `rank` = #{group}")
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -2971,8 +2972,8 @@ class ApiTest < UnitTestCase
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
     no_notes = Observation.no_notes_persisted
-    with    = Observation.where("notes != ?", no_notes)
-    without = Observation.where("notes = ?", no_notes)
+    with     = Observation.where("notes != ?", no_notes)
+    without  = Observation.where("notes = ?", no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_obs_notes: "yes"))

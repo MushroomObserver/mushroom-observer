@@ -216,7 +216,7 @@ class AccountController < ApplicationController
 
   def login_post
     user_params = params[:user] || {}
-    @login    = user_params[:login].to_s
+    @login = user_params[:login].to_s
     @password = user_params[:password].to_s
     @remember = user_params[:remember_me] == "1"
     user = User.authenticate(@login, @password)

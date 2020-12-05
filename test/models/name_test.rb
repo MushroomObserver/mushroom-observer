@@ -2547,6 +2547,7 @@ class NameTest < UnitTestCase
 
   def test_names_from_synonymous_genera
     User.current = rolf
+
     a  = create_test_name("Agaricus")
     a1 = create_test_name("Agaricus testus")
     a3 = create_test_name("Agaricus testii")
@@ -2773,6 +2774,7 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
     assert_not(Name.names_matching_desired_new_name(parsed).
                 include?(names(:unauthored_with_naming)))
+
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
     extant  = names(:authored_group)
