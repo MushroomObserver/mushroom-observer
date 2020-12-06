@@ -234,17 +234,6 @@ Rails/FilePath:
     - 'test/models/language_exporter_test.rb'
     - 'test/unit/image_s3_test.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: Include.
-# Include: app/models/**/*.rb
-Rails/FindBy:
-  Exclude:
-    - 'app/models/location.rb'
-    - 'app/models/queued_email/comment_add.rb'
-    - 'app/models/translation_string.rb'
-    - 'app/models/user.rb'
-
 # Offense count: 45
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb

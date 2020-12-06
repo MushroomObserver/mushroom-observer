@@ -10,11 +10,10 @@ class QueuedEmail::CommentAdd < QueuedEmail
     # Check for an already queued matching email
     email = QueuedEmail.
             includes(:queued_email_integers).
-            where("queued_emails.flavor" => "QueuedEmail::CommentAdd",
-                  "queued_email_integers.key" => "comment",
-                  "queued_emails.to_user_id" => comment.id,
-                  "queued_email_integers.value" => receiver.id).
-            first
+            find_by("queued_emails.flavor" => "QueuedEmail::CommentAdd",
+                    "queued_email_integers.key" => "comment",
+                    "queued_emails.to_user_id" => comment.id,
+                    "queued_email_integers.value" => receiver.id)
 
     if email
       # Only happens when queuing is enabled, just touch 'queued' time.
