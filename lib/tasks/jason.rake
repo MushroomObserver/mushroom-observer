@@ -300,11 +300,12 @@ namespace :jason do
       lines = [line]
 
       # Skip blank lines and comments.
-      if /^\s*(#|$)/.match?(line)
+      case line
+      when match?(/^\s*(#|$)/)
         line = $stdin.gets
 
       # Create new observation.
-      elsif line == "OBSERVATION"
+      when "OBSERVATION"
         date   = nil
         where  = nil
         what   = nil
@@ -647,17 +648,15 @@ namespace :jason do
           end
         end
 
-        for x in lines
-          puts(x)
-        end
+        lines.each { |x| puts x }
 
-      elsif /^[A-Z]/.match?(line)
+      when match?(/^[A-Z]/)
         puts(">>>>>>>> unrecognized object type")
         loop do
           line.chomp!
           puts(line)
           line = $stdin.gets
-        break unless line && !line.match(/^[A-Z]/)
+          break unless line && !line.match(/^[A-Z]/)
         end
 
       else
@@ -665,7 +664,7 @@ namespace :jason do
         loop do
           line.chomp!
           puts(line)
-        break unless line = $stdin.gets
+          break unless (line = $stdin.gets)
         end
       end
     end

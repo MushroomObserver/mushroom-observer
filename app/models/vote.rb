@@ -259,7 +259,6 @@ class Vote < AbstractModel
     end
   end
 
-
   def self.translate_menu(menu)
     result = []
     for k, v in menu

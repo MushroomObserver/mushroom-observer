@@ -39,7 +39,7 @@ module JavascriptHelper
     if args.reject { |arg| arg.class == String } != []
       raise(ArgumentError.new(
               "javascript_include doesn't take symbols like :default, etc."
-      ))
+            ))
     end
 
     @javascript_files ||= []

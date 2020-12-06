@@ -248,7 +248,7 @@ module ControllerExtensions
 
       raise(RangeError.new(
               "More than 100 files found with a label of '#{label}'"
-      ))
+            ))
     end
     print("Creating html_dump file: #{file_name}\n")
     file = File.new(file_name, "w")
