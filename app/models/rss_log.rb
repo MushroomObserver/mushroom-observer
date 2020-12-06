@@ -371,7 +371,6 @@ class RssLog < AbstractModel
 
   ##############################################################################
 
-
   # Encode a line of the log.  Pass in a triplet:
   # tag:: Symbol
   # args:: Hash

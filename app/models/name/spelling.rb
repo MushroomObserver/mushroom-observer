@@ -81,8 +81,6 @@ class Name < AbstractModel
     all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
                 "AND (#{conds}) AND correct_spelling_id IS NULL"
     where(all_conds).limit(10).to_a
-
-
   end
 
   # String words together replacing the one at +index+ with +sub+.
