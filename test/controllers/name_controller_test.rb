@@ -262,7 +262,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
-  def test_show_name_icn_id_info
+  def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
     get(:show_name, params: { id: name.id })
@@ -276,7 +276,17 @@ class NameControllerTest < FunctionalTestCase
     )
     assert_select(
       "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to SF GSD Species Synonymy record"
+      "Page is missing a link to GSD Synonymy record"
+    )
+  end
+
+  def test_show_name_genus_with_icn_id
+    # Name's icn_id is filled in
+    name = names(:tubaria)
+    get(:show_name, params: { id: name.id })
+    assert_select(
+      "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
+      "Page is missing a link to SF Synonymy record"
     )
   end
 

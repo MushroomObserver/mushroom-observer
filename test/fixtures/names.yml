@@ -103,6 +103,7 @@ tubaria:
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
   rank: <%= Name.ranks[:Genus] %>
+  icn_id: 18686
 
 tubaria_furfuracea:
   <<: *DEFAULTS
