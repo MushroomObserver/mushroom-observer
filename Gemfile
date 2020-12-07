@@ -70,7 +70,7 @@ gem("xmlrpc")
 # Simple versioning
 # Use our own fork, which stores enum attrs as integers in the db
 gem("cure_acts_as_versioned",
-    :git => "https://github.com/MushroomObserver/acts_as_versioned/")
+    git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # In Rails 4.0, use simple_enum to replace enum_column3
 # In the future, replace simple_enum with Rails native enums
