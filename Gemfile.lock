@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/MushroomObserver/acts_as_versioned/
+  revision: dbb4a9eb9a33deccdc6041b1c44b2a577acda0a4
+  specs:
+    cure_acts_as_versioned (0.6.3)
+      activerecord (>= 3.0.9)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -100,8 +107,6 @@ GEM
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
-    cure_acts_as_versioned (0.6.3)
-      activerecord (>= 3.0.9)
     docile (1.3.2)
     erubi (1.9.0)
     execjs (2.7.0)
@@ -280,7 +285,7 @@ DEPENDENCIES
   capybara
   coffee-rails
   coveralls
-  cure_acts_as_versioned
+  cure_acts_as_versioned!
   i18n
   jbuilder
   jquery-rails

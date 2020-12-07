@@ -68,10 +68,13 @@ gem("rtf")
 gem("xmlrpc")
 
 # Simple versioning
-gem("cure_acts_as_versioned")
+# Use our own fork, which stores enum attrs as integers in the db
+gem("cure_acts_as_versioned",
+    :git => "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # In Rails 4.0, use simple_enum to replace enum_column3
-# In Rails >= 4.1, use Rails built-in enums instead (available only in >= 4.1)
+# In the future, replace simple_enum with Rails native enums
+# https://www.pivotaltracker.com/story/show/90595194
 gem("simple_enum")
 
 # Amazon S3 SDK, for access to images on dreamhost S3
