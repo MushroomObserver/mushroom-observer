@@ -75,6 +75,8 @@ class QueuedEmail::ObservationChange < QueuedEmail
 
   ##############################################################################
 
+  # private class methods
+
   # Check to see if there is already an email started.
   def self.find_email(recipient, observation)
     QueuedEmail.
@@ -84,4 +86,6 @@ class QueuedEmail::ObservationChange < QueuedEmail
               "queued_emails.to_user_id" => recipient.id,
               "queued_email_integers.value" => observation.id)
   end
+
+  private_class_method :find_email
 end

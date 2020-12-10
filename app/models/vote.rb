@@ -259,6 +259,10 @@ class Vote < AbstractModel
     end
   end
 
+  ##############################################################################
+
+  # private class methods
+
   def self.translate_menu(menu)
     result = []
     for k, v in menu
@@ -266,4 +270,6 @@ class Vote < AbstractModel
     end
     result
   end
+
+  private_class_method :translate_menu
 end

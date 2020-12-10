@@ -2965,6 +2965,12 @@ class NameTest < UnitTestCase
   def test_guess_name_with_colon_in_pattern
     # Apparently assert_nothing_raised hides debug information but gives
     # nothing useful in return.
-    Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
+    # Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
+    #
+    # Reverted to `assert_nothing_raised` to avoid direct testing of private
+    # class method `Name.guess_with_errors`.
+    assert_nothing_raised do
+      Name.suggest_alternate_spellings("Crepidotus applanatus(Pers.:Fr.)Kummer")
+    end
   end
 end
