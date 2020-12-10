@@ -99,8 +99,9 @@ class Name < AbstractModel
 
   ##############################################################################
 
-
   # Guess correct name of partial string.
+  # This method should be private.
+  # See https://www.pivotaltracker.com/story/show/176098819
   def self.guess_word(prefix, word)
     str = "#{prefix} #{word}"
     results = guess_with_errors(str, 1)
@@ -110,6 +111,8 @@ class Name < AbstractModel
   end
 
   # Look up name replacing n letters at a time with a star.
+  # This method should be private.
+  # See https://www.pivotaltracker.com/story/show/176098819
   def self.guess_with_errors(name, count)
     patterns = []
 
