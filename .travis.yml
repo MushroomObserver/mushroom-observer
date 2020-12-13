@@ -13,7 +13,7 @@ sudo: true
 # script: bundle exec rake lang:update
 
 before_install:
-  - sudo apt-get install exiftool
+  - sudo apt-get install exiftool python
 
 install: ./script/travis_setup
 
