@@ -23,9 +23,12 @@ gem("sassc-rails")
 # Use jquery as the JavaScript library
 gem("jquery-rails")
 
-# Use thebuyracer as JavaScript runtime for ExecJS
+# Use therubyracer as JavaScript runtime for ExecJS
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem("therubyracer", platforms: :ruby)
+# gem("therubyracer", platforms: :ruby)
+
+# Use mini_racer as a substitute for therubyracer
+gem("mini_racer")
 
 # Use CoffeeScript for .js.coffee assets and views
 gem("coffee-rails")
