@@ -127,7 +127,7 @@ GEM
       railties (>= 3.1)
     json (2.3.0)
     kgio (2.11.3)
-    libv8 (3.16.14.19)
+    libv8 (8.4.255.0)
     loofah (2.7.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -139,6 +139,8 @@ GEM
     mimemagic (0.3.5)
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
+    mini_racer (0.3.1)
+      libv8 (~> 8.4.255)
     minitest (5.14.2)
     minitest-reporters (1.4.2)
       ansi
@@ -190,7 +192,6 @@ GEM
     rainbow (3.0.0)
     raindrops (0.19.1)
     rake (13.0.1)
-    ref (2.0.0)
     regexp_parser (1.7.1)
     rexml (3.2.4)
     rtf (0.3.3)
@@ -239,9 +240,6 @@ GEM
     sync (0.5.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    therubyracer (0.12.3)
-      libv8 (~> 3.16.14.15)
-      ref
     thor (1.0.1)
     thread_safe (0.3.6)
     tilt (2.0.10)
@@ -292,6 +290,7 @@ DEPENDENCIES
   jquery-slick-rails
   mail (= 2.7.0)
   mimemagic
+  mini_racer
   minitest
   minitest-reporters
   mocha
@@ -307,7 +306,6 @@ DEPENDENCIES
   sassc-rails
   simple_enum
   sprockets
-  therubyracer
   uglifier
   unicorn (= 5.4.1)
   web-console
