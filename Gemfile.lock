@@ -127,6 +127,7 @@ GEM
       railties (>= 3.1)
     json (2.3.0)
     kgio (2.11.3)
+    levenshtein (0.2.2)
     libv8 (8.4.255.0)
     loofah (2.7.0)
       crass (~> 1.0.2)
@@ -288,6 +289,7 @@ DEPENDENCIES
   jbuilder
   jquery-rails
   jquery-slick-rails
+  levenshtein
   mail (= 2.7.0)
   mimemagic
   mini_racer
