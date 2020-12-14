@@ -44,12 +44,9 @@
 #  users::              Users who have claimed this as their profile location.
 #
 #  ==== Lat/long methods
-#  north_west::         [north, west]
-#  north_east::         [north, east]
-#  south_west::         [south, west]
-#  south_east::         [south, east]
+#  close?::             Is a given lat/long close to this location?
 #  center::             [n+s/2, e+w/2]
-#  tweak::              Expand extents to include the given point.
+#  pseudoarea::         Rough measure of area covered by bounding box.
 #  parse_latitude::     Validate and parse latitude from a string.
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
@@ -78,6 +75,8 @@
 #
 class Location < AbstractModel
   require "acts_as_versioned"
+
+  require_dependency "location/suggestions"
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -207,14 +206,53 @@ class Location < AbstractModel
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
     self.west = Location.parse_longitude(west) || -90
-    return if north > south
+    center_box! if north <= south
+  end
 
-    center_lat = (north + south) / 2
-    center_lon = (east + west) / 2
+  def center_box!
+    center_lat, center_lon = center
     self.north = center_lat + 0.0001
     self.south = center_lat - 0.0001
     self.east = center_lon + 0.0001
     self.west = center_lon - 0.0001
+  end
+
+  def center
+    center_lat = (north + south) / 2
+    if east >= west
+      center_lon = (east + west) / 2
+    else
+      center_lon = west + (east + 360 - west) / 2
+      center_lon -= 360 if center_lon > 180
+    end
+    [center_lat, center_lon]
+  end
+
+  def close?(lat, long, pct = 0.10)
+    east >= west ? close1(lat, long, pct) : close2(lat, long, pct)
+  end
+
+  def close1(lat, long, pct)
+    h = (north - south) * pct
+    w = (east - west) * pct
+    lat < north + h &&
+      lat > south - h &&
+      long < east + w &&
+      long > west - w
+  end
+
+  def close2(lat, long, pct)
+    h = (north - south) * pct
+    w = (east - west + 360) * pct
+    (long < east + w || long > west - w) &&
+      lat < north + h &&
+      lat > south - h
+  end
+
+  # Calculate rough area in "square degrees", making no attempt at correcting
+  # for a degree of longitude being much smaller near the poles.
+  def pseudoarea
+    (east >= west ? east - west : 360 + east - west) * (north - south)
   end
 
   ##############################################################################
@@ -244,7 +282,7 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
+      location = Location.where("name LIKE ?", name).first
       return location if location
     end
     raise("There is no \"unknown\" location!")
@@ -400,6 +438,7 @@ class Location < AbstractModel
   UNDERSTOOD_CONTINENTS = load_param_hash(MO.location_continents_file)
   UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
+  STATE_ABBREVIATIONS  = load_param_hash(MO.location_state_abbrs_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})"
@@ -414,6 +453,11 @@ class Location < AbstractModel
 
   def self.understood_states(country)
     UNDERSTOOD_STATES[country]
+  end
+
+  def self.unabbreviate_state(state, country)
+    map = STATE_ABBREVIATIONS[country]
+    map && map[state] || state
   end
 
   # Returns a member of understood_places if the candidate is either a member
@@ -488,7 +532,6 @@ class Location < AbstractModel
     unless check_db && location_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
-      reasons += check_for_dubious_county(name)
       reasons += check_for_bad_country_or_state(name)
       reasons += check_for_bad_terms(name)
       reasons += check_for_bad_chars(name)
@@ -506,14 +549,6 @@ class Location < AbstractModel
     return [] unless comma_test(name)
 
     [:location_dubious_commas.l]
-  end
-
-  def self.check_for_dubious_county(name)
-    return [] if name.blank?
-    return [] if /Forest,|Park,|near /.match?(name)
-    return [] unless has_dubious_county?(name)
-
-    [:location_dubious_redundant_county.l]
   end
 
   def self.check_for_bad_country_or_state(name)
@@ -605,16 +640,6 @@ class Location < AbstractModel
 
   def self.dubious_country?(name)
     !understood_country?(country(name))
-  end
-
-  def self.has_dubious_county?(name)
-    tokens = name.split(", ")
-    return if tokens.length < 2
-
-    alt = [tokens[0]]
-    tokens[1..].each { |t| alt.push(t) if t[-4..] != " Co." }
-    result = alt.join(", ")
-    result == name ? nil : result
   end
 
   def self.fix_country(name)
