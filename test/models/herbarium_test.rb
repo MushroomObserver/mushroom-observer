@@ -39,6 +39,7 @@ class HerbariumTest < UnitTestCase
     # Make sure it takes at least one field from F.
     ny.update(mailing_address: "")
     assert_operator(ny.created_at, :<, f.created_at)
+
     name              = ny.name
     code              = ny.code
     email             = ny.email
@@ -47,7 +48,8 @@ class HerbariumTest < UnitTestCase
     description       = ny.description
     curators          = (ny.curators + f.curators).uniq
     herbarium_records = ny.herbarium_records + f.herbarium_records
-    result = ny.merge(f)
+    result            = ny.merge(f)
+
     assert_objs_equal(ny, result)
     assert_equal(name, result.name)
     assert_equal(code, result.code)

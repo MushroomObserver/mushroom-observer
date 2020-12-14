@@ -81,7 +81,7 @@ class SequenceControllerTest < FunctionalTestCase
 
   def test_create_sequence_post
     old_count = Sequence.count
-    obs   = observations(:detailed_unknown_obs)
+    obs = observations(:detailed_unknown_obs)
     owner = obs.user
 
     locus = "ITS"

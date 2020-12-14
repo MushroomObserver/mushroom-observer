@@ -489,9 +489,9 @@ class User < AbstractModel
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
   def self.authenticate(login, pass)
-    where("(login = ? OR name = ? OR email = ?) AND password = ? AND
-           password != '' ",
-          login, login, login, sha1(pass)).first
+    find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
+              password != '' ",
+            login, login, login, sha1(pass))
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -577,7 +577,7 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    @personal_herbarium ||= Herbarium.where(personal_user_id: id).first
+    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id)
   end
 
   def create_personal_herbarium

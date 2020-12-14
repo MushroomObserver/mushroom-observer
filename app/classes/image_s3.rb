@@ -20,8 +20,7 @@ class ImageS3
     @bucket            = opts[:bucket]
     @access_key_id     = opts[:access_key_id]
     @secret_access_key = opts[:secret_access_key]
-    # disable cop because we want **boolean** value of opts[:stub]
-    @stub              = !!opts[:stub] # rubocop:disable Style/DoubleNegation
+    @stub              = !!opts[:stub]
   end
 
   # Returns object you can call "each" on to iterate over all files in store:

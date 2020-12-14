@@ -127,7 +127,7 @@ module Query
         return if vals.empty?
 
         min, max = vals
-        sizes  = Image.all_sizes
+        sizes = Image.all_sizes
         pixels = Image.all_sizes_in_pixels
         if min
           size = pixels[sizes.index(min)]

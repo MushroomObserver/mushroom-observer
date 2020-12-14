@@ -259,7 +259,9 @@ class Vote < AbstractModel
     end
   end
 
-  private
+  ##############################################################################
+
+  # private class methods
 
   def self.translate_menu(menu)
     result = []
@@ -268,4 +270,6 @@ class Vote < AbstractModel
     end
     result
   end
+
+  private_class_method :translate_menu
 end

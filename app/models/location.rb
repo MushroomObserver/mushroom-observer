@@ -244,8 +244,7 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     names_for_unknown.each do |name|
-      # location = Location.find(:first, :conditions => ['name like ?', name])
-      location = Location.where("name LIKE ?", name).first
+      location = Location.find_by("name LIKE ?", name)
       return location if location
     end
     raise("There is no \"unknown\" location!")
