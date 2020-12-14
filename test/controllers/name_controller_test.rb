@@ -262,7 +262,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
-  def test_show_name_icn_id_info
+  def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
     get(:show_name, params: { id: name.id })
@@ -276,7 +276,17 @@ class NameControllerTest < FunctionalTestCase
     )
     assert_select(
       "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to SF GSD Species Synonymy record"
+      "Page is missing a link to GSD Synonymy record"
+    )
+  end
+
+  def test_show_name_genus_with_icn_id
+    # Name's icn_id is filled in
+    name = names(:tubaria)
+    get(:show_name, params: { id: name.id })
+    assert_select(
+      "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
+      "Page is missing a link to SF Synonymy record"
     )
   end
 
@@ -1733,6 +1743,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_update_add_icn_id
     name = names(:stereum_hirsutum)
+    rank = name.rank
     params = {
       id: name.id,
       name: {
@@ -1740,7 +1751,7 @@ class NameControllerTest < FunctionalTestCase
         text_name: name.text_name,
         author: name.author,
         sort_name: name.sort_name,
-        rank: name.rank,
+        rank: rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
         icn_id: 189_826
@@ -1756,6 +1767,9 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(189_826, name.reload.icn_id)
     assert_no_emails
+
+    assert_equal(rank, Name.ranks.key(name.versions.first.rank),
+                 "Rank versioned incorrectly.")
   end
 
   def test_update_icn_id_unchanged
@@ -1786,7 +1800,7 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
   end
 
-  def test_update_icn_id_invalid
+  def test_update_icn_id_unregistrable
     name = names(:authored_group)
     params = {
       id: name.id,
@@ -1805,6 +1819,28 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
 
     assert_flash_error(:name_error_unregistrable.l)
+  end
+
+  def test_update_icn_id_non_numeric
+    name = names(:stereum_hirsutum)
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_id: "MB12345"
+      }
+    }
+    default_validates_numericality_of_error_message = "is not a number"
+    login
+    post(:edit_name, params: params)
+
+    assert_flash_text(/#{default_validates_numericality_of_error_message}/)
   end
 
   def test_update_icn_id_duplicate

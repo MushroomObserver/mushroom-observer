@@ -636,9 +636,13 @@ class LocationController < ApplicationController
       @location, merge = merge, @location
     end
     if in_admin_mode? || @location.mergable?
+      old_name = @location.display_name
+      new_name = merge.display_name
       merge.merge(@location)
       merge.save if merge.changed?
       @location = merge
+      flash_notice(:runtime_location_merge_success.t(this: old_name,
+                                                     that: new_name))
       redirect_to(@location.show_link_args)
     else
       redirect_with_query(controller: :observer,

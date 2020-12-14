@@ -9,7 +9,7 @@ update image_votes set user_id = 0 where anonymous = true;
 
 update images set original_name = 'xxx';
 
-update observations set lat = null, long = null where gps_hidden = true;
+update observations set `lat` = null, `long` = null where `gps_hidden` = true;
 
 # delete from interests;
 

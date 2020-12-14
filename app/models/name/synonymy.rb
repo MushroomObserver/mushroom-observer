@@ -40,7 +40,7 @@ class Name < AbstractModel
   #
   def sort_synonyms
     all = synonyms - [self]
-    accepted_synonyms   = all.reject(&:deprecated)
+    accepted_synonyms = all.reject(&:deprecated)
     deprecated_synonyms = all.select(&:deprecated)
     [accepted_synonyms, deprecated_synonyms]
   end

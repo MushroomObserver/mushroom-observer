@@ -109,8 +109,8 @@ class ObserverController
   def rough_cut(params)
     @observation = create_observation_object(params[:observation])
     @observation.notes = notes_to_sym_and_compact
-    @naming      = Naming.construct(params[:naming], @observation)
-    @vote        = Vote.construct(params[:vote], @naming)
+    @naming = Naming.construct(params[:naming], @observation)
+    @vote = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)

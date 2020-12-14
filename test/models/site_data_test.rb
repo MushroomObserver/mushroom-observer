@@ -3,11 +3,42 @@
 require("test_helper")
 
 class SiteDataTest < UnitTestCase
-  def test_create
-    obj = SiteData.new
-    obj.get_site_data
-    obj.get_user_data(rolf.id)
-    obj.get_all_user_data
+  def test_site_data
+    # Create unverified user so that counts of users, verfied users,
+    # and contributing users are different
+    unverified_user = User.create(
+      login: "mkcwqwv",
+      email: "anastasiyaskakun93@rambler.ru",
+      password: "UveBeenPwned",
+      password_confirmation: "UveBeenPwned"
+    )
+    assert_not(unverified_user.verified)
+    unverified_user_count = User.where.not(verified: nil).count
+    assert_not_equal(User.count, unverified_user_count)
+
+    site_data = SiteData.new.get_site_data
+
+    assert_equal(unverified_user_count, site_data[:users])
+    assert_equal(User.where.not(contribution: 0).count,
+                 site_data[:contributing_users])
+    assert_equal(Sequence.count, site_data[:sequences])
+    assert_equal(Sequence.distinct.count(:observation_id),
+                 site_data[:sequenced_observations])
+  end
+
+  def test_user_data
+    user_data = SiteData.new.get_user_data(rolf.id)
+
+    assert_not(
+      user_data.key?(:contributing_users),
+      "Single user data should not include #{:site_stats_contributing_users.l}"
+    )
+  end
+
+  def test_all_user_data
+    all_user_data = SiteData.new.get_all_user_data
+
+    assert_equal(User.count, all_user_data.length)
   end
 
   # def test_two_tiered_observation_scoring
