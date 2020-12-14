@@ -236,7 +236,7 @@ class SpeciesListController < ApplicationController
 
   def render_name_list_as_txt(names)
     charset = "UTF-8"
-    str = "\xEF\xBB\xBF" + names.map(&:real_search_name).join("\r\n")
+    str = "\xEF\xBB\xBF#{names.map(&:real_search_name).join("\r\n")}"
     send_data(str, type: "text/plain",
                    charset: charset,
                    disposition: "attachment",
@@ -272,7 +272,7 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author if author.present?
+      doc << " #{author}" if author.present?
       doc.line_break
     end
     send_data(doc.to_rtf, type: "text/rtf",
@@ -301,9 +301,9 @@ class SpeciesListController < ApplicationController
       name, author = str.split("|")
       name.tr!("ë", "e")
       if author
-        Name.find_by_text_name_and_author(name, author)
+        Name.find_by(text_name: name, author: author)
       else
-        Name.find_by_text_name(name)
+        Name.find_by(text_name: name)
       end
     end
     @names.reject!(&:nil?)
@@ -453,7 +453,7 @@ class SpeciesListController < ApplicationController
     if /^\d+$/.match?(str)
       SpeciesList.safe_find(str)
     else
-      SpeciesList.find_by_title(str)
+      SpeciesList.find_by(title: str)
     end
   end
 
@@ -740,7 +740,9 @@ class SpeciesListController < ApplicationController
     @dubious_where_reasons = []
     if @place_name != params[:approved_where] && @species_list.location.nil?
       db_name = Location.user_name(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, provide_reasons: true)
+      @dubious_where_reasons = Location.dubious_name?(
+        db_name, provide_reasons: true
+      )
     end
 
     # Make sure all the names (that have been approved) exist.
