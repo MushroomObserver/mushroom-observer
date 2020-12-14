@@ -16,7 +16,7 @@ module ObservationReport
     end
 
     def filename
-      "observations_#{query.id.alphabetize}.#{extension}"
+      "observations_#{query.id&.alphabetize}.#{extension}"
     end
 
     def body
