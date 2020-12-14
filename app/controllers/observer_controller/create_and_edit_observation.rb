@@ -187,7 +187,7 @@ class ObserverController
   # a chance to fix it or choose an existing location.
   def location_doesnt_exist
     db_name = Location.user_name(@user, @place_name)
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @dubious_where_reasons = Location.dubious_name?(db_name, provide_reasons: true)
     @location_suggestion_reasons << :form_observations_location_doesnt_exist.t
     @location_suggestions = Location.suggestions(db_name, geolocation(params))
     @dubious_where_reasons.any? || @location_suggestions.any?

@@ -4,7 +4,7 @@ require("test_helper")
 
 class LocationTest < UnitTestCase
   def bad_location(str)
-    assert(Location.dubious_name?(str, true) != [])
+    assert(Location.dubious_name?(str, provide_reasons: true) != [])
   end
 
   def good_location(str)

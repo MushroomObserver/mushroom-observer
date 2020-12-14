@@ -740,7 +740,7 @@ class SpeciesListController < ApplicationController
     @dubious_where_reasons = []
     if @place_name != params[:approved_where] && @species_list.location.nil?
       db_name = Location.user_name(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+      @dubious_where_reasons = Location.dubious_name?(db_name, provide_reasons: true)
     end
 
     # Make sure all the names (that have been approved) exist.
