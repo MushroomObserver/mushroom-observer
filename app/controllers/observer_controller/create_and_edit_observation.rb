@@ -587,7 +587,7 @@ class ObserverController
       @collectors_name   = params[:collection_number][:name]
       @collectors_number = params[:collection_number][:number]
     end
-    return unless  params[:herbarium_record]
+    return unless params[:herbarium_record]
 
     @herbarium_name = params[:herbarium_record][:herbarium_name]
     @herbarium_id   = params[:herbarium_record][:herbarium_id]
