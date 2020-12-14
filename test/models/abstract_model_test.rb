@@ -100,6 +100,7 @@ class AbstractModelTest < UnitTestCase
 
   def test_update_view_stats
     User.current = rolf
+
     obs       = observations(:detailed_unknown_obs)
     image     = obs.images.first
     comment   = obs.comments.first

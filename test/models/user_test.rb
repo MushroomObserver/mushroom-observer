@@ -65,7 +65,7 @@ class UserTest < UnitTestCase
   end
 
   def test_collision
-    u = User.new
+    u       = User.new
     u.login = "rolf"
     u.email = "rolf@collectivesource.com"
     u.theme = "NULL"
@@ -76,7 +76,7 @@ class UserTest < UnitTestCase
   end
 
   def test_create
-    u = User.new
+    u       = User.new
     u.login = "nonexistingbob"
     u.email = "nonexistingbob@collectivesource.com"
     u.theme = "NULL"
@@ -158,9 +158,9 @@ class UserTest < UnitTestCase
 
   def test_all_editable_species_lists
     proj = projects(:bolete_project)
-    spl1  = species_lists(:first_species_list)
-    spl2  = species_lists(:another_species_list)
-    spl3  = species_lists(:unknown_species_list)
+    spl1 = species_lists(:first_species_list)
+    spl2 = species_lists(:another_species_list)
+    spl3 = species_lists(:unknown_species_list)
     assert_obj_list_equal([spl1, spl2], rolf.species_lists, :sort)
     assert_obj_list_equal(SpeciesList.where(user: mary), mary.species_lists)
     assert_obj_list_equal([], dick.species_lists)

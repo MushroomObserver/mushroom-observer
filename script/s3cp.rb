@@ -75,7 +75,7 @@ if copy
 end
 
 # Hacky way to grab MO.s3_credentials from config files using script/config.rb.
-cmd = File.expand_path("../script/config.rb", __dir__)
+cmd               = File.expand_path("../script/config.rb", __dir__)
 url               = `#{cmd} MO.s3_credentials[:#{server}][:server]`
 bucket            = `#{cmd} MO.s3_credentials[:#{server}][:bucket]`
 access_key_id     = `#{cmd} MO.s3_credentials[:#{server}][:access_key_id]`

@@ -81,6 +81,6 @@ class TranslationString < AbstractModel
   # Get age of official language's banner.  (Used by application layout to
   # determine if user has dismissed it yet.)
   def self.banner_time
-    where(tag: "app_banner_box", language: Language.official).first.updated_at
+    find_by(tag: "app_banner_box", language: Language.official).updated_at
   end
 end
