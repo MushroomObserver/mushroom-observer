@@ -184,6 +184,8 @@ class Name < AbstractModel
     unless name.deprecated
       if deprecated
         result = name
+      elsif observation_count > name.observation_count
+        result = self
       elsif observation_count < name.observation_count
         result = name
       elsif time_of_last_naming < name.time_of_last_naming

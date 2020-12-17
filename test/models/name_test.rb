@@ -2380,6 +2380,60 @@ class NameTest < UnitTestCase
     )
  end
 
+  def test_more_popular
+    approved_name = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    assert_equal(approved_name, approved_name.more_popular(deprecated_name),
+                 "Approved name should be more popular than deprecated one")
+    assert_equal(approved_name, deprecated_name.more_popular(approved_name),
+                 "Approved name should be more popular than deprecated one")
+
+    # Prove that more observed, approved Name is more popular than
+    # less observed, but more recently proposed, approved Name
+    more_observed_name = names(:fungi)
+    less_observed_name = names(:coprinus_comatus)
+    assert_operator(more_observed_name.observation_count, :>,
+                    less_observed_name.observation_count,
+                    "Test needs different fixtures")
+    less_observed_naming = Naming.where(name: less_observed_name).first
+    less_observed_naming.update(created_at: Time.zone.now + 1.hour)
+    assert_equal(
+      more_observed_name,
+      more_observed_name.more_popular(less_observed_name),
+      "More observed name should be more popular than " \
+      "less observed, more-recently proposed name"
+    )
+    assert_equal(
+      more_observed_name,
+      less_observed_name.more_popular(more_observed_name),
+      "More observed name should be more popular than " \
+      "less observed, more-recently proposed name"
+    )
+
+    # Prove that more recently proposed, approved Name is more popular than
+    # less recently proposed, approved Name with equal number of observations
+    later_proposed_name = names(:tremella)
+    earlier_proposed_name = names(:tremella_mesenterica)
+    assert_equal(earlier_proposed_name.observation_count,
+                 later_proposed_name.observation_count,
+                 "Test needs different fixtures")
+    later_proposed_naming = Naming.where(name: later_proposed_name).first
+    later_proposed_naming.update(created_at: Time.zone.now + 1.hour)
+
+    assert_equal(
+      later_proposed_name,
+      later_proposed_name.more_popular(earlier_proposed_name),
+      "More recently proposed name should be more popular than " \
+      "less recently proposed, approved Name with same number of observations"
+    )
+    assert_equal(
+      later_proposed_name,
+      earlier_proposed_name.more_popular(later_proposed_name),
+      "More recently proposed name should be more popular than " \
+      "less recently proposed, approved Name with same number of observations"
+    )
+  end
+
   # --------------------------------------
 
   def test_display_name_brief_authors
@@ -2546,6 +2600,14 @@ class NameTest < UnitTestCase
         :Form, true
       )
     )
+  end
+
+  def test_make_sure_names_are_bolded_correctly
+    name = names(:suilus)
+    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
+    Name.make_sure_names_are_bolded_correctly
+    name.reload
+    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
   # Just make sure mysql is collating accents and case correctly.
@@ -2919,14 +2981,6 @@ class NameTest < UnitTestCase
     assert_nil(good.correct_spelling)
     assert_not_nil(good.synonym_id)
     assert_objs_equal(good.synonym, bad.synonym)
-  end
-
-  def test_make_sure_names_are_bolded_correctly
-    name = names(:suilus)
-    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
-    Name.make_sure_names_are_bolded_correctly
-    name.reload
-    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
   def test_registability
