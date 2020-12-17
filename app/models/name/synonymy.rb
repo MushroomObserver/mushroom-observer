@@ -51,7 +51,7 @@ class Name < AbstractModel
       if @other_authors
         @other_authors.map(&:id)
       else
-        Name.pluck(:id).where(text_name: text_name).map(&:to_i)
+        Name.where(text_name: text_name).pluck(:id)
       end
     end
   end

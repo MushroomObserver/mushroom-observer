@@ -2752,6 +2752,22 @@ class NameTest < UnitTestCase
                  deprecated_name.best_preferred_synonym)
   end
 
+  def test_homonyms
+    name = names(:hygrocybe_russocoriacea_good_author)
+    expect = Name.where(text_name: name.text_name).pluck(:id)
+    assert_equal(expect, name.other_author_ids, "Homonym ids incorrect")
+
+    name.other_authors # sets @other_authors (in the context of name)
+    assert_equal(expect, name.other_author_ids, "Homonym ids incorrect")
+
+    name = names(:hygrocybe_russocoriacea_bad_author)
+    expect = Name.where(text_name: name.text_name).to_a
+    assert_equal(expect, name.other_authors, "Homonyms incorrect")
+
+    name.other_author_ids # sets @other_author_ids (in the context of name)
+    assert_equal(expect, name.other_authors, "Homonyms incorrect")
+  end
+
   def test_imageless
     assert_true(names(:imageless).imageless?)
     assert_false(names(:fungi).imageless?)
