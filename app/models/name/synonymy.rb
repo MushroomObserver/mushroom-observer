@@ -47,25 +47,21 @@ class Name < AbstractModel
 
   # Same as +other_authors+, but returns ids.
   def other_author_ids
-    @other_author_ids ||= begin
-      if @other_authors
-        @other_authors.map(&:id)
-      else
-        Name.where(text_name: text_name).pluck(:id)
-      end
-    end
+    @other_author_ids ||= if @other_authors
+                            @other_authors.map(&:id)
+                          else
+                            Name.where(text_name: text_name).pluck(:id)
+                          end
   end
 
   # Returns an Array of Name's, including itself, which differ only in author.
   def other_authors
-    @other_authors ||= begin
-      if @other_author_ids
-        # Slightly faster since id is primary index.
-        Name.where(id: @other_author_ids).to_a
-      else
-        Name.where(text_name: text_name).to_a
-      end
-    end
+    @other_authors ||= if @other_author_ids
+                         # Slightly faster since id is primary index.
+                         Name.where(id: @other_author_ids).to_a
+                       else
+                         Name.where(text_name: text_name).to_a
+                       end
   end
 
   # Removes this Name from its old Synonym.  It destroys the Synonym if there's
@@ -130,7 +126,7 @@ class Name < AbstractModel
   #
   # rubocop:disable Style/RedundantSelf
   # I think these methods read much better with self explicitly included. -JPH
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # This is the best I can do. I think splitting it up will make it worse. -JPH
   def merge_synonyms(name)
     if !self.synonym && !name.synonym
@@ -155,7 +151,7 @@ class Name < AbstractModel
       end
     end
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
   # Delete the other Name's old Synonym if there aren't any Name's in it
@@ -180,28 +176,19 @@ class Name < AbstractModel
   # Returns either self or name,
   # whichever has more observations or was last used.
   def more_popular(name)
-    result = self
-    unless name.deprecated
-      if deprecated
-        result = name
-      elsif observation_count > name.observation_count
-        result = self
-      elsif observation_count < name.observation_count
-        result = name
-      elsif time_of_last_naming < name.time_of_last_naming
-        result = name
-      end
-    end
-    result
+    return self if name.deprecated
+    return name if deprecated
+    return self if observation_count > name.observation_count
+    return name if name.observation_count > observation_count
+    return name if name.time_of_last_naming > time_of_last_naming
+
+    self
   end
 
   # (if no namings, returns created_at)
   def time_of_last_naming
     @time_of_last_naming ||= begin
-      last_use = Name.connection.select_value(
-        "SELECT MAX(created_at) FROM namings WHERE name_id = #{id}"
-      )
-      last_use || created_at
+      Naming.where(name_id: id).maximum(:created_at) || created_at
     end
   end
 
