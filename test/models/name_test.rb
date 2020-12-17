@@ -2345,7 +2345,6 @@ class NameTest < UnitTestCase
     expect = Name.where(text_name: name.text_name).pluck(:id)
     assert_equal(expect, name.other_author_ids, "Homonym ids incorrect")
 
-
     # This know too much about other_author_ids internals,
     # But how else can I do it? -- JDC 2020-12-16
     name.other_authors # sets @other_authors (in the context of name)
@@ -2371,14 +2370,13 @@ class NameTest < UnitTestCase
     name.clear_synonym
 
     assert_nil(name.synonym, "Failed to unsynonymize name")
-    assert_nil(
-      misspelt.reload.synonym,
-      "Failed to unsynonymize misspelling of unsynonymized name")
+    assert_nil(misspelt.reload.synonym,
+               "Failed to unsynonymize misspelling of unsynonymized name")
     assert_nil(
       misspelt.correct_spelling,
       "Failed to clear misspelling when correct spelling un-synonymized"
     )
- end
+  end
 
   def test_more_popular
     approved_name = names(:lactarius_alpinus)
