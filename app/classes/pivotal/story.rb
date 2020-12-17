@@ -37,9 +37,9 @@ class Pivotal
 
     def initialize(json)
       data = json.is_a?(String) ? JSON.parse(json) : json
-      @id    = data["id"]
-      @type  = data["story_type"]
-      @time  = data["estimate"]
+      @id = data["id"]
+      @type = data["story_type"]
+      @time = data["estimate"]
       @state = data["current_state"]
       @name  = data["name"]
       @user  = nil
