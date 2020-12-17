@@ -33,9 +33,10 @@ class NameTest < UnitTestCase
       :author
     ].each do |var|
       expect = expects[var]
-      actual = if var == :real_text_name
+      actual = case var
+               when :real_text_name
                  Name.display_to_real_text(parse)
-               elsif var == :real_search_name
+               when :real_search_name
                  Name.display_to_real_search(parse)
                else
                  parse.send(var)
@@ -45,8 +46,10 @@ class NameTest < UnitTestCase
         any_errors = true
         var = "#{var} (*)"
       end
-      msg << format("%-20s %-40s %-40s", var.to_s, expect.inspect,
-                    actual.inspect)
+      msg << format(
+        "%-20<var>s %-40<expect>s %-40<actual>s",
+        var: var.to_s, expect: expect.inspect, actual: actual.inspect
+      )
     end
     assert_not(any_errors, msg.join("\n"))
   end
@@ -63,32 +66,32 @@ class NameTest < UnitTestCase
   end
 
   def assert_name_match_various_authors(pattern, string, first_match)
-    assert_name_match(pattern, string + " Author", first_match, " Author")
-    assert_name_match(pattern, string + " Śliwa", first_match, " Śliwa")
-    assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
-    assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
-    assert_name_match(pattern, string + " (One) Two", first_match, " (One) Two")
-    assert_name_match(pattern, string + " auct", first_match, " auct")
-    assert_name_match(pattern, string + " auct non Aurora",
+    assert_name_match(pattern, "#{string} Author", first_match, " Author")
+    assert_name_match(pattern, "#{string} Śliwa", first_match, " Śliwa")
+    assert_name_match(pattern, %(#{string} "Author"), first_match, ' "Author"')
+    assert_name_match(pattern, %(#{string} "Česka"), first_match, ' "Česka"')
+    assert_name_match(pattern, "#{string} (One) Two", first_match, " (One) Two")
+    assert_name_match(pattern, "#{string} auct", first_match, " auct")
+    assert_name_match(pattern, "#{string} auct non Aurora",
                       first_match, " auct non Aurora")
-    assert_name_match(pattern, string + " auct Borealis",
+    assert_name_match(pattern, "#{string} auct Borealis",
                       first_match, " auct Borealis")
-    assert_name_match(pattern, string + " auct. N. Amer.",
+    assert_name_match(pattern, "#{string} auct. N. Amer.",
                       first_match, " auct. N. Amer.")
-    assert_name_match(pattern, string + " ined",
+    assert_name_match(pattern, "#{string} ined",
                       first_match, " ined")
-    assert_name_match(pattern, string + " in ed.", first_match, " in ed.")
-    assert_name_match(pattern, string + " nomen nudum",
+    assert_name_match(pattern, "#{string} in ed.", first_match, " in ed.")
+    assert_name_match(pattern, "#{string} nomen nudum",
                       first_match, " nomen nudum")
-    assert_name_match(pattern, string + " nom. prov.",
+    assert_name_match(pattern, "#{string} nom. prov.",
                       first_match, " nom. prov.")
-    assert_name_match(pattern, string + " comb. prov.",
+    assert_name_match(pattern, "#{string} comb. prov.",
                       first_match, " comb. prov.")
-    assert_name_match(pattern, string + " sensu Author",
+    assert_name_match(pattern, "#{string} sensu Author",
                       first_match, " sensu Author")
-    assert_name_match(pattern, string + ' sens. "Author"',
+    assert_name_match(pattern, %(#{string} sens. "Author"),
                       first_match, ' sens. "Author"')
-    assert_name_match(pattern, string + ' "(One) Two"',
+    assert_name_match(pattern, %(#{string} "(One) Two"),
                       first_match, ' "(One) Two"')
   end
 
