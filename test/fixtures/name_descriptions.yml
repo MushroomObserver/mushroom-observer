@@ -65,6 +65,7 @@ suillus_desc:
   <<: *DEFAULTS
   name: suillus
   user: dick
+  source_type: <%= NameDescription.source_types[:public] %>
   gen_desc: A __Suillus__ by any other name would smell as sweet...
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project

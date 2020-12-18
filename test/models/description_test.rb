@@ -188,4 +188,15 @@ class DescriptionTest < UnitTestCase
            "text_name of user sourced Description with unknown user should " \
            "start_with \"?'s\" ")
   end
+
+  def test_source_object
+    desc = name_descriptions(:suillus_desc) # public source
+    assert_nil(desc.source_object)
+
+    desc = name_descriptions(:peltigera_user_desc)
+    assert_equal(desc.user, desc.source_object)
+
+    desc = name_descriptions(:draft_boletus_edulis)
+    assert_equal(desc.project, desc.source_object)
+  end
 end
