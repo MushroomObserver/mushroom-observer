@@ -152,4 +152,23 @@ class DescriptionTest < UnitTestCase
     error = assert_raises(Exception) { desc.permitted?(table, "bad argument") }
     assert_equal(ArgumentError, error.class)
   end
+
+  def test_formats
+    desc = name_descriptions(:suillus_desc)
+    assert_match(
+      /^Public Description of /, desc.text_name,
+      "Description text_name should start with description source type"
+    )
+    assert_match(/#{desc.parent.search_name}$/, desc.text_name,
+                 "Description text_name should end with parent's search_name")
+    assert_equal(ActionView::Base.full_sanitizer.sanitize(desc.text_name),
+                 desc.text_name,
+                 "Description text_name should not have HTML")
+
+    assert_match(desc.id.to_s, desc.unique_text_name,
+                 "Description unique_text_name should include id")
+
+    assert_match(desc.id.to_s, desc.unique_format_name,
+                 "Description unique_format_name should include id")
+  end
 end
