@@ -179,4 +179,13 @@ class DescriptionTest < UnitTestCase
     assert_match(desc.id.to_s, desc.unique_partial_text_name,
                  "Description unique_partial_text_name should include id")
   end
+
+  def test_user_sourced_description_with_unknown_user
+    desc = name_descriptions(:peltigera_user_desc)
+    desc.update(user_id: nil)
+
+    assert(desc.text_name.start_with?("?'s "),
+           "text_name of user sourced Description with unknown user should " \
+           "start_with \"?'s\" ")
+  end
 end
