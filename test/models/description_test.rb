@@ -170,5 +170,8 @@ class DescriptionTest < UnitTestCase
 
     assert_match(desc.id.to_s, desc.unique_format_name,
                  "Description unique_format_name should include id")
+
+    assert_no_match(desc.parent.text_name, desc.partial_text_name,
+                    "Description partial_text_name should omit parent")
   end
 end
