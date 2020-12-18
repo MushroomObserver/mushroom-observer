@@ -152,7 +152,7 @@ class Description < AbstractModel
 
   # Descriptive title without parent name, in plain text.
   def partial_text_name
-    build_name(:part).t.html_to_ascii
+    put_together_name(:part).t.html_to_ascii
   end
 
   # Same as +partial_text_name+ but with id tacked on.
