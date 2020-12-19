@@ -296,9 +296,9 @@ class Description < AbstractModel
     "#{table_name}_admins".to_sym
   end
 
-  # Name of the join table used to keep admin groups.
+  # Wrapper around class method of same name
   def admins_join_table
-    "#{self.class.table_name}_admins".to_sym
+   self.class.admins_join_table
   end
 
   # Name of the join table used to keep writer groups.
@@ -306,9 +306,9 @@ class Description < AbstractModel
     "#{table_name}_writers".to_sym
   end
 
-  # Name of the join table used to keep writer groups.
+  # Wrapper around class method of same name
   def writers_join_table
-    "#{self.class.table_name}_writers".to_sym
+    self.class.writers_join_table
   end
 
   # Name of the join table used to keep reader groups.
@@ -316,9 +316,9 @@ class Description < AbstractModel
     "#{table_name}_readers".to_sym
   end
 
-  # Name of the join table used to keep reader groups.
+  # Wrapper around class method of same name
   def readers_join_table
-    "#{self.class.table_name}_readers".to_sym
+    self.class.readers_join_table
   end
 
   # List of all the admins for this description, as ids.
@@ -469,9 +469,9 @@ class Description < AbstractModel
     "#{table_name}_authors".to_sym
   end
 
-  # Name of the join table used to keep authors.
+  # Wrapper around class method of same name
   def authors_join_table
-    "#{self.class.table_name}_authors".to_sym
+    self.class.authors_join_table
   end
 
   # Name of the join table used to keep editors.
@@ -479,9 +479,9 @@ class Description < AbstractModel
     "#{table_name}_editors".to_sym
   end
 
-  # Name of the join table used to keep editors.
+  # Wrapper around class method of same name
   def editors_join_table
-    "#{self.class.table_name}_editors".to_sym
+    self.class.editors_join_table
   end
 
   # Is the given User and author?
