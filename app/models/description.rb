@@ -321,17 +321,17 @@ class Description < AbstractModel
     self.class.readers_join_table
   end
 
-  # List of all the admins for this description, as ids.
+  # List of all the admins for this description
   def admins
     group_users(admins_join_table)
   end
 
-  # List of all the writers for this description, as ids.
+  # List of all the writers for this description
   def writers
     group_users(writers_join_table)
   end
 
-  # List of all the readers for this description, as ids.
+  # List of all the readers for this description
   def readers
     group_users(readers_join_table)
   end

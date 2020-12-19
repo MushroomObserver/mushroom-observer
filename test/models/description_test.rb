@@ -199,4 +199,22 @@ class DescriptionTest < UnitTestCase
     desc = name_descriptions(:draft_boletus_edulis)
     assert_equal(desc.project, desc.source_object)
   end
+
+  def test_groups
+    desc = name_descriptions(:coprinus_comatus_desc)
+    assert_equal([rolf], desc.admins)
+    assert_equal([rolf.id], desc.admin_ids)
+    assert_equal(User.all, desc.writers)
+    assert_equal(User.pluck(:id), desc.writer_ids)
+    assert_equal(User.all, desc.readers)
+    assert_equal(User.pluck(:id), desc.reader_ids)
+
+    desc = name_descriptions(:draft_coprinus_comatus)
+    assert_equal([rolf, mary, katrina], desc.admins)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.admin_ids)
+    assert_equal([rolf, mary, katrina], desc.writers)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.writer_ids)
+    assert_equal([rolf, mary, katrina], desc.readers)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.reader_ids)
+  end
 end
