@@ -185,6 +185,29 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
+  # TODO - Find out why:
+  #   NameDescription before_destroy call back is not invoked by this method
+  #   name.description.destroyed? does not work in this method
+  # Perhaps change the controller
+  #   www.ruby-forum.com/t/post-to-other-controller-in-functional-test/58593
+  # use url instead of action name
+  #   https://github.com/rspec/rspec-rails/issues/1756
+  # or redo this as an integration test
+  # JDC 2020-12-20
+  def test_destroy_default_description
+    name = names(:suillus)
+    assert(name.desc.present?, "Text needs Name fixture with a Description")
+    params = { id: desc.id }
+    login("rolf")
+    make_admin("rolf")
+
+    assert_difference("NameDescription.count", -1) do
+      post(:destroy_name_description, params: { id: name.description.id })
+    end
+    assert_nil(name.description)
+    assert_redirected_to(action: :show_name, id: name.id)
+  end
+
   def assert_email_generated
     assert_not_empty(@@emails, "Was expecting an email notification.")
   ensure
@@ -4862,6 +4885,10 @@ class NameControllerTest < FunctionalTestCase
                  "Child, #{child.search_name}, still has 'lichen'.")
     end
   end
+
+  # ---------------------------
+  #  Test miscellaneous stuff.
+  # ---------------------------
 
   def test_why_danny_cant_edit_lentinus_description
     desc = name_descriptions(:boletus_edulis_desc)
