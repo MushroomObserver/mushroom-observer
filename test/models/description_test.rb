@@ -126,12 +126,17 @@ class DescriptionTest < UnitTestCase
     end
   end
 
+  # ------------------------------------------------------------------
+
   def test_is_editor
     desc = name_descriptions(:suillus_desc)
 
-    assert(desc.is_editor?(rolf))
-    assert(desc.is_editor?(mary))
-    assert_not(desc.is_editor?(katrina))
+    assert(desc.is_editor?(rolf)
+           "Rolf should be an editor of :suillus_desc")
+    assert(desc.is_editor?(mary)
+           "Mary should be an editor of :suillus_desc")
+    assert_not(desc.is_editor?(katrina)
+           "Katrina should not be an editor of :suillus_desc")
   end
 
   def test_parent_setters
