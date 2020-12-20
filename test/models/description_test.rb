@@ -126,6 +126,14 @@ class DescriptionTest < UnitTestCase
     end
   end
 
+  def test_is_editor
+    desc = name_descriptions(:suillus_desc)
+
+    assert(desc.is_editor?(rolf))
+    assert(desc.is_editor?(mary))
+    assert_not(desc.is_editor?(katrina))
+  end
+
   def test_parent_setters
     albion = locations(:albion)
     obj = LocationDescription.new(location_id: albion.id,
@@ -218,7 +226,7 @@ class DescriptionTest < UnitTestCase
     assert_equal([rolf, mary, katrina].map(&:id), desc.reader_ids)
   end
 
-  def test_groups_add_and_remove_user_groups
+  def test_add_remove_user_group_to_description_group
     desc = name_descriptions(:peltigera_user_desc)
     user_group = user_groups(:bolete_users)
 
