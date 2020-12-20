@@ -217,4 +217,25 @@ class DescriptionTest < UnitTestCase
     assert_equal([rolf, mary, katrina], desc.readers)
     assert_equal([rolf, mary, katrina].map(&:id), desc.reader_ids)
   end
+
+  def test_groups_add_and_remove_user_groups
+    desc = name_descriptions(:peltigera_user_desc)
+    user_group = user_groups(:bolete_users)
+
+    desc.add_admin(user_group)
+    desc.add_writer(user_group)
+    desc.add_reader(user_group)
+
+    assert(desc.admins.include?(user_group))
+    assert(desc.writers.include?(user_group))
+    assert(desc.readers.include?(user_group))
+
+    desc.remove_admin(user_group)
+    desc.remove_writer(user_group)
+    desc.remove_reader(user_group)
+
+    assert(desc.admins.exclude?(user_group))
+    assert(desc.writers.exclude?(user_group))
+    assert(desc.readers.exclude?(user_group))
+  end
 end
