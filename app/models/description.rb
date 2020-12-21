@@ -27,7 +27,7 @@
 #  versioned_table_name:: Table used to keep past versions.
 #
 #  ==== Descriptive Text
-#  has_any_notes?::       Are any of the notes fields non-empty?
+#  notes?::               Are any of the notes fields non-empty?
 #  all_notes::            Return all the notes fields via a Hash.
 #  all_notes=::           Change all the notes fields via a Hash.
 #  note_status::          Return some basic stats on notes fields.
@@ -179,7 +179,7 @@ class Description < AbstractModel
   ##############################################################################
 
   # Are any of the descriptive text fields non-empty?
-  def has_any_notes?
+  def notes?
     result = false
     self.class.all_note_fields.each do |field|
       result = send(field).to_s.match(/\S/)
@@ -574,6 +574,6 @@ class Description < AbstractModel
 
   # By default make first user to add any text an author.
   def author_worthy?
-    has_any_notes?
+    notes?
   end
 end
