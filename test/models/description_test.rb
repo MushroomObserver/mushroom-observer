@@ -128,6 +128,15 @@ class DescriptionTest < UnitTestCase
 
   # ------------------------------------------------------------------
 
+  def test_destroy_default_description
+    name = names(:suillus)
+    desc = name.description
+    desc.destroy
+
+    assert_nil(name.reload.description,
+               "Destroying default description should reset name.description")
+  end
+
   def test_is_editor
     desc = name_descriptions(:coprinus_comatus_desc)
 
