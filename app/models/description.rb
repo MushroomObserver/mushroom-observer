@@ -480,16 +480,11 @@ class Description < AbstractModel
 
     authors.delete(user)
     SiteData.update_contribution(:del, authors_join_table, user.id)
-    if !editors.member?(user) &&
-       # Make sure user has actually made at least one change.
-       self.class.connection.select_value(%(
-         SELECT id FROM #{versioned_table_name}
-         WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
-         LIMIT 1
-       ))
-      editors.push(user)
-      SiteData.update_contribution(:add, editors_join_table, user.id)
-    end
+
+    return unless !editors.member?(user) && user_made_a_change?(user)
+
+    editors.push(user)
+    SiteData.update_contribution(:add, editors_join_table, user.id)
   end
 
   # Add a user on as an "editor".
@@ -570,6 +565,14 @@ class Description < AbstractModel
           groups.include?(arg)
       groups.delete(arg)
     end
+  end
+
+  def user_made_a_change?(user)
+    self.class.connection.select_value(%(
+      SELECT id FROM #{versioned_table_name}
+      WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
+      LIMIT 1
+    ))
   end
 
   # By default make first user to add any text an author.
