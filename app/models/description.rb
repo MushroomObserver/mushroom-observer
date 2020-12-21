@@ -84,6 +84,10 @@
 class Description < AbstractModel
   self.abstract_class = true
 
+  before_save :add_author_or_editor
+  before_destroy :update_users_and_parent
+
+
   # Aliases for location / name.
   def parent
     send(parent_type)
@@ -168,28 +172,6 @@ class Description < AbstractModel
   # Same as +partial_format_name+ but with id tacked on.
   def unique_partial_format_name
     string_with_id(partial_format_name)
-  end
-
-  # Descriptive subtitle for this description (when it is not necessary to
-  # include the title of the parent object), in plain text.  [I'm not sure
-  # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
-  def put_together_name(full_or_part)
-    tag = :"description_#{full_or_part}_title_#{source_type}"
-    user_name = begin
-                  user.legal_name
-                rescue StandardError
-                  "?"
-                end
-    args = {
-      text: source_name,
-      user: user_name
-    }
-    if full_or_part == :full
-      args[:object] = parent.format_name
-    elsif source_name.present?
-      tag = :"#{tag}_with_text"
-    end
-    tag.l(args)
   end
 
   ##############################################################################
@@ -396,18 +378,6 @@ class Description < AbstractModel
     chg_permission(readers, arg, :remove)
   end
 
-  # Change a given User's or UserGroup's privileges.
-  def chg_permission(groups, arg, mode)
-    arg = UserGroup.one_user(arg) if arg.is_a?(User)
-    if (mode == :add) &&
-       !groups.include?(arg)
-      groups.push(arg)
-    elsif (mode == :remove) &&
-          groups.include?(arg)
-      groups.delete(arg)
-    end
-  end
-
   # Check if a given user has the given type of permission.
   def permitted?(table, user)
     if user.is_a?(User)
@@ -538,16 +508,10 @@ class Description < AbstractModel
   #
   ##############################################################################
 
-  # By default make first user to add any text an author.
-  def author_worthy?
-    has_any_notes?
-  end
-
   # Callback that updates editors and/or authors after a User makes a change.
   # If the Name has no author and they've made sufficient contributions, they
   # get promoted to author by default.  In all cases make sure the user is
   # added on as an editor.
-  before_save :add_author_or_editor
   def add_author_or_editor
     return unless !@save_without_our_callbacks && (user = User.current)
 
@@ -556,7 +520,6 @@ class Description < AbstractModel
 
   # When destroying an object, subtract contributions due to
   # authorship/editorship.
-  before_destroy :update_users_and_parent
   def update_users_and_parent
     # Update editors' and authors' contributions.
     authors.each do |user|
@@ -571,5 +534,48 @@ class Description < AbstractModel
       parent.description_id = nil
       parent.save_without_our_callbacks
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  # Descriptive subtitle for this description (when it is not necessary to
+  # include the title of the parent object), in plain text.  [I'm not sure
+  # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
+  def put_together_name(full_or_part)
+    tag = :"description_#{full_or_part}_title_#{source_type}"
+    user_name = begin
+                  user.legal_name
+                rescue StandardError
+                  "?"
+                end
+    args = {
+      text: source_name,
+      user: user_name
+    }
+    if full_or_part == :full
+      args[:object] = parent.format_name
+    elsif source_name.present?
+      tag = :"#{tag}_with_text"
+    end
+    tag.l(args)
+  end
+
+  # Change a given User's or UserGroup's privileges.
+  def chg_permission(groups, arg, mode)
+    arg = UserGroup.one_user(arg) if arg.is_a?(User)
+    if (mode == :add) &&
+       !groups.include?(arg)
+      groups.push(arg)
+    elsif (mode == :remove) &&
+          groups.include?(arg)
+      groups.delete(arg)
+    end
+  end
+
+  # By default make first user to add any text an author.
+  def author_worthy?
+    has_any_notes?
   end
 end
