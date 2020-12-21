@@ -218,14 +218,14 @@ class Description < AbstractModel
   #   num_fields, total_length = name.note_status
   #
   def note_status
-    fieldCount = sizeCount = 0
+    field_count = size_count = 0
     all_notes.each_value do |v|
       if v.present?
-        fieldCount += 1
-        sizeCount += v.strip_squeeze.length
+        field_count += 1
+        size_count += v.strip_squeeze.length
       end
     end
-    [fieldCount, sizeCount]
+    [field_count, size_count]
   end
 
   ##############################################################################
