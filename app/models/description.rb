@@ -67,7 +67,7 @@
 #  editors::              User's that have edited this Name.
 #  authors::              User's that have made "significant" contributions.
 #  editor?::              Is a given User an editor?
-#  is_author?::           Is a given User an author?
+#  author?::              Is a given User an author?
 #  add_editor::           Make given user an "editor".
 #  add_author::           Make given user an "author".
 #  remove_author::        Demote given user to "editor".
@@ -453,7 +453,7 @@ class Description < AbstractModel
   end
 
   # Is the given User an author?
-  def is_author?(user)
+  def author?(user)
     authors.member?(user)
   end
 

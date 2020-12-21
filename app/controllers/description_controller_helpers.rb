@@ -541,7 +541,7 @@ module DescriptionControllerHelpers
     if params.is_a?(Hash)
       root = in_admin_mode?
       admin = desc.is_admin?(@user)
-      author = desc.is_author?(@user)
+      author = desc.author?(@user)
 
       params.delete(:source_type) unless root
       unless root ||

@@ -17,11 +17,11 @@
     "interest"
   elsif new_loc.version != old_loc.version
     @user.email_locations_editor && new_loc.descriptions.any? {|d| d.editor?(@user)} ? "editor" :
-    @user.email_locations_author && new_loc.descriptions.any? {|d| d.is_author?(@user)} ? "author" :
+    @user.email_locations_author && new_loc.descriptions.any? {|d| d.author?(@user)} ? "author" :
     @user.email_locations_admin  && new_loc.descriptions.any? {|d| d.is_admin?(@user)}  ? "admin"  : nil
   elsif new_desc
     @user.email_locations_editor && new_desc.editor?(@user) ? "editor" :
-    @user.email_locations_author && new_desc.is_author?(@user) ? "author" :
+    @user.email_locations_author && new_desc.author?(@user) ? "author" :
     @user.email_locations_admin  && new_desc.is_admin?(@user)  ? "admin"  : nil
   else
     nil
