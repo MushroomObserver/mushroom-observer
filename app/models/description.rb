@@ -79,8 +79,7 @@
 #  before_destroy::       Subtract authorship/editorship contributions
 #                         before destroy.
 #
-############################################################################
-
+#
 class Description < AbstractModel
   self.abstract_class = true
 
