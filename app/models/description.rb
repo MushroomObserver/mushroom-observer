@@ -279,7 +279,7 @@ class Description < AbstractModel
 
   # Wrapper around class method of same name
   def admins_join_table
-   self.class.admins_join_table
+    self.class.admins_join_table
   end
 
   # Name of the join table used to keep writer groups.
@@ -465,14 +465,14 @@ class Description < AbstractModel
 
   # Add a User on as an "author".  Saves User if changed.  Returns nothing.
   def add_author(user)
-    unless authors.member?(user)
-      authors.push(user)
-      SiteData.update_contribution(:add, authors_join_table, user.id)
-      if editors.member?(user)
-        editors.delete(user)
-        SiteData.update_contribution(:del, editors_join_table, user.id)
-      end
-    end
+    return if authors.member?(user)
+
+    authors.push(user)
+    SiteData.update_contribution(:add, authors_join_table, user.id)
+    return unless editors.member?(user)
+
+    editors.delete(user)
+    SiteData.update_contribution(:del, editors_join_table, user.id)
   end
 
   # Demote a User to "editor".  Saves User if changed.  Returns nothing.
@@ -495,10 +495,10 @@ class Description < AbstractModel
 
   # Add a user on as an "editor".
   def add_editor(user)
-    if !authors.member?(user) && !editors.member?(user)
-      editors.push(user)
-      SiteData.update_contribution(:add, editors_join_table, user.id)
-    end
+    return unless !authors.member?(user) && !editors.member?(user)
+
+    editors.push(user)
+    SiteData.update_contribution(:add, editors_join_table, user.id)
   end
 
   ##############################################################################
@@ -528,11 +528,11 @@ class Description < AbstractModel
       SiteData.update_contribution(:del, editors_join_table, user.id)
     end
 
+    return unless parent.description_id == id
+
     # Make sure parent doesn't point to a nonexisting object.
-    if parent.description_id == id
-      parent.description_id = nil
-      parent.save_without_our_callbacks
-    end
+    parent.description_id = nil
+    parent.save_without_our_callbacks
   end
 
   ##############################################################################
