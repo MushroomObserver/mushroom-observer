@@ -87,7 +87,6 @@ class Description < AbstractModel
   before_save :add_author_or_editor
   before_destroy :update_users_and_parent
 
-
   # Aliases for location / name.
   def parent
     send(parent_type)
