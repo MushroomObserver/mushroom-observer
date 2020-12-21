@@ -137,14 +137,14 @@ class DescriptionTest < UnitTestCase
                "Destroying default description should reset name.description")
   end
 
-  def test_is_editor
+  def test_editor
     desc = name_descriptions(:coprinus_comatus_desc)
 
-    assert(desc.is_editor?(mary),
+    assert(desc.editor?(mary),
            "Mary should be an editor of #{desc.text_name}")
-    assert(desc.is_editor?(rolf),
+    assert(desc.editor?(rolf),
            "Rolf should be an editor of #{desc.text_name}")
-    assert_not(desc.is_editor?(katrina),
+    assert_not(desc.editor?(katrina),
                "Katrina should be an editor of #{desc.text_name}")
   end
 
