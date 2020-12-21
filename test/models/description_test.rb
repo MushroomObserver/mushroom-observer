@@ -177,11 +177,9 @@ class DescriptionTest < UnitTestCase
 
   def test_formats
     desc = name_descriptions(:suillus_desc)
-    assert_match(
-      /^Public Description of /, desc.text_name,
-      "Description text_name should start with description source type"
-    )
-    assert_match(/#{desc.parent.search_name}$/, desc.text_name,
+    assert(desc.text_name.start_with?("Public Description of "),
+      "Description text_name should start with description source type")
+    assert(desc.text_name.end_with?(desc.parent.search_name),
                  "Description text_name should end with parent's search_name")
     assert_equal(ActionView::Base.full_sanitizer.sanitize(desc.text_name),
                  desc.text_name,
