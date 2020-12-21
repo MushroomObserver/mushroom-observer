@@ -46,7 +46,7 @@
 #  writer_ids::           User's with write privileges, as Array of ids.
 #  reader_ids::           User's with read privileges, as Array of ids.
 #  is_admin?::            Does a given User have admin privileges?
-#  is_writer?::           Does a given User have write privileges?
+#  writer?::              Does a given User have write privileges?
 #  is_reader?::           Does a given User have read privileges?
 #  add_admin::            Give a User or UserGroup admin privileges.
 #  add_writer::           Give a User or UserGroup writer privileges.
@@ -55,8 +55,8 @@
 #  remove_writer::        Remove a User's or UserGroup's writer privileges.
 #  remove_reader::        Remove a User's or UserGroup's reader privileges.
 #  permitted?::           Does a given User have a given type of permission?
-#  group_user_ids::       Get list of user ids from a given permissions table.
-#  group_ids::      Get list of user_group ids from a given permissions table.
+#  group_user_ids::       List of user ids from a given permissions table.
+#  group_ids::            List of user_group ids from a given permissions table.
 #  admins_join_table::    Table used to list admin groups.
 #  writers_join_table::   Table used to list writer groups.
 #  readers_join_table::   Table used to list reader groups.
@@ -337,7 +337,7 @@ class Description < AbstractModel
   end
 
   # Is a given user an writer for this description?
-  def is_writer?(user)
+  def writer?(user)
     public_write || permitted?(writers_join_table, user)
   end
 

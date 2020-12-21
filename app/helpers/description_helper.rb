@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module DescriptionHelper
-  def is_writer?(desc)
-    desc.is_writer?(@user) || in_admin_mode?
+  def writer?(desc)
+    desc.writer?(@user) || in_admin_mode?
   end
 
   def is_admin?(desc)
@@ -18,7 +18,7 @@ module DescriptionHelper
       tabs << link_with_query(:show_object.t(type: type),
                               action: "show_#{type}", id: desc.parent_id)
     end
-    if is_writer?(desc)
+    if writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
                               action: "edit_#{type}_description", id: desc.id)
     end
@@ -74,7 +74,7 @@ module DescriptionHelper
     type = desc.type_tag
     title = description_title(desc)
     links = []
-    if is_writer?(desc)
+    if writer?(desc)
       links << link_with_query(:EDIT.t, action: "edit_#{type}", id: desc.id)
     end
     if is_admin?(desc)
@@ -112,7 +112,7 @@ module DescriptionHelper
     # Turn each into a link to show_description, and add optional controls.
     list.map! do |desc|
       item = description_link(desc)
-      writer = is_writer?(desc)
+      writer = writer?(desc)
       admin  = is_admin?(desc)
       if writer || admin
         links = []

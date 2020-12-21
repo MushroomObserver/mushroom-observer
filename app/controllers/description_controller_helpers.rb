@@ -111,7 +111,7 @@ module DescriptionControllerHelpers
     src_title = src.format_name
 
     # Doesn't have permission to edit destination.
-    if !in_admin_mode? && !dest.is_writer?(@user)
+    if !in_admin_mode? && !dest.writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       @description = src
 
@@ -523,7 +523,7 @@ module DescriptionControllerHelpers
     okay = true
 
     # Fail completely if they don't even have write permission.
-    unless in_admin_mode? || desc.is_writer?(@user)
+    unless in_admin_mode? || desc.writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       if in_admin_mode? || desc.is_reader?(@user)
         redirect_to(action: desc.show_action, id: desc.id)
