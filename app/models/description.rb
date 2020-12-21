@@ -484,12 +484,12 @@ class Description < AbstractModel
     self.class.editors_join_table
   end
 
-  # Is the given User and author?
+  # Is the given User an author?
   def is_author?(user)
     authors.member?(user)
   end
 
-  # Is the given User and editor?
+  # Is the given User an editor?
   def is_editor?(user)
     editors.member?(user)
   end
