@@ -145,7 +145,7 @@ class DescriptionTest < UnitTestCase
     assert(desc.is_editor?(rolf),
            "Rolf should be an editor of #{desc.text_name}")
     assert_not(desc.is_editor?(katrina),
-           "Katrina should be an editor of #{desc.text_name}")
+               "Katrina should be an editor of #{desc.text_name}")
   end
 
   def test_parent_setters
