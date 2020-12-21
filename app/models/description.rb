@@ -393,14 +393,7 @@ class Description < AbstractModel
   # Array of User instances.  Caches result.
   def group_users(table)
     @group_users ||= {}
-    return @group_users[table] if @group_users[table]
-
-    ids = group_user_ids(table)
-    ids = ["-1"] if ids.empty?
-    id_list = ids.map(&:to_s).join(",")
-    @group_users[table] = User.find_by_sql(%(
-      SELECT * FROM users
-      WHERE id IN (#{id_list})))
+    @group_users[table] ||= User.where(id: group_user_ids(table)).to_a
   end
 
   # Do minimal query to enumerate the users in a list of groups.  Return as an
