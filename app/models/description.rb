@@ -182,7 +182,7 @@ class Description < AbstractModel
   # Are any of the descriptive text fields non-empty?
   def has_any_notes?
     result = false
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       result = send(field).to_s.match(/\S/)
       break if result
     end
@@ -193,7 +193,7 @@ class Description < AbstractModel
   # counterpart writer-method +all_notes=+.)
   def all_notes
     result = {}
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       value = send(field).to_s
       result[field] = value.presence
     end
@@ -207,7 +207,7 @@ class Description < AbstractModel
   #   name.all_notes = hash
   #
   def all_notes=(notes)
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       send("#{field}=", notes[field])
     end
   end
