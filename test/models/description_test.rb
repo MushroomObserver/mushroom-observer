@@ -178,26 +178,26 @@ class DescriptionTest < UnitTestCase
   def test_formats
     desc = name_descriptions(:suillus_desc)
     assert(desc.text_name.start_with?("Public Description of "),
-      "Description text_name should start with description source type")
+           "Description text_name should start with description source type")
     assert(desc.text_name.end_with?(desc.parent.search_name),
-                 "Description text_name should end with parent's search_name")
+           "Description text_name should end with parent's search_name")
     assert_equal(ActionView::Base.full_sanitizer.sanitize(desc.text_name),
                  desc.text_name,
                  "Description text_name should not have HTML")
 
-    assert_match(desc.id.to_s, desc.unique_text_name,
-                 "Description unique_text_name should include id")
+    assert(desc.unique_text_name.include?(desc.id.to_s),
+           "Description unique_text_name should include id")
 
-    assert_match(desc.id.to_s, desc.unique_format_name,
-                 "Description unique_format_name should include id")
+    assert(desc.unique_format_name.include?(desc.id.to_s),
+           "Description unique_format_name should include id")
 
-    assert_no_match(desc.parent.text_name, desc.partial_text_name,
-                    "Description partial_text_name should omit parent")
+    assert(desc.partial_text_name.exclude?(desc.parent.text_name),
+           "Description partial_text_name should omit parent")
 
-    assert_no_match(desc.parent.text_name, desc.unique_partial_text_name,
-                    "Description unique_partial_text_name should omit parent")
-    assert_match(desc.id.to_s, desc.unique_partial_text_name,
-                 "Description unique_partial_text_name should include id")
+    assert(desc.unique_partial_text_name.exclude?(desc.parent.text_name),
+           "Description unique_partial_text_name should omit parent")
+    assert(desc.unique_partial_text_name.include?(desc.id.to_s),
+           "Description unique_partial_text_name should include id")
   end
 
   def test_user_sourced_description_with_unknown_user
