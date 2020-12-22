@@ -129,6 +129,7 @@ GEM
     kgio (2.11.3)
     levenshtein (0.2.2)
     libv8 (8.4.255.0)
+    libv8 (8.4.255.0-x86_64-linux)
     loofah (2.7.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -272,6 +273,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   RedCloth
@@ -315,4 +317,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.1.4
+   2.2.2
