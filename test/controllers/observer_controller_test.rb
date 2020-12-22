@@ -1866,6 +1866,35 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:herbarium_record_herbarium_id, "1234")
   end
 
+  def test_create_observation_herbarium_record_already_used
+    record = herbarium_records(:field_museum_record)
+    user = dick
+    assert_not(
+      record.can_edit?(user),
+      "Test needs different fixture: herbarim_record not editable by user"
+    )
+    old_record_obs_count = record.observations.count
+    included_in_flash = :create_herbarium_record_already_used_by_someone_else.t(
+      herbarium_name: record.herbarium.name
+    )
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: record.herbarium.name,
+          herbarium_id: record.accession_number
+      },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0, dick
+    )
+    obs = assigns(:observation)
+
+    assert(obs.specimen)
+    assert_flash_text(/#{included_in_flash}/)
+    assert(obs.herbarium_records.count.zero?)
+    assert_equal(old_record_obs_count, record.observations.count)
+  end
+
   def test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
     generic_construct_observation(
