@@ -1883,7 +1883,7 @@ class ObserverControllerTest < FunctionalTestCase
         herbarium_record: {
           herbarium_name: record.herbarium.name,
           herbarium_id: record.accession_number
-      },
+        },
         name: { name: "Coprinus comatus" } },
       1, 1, 0, dick
     )
