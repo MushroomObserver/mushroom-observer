@@ -6,6 +6,7 @@
 #    create_observation::
 #    edit_observation::
 #    destroy_observation::
+#    hide_thumbnail_map::
 #    recalc::               recalculate consensus ID
 #
 class ObserverController
@@ -834,6 +835,10 @@ class ObserverController
     image
   end
 
+  ##############################################################################
+
+  public
+
   def hide_thumbnail_map
     pass_query_params
     id = params[:id].to_s
@@ -845,6 +850,10 @@ class ObserverController
     end
     redirect_with_query(action: :show_observation, id: id)
   end
+
+  ##############################################################################
+
+  private
 
   def strip_images!
     @observation.images.each do |img|
