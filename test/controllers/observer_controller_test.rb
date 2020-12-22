@@ -2797,6 +2797,51 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(licenses(:ccwiki30), img.license)
   end
 
+  def test_edit_observation_save_failure
+    obs = observations(:detailed_unknown_obs)
+    new_where = "Somewhere In, Japan"
+    new_notes = { other: "blather blather blather" }
+    img = images(:in_situ_image)
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: new_notes,
+        place_name: new_where,
+        "when(1i)" => "2001",
+        "when(2i)" => "2",
+        "when(3i)" => "3",
+        specimen: false,
+        thumb_image_id: "0"
+      },
+      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image: {
+        img.id.to_s => {
+          notes: "new notes",
+          original_name: "new name",
+          copyright_holder: "someone else",
+          "when(1i)" => "2012",
+          "when(2i)" => "4",
+          "when(3i)" => "6",
+          license_id: licenses(:ccwiki30).id.to_s
+        }
+      },
+      log_change: { checked: "1" }
+    }
+    Observation.any_instance.stubs(:save).returns(false)
+
+    assert_no_difference(
+      "Observation.count", "An Observation should not be created"
+    ) do
+      post_requires_user(:edit_observation,
+                         [{ controller: :observer,
+                            action: :show_observation }],
+                         params,
+                         "mary")
+    end
+    assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
+    assert_response(:success,"Edit form should be reloaded")
+  end
+
   def test_edit_observation_no_logging
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
