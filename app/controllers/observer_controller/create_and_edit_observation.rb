@@ -49,6 +49,10 @@ class ObserverController
     end
   end
 
+  ##############################################################################
+
+  private
+
   def create_observation_get
     @observation = Observation.new
     @naming      = Naming.new
@@ -379,6 +383,10 @@ class ObserverController
     init_list_vars_for_reload(@observation)
   end
 
+  ##############################################################################
+
+  public
+
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -470,6 +478,10 @@ class ObserverController
     end
   end
 
+  ##############################################################################
+
+  private
+
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}
   end
@@ -485,7 +497,11 @@ class ObserverController
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
 
-  # Callback to destroy an observation (and associated namings, votes, etc.)
+  ##############################################################################
+
+  public
+
+  # Destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
@@ -537,6 +553,10 @@ class ObserverController
     # render(plain: "", layout: true)
     redirect_with_query(action: "show_observation", id: id)
   end
+
+  ##############################################################################
+
+  private
 
   ##############################################################################
   #
@@ -854,8 +874,6 @@ class ObserverController
   end
 
   ##############################################################################
-
-  private
 
   def update_naming(reason)
     return unless @name
