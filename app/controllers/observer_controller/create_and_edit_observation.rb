@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
+#  Actions:
+#
+#    create_observation::
+#    edit_observation::
+#    destroy_observation::
+#    recalc::               recalculate consensus ID
+#    update_whitelisted_observation_attributes
+#
 class ObserverController
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
