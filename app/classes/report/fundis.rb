@@ -70,7 +70,7 @@ module Report
 
     def record_numbers(row)
       str = collector_numbers(row)
-      str = "; " + str if str.present?
+      str = ";#{str}" if str.present?
       mo_number(row) + str
     end
 
