@@ -1363,7 +1363,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert(Observation.where(id: obs.id).exists?)
   end
 
-
   # Prove that recalc redirects to show_observation, and
   # corrects an Observation's name.
   def test_recalc
@@ -1380,6 +1379,13 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_observation, id: obs.id)
     assert_equal(accurate_consensus, obs.name)
+  end
+
+  def test_recalc_error
+    login
+    get(:recalc, params: { id: -1 })
+
+    assert_flash_text(/Caught exception/)
   end
 
   def test_some_admin_pages
