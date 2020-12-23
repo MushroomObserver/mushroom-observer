@@ -1383,6 +1383,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_recalc_error
     login
+    # Make recalc throw an error with Observation.find(-1)
     get(:recalc, params: { id: -1 })
 
     assert_flash_text(/Caught exception/)
@@ -2676,6 +2677,25 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" Author', assigns(:observation).name.search_name)
+  end
+
+  def test_create_observation_pending_naming_notification
+    params = {
+      observation: {
+        when: Time.zone.now,
+        place_name: locations(:albion).name,
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      name: {},
+      vote: { value: "3" }
+    }
+    login("rolf")
+
+    ObserverController.any_instance.stubs(:unshown_notifications?).returns(true)
+    post(:create_observation, params: params)
+
+    assert_redirected_to(/#{observer_show_notifications_path}/)
   end
 
   def test_create_observation_strip_images
