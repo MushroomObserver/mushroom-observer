@@ -1350,6 +1350,20 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def test_destroy_observation_failure
+    obs = observations(:minimal_unknown_obs)
+    params = { id: obs.id.to_s }
+    login(obs.user.login)
+
+    Observation.any_instance.stubs(:destroy).returns(false)
+    post(:destroy_observation, params)
+
+    assert_redirected_to(/#{obs.id}/)
+    assert_not(obs.destroyed?)
+    assert(Observation.where(id: obs.id).exists?)
+  end
+
+
   # Prove that recalc redirects to show_observation, and
   # corrects an Observation's name.
   def test_recalc
@@ -2839,7 +2853,7 @@ class ObserverControllerTest < FunctionalTestCase
                          "mary")
     end
     assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
-    assert_response(:success,"Edit form should be reloaded")
+    assert_response(:success, "Edit form should be reloaded")
   end
 
   def test_edit_observation_no_logging
