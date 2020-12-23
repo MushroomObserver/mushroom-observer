@@ -2679,25 +2679,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('"One" Author', assigns(:observation).name.search_name)
   end
 
-  def test_create_observation_pending_naming_notification
-    params = {
-      observation: {
-        when: Time.zone.now,
-        place_name: locations(:albion).name,
-        specimen: "0",
-        thumb_image_id: "0"
-      },
-      name: {},
-      vote: { value: "3" }
-    }
-    login("rolf")
-
-    ObserverController.any_instance.stubs(:unshown_notifications?).returns(true)
-    post(:create_observation, params: params)
-
-    assert_redirected_to(/#{observer_show_notifications_path}/)
-  end
-
   def test_create_observation_strip_images
     login("rolf")
     loc = locations(:burbank)
@@ -2758,6 +2739,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  def test_create_observation_pending_naming_notification
+    params = {
+      observation: {
+        when: Time.zone.now,
+        place_name: locations(:albion).name,
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      name: {},
+      vote: { value: "3" }
+    }
+    login("rolf")
+
+    ObserverController.any_instance.stubs(:unshown_notifications?).returns(true)
+    post(:create_observation, params: params)
+
+    assert_redirected_to(/#{observer_show_notifications_path}/)
   end
 
   # ----------------------------------------------------------------

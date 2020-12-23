@@ -868,10 +868,6 @@ class ObserverController
   #
   ##############################################################################
 
-  def use_notes_template?
-    @user.notes_template? && @observation.notes.blank?
-  end
-
   # String combining the note parts defined in the User's notes_template
   # with their filled-in values, ignoring parts with blank values
   def combined_notes_parts
