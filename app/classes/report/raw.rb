@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Default CSV report.
-  class Raw < ObservationReport::CSV
+  class Raw < Report::CSV
     # rubocop:disable Metrics/MethodLength
     def labels
       %w[

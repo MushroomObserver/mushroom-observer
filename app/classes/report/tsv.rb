@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Provides rendering ability for TSV-type reports.
-  class TSV < ObservationReport::BaseTable
+  class TSV < Report::BaseTable
     self.default_encoding = "UTF-8"
     self.mime_type = "text/tsv"
     self.extension = "tsv"

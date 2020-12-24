@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Symbiota-style tsv report.
-  class Symbiota < ObservationReport::TSV
+  class Symbiota < Report::TSV
     def labels
       %w[
         scientificName

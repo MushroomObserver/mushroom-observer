@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # base table class
-  class BaseTable < ObservationReport::Base
+  class BaseTable < Report::Base
     attr_accessor :query
 
     class_attribute :separator
@@ -10,7 +10,7 @@ module ObservationReport
     def initialize(args)
       super(args)
       self.query = args[:query]
-      raise("ObservationReport initialized without query!") unless query
+      raise("Report initialized without query!") unless query
     end
 
     # Stub for subclasses which need to add other columns to table.
