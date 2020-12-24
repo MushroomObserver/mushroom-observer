@@ -3055,6 +3055,48 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success, "Edit form should be reloaded")
   end
 
+  def test_edit_observation_image_save_failure
+    obs = observations(:detailed_unknown_obs)
+    # more detailed location to avoid location flash warning and redirection
+    location = locations(:point_reyes)
+    obs.update(location: location)
+    img = obs.images.first
+    img_notes = img.notes
+
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: obs.notes,
+        place_name: obs.where,
+        "when(1i)" => obs.when.strftime("%Y"),
+        "when(2i)" => obs.when.strftime("%m"),
+        "when(3i)" => obs.when.strftime("%d"),
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image: {
+        img.id.to_s => {
+          notes: "change something to force image to be saved",
+          original_name: img.original_name,
+          copyright_holder: img.copyright_holder,
+          "when(1i)" => img.when.strftime("%Y"),
+          "when(2i)" => img.when.strftime("%m"),
+          "when(3i)" => img.when.strftime("%d"),
+          license_id: img.license_id
+        }
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:edit_observation, params: params)
+
+    assert_redirected_to(/#{obs.id}$/)
+    assert_equal(img_notes, img.reload.notes)
+  end
+
   # --------------------------------------------------------------------
   #  Test notes with template create_observation, and edit_observation,
   #  both "get" and "post".
