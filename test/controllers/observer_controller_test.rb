@@ -2939,7 +2939,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
-      Rails.root.join("test", "fixtures", "projects.yml").to_s, "text/plain"
+      Rails.root.join("test/fixtures/projects.yml").to_s, "text/plain"
     )
     params = {
       id: obs.id,
