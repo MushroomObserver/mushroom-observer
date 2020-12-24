@@ -2837,34 +2837,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(licenses(:ccwiki30), img.license)
   end
 
-  def test_edit_observation_save_failure
-    obs = observations(:minimal_unknown_obs)
-    params = {
-      id: obs.id.to_s,
-      observation: {
-        notes: { other: "new notes" },
-        place_name: obs.where,
-        "when(1i)" => "2006",
-        "when(2i)" => "05",
-        "when(3i)" => "11",
-        specimen: obs.specimen,
-        thumb_image_id: obs.thumb_image_id
-      },
-      log_change: { checked: "0" }
-    }
-
-    login(obs.user.name)
-    Observation.any_instance.stubs(:save).returns(false)
-    assert_no_difference(
-      "Observation.count", "An Observation should not be created"
-    ) do
-      post(:edit_observation, params: params)
-    end
-
-    assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
-    assert_response(:success, "Edit form should be reloaded")
-  end
-
   def test_edit_observation_no_logging
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
@@ -3053,6 +3025,34 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  def test_edit_observation_save_failure
+    obs = observations(:minimal_unknown_obs)
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: { other: "new notes" },
+        place_name: obs.where,
+        "when(1i)" => "2006",
+        "when(2i)" => "05",
+        "when(3i)" => "11",
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Observation.any_instance.stubs(:save).returns(false)
+    assert_no_difference(
+      "Observation.count", "An Observation should not be created"
+    ) do
+      post(:edit_observation, params: params)
+    end
+
+    assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
+    assert_response(:success, "Edit form should be reloaded")
   end
 
   # --------------------------------------------------------------------
