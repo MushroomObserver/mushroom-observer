@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Row in raw data table.  Initialization values array comes directly from a
   # sequel query (model.connection.select_values).  Columns are:
   #
@@ -31,11 +31,11 @@ module ObservationReport
   # 24:: locations.high
   # 25:: locations.low
   #
-  # Subclasses of ObservationReport::BaseTable can access added columns with
+  # Subclasses of Report::BaseTable can access added columns with
   # +row.val(N) = "valN"+ where N is 1, 2, and so on.
   #
   class Row
-    include ObservationReport::RowExtensions
+    include Report::RowExtensions
 
     def initialize(vals)
       @vals = vals

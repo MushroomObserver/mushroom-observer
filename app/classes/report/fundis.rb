@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Format for export to FunDiS.
-  class Fundis < ObservationReport::CSV
+  class Fundis < Report::CSV
     FUNDIS_PROJECT_NAME = "Fungal Diversity Survey"
 
     def labels
@@ -70,7 +70,7 @@ module ObservationReport
 
     def record_numbers(row)
       str = collector_numbers(row)
-      str = "; " + str if str.present?
+      str = "; #{str}" if str.present?
       mo_number(row) + str
     end
 

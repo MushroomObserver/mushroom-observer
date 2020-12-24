@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Special format for Adolf.
-  class Adolf < ObservationReport::CSV
+  class Adolf < Report::CSV
     self.mime_type = "application/vnd.ms-excel"
 
     # rubocop:disable Metrics/MethodLength

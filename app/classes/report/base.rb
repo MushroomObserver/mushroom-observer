@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # base class
   class Base
     attr_accessor :encoding
@@ -12,7 +12,7 @@ module ObservationReport
 
     def initialize(args)
       self.encoding = args[:encoding] || default_encoding
-      raise("ObservationReport initialized without encoding!") unless encoding
+      raise("Report initialized without encoding!") unless encoding
     end
 
     def filename

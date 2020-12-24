@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ObservationReportTest < UnitTestCase
+class ReportTest < UnitTestCase
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
     expect = [
@@ -47,7 +47,7 @@ class ObservationReportTest < UnitTestCase
       obs.id.to_s,
       nil
     ]
-    do_csv_test(ObservationReport::Adolf, obs, expect, &:text_name)
+    do_csv_test(Report::Adolf, obs, expect, &:text_name)
   end
 
   def test_darwin_observations
@@ -80,12 +80,12 @@ class ObservationReportTest < UnitTestCase
       "294",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::Darwin::Observations, obs, expect, &:id)
+    do_csv_test(Report::Darwin::Observations, obs, expect, &:id)
   end
 
   def test_dwca
     expect = ["meta.xml", "observations.csv", "multimedia.csv"]
-    do_zip_test(ObservationReport::Dwca, expect)
+    do_zip_test(Report::Dwca, expect)
   end
 
   def test_taxa_report
@@ -137,7 +137,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
+    do_csv_test(Report::Fundis, obs, expect, &:id)
   end
 
   def test_fundis_with_exact_lat_long
@@ -182,7 +182,7 @@ class ObservationReportTest < UnitTestCase
       "Agaricus",
       "Foo: Bar\nOther: Things"
     ]
-    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
+    do_csv_test(Report::Fundis, obs, expect, &:id)
   end
 
   def test_fundis_with_hidden_gps
@@ -219,13 +219,13 @@ class ObservationReportTest < UnitTestCase
       "",
       "unknown_with_lat_long"
     ]
-    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
+    do_csv_test(Report::Fundis, obs, expect, &:id)
 
     User.current = mary
     expect[11] = "34.1622"
     expect[12] = "-118.3521"
     expect[13] = nil
-    do_csv_test(ObservationReport::Fundis, obs, expect, &:id)
+    do_csv_test(Report::Fundis, obs, expect, &:id)
   end
 
   def test_raw
@@ -262,7 +262,7 @@ class ObservationReportTest < UnitTestCase
       "Found in a strange place... & with śtrangè characters™",
       "http://mushroomobserver.org/#{obs.id}"
     ]
-    do_csv_test(ObservationReport::Raw, obs, expect, &:id)
+    do_csv_test(Report::Raw, obs, expect, &:id)
   end
 
   def test_symbiota1
@@ -308,7 +308,7 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
-    do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
   def test_symbiota2
@@ -342,11 +342,11 @@ class ObservationReportTest < UnitTestCase
       obs.id.to_s,
       "http://mushroomobserver.org/#{obs.id}"
     ]
-    do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
+    do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
   def test_rounding_of_latitudes_etc
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[2] = 1.20456
     assert_equal(1.2, row.obs_lat(2))
     assert_equal(1.205, row.obs_lat(3))
@@ -362,13 +362,13 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_cleaning_of_notes
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[9] = { Observation.other_notes_key => " abc  def " }.to_yaml
     assert_equal("abc  def", row.obs_notes)
   end
 
   def test_split_date
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[1] = "2017-01-03"
     assert_equal("2017", row.year)
     assert_equal("1", row.month)
@@ -376,14 +376,14 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_loc_name_sci
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[19] = "Park, Random, Some, Alameda Co., California, USA"
     assert_equal("USA, California, Alameda Co., Some, Random, Park",
                  row.loc_name_sci)
   end
 
   def test_split_location
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[19] = "Park, Random, Some, Alameda Co., California, USA"
     assert_equal("USA", row.country)
     assert_equal("California", row.state)
@@ -391,7 +391,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal("Some, Random, Park", row.locality)
     assert_equal("Alameda Co., Some, Random, Park", row.locality_with_county)
 
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[19] = "Big Branch, Saint Tammany Parish, Louisiana, USA"
     assert_equal("USA", row.country)
     assert_equal("Louisiana", row.state)
@@ -399,7 +399,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal("Big Branch", row.locality)
     assert_equal("Saint Tammany Parish, Big Branch", row.locality_with_county)
 
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[19] = "Central Park, Los Angeles, California, USA"
     assert_equal("USA", row.country)
     assert_equal("California", row.state)
@@ -456,7 +456,7 @@ class ObservationReportTest < UnitTestCase
 
   def test_ascii_encoding
     query = Query.lookup(:Observation, :all)
-    report = ObservationReport::Raw.new(query: query)
+    report = Report::Raw.new(query: query)
     report.encoding = "ASCII"
     body = report.body
     assert_not_empty(body)
@@ -464,7 +464,7 @@ class ObservationReportTest < UnitTestCase
 
   def test_utf_16_encoding
     query = Query.lookup(:Observation, :all)
-    report = ObservationReport::Raw.new(query: query)
+    report = Report::Raw.new(query: query)
     report.encoding = "UTF-16"
     body = report.body
     assert_not_empty(body)
@@ -510,15 +510,15 @@ class ObservationReportTest < UnitTestCase
 
   def build_taxa_report
     query = Query.lookup(:Observation, :all)
-    observations = ObservationReport::Darwin::Observations.new(query: query)
+    observations = Report::Darwin::Observations.new(query: query)
     return if observations.body.empty?
 
-    report_type = ObservationReport::Darwin::Taxa
+    report_type = Report::Darwin::Taxa
     report_type.new(query: query, observations: observations)
   end
 
   def do_split_test(name, author, rank, expect)
-    row = ObservationReport::Row.new(vals = [])
+    row = Report::Row.new(vals = [])
     vals[15] = name
     vals[16] = author
     vals[17] = Name.ranks[rank]

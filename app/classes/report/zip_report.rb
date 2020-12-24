@@ -2,9 +2,9 @@
 
 require("zip")
 
-module ObservationReport
+module Report
   # Provides rendering ability for ZIP-type reports.
-  class ZipReport < ObservationReport::Base
+  class ZipReport < Report::Base
     attr_accessor :content # List of (name, stream) pairs
 
     self.default_encoding = "UTF-8"
