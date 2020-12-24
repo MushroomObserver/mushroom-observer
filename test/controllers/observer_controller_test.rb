@@ -1356,7 +1356,7 @@ class ObserverControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     Observation.any_instance.stubs(:destroy).returns(false)
-    post(:destroy_observation, params)
+    post(:destroy_observation, params: params)
 
     assert_redirected_to(/#{obs.id}/)
     assert_not(obs.destroyed?)
@@ -3589,7 +3589,8 @@ class ObserverControllerTest < FunctionalTestCase
       approved_where: approved ? str : "something else"
     }
     login("rolf") unless User.current
-    post(:create_observation, modified_generic_params(params, User.current))
+    post(:create_observation,
+         params: modified_generic_params(params, User.current))
     if succeed
       expect_obs_form_to_succeed
     else
@@ -3846,7 +3847,7 @@ class ObserverControllerTest < FunctionalTestCase
       approved_where: "something else",
       location_suggestions: { name: loc.name }
     }
-    post(:create_observation, modified_generic_params(params, user))
+    post(:create_observation, params: modified_generic_params(params, user))
     assert_response(:redirect, "expected this to submit successfully")
     obs = Observation.last
     assert_objs_equal(loc, obs.location)
@@ -3865,7 +3866,7 @@ class ObserverControllerTest < FunctionalTestCase
       county: "Mendocino Co.",
       city: "Gualala"
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_missing.t)
     assert_suggestions_include(loc)
@@ -3882,7 +3883,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { place_name: "California, USA", lat: lat, long: long }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_inaccurate.t)
     assert_suggestions_include(loc)
@@ -3899,7 +3900,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { place_name: str }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
     assert_suggestions_include(loc)
@@ -3917,7 +3918,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { lat: lat, long: long }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_outside.t)
     assert_suggestions_include(locations(:california))
