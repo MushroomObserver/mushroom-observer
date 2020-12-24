@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   module Darwin
     # Darwin Core Observations format.
-    class Taxa < ObservationReport::CSV
+    class Taxa < Report::CSV
       attr_accessor :observations
 
       self.separator = "\t"

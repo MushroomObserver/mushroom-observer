@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   module RowExtensions
     def year
       @date ||= split_date
