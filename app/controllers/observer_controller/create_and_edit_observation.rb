@@ -862,24 +862,6 @@ class ObserverController
     end
   end
 
-  ##############################################################################
-  #
-  #  Methods relating to User#notes_template
-  #
-  ##############################################################################
-
-  # String combining the note parts defined in the User's notes_template
-  # with their filled-in values, ignoring parts with blank values
-  def combined_notes_parts
-    @user.notes_template_parts.each_with_object("") do |part, notes|
-      key   = Observation.notes_part_id(part).to_sym
-      value = params[key]
-      notes << "#{part}: #{value}\n" if value.present?
-    end
-  end
-
-  ##############################################################################
-
   def update_naming(reason)
     return unless @name
 
