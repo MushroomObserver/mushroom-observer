@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Provides rendering ability for CSV-type reports.
-  class CSV < ObservationReport::BaseTable
+  class CSV < Report::BaseTable
     require "csv"
 
     self.default_encoding = "UTF-8"

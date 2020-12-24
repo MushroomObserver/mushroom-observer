@@ -261,14 +261,14 @@ class ObserverController
     if params[:commit] == :CANCEL.l
       redirect_with_query(action: :index_observation, always_index: true)
     elsif params[:commit] == :DOWNLOAD.l
-      render_observation_report
+      create_and_render_report
     elsif params[:commit] == :download_observations_print_labels.l
       render_labels
     end
   end
 
-  def render_observation_report
-    report = create_observation_report(
+  def create_and_render_report
+    report = create_report(
       query: @query, format: @format, encoding: @encoding
     )
     render_report(report)
@@ -279,19 +279,19 @@ class ObserverController
     render(action: "print_labels", layout: "printable")
   end
 
-  def create_observation_report(args)
+  def create_report(args)
     format = args[:format].to_s
     case format
     when "raw"
-      ObservationReport::Raw.new(args)
+      Report::Raw.new(args)
     when "adolf"
-      ObservationReport::Adolf.new(args)
+      Report::Adolf.new(args)
     when "darwin"
-      ObservationReport::Dwca.new(args)
+      Report::Dwca.new(args)
     when "symbiota"
-      ObservationReport::Symbiota.new(args)
+      Report::Symbiota.new(args)
     when "fundis"
-      ObservationReport::Fundis.new(args)
+      Report::Fundis.new(args)
     else
       raise("Invalid download type: #{format.inspect}")
     end

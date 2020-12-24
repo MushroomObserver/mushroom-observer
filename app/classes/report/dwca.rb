@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ObservationReport
+module Report
   # Darwin Core Archive format.
-  class Dwca < ObservationReport::ZipReport
+  class Dwca < Report::ZipReport
     attr_accessor :images, :observations
 
     def initialize(args)

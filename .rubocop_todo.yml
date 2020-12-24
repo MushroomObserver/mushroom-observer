@@ -43,10 +43,10 @@ Lint/LiteralAsCondition:
 # Configuration parameters: MaximumRangeSize.
 Lint/MissingCopEnableDirective:
   Exclude:
-    - 'app/classes/observation_report/adolf.rb'
-    - 'app/classes/observation_report/fundis.rb'
-    - 'app/classes/observation_report/raw.rb'
-    - 'app/classes/observation_report/symbiota.rb'
+    - 'app/classes/report/adolf.rb'
+    - 'app/classes/report/fundis.rb'
+    - 'app/classes/report/raw.rb'
+    - 'app/classes/report/symbiota.rb'
 
 # Offense count: 15
 Lint/MissingSuper:
@@ -330,7 +330,7 @@ Rails/SkipsModelValidations:
     - 'test/controllers/api_controller_test.rb'
     - 'test/controllers/image_controller_test.rb'
     - 'test/models/location_test.rb'
-    - 'test/models/observation_report_test.rb'
+    - 'test/models/report_test.rb'
     - 'test/models/observation_test.rb'
 
 # Offense count: 2
