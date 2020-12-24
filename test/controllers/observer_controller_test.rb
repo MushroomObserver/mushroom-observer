@@ -2838,46 +2838,29 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation_save_failure
-    obs = observations(:detailed_unknown_obs)
-    new_where = "Somewhere In, Japan"
-    new_notes = { other: "blather blather blather" }
-    img = images(:in_situ_image)
+    obs = observations(:minimal_unknown_obs)
     params = {
       id: obs.id.to_s,
       observation: {
-        notes: new_notes,
-        place_name: new_where,
-        "when(1i)" => "2001",
-        "when(2i)" => "2",
-        "when(3i)" => "3",
-        specimen: false,
-        thumb_image_id: "0"
+        notes: { other: "new notes" },
+        place_name: obs.where,
+        "when(1i)" => "2006",
+        "when(2i)" => "05",
+        "when(3i)" => "11",
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
       },
-      good_images: "#{img.id} #{images(:turned_over_image).id}",
-      good_image: {
-        img.id.to_s => {
-          notes: "new notes",
-          original_name: "new name",
-          copyright_holder: "someone else",
-          "when(1i)" => "2012",
-          "when(2i)" => "4",
-          "when(3i)" => "6",
-          license_id: licenses(:ccwiki30).id.to_s
-        }
-      },
-      log_change: { checked: "1" }
+      log_change: { checked: "0" }
     }
-    Observation.any_instance.stubs(:save).returns(false)
 
+    login(obs.user.name)
+    Observation.any_instance.stubs(:save).returns(false)
     assert_no_difference(
       "Observation.count", "An Observation should not be created"
     ) do
-      post_requires_user(:edit_observation,
-                         [{ controller: :observer,
-                            action: :show_observation }],
-                         params,
-                         "mary")
+      post(:edit_observation, params: params)
     end
+
     assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
     assert_response(:success, "Edit form should be reloaded")
   end
