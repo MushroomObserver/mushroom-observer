@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
+# Return an array of suggested Locations, a given user input (name or lat/lon)
 class Location < AbstractModel
+  # SQL string to calculate db grid size in lat/lon squares
+  # This is the db counterpart of pseudoarea, differing by rounding error
+  GRID_SQUARES = "IF(east >= west, east - west, 360 + east - west) " \
+                 "* (north - south)"
+  # max suggested size in lat/lon "squares"
+  # suggestions should not include a Location with a larger pseudoarea
+  MAX_SUGGESTED_SIZE = 6800
+
+  # class methods
   class << self
     # Return some locations that are close to the given name and/or geolocation
     # data from google and/or lat/long provided by user.
@@ -20,16 +30,21 @@ class Location < AbstractModel
       [geo_city, geo_county, geo_state, geo_country].reject(&:blank?).join(", ")
     end
 
-    # Return most specific locations containing the given lat/long.
+    # Locations with enough verbal levels of precision
+    # containing the given lat/long, excluding Locations that are "too large"
+    # sorted by size, ascending
     def suggestions_for_latlong(lat, long)
       all = Location.where("(south <= ? AND north >= ?) AND " \
                            "IF(east >= west, west <= ? AND east >= ?, " \
                            "west <= ? OR east >= ?)",
-                           lat, lat, long, long, long, long).to_a
-      # Return only most specific locations.
+                           lat, lat, long, long, long, long).
+            # exclude locations that are too large
+            where("#{GRID_SQUARES} <= #{MAX_SUGGESTED_SIZE}").
+            to_a
+      # Return only most "precise" Locations.
       [3, 2, 1, 0].each do |n|
         locs = all.select { |loc| loc.name.split(",").length > n }
-        return locs if locs.any?
+        return locs.sort_by(&:pseudoarea) if locs.any?
       end
       []
     end
@@ -60,7 +75,7 @@ class Location < AbstractModel
 
     # Did google provide the name of a country we recognize?
     def suggestions_if_geo_country_good(str, geolocation)
-      return unless geo_country = geolocation[:country]
+      return unless (geo_country = geolocation[:country])
       return unless Location.understood_country?(geo_country)
 
       # Just see if maybe the user omitted the country...
