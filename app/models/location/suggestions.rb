@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Return an array of suggested Locations, a given user input (name or lat/lon)
+# Return array of suggested Locations for a given user input (name or lat/lon)
 class Location < AbstractModel
   # SQL string to calculate db grid size in lat/lon squares
   # This is the db counterpart of pseudoarea, differing by rounding error
   GRID_SQUARES = "IF(east >= west, east - west, 360 + east - west) " \
                  "* (north - south)"
+
   # max suggested size in lat/lon "squares"
   # suggestions should not include a Location with a larger pseudoarea
   MAX_SUGGESTED_SIZE = 6800
@@ -31,7 +32,7 @@ class Location < AbstractModel
     end
 
     # Locations with enough verbal levels of precision
-    # containing the given lat/long, excluding Locations that are "too large"
+    # containing the given lat/lon, excluding Locations that are "too large"
     # sorted by size, ascending
     def suggestions_for_latlong(lat, long)
       all = Location.where("(south <= ? AND north >= ?) AND " \
