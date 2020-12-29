@@ -375,7 +375,6 @@ ACTIONS = {
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    update_whitelisted_observation_attributes: {},
     user_search: {},
     users_by_contribution: {},
     users_by_name: {},
