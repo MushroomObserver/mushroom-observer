@@ -457,6 +457,26 @@ class LocationControllerTest < FunctionalTestCase
     assert_input_value(:location_display_name, loc.display_name)
   end
 
+  def test_edit_locked_location
+    location = locations(:albion)
+    location.update(locked: true)
+    login(mary.login)
+
+    get(:edit_location, params: { id: location.id })
+
+    assert_select(
+      "input:match('name', ?)", /location/, { minimum: 2 },
+      "Location form for locked Location should have location input fields"
+    ) do |location_input_fields|
+      location_input_fields.each do |field|
+        assert_equal(
+          "hidden", field["type"],
+          "Location input fields should be hidden for locked Locations"
+        )
+      end
+    end
+  end
+
   def test_edit_unknown_location
     loc = locations(:unknown_location)
     old_loc_display_name = loc.display_name
