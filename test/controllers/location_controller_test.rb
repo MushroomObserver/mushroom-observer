@@ -467,7 +467,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_select(
       "input:match('name', ?)", /location/, { minimum: 2 },
       "Location form for locked Location should have location input fields"
-      ) do |location_input_fields|
+    ) do |location_input_fields|
       location_input_fields.each do |field|
         assert_equal(
           "hidden", field["type"],
