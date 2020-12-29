@@ -464,8 +464,17 @@ class LocationControllerTest < FunctionalTestCase
 
     get(:edit_location, params: { id: location.id })
 
-    assert_select("input#location_display_name[type='text']", { count: 0 })
-    assert_select("input#location_display_name[type='hidden']", { count: 1 })
+    assert_select(
+      "input:match('name', ?)", /location/, { minimum: 2 },
+      "Location form for locked Location should have location input fields"
+      ) do |location_input_fields|
+      location_input_fields.each do |field|
+        assert_equal(
+          "hidden", field["type"],
+          "Location input fields should be hidden for locked Locations"
+        )
+      end
+    end
   end
 
   def test_edit_unknown_location
