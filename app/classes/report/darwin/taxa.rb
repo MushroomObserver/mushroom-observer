@@ -14,10 +14,14 @@ module Report
       end
 
       def formatted_rows
-        query.select_rows(
+        @formatted_rows ||= query.select_rows(
           select: "DISTINCT names.id, names.text_name",
           join: [:names]
         )
+      end
+
+      def ids
+        formatted_rows.map { |row| row[0] }
       end
 
       def labels
