@@ -2,7 +2,7 @@
 
 module Report
   # Darwin Core Archive format.
-  class Dwca < Report::ZipReport
+  class Gbif < Report::ZipReport
     attr_accessor :images, :observations
 
     def initialize(args)

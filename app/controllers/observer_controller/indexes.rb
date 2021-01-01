@@ -287,7 +287,7 @@ class ObserverController
     when "adolf"
       Report::Adolf.new(args)
     when "darwin"
-      Report::Dwca.new(args)
+      Report::Gbif.new(args)
     when "eol"
       Report::Eol.new(args)
     when "symbiota"
