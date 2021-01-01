@@ -83,6 +83,11 @@ class ReportTest < UnitTestCase
     do_csv_test(Report::Darwin::Observations, obs, expect, &:id)
   end
 
+  def test_eol
+    expect = ["meta.xml", "taxa.csv", "multimedia.csv"]
+    do_zip_test(Report::Eol, expect)
+  end
+
   def test_gbif
     expect = ["meta.xml", "observations.csv", "multimedia.csv"]
     do_zip_test(Report::Gbif, expect)
