@@ -50,8 +50,8 @@
       <%= :download_observations_adolf.t %>
     </li>
     <li>
-      <%= radio_button_tag(:format, :darwin, @format == "darwin") %>
-      <%= :download_observations_darwin.t %>
+      <%= radio_button_tag(:format, :gbif, @format == "gbif") %>
+      <%= :download_observations_gbif.t %>
       (<%= link_to(:download_observations_what_is_this.t, "http://rs.tdwg.org/dwc/index.htm",
                    target: "_new") %>)
     </li>

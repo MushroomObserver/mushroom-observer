@@ -3810,7 +3810,7 @@ class ObserverControllerTest < FunctionalTestCase
       :download_observations,
       params: {
         q: query.id.alphabetize,
-        format: "darwin",
+        format: "gbif",
         encoding: "UTF-8",
         commit: "Download"
       }
