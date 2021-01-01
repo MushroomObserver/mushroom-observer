@@ -13,7 +13,7 @@ module Report
     end
 
     def filename
-      "dwca.#{extension}"
+      "gbif.#{extension}"
     end
 
     # generate CSV & meta.xml and bundle into a Zip
