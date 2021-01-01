@@ -56,6 +56,10 @@
                    target: "_new") %>)
     </li>
     <li>
+      <%= radio_button_tag(:format, :eol, @format == "eol") %>
+      <%= :download_observations_eol.t %>
+    </li>
+    <li>
       <%= radio_button_tag(:format, :symbiota, @format == "symbiota") %>
       <%= :download_observations_symbiota.t %>
     </li>

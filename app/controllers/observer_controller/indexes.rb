@@ -288,6 +288,8 @@ class ObserverController
       Report::Adolf.new(args)
     when "darwin"
       Report::Dwca.new(args)
+    when "eol"
+      Report::Eol.new(args)
     when "symbiota"
       Report::Symbiota.new(args)
     when "fundis"

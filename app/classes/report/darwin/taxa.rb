@@ -4,17 +4,20 @@ module Report
   module Darwin
     # Darwin Core Observations format.
     class Taxa < Report::CSV
-      attr_accessor :observations
+      attr_accessor :query
 
       self.separator = "\t"
 
       def initialize(args)
         super(args)
-        self.observations = args[:observations]
+        self.query = args[:query]
       end
 
       def formatted_rows
-        sort_after(observations.taxa)
+        query.select_rows(
+          select: "DISTINCT names.id, names.text_name",
+          join: [:names]
+        )
       end
 
       def labels
@@ -22,10 +25,6 @@ module Report
           taxonID
           scientificName
         ].freeze
-      end
-
-      def sort_after(rows)
-        rows.sort_by { |row| row[0].to_i }
       end
     end
   end

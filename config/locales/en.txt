@@ -1380,6 +1380,7 @@
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
+  download_observations_eol: Taxa for EOL
   download_observations_symbiota: Symbiota
   download_observations_fundis: FunDiS
   download_observations_what_is_this: what is this?

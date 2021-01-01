@@ -3822,6 +3822,18 @@ class ObserverControllerTest < FunctionalTestCase
       :download_observations,
       params: {
         q: query.id.alphabetize,
+        format: "eol",
+        encoding: "UTF-8",
+        commit: "Download"
+      }
+    )
+    assert_no_flash
+    assert_response(:success)
+
+    post(
+      :download_observations,
+      params: {
+        q: query.id.alphabetize,
         format: "symbiota",
         encoding: "UTF-8",
         commit: "Download"
