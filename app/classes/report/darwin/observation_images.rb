@@ -3,7 +3,7 @@
 module Report
   module Darwin
     # Darwin Core Observations format.
-    class Images < Report::CSV
+    class ObservationImages < Report::CSV
       attr_accessor :observations, :query
 
       self.separator = "\t"

@@ -9,7 +9,7 @@ module Report
       super(args)
       self.observations = Darwin::Observations.new(args)
       args[:observations] = observations
-      self.images = Darwin::Images.new(args)
+      self.images = Darwin::ObservationImages.new(args)
     end
 
     def filename
