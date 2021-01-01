@@ -1,17 +1,11 @@
 # frozen_string_literal: true
 
-"""
-SELECT io.image_id
-FROM images_observations io, observations o
-WHERE o.name_id in (31753)
-AND io.observation_id = o.id
-AND o.vote_cache > 2.5;
-"""
-
 module Report
   module Darwin
     # Darwin Core Observations format.
     class TaxonImages < Report::CSV
+      VOTE_CUTOFF = 2.5
+
       attr_accessor :taxa, :query
 
       self.separator = "\t"
@@ -26,6 +20,7 @@ module Report
         self.query = tables[:images]
         add_joins
         add_project
+        query.where(tables[:observations][:vote_cache].gteq(VOTE_CUTOFF))
       end
 
       def tables
@@ -67,11 +62,7 @@ module Report
       end
 
       def formatted_rows
-        names_attr = tables[:observations][:name_id]
-        query.where(names_attr.in(taxa.ids))
-        vote_cache_attr = tables[:observations][:vote_cache]
-        query.where(vote_cache_attr.gt(2.5))
-
+        query.where(tables[:observations][:name_id].in(taxa.ids))
         rows = ActiveRecord::Base.connection.exec_query(query.to_sql)
         sort_after(rows.map { |row| format_image_row(row) })
       end
