@@ -1,0 +1,22 @@
+<archive xmlns="http://rs.tdwg.org/dwc/text/">
+  <core encoding="UTF-8" fieldsTerminatedBy="\t" linesTerminatedBy="\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/Occurrence">
+    <files>
+      <location>taxa.csv</location>
+    </files>
+    <id index="0" />
+    <field index="1" term="http://rs.tdwg.org/dwc/terms/scientificName"/>
+  </core>
+  <extension encoding="UTF-8" fieldsTerminatedBy="\t" linesTerminatedBy="\n" fieldsEnclosedBy="" ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Multimedia">
+    <files>
+      <location>multimedia.csv</location>
+    </files>
+    <coreid index="0" />
+    <field index="1" term="http://purl.org/dc/terms/type"/>
+    <field index="2" term="http://purl.org/dc/terms/format"/>
+    <field index="3" term="http://purl.org/dc/terms/identifier"/>
+    <field index="4" term="http://purl.org/dc/terms/created"/>
+    <field index="5" term="http://purl.org/dc/terms/creator"/>
+    <field index="6" term="http://purl.org/dc/terms/license"/>
+    <field index="7" term="http://purl.org/dc/terms/rightsHolder"/>
+  </extension>
+</archive>
