@@ -112,6 +112,13 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_location_pattern_search_id
+    loc = locations(:salt_point)
+
+    get(:location_search, params: { pattern: loc.id.to_s })
+    assert_redirected_to("#{location_show_location_path}/#{loc.id}")
+  end
+
   def test_location_advanced_search
     query = Query.lookup_and_save(:Location, :advanced_search,
                                   location: "California")
