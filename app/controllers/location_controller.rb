@@ -97,11 +97,17 @@ class LocationController < ApplicationController
 
   # Displays a list of locations matching a given string.
   def location_search
-    query = create_query(
-      :Location, :pattern_search,
-      pattern: Location.user_name(@user, params[:pattern].to_s)
-    )
-    show_selected_locations(query, link_all_sorts: true)
+    pattern = params[:pattern].to_s
+    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if loc
+      redirect_to(action: "show_location", id: loc.id)
+    else
+      query = create_query(
+        :Location, :pattern_search,
+        pattern: Location.user_name(@user, pattern)
+      )
+      show_selected_locations(query, link_all_sorts: true)
+    end
   end
 
   # Displays matrix of advanced search results.
