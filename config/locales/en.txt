@@ -1590,7 +1590,7 @@
   form_synonyms_deprecate_synonyms: Deprecate Synonyms
   form_synonyms_deprecate_synonyms_help: If checked all listed synonyms become deprecated names.  Otherwise, they are left as they are with new names created as not deprecated.
   form_synonyms_missing_names: The following names could not be found.
-  form_synonyms_missing_names_help: Click 'Add' to create these names.  If you want to correct any names, do so in the area below and click 'Add' to re-evaluate the list.
+  form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names.  If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
   # image/add_image
   image_set_default: Set as default thumbnail
