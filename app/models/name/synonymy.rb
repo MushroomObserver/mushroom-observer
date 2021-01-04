@@ -12,6 +12,11 @@ class Name < AbstractModel
     synonym ? synonym.name_ids.to_a : [id]
   end
 
+  # Same as synonyms, but excludes self
+  def other_synonyms
+    synonyms.drop(1)
+  end
+
   # Returns an Array of all synonym Name's including itself at front of list.
   # (This looks screwy, but I think it is the safest way to handle it.
   # Note that synonym.names does include self, but it's a different instance.

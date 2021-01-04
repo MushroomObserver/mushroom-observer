@@ -145,6 +145,11 @@
 #  ranks_below_species::     Ranks: below :Species.
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
+#  ==== Scopes
+#  with_correct_spelling
+#  with_classification_like(rank, text_name)
+#  with_rank_below(rank)
+#
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.
@@ -190,9 +195,10 @@
 #
 #  ==== Formatting
 #  text_name::               "Xxx"
-#  format_name::             "Xxx sp. Author"
+#  format_name::             "**_Xxx sp.__** Author"
 #  unique_text_name::        "Xxx (123)"
-#  unique_format_name::      "Xxx sp. Author (123)"
+#  unique_format_name::      "**__Xxx sp.__** Author (123)"
+#  unique_search_name::      Xxx yyy Author (123)
 #  stripped_text_name        text_name minus quotes, periods, sp, group, etc.
 #  display_name_brief_authors:: Marked up name with authors shortened:
 #                            **__"Xxx yyy__ author**
@@ -222,6 +228,7 @@
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
 #  synonym_ids:              List of IDs of all synonyms, including this Name
+#  other_synonym_ids         List of IDs of all synonyms, excluding this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  best_approved_synonym::   Single "best" approved synonym
@@ -255,8 +262,9 @@
 #  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  ==== Merging
-#  mergeable?::              Is it safe to merge this Name into another?
+#  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
+#  dependents?::         Does another Name depend from this Name?
 #
 #  == Callbacks
 #

@@ -2436,6 +2436,8 @@ class NameTest < UnitTestCase
   end
 
   # --------------------------------------
+  #  formatting
+  # --------------------------------------
 
   def test_display_name_brief_authors
     # Name 0 authors
@@ -2611,6 +2613,8 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
+  # --------------------------------------
+
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
     return unless sql_collates_accents?
@@ -2759,13 +2763,12 @@ class NameTest < UnitTestCase
 
   def test_names_from_synonymous_genera
     User.current = rolf
-
-    a  = create_test_name("Agaricus")
+    a = create_test_name("Agaricus")
     a1 = create_test_name("Agaricus testus")
     a3 = create_test_name("Agaricus testii")
-    b  = create_test_name("Pseudoagaricum")
+    b = create_test_name("Pseudoagaricum")
     b1 = create_test_name("Pseudoagaricum testum")
-    c  = create_test_name("Hyperagarica")
+    c = create_test_name("Hyperagarica")
     c1 = create_test_name("Hyperagarica testa")
     d = names(:lepiota)
     b.change_deprecated(true)
@@ -2858,6 +2861,117 @@ class NameTest < UnitTestCase
                            Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
 
+  # --------------------------------------
+
+  def test_approved_synonym_of_proposed_name_has_dependents
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym,
+           "Test needs different fixture: " \
+           "an Approved Name, with a Synonym having Naming(s)")
+
+    assert(
+      approved_synonym.dependents?,
+      "`dependents?` should be true for an approved synonym " \
+      "(#{approved_synonym}) of a Proposed Name (#deprecated_name)"
+    )
+  end
+
+  def test_correctly_spelled_ancestor_of_proposed_name_has_dependents
+    ancestor = names(:basidiomycetes)
+    assert(
+      !ancestor.is_misspelling? &&
+      Name.joins(:namings).where(
+        "classification LIKE ?",
+        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
+      ).any?,
+      "Test needs different fixture: A correctly spelled Name " \
+      "at a rank that has Namings classified with that rank."
+    )
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for a Name above genus " \
+      "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
+      "of a Proposed Name"
+    )
+
+    ancestor = names(:boletus)
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for a Genus (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
+    )
+
+    ancestor = names(:amanita_boudieri)
+    Naming.create(user: mary,
+                  name: names(:amanita_boudieri_var_beillei),
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for Species (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
+    )
+  end
+
+  def test_misspelt_ancestor_of_misspelt_proposed_name_has_no_dependents
+    misspelt_genus = names(:suilus)
+    species_of_missplet_genus = Name.create(
+      text_name: "#{misspelt_genus.text_name} lakei",
+      display_name: "__#{misspelt_genus.text_name} lakei__",
+      rank: :Species,
+      user: dick,
+      correct_spelling: names(:boletus_edulis) # anything will do
+    )
+    Naming.create(user: mary,
+                  name: species_of_missplet_genus,
+                  observation: observations(:minimal_unknown_obs))
+
+    assert_not(
+      misspelt_genus.dependents?,
+      "`dependents?` should be false for " \
+      "misspelt genus of misspelt Proposed Name " \
+    )
+  end
+
+  def test_ancestor_of_correctly_spelled_unproposed_name_has_dependents
+    ancestor = Name.create(
+      text_name: "Phyllotopsidaceae",
+      search_name: "Phyllotopsidaceae",
+      sort_name: "Phyllotopsidaceae",
+      display_name: "**__Phyllotopsidaceae__**",
+      rank: Name.ranks[:Family],
+      user: dick
+    )
+    descendant = Name.create(
+      text_name: "Macrotyphula",
+      search_name: "Macrotyphula",
+      sort_name: "Macrotyphula",
+      display_name: "**__Macrotyphula__**",
+      rank: Name.ranks[:Genus],
+      classification: "Family: _#{ancestor.text_name}_",
+      user: dick
+    )
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
+
+    ancestor = names(:tubaria)
+    descendant = names(:tubaria_furfuracea)
+    assert(
+      Naming.where(name: descendant).none? && !descendant.is_misspelling?,
+      "Test needs different fixture: correctly spelled, without Namings"
+    )
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
+  end
+
+  # --------------------------------------
+
   def test_imageless
     assert_true(names(:imageless).imageless?)
     assert_false(names(:fungi).imageless?)
@@ -2880,12 +2994,11 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
     assert_not(Name.names_matching_desired_new_name(parsed).
                 include?(names(:unauthored_with_naming)))
-
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
-    extant  = names(:authored_group)
+    extant = names(:authored_group)
     desired = extant.text_name
-    parsed  = Name.parse_name(desired)
+    parsed = Name.parse_name(desired)
     assert_not(Name.names_matching_desired_new_name(parsed).include?(extant),
                "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
@@ -3063,12 +3176,21 @@ class NameTest < UnitTestCase
   def test_guess_name_with_colon_in_pattern
     # Apparently assert_nothing_raised hides debug information but gives
     # nothing useful in return.
-    # Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
-    #
-    # Reverted to `assert_nothing_raised` to avoid direct testing of private
-    # class method `Name.guess_with_errors`.
-    assert_nothing_raised do
-      Name.suggest_alternate_spellings("Crepidotus applanatus(Pers.:Fr.)Kummer")
-    end
+    Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
+  end
+
+  def test_merge_interests
+    old_name = names(:agaricus_campestros)
+    interests = old_name.interests
+    assert(interests.any?, "Test needs a fixture with an interest")
+    target = names(:agaricus_campestras)
+    assert(target.interests.none?, "Test needs a fixture without interests")
+
+    target.merge(old_name)
+    assert_equal(
+      interests, target.interests,
+      "Old name (#{old_name.text_name}) interests " \
+      "were not moved to target (#{target.text_name})"
+    )
   end
 end
