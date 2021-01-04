@@ -27,15 +27,7 @@ class NameController
     return unless @name
 
     init_edit_name_form
-    if request.method == "POST"
-      @parse = parse_name
-      match = check_for_matches if name_unlocked?
-      if match
-        merge_names(match)
-      else
-        change_existing_name
-      end
-    end
+    update if request.method == "POST"
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
@@ -112,14 +104,32 @@ class NameController
   end
 
   def set_icn_id_if_unlocked_or_admin
-    @name.icn_id   = params[:name][:icn_id] if name_unlocked? || in_admin_mode?
+    @name.icn_id   = params[:name][:icn_id] if editable_in_session?
   end
 
   # ------
   # update
   # ------
 
-  def name_unlocked?
+  def update
+    @parse = parse_name
+    if @name.dependents? && !in_admin_mode?
+      redirect_with_query(
+        controller: :observer, action: :email_name_change_request,
+        name_id: @name.id, new_name: @parse.search_name
+      )
+      return
+    end
+
+    match = check_for_matches if editable_in_session?
+    if match
+      merge_names(match)
+    else
+      change_existing_name
+    end
+  end
+
+  def editable_in_session?
     in_admin_mode? || !@name.locked
   end
 
@@ -129,7 +139,7 @@ class NameController
 
     args = {
       str: @parse.real_search_name,
-      matches: new_name.map(&:search_name).join(" / ")
+      matches: matches.map(&:unique_search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
   end
@@ -173,8 +183,10 @@ class NameController
       any_changes = true
     end
     # Update ancestors regardless whether name changed; maybe this will add
-    # missing ancestors in case database is messed up
-    update_ancestors
+    # missing ancestors in case database is messed up. But don't update
+    # ancestors if non-admin is changing locked namge because that would create
+    # bogus name and ancestors if @parse.search_name differs from @name
+    update_ancestors if editable_in_session?
     any_changes
   end
 
@@ -194,7 +206,7 @@ class NameController
   # changes nothing and raises a RuntimeError.
   #
   def update_correct_spelling
-    return unless name_unlocked?
+    return unless editable_in_session?
 
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
@@ -238,7 +250,7 @@ class NameController
   end
 
   def set_name_author_and_rank
-    return unless name_unlocked?
+    return unless editable_in_session?
 
     email_admin_name_change unless minor_change?
     @name.attributes = @parse.params
@@ -291,7 +303,8 @@ class NameController
   # -------------
 
   def merge_names(new_name)
-    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
+    if in_admin_mode? ||
+       !@name.merger_destructive? || !new_name.merger_destructive?
       perform_merge_names(new_name)
       redirect_to_show_name
     else
@@ -316,14 +329,9 @@ class NameController
 
     # Force log to display the destroyed name
     @name.display_name = logged_destroyed_name
-
-    # Fill in author if other has one.
-    if survivor.author.blank? && @parse.author.present?
-      survivor.change_author(@parse.author)
-    end
     survivor.change_deprecated(deprecation) unless deprecation.nil?
 
-    survivor.merge(@name) # move associations to survivor, destroy @name
+    survivor.merge(@name) # move associations to survivor, destroy @name object
 
     send_merger_messages(destroyed_real_search_name: destroyed_real_search_name,
                          survivor: survivor)
@@ -351,7 +359,7 @@ class NameController
   end
 
   def reverse_merger_safer?(presumptive_survivor)
-    !@name.mergeable? && presumptive_survivor.mergeable?
+    @name.merger_destructive? && !presumptive_survivor.merger_destructive?
   end
 
   def send_merger_messages(destroyed_real_search_name:, survivor:)

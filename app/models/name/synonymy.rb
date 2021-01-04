@@ -12,6 +12,11 @@ class Name < AbstractModel
     synonym ? synonym.name_ids.to_a : [id]
   end
 
+  # Same as synonyms, but excludes self
+  def other_synonyms
+    synonyms.drop(1)
+  end
+
   # Returns an Array of all synonym Name's including itself at front of list.
   # (This looks screwy, but I think it is the safest way to handle it.
   # Note that synonym.names does include self, but it's a different instance.
@@ -130,7 +135,8 @@ class Name < AbstractModel
   #
   # rubocop:disable Style/RedundantSelf
   # I think these methods read much better with self explicitly included. -JPH
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+  # rubucop:disable Metrics/PerceivedComplexity
   # This is the best I can do. I think splitting it up will make it worse. -JPH
   def merge_synonyms(name)
     if !self.synonym && !name.synonym
@@ -155,7 +161,8 @@ class Name < AbstractModel
       end
     end
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubucop:enable Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
   # Delete the other Name's old Synonym if there aren't any Name's in it
