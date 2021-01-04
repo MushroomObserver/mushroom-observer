@@ -65,6 +65,7 @@ suillus_desc:
   <<: *DEFAULTS
   name: suillus
   user: dick
+  source_type: <%= NameDescription.source_types[:public] %>
   gen_desc: A __Suillus__ by any other name would smell as sweet...
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
@@ -171,6 +172,9 @@ coprinus_comatus_desc:
   name: coprinus_comatus
   authors: rolf
   editors: rolf, mary
+  admin_groups:  reviewers
+  reader_groups: all_users
+  writer_groups: all_users
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   created_at: 2007-02-26 20:48:00
   updated_at: 2007-02-27 20:48:00

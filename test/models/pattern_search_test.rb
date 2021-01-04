@@ -779,12 +779,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_deprecated
-    expect = Name.where(deprecated: true, correct_spelling_id: nil)
+    expect = Name.where(deprecated: true).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where(deprecated: false, correct_spelling_id: nil)
+    expect = Name.where(deprecated: false).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:no")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -796,7 +796,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("include_misspellings:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where(correct_spelling_id: nil)
+    expect = Name.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("include_misspellings:no")
     assert_name_list_equal(expect, x.query.results, :sort)
