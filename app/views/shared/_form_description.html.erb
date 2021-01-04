@@ -3,7 +3,7 @@
   type       = desc.source_type
   new_record = desc.new_record?
   admin      = new_record || desc.is_admin?(@user)
-  author     = new_record || desc.is_author?(@user)
+  author     = new_record || desc.author?(@user)
   owner      = desc.user == @user
   root       = in_admin_mode?
 %>
