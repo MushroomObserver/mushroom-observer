@@ -3,9 +3,16 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-detailed_unknown_obs_interest:
-  updated_at: 2008-03-02 21:14:00
+DEFAULTS: &DEFAULTS
   user: junk
+  state: true
+
+detailed_unknown_obs_interest:
+  <<: *DEFAULTS
   target_type: Observation
   target: detailed_unknown_obs
-  state: true
+
+agaricus_campestros_interest:
+  <<: *DEFAULTS
+  target_type: Name
+  target: agaricus_campestros
