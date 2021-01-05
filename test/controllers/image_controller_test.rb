@@ -273,7 +273,7 @@ class ImageControllerTest < FunctionalTestCase
     get(:advanced_search, params: { q: "xxxxx" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(observer_advanced_search_path)
+    assert_redirected_to(observer_advanced_search_form_path)
   end
 
   def test_add_image
