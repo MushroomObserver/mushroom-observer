@@ -5,7 +5,11 @@ class Name < AbstractModel
 
   # Is this Name misspelled?
   def is_misspelling?
-    correct_spelling_id.present?
+    !correctly_spelt?
+  end
+
+  def correctly_spelt?
+    correct_spelling_id.blank?
   end
 
   # Do some simple queries to try to find alternate spellings of the given
