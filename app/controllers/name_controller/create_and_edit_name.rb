@@ -113,7 +113,7 @@ class NameController
 
   def update
     @parse = parse_name
-    if @name.dependents? && !in_admin_mode?
+    if !minor_change? && @name.dependents? && !in_admin_mode?
       redirect_with_query(
         controller: :observer, action: :email_name_change_request,
         name_id: @name.id, new_name: @parse.search_name

@@ -2866,18 +2866,42 @@ class NameTest < UnitTestCase
   def test_approved_synonym_of_proposed_name_has_dependents
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym &&
+           deprecated_name.correctly_spelt?,
+           "Test needs different fixture(s): " \
+           "an Approved Name, with a Deprecated Synonym" \
+           "the Deprecated Name being correctly spelt")
     Naming.create(user: mary,
                   name: deprecated_name,
                   observation: observations(:minimal_unknown_obs))
-    assert(!approved_synonym.deprecated &&
-           deprecated_name.synonym == approved_synonym.synonym,
-           "Test needs different fixture: " \
-           "an Approved Name, with a Synonym having Naming(s)")
 
     assert(
       approved_synonym.dependents?,
       "`dependents?` should be true for an approved synonym " \
-      "(#{approved_synonym}) of a Proposed Name (#deprecated_name)"
+      "(#{approved_synonym.text_name}) of " \
+      "a correctly spelt Proposed Name (#{deprecated_name.text_name})"
+    )
+  end
+
+  def test_approved_synonym_of_mispelt_name_has_no_dependents
+    approved_synonym = names(:peltigera)
+    deprecated_name = names(:petigera)
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym &&
+           deprecated_name.is_misspelling?,
+           "Test needs different fixture(s): " \
+           "an Approved Name, with a Deprecated Synonym" \
+           "the Deprecated Name being misspelt")
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+
+    assert_not(
+      approved_synonym.dependents?,
+      "`dependents?` should be false for an approved synonym " \
+      "(#{approved_synonym.text_name}) of " \
+      "a misspelt Proposed Name (#{deprecated_name.text_name})"
     )
   end
 
