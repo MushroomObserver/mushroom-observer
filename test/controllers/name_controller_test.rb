@@ -1762,6 +1762,38 @@ class NameControllerTest < FunctionalTestCase
     )
   end
 
+  def test_update_minor_change_to_ancestor
+    name = names(:boletus)
+    assert(name.children.present? &&
+           name.icn_id.blank? && name.author.blank? && name.citation.blank?,
+           "Test needs different fixture: " \
+           "Name with a child, and without icn_id, author, or citation")
+    params = {
+      id: name.id,
+      name: {
+        text_name: name.text_name,
+        rank: name.rank,
+        # adding these should be a minor change
+        icn_id: "17175",
+        author: "L.",
+        citation: "Sp. pl. 2: 1176 (1753)"
+      }
+    }
+
+    login(name.user.login)
+    post(:edit_name, params: params)
+
+    assert_flash_success(
+      "User should be able to make minor changes to Name that has offspring"
+    )
+    # assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+    name.reload
+    assert_equal(params[:name][:icn_id], name.icn_id.to_s)
+    assert_equal(params[:name][:author], name.author)
+    assert_equal(params[:name][:citation], name.citation)
+  end
+
   def test_update_change_text_name_of_approved_synonym
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
