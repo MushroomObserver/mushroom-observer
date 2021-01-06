@@ -543,7 +543,7 @@ class Name < AbstractModel
 
   # Does another Name "depend" on this Name?
   def dependents?
-    approved_synonym_of_proposed_name? ||
+    approved_synonym_of_correctly_spelt_proposed_name? ||
       correctly_spelled_ancestor_of_proposed_name? ||
       ancestor_of_correctly_spelled_name?
   end
@@ -552,8 +552,10 @@ class Name < AbstractModel
 
   private
 
-  def approved_synonym_of_proposed_name?
-    !deprecated && Naming.where(name: other_synonyms).any?
+  def approved_synonym_of_correctly_spelt_proposed_name?
+    !deprecated &&
+      Naming.joins(:name).where(name: other_synonyms).
+        merge(Name.with_correct_spelling).any?
   end
 
   def ancestor_of_correctly_spelled_name?
