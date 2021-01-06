@@ -1786,7 +1786,6 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success(
       "User should be able to make minor changes to Name that has offspring"
     )
-    # assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
     name.reload
     assert_equal(params[:name][:icn_id], name.icn_id.to_s)

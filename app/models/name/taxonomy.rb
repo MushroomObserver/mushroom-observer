@@ -555,7 +555,7 @@ class Name < AbstractModel
   def approved_synonym_of_correctly_spelt_proposed_name?
     !deprecated &&
       Naming.joins(:name).where(name: other_synonyms).
-      merge(Name.with_correct_spelling).any?
+        merge(Name.with_correct_spelling).any?
   end
 
   def ancestor_of_correctly_spelled_name?
