@@ -5,7 +5,7 @@ app_root = File.expand_path("..", __dir__)
 require("#{app_root}/app/classes/image_s3.rb")
 require("fileutils")
 
-abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
+abort(<<"INSTRUCTIONS") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
   USAGE::
 
@@ -26,7 +26,7 @@ abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
     --verbose  Print what is happening to stdout.
     --help     Print this message.
 
-EOB
+INSTRUCTIONS
 
 verbose = true if ARGV.any? { |arg| ["-v", "--verbose"].include?(arg) }
 replace = true if ARGV.any? { |arg| ["-r", "--replace"].include?(arg) }
@@ -69,12 +69,11 @@ end
 
 if replace
   FileUtils.rm(cache_file)
-  FileUtils.touch(cache_file)
 else
   FileUtils.touch(cache_file)
   FileUtils.mv(cache_file, temp_file1)
-  FileUtils.touch(cache_file)
 end
+FileUtils.touch(cache_file)
 
 num = 0
 sum = 0
