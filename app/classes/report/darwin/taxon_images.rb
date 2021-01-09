@@ -73,6 +73,7 @@ module Report
           type
           format
           accessURL
+          taxonID
           created
           creator
           license
@@ -91,10 +92,11 @@ module Report
       end
 
       def format_image_row(row)
-        [row["name_id"].to_s,
+        [row["id"].to_s,
          "StillImage",
          "image/jpeg",
          image_url(row["id"]),
+         row["name_id"].to_s,
          row["when"].to_s,
          row["name"].to_s == "" ? row["login"] : row["name"],
          row["license_url"],
