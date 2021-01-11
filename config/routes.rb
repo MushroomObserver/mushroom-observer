@@ -143,7 +143,7 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbarium: {
+  herbaria: {
     create_herbarium: {},
     delete_curator: {},
     destroy_herbarium: {},
