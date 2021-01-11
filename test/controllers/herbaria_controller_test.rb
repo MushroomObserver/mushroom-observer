@@ -3,7 +3,7 @@
 require("test_helper")
 
 # tests of Herbarium controller
-class HerbariumControllerTest < FunctionalTestCase
+class HerbariaControllerTest < FunctionalTestCase
   def herbarium_params
     {
       name: "",
