@@ -2439,7 +2439,7 @@
   herbarium_code: Code
   user_personal_herbarium: "[name]: Personal Fungarium"
 
-  # herbarium/show_herbarium
+  # herbaria/show_herbarium
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
@@ -2447,7 +2447,7 @@
   show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this fungarium.  When we add curators to an MO fungarium, those curators are given exclusive rights to edit the fungarium's addresses and notes.  Curators are also allowed to create fungarium records for other users' observations.  For example, when a fungarium accessions a contributor's specimen, the fungarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your fungarium and what its accession number is.  Please ask how MO can help your fungarium IT people automate this process via our API.
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
-  # herbarium/create_herbarium
+  # herbaria/create_herbarium
   create_herbarium: Create New Fungarium
   create_herbarium_title: Create New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
@@ -2460,7 +2460,7 @@
   create_herbarium_personal_already_exists: You've already created a personal fungarium called '[name]'.
   create_herbarium_must_define_location: You must define this location before we can use it for this fungarium. Any other information you provided has been saved.
 
-  # herbarium/edit_herbarium
+  # herbaria/edit_herbarium
   edit_herbarium: Edit Fungarium
   edit_herbarium_title: Editing Fungarium
   edit_herbarium_this_is_personal_herbarium: This is your personal fungarium. You are only allowed one personal fungarium. If you would like to change which fungarium is your personal fungarium, please contact the admins and explain the situation.
@@ -2474,10 +2474,10 @@
 
 
 
-  # herbarium/list_herbaria
+  # herbaria/list_herbaria
   list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
-  # herbarium/index
+  # herbaria/index
   herbarium_index: Fungarium Index
   herbarium_index_list_all_herbaria: List All Fungaria
   herbarium_index_nonpersonal_herbaria: List Institutional Fungaria
