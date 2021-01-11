@@ -109,7 +109,7 @@ gem("byebug", group: [:development, :test])
 gem("web-console", group: :development)
 
 # Automatically track code test coverage
-gem 'coveralls_reborn', '~> 0.20.0', require: false
+gem("coveralls_reborn", "~> 0.20.0", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
