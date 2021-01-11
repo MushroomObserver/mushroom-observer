@@ -204,14 +204,14 @@ class HerbariaController < ApplicationController
     @links ||= []
     if query.flavor != :all
       @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbarium, action: :list_herbaria }]
+                 { controller: :herbaria, action: :list_herbaria }]
     end
     if query.flavor != :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbarium, action: :index }]
+                 { controller: :herbaria, action: :index }]
     end
     @links << [:create_herbarium.l,
-               { controller: :herbarium, action: :create_herbarium }]
+               { controller: :herbaria, action: :create_herbarium }]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.

@@ -593,7 +593,7 @@ class LocationController < ApplicationController
           if (herbarium = Herbarium.safe_find(@set_herbarium))
             herbarium.location = @location
             herbarium.save
-            redirect_to(controller: :herbarium,
+            redirect_to(controller: :herbaria,
                         action: :show_herbarium,
                         id: @set_herbarium)
           end
