@@ -2,6 +2,7 @@
 
 # Controls viewing and modifying herbaria.
 class HerbariaController < ApplicationController
+  # filters
   before_action :login_required, except: [
     :index,
     :index_herbarium,
@@ -10,35 +11,32 @@ class HerbariaController < ApplicationController
     :show_herbarium
   ]
 
-  # Displays selected Herbarium's (based on current Query).
-  def index_herbarium
-    query = find_or_create_query(:Herbarium, by: params[:by])
-    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
-  end
+  # Old Action Name          Proposed New Name
+  # ---------------          -----------------
+  # create_herbarium (get)   new
+  # create_herbarium (post)  create
+  # delete_curator           ? - in separate file or controller?
+  # destroy_herbarium        destroy
+  # edit_herbarium (get)     edit
+  # edit_herbarium (post)    update
+  # herbarium_search         search
+  # index                    index_nonpersonal
+  # index_herbarium          index_selected
+  # list_herbaria            index
+  # merge_herbaria           merge - in separate file or controller?
+  # next_herbarium           next
+  # prev_herbarium           prev
+  # request_to_be_curator    ? - in separate file or controller?
+  # show_herbarium           show
 
-  def index
-    store_location
-    query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
-    show_selected_herbaria(query, always_index: true)
-  end
 
-  # Show list of herbaria.
+  # ---------- Actions to Display data (index, show, etc.) ---------------------
+
+  # List of all herbaria
   def list_herbaria
     store_location
     query = create_query(:Herbarium, :all, by: :name)
     show_selected_herbaria(query, always_index: true)
-  end
-
-  # Display list of Herbaria whose text matches a string pattern.
-  def herbarium_search
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(action: "show_herbarium", id: herbarium.id)
-    else
-      query = create_query(:Herbarium, :pattern_search, pattern: pattern)
-      show_selected_herbaria(query)
-    end
   end
 
   def show_herbarium
@@ -58,13 +56,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def next_herbarium
-    redirect_to_next_object(:next, Herbarium, params[:id].to_s)
-  end
-
-  def prev_herbarium
-    redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
-  end
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def create_herbarium
     store_location
@@ -98,6 +90,63 @@ class HerbariaController < ApplicationController
     end
   end
 
+  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
+
+  def destroy_herbarium
+    pass_query_params
+    keep_track_of_referrer
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium
+
+    if in_admin_mode? ||
+       @herbarium.curator?(@user) ||
+       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
+      @herbarium.destroy
+      redirect_to_referrer || redirect_to_herbarium_index
+    else
+      flash_error(:permission_denied.t)
+      redirect_to_referrer || redirect_to_show_herbarium
+    end
+  end
+
+  # ========== Non=standard REST Actions =======================================
+
+  # ---------- Display data
+
+  # Display selected Herbarium's (based on current Query).
+  def index_herbarium
+    query = find_or_create_query(:Herbarium, by: params[:by])
+    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+  end
+
+  def index
+    store_location
+    query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
+    show_selected_herbaria(query, always_index: true)
+  end
+
+  # Display list of Herbaria whose text matches a string pattern.
+  def herbarium_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (herbarium = Herbarium.safe_find(pattern))
+      redirect_to(action: "show_herbarium", id: herbarium.id)
+    else
+      query = create_query(:Herbarium, :pattern_search, pattern: pattern)
+      show_selected_herbaria(query)
+    end
+  end
+
+  def next_herbarium
+    redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+  end
+
+  def prev_herbarium
+    redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+  end
+
+  # ---------- Modify data
+
   def merge_herbaria
     pass_query_params
     keep_track_of_referrer
@@ -122,6 +171,8 @@ class HerbariaController < ApplicationController
     redirect_to_referrer || redirect_to_show_herbarium
   end
 
+  # ---------- Other
+
   def request_to_be_curator
     pass_query_params
     keep_track_of_referrer
@@ -136,23 +187,6 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:show_herbarium_request_sent.t)
     redirect_to_referrer || redirect_to_show_herbarium
-  end
-
-  def destroy_herbarium
-    pass_query_params
-    keep_track_of_referrer
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
-
-    if in_admin_mode? ||
-       @herbarium.curator?(@user) ||
-       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
-      @herbarium.destroy
-      redirect_to_referrer || redirect_to_herbarium_index
-    else
-      flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_to_show_herbarium
-    end
   end
 
   ##############################################################################
