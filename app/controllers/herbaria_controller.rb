@@ -419,7 +419,7 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(action: :index_herbarium, id: herbarium.try(&:id))
+    redirect_with_query(action: :index_selected, id: herbarium.try(&:id))
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
