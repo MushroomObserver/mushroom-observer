@@ -9,7 +9,7 @@
                             {action: :destroy_herbarium_record, id: @herbarium_record.id},
                             data: {confirm: :are_you_sure.t})
   end
-  tabs << link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
 
   @tabsets = {
     pager_for: @herbarium_record,

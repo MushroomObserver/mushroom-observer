@@ -46,7 +46,7 @@
                                     herbarium.show_link_args) %>
               <% elsif @merge != herbarium %>
                 <%= link_with_query(herbarium.name.t,
-                                    controller: :herbarium, action: :merge_herbaria,
+                                    controller: :herbaria, action: :merge_herbaria,
                                     that: @merge.id, this: herbarium.id) %>
               <% else %>
                 [<%= content_tag(:i, herbarium.name.t, style: "color:red") %>]
