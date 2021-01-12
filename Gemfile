@@ -109,7 +109,10 @@ gem("byebug", group: [:development, :test])
 gem("web-console", group: :development)
 
 # Automatically track code test coverage
-gem("coveralls", require: false)
+# Use coveralls_reborn gem instead of coveralls gem
+# With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
+# when Travis submits the coverage report to Coveralls
+gem("coveralls_reborn", "~> 0.20.0", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
