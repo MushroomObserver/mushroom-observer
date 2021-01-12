@@ -33,13 +33,13 @@ class HerbariaController < ApplicationController
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
   # List of all herbaria
-  def list_herbaria
+  def index
     store_location
     query = create_query(:Herbarium, :all, by: :name)
     show_selected_herbaria(query, always_index: true)
   end
 
-  def show_herbarium
+  def show
     store_location
     pass_query_params
     @canonical_url = Herbarium.show_url(params[:id])
@@ -58,7 +58,7 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
-  def create_herbarium
+  def new
     store_location
     pass_query_params
     keep_track_of_referrer
@@ -71,7 +71,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def edit_herbarium
+  def edit
     store_location
     pass_query_params
     keep_track_of_referrer
@@ -92,7 +92,13 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
-  def destroy_herbarium
+  def create
+  end
+
+  def update
+  end
+
+  def destroy
     pass_query_params
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -114,19 +120,19 @@ class HerbariaController < ApplicationController
   # ---------- Display data
 
   # Display selected Herbarium's (based on current Query).
-  def index_herbarium
+  def index_selected
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
-  def index
+  def index_nonpersonal
     store_location
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
   end
 
   # Display list of Herbaria whose text matches a string pattern.
-  def herbarium_search
+  def search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium = Herbarium.safe_find(pattern))
@@ -137,17 +143,17 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def next_herbarium
+  def next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  def prev_herbarium
+  def prev
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
   # ---------- Modify data
 
-  def merge_herbaria
+  def merge
     pass_query_params
     keep_track_of_referrer
     this = find_or_goto_index(Herbarium, params[:this]) || return
