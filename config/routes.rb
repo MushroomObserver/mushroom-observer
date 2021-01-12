@@ -143,6 +143,31 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
+  herbaria: {
+    # create_herbarium: {}, # aliased only
+    delete_curator: {},
+    # destroy_herbarium: {}, # aliased only
+    # edit_herbarium: {}, # aliased only
+    search: {},
+    index_herbarium: {},
+    index_nonpersonal_herbarium: {},
+    # list_herbaria: {}, # aliased only
+    merge: {},
+    # next_herbarium: {}, # aliased only
+    # prev_herbarium: {}, # aliased only
+    request_to_be_curator: {},
+    # show_herbarium: {}, # aliased only
+    next: {},
+    prev: {}
+    # resources
+    # create: {},
+    # destroy: {},
+    # edit: {},
+    # index: {},
+    # new: {},
+    # show: {},
+    # update: {}
+  },
   herbarium_record: {
     create_herbarium_record: {},
     destroy_herbarium_record: {},
@@ -653,17 +678,7 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  resources :herbaria, id: /\d+/ do
-    get "delete_curator", on: :member
-    get "index_nonpersonal", on: :member
-    get "index_selected", on: :member
-    get "merge", on: :member
-    get "next", on: :member
-    get "prev", on: :member
-    get "delete_curator", on: :member
-    get "request_to_be_curator", on: :member
-    get "search", on: :member
-  end
+  resources :herbaria, id: /\d+/
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications

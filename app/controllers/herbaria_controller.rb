@@ -21,7 +21,7 @@ class HerbariaController < ApplicationController
   # edit_herbarium (post)    update
   # herbarium_search         search
   # index                    index_nonpersonal
-  # index_herbarium          index_selected
+  # index_herbarium          index_herbarium
   # list_herbaria            index
   # merge_herbaria           merge - in separate file or controller?
   # next_herbarium           next
@@ -120,7 +120,7 @@ class HerbariaController < ApplicationController
   # ---------- Display data
 
   # Display selected Herbarium's (based on current Query).
-  def index_selected
+  def index_herbarium
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
