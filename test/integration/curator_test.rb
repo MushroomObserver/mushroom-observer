@@ -83,7 +83,7 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
-    get("/herbaria/show_herbarium/#{rec.herbarium.id}")
+    get("/herbaria/show/#{rec.herbarium.id}")
     click(href: /herbarium_index/)
     assert_template("herbarium_record/list_herbarium_records")
     click(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
@@ -112,7 +112,7 @@ class CuratorTest < IntegrationTestCase
     get("/herbarium_record/create_herbarium_record/" +
         observations(:minimal_unknown_obs).id.to_s)
     click(label: :herbarium_index.t)
-    assert_template("herbaria/list_herbaria")
+    assert_template("herbaria/index")
   end
 
   def test_single_herbarium_search
@@ -122,7 +122,7 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIA.l)
       form.submit("Search")
     end
-    assert_template("herbaria/show_herbarium")
+    assert_template("herbaria/show")
   end
 
   def test_multiple_herbarium_search
@@ -132,7 +132,7 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIA.l)
       form.submit("Search")
     end
-    assert_template("herbaria/list_herbaria")
+    assert_template("herbaria/index")
   end
 
   def test_herbarium_record_search
@@ -151,7 +151,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
     login!(curator.login, "testpassword", true)
-    get("/herbaria/edit_herbarium?id=#{herbarium.id}")
+    get("/herbaria/edit?id=#{herbarium.id}")
     open_form do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
@@ -159,14 +159,14 @@ class CuratorTest < IntegrationTestCase
     end
     herbarium = Herbarium.find(herbarium.id)
     assert_equal(new_code, herbarium.code)
-    assert_template("herbaria/show_herbarium")
+    assert_template("herbaria/show")
   end
 
   def test_herbarium_create
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get("/herbaria/create_herbarium")
+    get("/herbaria/create")
     open_form do |form|
       form.assert_value("herbarium_name", "")
       form.assert_value("code", "")
@@ -181,6 +181,6 @@ class CuratorTest < IntegrationTestCase
     end
     user = User.find(user.id)
     assert_not_empty(user.curated_herbaria)
-    assert_template("herbaria/show_herbarium")
+    assert_template("herbaria/show")
   end
 end

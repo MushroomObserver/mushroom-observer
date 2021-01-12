@@ -46,13 +46,13 @@
                                     herbarium.show_link_args) %>
               <% elsif @merge != herbarium %>
                 <%= link_with_query(herbarium.name.t,
-                                    controller: :herbaria, action: :merge_herbaria,
+                                    controller: :herbaria, action: :merge,
                                     that: @merge.id, this: herbarium.id) %>
               <% else %>
                 [<%= content_tag(:i, herbarium.name.t, style: "color:red") %>]
               <% end %>
               <% if @user && !@merge && (herbarium.can_edit? || in_admin_mode?) %>
-                [<%= link_with_query(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %> |
+                [<%= link_with_query(:EDIT.t, action: :edit, id: herbarium.id) %> |
                  <%= link_to(:MERGE.t, reload_with_args(merge: herbarium.id)) %>]
               <% end %>
             </td>

@@ -621,10 +621,10 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :observer, action: :list_observations)
 
-    # Make sure this redirects correctly to list_herbaria not list_herariums.
+    # Make sure this redirects correctly to index not list_herariums.
     params = { search: { pattern: "", type: :herbarium } }
     get(:pattern_search, params: params)
-    assert_redirected_to(controller: :herbaria, action: :list_herbaria)
+    assert_redirected_to(controller: :herbaria, action: :index)
   end
 
   def test_observation_search_help

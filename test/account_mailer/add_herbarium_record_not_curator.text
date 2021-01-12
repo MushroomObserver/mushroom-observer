@@ -10,5 +10,5 @@ The user, rolf, added the fungarium record, Cortinarius sp.: 1234, to the fungar
 Here are some handy links:
 
 Show this fungarium record: http://mushroomobserver.org/herbarium_record/show_herbarium_record/<%= ActiveRecord::FixtureSet.identify(:interesting_unknown) %>
-Show this fungarium: http://mushroomobserver.org/herbaria/show_herbarium/<%= ActiveRecord::FixtureSet.identify(:nybg_herbarium) %>
+Show this fungarium: http://mushroomobserver.org/herbaria/show/<%= ActiveRecord::FixtureSet.identify(:nybg_herbarium) %>
 Show user's profile: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>

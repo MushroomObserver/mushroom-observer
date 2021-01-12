@@ -9,7 +9,7 @@
     tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
                             @back_object.show_link_args)
   end
-  tabs << link_with_query(:create_herbarium.t, controller: :herbaria, action: :create_herbarium)
+  tabs << link_with_query(:create_herbarium.t, controller: :herbaria, action: :create)
   tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
 
   @tabsets = { right: draw_tab_set(tabs) }
