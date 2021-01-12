@@ -143,21 +143,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbaria: {
-    create_herbarium: {},
-    delete_curator: {},
-    destroy_herbarium: {},
-    edit_herbarium: {},
-    herbarium_search: {},
-    index: {},
-    index_herbarium: {},
-    list_herbaria: {},
-    merge_herbaria: {},
-    next_herbarium: {},
-    prev_herbarium: {},
-    request_to_be_curator: {},
-    show_herbarium: {}
-  },
   herbarium_record: {
     create_herbarium_record: {},
     destroy_herbarium_record: {},
@@ -667,6 +652,18 @@ MushroomObserver::Application.routes.draw do
     old_controller: "glossary", new_controller: "glossary_terms",
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
+
+  resources :herbaria, id: /\d+/ do
+    get "delete_curator", on: :member
+    get "index_nonpersonal", on: :member
+    get "index_selected", on: :member
+    get "merge", on: :member
+    get "next", on: :member
+    get "prev", on: :member
+    get "delete_curator", on: :member
+    get "request_to_be_curator", on: :member
+    get "search", on: :member
+  end
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
