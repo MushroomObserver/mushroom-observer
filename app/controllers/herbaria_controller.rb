@@ -20,7 +20,7 @@ class HerbariaController < ApplicationController
   # edit_herbarium (get)     edit
   # edit_herbarium (post)    update
   # herbarium_search         search
-  # index                    index_nonpersonal
+  # index                    index_nonpersonal_herbaria
   # index_herbarium          index_herbarium
   # list_herbaria            index
   # merge_herbaria           merge - in separate file or controller?
@@ -32,7 +32,7 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # List of all herbaria
+  # List all herbaria
   def index
     store_location
     query = create_query(:Herbarium, :all, by: :name)
@@ -125,7 +125,8 @@ class HerbariaController < ApplicationController
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
-  def index_nonpersonal
+  # list nonpersonal herbaria
+  def index_nonpersonal_herbaria
     store_location
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
@@ -210,14 +211,14 @@ class HerbariaController < ApplicationController
     @links ||= []
     if query.flavor != :all
       @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbaria, action: :list_herbaria }]
+                 { controller: :herbaria, action: :index }]
     end
     if query.flavor != :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbaria, action: :index }]
+                 { controller: :herbaria, action: :index_nonpersonal_herbaria }]
     end
     @links << [:create_herbarium.l,
-               { controller: :herbaria, action: :create_herbarium }]
+               { controller: :herbaria, action: :create }]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
@@ -419,7 +420,7 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(action: :index_selected, id: herbarium.try(&:id))
+    redirect_with_query(action: :index_herbarium, id: herbarium.try(&:id))
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)

@@ -29,7 +29,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index
-    get_with_dump(:index_nonpersonal)
+    get_with_dump(:index_nonpersonal_herbaria)
     assert_template(:index)
   end
 
@@ -372,7 +372,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_redirected_to(
       { action: :index_herbarium },
       "Non-GET or -POST :create request should " \
-        "redirect to referrer or index_nonpersonal"
+        "redirect to referrer or index_nonpersonal_herbaria"
     )
   end
 
