@@ -36,8 +36,16 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_list_herbaria
-    get_with_dump(:index)
+  def test_index
+    get(:index)
+
+    assert_response(:success)
+    Herbarium.find_each do |herbarium|
+      assert_select(
+        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
+        "Herbarium Index missing link to #{herbarium.name} (##{herbarium.id})"
+      )
+    end
   end
 
   def test_herbarium_search
