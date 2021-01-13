@@ -48,8 +48,9 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_herbarium_search
-    get_with_dump(:search, pattern: "Personal Herbarium")
+  def test_search
+    get(:search, pattern: "Personal Herbarium")
+    # TODO: Assert page contents
   end
 
   def test_search_number
