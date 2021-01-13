@@ -6,9 +6,11 @@ class HerbariaController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_herbaria,
-    :list_herbaria,
+    :index_nonpersonal_herbaria,
     :herbarium_search,
-    :show_herbarium
+    :next,
+    :prev,
+    :show
   ]
 
   # Old Action Name          Proposed New Name
