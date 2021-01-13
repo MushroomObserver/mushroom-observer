@@ -16,8 +16,8 @@ class HerbariaControllerTest < FunctionalTestCase
     }
   end
 
-  def test_index_herbarium
-    get(:index_herbarium)
+  def test_index_herbaria
+    get(:index_herbaria)
 
     assert_response(:success)
     Herbarium.find_each do |herbarium|
@@ -28,8 +28,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index
-    get_with_dump(:index_nonpersonal_herbaria)
+  def test_index_nonpersonal_herbaria
+    get(:index_nonpersonal_herbaria)
     assert_template(:index)
   end
 
@@ -169,12 +169,12 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:merge, params: { this: id1, that: id2 })
     assert_flash_success
     # fundis ends up being the destination because it is older.
-    assert_redirected_to(action: :index_herbarium, id: fundis.id)
+    assert_redirected_to(action: :index_herbaria, id: fundis.id)
 
     make_admin("mary")
     get(:merge, params: { this: id3, that: id4 })
     assert_flash_success
-    assert_redirected_to(action: :index_herbarium,
+    assert_redirected_to(action: :index_herbaria,
                          id: herbaria(:nybg_herbarium).id)
   end
 
@@ -370,7 +370,7 @@ class HerbariaControllerTest < FunctionalTestCase
     put(:create)
 
     assert_redirected_to(
-      { action: :index_herbarium },
+      { action: :index_herbaria },
       "Non-GET or -POST :create request should " \
         "redirect to referrer or index_nonpersonal_herbaria"
     )

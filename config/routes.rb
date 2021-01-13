@@ -149,7 +149,7 @@ ACTIONS = {
     # destroy_herbarium: {}, # aliased only
     # edit_herbarium: {}, # aliased only
     search: {},
-    index_herbarium: {},
+    index_herbaria: {},
     index_nonpersonal_herbaria: {},
     # list_herbaria: {}, # aliased only
     merge: {},
