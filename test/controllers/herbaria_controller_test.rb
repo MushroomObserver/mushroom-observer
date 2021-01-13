@@ -13,7 +13,7 @@ class HerbariaControllerTest < FunctionalTestCase
       email: "",
       mailing_address: "",
       description: ""
-    }
+    }.freeze
   end
 
   def test_index_herbaria
@@ -64,7 +64,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_list_herbaria_merge_source
+  def test_index_merge_source
     herb1 = herbaria(:nybg_herbarium)
     herb2 = herbaria(:fundis_herbarium)
     herb3 = herbaria(:dick_herbarium)
@@ -74,37 +74,37 @@ class HerbariaControllerTest < FunctionalTestCase
 
     get(:index)
     assert_select("a[href*=edit]", count: 0)
-    assert_select("a[href*=merge]", count: 0)
+    assert_select("a[href^='herbaria_merge_path']", count: 0)
 
     login("dick")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 0)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 0)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 1)
-    assert_select("a[href*=merge]", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 0)
+    assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href^='herbaria_merge_path']", count: 0)
 
     login("rolf")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 0)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 0)
-    assert_select("a[href*=merge]", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 0)
+    assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 0)
+    assert_select("a[href^='herbaria_merge_path']", count: 0)
 
     make_admin("zero")
     get(:index)
-    assert_select("a[href*='edit/#{herb1.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb2.id}']", count: 1)
-    assert_select("a[href*='edit/#{herb3.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb1.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb2.id}']", count: 1)
-    assert_select("a[href*='index?merge=#{herb3.id}']", count: 1)
-    assert_select("a[href*=merge]", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
   def test_list_herbaria_merge_target
@@ -118,7 +118,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     get(:index, params: { merge: source.id })
     assert_select("a[href*=edit]", count: 0)
-    assert_select("a[href*=merge]", count: 0)
+    assert_select("a[href^='herbaria_merge_path']", count: 0)
 
     login("dick")
     get(:index, params: { merge: source.id })
