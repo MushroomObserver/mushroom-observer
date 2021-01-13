@@ -30,6 +30,9 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_nonpersonal_herbaria
     get(:index_nonpersonal_herbaria)
+
+    # TODO: replace assert_template with assertions that
+    # all nonpersonal, and no personal, herbaria are displayed
     assert_template(:index)
   end
 

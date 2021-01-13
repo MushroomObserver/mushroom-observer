@@ -242,6 +242,7 @@ class HerbariaController < ApplicationController
       args[:sorting_links].reject! { |x| x[0] == "user" }
     end
 
+    args[:action] = :index # render with the index template
     show_index_of_objects(query, args)
   end
 
