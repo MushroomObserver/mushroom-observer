@@ -22,7 +22,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     Herbarium.find_each do |herbarium|
       assert_select(
-        "a[href *= '#{herbarium_show_herbarium_path}/#{herbarium.id}']", true,
+        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
         "Herbarium Index missing link to #{herbarium.name} (##{herbarium.id})"
       )
     end
@@ -639,7 +639,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_put
     herbarium = herbaria(:rolf_herbarium)
-    back = "#{herbarium_show_herbarium_path}/#{herbarium.id}"
+    back = herbarium_path(herbarium.id)
     params = { id: herbarium.id, back: back }
     login("rolf")
     put(:edit, { params: params })
