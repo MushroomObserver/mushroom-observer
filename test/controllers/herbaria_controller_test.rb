@@ -58,7 +58,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:search, params: { pattern: herbarium.id })
 
     assert_redirected_to(
-      "#{herbarium_show_herbarium_path}/#{herbarium.id}",
+      herbarium_path(herbarium.id),
       "Herbarium search for ##{herbarium.id} should show " \
         "#{herbarium.name} herbarium"
     )

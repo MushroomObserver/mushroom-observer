@@ -7,9 +7,9 @@ class HerbariaController < ApplicationController
     :index,
     :index_herbaria,
     :index_nonpersonal_herbaria,
-    :herbarium_search,
     :next,
     :prev,
+    :search,
     :show
   ]
 
@@ -137,9 +137,8 @@ class HerbariaController < ApplicationController
   # Display list of Herbaria whose text matches a string pattern.
   def search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(action: "show_herbarium", id: herbarium.id)
+    if pattern.match(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
+      redirect_to(herbarium_path(herbarium.id))
     else
       query = create_query(:Herbarium, :pattern_search, pattern: pattern)
       show_selected_herbaria(query)
