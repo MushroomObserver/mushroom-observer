@@ -23,11 +23,13 @@
 #                       Lookup instances with a string that may contain "*"s.
 #
 #  ==== Report "show" action for object/model
-#  show_controller::    These two return the controller and action of the main.
-#  show_action::        Page used to display this object.
+#  show_controller::    These two return the controller and action of the main
+#  show_action::          page used to display this object.
 #  show_url::           "Official" URL for this database object.
 #  show_link_args::     "Official" link_to args for this database object.
-#  index_action::       Page used to display index of these objects.
+#  index_action::       Name of action to display index of these objects
+#  next_action          Name of action to display next one of these objects
+#  prev_action          Name of action to display previous one of these objects
 #
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.
@@ -382,6 +384,18 @@ class AbstractModel < ApplicationRecord
   #   Name.index_action => "index_name" #unormalized
   #   name.index_action => "index_name"
   #
+  # WARNING.
+  # 1. There is no standard Rails action name for displaying a **search** index.
+  # 2. Some old MO object classes are not searchable, and thus
+  #    lack an action that displays a **search** index.
+  # 3. The Rails standard "index" lists **all** objects. And the
+  #    corresponding old MO action that lists all objects is "list".
+  # 4. Many old MO object classes have > 1 action that produce indices, BUT
+  #    some object classes did not have a "list" action
+  # So for "normalized" controllers.
+  #   Best: each such controller has just one index action.
+  #   Otherwise, perhaps define "index_action" in the individual object class.
+  # JDC 2021-01-14
   def self.index_action
     return "index" if controller_normalized?(name) # Rails standard
 
@@ -443,6 +457,30 @@ class AbstractModel < ApplicationRecord
 
   def show_past_action
     self.class.show_past_action
+  end
+
+  # Return the name of the "next" action
+  # See comments above at show_action
+  def self.next_action
+    return "next" if controller_normalized?(name) # Rails standard
+
+    "next_#{name.underscore}" # Old MO style
+  end
+
+  def next_action
+    self.class.next_action
+  end
+
+  # Return the name of the "prev" action
+  # See comments above at show_action
+  def self.prev_action
+    return "prev" if controller_normalized?(name) # Rails standard
+
+    "prev_#{name.underscore}" # Old MO style
+  end
+
+  def prev_action
+    self.class.prev_action
   end
 
   # Return the link_to args of the "show_<object>" action

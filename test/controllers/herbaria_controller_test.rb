@@ -190,9 +190,11 @@ class HerbariaControllerTest < FunctionalTestCase
                          id: herbaria(:nybg_herbarium).id)
   end
 
-  def test_show_herbarium
+  def test_show
     nybg = herbaria(:nybg_herbarium)
-    get_with_dump(:show, id: nybg.id)
+    get(:show, id: nybg.id)
+
+    # TODO: replace with test of content
     assert_template(:show)
   end
 
