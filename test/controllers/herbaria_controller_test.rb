@@ -107,7 +107,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_list_herbaria_merge_target
+  def test_index_merge_target
     source = herbaria(:field_museum)
     herb1  = herbaria(:nybg_herbarium)
     herb2  = herbaria(:fundis_herbarium)
