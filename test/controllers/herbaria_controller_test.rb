@@ -142,7 +142,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
   end
 
-  def test_merge_herbaria
+  def test_merge
     # Rule is non-admins can only merge herbaria which they own all the records
     # at, into their own personal herbarium.  Nothing else.  Mary owns all the
     # records at fundis, randomly enough, so if we create a personal
