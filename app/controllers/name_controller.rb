@@ -208,6 +208,8 @@ class NameController < ApplicationController
 
   # Displays list of advanced search results.
   def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
     query = find_query(:Name)
     show_selected_names(query)
   rescue StandardError => e
