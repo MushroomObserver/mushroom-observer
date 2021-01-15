@@ -447,7 +447,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_template("edit")
   end
 
-  def test_edit_herbarium_with_curators
+  def test_edit_with_curators
     nybg = herbaria(:nybg_herbarium)
     get(:edit, params: { id: nybg.id })
     assert_response(:redirect)
@@ -460,10 +460,14 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit, id: nybg.id)
+    assert_response(:success)
+    # TODO: replace following with test for content
     assert_template("edit")
 
     make_admin("mary")
     get(:edit, params: { id: nybg.id })
+    assert_response(:success)
+    # TODO: replace following with test for content
     assert_template("edit")
   end
 
