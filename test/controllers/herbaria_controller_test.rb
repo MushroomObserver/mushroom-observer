@@ -256,16 +256,16 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
-  def test_create_herbarium
-    get(:create)
-    assert_response(:redirect)
+  def test_new
+    get(:new)
+    assert_redirected_to(account_login_path)
 
     login("rolf")
-    get_with_dump(:create)
-    assert_template(:create)
+    get(:new)
+    assert_form_action(action: :create) # "new" form posts to :create action
   end
 
-  def test_create_herbarium_post
+  def test_create
     herbarium_count = Herbarium.count
     params = herbarium_params.merge(
       name: " Burbank <blah> Herbarium ",

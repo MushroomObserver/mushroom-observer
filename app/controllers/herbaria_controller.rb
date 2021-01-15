@@ -64,13 +64,7 @@ class HerbariaController < ApplicationController
     store_location
     pass_query_params
     keep_track_of_referrer
-    if request.method == "GET"
-      @herbarium = Herbarium.new
-    elsif request.method == "POST"
-      post_create_herbarium
-    else
-      redirect_to_referrer || redirect_to_herbarium_index
-    end
+    @herbarium = Herbarium.new
   end
 
   def edit
@@ -95,6 +89,14 @@ class HerbariaController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
+    store_location
+    pass_query_params
+    keep_track_of_referrer
+    if request.method == post
+      post_create_herbarium
+    else
+      redirect_to_referrer || redirect_to_herbarium_index
+    end
   end
 
   def update
