@@ -92,7 +92,7 @@ class HerbariaController < ApplicationController
     store_location
     pass_query_params
     keep_track_of_referrer
-    if request.method == post
+    if request.method == "POST"
       post_create_herbarium
     else
       redirect_to_referrer || redirect_to_herbarium_index
