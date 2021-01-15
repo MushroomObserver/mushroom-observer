@@ -390,7 +390,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_post_invalid_personal_user
+  def test_create_invalid_personal_user
     params = herbarium_params.merge(
       name: "My Herbarium",
       personal: "1",
@@ -431,7 +431,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_herbarium_without_curators
+  def test_edit_without_curators
     nybg = herbaria(:nybg_herbarium)
     nybg.curators.delete(rolf)
     nybg.curators.delete(roy)
