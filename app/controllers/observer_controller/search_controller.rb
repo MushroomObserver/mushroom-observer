@@ -102,6 +102,8 @@ class ObserverController
       search[:search_location_notes] = params[:search_location_notes].present?
       query = create_query(:Observation, :advanced_search, search)
     else
+      return if handle_advanced_search_invalid_q_param?
+
       query = find_query(:Observation)
     end
     show_selected_observations(query)

@@ -3875,6 +3875,9 @@
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
   pattern_search_user_me_not_logged_in_error: The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!
 
+  # Advanced search error messages
+  advanced_search_bad_q_error: Search expired or cannot be found. Please re-enter search criteria.
+
   # content for html header title tag,
   # used when there are no hits for a list or search
   title_for_comment_search: Comment Search
