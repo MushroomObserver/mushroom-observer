@@ -299,7 +299,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_includes(email.body.to_s, herbarium.show_url)
   end
 
-  def test_create_herbarium_post_with_duplicate_name
+  def test_create_duplicate_name
     herbarium_count = Herbarium.count
     login("rolf")
     nybg = herbaria(:nybg_herbarium)
@@ -327,7 +327,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal("1", herbarium.personal)
   end
 
-  def test_create_herbarium_post_with_nonexisting_place_name
+  def test_create_nonexisting_place_name
     herbarium_count = Herbarium.count
     login("rolf")
     params = herbarium_params.merge(
