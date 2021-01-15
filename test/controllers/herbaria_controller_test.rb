@@ -440,7 +440,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("mary")
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template("edit")
   end
 
@@ -456,7 +456,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit, id: nybg.id)
+    get(:edit, id: nybg.id)
     assert_template("edit")
 
     make_admin("mary")
@@ -707,7 +707,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:request_to_be_curator)
     assert_response(:redirect)
 
-    get_with_dump(:request_to_be_curator, id: nybg.id)
+    get(:request_to_be_curator, id: nybg.id)
     assert_response(:success)
   end
 
