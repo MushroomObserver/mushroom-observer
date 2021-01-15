@@ -410,7 +410,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_post_second_personal_herbarium
+  def test_create_second_personal_herbarium
     params = herbarium_params.merge(
       name: "My Herbarium",
       personal: "1",
@@ -441,6 +441,9 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("mary")
     get(:edit, id: nybg.id)
+
+    assert_response(:success)
+    # TODO: replace following with test for content
     assert_template("edit")
   end
 
