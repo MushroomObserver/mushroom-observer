@@ -1100,6 +1100,17 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  # Handle advanced_search actions with an invalid q param,
+  # so that they get just one flash msg if the query has expired.
+  # This method avoids a call to find_safe, which would add
+  # "undefined method `id' for nil:NilClass" if there's no QueryRecord for q
+  def handle_advanced_search_invalid_q_param?
+    return unless invalid_q_param?
+
+    flash_error(:advanced_search_bad_q_error.t)
+    redirect_to(observer_advanced_search_form_path)
+  end
+
   private ##########
 
   def map_past_bys(args)
@@ -1178,6 +1189,11 @@ class ApplicationController < ActionController::Base
 
   def query_needs_update?(new_args, query)
     new_args.any? { |_arg, val| query.params[:arg] != val }
+  end
+
+  def invalid_q_param?
+    params && params[:q] &&
+      !QueryRecord.where(id: params[:q].dealphabetize).exists?
   end
 
   public ##########

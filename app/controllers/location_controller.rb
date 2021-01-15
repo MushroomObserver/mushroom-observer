@@ -112,6 +112,8 @@ class LocationController < ApplicationController
 
   # Displays matrix of advanced search results.
   def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
