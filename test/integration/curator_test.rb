@@ -83,7 +83,7 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
-    get("/herbaria/show/#{rec.herbarium.id}")
+    get(herbarium_path(rec.herbarium.id))
     click(href: /herbarium_index/)
     assert_template("herbarium_record/list_herbarium_records")
     click(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
@@ -122,7 +122,11 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIA.l)
       form.submit("Search")
     end
-    assert_template("herbaria/show")
+
+    assert_select(
+      "title",
+      text: "#{:app_title.l}: #{herbaria(:nybg_herbarium).format_name}"
+    )
   end
 
   def test_multiple_herbarium_search
