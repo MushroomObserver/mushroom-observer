@@ -180,8 +180,12 @@ class CuratorTest < IntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get(herbaria_path)
-    open_form do |form|
+    get(new_herbarium_path)
+
+    open_form(
+      # form POSTs to herbaria, not new_herbarium_path
+      "form[action^='#{herbaria_path}']"
+    ) do |form|
       form.assert_value("herbarium_name", "")
       form.assert_value("code", "")
       form.assert_value("place_name", "")
@@ -195,9 +199,10 @@ class CuratorTest < IntegrationTestCase
     end
     user = User.find(user.id)
     assert_not_empty(user.curated_herbaria)
+
     assert_select(
       "#title-caption",
-      { text: herbarium.last.format_name },
+      { text: "Mary’s Herbarium" }, # smart apostrophe
       "Creating a Fungarium should show the new Fungarium"
     )
   end
