@@ -440,10 +440,9 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_not_logged_in
-    nybg = herbaria(:nybg_herbarium)
-    get(:edit, params: { id: nybg.id })
-    assert_response(:redirect)
+  def test_edit_no_login
+    get(:edit, params: { id: herbaria(:nybg_herbarium).id })
+    assert_redirected_to(account_login_path)
   end
 
   def test_edit_without_curators
@@ -480,6 +479,12 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_template("edit")
   end
 
+  def test_update_no_login
+    post(:update, params: { herbarium: herbarium_params,
+                            id: herbaria(:nybg_herbarium).id })
+    assert_redirected_to(account_login_path)
+  end
+
   def test_update
     nybg = herbaria(:nybg_herbarium)
     last_update = nybg.updated_at
@@ -491,9 +496,6 @@ class HerbariaControllerTest < FunctionalTestCase
       mailing_address: "All\nNew\nLocation\n<spam>\n",
       description: " And  more  stuff. "
     )
-
-    post(:update, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(account_login_path)
 
     login("mary")
     post(:edit, params: { herbarium: params, id: nybg.id })
