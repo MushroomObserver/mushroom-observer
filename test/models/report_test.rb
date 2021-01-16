@@ -93,16 +93,6 @@ class ReportTest < UnitTestCase
     do_zip_test(Report::Gbif, expect)
   end
 
-  def test_taxa_report
-    taxa_report = build_taxa_report
-    report_content = taxa_report.body
-    assert_not_empty(report_content)
-    table = CSV.parse(report_content, col_sep: taxa_report.separator)
-    assert_equal(Observation.select(:name_id).distinct.count + 1, table.count)
-    obs = Observation.first
-    assert(table.include?([obs.name_id.to_s, obs.text_name]))
-  end
-
   def test_fundis_no_exact_lat_long
     # There are two collection numbers for this observation.  I can't think of
     # any good way to ensure the order that these are rendered in the report be
@@ -511,15 +501,6 @@ class ReportTest < UnitTestCase
       contents << entry.name
     end
     assert_equal(expect, contents)
-  end
-
-  def build_taxa_report
-    query = Query.lookup(:Observation, :all)
-    observations = Report::Darwin::Observations.new(query: query)
-    return if observations.body.empty?
-
-    report_type = Report::Darwin::Taxa
-    report_type.new(query: query, observations: observations)
   end
 
   def do_split_test(name, author, rank, expect)

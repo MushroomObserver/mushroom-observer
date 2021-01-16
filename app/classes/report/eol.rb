@@ -7,11 +7,9 @@ module Report
 
     def initialize(args)
       super(args)
-      self.observations = Darwin::Observations.new(args)
-      args[:observations] = observations
-      self.taxa = Darwin::Taxa.new(args)
-      args[:taxa] = taxa
       self.images = Darwin::TaxonImages.new(args)
+      args[:taxa] = images.taxa
+      self.taxa = Darwin::ImageTaxa.new(args)
     end
 
     def filename

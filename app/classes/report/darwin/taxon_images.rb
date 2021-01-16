@@ -6,13 +6,12 @@ module Report
     class TaxonImages < Report::CSV
       VOTE_CUTOFF = 2.5
 
-      attr_accessor :taxa, :query
+      attr_accessor :query
 
       self.separator = "\t"
 
       def initialize(args)
         super(args)
-        self.taxa = args[:taxa]
         initialize_query
       end
 
@@ -20,7 +19,13 @@ module Report
         self.query = tables[:images]
         add_joins
         add_project
+        add_conditions
+      end
+
+      def add_conditions
         query.where(tables[:observations][:vote_cache].gteq(VOTE_CUTOFF))
+        query.where(tables[:images][:ok_for_export].eq(1))
+        query.where(tables[:names][:ok_for_export].eq(1))
       end
 
       def tables
@@ -28,6 +33,7 @@ module Report
           images: Image.arel_table,
           images_observations: Arel::Table.new(:images_observations),
           licenses: License.arel_table,
+          names: Name.arel_table,
           observations: Observation.arel_table,
           users: User.arel_table
         }
@@ -37,6 +43,7 @@ module Report
         join_table(:images_observations, :image_id, attribute(:images, :id))
         join_table(:observations, :id,
                    attribute(:images_observations, :observation_id))
+        join_table(:names, :id, attribute(:observations, :name_id))
         join_table(:licenses, :id, attribute(:images, :license_id))
         join_table(:users, :id, attribute(:images, :user_id))
       end
@@ -50,6 +57,7 @@ module Report
       def add_project
         query.project(attribute(:images, :id),
                       attribute(:observations, :name_id),
+                      attribute(:names, :text_name),
                       attribute(:images, :when),
                       attribute(:users, :name),
                       attribute(:users, :login),
@@ -62,9 +70,19 @@ module Report
       end
 
       def formatted_rows
-        query.where(tables[:observations][:name_id].in(taxa.ids))
-        rows = ActiveRecord::Base.connection.exec_query(query.to_sql)
-        sort_after(rows.map { |row| format_image_row(row) })
+        @formatted_rows = sort_after(rows.map { |row| format_image_row(row) })
+      end
+
+      def rows
+        @rows ||= ActiveRecord::Base.connection.exec_query(query.to_sql)
+      end
+
+      def taxa
+        return @taxa if @taxa
+
+        @taxa = Set.new
+        rows.each { |row| @taxa.add([row["name_id"], row["text_name"]]) }
+        @taxa
       end
 
       def labels
