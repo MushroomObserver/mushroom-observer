@@ -379,13 +379,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_user_list_equal([mary], herbarium.curators)
   end
 
-  def test_create_bad_methods
-    !assert_recognizes({ controller: "herbaria", action: "create" },
-                       { path: "herbaria", method: :patch } )
-    !assert_recognizes({ controller: "herbaria", action: "create" },
-                       { path: "herbaria", method: :put } )
-  end
-
   def test_create_invalid_personal_user
     params = herbarium_params.merge(
       name: "My Herbarium",
@@ -654,20 +647,6 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { id: herbarium.id, herbarium: params })
     assert_nil(herbarium.reload.personal_user_id)
     assert_empty(herbarium.curators)
-  end
-
-  def test_edit_herbarium_put
-    herbarium = herbaria(:rolf_herbarium)
-    back = herbarium_path(herbarium.id)
-    params = { id: herbarium.id, back: back }
-    login("rolf")
-    put(:edit, { params: params })
-
-    assert_redirected_to(
-      back,
-      "Non-GET or -POST :edit request should " \
-        "redirect to referrer or show"
-    )
   end
 
   def test_delete_curator

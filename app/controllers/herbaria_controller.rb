@@ -186,6 +186,7 @@ class HerbariaController < ApplicationController
 
   # ---------- Other
 
+  # linked from show page
   def request_to_be_curator
     pass_query_params
     keep_track_of_referrer
