@@ -122,10 +122,11 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIA.l)
       form.submit("Search")
     end
-
     assert_select(
-      "title",
-      text: "#{:app_title.l}: #{herbaria(:nybg_herbarium).format_name}"
+      "#title-caption",
+      { text: herbaria(:nybg_herbarium).format_name },
+      "Fungaria pattern search with a single hit should land on " \
+      "the show page for that Fungarium"
     )
   end
 
@@ -136,7 +137,12 @@ class CuratorTest < IntegrationTestCase
       form.select("type", :HERBARIA.l)
       form.submit("Search")
     end
-    assert_template("herbaria/index")
+    assert_select(
+      "#title-caption",
+      { text: "Fungaria Matching ‘Personal’" },
+      "Fungaria pattern search with multiple hits should land on " \
+      "an index page for those Fungaria"
+    )
   end
 
   def test_herbarium_record_search
@@ -155,7 +161,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
     login!(curator.login, "testpassword", true)
-    get("/herbaria/edit?id=#{herbarium.id}")
+    get(edit_herbarium_path(herbarium.id))
     open_form do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
@@ -163,14 +169,18 @@ class CuratorTest < IntegrationTestCase
     end
     herbarium = Herbarium.find(herbarium.id)
     assert_equal(new_code, herbarium.code)
-    assert_template("herbaria/show")
+    assert_select(
+      "#title-caption",
+      { text: herbarium.format_name },
+      "Changing Fungarium code should show that Fungarium"
+    )
   end
 
   def test_herbarium_create
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get("/herbaria/create")
+    get(herbaria_path)
     open_form do |form|
       form.assert_value("herbarium_name", "")
       form.assert_value("code", "")
@@ -185,6 +195,10 @@ class CuratorTest < IntegrationTestCase
     end
     user = User.find(user.id)
     assert_not_empty(user.curated_herbaria)
-    assert_template("herbaria/show")
+    assert_select(
+      "#title-caption",
+      { text: herbarium.last.format_name },
+      "Creating a Fungarium should show the new Fungarium"
+    )
   end
 end
