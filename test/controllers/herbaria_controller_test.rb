@@ -379,20 +379,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_user_list_equal([mary], herbarium.curators)
   end
 
-  def test_create_herbarium_put
-    # There is no route to PUT herbaria without an id.
-    # In the real world the response is :not_found (404)
-    # But in tests, put(create) goes to HerbariaController#create,
-    # with response :success (200)
-    skip("put(:create)' behaves incorrectly in tests. See code comments.")
-
-    login
-    put(:create)
-
-    assert_response(:not_found)
-  end
-
-  def test_create_bad_routes
+  def test_create_bad_methods
     !assert_recognizes({ controller: "herbaria", action: "create" },
                        { path: "herbaria", method: :patch } )
     !assert_recognizes({ controller: "herbaria", action: "create" },
