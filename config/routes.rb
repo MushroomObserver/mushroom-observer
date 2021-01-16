@@ -148,7 +148,7 @@ ACTIONS = {
     delete_curator: {},
     # destroy_herbarium: {}, # aliased only
     # edit_herbarium: {}, # aliased only
-    search: {},
+    # search: {},
     index_herbaria: {},
     index_nonpersonal_herbaria: {},
     # list_herbaria: {}, # aliased only
@@ -678,7 +678,9 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  resources :herbaria, id: /\d+/
+  resources :herbaria, id: /\d+/ do
+    get "search", on: :collection
+  end
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
