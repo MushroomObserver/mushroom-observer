@@ -485,13 +485,13 @@ class HerbariaControllerTest < FunctionalTestCase
     )
 
     login("mary")
-    post(:edit, params: { herbarium: params, id: nybg.id })
+    post(:update, params: { herbarium: params, id: nybg.id })
     assert_redirected_to(herbarium_path(nybg.id))
     assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")
-    post(:edit, params: { herbarium: params, id: nybg.id })
+    post(:update, params: { herbarium: params, id: nybg.id })
     assert_redirected_to(herbarium_path(nybg.id))
     assert_no_flash
     assert_not_equal(last_update, nybg.reload.updated_at)

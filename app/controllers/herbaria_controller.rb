@@ -96,6 +96,13 @@ class HerbariaController < ApplicationController
   end
 
   def update
+    store_location
+    pass_query_params
+    keep_track_of_referrer
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium
+    return unless make_sure_can_edit!
+    post_edit_herbarium
   end
 
   def destroy
