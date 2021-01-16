@@ -440,16 +440,16 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_without_curators
+  def test_edit_not_logged_in
     nybg = herbaria(:nybg_herbarium)
-    nybg.curators.delete(rolf)
-    nybg.curators.delete(roy)
-    assert_empty(nybg.reload.curators)
     get(:edit, params: { id: nybg.id })
     assert_response(:redirect)
+  end
 
+  def test_edit_without_curators
+    herbarium = herbaria(:curatorless_herbarium)
     login("mary")
-    get(:edit, id: nybg.id)
+    get(:edit, id: herbarium.id)
 
     assert_response(:success)
     # TODO: replace following with test for content
@@ -480,7 +480,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_template("edit")
   end
 
-  def test_edit_herbarium_post
+  def test_update
     nybg = herbaria(:nybg_herbarium)
     last_update = nybg.updated_at
     params = herbarium_params.merge(
@@ -492,18 +492,18 @@ class HerbariaControllerTest < FunctionalTestCase
       description: " And  more  stuff. "
     )
 
-    post(:edit, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(controller: :account, action: :login)
+    post(:update, params: { herbarium: params, id: nybg.id })
+    assert_redirected_to(account_login_path)
 
     login("mary")
     post(:edit, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(action: :show, id: nybg.id)
+    assert_redirected_to(herbarium_path(nybg.id))
     assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")
     post(:edit, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(action: :show, id: nybg.id)
+    assert_redirected_to(herbarium_path(nybg.id))
     assert_no_flash
     assert_not_equal(last_update, nybg.reload.updated_at)
     assert_equal("New Herbarium", nybg.name)
