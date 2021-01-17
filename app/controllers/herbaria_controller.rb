@@ -12,6 +12,36 @@ class HerbariaController < ApplicationController
     :search,
     :show
   ]
+  before_action :store_location, only: [
+    :create,
+    :edit,
+    :index,
+    :index_nonpersonal_herbaria,
+    :new,
+    :show,
+    :update
+  ]
+  before_action :pass_query_params, only: [
+    :create,
+    :delete_curator,
+    :destroy,
+    :edit,
+    :merge,
+    :new,
+    :request_to_be_curator,
+    :show,
+    :update
+  ]
+  before_action :keep_track_of_referrer, only: [
+    :create,
+    :delete_curator,
+    :destroy,
+    :edit,
+    :merge,
+    :new,
+    :request_to_be_curator,
+    :update
+  ]
 
   # Old MO Action Name       New "Normalized"Name
   # ------------------       --------------------
@@ -35,14 +65,11 @@ class HerbariaController < ApplicationController
 
   # List all herbaria
   def index
-    store_location
     query = create_query(:Herbarium, :all, by: :name)
     show_selected_herbaria(query, always_index: true)
   end
 
   def show
-    store_location
-    pass_query_params
     @canonical_url = Herbarium.show_url(params[:id])
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return if request.method != "POST"
@@ -60,16 +87,10 @@ class HerbariaController < ApplicationController
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def new
-    store_location
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = Herbarium.new
   end
 
   def edit
-    store_location
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
@@ -88,16 +109,10 @@ class HerbariaController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    store_location
-    pass_query_params
-    keep_track_of_referrer
     post_create_herbarium
   end
 
   def update
-    store_location
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
@@ -105,8 +120,6 @@ class HerbariaController < ApplicationController
   end
 
   def destroy
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -133,7 +146,6 @@ class HerbariaController < ApplicationController
 
   # list nonpersonal herbaria
   def index_nonpersonal_herbaria
-    store_location
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
   end
@@ -160,8 +172,6 @@ class HerbariaController < ApplicationController
   # ---------- Modify data
 
   def merge
-    pass_query_params
-    keep_track_of_referrer
     this = find_or_goto_index(Herbarium, params[:this]) || return
     that = find_or_goto_index(Herbarium, params[:that]) || return
     result = perform_or_request_merge(this, that) || return
@@ -169,8 +179,6 @@ class HerbariaController < ApplicationController
   end
 
   def delete_curator
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
@@ -187,8 +195,6 @@ class HerbariaController < ApplicationController
 
   # linked from show page
   def request_to_be_curator
-    pass_query_params
-    keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
 
