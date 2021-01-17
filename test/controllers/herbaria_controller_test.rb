@@ -159,7 +159,6 @@ class HerbariaControllerTest < FunctionalTestCase
     number2 = query.results[1]
     q = query.record.id.alphabetize
 
-    login
     get(:next, params: { id: number1.id, q: q })
     assert_redirected_to(action: :show, id: number2.id, q: q)
 
