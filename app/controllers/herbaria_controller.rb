@@ -13,8 +13,8 @@ class HerbariaController < ApplicationController
     :show
   ]
 
-  # Old Action Name          Proposed New Name
-  # ---------------          -----------------
+  # Old MO Action Name       New "Normalized"Name
+  # ------------------       --------------------
   # create_herbarium (get)   new
   # create_herbarium (post)  create
   # delete_curator           ? - in separate file or controller?
@@ -30,7 +30,6 @@ class HerbariaController < ApplicationController
   # prev_herbarium           prev
   # request_to_be_curator    ? - in separate file or controller?
   # show_herbarium           show
-
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 

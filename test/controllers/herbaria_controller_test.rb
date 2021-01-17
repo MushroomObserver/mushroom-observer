@@ -4,6 +4,7 @@ require("test_helper")
 
 # tests of Herbarium controller
 class HerbariaControllerTest < FunctionalTestCase
+  # ---------- Helpers ----------
   def herbarium_params
     {
       name: "",
@@ -16,24 +17,13 @@ class HerbariaControllerTest < FunctionalTestCase
     }.freeze
   end
 
-  def test_index_herbaria
-    get(:index_herbaria)
+  # ---------- Actions to Display data (index, show, etc.) ---------------------
+  def test_show
+    nybg = herbaria(:nybg_herbarium)
+    get(:show, id: nybg.id)
 
-    assert_response(:success)
-    Herbarium.find_each do |herbarium|
-      assert_select(
-        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
-        "Herbarium Index missing link to #{herbarium.name} (##{herbarium.id})"
-      )
-    end
-  end
-
-  def test_index_nonpersonal_herbaria
-    get(:index_nonpersonal_herbaria)
-
-    # TODO: replace assert_template with assertions that
-    # all nonpersonal, and no personal, herbaria are displayed
-    assert_template(:index)
+    # TODO: replace with test of content
+    assert_template(:show)
   end
 
   def test_index
@@ -48,23 +38,7 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_search
-    get(:search, pattern: "Personal Herbarium")
-    # TODO: Assert page contents
-  end
-
-  def test_search_number
-    herbarium = herbaria(:nybg_herbarium)
-    get(:search, params: { pattern: herbarium.id })
-
-    assert_redirected_to(
-      herbarium_path(herbarium.id),
-      "Herbarium search for ##{herbarium.id} should show " \
-        "#{herbarium.name} herbarium"
-    )
-  end
-
-  def test_index_merge_source
+  def test_index_merge_source_links_present
     herb1 = herbaria(:nybg_herbarium)
     herb2 = herbaria(:fundis_herbarium)
     herb3 = herbaria(:dick_herbarium)
@@ -107,7 +81,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_index_merge_target
+  def test_index_merge_target_links_present
     source = herbaria(:field_museum)
     herb1  = herbaria(:nybg_herbarium)
     herb2  = herbaria(:fundis_herbarium)
@@ -142,102 +116,39 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
   end
 
-  def test_merge
-    # Rule is non-admins can only merge herbaria which they own all the records
-    # at, into their own personal herbarium.  Nothing else.  Mary owns all the
-    # records at fundis, randomly enough, so if we create a personal
-    # herbarium for her, she should be able to merge fundis into it.
-    fundis = herbaria(:fundis_herbarium)
-    assert_true(fundis.owns_all_records?(mary))
-    mary_herbarium = mary.create_personal_herbarium
-    id1 = fundis.id
-    id2 = mary_herbarium.id
-    id3 = herbaria(:nybg_herbarium).id
-    id4 = herbaria(:field_museum).id
+  def test_index_herbaria
+    get(:index_herbaria)
 
-    get(:merge, params: { this: id1, that: id2 })
-    assert_redirected_to(controller: :account, action: :login)
-
-    login("rolf")
-    get(:merge, params: { this: id1, that: id2 })
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
-                         type: :Herbarium, old_id: id1, new_id: id2)
-
-    login("mary")
-    get(:merge)
-    assert_flash_error
-    get(:merge, params: { this: id2, that: id2 })
-    assert_no_flash
-    get(:merge, params: { this: 666 })
-    assert_flash_error
-    get(:merge, params: { this: id1, that: 666 })
-    assert_flash_error
-    get(:merge, params: { this: id3, that: id3 })
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
-                         type: :Herbarium, old_id: id3, new_id: id3)
-    get(:merge, params: { this: id1, that: id3 })
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
-                         type: :Herbarium, old_id: id1, new_id: id3)
-    get(:merge, params: { this: id1, that: id2 })
-    assert_flash_success
-    # fundis ends up being the destination because it is older.
-    assert_redirected_to(action: :index_herbaria, id: fundis.id)
-
-    make_admin("mary")
-    get(:merge, params: { this: id3, that: id4 })
-    assert_flash_success
-    assert_redirected_to(action: :index_herbaria,
-                         id: herbaria(:nybg_herbarium).id)
-  end
-
-  def test_show
-    nybg = herbaria(:nybg_herbarium)
-    get(:show, id: nybg.id)
-
-    # TODO: replace with test of content
-    assert_template(:show)
-  end
-
-  def test_show_herbarium_post
-    nybg = herbaria(:nybg_herbarium)
-    params = {
-      id: nybg.id,
-      add_curator: mary.login
-    }
-    curator_count = nybg.curators.count
-
-    post(:show, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-
-    login("mary")
-    post(:show, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-
-    login("rolf")
-    post(:show, params: params)
-    assert_equal(curator_count + 1, nybg.reload.curators.count)
     assert_response(:success)
+    Herbarium.find_each do |herbarium|
+      assert_select(
+        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
+        "Herbarium Index missing link to #{herbarium.name} (##{herbarium.id})"
+      )
+    end
   end
 
-  def test_show_add_nonuser_curator
-    herbarium = herbaria(:rolf_herbarium)
-    login = "non-user"
-    params = {
-      id: herbarium.id,
-      add_curator: login
-    }
-    login("rolf")
+  def test_index_nonpersonal_herbaria
+    get(:index_nonpersonal_herbaria)
 
-    assert_no_difference(
-      "herbarium.curators.count",
-      "Curators should not change when trying to add non-user as curator"
-    ) do
-      post(:show, params: params)
-      herbarium.reload
-    end
-    assert_flash(
-      /#{:show_herbarium_no_user.t(login: login)}/,
-      "Error should be flashed if trying to add non-user as curator"
+    # TODO: replace assert_template with assertions that
+    # all nonpersonal, and no personal, herbaria are displayed
+    assert_template(:index)
+  end
+
+  def test_search
+    get(:search, pattern: "Personal Herbarium")
+    # TODO: Assert page contents
+  end
+
+  def test_search_number
+    herbarium = herbaria(:nybg_herbarium)
+    get(:search, params: { pattern: herbarium.id })
+
+    assert_redirected_to(
+      herbarium_path(herbarium.id),
+      "Herbarium search for ##{herbarium.id} should show " \
+        "#{herbarium.name} herbarium"
     )
   end
 
@@ -256,6 +167,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show, id: number1.id, q: q)
   end
 
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
+
   def test_new
     get(:new)
     assert_redirected_to(account_login_path)
@@ -264,6 +177,47 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:new)
     assert_form_action(action: :create) # "new" form posts to :create action
   end
+
+  def test_edit_no_login
+    get(:edit, params: { id: herbaria(:nybg_herbarium).id })
+    assert_redirected_to(account_login_path)
+  end
+
+  def test_edit_without_curators
+    herbarium = herbaria(:curatorless_herbarium)
+    login("mary")
+    get(:edit, id: herbarium.id)
+
+    assert_response(:success)
+    # TODO: replace following with test for content
+    assert_template("edit")
+  end
+
+  def test_edit_with_curators
+    nybg = herbaria(:nybg_herbarium)
+    get(:edit, params: { id: nybg.id })
+    assert_response(:redirect)
+
+    login("mary")
+    assert_not(nybg.curator?(mary))
+    get(:edit, params: { id: nybg.id })
+    assert_flash_text(/Permission denied/i)
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:edit, id: nybg.id)
+    assert_response(:success)
+    # TODO: replace following with test for content
+    assert_template("edit")
+
+    make_admin("mary")
+    get(:edit, params: { id: nybg.id })
+    assert_response(:success)
+    # TODO: replace following with test for content
+    assert_template("edit")
+  end
+
+  # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def test_create
     herbarium_count = Herbarium.count
@@ -418,45 +372,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_error(
       "Trying to create second personal herbarium for user should flash error"
     )
-  end
-
-  def test_edit_no_login
-    get(:edit, params: { id: herbaria(:nybg_herbarium).id })
-    assert_redirected_to(account_login_path)
-  end
-
-  def test_edit_without_curators
-    herbarium = herbaria(:curatorless_herbarium)
-    login("mary")
-    get(:edit, id: herbarium.id)
-
-    assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
-  end
-
-  def test_edit_with_curators
-    nybg = herbaria(:nybg_herbarium)
-    get(:edit, params: { id: nybg.id })
-    assert_response(:redirect)
-
-    login("mary")
-    assert_not(nybg.curator?(mary))
-    get(:edit, params: { id: nybg.id })
-    assert_flash_text(/Permission denied/i)
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:edit, id: nybg.id)
-    assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
-
-    make_admin("mary")
-    get(:edit, params: { id: nybg.id })
-    assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
   end
 
   def test_update
@@ -649,6 +564,59 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_empty(herbarium.curators)
   end
 
+  def test_destroy
+    herbarium = herbaria(:nybg_herbarium)
+    records = herbarium.herbarium_records
+    assert_not_empty(records)
+    record_ids = records.map(&:id)
+
+    # Must be logged in.
+    get(:destroy, params: { id: herbarium.id })
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # Must be curator or admin.
+    login("mary")
+    get(:destroy, params: { id: herbarium.id })
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # Curator can do it.
+    login("roy")
+    get(:destroy, params: { id: herbarium.id })
+    assert_nil(Herbarium.safe_find(herbarium.id))
+    assert_empty(HerbariumRecord.where(herbarium_id: herbarium.id))
+    assert_empty(Herbarium.connection.select_values(%(
+      SELECT observation_id FROM herbarium_records_observations
+      WHERE herbarium_record_id IN (#{record_ids.map(&:to_s).join(",")})
+    )))
+  end
+
+  def test_destroy_noncurator_owns_all_records
+    herbarium = herbaria(:fundis_herbarium)
+    assert_true(herbarium.owns_all_records?(mary))
+    assert_empty(herbarium.curators)
+
+    # Make sure noncurator can do it only if there are no curators.
+    login("mary")
+    herbarium.add_curator(dick)
+    get(:destroy, params: { id: herbarium.id })
+    assert_flash_error
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # But if there are no curators and the user owns all the records.
+    # (Note that this means anyone can destroy any uncurated empty herbaria.)
+    herbarium.curators.clear
+    get(:destroy, params: { id: herbarium.id })
+    assert_no_flash
+    assert_nil(Herbarium.safe_find(herbarium.id))
+  end
+
+  def test_destroy_admin
+    herbarium = herbaria(:nybg_herbarium)
+    make_admin("mary")
+    get(:destroy, params: { id: herbarium.id })
+    assert_nil(Herbarium.safe_find(herbarium.id))
+  end
+
   def test_delete_curator
     nybg = herbaria(:nybg_herbarium)
     assert(nybg.curator?(rolf))
@@ -682,6 +650,97 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_merge
+    # Rule is non-admins can only merge herbaria which they own all the records
+    # at, into their own personal herbarium.  Nothing else.  Mary owns all the
+    # records at fundis, randomly enough, so if we create a personal
+    # herbarium for her, she should be able to merge fundis into it.
+    fundis = herbaria(:fundis_herbarium)
+    assert_true(fundis.owns_all_records?(mary))
+    mary_herbarium = mary.create_personal_herbarium
+    id1 = fundis.id
+    id2 = mary_herbarium.id
+    id3 = herbaria(:nybg_herbarium).id
+    id4 = herbaria(:field_museum).id
+
+    get(:merge, params: { this: id1, that: id2 })
+    assert_redirected_to(controller: :account, action: :login)
+
+    login("rolf")
+    get(:merge, params: { this: id1, that: id2 })
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id1, new_id: id2)
+
+    login("mary")
+    get(:merge)
+    assert_flash_error
+    get(:merge, params: { this: id2, that: id2 })
+    assert_no_flash
+    get(:merge, params: { this: 666 })
+    assert_flash_error
+    get(:merge, params: { this: id1, that: 666 })
+    assert_flash_error
+    get(:merge, params: { this: id3, that: id3 })
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id3, new_id: id3)
+    get(:merge, params: { this: id1, that: id3 })
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id1, new_id: id3)
+    get(:merge, params: { this: id1, that: id2 })
+    assert_flash_success
+    # fundis ends up being the destination because it is older.
+    assert_redirected_to(action: :index_herbaria, id: fundis.id)
+
+    make_admin("mary")
+    get(:merge, params: { this: id3, that: id4 })
+    assert_flash_success
+    assert_redirected_to(action: :index_herbaria,
+                         id: herbaria(:nybg_herbarium).id)
+  end
+
+  def test_show_herbarium_post
+    nybg = herbaria(:nybg_herbarium)
+    params = {
+      id: nybg.id,
+      add_curator: mary.login
+    }
+    curator_count = nybg.curators.count
+
+    post(:show, params: params)
+    assert_equal(curator_count, nybg.reload.curators.count)
+
+    login("mary")
+    post(:show, params: params)
+    assert_equal(curator_count, nybg.reload.curators.count)
+
+    login("rolf")
+    post(:show, params: params)
+    assert_equal(curator_count + 1, nybg.reload.curators.count)
+    assert_response(:success)
+  end
+
+  def test_show_add_nonuser_curator
+    herbarium = herbaria(:rolf_herbarium)
+    login = "non-user"
+    params = {
+      id: herbarium.id,
+      add_curator: login
+    }
+    login("rolf")
+
+    assert_no_difference(
+      "herbarium.curators.count",
+      "Curators should not change when trying to add non-user as curator"
+    ) do
+      post(:show, params: params)
+      herbarium.reload
+    end
+    assert_flash(
+      /#{:show_herbarium_no_user.t(login: login)}/,
+      "Error should be flashed if trying to add non-user as curator"
+    )
+  end
+
   def test_request_to_be_curator
     nybg = herbaria(:nybg_herbarium)
     get(:request_to_be_curator, params: { id: nybg.id })
@@ -709,58 +768,5 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
     assert_match(/ZZYZX/, ActionMailer::Base.deliveries.last.to_s)
-  end
-
-  def test_destroy_herbarium
-    herbarium = herbaria(:nybg_herbarium)
-    records = herbarium.herbarium_records
-    assert_not_empty(records)
-    record_ids = records.map(&:id)
-
-    # Must be logged in.
-    get(:destroy, params: { id: herbarium.id })
-    assert_not_nil(Herbarium.safe_find(herbarium.id))
-
-    # Must be curator or admin.
-    login("mary")
-    get(:destroy, params: { id: herbarium.id })
-    assert_not_nil(Herbarium.safe_find(herbarium.id))
-
-    # Curator can do it.
-    login("roy")
-    get(:destroy, params: { id: herbarium.id })
-    assert_nil(Herbarium.safe_find(herbarium.id))
-    assert_empty(HerbariumRecord.where(herbarium_id: herbarium.id))
-    assert_empty(Herbarium.connection.select_values(%(
-      SELECT observation_id FROM herbarium_records_observations
-      WHERE herbarium_record_id IN (#{record_ids.map(&:to_s).join(",")})
-    )))
-  end
-
-  def test_destroy_herbarium_noncurator_owns_all_records
-    herbarium = herbaria(:fundis_herbarium)
-    assert_true(herbarium.owns_all_records?(mary))
-    assert_empty(herbarium.curators)
-
-    # Make sure noncurator can do it only if there are no curators.
-    login("mary")
-    herbarium.add_curator(dick)
-    get(:destroy, params: { id: herbarium.id })
-    assert_flash_error
-    assert_not_nil(Herbarium.safe_find(herbarium.id))
-
-    # But if there are no curators and the user owns all the records.
-    # (Note that this means anyone can destroy any uncurated empty herbaria.)
-    herbarium.curators.clear
-    get(:destroy, params: { id: herbarium.id })
-    assert_no_flash
-    assert_nil(Herbarium.safe_find(herbarium.id))
-  end
-
-  def test_destroy_herbarium_admin
-    herbarium = herbaria(:nybg_herbarium)
-    make_admin("mary")
-    get(:destroy, params: { id: herbarium.id })
-    assert_nil(Herbarium.safe_find(herbarium.id))
   end
 end
