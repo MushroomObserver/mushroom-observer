@@ -9,8 +9,10 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(add_query_param(action: :edit, id: @herbarium,
-                               back: @back)) do %>
-    <%= render(partial: "form", locals: {button: :SAVE}) %>
+  <%= form_tag(add_query_param(
+        action: :update, method: :patch, id: @herbarium, back: @back)
+      ) do %>
+    <%# Rails does not respect 'method: "patch"' in the line above %>
+    <%= hidden_field_tag("_method", :patch) %>
   <% end %>
 </div>
