@@ -70,7 +70,7 @@ class HerbariaController < ApplicationController
   end
 
   def show
-    @canonical_url = Herbarium.show_url(params[:id])
+    @canonical_url = herbarium_url(params[:id])
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return if request.method != "POST"
     return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
