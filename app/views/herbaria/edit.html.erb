@@ -14,5 +14,6 @@
       ) do %>
     <%# Rails does not respect 'method: "patch"' in the line above %>
     <%= hidden_field_tag("_method", :patch) %>
+    <%= render(partial: "form", locals: { button: :SAVE }) %>
   <% end %>
 </div>

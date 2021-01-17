@@ -162,17 +162,19 @@ class CuratorTest < IntegrationTestCase
     curator = herbarium.curators[0]
     login!(curator.login, "testpassword", true)
     get(edit_herbarium_path(herbarium.id))
-    open_form do |form|
+    open_form(
+      # edit posts to update; this is the update url
+      "form[action^='#{herbarium_path(herbarium.id)}']"
+    ) do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
       form.submit(:SAVE.t)
     end
-    herbarium = Herbarium.find(herbarium.id)
-    assert_equal(new_code, herbarium.code)
+    assert_equal(new_code, herbarium.reload.code)
     assert_select(
       "#title-caption",
       { text: herbarium.format_name },
-      "Changing Fungarium code should show that Fungarium"
+      "Changing Fungarium code should land on page for that Fungarium"
     )
   end
 
