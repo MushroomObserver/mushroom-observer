@@ -251,7 +251,7 @@ class HerbariaController < ApplicationController
   end
 
   def post_create_herbarium
-    @herbarium = Herbarium.new(whitelisted_herbarium_params)
+    @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
     if validate_name! &&
        validate_location! &&
@@ -267,7 +267,7 @@ class HerbariaController < ApplicationController
   end
 
   def post_edit_herbarium
-    @herbarium.attributes = whitelisted_herbarium_params
+    @herbarium.attributes = herbarium_params
     normalize_parameters
     if validate_name! &&
        validate_location! &&
@@ -443,7 +443,7 @@ class HerbariaController < ApplicationController
     true
   end
 
-  def whitelisted_herbarium_params
+  def herbarium_params
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
