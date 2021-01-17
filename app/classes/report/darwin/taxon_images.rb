@@ -25,7 +25,18 @@ module Report
       def add_conditions
         query.where(tables[:observations][:vote_cache].gteq(VOTE_CUTOFF))
         query.where(tables[:images][:ok_for_export].eq(1))
-        query.where(tables[:names][:ok_for_export].eq(1))
+        add_name_conditions(tables[:names])
+      end
+
+      def add_name_conditions(table)
+        query.where(table[:ok_for_export].eq(1))
+        query.where(table[:deprecated].eq(0))
+        query.where(table[:text_name].does_not_match('%"%'))
+        add_rank_condition(table, [:Species, :Genus])
+      end
+
+      def add_rank_condition(table, ranks)
+        query.where(table[:rank].in(ranks.map { |rank| Name.ranks[rank] }))
       end
 
       def tables
