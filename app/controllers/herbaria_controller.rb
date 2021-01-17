@@ -214,7 +214,7 @@ class HerbariaController < ApplicationController
 
   def show_selected_herbaria(query, args = {})
     args = {
-      action: :list_herbaria,
+      action: :index,
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]

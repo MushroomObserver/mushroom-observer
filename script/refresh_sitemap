@@ -63,7 +63,7 @@ OBJECT_TYPES = [
    "glossary_terms/ID"],
   ["herbaria",
    "Herbarium",
-   "herbaria/show_herbarium/ID"],
+   "herbaria/show/ID"],
   ["name_descriptions",
    "NameDescription",
    "name/show_name_description/ID"],
