@@ -26,8 +26,8 @@ class ObserverController
     when :comment, :image, :location,
       :name, :project, :species_list, :herbarium_record
       ctrlr = type
-    when :herbaria
-      ctrlr = type
+    when :herbarium
+      ctrlr = :herbaria
     when :google
       site_google_search(pattern)
       return
@@ -39,19 +39,18 @@ class ObserverController
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
-      action = if type == :herbaria
+      action = if type == :herbarium
                  "index" # Rails default to list all objects
                else
                  "list_#{type.to_s.pluralize}" # old MO standard
                end
       redirect_to(controller: ctrlr, action: action)
     else
-      action = if type == :herbaria
+      action = if type == :herbarium
                  "search" # new MO standard for "normalized" controllers
                else
                  "#{type}_search" # old MO standard
                end
-
       redirect_to(controller: ctrlr, action: action, pattern: pattern)
     end
   end
