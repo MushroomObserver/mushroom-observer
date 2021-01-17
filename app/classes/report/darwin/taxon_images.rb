@@ -98,38 +98,30 @@ module Report
 
       def labels
         %w[
-          identifier
-          type
-          format
-          accessURL
-          taxonID
-          created
-          creator
-          license
-          rightsHolder
+          imageURL
+          name
+          nameURL
         ]
       end
 
       def sort_after(rows)
-        rows.sort_by { |row| row[0].to_i }
+        rows.sample(100)
       end
 
       private
 
       def image_url(id)
-        "https://mushroomobserver.org/images/320/#{id}.jpg"
+        "https://mushroomobserver.org/images/640/#{id}.jpg"
+      end
+
+      def name_url(id)
+        "https://mushroomobserver.org/name/show_name/#{id}"
       end
 
       def format_image_row(row)
-        [row["id"].to_s,
-         "StillImage",
-         "image/jpeg",
-         image_url(row["id"]),
-         row["name_id"].to_s,
-         row["when"].to_s,
-         row["name"].to_s == "" ? row["login"] : row["name"],
-         row["license_url"],
-         row["copyright_holder"]]
+        [image_url(row["id"]),
+         row["text_name"].to_s,
+         name_url(row["name_id"]).to_s]
       end
     end
   end
