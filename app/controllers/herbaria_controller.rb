@@ -73,16 +73,6 @@ class HerbariaController < ApplicationController
   def show
     @canonical_url = herbarium_url(params[:id])
     @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return if request.method != "POST"
-    return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
-
-    login = params[:add_curator].to_s.sub(/ <.*/, "")
-    user = User.find_by_login(login)
-    if user
-      @herbarium.add_curator(user)
-    else
-      flash_error(:show_herbarium_no_user.t(login: login))
-    end
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -181,15 +171,16 @@ class HerbariaController < ApplicationController
 
   def add_curator
     @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
-
-    login = params[:add_curator].to_s.sub(/ <.*/, "")
-    user = User.find_by_login(login)
-    if user
-      @herbarium.add_curator(user)
-    else
-      flash_error(:show_herbarium_no_user.t(login: login))
+    if @user && (@herbarium.curator?(@user) || in_admin_mode?)
+      login = params[:add_curator].to_s.sub(/ <.*/, "")
+      user = User.find_by_login(login)
+      if user
+        @herbarium.add_curator(user)
+      else
+        flash_error(:show_herbarium_no_user.t(login: login))
+      end
     end
+    redirect_to_show_herbarium
   end
 
   def delete_curator

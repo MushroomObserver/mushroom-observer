@@ -721,7 +721,7 @@ class HerbariaControllerTest < FunctionalTestCase
                          id: herbaria(:nybg_herbarium).id)
   end
 
-  def test_show_herbarium_post
+  def test_add_curators
     params = {
       id: nybg.id,
       add_curator: mary.login
@@ -738,10 +738,10 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     post(:add_curator, params: params)
     assert_equal(curator_count + 1, nybg.reload.curators.count)
-    assert_response(:success)
+    assert_redirected_to(herbarium_path(nybg.id))
   end
 
-  def test_show_add_nonuser_curator
+  def test_add_nonuser_curator
     herbarium = herbaria(:rolf_herbarium)
     login = "non-user"
     params = {

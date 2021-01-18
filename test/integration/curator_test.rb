@@ -164,7 +164,7 @@ class CuratorTest < IntegrationTestCase
     get(edit_herbarium_path(herbarium.id))
     open_form(
       # edit posts to update; this is the update url
-      "form[action^='#{herbarium_path(herbarium.id)}']"
+      "form[action^='#{herbarium_path(herbarium)}']"
     ) do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
@@ -210,24 +210,27 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_add_curators
-    herbarium = herbaria(:nybg_herbarium)
-    assert(herbarium.curators.include?(roy),
+    nybg = herbaria(:nybg_herbarium)
+    # Make sure nobody broke the fixtures
+    assert(nybg.curators.include?(roy),
            "Need different fixture: herbarium where roy is a curator")
-    assert(herbarium.curators.exclude?(mary),
+    assert(nybg.curators.exclude?(mary),
            "Need different fixture: herbarium where mary is not a curator")
 
+    # add mary as a curator
     login!(roy.login, "testpassword", true)
-    get(herbarium_path(herbarium.id))
-    assert_select(
-      "#title-caption",
-      { text: herbaria(:nybg_herbarium).format_name },
-      "Should display show page #{herbarium.format_name}"
-    )
-
-    open_form("form[action^='#{herbarium_path(herbarium)}']") do |form|
+    get(herbarium_path(nybg))
+    open_form("form[action^='#{add_curator_herbarium_path(nybg)}']") do |form|
       form.change("add_curator", mary.login)
       form.submit("Add Curator")
     end
-    assert(herbarium.curators.include?(mary))
+
+    assert(nybg.curators.include?(mary),
+           "Failed to add mary to curators of #{nybg.format_name}")
+    # Page should have a link to delete mary as a curator
+    assert_select(
+      "a:match('href', ?)",
+      /#{delete_curator_herbarium_path(nybg)}\?user=#{mary.id}/,
+    )
   end
 end
