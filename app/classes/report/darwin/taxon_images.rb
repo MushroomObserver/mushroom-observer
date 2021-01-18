@@ -5,6 +5,9 @@ module Report
     # Darwin Core Observations format.
     class TaxonImages < Report::CSV
       VOTE_CUTOFF = 2.5
+      TAXON_COUNT = 20
+      MAX_IMAGES_PER_TAXON = 10
+      TOTAL_IMAGES = 100
 
       attr_accessor :query
 
@@ -98,14 +101,42 @@ module Report
 
       def labels
         %w[
-          imageURL
+          taxonID
           name
+          imageURL
           nameURL
         ]
       end
 
+      def process_rows(rows)
+        @taxon_options = Set.new
+        rows.each do |row|
+          @taxon_options.add(row[0])
+        end
+      end
+
+      def select_rows(rows)
+        process_rows(rows)
+        result = []
+        counts = {}
+        taxon_sample = @taxon_options.to_a.sample(TAXON_COUNT)
+        taxon_sample.each { |taxon_id| counts[taxon_id] = 0 }
+        total = 0
+        rows.each do |row|
+          name_id = row[0]
+          if counts.key?(name_id) && counts[name_id] < MAX_IMAGES_PER_TAXON
+            result.append(row)
+            counts[name_id] += 1
+            total += 1
+            return result if total >= TOTAL_IMAGES
+          end
+        end
+        result
+      end
+
       def sort_after(rows)
-        rows.sample(100)
+        selection = select_rows(rows)
+        selection.sort_by { |row| row[0] }
       end
 
       private
@@ -119,9 +150,10 @@ module Report
       end
 
       def format_image_row(row)
-        [image_url(row["id"]),
-         row["text_name"].to_s,
-         name_url(row["name_id"]).to_s]
+        [row["name_id"].to_s,
+         row["text_name"],
+         image_url(row["id"]),
+         name_url(row["name_id"])]
       end
     end
   end
