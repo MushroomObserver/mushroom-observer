@@ -145,7 +145,7 @@ ACTIONS = {
   },
   herbaria: {
     # create_herbarium: {}, # aliased only
-    delete_curator: {},
+    # delete_curator: {},
     # destroy_herbarium: {}, # aliased only
     # edit_herbarium: {}, # aliased only
     # search: {},
@@ -680,6 +680,7 @@ MushroomObserver::Application.routes.draw do
 
   resources :herbaria, id: /\d+/ do
     post "add_curator", on: :member
+    get "delete_curator", on: :member
     get "search", on: :collection
   end
 
