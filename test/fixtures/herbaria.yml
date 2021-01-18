@@ -35,4 +35,4 @@ field_museum:
     curators: rolf, thorsten
 
 curatorless_herbarium:
-    name: $Label
+    name: $LABEL
