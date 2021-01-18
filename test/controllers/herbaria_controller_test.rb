@@ -21,9 +21,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_show
     nybg = herbaria(:nybg_herbarium)
     get(:show, id: nybg.id)
-
-    # TODO: replace with test of content
-    assert_template(:show)
+    assert_select("#title-caption", text: nybg.format_name, count: 1)
   end
 
   def test_index
@@ -38,7 +36,7 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_merge_source_links_present
+  def test_index_merge_source_links_presence
     herb1 = herbaria(:nybg_herbarium)
     herb2 = herbaria(:fundis_herbarium)
     herb3 = herbaria(:dick_herbarium)
@@ -81,7 +79,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_index_merge_target_links_present
+  def test_index_merge_target_links_presence
     source = herbaria(:field_museum)
     herb1  = herbaria(:nybg_herbarium)
     herb2  = herbaria(:fundis_herbarium)
@@ -131,14 +129,13 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_index_nonpersonal_herbaria
     get(:index_nonpersonal_herbaria)
 
-    # TODO: replace assert_template with assertions that
-    # all nonpersonal, and no personal, herbaria are displayed
-    assert_template(:index)
+    # TODO: aassert all nonpersonal, and no personal, herbaria are displayed
+    assert_select("#title-caption", text: :query_title_nonpersonal.l, count: 1)
   end
 
   def test_search
     get(:search, pattern: "Personal Herbarium")
-    # TODO: Assert page contents
+    # TODO: Assert page title, all personal herbaria, no institutional
   end
 
   def test_search_number
@@ -188,8 +185,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, id: herbarium.id)
 
     assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
+    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
   end
 
   def test_edit_with_curators
@@ -206,14 +202,12 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, id: nybg.id)
     assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
+    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
 
     make_admin("mary")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    # TODO: replace following with test for content
-    assert_template("edit")
+    assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
