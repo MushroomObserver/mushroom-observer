@@ -209,7 +209,7 @@ class CuratorTest < IntegrationTestCase
     )
   end
 
-  def test_modify_curators
+  def test_add_curators
     herbarium = herbaria(:nybg_herbarium)
     assert(herbarium.curators.include?(roy),
            "Need different fixture: herbarium where roy is a curator")
@@ -229,7 +229,5 @@ class CuratorTest < IntegrationTestCase
       form.submit("Add Curator")
     end
     assert(herbarium.curators.include?(mary))
-
-    # assert(herbarium.curators.exclude?(mary))
   end
 end
