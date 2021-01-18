@@ -5,6 +5,11 @@ require("test_helper")
 # tests of Herbarium controller
 class HerbariaControllerTest < FunctionalTestCase
   # ---------- Helpers ----------
+
+  def nybg
+    herbaria(:nybg_herbarium)
+  end
+
   def herbarium_params
     {
       name: "",
@@ -19,7 +24,6 @@ class HerbariaControllerTest < FunctionalTestCase
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
   def test_show
-    nybg = herbaria(:nybg_herbarium)
     get(:show, id: nybg.id)
     assert_select("#title-caption", text: nybg.format_name, count: 1)
   end
@@ -175,7 +179,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_edit_no_login
-    get(:edit, params: { id: herbaria(:nybg_herbarium).id })
+    get(:edit, params: { id: nybg.id })
     assert_redirected_to(account_login_path)
   end
 
@@ -189,7 +193,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_edit_with_curators
-    nybg = herbaria(:nybg_herbarium)
     get(:edit, params: { id: nybg.id })
     assert_response(:redirect)
 
@@ -249,7 +252,6 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_create_duplicate_name
     herbarium_count = Herbarium.count
     login("rolf")
-    nybg = herbaria(:nybg_herbarium)
     params = herbarium_params.merge(
       name: nybg.name.gsub(/ /, " <spam> "),
       code: "  NEW <spam> ",
@@ -368,7 +370,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_update
-    nybg = herbaria(:nybg_herbarium)
     last_update = nybg.updated_at
     params = herbarium_params.merge(
       name: " New Herbarium <spam> ",
@@ -426,7 +427,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_update_with_nonexisting_place_name
-    nybg = herbaria(:nybg_herbarium)
     params = herbarium_params.merge(place_name: "New Location")
     login("rolf")
     patch(:update, params: { herbarium: params, id: nybg.id })
@@ -604,14 +604,13 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy_admin
-    herbarium = herbaria(:nybg_herbarium)
+    herbarium = nybg
     make_admin("mary")
     get(:destroy, params: { id: herbarium.id })
     assert_nil(Herbarium.safe_find(herbarium.id))
   end
 
   def test_delete_curator
-    nybg = herbaria(:nybg_herbarium)
     assert(nybg.curator?(rolf))
     assert(nybg.curator?(roy))
     curator_count = nybg.curators.count
@@ -692,7 +691,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_herbarium_post
-    nybg = herbaria(:nybg_herbarium)
     params = {
       id: nybg.id,
       add_curator: mary.login
@@ -735,7 +733,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_request_to_be_curator
-    nybg = herbaria(:nybg_herbarium)
     get(:request_to_be_curator, params: { id: nybg.id })
     assert_response(:redirect)
 
@@ -749,7 +746,6 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_request_to_be_curator_post
     email_count = ActionMailer::Base.deliveries.count
-    nybg = herbaria(:nybg_herbarium)
     post(:request_to_be_curator, params: { id: nybg.id })
     assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
