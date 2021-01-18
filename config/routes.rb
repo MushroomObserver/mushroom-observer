@@ -149,16 +149,16 @@ ACTIONS = {
     # destroy_herbarium: {}, # aliased only
     # edit_herbarium: {}, # aliased only
     # search: {},
-    index_herbaria: {},
-    index_nonpersonal_herbaria: {},
+    # index_herbaria: {},
+    # index_nonpersonal_herbaria: {},
     # list_herbaria: {}, # aliased only
-    merge: {},
+    # merge: {},
     # next_herbarium: {}, # aliased only
     # prev_herbarium: {}, # aliased only
-    request_to_be_curator: {},
+    # request_to_be_curator: {},
     # show_herbarium: {}, # aliased only
-    next: {},
-    prev: {}
+    # next: {},
+    # prev: {}
     # resources
     # create: {},
     # destroy: {},
@@ -679,9 +679,20 @@ MushroomObserver::Application.routes.draw do
   )
 
   resources :herbaria, id: /\d+/ do
-    post "add_curator", on: :member
-    get "delete_curator", on: :member
-    get "search", on: :collection
+    member do
+      post "add_curator"
+      get "delete_curator"
+      get "next"
+      get "prev"
+    end
+    collection do
+      get "index_herbaria"
+      get "index_nonpersonal_herbaria"
+      get "merge"
+      get "request_to_be_curator"
+      post "request_to_be_curator"
+      get "search"
+    end
   end
 
   get "publications/:id/destroy" => "publications#destroy"
