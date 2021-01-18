@@ -144,7 +144,7 @@ class HerbariaController < ApplicationController
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
-  # list nonpersonal herbaria
+  # list nonpersonal herbaria (herbarium.personal_id == nil)
   def index_nonpersonal_herbaria
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
@@ -221,11 +221,11 @@ class HerbariaController < ApplicationController
     }.merge(args)
 
     @links ||= []
-    if query.flavor != :all
+    unless query.flavor == :all
       @links << [:herbarium_index_list_all_herbaria.l,
                  { controller: :herbaria, action: :index }]
     end
-    if query.flavor != :nonpersonal
+    unless query.flavor == :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
                  { controller: :herbaria, action: :index_nonpersonal_herbaria }]
     end
