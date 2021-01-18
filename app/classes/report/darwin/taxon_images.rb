@@ -28,6 +28,7 @@ module Report
       def add_conditions
         query.where(tables[:observations][:vote_cache].gteq(VOTE_CUTOFF))
         query.where(tables[:images][:ok_for_export].eq(1))
+        query.where(tables[:names][:lifeform].eq(""))
         add_name_conditions(tables[:names])
       end
 
@@ -72,6 +73,7 @@ module Report
         query.project(attribute(:images, :id),
                       attribute(:observations, :name_id),
                       attribute(:names, :text_name),
+                      attribute(:images, :vote_cache),
                       attribute(:images, :when),
                       attribute(:users, :name),
                       attribute(:users, :login),
@@ -104,7 +106,7 @@ module Report
           taxonID
           name
           imageURL
-          nameURL
+          imageQuality
         ]
       end
 
@@ -142,18 +144,14 @@ module Report
       private
 
       def image_url(id)
-        "https://mushroomobserver.org/images/640/#{id}.jpg"
-      end
-
-      def name_url(id)
-        "https://mushroomobserver.org/name/show_name/#{id}"
+        "https://mushroomobserver.org/image/show_image/#{id}"
       end
 
       def format_image_row(row)
         [row["name_id"].to_s,
          row["text_name"],
          image_url(row["id"]),
-         name_url(row["name_id"])]
+         row["vote_cache"].to_s]
       end
     end
   end
