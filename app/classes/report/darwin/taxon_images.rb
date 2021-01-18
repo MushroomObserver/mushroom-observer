@@ -5,6 +5,7 @@ module Report
     # Darwin Core Observations format.
     class TaxonImages < Report::CSV
       VOTE_CUTOFF = 2.5
+      SAMPLE_SIZE = 100
 
       attr_accessor :query
 
@@ -105,23 +106,18 @@ module Report
       end
 
       def sort_after(rows)
-        rows.sample(100)
+        rows.sample(SAMPLE_SIZE)
       end
 
       private
 
       def image_url(id)
-        "https://mushroomobserver.org/images/640/#{id}.jpg"
-      end
-
-      def name_url(id)
-        "https://mushroomobserver.org/name/show_name/#{id}"
+        "https://mushroomobserver.org/image/show_image/#{id}.jpg"
       end
 
       def format_image_row(row)
         [image_url(row["id"]),
-         row["text_name"].to_s,
-         name_url(row["name_id"]).to_s]
+         row["text_name"].to_s]
       end
     end
   end
