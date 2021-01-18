@@ -208,4 +208,28 @@ class CuratorTest < IntegrationTestCase
       "Creating a Fungarium should show the new Fungarium"
     )
   end
+
+  def test_modify_curators
+    herbarium = herbaria(:nybg_herbarium)
+    assert(herbarium.curators.include?(roy),
+           "Need different fixture: herbarium where roy is a curator")
+    assert(herbarium.curators.exclude?(mary),
+           "Need different fixture: herbarium where mary is not a curator")
+
+    login!(roy.login, "testpassword", true)
+    get(herbarium_path(herbarium.id))
+    assert_select(
+      "#title-caption",
+      { text: herbaria(:nybg_herbarium).format_name },
+      "Should display show page #{herbarium.format_name}"
+    )
+
+    open_form("form[action^='#{herbarium_path(herbarium)}']") do |form|
+      form.change("add_curator", mary.login)
+      form.submit("Add Curator")
+    end
+    assert(herbarium.curators.include?(mary))
+
+    # assert(herbarium.curators.exclude?(mary))
+  end
 end

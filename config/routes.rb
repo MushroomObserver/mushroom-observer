@@ -679,6 +679,7 @@ MushroomObserver::Application.routes.draw do
   )
 
   resources :herbaria, id: /\d+/ do
+    post "add_curator", on: :member
     get "search", on: :collection
   end
 

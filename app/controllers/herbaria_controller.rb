@@ -179,6 +179,19 @@ class HerbariaController < ApplicationController
     redirect_to_herbarium_index(result)
   end
 
+  def add_curator
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
+
+    login = params[:add_curator].to_s.sub(/ <.*/, "")
+    user = User.find_by_login(login)
+    if user
+      @herbarium.add_curator(user)
+    else
+      flash_error(:show_herbarium_no_user.t(login: login))
+    end
+  end
+
   def delete_curator
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium

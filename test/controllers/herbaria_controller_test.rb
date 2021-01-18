@@ -728,15 +728,15 @@ class HerbariaControllerTest < FunctionalTestCase
     }
     curator_count = nybg.curators.count
 
-    post(:show, params: params)
+    post(:add_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
 
     login("mary")
-    post(:show, params: params)
+    post(:add_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
 
     login("rolf")
-    post(:show, params: params)
+    post(:add_curator, params: params)
     assert_equal(curator_count + 1, nybg.reload.curators.count)
     assert_response(:success)
   end
@@ -754,7 +754,7 @@ class HerbariaControllerTest < FunctionalTestCase
       "herbarium.curators.count",
       "Curators should not change when trying to add non-user as curator"
     ) do
-      post(:show, params: params)
+      post(:add_curator, params: params)
       herbarium.reload
     end
     assert_flash(
