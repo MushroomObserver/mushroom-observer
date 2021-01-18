@@ -70,6 +70,7 @@ module Report
         query.project(attribute(:images, :id),
                       attribute(:observations, :name_id),
                       attribute(:names, :text_name),
+                      attribute(:images, :vote_cache),
                       attribute(:images, :when),
                       attribute(:users, :name),
                       attribute(:users, :login),
@@ -101,7 +102,7 @@ module Report
         %w[
           imageURL
           name
-          nameURL
+          imageQuality
         ]
       end
 
@@ -112,12 +113,14 @@ module Report
       private
 
       def image_url(id)
-        "https://mushroomobserver.org/image/show_image/#{id}.jpg"
+        "https://mushroomobserver.org/image/show_image/#{id}"
       end
 
       def format_image_row(row)
         [image_url(row["id"]),
-         row["text_name"].to_s]
+         row["text_name"].to_s,
+         row["vote_cache"].to_s
+        ]
       end
     end
   end
