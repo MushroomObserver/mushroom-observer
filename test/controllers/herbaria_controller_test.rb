@@ -647,27 +647,27 @@ class HerbariaControllerTest < FunctionalTestCase
     curator_count = nybg.curators.count
     params = { id: nybg.id, user: roy.id }
 
-    post(:delete_curator, params: params)
+    get(:delete_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
     login("mary")
-    post(:delete_curator, params: params)
+    get(:delete_curator, params: params)
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
     login("rolf")
-    post(:delete_curator, params: params.except(:user))
+    get(:delete_curator, params: params.except(:user))
     assert_equal(curator_count, nybg.reload.curators.count)
     assert_response(:redirect)
 
-    post(:delete_curator, params: params)
+    get(:delete_curator, params: params)
     assert_equal(curator_count - 1, nybg.reload.curators.count)
     assert_not(nybg.curator?(roy))
     assert_response(:redirect)
 
     make_admin("mary")
-    post(:delete_curator, params: params.merge(user: rolf.id))
+    get(:delete_curator, params: params.merge(user: rolf.id))
     assert_equal(curator_count - 2, nybg.reload.curators.count)
     assert_not(nybg.curator?(rolf))
     assert_response(:redirect)
