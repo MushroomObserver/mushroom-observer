@@ -43,24 +43,25 @@ class HerbariaController < ApplicationController
     :update
   ]
 
-  # Old MO Action (method)     New "Normalized" Action (method)
-  # ----------------------     --------------------------------
-  # create_herbarium (get)     new
-  # create_herbarium (post)    create
-  # delete_curator             ? - in separate file or controller?
-  # destroy_herbarium          destroy
-  # edit_herbarium (get)       edit
-  # edit_herbarium (post)      update
-  # herbarium_search           search
-  # index                      index_nonpersonal_herbaria
-  # index_herbarium            index_herbaria
-  # list_herbaria              index
-  # merge_herbaria             merge - in separate file or controller?
-  # next_herbarium             next
-  # prev_herbarium             prev
-  # request_to_be_curator      ? - in separate file or controller?
-  # show_herbarium (get)       show
-  # show_herbarium (post)      add_curator
+  # Old MO Action (method)        New "Normalized" Action (method)
+  # ----------------------        --------------------------------
+  # create_herbarium (get)        new
+  # create_herbarium (post)       create
+  # delete_curator                ? - in separate file or controller?
+  # destroy_herbarium             destroy
+  # edit_herbarium (get)          edit
+  # edit_herbarium (post)         update
+  # herbarium_search              search
+  # index                         index_nonpersonal_herbaria
+  # index_herbarium               index_herbaria
+  # list_herbaria                 index
+  # merge_herbaria                merge - in separate file or controller?
+  # next_herbarium                next
+  # prev_herbarium                prev
+  # request_to_be_curator (get)   CuratorRequest#new
+  # request_to_be_curator (post)  CuratorRequest#create
+  # show_herbarium (get)          show
+  # show_herbarium (post)         add_curator
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
