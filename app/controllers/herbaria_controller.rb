@@ -6,7 +6,7 @@ class HerbariaController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_herbaria,
-    :index_nonpersonal_herbaria,
+    :nonpersonal,
     :next,
     :prev,
     :search,
@@ -16,7 +16,7 @@ class HerbariaController < ApplicationController
     :create,
     :edit,
     :index,
-    :index_nonpersonal_herbaria,
+    :nonpersonal,
     :new,
     :show,
     :update
@@ -52,7 +52,7 @@ class HerbariaController < ApplicationController
   # edit_herbarium (get)          edit
   # edit_herbarium (post)         update
   # herbarium_search              search
-  # index                         index_nonpersonal_herbaria
+  # index                         nonpersonal
   # index_herbarium               index_herbaria
   # list_herbaria                 index
   # merge_herbaria                merge - in separate file or controller?
@@ -137,7 +137,7 @@ class HerbariaController < ApplicationController
   end
 
   # list nonpersonal herbaria (herbarium.personal_id == nil)
-  def index_nonpersonal_herbaria
+  def nonpersonal
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
   end
@@ -233,7 +233,7 @@ class HerbariaController < ApplicationController
     end
     unless query.flavor == :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbaria, action: :index_nonpersonal_herbaria }]
+                 { controller: :herbaria, action: :nonpersonal }]
     end
     @links << [:create_herbarium.l,
                { controller: :herbaria, action: :create }]

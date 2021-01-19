@@ -130,8 +130,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_nonpersonal_herbaria
-    get(:index_nonpersonal_herbaria)
+  def test_nonpersonal
+    get(:nonpersonal)
 
     assert_select("#title-caption", text: :query_title_nonpersonal.l, count: 1)
     Herbarium.where(personal_user_id: nil).each do |herbarium|
