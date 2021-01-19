@@ -5,7 +5,7 @@ class HerbariaController < ApplicationController
   # filters
   before_action :login_required, except: [
     :index,
-    :index_herbaria,
+    :filtered,
     :nonpersonal,
     :next,
     :prev,
@@ -53,7 +53,7 @@ class HerbariaController < ApplicationController
   # edit_herbarium (post)         update
   # herbarium_search              search
   # index                         nonpersonal
-  # index_herbarium               index_herbaria
+  # index_herbarium               filtered
   # list_herbaria                 index
   # merge_herbaria                merge - in separate file or controller?
   # next_herbarium                next
@@ -131,7 +131,7 @@ class HerbariaController < ApplicationController
   # ---------- Display data
 
   # Display selected Herbarium's (based on current Query).
-  def index_herbaria
+  def filtered
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
@@ -439,7 +439,7 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(action: :index_herbaria, id: herbarium.try(&:id))
+    redirect_with_query(action: :filtered, id: herbarium.try(&:id))
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)

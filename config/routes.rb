@@ -686,7 +686,7 @@ MushroomObserver::Application.routes.draw do
       get "prev"
     end
     collection do
-      get "index_herbaria"
+      get "filtered"
       get "nonpersonal"
       get "merge"
       get "request_to_be_curator"

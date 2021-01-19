@@ -2479,7 +2479,7 @@
   herbarium_index_records: Records
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into.  This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium.  If you do not have permission to perform the merge, it will send a request to the admins.  ("+Cancel merge.+":[url])
 
-  # herbaria/index_herbaria
+  # herbaria/filtered
   list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
 

@@ -118,8 +118,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
   end
 
-  def test_index_herbaria
-    get(:index_herbaria)
+  def test_filtered
+    get(:filtered)
 
     assert_response(:success)
     Herbarium.find_each do |herbarium|
@@ -712,12 +712,12 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:merge, params: { this: id1, that: id2 })
     assert_flash_success
     # fundis ends up being the destination because it is older.
-    assert_redirected_to(action: :index_herbaria, id: fundis.id)
+    assert_redirected_to(action: :filtered, id: fundis.id)
 
     make_admin("mary")
     get(:merge, params: { this: id3, that: id4 })
     assert_flash_success
-    assert_redirected_to(action: :index_herbaria,
+    assert_redirected_to(action: :filtered,
                          id: herbaria(:nybg_herbarium).id)
   end
 
