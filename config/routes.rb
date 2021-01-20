@@ -670,6 +670,8 @@ MushroomObserver::Application.routes.draw do
   resources :articles, id: /\d+/
   redirect_legacy_actions(old_controller: "article")
 
+  resources :curator_requests, only: [:new, :create]
+
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
   end
