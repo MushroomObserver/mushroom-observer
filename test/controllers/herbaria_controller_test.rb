@@ -34,7 +34,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     Herbarium.find_each do |herbarium|
       assert_select(
-        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
+        "a[href *= '#{herbarium_path(herbarium)}']", true,
         "Herbarium Index missing link to #{herbarium.format_name})"
       )
     end
@@ -54,9 +54,9 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("dick")
     get(:index)
-    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 0)
-    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
-    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb1)}']", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb2)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3)}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 0)
     assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 1)
@@ -64,9 +64,9 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:index)
-    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 1)
-    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
-    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 0)
+    assert_select("a[href^='#{edit_herbarium_path(herb1)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb2)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3)}']", count: 0)
     assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 0)
@@ -74,9 +74,9 @@ class HerbariaControllerTest < FunctionalTestCase
 
     make_admin("zero")
     get(:index)
-    assert_select("a[href^='#{edit_herbarium_path(herb1.id)}']", count: 1)
-    assert_select("a[href^='#{edit_herbarium_path(herb2.id)}']", count: 1)
-    assert_select("a[href^='#{edit_herbarium_path(herb3.id)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb1)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb2)}']", count: 1)
+    assert_select("a[href^='#{edit_herbarium_path(herb3)}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb1.id}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb2.id}']", count: 1)
     assert_select("a[href*='herbaria?merge=#{herb3.id}']", count: 1)
@@ -124,7 +124,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     Herbarium.find_each do |herbarium|
       assert_select(
-        "a[href *= '#{herbarium_path(herbarium.id)}']", true,
+        "a[href *= '#{herbarium_path(herbarium)}']", true,
         "Herbarium Index missing link to #{herbarium.format_name})"
       )
     end
@@ -136,14 +136,14 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("#title-caption", text: :query_title_nonpersonal.l, count: 1)
     Herbarium.where(personal_user_id: nil).each do |herbarium|
       assert_select(
-        "a[href ^= '#{herbarium_path(herbarium.id)}']", true,
+        "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "List of Institutional Fungaria is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
     Herbarium.where.not(personal_user_id: nil).each do |herbarium|
       assert_select(
-        "a[href ^= '#{herbarium_path(herbarium.id)}']", false,
+        "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "List of Institutional Fungaria should not have a link to " \
         "#{herbarium.format_name})"
       )
@@ -159,14 +159,14 @@ class HerbariaControllerTest < FunctionalTestCase
     )
     Herbarium.where.not(personal_user_id: nil).each do |herbarium|
       assert_select(
-        "a[href ^= '#{herbarium_path(herbarium.id)}']", true,
+        "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "Search for #{pattern} is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
     Herbarium.where(personal_user_id: nil).each do |herbarium|
       assert_select(
-        "a[href ^= '#{herbarium_path(herbarium.id)}']", false,
+        "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "Search for #{pattern} should not have a link to " \
         "#{herbarium.format_name})"
       )
@@ -178,7 +178,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:search, params: { pattern: herbarium.id })
 
     assert_redirected_to(
-      herbarium_path(herbarium.id),
+      herbarium_path(herbarium),
       "Herbarium search for ##{herbarium.id} should show " \
         "#{herbarium.name} herbarium"
     )
@@ -416,13 +416,13 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("mary")
     patch(:update, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(herbarium_path(nybg.id))
+    assert_redirected_to(herbarium_path(nybg))
     assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")
     patch(:update, params: { herbarium: params, id: nybg.id })
-    assert_redirected_to(herbarium_path(nybg.id))
+    assert_redirected_to(herbarium_path(nybg))
     assert_no_flash
     assert_not_equal(last_update, nybg.reload.updated_at)
     assert_equal("New Herbarium", nybg.name)
@@ -741,7 +741,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     post(:add_curator, params: params)
     assert_equal(curator_count + 1, nybg.reload.curators.count)
-    assert_redirected_to(herbarium_path(nybg.id))
+    assert_redirected_to(herbarium_path(nybg))
   end
 
   def test_add_nonuser_curator

@@ -161,7 +161,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
     login!(curator.login, "testpassword", true)
-    get(edit_herbarium_path(herbarium.id))
+    get(edit_herbarium_path(herbarium))
     open_form(
       # edit posts to update; this is the update url
       "form[action^='#{herbarium_path(herbarium)}']"
