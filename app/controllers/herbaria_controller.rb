@@ -45,21 +45,21 @@ class HerbariaController < ApplicationController
   # ----------------------        --------------------------------
   # create_herbarium (get)        new
   # create_herbarium (post)       create
-  # delete_curator                ? - in separate file or controller?
+  # delete_curator (delete)       CuratorsController#destroy
   # destroy_herbarium             destroy
   # edit_herbarium (get)          edit
   # edit_herbarium (post)         update
-  # herbarium_search              search
-  # index                         nonpersonal
-  # index_herbarium               filtered
-  # list_herbaria                 index
-  # merge_herbaria                merge - in separate file or controller?
-  # next_herbarium                next
-  # prev_herbarium                prev
+  # herbarium_search (get)        search
+  # index (get)                   nonpersonal
+  # index_herbarium (get)         filtered
+  # list_herbaria (get)           index
+  # merge_herbaria (get)          merge - maybe in separate controller?
+  # next_herbarium (get)          next
+  # prev_herbarium (get)          prev
   # request_to_be_curator (get)   CuratorRequest#new
   # request_to_be_curator (post)  CuratorRequest#create
   # show_herbarium (get)          show
-  # show_herbarium (post)         add_curator
+  # show_herbarium (post)         CuratorsController#create
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
