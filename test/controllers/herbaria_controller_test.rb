@@ -206,7 +206,10 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new)
-    assert_form_action(action: :create) # "new" form posts to :create action
+    assert_select(
+      "form[action='#{herbaria_path}'][method='post']", { count: 1 },
+      "'new' action should render a form that posts to #{herbaria_path}"
+    )
   end
 
   def test_edit_no_login
