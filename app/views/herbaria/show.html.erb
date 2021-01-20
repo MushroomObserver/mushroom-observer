@@ -41,7 +41,8 @@
         <% end %>
       <% else %>
         <%= link_with_query(:show_herbarium_curator_request.t,
-                           action: :request_to_be_curator, id: @herbarium.id) %>
+                            controller: :curator_requests,
+                            action: :new, id: @herbarium.id ) %>
       <% end %>
     </div>
 

@@ -762,31 +762,4 @@ class HerbariaControllerTest < FunctionalTestCase
       "Error should be flashed if trying to add non-user as curator"
     )
   end
-
-  def test_request_to_be_curator
-    get(:request_to_be_curator, params: { id: nybg.id })
-    assert_response(:redirect)
-
-    login("mary")
-    get(:request_to_be_curator)
-    assert_response(:redirect)
-
-    get(:request_to_be_curator, id: nybg.id)
-    assert_response(:success)
-  end
-
-  def test_request_to_be_curator_post
-    email_count = ActionMailer::Base.deliveries.count
-    post(:request_to_be_curator, params: { id: nybg.id })
-    assert_equal(email_count, ActionMailer::Base.deliveries.count)
-
-    login("mary")
-    post(:request_to_be_curator)
-    assert_equal(email_count, ActionMailer::Base.deliveries.count)
-
-    post(:request_to_be_curator, params: { id: nybg.id, notes: "ZZYZX" })
-    assert_response(:redirect)
-    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
-    assert_match(/ZZYZX/, ActionMailer::Base.deliveries.last.to_s)
-  end
 end

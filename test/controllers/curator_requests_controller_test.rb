@@ -28,7 +28,7 @@ class CuratorRequestsControllerTest < FunctionalTestCase
     get(:new, params: { id: nybg.id })
     assert_redirected_to(
       account_login_path,
-      "Curator request by Anonymous should redirected to account login"
+      "Curator request by anonymous user should redirected to account login"
     )
 
     login("mary")
@@ -41,7 +41,7 @@ class CuratorRequestsControllerTest < FunctionalTestCase
     get(:new, id: nybg.id)
     assert_select(
       "form[action='#{curator_requests_path(id: nybg)}'][method='post']",
-      true,
+      { count: 1 },
       "Curator request should open a form that posts to " \
       "#{curator_requests_path(id: nybg)}"
     )

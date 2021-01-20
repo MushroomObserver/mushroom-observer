@@ -691,8 +691,6 @@ MushroomObserver::Application.routes.draw do
       get "filtered"
       get "nonpersonal"
       get "merge"
-      get "request_to_be_curator"
-      post "request_to_be_curator"
       get "search"
     end
   end

@@ -28,7 +28,6 @@ class HerbariaController < ApplicationController
     :edit,
     :merge,
     :new,
-    :request_to_be_curator,
     :show,
     :update
   ]
@@ -39,7 +38,6 @@ class HerbariaController < ApplicationController
     :edit,
     :merge,
     :new,
-    :request_to_be_curator,
     :update
   ]
 
@@ -198,21 +196,6 @@ class HerbariaController < ApplicationController
   end
 
   # ---------- Other
-
-  # linked from show page
-  def request_to_be_curator
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium && request.method == "POST"
-
-    subject = "Herbarium Curator Request"
-    content =
-      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
-      "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
-      "Notes: #{params[:notes]}"
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
-    flash_notice(:show_herbarium_request_sent.t)
-    redirect_to_referrer || redirect_to_show_herbarium
-  end
 
   ##############################################################################
 
