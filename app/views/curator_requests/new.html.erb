@@ -12,8 +12,8 @@
 
 <div class="max-width-text">
   <%= :show_herbarium_curator_help.tp %>
-  <%= form_tag(add_query_param(action: :create, id: @herbarium.id,
-                               back: @back)) do %>
+  <%= form_tag(add_query_param(curator_requests_path(id: @herbarium)),
+               back: @back) do %>
     <div class="form-group push-down">
       <%= label_tag(:herbarium_name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
     </div>
@@ -21,7 +21,7 @@
     <div class="form-group push-down">
       <%= label_tag(:notes, :NOTES.t + ":") %>
       <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
-                        data: {autofocus: true}) %>
+                        data: { autofocus: true }) %>
     </div>
 
     <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>

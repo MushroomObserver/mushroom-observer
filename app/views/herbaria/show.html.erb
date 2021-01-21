@@ -35,9 +35,12 @@
     </div>
 
     <div class="push-down">
-      <%= render(partial: "curator_table", locals: {herbarium: @herbarium}) %>
+      <%= render(partial: "curator_table",
+                 locals: { herbarium: @herbarium }) %>
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
-        <%= form_tag(add_query_param(action: :add_curator, id: @herbarium)) do %>
+        <%= form_tag(
+              add_query_param(action: :add_curator, id: @herbarium)
+            ) do %>
           <div class="form-inline push-down">
             <%= text_field_tag(:add_curator, "", class: "form-control") %>
             <label for="add_curator">

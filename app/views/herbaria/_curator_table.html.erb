@@ -4,7 +4,7 @@
   <thead>
     <tr>
       <th colspan="<%= can_delete ? 2 : 1 %>">
-        <%= pluralize(herbarium.curators.length, :herbarium_curator.t) + ":" %>
+        <%= "#{pluralize(herbarium.curators.length, :herbarium_curator.t)}:" %>
       </th>
     </tr>
   </thead>
@@ -13,9 +13,11 @@
       <tr>
         <% if can_delete %>
           <td>
-            <%= link_to("X ",
-                  { action: :delete_curator, id: herbarium.id, user: user.id },
-                  { data: { confirm: :are_you_sure.t } }) %>
+            <%= link_to(
+                  "X ",
+                  delete_curator_herbarium_path(herbarium, user: user.id),
+                  data: { confirm: :are_you_sure.t }
+                ) %>
           </td>
         <% end %>
         <td>
