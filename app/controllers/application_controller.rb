@@ -1018,10 +1018,27 @@ class ApplicationController < ActionController::Base
   helper_method :query_params
 
   def add_query_param(params, query = nil)
-    params[:q] = get_query_param(query) unless browser.bot?
-    params
+    return params if browser.bot?
+
+    query_param = get_query_param(query)
+    if params.is_a?(String) # i.e., if params is a path
+      append_query_param_to_path(params, query_param)
+    else
+      params[:q] = query_param
+      params
+    end
   end
   helper_method :add_query_param
+
+  def append_query_param_to_path(path, query_param)
+    return path unless query_param
+
+    if path =~ /\?/ # Does path already have a query string?
+      "#{path}&q=#{query_param}" # add query_param to existing query string
+    else
+      "#{path}?q=#{query_param}" # create a query string comprising query_param
+    end
+  end
 
   # Allows us to add query to a path helper:
   #   object_path(@object, q: get_query_param)
