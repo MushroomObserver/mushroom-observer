@@ -4,14 +4,15 @@
   tabs = []
   if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
     tabs += [
-      link_with_query(:edit_herbarium.t, action: :edit, id: @herbarium.id),
-      link_with_query(:destroy_object.t(type: :herbarium), action: :destroy,
-                      id: @herbarium.id, back: url_after_delete(@herbarium))
+      link_with_query(:edit_herbarium.t, edit_herbarium_path(@herbarium.id)),
+      link_with_query(:destroy_object.t(type: :herbarium),
+                      herbarium_path(@herbarium),
+                      method: :delete, back: url_after_delete(@herbarium))
     ]
   end
   tabs += [
-    link_with_query(:create_herbarium.t, action: :create),
-    link_with_query(:herbarium_index.t, action: :nonpersonal)
+    link_with_query(:create_herbarium.t, new_herbarium_path),
+    link_with_query(:herbarium_index.t, nonpersonal_herbaria_path)
   ]
 
   @tabsets = {
@@ -25,8 +26,12 @@
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
     <div class="push-down">
-      <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.length),
-                  controller: :herbarium_record, action: :herbarium_index, id: @herbarium.id) %>
+      <%= link_to(:show_herbarium_herbarium_record_count.t(
+                    count: @herbarium.herbarium_records.length
+                  ),
+                  controller: :herbarium_record,
+                  action: :herbarium_index,
+                  id: @herbarium.id) %>
     </div>
 
     <div class="push-down">
@@ -35,14 +40,15 @@
         <%= form_tag(add_query_param(action: :add_curator, id: @herbarium)) do %>
           <div class="form-inline push-down">
             <%= text_field_tag(:add_curator, "", class: "form-control") %>
-            <label for="add_curator"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
+            <label for="add_curator">
+              <%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %>
+            </label>
             <% turn_into_user_auto_completer(:add_curator) %>
           </div>
         <% end %>
       <% else %>
         <%= link_with_query(:show_herbarium_curator_request.t,
-                            controller: :curator_requests,
-                            action: :new, id: @herbarium.id ) %>
+                            new_curator_request_path(id: @herbarium.id)) %>
       <% end %>
     </div>
 
