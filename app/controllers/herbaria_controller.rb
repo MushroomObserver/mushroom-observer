@@ -59,7 +59,7 @@ class HerbariaController < ApplicationController
   # request_to_be_curator (get)   CuratorRequest#new
   # request_to_be_curator (post)  CuratorRequest#create
   # show_herbarium (get)          show
-  # show_herbarium (post)         CuratorsController#create
+  # show_herbarium (post)         add_curator(get)?, CuratorsController#create
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
@@ -426,7 +426,7 @@ class HerbariaController < ApplicationController
   end
 
   def redirect_to_show_herbarium(herbarium = @herbarium)
-    redirect_with_query(herbarium.show_link_args)
+    redirect_with_query(herbarium_path(herbarium))
   end
 
   def redirect_to_create_location

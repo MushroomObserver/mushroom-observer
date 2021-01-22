@@ -680,7 +680,12 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
+  namespace :herbaria do
+    resources :curators
+  end
+
   resources :herbaria, id: /\d+/ do
+    # non-CRUD actions
     member do
       post "add_curator"
       get "delete_curator"
