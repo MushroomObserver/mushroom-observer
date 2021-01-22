@@ -220,17 +220,17 @@ class CuratorTest < IntegrationTestCase
     # add mary as a curator
     login!(roy.login, "testpassword", true)
     get(herbarium_path(nybg))
-    open_form("form[action^='#{add_curator_herbarium_path(nybg)}']") do |form|
+    open_form("form[action^='#{herbaria_curators_path(id: nybg)}']") do |form|
       form.change("add_curator", mary.login)
       form.submit("Add Curator")
     end
 
-    assert(nybg.curators.include?(mary),
+   assert(nybg.curator?(mary),
            "Failed to add mary to curators of #{nybg.format_name}")
     # Page should have a link to delete mary as a curator
     assert_select(
       "a:match('href', ?)",
-      /#{delete_curator_herbarium_path(nybg)}\?user=#{mary.id}/,
+      /#{herbaria_curator_path(nybg)}\?user=#{mary.id}/,
     )
   end
 end

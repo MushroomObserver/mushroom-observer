@@ -644,38 +644,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_nil(Herbarium.safe_find(herbarium.id))
   end
 
-  def test_delete_curator
-    assert(nybg.curator?(rolf))
-    assert(nybg.curator?(roy))
-    curator_count = nybg.curators.count
-    params = { id: nybg.id, user: roy.id }
-
-    get(:delete_curator, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-    assert_response(:redirect)
-
-    login("mary")
-    get(:delete_curator, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:delete_curator, params: params.except(:user))
-    assert_equal(curator_count, nybg.reload.curators.count)
-    assert_response(:redirect)
-
-    get(:delete_curator, params: params)
-    assert_equal(curator_count - 1, nybg.reload.curators.count)
-    assert_not(nybg.curator?(roy))
-    assert_response(:redirect)
-
-    make_admin("mary")
-    get(:delete_curator, params: params.merge(user: rolf.id))
-    assert_equal(curator_count - 2, nybg.reload.curators.count)
-    assert_not(nybg.curator?(rolf))
-    assert_response(:redirect)
-  end
-
   def test_merge
     # Rule is non-admins can only merge herbaria which they own all the records
     # at, into their own personal herbarium.  Nothing else.  Mary owns all the
@@ -721,47 +689,5 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:merge, params: { this: id3, that: id4 })
     assert_flash_success
     assert_redirected_to(filtered_herbaria_path(id: nybg))
-  end
-
-  def test_add_curators
-    params = {
-      id: nybg.id,
-      add_curator: mary.login
-    }
-    curator_count = nybg.curators.count
-
-    post(:add_curator, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-
-    login("mary")
-    post(:add_curator, params: params)
-    assert_equal(curator_count, nybg.reload.curators.count)
-
-    login("rolf")
-    post(:add_curator, params: params)
-    assert_equal(curator_count + 1, nybg.reload.curators.count)
-    assert_redirected_to(herbarium_path(nybg))
-  end
-
-  def test_add_nonuser_curator
-    herbarium = herbaria(:rolf_herbarium)
-    login = "non-user"
-    params = {
-      id: herbarium.id,
-      add_curator: login
-    }
-    login("rolf")
-
-    assert_no_difference(
-      "herbarium.curators.count",
-      "Curators should not change when trying to add non-user as curator"
-    ) do
-      post(:add_curator, params: params)
-      herbarium.reload
-    end
-    assert_flash(
-      /#{:show_herbarium_no_user.t(login: login)}/,
-      "Error should be flashed if trying to add non-user as curator"
-    )
   end
 end

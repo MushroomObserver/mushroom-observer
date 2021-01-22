@@ -15,8 +15,8 @@
           <td>
             <%= link_to(
                   "X ",
-                  delete_curator_herbarium_path(herbarium, user: user.id),
-                  data: { confirm: :are_you_sure.t }
+                  herbaria_curator_path(herbarium, user: user.id),
+                  method: :delete, data: { confirm: :are_you_sure.t }
                 ) %>
           </td>
         <% end %>

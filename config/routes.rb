@@ -687,8 +687,6 @@ MushroomObserver::Application.routes.draw do
   resources :herbaria, id: /\d+/ do
     # non-CRUD actions
     member do
-      post "add_curator"
-      get "delete_curator"
       get "next"
       get "prev"
     end
@@ -710,7 +708,7 @@ MushroomObserver::Application.routes.draw do
         controller: "ajax", action: action, id: /\S.*/)
   end
 
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # Accept non-"#5E5E5E" ids for the /observer/lookup_xxx/id actions.
   LOOKUP_XXX_ID_ACTIONS.each do |action|
     get("observer/#{action}/:id",
         controller: "observer", action: action, id: /.*/)

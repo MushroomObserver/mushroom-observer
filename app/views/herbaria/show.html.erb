@@ -39,7 +39,7 @@
                  locals: { herbarium: @herbarium }) %>
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
         <%= form_tag(
-              add_query_param(action: :add_curator, id: @herbarium)
+              add_query_param(herbaria_curators_path(id: @herbarium))
             ) do %>
           <div class="form-inline push-down">
             <%= text_field_tag(:add_curator, "", class: "form-control") %>

@@ -23,7 +23,6 @@ class HerbariaController < ApplicationController
   ]
   before_action :pass_query_params, only: [
     :create,
-    :delete_curator,
     :destroy,
     :edit,
     :merge,
@@ -33,7 +32,6 @@ class HerbariaController < ApplicationController
   ]
   before_action :keep_track_of_referrer, only: [
     :create,
-    :delete_curator,
     :destroy,
     :edit,
     :merge,
@@ -45,7 +43,7 @@ class HerbariaController < ApplicationController
   # ----------------------        --------------------------------
   # create_herbarium (get)        new
   # create_herbarium (post)       create
-  # delete_curator (delete)       CuratorsController#destroy
+  # delete_curator (delete)       Curators#destroy
   # destroy_herbarium             destroy
   # edit_herbarium (get)          edit
   # edit_herbarium (post)         update
@@ -59,7 +57,7 @@ class HerbariaController < ApplicationController
   # request_to_be_curator (get)   CuratorRequest#new
   # request_to_be_curator (post)  CuratorRequest#create
   # show_herbarium (get)          show
-  # show_herbarium (post)         add_curator(get)?, CuratorsController#create
+  # show_herbarium (post)         Curators#create
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
@@ -166,33 +164,6 @@ class HerbariaController < ApplicationController
     that = find_or_goto_index(Herbarium, params[:that]) || return
     result = perform_or_request_merge(this, that) || return
     redirect_to_herbarium_index(result)
-  end
-
-  def add_curator
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    if @user && (@herbarium.curator?(@user) || in_admin_mode?)
-      login = params[:add_curator].to_s.sub(/ <.*/, "")
-      user = User.find_by_login(login)
-      if user
-        @herbarium.add_curator(user)
-      else
-        flash_error(:show_herbarium_no_user.t(login: login))
-      end
-    end
-    redirect_to_show_herbarium
-  end
-
-  def delete_curator
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
-
-    user = User.safe_find(params[:user])
-    if !@herbarium.curator?(@user) && !in_admin_mode?
-      flash_error(:permission_denied.t)
-    elsif user && @herbarium.curator?(user)
-      @herbarium.delete_curator(user)
-    end
-    redirect_to_referrer || redirect_to_show_herbarium
   end
 
   # ---------- Other

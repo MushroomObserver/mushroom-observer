@@ -13,8 +13,8 @@ class  Herbaria::CuratorsController < ApplicationController
 
   # Old MO Action (method)        New "Normalized" Action (method)
   # ----------------------        --------------------------------
-  # delete_curator (delete)       CuratorsController#destroy
-  # show_herbarium (post)         add_curator(get)?, CuratorsController#create
+  # delete_curator (delete)       Curators#destroy
+  # show_herbarium (post)         add_curator(get)? => Curators#create
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
