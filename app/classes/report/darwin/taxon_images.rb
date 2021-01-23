@@ -102,6 +102,7 @@ module Report
           type
           format
           accessURL
+          furtherInformationURL
           taxonID
           created
           creator
@@ -117,7 +118,11 @@ module Report
       private
 
       def image_url(id)
-        "https://mushroomobserver.org/images/320/#{id}.jpg"
+        "https://mushroomobserver.org/images/640/#{id}.jpg"
+      end
+
+      def show_image_url(id)
+        "https://mushroomobserver.org/image/show_image/#{id}"
       end
 
       def format_image_row(row)
@@ -125,6 +130,7 @@ module Report
          "StillImage",
          "image/jpeg",
          image_url(row["id"]),
+         show_image_url(row["id"]),
          row["name_id"].to_s,
          row["when"].to_s,
          row["name"].to_s == "" ? row["login"] : row["name"],
