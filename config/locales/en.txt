@@ -1379,6 +1379,7 @@
   download_observations_format: Choose format
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
+  download_observations_dwca: Occurrence Darwin Core Archive
   download_observations_gbif: Occurrence Darwin Core Archive for GBIF
   download_observations_eol: Taxon Darwin Core Archive for EOL
   download_observations_symbiota: Symbiota

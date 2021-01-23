@@ -286,6 +286,8 @@ class ObserverController
       Report::Raw.new(args)
     when "adolf"
       Report::Adolf.new(args)
+    when "dwca"
+      Report::Dwca.new(args)
     when "gbif"
       Report::Gbif.new(args)
     when "eol"

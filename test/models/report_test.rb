@@ -93,6 +93,11 @@ class ReportTest < UnitTestCase
     do_zip_test(Report::Gbif, expect)
   end
 
+  def test_dwca
+    expect = ["meta.xml", "observations.csv", "multimedia.csv"]
+    do_zip_test(Report::Dwca, expect)
+  end
+
   def test_fundis_no_exact_lat_long
     # There are two collection numbers for this observation.  I can't think of
     # any good way to ensure the order that these are rendered in the report be
