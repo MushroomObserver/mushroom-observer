@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # request to be a herbarium curators
-class CuratorRequestsController < ApplicationController
+class Herbaria::CuratorRequestsController < ApplicationController
   # filters
   before_action :login_required
   before_action :store_location

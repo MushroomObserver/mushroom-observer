@@ -1,3 +1,4 @@
+<%# Display form for a new request to be a herbarium curator %>
 <%
   @title = :show_herbarium_curator_request.t
 
@@ -12,7 +13,7 @@
 
 <div class="max-width-text">
   <%= :show_herbarium_curator_help.tp %>
-  <%= form_tag(add_query_param(curator_requests_path(id: @herbarium)),
+  <%= form_tag(add_query_param(herbaria_curator_requests_path(id: @herbarium)),
                back: @back) do %>
     <div class="form-group push-down">
       <%= label_tag(:herbarium_name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
