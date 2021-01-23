@@ -1,12 +1,14 @@
 <nav class="navbar navbar-default">
-  <%=
-    form_tag({controller: :observer, action: :pattern_search},
-             {class: "navbar-form navbar-left"}) do %>
+  <%= form_tag(
+        observer_pattern_search_path,
+        { class: "navbar-form navbar-left" }
+      ) do %>
       <div>
         <div class="inline align-top icon-addon addon-sm">
           <%= text_field(:search, :pattern, value: session[:pattern],
                          class: "form-control", placeholder: :app_find.t) %>
-          <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
+          <label for="search_pattern" class="glyphicon glyphicon-search"
+                 title="search"> </label>
         </div>
         <div class="inline align-top nowrap">
           <%=
@@ -26,28 +28,26 @@
             select(:search, :type,
                    options_for_select(options,
                                       session[:search_type] || :observation),
-                   {},
-                   {class: "form-control inline align-top",
-                    style: "width: auto;"})
+                   { },
+                   { class: "form-control inline align-top",
+                     style: "width: auto;" })
           %>
           <%= submit_tag(:app_search.l, class: "btn align-top",
                          style: "margin-right:0.5em") %>
         </div>
         <%=
             link_to(content_tag(:span, :search_bar_help.t),
-                    controller: :observer,
-                    action: :search_bar_help)
+                    observer_search_bar_help_path)
         %>
         |
 
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,
                                            style: "white-space:nowrap"),
-                               controller: :observer,
-                               action: :advanced_search_form)
+                       observer_advanced_search_form_path)
           @timer_end ||= Time.zone.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-          timer = "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
+          timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"
         %>
         <% if @timer_start %>
           <div class="inline hidden-xs" style="font-size:80%">
@@ -67,56 +67,90 @@
     <% end %>
 
   <% if @user.nil? %>
-    <div class="nav navbar-nav navbar-form navbar-right hidden-xs" style="margin:0">
+    <div class="nav navbar-nav navbar-form navbar-right hidden-xs"
+         style="margin:0">
       <p class="form-control-static">
-        <%= link_to(:app_login.t, {controller: :account, action: :login}, {class: "btn btn-primary"}) %>
-        <%= link_to(:app_create_account.t, {controller: :account, action: :signup}, {class: "btn btn-primary"}) %>
+        <%= link_to(
+              :app_login.t, account_login_path,
+              { class: "btn btn-primary" }
+            ) %>
+        <%= link_to(
+              :app_create_account.t, account_signup_path,
+              { class: "btn btn-primary" }
+            ) %>
       </p>
     </div>
   <% else ##user is logged in %>
     <ul class="nav navbar-nav navbar-right hidden-xs" style="margin-right:0">
       <% if @user.admin %>
         <li>
-          <%= link_to("", {controller: :account, action: in_admin_mode? ? :turn_admin_off : :turn_admin_on},
-                           {class: "glyphicon glyphicon-text-background",
-                            title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
-                            data: {toggle: "tooltip", placement: "bottom"}}) %>
+          <%= link_to(
+            "",
+            in_admin_mode? ? account_turn_admin_off_path : account_turn_admin_on_path,
+            { class: "glyphicon glyphicon-text-background",
+              title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
+              data: { toggle: "tooltip", placement: "bottom" } }
+          ) %>
         </li>
       <% end %>
       <li>
-        <%= link_to("", {controller: :comment, action: :show_comments_for_user, id: @user.id},
-                        {class: "glyphicon glyphicon-inbox", title: :app_comments_for_you.t,
-                         data: {toggle: "tooltip", placement: "bottom"}}) %>
+        <%= link_to(
+              "", comment_show_comments_for_user_path(@user),
+              { class: "glyphicon glyphicon-inbox",
+                title: :app_comments_for_you.t,
+                data: { toggle: "tooltip", placement: "bottom" } }
+            ) %>
       </li>
       <li>
-        <%= link_to("", {controller: :interest, action: :list_interests},
-                        {class: "glyphicon glyphicon-bullhorn", title: :app_your_interests.t,
-                         data: {toggle: "tooltip", placement: "bottom"}}) %>
+        <%= link_to(
+              "",
+              interest_list_interests_path,
+              { class: "glyphicon glyphicon-bullhorn",
+                title: :app_your_interests.t,
+                data: { toggle: "tooltip", placement: "bottom" } }
+            ) %>
       </li>
       <li>
-        <%= link_to("", {controller: :account, action: :prefs},
-                        {class: "glyphicon glyphicon-cog", title: :app_preferences.t,
-                         data: {toggle: "tooltip", placement: "bottom"}}) %>
+        <%= link_to(
+              "",
+              account_prefs_path,
+              { class: "glyphicon glyphicon-cog", title: :app_preferences.t,
+                data: { toggle: "tooltip", placement: "bottom" } }
+            ) %>
       </li>
       <li id="user_drop_down" class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+           role="button" aria-expanded="false">
           <%= h(@user.login) %>
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-          <li><%= link_to(:app_your_observations.t, {controller: :observer, action: :observations_by_user, id: @user.id}, {class: ""}) %></li>
-          <li><%= link_to(:app_your_lists.t, {controller: :species_list, action: :species_lists_by_user, id: @user.id}, {class: ""} ) %></li>
-          <li><%= link_to(:app_your_interests.t, {controller: :interest, action: :list_interests}, {class: ""}) %></li>
-          <li><%= link_to(:app_your_summary.t, {controller: :observer, action: :show_user, id: @user.id}, {class: ""}) %></li>
-          <li><%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: ""}) %></li>
+          <li><%= link_to(:app_your_observations.t,
+                          observer_observations_by_user_path(@user),
+                          { class: "" } ) %></li>
+          <li><%= link_to(:app_your_lists.t,
+                          species_list_species_lists_by_user_path(@user),
+                          { class: "" } ) %></li>
+          <li><%= link_to(:app_your_interests.t,
+                          interest_list_interests_path,
+                          { class: "" }) %></li>
+          <li><%= link_to(:app_your_summary.t,
+                          observer_show_user_path(@user),
+                          { class: "" }) %></li>
+          <li><%= link_to(:app_preferences.t,
+                          account_prefs_path,
+                          { class: "" }) %></li>
           <li class="divider"></li>
-          <li><%= link_to(:app_logout.t, {controller: :account, action: :logout_user}) %></li>
+          <li><%= link_to(:app_logout.t,
+                          account_logout_user_path) %></li>
         </ul>
       </li>
-      <li> <%= link_to("", {controller: :account, action: :logout_user},
-                       {class: "glyphicon glyphicon-log-out", title: :app_logout.t,
-                        data: {toggle: "tooltip", placement: "bottom"},
-                        style: "padding-right: 10px" }) %>
+      <li> <%= link_to("",
+                       account_logout_user_path,
+                       { class: "glyphicon glyphicon-log-out",
+                          title: :app_logout.t,
+                          data: { toggle: "tooltip", placement: "bottom" },
+                          style: "padding-right: 10px" }) %>
       </li>
     </ul>
   <% end %>
