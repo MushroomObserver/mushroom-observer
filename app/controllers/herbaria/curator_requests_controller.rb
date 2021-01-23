@@ -15,14 +15,15 @@ class Herbaria::CuratorRequestsController < ApplicationController
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
-  # linked from show page
+  # Display form for user to request being added as a curator_request_params
+  # linked from herbarium show page
   def new
     @herbarium = find_or_goto_index(Herbarium, params[:id])
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
-  # linked from show page
+  # Email the completed form to the webmaster
   def create
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium

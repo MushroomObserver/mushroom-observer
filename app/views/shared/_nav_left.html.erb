@@ -47,13 +47,15 @@
         <%= link_to(:app_logout.t, account_logout_user_path) %>
       </span>
     </div>
-    <%= link_to(:app_comments_for_you.t, comment_show_comments_by_user_path(@user),
+    <%= link_to(:app_comments_for_you.t,
+                "#{comment_show_comments_by_user_path}/#{@user.id}",
                 { class: "list-group-item visible-xs" }) %>
-    <%= link_to(:app_your_observations.t, observer_observations_by_user_path(@user),
+    <%= link_to(:app_your_observations.t,
+                "#{observer_observations_by_user_path}/#{@user.id}",
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_your_interests.t, interest_list_interests_path,
                 { class: "list-group-item visible-xs" }) %>
-    <%= link_to(:app_your_summary.t, observer_show_user_path(@user),
+    <%= link_to(:app_your_summary.t, "#{observer_show_user_path}/#{@user.id}",
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_preferences.t, account_prefs_path,
                 { class: "list-group-item visible-xs" }) %>
@@ -71,8 +73,9 @@
   </div>
   <%= link_to(:app_create_observation.t, observer_create_observation_path,
               { class: "list-group-item indent" }) %>
-  <%= link_to(:app_your_observations.t, observer_observations_by_user_path(@user),
-              { class: "list-group-item indent" }) if @user%>
+  <%= link_to(:app_your_observations.t,
+              "#{observer_observations_by_user_path}/#{@user.id}",
+              { class: "list-group-item indent" }) if @user %>
   <%= link_to(:app_sort_by_date_obs.t, observer_list_observations_path,
               { class: "list-group-item indent" }) %>
 
@@ -90,7 +93,8 @@
     <%= :app_species_list.t %>
   </div>
   <% unless @user.nil? %>
-    <%= link_to(:app_your_lists.t, species_list_species_lists_by_user_path(@user),
+    <%= link_to(:app_your_lists.t,
+                "#{species_list_species_lists_by_user_path}/#{@user.id}",
                 { class: "list-group-item indent" } ) %>
   <% end%>
   <%= link_to(:app_create_list.t, species_list_name_lister_path,
