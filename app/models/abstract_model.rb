@@ -346,16 +346,18 @@ class AbstractModel < ApplicationRecord
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
-  #   Article.show_controller => "articles" # for normalized controller
+  # The name must be anchored with a slash to avoid namespacing it.
   #
-  #   Name.show_controller => "name" # unnormalized controller and special cases
-  #   name.show_controller => "name"
+  #   Article.show_controller => "/articles" # for normalized controller
+  #
+  #   Name.show_controller => "/name" # unnormalized controller & special cases
+  #   name.show_controller => "/name"
   #
   def self.show_controller
     if controller_normalized?(name)
-      name.pluralize.underscore # Rails standard for most controllers
+      "/#{name.pluralize.underscore}" # Rails standard for most controllers
     else
-      name.underscore # old MO controller names and any special cases
+      "/#{name.underscore}" # old MO controller names and any special cases
     end
   end
 

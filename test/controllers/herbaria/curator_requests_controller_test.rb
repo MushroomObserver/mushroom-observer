@@ -27,8 +27,6 @@ class Herbaria::CuratorRequestsControllerTest < FunctionalTestCase
   def test_new
     login("mary")
     get(:new, id: nybg.id)
-File.open("response.html", "w") { |file| file.puts @response.body }
-byebug
 
     assert_select(
       "form[action^='#{herbaria_curator_requests_path(id: nybg)}'][method='post']",
@@ -49,9 +47,10 @@ byebug
   def test_new_no_herbarium
     login("mary")
     get(:new)
+
     assert_redirected_to(
       herbaria_path,
-      "Curator request without herbarium id should redirect to index"
+      "Curator request without herbarium id should redirect to herbaria index"
     )
   end
 
