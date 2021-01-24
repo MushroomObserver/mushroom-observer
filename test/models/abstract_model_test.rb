@@ -403,8 +403,8 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_show_controller
-    assert_equal("articles", Article.show_controller)
-    assert_equal("#{self.class.name.underscore}/phony", Phony.show_controller)
+    assert_equal("/articles", Article.show_controller)
+    assert_equal("/#{self.class.name.underscore}/phony", Phony.show_controller)
   end
 
   def test_show_action
@@ -415,10 +415,10 @@ class AbstractModelTest < UnitTestCase
   def test_show_url
     assert_equal("#{MO.http_domain}/articles/2020",
                  Article.show_url(2020))
-    assert_equal("#{MO.http_domain}/" \
-                 "#{Phony.show_controller}/" \
-                 "#{Phony.show_action}/2020",
-                 Phony.show_url(2020))
+    assert_equal(
+      "#{MO.http_domain}#{Phony.show_controller}/#{Phony.show_action}/2020",
+      Phony.show_url(2020)
+    )
   end
 
   def test_index_action

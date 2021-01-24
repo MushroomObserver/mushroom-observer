@@ -435,11 +435,12 @@ class AbstractModel < ApplicationRecord
   #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
   #
+  # Note that show_controller has a leading forward slash
   def self.show_url(id)
     if controller_normalized?(name)
-      "#{MO.http_domain}/#{show_controller}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
     end
   end
 

@@ -657,8 +657,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations)
     assert_empty(@controller.instance_variable_get("@title"))
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal(css_select("title").text,
-                 "Mushroom Observer: Observation Search",
+    assert_equal("Mushroom Observer: Observation Search",
+                 css_select("title").text,
                  "metadata <title> tag incorrect")
 
     # If pattern is id of a real Observation, go directly to that Observation.
