@@ -4,7 +4,8 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 nybg_herbarium:
-    created_at: 2012-10-21 12:14:00 # api tests rely on these dates
+    # api tests rely on these dates, and nybg must be older than field_museum
+    created_at: 2012-10-21 12:14:00
     updated_at: 2012-10-21 12:14:00
     name: The New York Botanical Garden
     mailing_address: The New York Botanical Herbarium & Garden, Bronx, New York, USA

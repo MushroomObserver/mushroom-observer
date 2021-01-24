@@ -681,6 +681,7 @@ MushroomObserver::Application.routes.draw do
   namespace :herbaria do
     resources :curator_requests, only: [:new, :create]
     resources :curators, only: [:create, :destroy]
+    resources :merges, only: [:new]
   end
 
   resources :herbaria, id: /\d+/ do
