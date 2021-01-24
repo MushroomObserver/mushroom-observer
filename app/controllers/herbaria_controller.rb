@@ -340,6 +340,34 @@ class HerbariaController < ApplicationController
     true
   end
 
+  def perform_or_request_merge(this, that)
+    if in_admin_mode? || this.can_merge_into?(that)
+      perform_merge(this, that)
+    else
+      request_merge(this, that)
+    end
+  end
+
+  def perform_merge(this, that)
+    old_name = this.name_was
+    result = this.merge(that)
+    flash_notice(
+      :runtime_merge_success.t(
+        type: :herbarium, this: old_name, that: result.name
+        )
+    )
+    result
+  end
+
+  def request_merge(this, that)
+    redirect_with_query(
+      observer_email_merge_request_path(
+        type: :Herbarium, old_id: this.id, new_id: that.id
+      )
+    )
+    false
+  end
+
   def notify_admins_of_new_herbarium
     subject = "New Herbarium"
     content = "User created a new herbarium:\n" \
