@@ -693,7 +693,6 @@ MushroomObserver::Application.routes.draw do
     collection do
       get "filtered"
       get "nonpersonal"
-      get "merge"
       get "search"
     end
   end

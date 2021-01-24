@@ -25,7 +25,6 @@ class HerbariaController < ApplicationController
     :create,
     :destroy,
     :edit,
-    :merge,
     :new,
     :show,
     :update
@@ -34,7 +33,6 @@ class HerbariaController < ApplicationController
     :create,
     :destroy,
     :edit,
-    :merge,
     :new,
     :update
   ]
@@ -158,13 +156,6 @@ class HerbariaController < ApplicationController
   end
 
   # ---------- Modify data
-
-  def merge
-    this = find_or_goto_index(Herbarium, params[:this]) || return
-    that = find_or_goto_index(Herbarium, params[:that]) || return
-    result = perform_or_request_merge(this, that) || return
-    redirect_to_herbarium_index(result)
-  end
 
   # ---------- Other
 
@@ -347,29 +338,6 @@ class HerbariaController < ApplicationController
 
     flash_error(:edit_herbarium_cant_make_personal.t)
     true
-  end
-
-  def perform_or_request_merge(this, that)
-    if in_admin_mode? || this.can_merge_into?(that)
-      perform_merge(this, that)
-    else
-      request_merge(this, that)
-    end
-  end
-
-  def perform_merge(this, that)
-    old_name = this.name_was
-    result = this.merge(that)
-    flash_notice(:runtime_merge_success.t(type: :herbarium,
-                                          this: old_name,
-                                          that: result.name))
-    result
-  end
-
-  def request_merge(this, that)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
-                        type: :Herbarium, old_id: this.id, new_id: that.id)
-    false
   end
 
   def notify_admins_of_new_herbarium
