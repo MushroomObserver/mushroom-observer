@@ -170,13 +170,6 @@ class HerbariaController < ApplicationController
   include Herbaria::SharedPrivateMethods
 
   def show_selected_herbaria(query, args = {})
-    args = {
-      action: :index,
-      letters: "herbaria.name",
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args)
-
     @links ||= []
     unless query.flavor == :all
       @links << [:herbarium_index_list_all_herbaria.l,
@@ -192,6 +185,13 @@ class HerbariaController < ApplicationController
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
     @merge = Herbarium.safe_find(params[:merge])
+
+    args = {
+      action: :index,
+      letters: "herbaria.name",
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user]
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
