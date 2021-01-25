@@ -591,25 +591,24 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy
-    herbarium = herbaria(:nybg_herbarium)
-    records = herbarium.herbarium_records
+    records = nybg.herbarium_records
     assert_not_empty(records)
     record_ids = records.map(&:id)
 
     # Must be logged in.
-    get(:destroy, params: { id: herbarium.id })
-    assert_not_nil(Herbarium.safe_find(herbarium.id))
+    get(:destroy, params: { id: nybg.id })
+    assert_not_nil(Herbarium.safe_find(nybg.id))
 
     # Must be curator or admin.
     login("mary")
-    get(:destroy, params: { id: herbarium.id })
-    assert_not_nil(Herbarium.safe_find(herbarium.id))
+    get(:destroy, params: { id: nybg.id })
+    assert_not_nil(Herbarium.safe_find(nybg.id))
 
     # Curator can do it.
     login("roy")
-    get(:destroy, params: { id: herbarium.id })
-    assert_nil(Herbarium.safe_find(herbarium.id))
-    assert_empty(HerbariumRecord.where(herbarium_id: herbarium.id))
+    get(:destroy, params: { id: nybg.id })
+    assert_nil(Herbarium.safe_find(nybg.id))
+    assert_empty(HerbariumRecord.where(herbarium_id: nybg.id))
     assert_empty(Herbarium.connection.select_values(%(
       SELECT observation_id FROM herbarium_records_observations
       WHERE herbarium_record_id IN (#{record_ids.map(&:to_s).join(",")})
@@ -637,9 +636,8 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy_admin
-    herbarium = nybg
     make_admin("mary")
-    get(:destroy, params: { id: herbarium.id })
-    assert_nil(Herbarium.safe_find(herbarium.id))
+    get(:destroy, params: { id: nybg.id })
+    assert_nil(Herbarium.safe_find(nybg.id))
   end
 end
