@@ -10,26 +10,15 @@ class Herbaria::CuratorRequestsControllerTest < FunctionalTestCase
     herbaria(:nybg_herbarium)
   end
 
-  def herbarium_params
-    {
-      name: "",
-      personal: "",
-      code: "",
-      place_name: "",
-      email: "",
-      mailing_address: "",
-      description: ""
-    }.freeze
-  end
-
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def test_new
     login("mary")
-    get(:new, id: nybg.id)
+    get(:new, params: { id: nybg.id })
 
     assert_select(
-      "form[action^='#{herbaria_curator_requests_path(id: nybg)}'][method='post']",
+      "form[action^='#{herbaria_curator_requests_path(id: nybg)}']" \
+      "[method='post']",
       { count: 1 },
       "Curator request should open a form that posts to " \
       "#{herbaria_curator_requests_path(id: nybg)}"

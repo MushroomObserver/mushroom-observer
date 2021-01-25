@@ -25,15 +25,11 @@ class Herbaria::MergesController < ApplicationController
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
-
   # ---------- Modify data
-
 
   # ---------- Other
 
   ##############################################################################
-
-  private
 
   include Herbaria::SharedPrivateMethods # shared private methods
 end

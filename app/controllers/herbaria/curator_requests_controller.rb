@@ -40,7 +40,5 @@ class Herbaria::CuratorRequestsController < ApplicationController
 
   ##############################################################################
 
-  private
-
   include Herbaria::SharedPrivateMethods
 end

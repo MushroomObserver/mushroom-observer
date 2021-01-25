@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying herbaria.
-class  Herbaria::CuratorsController < ApplicationController
+class Herbaria::CuratorsController < ApplicationController
   # filters
   before_action :login_required
   before_action :pass_query_params, only: [
-    :destroy,
+    :destroy
   ]
   before_action :keep_track_of_referrer, only: [
-    :destroy,
+    :destroy
   ]
 
   # Old MO Action (method)        New "Normalized" Action (method)
@@ -26,7 +26,7 @@ class  Herbaria::CuratorsController < ApplicationController
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     if @user && (@herbarium.curator?(@user) || in_admin_mode?)
       login = params[:add_curator].to_s.sub(/ <.*/, "")
-      user = User.find_by_login(login)
+      user = User.find_by(login: login)
       if user
         @herbarium.add_curator(user)
       else
@@ -50,8 +50,6 @@ class  Herbaria::CuratorsController < ApplicationController
   end
 
   ##############################################################################
-
-  private
 
   include Herbaria::SharedPrivateMethods
 end

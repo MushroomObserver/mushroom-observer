@@ -2,6 +2,8 @@
 
 # private methods shared by HerbariaController and subcontrollers
 module Herbaria::SharedPrivateMethods
+  private
+
   def keep_track_of_referrer
     @back = params[:back] || request.referer
   end
@@ -32,8 +34,10 @@ module Herbaria::SharedPrivateMethods
   def perform_merge(this, that)
     old_name = this.name_was
     result = this.merge(that)
-    flash_notice(:runtime_merge_success.t(
-                 type: :herbarium, this: old_name, that: result.name)
+    flash_notice(
+      :runtime_merge_success.t(
+        type: :herbarium, this: old_name, that: result.name
+      )
     )
     result
   end

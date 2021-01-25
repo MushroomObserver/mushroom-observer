@@ -3,7 +3,7 @@
 require("test_helper")
 
 # tests of Herbarium controller
-class Herbaria::CuratorsControllerTest< FunctionalTestCase
+class Herbaria::CuratorsControllerTest < FunctionalTestCase
   # ---------- Helpers ----------
 
   def nybg
@@ -79,7 +79,7 @@ class Herbaria::CuratorsControllerTest< FunctionalTestCase
 
     login("mary")
     make_admin("mary")
-    delete(:destroy, { id: nybg.id, user: roy.id } )
+    delete(:destroy, params: { id: nybg.id, user: roy.id })
 
     assert_equal(curator_count - 1, nybg.reload.curators.count)
     assert_not(nybg.curator?(roy))
