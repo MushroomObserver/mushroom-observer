@@ -287,15 +287,8 @@ class HerbariaController < ApplicationController
 
   def validate_admin_personal_user!
     return true unless in_admin_mode?
+    return true if nonpersonal!
 
-    if @herbarium.personal_user_name.blank?
-      return true if @herbarium.personal_user_id.nil?
-
-      flash_notice(:edit_herbarium_successfully_made_nonpersonal.t)
-      @herbarium.personal_user_id = nil
-      @herbarium.curators.clear
-      return true
-    end
     name = @herbarium.personal_user_name
     name.sub!(/\s*<(.*)>$/, "")
     user = User.find_by(login: name)
@@ -307,7 +300,7 @@ class HerbariaController < ApplicationController
       return false
     end
     return true if user.personal_herbarium == @herbarium
-    return false if personal_herbarium?(user)
+    return false if flash_personal_herbarium?(user)
 
     flash_notice(
       :edit_herbarium_successfully_made_personal.t(user: user.login)
@@ -317,7 +310,19 @@ class HerbariaController < ApplicationController
     @herbarium.personal_user_id = user.id
   end
 
-  def personal_herbarium?(user)
+  # Return true/false if @herbarium nonpersonal/personal,
+  # making it nonpersonal & flashing message if possible
+  def nonpersonal!
+    return false if @herbarium.personal_user_name.present?
+    return true if @herbarium.personal_user_id.nil?
+
+    flash_notice(:edit_herbarium_successfully_made_nonpersonal.t)
+    @herbarium.personal_user_id = nil
+    @herbarium.curators.clear
+    true
+  end
+
+  def flash_personal_herbarium?(user)
     return false if user.personal_herbarium.blank?
 
     flash_error(
