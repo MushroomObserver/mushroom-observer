@@ -53,22 +53,5 @@ class  Herbaria::CuratorsController < ApplicationController
 
   private
 
-  def keep_track_of_referrer
-    @back = params[:back] || request.referer
-  end
-
-  def redirect_to_referrer
-    return false if @back.blank?
-
-    redirect_to(@back)
-    true
-  end
-
-  def redirect_to_show_herbarium(herbarium = @herbarium)
-    redirect_with_query(herbarium_path(herbarium))
-  end
-
-  # placeholder for strong parameter method
-  def curator_params
-  end
+  include Herbaria::SharedPrivateMethods
 end
