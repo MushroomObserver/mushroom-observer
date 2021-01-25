@@ -441,7 +441,6 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_update_with_duplicate_name
-    nybg  = herbaria(:nybg_herbarium)
     other = herbaria(:rolf_herbarium)
     last_update = nybg.updated_at
     params = herbarium_params.merge(name: other.name)

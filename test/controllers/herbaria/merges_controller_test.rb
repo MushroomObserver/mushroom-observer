@@ -49,7 +49,7 @@ class Herbaria::MergesControllerTest < FunctionalTestCase
     assert_redirected_to(filtered_herbaria_path(id: fundis))
   end
 
-  def test_update_admin
+  def test_merge_admin
     make_admin("mary")
     get(:new, params: { this: nybg.id, that: field_museum.id })
     assert_flash_success
@@ -57,13 +57,13 @@ class Herbaria::MergesControllerTest < FunctionalTestCase
     assert_redirected_to(filtered_herbaria_path(id: nybg))
   end
 
-  def test_update_no_login
+  def test_merge_no_login
     marys = mary.create_personal_herbarium
     get(:new, params: { this: fundis.id, that: marys.id })
     assert_redirected_to(account_login_path)
   end
 
-  def test_update_by_record_nonowner
+  def test_merge_by_record_nonowner
     marys = mary.create_personal_herbarium
     login("rolf")
     get(:new, params: { this: fundis.id, that: marys.id })
@@ -75,7 +75,7 @@ class Herbaria::MergesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_update_no_params
+  def test_merge_no_params
     login("mary")
     get(:new)
     assert_flash_error
@@ -88,19 +88,19 @@ class Herbaria::MergesControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
-  def test_update_non_existent_merge_source
+  def test_merge_non_existent_merge_source
     login("mary")
     get(:new, params: { this: 666 })
     assert_flash_error
   end
 
-  def test_update_non_existent_merge_target
+  def test_merge_non_existent_merge_target
     login("mary")
     get(:new, params: { this: fundis.id, that: 666 })
     assert_flash_error
   end
 
-  def test_update_merge_identical_non_personal_herbaria
+  def test_merge_identical_non_personal_herbaria
     login("mary")
     get(:new, params: { this: nybg.id, that: nybg.id })
 
