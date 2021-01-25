@@ -106,7 +106,15 @@ class HerbariaController < ApplicationController
     return unless @herbarium
     return unless make_sure_can_edit!
 
-    update_herbarium
+    # update_herbarium
+    @herbarium.attributes = herbarium_params
+    normalize_parameters
+    return unless validate_herbarium!
+
+    @herbarium.save
+    redirect_to_create_location ||
+      redirect_to_referrer ||
+      redirect_to_show_herbarium
   end
 
   def destroy
@@ -211,17 +219,6 @@ class HerbariaController < ApplicationController
 
     args[:action] = :index # render with the index template
     show_index_of_objects(query, args)
-  end
-
-  def update_herbarium
-    @herbarium.attributes = herbarium_params
-    normalize_parameters
-    return unless validate_herbarium!
-
-    @herbarium.save
-    redirect_to_create_location ||
-      redirect_to_referrer ||
-      redirect_to_show_herbarium
   end
 
   def make_sure_can_edit!
