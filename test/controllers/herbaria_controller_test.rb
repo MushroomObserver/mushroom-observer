@@ -640,4 +640,15 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:destroy, params: { id: nybg.id })
     assert_nil(Herbarium.safe_find(nybg.id))
   end
+
+  def test_destroy_nonexistent_herbarium
+    assert_not(Herbarium.exists?(314159))
+    login("mary")
+    get(:destroy, params: { id: 314159 })
+
+    assert_redirected_to(
+      herbaria_path,
+      "Attempt to destroy non-existent herbarium should redirect to index"
+    )
+  end
 end
