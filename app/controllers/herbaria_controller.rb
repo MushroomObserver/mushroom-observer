@@ -96,9 +96,7 @@ class HerbariaController < ApplicationController
     @herbarium.save
     @herbarium.add_curator(@user) if @herbarium.personal_user
     notify_admins_of_new_herbarium unless @herbarium.personal_user
-    redirect_to_create_location ||
-      redirect_to_referrer ||
-      redirect_to_show_herbarium
+    redirect_to_create_location_or_referrer_or_show_location
   end
 
   def update
@@ -112,9 +110,7 @@ class HerbariaController < ApplicationController
     return unless validate_herbarium!
 
     @herbarium.save
-    redirect_to_create_location ||
-      redirect_to_referrer ||
-      redirect_to_show_herbarium
+    redirect_to_create_location_or_referrer_or_show_location
   end
 
   def destroy
@@ -349,6 +345,12 @@ class HerbariaController < ApplicationController
               "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
               "Obj: #{@herbarium.show_url}\n"
     WebmasterEmail.build(@user.email, content, subject).deliver_now
+  end
+
+  def redirect_to_create_location_or_referrer_or_show_location
+    redirect_to_create_location ||
+      redirect_to_referrer ||
+      redirect_to_show_herbarium
   end
 
   def redirect_to_create_location
