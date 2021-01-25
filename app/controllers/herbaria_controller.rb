@@ -89,7 +89,16 @@ class HerbariaController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    create_herbarium
+    @herbarium = Herbarium.new(herbarium_params)
+    normalize_parameters
+    return unless validate_herbarium!
+
+    @herbarium.save
+    @herbarium.add_curator(@user) if @herbarium.personal_user
+    notify_admins_of_new_herbarium unless @herbarium.personal_user
+    redirect_to_create_location ||
+      redirect_to_referrer ||
+      redirect_to_show_herbarium
   end
 
   def update
@@ -202,19 +211,6 @@ class HerbariaController < ApplicationController
 
     args[:action] = :index # render with the index template
     show_index_of_objects(query, args)
-  end
-
-  def create_herbarium
-    @herbarium = Herbarium.new(herbarium_params)
-    normalize_parameters
-    return unless validate_herbarium!
-
-    @herbarium.save
-    @herbarium.add_curator(@user) if @herbarium.personal_user
-    notify_admins_of_new_herbarium unless @herbarium.personal_user
-    redirect_to_create_location ||
-      redirect_to_referrer ||
-      redirect_to_show_herbarium
   end
 
   def update_herbarium
