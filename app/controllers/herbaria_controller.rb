@@ -267,7 +267,9 @@ class HerbariaController < ApplicationController
     return true if @herbarium.place_name.blank?
 
     @herbarium.location =
-      Location.find_by_name_or_reverse_name(@herbarium.place_name)
+      # Location.find_by_name_or_reverse_name(@herbarium.place_name)
+      Location.where(name: @herbarium.place_name).
+      or(Location.where(scientific_name: @herbarium.place_name)).first
     # Will redirect to create location if not found.
     true
   end
@@ -296,7 +298,7 @@ class HerbariaController < ApplicationController
     end
     name = @herbarium.personal_user_name
     name.sub!(/\s*<(.*)>$/, "")
-    user = User.find_by_login(name)
+    user = User.find_by(login: name)
     unless user
       flash_error(
         :runtime_no_match_name.t(type: :user,
