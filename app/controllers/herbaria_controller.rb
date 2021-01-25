@@ -343,6 +343,12 @@ class HerbariaController < ApplicationController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
   end
 
+  def user_can_destroy_herbarium?
+    in_admin_mode? ||
+     @herbarium.curator?(@user) ||
+     @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
+  end
+
   def redirect_to_create_location_or_referrer_or_show_location
     redirect_to_create_location ||
       redirect_to_referrer ||
