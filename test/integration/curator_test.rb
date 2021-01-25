@@ -225,8 +225,8 @@ class CuratorTest < IntegrationTestCase
       form.submit("Add Curator")
     end
 
-   assert(nybg.curator?(mary),
-          "Failed to add mary to curators of #{nybg.format_name}")
+    assert(nybg.curator?(mary),
+           "Failed to add mary to curators of #{nybg.format_name}")
     assert_select(
       "a:match('href', ?)",
       /#{herbaria_curator_path(nybg)}\?user=#{mary.id}/,

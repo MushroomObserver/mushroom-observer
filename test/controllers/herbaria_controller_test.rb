@@ -642,9 +642,9 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy_nonexistent_herbarium
-    assert_not(Herbarium.exists?(314159))
+    assert_not(Herbarium.exists?(314_159))
     login("mary")
-    get(:destroy, params: { id: 314159 })
+    get(:destroy, params: { id: 314_159 })
 
     assert_redirected_to(
       herbaria_path,
