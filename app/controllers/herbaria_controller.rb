@@ -100,8 +100,7 @@ class HerbariaController < ApplicationController
   end
 
   def update
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
     return unless make_sure_can_edit!
 
     # update_herbarium
@@ -114,8 +113,7 @@ class HerbariaController < ApplicationController
   end
 
   def destroy
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
 
     if user_can_destroy_herbarium?
       @herbarium.destroy
