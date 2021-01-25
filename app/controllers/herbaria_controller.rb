@@ -117,9 +117,7 @@ class HerbariaController < ApplicationController
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
 
-    if in_admin_mode? ||
-       @herbarium.curator?(@user) ||
-       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
+    if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referrer || redirect_to_herbarium_index
     else
