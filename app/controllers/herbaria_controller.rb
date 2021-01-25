@@ -172,15 +172,13 @@ class HerbariaController < ApplicationController
   def show_selected_herbaria(query, args = {})
     @links ||= []
     unless query.flavor == :all
-      @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbaria, action: :index }]
+      @links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
     end
     unless query.flavor == :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbaria, action: :nonpersonal }]
+                 nonpersonal_herbaria_path]
     end
-    @links << [:create_herbarium.l,
-               { controller: :herbaria, action: :create }]
+    @links << [:create_herbarium.l, herbaria_path(method: :post)]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
