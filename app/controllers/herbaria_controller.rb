@@ -345,8 +345,8 @@ class HerbariaController < ApplicationController
 
   def user_can_destroy_herbarium?
     in_admin_mode? ||
-     @herbarium.curator?(@user) ||
-     @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
+      @herbarium.curator?(@user) ||
+      @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
   end
 
   def redirect_to_create_location_or_referrer_or_show_location
