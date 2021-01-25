@@ -226,11 +226,12 @@ class CuratorTest < IntegrationTestCase
     end
 
    assert(nybg.curator?(mary),
-           "Failed to add mary to curators of #{nybg.format_name}")
-    # Page should have a link to delete mary as a curator
+          "Failed to add mary to curators of #{nybg.format_name}")
     assert_select(
       "a:match('href', ?)",
       /#{herbaria_curator_path(nybg)}\?user=#{mary.id}/,
+      true,
+      "Page should have a link to delete mary as a curator"
     )
   end
 end

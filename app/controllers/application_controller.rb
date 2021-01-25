@@ -1033,7 +1033,7 @@ class ApplicationController < ActionController::Base
   def append_query_param_to_path(path, query_param)
     return path unless query_param
 
-    if path =~ /\?/ # Does path already have a query string?
+    if path.match(/\?/) # Does path already have a query string?
       "#{path}&q=#{query_param}" # add query_param to existing query string
     else
       "#{path}?q=#{query_param}" # create a query string comprising query_param

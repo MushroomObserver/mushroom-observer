@@ -436,7 +436,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_update_no_login
     patch(:update, params: { herbarium: herbarium_params,
-                            id: herbaria(:nybg_herbarium).id })
+                             id: herbaria(:nybg_herbarium).id })
     assert_redirected_to(account_login_path)
   end
 
