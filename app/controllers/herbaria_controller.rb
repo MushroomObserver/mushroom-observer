@@ -307,21 +307,25 @@ class HerbariaController < ApplicationController
       return false
     end
     return true if user.personal_herbarium == @herbarium
+    return false if personal_herbarium?(user)
 
-    if user.personal_herbarium.present?
-      flash_error(
-        :edit_herbarium_user_already_has_personal_herbarium.t(
-          user: user.login, herbarium: user.personal_herbarium.name
-        )
-      )
-      return false
-    end
     flash_notice(
       :edit_herbarium_successfully_made_personal.t(user: user.login)
     )
     @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
+  end
+
+  def personal_herbarium?(user)
+    return false if user.personal_herbarium.blank?
+
+    flash_error(
+      :edit_herbarium_user_already_has_personal_herbarium.t(
+        user: user.login, herbarium: user.personal_herbarium.name
+      )
+    )
+    true
   end
 
   def already_have_personal_herbarium!
