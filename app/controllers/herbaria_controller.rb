@@ -207,31 +207,25 @@ class HerbariaController < ApplicationController
   def create_herbarium
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      @herbarium.add_curator(@user) if @herbarium.personal_user
-      notify_admins_of_new_herbarium unless @herbarium.personal_user
-      redirect_to_create_location ||
-        redirect_to_referrer ||
-        redirect_to_show_herbarium
-    end
+    return unless validate_herbarium!
+
+    @herbarium.save
+    @herbarium.add_curator(@user) if @herbarium.personal_user
+    notify_admins_of_new_herbarium unless @herbarium.personal_user
+    redirect_to_create_location ||
+      redirect_to_referrer ||
+      redirect_to_show_herbarium
   end
 
   def update_herbarium
     @herbarium.attributes = herbarium_params
     normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      redirect_to_create_location ||
-        redirect_to_referrer ||
-        redirect_to_show_herbarium
-    end
+    return unless validate_herbarium!
+
+    @herbarium.save
+    redirect_to_create_location ||
+      redirect_to_referrer ||
+      redirect_to_show_herbarium
   end
 
   def make_sure_can_edit!
@@ -249,6 +243,13 @@ class HerbariaController < ApplicationController
     end
     @herbarium.description = @herbarium.description.to_s.strip
     @herbarium.code = "" if @herbarium.personal_user_id
+  end
+
+  def validate_herbarium!
+    validate_name! &&
+      validate_location! &&
+      validate_personal_herbarium! &&
+      validate_admin_personal_user!
   end
 
   def validate_name!
