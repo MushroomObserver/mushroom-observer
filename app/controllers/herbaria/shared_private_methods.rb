@@ -4,6 +4,8 @@
 module Herbaria::SharedPrivateMethods
   private
 
+  # ---------- Filters ---------------------------------------------------------
+
   def keep_track_of_referrer
     @back = params[:back] || request.referer
   end
@@ -15,6 +17,8 @@ module Herbaria::SharedPrivateMethods
     true
   end
 
+  # ---------- Redirects -------------------------------------------------------
+
   def redirect_to_show_herbarium(herbarium = @herbarium)
     redirect_with_query(herbarium_path(herbarium))
   end
@@ -22,6 +26,8 @@ module Herbaria::SharedPrivateMethods
   def redirect_to_herbarium_index(herbarium = @herbarium)
     redirect_with_query(filtered_herbaria_path(id: herbarium.try(&:id)))
   end
+
+  # ---------- Other --- -------------------------------------------------------
 
   def perform_or_request_merge(this, that)
     if in_admin_mode? || this.can_merge_into?(that)
