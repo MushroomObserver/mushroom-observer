@@ -81,28 +81,23 @@ class HerbariaController < ApplicationController
     return unless @herbarium
     return unless make_sure_can_edit!
 
-    if request.method == "GET"
-      @herbarium.place_name         = @herbarium.location.try(&:name)
-      @herbarium.personal           = @herbarium.personal_user_id.present?
-      @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    elsif request.method == "POST"
-      post_edit_herbarium
-    else
-      redirect_to_referrer || redirect_to_show_herbarium
-    end
+    @herbarium.place_name         = @herbarium.location.try(&:name)
+    @herbarium.personal           = @herbarium.personal_user_id.present?
+    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    post_create_herbarium
+    create_herbarium
   end
 
   def update
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
-    post_edit_herbarium
+
+    update_herbarium
   end
 
   def destroy
@@ -124,7 +119,7 @@ class HerbariaController < ApplicationController
 
   # ---------- Display data
 
-  # Display selected Herbarium's (based on current Query).
+  # Display selected Herbaria based on current Query
   def filtered
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
@@ -136,7 +131,7 @@ class HerbariaController < ApplicationController
     show_selected_herbaria(query, always_index: true)
   end
 
-  # Display list of Herbaria whose text matches a string pattern.
+  # list of Herbaria whose text matches a string pattern.
   def search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
@@ -209,7 +204,7 @@ class HerbariaController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  def post_create_herbarium
+  def create_herbarium
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
     if validate_name! &&
@@ -225,7 +220,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def post_edit_herbarium
+  def update_herbarium
     @herbarium.attributes = herbarium_params
     normalize_parameters
     if validate_name! &&
