@@ -22,8 +22,6 @@ module Herbaria
 
     ############################################################################
 
-    private
-
     include Herbaria::SharedPrivateMethods
   end
 end

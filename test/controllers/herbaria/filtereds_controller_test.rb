@@ -38,7 +38,7 @@ module Herbaria
     end
 
     def test_filtered_set
-      skip "under construction"
+      skip("under construction")
       set = [nybg, herbaria(:rolf_herbarium)]
       Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
       get(:index, params: { id: nybg.id })
