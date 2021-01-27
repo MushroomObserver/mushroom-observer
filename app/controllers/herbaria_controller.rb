@@ -28,7 +28,7 @@ class HerbariaController < ApplicationController
   # destroy_herbarium             destroy
   # edit_herbarium (get)          edit
   # edit_herbarium (post)         update
-  # herbarium_search (get)        search
+  # herbarium_search (get)        Herbaria::Searches#index (get)
   # index (get)                   nonpersonal
   # index_herbarium (get)         filtered
   # list_herbaria (get)           index

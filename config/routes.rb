@@ -682,6 +682,7 @@ MushroomObserver::Application.routes.draw do
     resources :curator_requests, only: [:new, :create]
     resources :curators, only: [:create, :destroy]
     resources :merges, only: [:new]
+    resources :searches, only: [:index]
   end
 
   resources :herbaria, id: /\d+/ do
