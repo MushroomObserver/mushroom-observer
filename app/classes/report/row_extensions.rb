@@ -2,48 +2,53 @@
 
 module Report
   module RowExtensions
+    def reset
+      split_date
+      split_location
+      split_name
+    end
+
     def year
-      @date ||= split_date
-      @date[0]
+      split_date if @year.nil?
+      @year
     end
 
     def month
-      @date ||= split_date
-      @date[1]
+      split_date if @month.nil?
+      @month
     end
 
     def day
-      @date ||= split_date
-      @date[2]
+      split_date if @day.nil?
+      @day
     end
 
     def split_date
-      year, month, day = obs_when.to_s.split("-")
-      month.sub!(/^0/, "")
-      day.sub!(/^0/, "")
-      [year, month, day]
+      @year, @month, @day = obs_when.to_s.split("-")
+      @month.sub!(/^0/, "")
+      @day.sub!(/^0/, "")
     end
 
     # --------------------
 
     def country
-      @location ||= split_location
-      @location[0]
+      split_location if @country.nil?
+      @country
     end
 
     def state
-      @location ||= split_location
-      @location[1]
+      split_location if @state.nil?
+      @state
     end
 
     def county
-      @location ||= split_location
-      @location[2]
+      split_location if @county.nil?
+      @county
     end
 
     def locality
-      @location ||= split_location
-      @location[3]
+      split_location if @locality.nil?
+      @locality
     end
 
     def locality_with_county
@@ -52,17 +57,17 @@ module Report
 
       val.split(", ", 3)[2]
     end
-
+ 
     def split_location
       val = Location.reverse_name(loc_name)
-      return [nil, nil, nil, nil] if val.blank?
+      return empty_loc if val.blank?
+      return @country = @state = @county = @locality = nil if val.blank?
 
-      country, state, county, locality = val.split(", ", 4)
-      if county && !county.sub!(/ (Co\.|Parish)$/, "")
-        locality = locality.blank? ? county : "#{county}, #{locality}"
-        county = nil
+      @country, @state, @county, @locality = val.split(", ", 4)
+      if @county && !@county.sub!(/ (Co\.|Parish)$/, "")
+        @locality = @locality.blank? ? @county : "#{county}, #{locality}"
+        @county = nil
       end
-      [country, state, county, locality]
     end
 
     # --------------------
@@ -116,84 +121,91 @@ module Report
     # --------------------
 
     def genus
-      @name ||= split_name
-      @name[0]
+      split_name if @genus.nil?
+      @genus
     end
 
     def species
-      @name ||= split_name
-      @name[1]
+      split_name if @species.nil?
+      @species
     end
 
     def subspecies
-      @name ||= split_name
-      @name[2]
+      split_name if @subspecies.nil?
+      @subspecies
     end
 
     def variety
-      @name ||= split_name
-      @name[3]
+      split_name if @variety.nil?
+      @variety
     end
 
     def form
-      @name ||= split_name
-      @name[4]
+      split_name if @form.nil?
+      @form
     end
 
     def form_or_variety_or_subspecies
-      form || variety || subspecies
+      @form || @variety || @subspecies
     end
 
     def species_author
-      @name ||= split_name
-      @name[5]
+      split_name if @species_author.nil?
+      @species_author
     end
 
     def subspecies_author
-      @name ||= split_name
-      @name[6]
+      split_name if @subspecies_author.nil?
+      @subspecies_author
     end
 
     def variety_author
-      @name ||= split_name
-      @name[7]
+      split_name if @variety_author.nil?
+      @variety_author
     end
 
     def form_author
-      @name ||= split_name
-      @name[8]
+      split_name if @form_author.nil?
+      @form_author
     end
 
     def cf
-      @name ||= split_name
-      @name[9]
+      split_name if @cf.nil?
+      @cf
     end
 
     def split_name
       name = name_text_name.dup
-      cf = name.sub!(/ cfr?\.( |$)/, "\\1") ? "cf." : nil
-      gen, sp, ssp, var, f = split_name_string(name)
-      sp_auth, ssp_auth, var_auth, f_auth = which_author(sp)
-      [gen, sp, ssp, var, f, sp_auth, ssp_auth, var_auth, f_auth, cf]
+      @cf = name.sub!(/ cfr?\.( |$)/, "\\1") ? "cf." : nil
+      split_name_string(name)
+      which_author(@species)
     end
 
     def split_name_string(name)
-      f   = Regexp.last_match(1) if name.sub!(/ f. (\S+)$/, "")
-      var = Regexp.last_match(1) if name.sub!(/ var. (\S+)$/, "")
-      ssp = Regexp.last_match(1) if name.sub!(/ ssp. (\S+)$/, "")
-      sp  = Regexp.last_match(1) if name.sub!(/ (\S.*)$/, "")
-      [name, sp, ssp, var, f]
+      @form = Regexp.last_match(1) if name.sub!(/ f. (\S+)$/, "")
+      @variety = Regexp.last_match(1) if name.sub!(/ var. (\S+)$/, "")
+      @subspecies = Regexp.last_match(1) if name.sub!(/ ssp. (\S+)$/, "")
+      @species = Regexp.last_match(1) if name.sub!(/ (\S.*)$/, "")
+      @genus = name
     end
 
     def which_author(species)
       author = name_author
       rank   = name_rank
-      return [nil, nil, nil, author] if rank == "Form"
-      return [nil, nil, author, nil] if rank == "Variety"
-      return [nil, author, nil, nil] if rank == "Subspecies"
-      return [author, nil, nil, nil] if species.present?
-
-      [nil, nil, nil, nil]
+      @species_author = nil
+      @subspecies_author = nil
+      @variety_author = nil
+      @form_author = nil
+      case rank
+      when "Form"
+        @form_author = author
+      when "Variety"
+        @variety_author = author
+      when "Subspecies"
+        @subspecies_author = author
+      else
+        @species_author = author if species.present?
+      end
     end
 
     # --------------------

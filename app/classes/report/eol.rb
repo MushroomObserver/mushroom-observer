@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Report
-  # Darwin Core Archive format.
   class Eol < Report::ZipReport
     attr_accessor :images, :observations, :taxa
 
