@@ -47,7 +47,7 @@ module Herbaria
 
       assert_flash_success
       # fundis ends up being the destination because it is older.
-      assert_redirected_to(filtered_herbaria_path(id: fundis))
+      assert_redirected_to(herbaria_filtereds_path(id: fundis))
     end
 
     def test_merge_admin
@@ -55,7 +55,7 @@ module Herbaria
       get(:new, params: { this: nybg.id, that: field_museum.id })
       assert_flash_success
       # nybg survives because it is older.
-      assert_redirected_to(filtered_herbaria_path(id: nybg))
+      assert_redirected_to(herbaria_filtereds_path(id: nybg))
     end
 
     def test_merge_no_login

@@ -1539,9 +1539,8 @@ class ApplicationController < ActionController::Base
         end
       end
 
-      # Render the list if given template.
       if args[:template]
-        render(template: args[:template])
+        render(template: args[:template]) # Render the list if given template.
       elsif args[:action]
         render(action: args[:action])
       end

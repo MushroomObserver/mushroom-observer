@@ -103,6 +103,6 @@ module Herbaria::SharedPrivateMethods
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(filtered_herbaria_path(id: herbarium.try(&:id)))
+    redirect_with_query(herbaria_filtereds_path(id: herbarium.try(&:id)))
   end
-  end
+end

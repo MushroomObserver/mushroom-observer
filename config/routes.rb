@@ -681,10 +681,10 @@ MushroomObserver::Application.routes.draw do
   namespace :herbaria do
     resources :curator_requests, only: [:new, :create]
     resources :curators, only: [:create, :destroy]
+    resources :filtereds, only: [:index]
     resources :merges, only: [:new]
     resources :searches, only: [:index]
   end
-
   resources :herbaria, id: /\d+/ do
     # non-CRUD actions
     member do
