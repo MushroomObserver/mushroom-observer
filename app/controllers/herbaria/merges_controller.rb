@@ -16,11 +16,14 @@ module Herbaria
 
     # ---------- Actions to Display forms -- (new, edit, etc.) -----------------
 
-    # Performs a merger of this herbarium into that Herbarium
-
+    # Merges :this into :that Herbarium if user has sufficient privileges
+    # Otherwise sends an email to the webmaster requesting a merger
     def new
       this = find_or_goto_index(Herbarium, params[:this]) || return
       that = find_or_goto_index(Herbarium, params[:that]) || return
+
+      # Calls shared private methods, also used by
+      # Herbaria#create and Herbaria#update
       result = perform_or_request_merge(this, that) || return
 
       redirect_to_herbarium_index(result)
@@ -28,13 +31,7 @@ module Herbaria
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
-    # ---------- Modify data
-
-
     ############################################################################
-
-    # The bulk of this action is in private methods, which are alse used by
-    # Herbaria#create and Herbaria#update
 
     include Herbaria::SharedPrivateMethods # shared private methods
   end
