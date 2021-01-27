@@ -150,40 +150,6 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_search
-    pattern = "Personal Herbarium"
-    get(:search, pattern: "Personal Herbarium")
-
-    assert_select("#title-caption").text.start_with?(
-      :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
-    )
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
-      assert_select(
-        "a[href ^= '#{herbarium_path(herbarium)}']", true,
-        "Search for #{pattern} is missing a link to " \
-        "#{herbarium.format_name})"
-      )
-    end
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
-      assert_select(
-        "a[href ^= '#{herbarium_path(herbarium)}']", false,
-        "Search for #{pattern} should not have a link to " \
-        "#{herbarium.format_name})"
-      )
-    end
-  end
-
-  def test_search_number
-    herbarium = herbaria(:nybg_herbarium)
-    get(:search, params: { pattern: herbarium.id })
-
-    assert_redirected_to(
-      herbarium_path(herbarium),
-      "Herbarium search for ##{herbarium.id} should show " \
-        "#{herbarium.name} herbarium"
-    )
-  end
-
   def test_next_and_prev
     query = Query.lookup_and_save(:Herbarium, :all)
     assert_operator(query.num_results, :>, 1)

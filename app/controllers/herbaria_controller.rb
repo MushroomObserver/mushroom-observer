@@ -123,17 +123,6 @@ class HerbariaController < ApplicationController
     show_selected_herbaria(query, always_index: true)
   end
 
-  # list of Herbaria whose text matches a string pattern.
-  def search
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(herbarium_path(herbarium.id))
-    else
-      query = create_query(:Herbarium, :pattern_search, pattern: pattern)
-      show_selected_herbaria(query)
-    end
-  end
-
   def next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
