@@ -27,7 +27,8 @@ module Herbaria::SharedPrivateMethods
     redirect_with_query(filtered_herbaria_path(id: herbarium.try(&:id)))
   end
 
-  # ---------- Other --- -------------------------------------------------------
+  # ---------- Merges ----------------------------------------------------------
+  # Used by create, edit and HerbariaMerges
 
   def perform_or_request_merge(this, that)
     if in_admin_mode? || this.can_merge_into?(that)

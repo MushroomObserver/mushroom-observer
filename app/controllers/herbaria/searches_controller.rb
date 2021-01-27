@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
-# Controls viewing and modifying herbaria.
 module Herbaria
+  # List Herbaria based on a "pattern" search (defined by the url search string)
   class SearchesController < ApplicationController
-    # filters
-
     # Old MO Action (method)        New "Normalized" Action (method)
     # ----------------------        --------------------------------
     # herbarium_search (get)        Herbaria::Searches#index (get)
 
-    # ---------- Actions to Display data (index, show, etc.) ---------------------
+    # ---------- Actions to Display data (index, show, etc.) -------------------
 
     # list of Herbaria whose text matches a string pattern.
     def index
@@ -22,7 +20,7 @@ module Herbaria
       end
     end
 
-    ##############################################################################
+    ############################################################################
 
     private
 
