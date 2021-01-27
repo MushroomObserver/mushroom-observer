@@ -37,7 +37,7 @@ module Herbaria
         "Notes: #{params[:notes]}"
       WebmasterEmail.build(@user.email, content, subject).deliver_now
       flash_notice(:show_herbarium_request_sent.t)
-      redirect_to_referrer || redirect_to_show_herbarium
+      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     end
 
     ############################################################################

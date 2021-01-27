@@ -30,7 +30,7 @@ module Herbaria
           flash_error(:show_herbarium_no_user.t(login: login))
         end
       end
-      redirect_to_show_herbarium
+      redirect_with_query(herbarium_path(@herbarium))
     end
 
     def destroy
@@ -43,7 +43,7 @@ module Herbaria
       elsif user && @herbarium.curator?(user)
         @herbarium.delete_curator(user)
       end
-      redirect_to_referrer || redirect_to_show_herbarium
+      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     end
 
     ############################################################################

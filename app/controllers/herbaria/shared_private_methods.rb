@@ -95,14 +95,4 @@ module Herbaria::SharedPrivateMethods
     )
     false
   end
-
-  # ---------- Redirects
-
-  def redirect_to_show_herbarium(herbarium = @herbarium)
-    redirect_with_query(herbarium_path(herbarium))
-  end
-
-  def redirect_to_herbarium_index(herbarium = @herbarium)
-    redirect_with_query(herbaria_filtereds_path(id: herbarium.try(&:id)))
-  end
 end
