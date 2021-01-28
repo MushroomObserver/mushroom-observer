@@ -112,12 +112,6 @@ class HerbariaController < ApplicationController
 
   # ---------- Display data
 
-  # Display selected Herbaria based on current Query
-  def filtered
-    query = find_or_create_query(:Herbarium, by: params[:by])
-    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
-  end
-
   # list nonpersonal herbaria (herbarium.personal_id == nil)
   def nonpersonal
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)

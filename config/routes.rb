@@ -692,7 +692,6 @@ MushroomObserver::Application.routes.draw do
       get "prev"
     end
     collection do
-      get "filtered"
       get "nonpersonal"
     end
   end

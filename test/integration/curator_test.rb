@@ -111,8 +111,11 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     get("/herbarium_record/create_herbarium_record/" +
         observations(:minimal_unknown_obs).id.to_s)
-    click(label: :herbarium_index.t)
-    assert_template("herbaria/index")
+    click(label: :herbarium_index.l)
+    assert_select(
+      "#title-caption", { text: "#{:HERBARIA.l} by Name" },
+      "Clicking #{:herbarium_index.l} should display #{:HERBARIA.l} by Name"
+    )
   end
 
   def test_single_herbarium_search
@@ -153,6 +156,12 @@ class CuratorTest < IntegrationTestCase
       form.submit("Search")
     end
     assert_template("herbarium_record/list_herbarium_records")
+    assert_select(
+      "#title-caption",
+      { text: "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’" },
+      "Fungarium Record pattern search should display " \
+      "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’"
+    )
   end
 
   def test_herbarium_change_code

@@ -32,6 +32,8 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
+    assert_select("#title-caption", { text: "#{:HERBARIA.l} by Name" },
+                  "index should display #{:HERBARIA.l} by Name")
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -116,18 +118,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href*='this=#{herb1.id}']", count: 1)
     assert_select("a[href*='this=#{herb2.id}']", count: 1)
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
-  end
-
-  def test_filtered
-    get(:filtered)
-
-    assert_response(:success)
-    Herbarium.find_each do |herbarium|
-      assert_select(
-        "a[href *= '#{herbarium_path(herbarium)}']", true,
-        "Herbarium Index missing link to #{herbarium.format_name})"
-      )
-    end
   end
 
   def test_nonpersonal
