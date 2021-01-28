@@ -5,6 +5,29 @@ module Report
     # Darwin Core Observations format.
     class GbifImages < Report::CSV
       VOTE_CUTOFF = 2.5
+      PROJECTION_ATTRIBUTES = [[:images, :id],
+                               [:images, :when],
+                               [:images, :copyright_holder],
+                               [:images_observations, :observation_id],
+                               [:observations, :updated_at],
+                               [:observations, :when, "obs_when"],
+                               [:observations, :lat],
+                               [:observations, :long],
+                               [:observations, :alt],
+                               [:observations, :notes],
+                               [:names, :text_name],
+                               [:names, :author],
+                               [:names, :rank],
+                               [:locations, :name, "location_name"],
+                               [:locations, :north],
+                               [:locations, :south],
+                               [:locations, :east],
+                               [:locations, :west],
+                               [:locations, :high],
+                               [:locations, :low],
+                               [:users, :name],
+                               [:users, :login],
+                               [:licenses, :url, "license_url"]].freeze
 
       attr_accessor :query
 
@@ -23,10 +46,14 @@ module Report
       end
 
       def add_conditions
-        query.where(tables[:observations][:vote_cache].gteq(VOTE_CUTOFF))
-        query.where(tables[:observations][:gps_hidden].eq(0))
+        add_observation_conditions(tables[:observations])
         query.where(tables[:images][:ok_for_export].eq(1))
         add_name_conditions(tables[:names])
+      end
+
+      def add_observation_conditions(table)
+        query.where(table[:vote_cache].gteq(VOTE_CUTOFF))
+        query.where(table[:gps_hidden].eq(0))
       end
 
       def add_name_conditions(table)
@@ -69,34 +96,14 @@ module Report
       end
 
       def add_project
-        query.project(attribute(:images, :id),
-                      attribute(:images, :when),
-                      attribute(:images, :copyright_holder),
+        query.project(*project_attributes)
+      end
 
-                      attribute(:images_observations, :observation_id),
-                      attribute(:observations, :updated_at),
-                      attribute(:observations, :when).as("obs_when"),
-                      attribute(:observations, :lat),
-                      attribute(:observations, :long),
-                      attribute(:observations, :alt),
-                      attribute(:observations, :notes),
-
-                      attribute(:names, :text_name),
-                      attribute(:names, :author),
-                      attribute(:names, :rank),
-
-                      attribute(:locations, :name).as("location_name"),
-                      attribute(:locations, :north),
-                      attribute(:locations, :south),
-                      attribute(:locations, :east),
-                      attribute(:locations, :west),
-                      attribute(:locations, :high),
-                      attribute(:locations, :low),
-
-                      attribute(:users, :name),
-                      attribute(:users, :login),
-
-                      attribute(:licenses, :url).as("license_url"))
+      def project_attributes
+        PROJECTION_ATTRIBUTES.map do |spec|
+          result = attribute(spec[0], spec[1])
+          spec.length > 2 ? result.as(spec[2]) : result
+        end
       end
 
       def attribute(table_name, field)
