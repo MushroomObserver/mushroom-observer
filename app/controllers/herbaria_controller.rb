@@ -112,12 +112,6 @@ class HerbariaController < ApplicationController
 
   # ---------- Display data
 
-  # list nonpersonal herbaria (herbarium.personal_id == nil)
-  def nonpersonal
-    query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
-    show_selected_herbaria(query, always_index: true)
-  end
-
   def next
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end

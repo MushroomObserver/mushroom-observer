@@ -693,9 +693,6 @@ MushroomObserver::Application.routes.draw do
       get "next"
       get "prev"
     end
-    collection do
-      get "nonpersonal"
-    end
   end
 
   get "publications/:id/destroy" => "publications#destroy"
