@@ -113,8 +113,9 @@ class CuratorTest < IntegrationTestCase
         observations(:minimal_unknown_obs).id.to_s)
     click(label: :herbarium_index.l)
     assert_select(
-      "#title-caption", { text: "#{:HERBARIA.l} by Name" },
-      "Clicking #{:herbarium_index.l} should display #{:HERBARIA.l} by Name"
+      "#title-caption", { text: :query_title_nonpersonal.l },
+      "Clicking #{:herbarium_index.l} should display " \
+      "#{:query_title_nonpersonal.l} by Name"
     )
   end
 
