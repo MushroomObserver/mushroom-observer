@@ -35,18 +35,6 @@ module Herbaria::SharedPrivateMethods
     show_index_of_objects(query, args)
   end
 
-  def right_tab_links(query, links)
-    links ||= []
-    unless query.flavor == :all
-      links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
-    end
-    unless query.flavor == :nonpersonal
-      links << [:herbarium_index_nonpersonal_herbaria.l,
-                nonpersonal_herbaria_path]
-    end
-    links << [:create_herbarium.l, herbaria_path(method: :post)]
-  end
-
   def show_index_args(args)
     { # default args
       letters: "herbaria.name",
@@ -62,6 +50,18 @@ module Herbaria::SharedPrivateMethods
               ["created_at",  :sort_by_created_at.t],
               ["updated_at",  :sort_by_updated_at.t]
             ])
+  end
+
+  def right_tab_links(query, links)
+    links ||= []
+    unless query.flavor == :all
+      links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
+    end
+    unless query.flavor == :nonpersonal
+      links << [:herbarium_index_nonpersonal_herbaria.l,
+                nonpersonal_herbaria_path]
+    end
+    links << [:create_herbarium.l, herbaria_path(method: :post)]
   end
 
   # ---------- Merges ----------------------------------------------------------
