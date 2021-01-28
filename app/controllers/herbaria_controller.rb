@@ -9,7 +9,7 @@ class HerbariaController < ApplicationController
   )
   before_action(
     :store_location,
-    only: [:create, :edit, :index, :nonpersonal, :new, :show, :update]
+    only: [:create, :edit, :index, :new, :show, :update]
   )
   before_action(
     :pass_query_params,
@@ -29,7 +29,7 @@ class HerbariaController < ApplicationController
   # edit_herbarium (get)          edit
   # edit_herbarium (post)         update
   # herbarium_search (get)        Herbaria::Searches#index (get)
-  # index (get)                   nonpersonal
+  # index (get)                   Herbaria::Nonpersonals#index (get)
   # index_herbarium (get)         Herbaria::Filtereds#index (get)
   # list_herbaria (get)           index
   # merge_herbaria (get)          Herbaria::Merges#new (get)

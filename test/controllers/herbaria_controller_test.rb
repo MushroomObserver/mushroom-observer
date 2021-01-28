@@ -120,26 +120,6 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href*='this=#{herb3.id}']", count: 1)
   end
 
-  def test_nonpersonal
-    get(:nonpersonal)
-
-    assert_select("#title-caption", text: :query_title_nonpersonal.l, count: 1)
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
-      assert_select(
-        "a[href ^= '#{herbarium_path(herbarium)}']", true,
-        "List of Institutional Fungaria is missing a link to " \
-        "#{herbarium.format_name})"
-      )
-    end
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
-      assert_select(
-        "a[href ^= '#{herbarium_path(herbarium)}']", false,
-        "List of Institutional Fungaria should not have a link to " \
-        "#{herbarium.format_name})"
-      )
-    end
-  end
-
   def test_next_and_prev
     query = Query.lookup_and_save(:Herbarium, :all)
     assert_operator(query.num_results, :>, 1)
