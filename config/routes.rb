@@ -683,7 +683,6 @@ MushroomObserver::Application.routes.draw do
     resources :curators, only: [:create, :destroy]
     resources :filtereds, only: [:index]
     resources :merges, only: [:new]
-    resources :nexts, only: [:show]
     resources :filtereds, only: [:index]
     resources :nonpersonals, only: [:index]
     resources :searches, only: [:index]

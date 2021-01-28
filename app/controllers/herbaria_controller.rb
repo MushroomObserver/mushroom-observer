@@ -33,8 +33,8 @@ class HerbariaController < ApplicationController
   # index_herbarium (get)         Herbaria::Filtereds#index (get)
   # list_herbaria (get)           index
   # merge_herbaria (get)          Herbaria::Merges#new (get)
-  # next_herbarium (get)          Herbaria::Nexts#show (get)
-  # prev_herbarium (get)          Herbaria::Prevs#show (get)
+  # next_herbarium (get)          next
+  # prev_herbarium (get)          prev
   # request_to_be_curator (get)   Herbaria::CuratorRequest#new
   # request_to_be_curator (post)  Herbaria::CuratorRequest#create
   # show_herbarium (get)          show
