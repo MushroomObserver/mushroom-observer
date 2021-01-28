@@ -4,9 +4,59 @@ module Report
   class GbifRow
     include Report::RowExtensions
 
-    def row=(row)
+    def output_row(row)
       @row = row
-      reset
+      observation_info + name_info + date_info + location_info
+    end
+
+    def observation_info
+      [
+        observation_id,
+        url,
+        "HumanObservation",
+        updated_at,
+        "MushroomObserver",
+        nil
+      ]
+    end
+
+    def name_info
+      [
+        name_text_name,
+        name_author,
+        name_rank,
+        genus,
+        species,
+        form_or_variety_or_subspecies,
+        user_name
+      ]
+    end
+
+    def date_info
+      [
+        obs_when,
+        year,
+        month,
+        day,
+        country,
+        state,
+        county
+      ]
+    end
+
+    def location_info
+      [
+        locality,
+        best_lat,
+        best_long,
+        best_low,
+        best_high,
+        obs_notes
+      ]
+    end
+
+    def url
+      "#{MO.http_domain}/#{observation_id}"
     end
 
     def observation_id

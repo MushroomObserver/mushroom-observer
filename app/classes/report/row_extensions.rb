@@ -57,7 +57,7 @@ module Report
 
       val.split(", ", 3)[2]
     end
- 
+
     def split_location
       val = Location.reverse_name(loc_name)
       return empty_loc if val.blank?
