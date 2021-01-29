@@ -733,11 +733,13 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:destroy, params: { id: nybg.id })
 
     assert_nil(Herbarium.safe_find(nybg.id))
-    assert_empty(HerbariumRecord.where(herbarium_id: nybg.id))
-    assert_empty(Herbarium.connection.select_values(%(
-      SELECT observation_id FROM herbarium_records_observations
-      WHERE herbarium_record_id IN (#{record_ids.map(&:to_s).join(",")})
-    )))
+    assert_not(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
+    assert_not(
+      Observation.joins(:herbarium_records).
+                  where('herbarium_records.id' => record_ids).
+                  exists?,
+      "There should not longer be herbarium records for the Observations " \
+      "which were in #{nybg.name}")
   end
 
   def test_destroy_curated_herbarium_by_noncurator_owning_all_records
