@@ -31,24 +31,24 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def field_museum
-   herbaria(:field_museum)
+    herbaria(:field_museum)
   end
 
   # params used in test_create
   def create_params
     herbarium_params.merge(
-    name: " Burbank <blah> Herbarium ",
-    code: "BH  ",
-    place_name: "Burbank, California, USA",
-    email: "curator@bh.org",
-    mailing_address: "New Herbarium\n1234 Figueroa\nBurbank, CA, 91234\n\n\n",
-    description: "\nSpecializes in local macrofungi. <http:blah>\n"
+      name: " Burbank <blah> Herbarium ",
+      code: "BH  ",
+      place_name: "Burbank, California, USA",
+      email: "curator@bh.org",
+      mailing_address: "New Herbarium\n1234 Figueroa\nBurbank, CA, 91234\n\n\n",
+      description: "\nSpecializes in local macrofungi. <http:blah>\n"
     )
   end
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
   def test_show
-    get(:show, id: nybg.id)
+    get(:show, params: { id: nybg.id })
     assert_select("#title-caption", text: nybg.format_name, count: 1)
   end
 
@@ -67,8 +67,8 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_merge_source_links_presence_rolf
-    assert_true(nybg.can_edit?(rolf))  # rolf id curator
-    assert_true(fundis.can_edit?(rolf))  # no curators
+    assert_true(nybg.can_edit?(rolf)) # rolf id curator
+    assert_true(fundis.can_edit?(rolf)) # no curators
     assert_false(dicks_personal.can_edit?(rolf)) # someone else's personal herb.
 
     login("rolf")
@@ -84,8 +84,8 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_merge_source_links_presence_dick
-    assert_false(nybg.can_edit?(dick))  # not a curator
-    assert_true(fundis.can_edit?(dick))  # no curators
+    assert_false(nybg.can_edit?(dick)) # not a curator
+    assert_true(fundis.can_edit?(dick)) # no curators
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
@@ -121,8 +121,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_merge_target_links_presence_rolf
     source = field_museum
-    assert_true(nybg.can_edit?(rolf))  # rolf id curator
-    assert_true(fundis.can_edit?(rolf))  # no curators
+    assert_true(nybg.can_edit?(rolf)) # rolf id curator
+    assert_true(fundis.can_edit?(rolf)) # no curators
     assert_false(dicks_personal.can_edit?(rolf)) # someone else's personal herb.
 
     login("dick")
@@ -142,8 +142,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_merge_target_links_presence_dick
     source = field_museum
-    assert_false(nybg.can_edit?(dick))  # dick is not a curator
-    assert_true(fundis.can_edit?(dick))  # no curators
+    assert_false(nybg.can_edit?(dick)) # dick is not a curator
+    assert_true(fundis.can_edit?(dick)) # no curators
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
@@ -219,7 +219,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_edit_without_curators
     herbarium = herbaria(:curatorless_herbarium)
     login("mary")
-    get(:edit, id: herbarium.id)
+    get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
     assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
@@ -237,7 +237,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_edit_with_curators_by_curator
     assert(nybg.curator?(rolf))
     login("rolf")
-    get(:edit, id: nybg.id)
+    get(:edit, params: { id: nybg.id })
     assert_response(:success)
     assert_select("#title-caption", text: :edit_herbarium_title.l, count: 1)
   end
@@ -278,7 +278,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_create_no_login
     herbarium_count = Herbarium.count
-    post(:create, params:  { herbarium: create_params })
+    post(:create, params: { herbarium: create_params })
 
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:redirect)
@@ -477,7 +477,6 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_update_with_duplicate_name_by_owner_of_all_records
     other = herbaria(:rolf_herbarium)
-    last_update = nybg.updated_at
     params = herbarium_params.merge(name: other.name)
     # Rolf can both edit and does own all the records.  Should merge.
     login("rolf")
@@ -736,10 +735,10 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_not(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
     assert_not(
       Observation.joins(:herbarium_records).
-                  where('herbarium_records.id' => record_ids).
-                  exists?,
+                  where("herbarium_records.id" => record_ids).exists?,
       "There should not longer be herbarium records for the Observations " \
-      "which were in #{nybg.name}")
+      "which were in #{nybg.name}"
+    )
   end
 
   def test_destroy_curated_herbarium_by_noncurator_owning_all_records
