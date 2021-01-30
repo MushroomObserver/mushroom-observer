@@ -10,9 +10,9 @@ module Herbaria
     before_action :keep_track_of_referrer
 
     # Old MO Action (method)        New "Normalized" Action (method)
-    # ----------------------        --------------------------------
-    # request_to_be_curator (get)   CuratorRequest#new
-    # request_to_be_curator (post)  CuratorRequest#create
+    # ----------------------------  --------------------------------
+    # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
+    # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
 
     # ---------- Actions to Display forms -- (new, edit, etc.) -----------------
 

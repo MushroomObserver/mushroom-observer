@@ -21,24 +21,24 @@ class HerbariaController < ApplicationController
   )
 
   # Old MO Action (method)        New "Normalized" Action (method)
-  # ----------------------        --------------------------------
-  # create_herbarium (get)        new
-  # create_herbarium (post)       create
-  # delete_curator (delete)       Herbaria::Curators#destroy
-  # destroy_herbarium             destroy
-  # edit_herbarium (get)          edit
-  # edit_herbarium (post)         update
+  # ---------------------------   --------------------------------
+  # create_herbarium (get)        new (get)
+  # create_herbarium (post)       create (post)
+  # delete_curator (delete)       Herbaria::Curators#destroy (delete)
+  # destroy_herbarium (delete)    destroy (delete)
+  # edit_herbarium (get)          edit (get)
+  # edit_herbarium (post)         update (patch)
   # herbarium_search (get)        Herbaria::Searches#index (get)
   # index (get)                   Herbaria::Nonpersonals#index (get)
   # index_herbarium (get)         Herbaria::Filtereds#index (get)
-  # list_herbaria (get)           index
+  # list_herbaria (get)           index (get)
   # merge_herbaria (get)          Herbaria::Merges#new (get)
-  # next_herbarium (get)          next
-  # prev_herbarium (get)          prev
-  # request_to_be_curator (get)   Herbaria::CuratorRequest#new
-  # request_to_be_curator (post)  Herbaria::CuratorRequest#create
-  # show_herbarium (get)          show
-  # show_herbarium (post)         Herbaria::Curators#create
+  # next_herbarium (get)          next (get)
+  # prev_herbarium (get)          prev (get)
+  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
+  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
+  # show_herbarium (get)          show (get)
+  # show_herbarium (post)         Herbaria::Curators#create (post)
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
