@@ -17,7 +17,7 @@ class HerbariaController < ApplicationController
   )
   before_action(
     :keep_track_of_referrer,
-    only: [:create, :destroy, :edit, :new, :update]
+    only: [:destroy, :edit, :new]
   )
 
   # Old MO Action (method)        New "Normalized" Action (method)
