@@ -5,7 +5,6 @@ module Herbaria
   class Herbaria::CuratorRequestsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :store_location
     before_action :pass_query_params
     before_action :keep_track_of_referrer
 

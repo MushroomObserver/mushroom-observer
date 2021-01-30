@@ -3,6 +3,14 @@
 require("test_helper")
 
 class CuratorTest < IntegrationTestCase
+  # ---------- Helpers ----------
+
+  def nybg
+    herbaria(:nybg_herbarium)
+  end
+
+  # ---------- Tests ----------
+
   def test_first_herbarium_record
     # Mary doesn't have a herbarium.
     obs = observations(:minimal_unknown_obs)
@@ -220,7 +228,6 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_add_curators
-    nybg = herbaria(:nybg_herbarium)
     # Make sure nobody broke the fixtures
     assert(nybg.curators.include?(roy),
            "Need different fixture: herbarium where roy is a curator")
@@ -243,5 +250,28 @@ class CuratorTest < IntegrationTestCase
       true,
       "Page should have a link to delete mary as a curator"
     )
+  end
+
+  def test_curator_request
+    # Make sure noone broke the fixtures
+    assert(nybg.curators.exclude?(mary),
+           "Need different fixture: herbarium that mary does not curate")
+
+    login!("mary", "testpassword", true)
+    get(herbarium_path(nybg))
+    click(label: :show_herbarium_curator_request.l)
+    assert_select("#title-caption").text.
+      starts_with?(:show_herbarium_curator_request.l)
+
+    open_form(
+      "form[action^='#{herbaria_curator_requests_path(id: nybg)}']"
+    ) do |form|
+      form.submit
+    end
+
+    assert_flash_text(:show_herbarium_request_sent.t)
+    assert_select(
+      "#title-caption", { text: nybg.format_name },
+      "Submitting a curator request should return to herbarium page")
   end
 end

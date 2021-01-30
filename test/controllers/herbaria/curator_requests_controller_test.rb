@@ -51,7 +51,7 @@ module Herbaria
       login("mary")
       post(:create, params: { id: nybg.id, notes: "ZZYZX" })
 
-      assert_response(:redirect)
+      assert_redirected_to(herbarium_path(nybg))
       assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
       assert_match(/ZZYZX/, ActionMailer::Base.deliveries.last.to_s)
     end
