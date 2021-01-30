@@ -200,7 +200,8 @@ class CuratorTest < IntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get(new_herbarium_path)
+    get(herbaria_path)
+    click(label: :create_herbarium.l)
 
     open_form(
       # form POSTs to herbaria, not new_herbarium_path
