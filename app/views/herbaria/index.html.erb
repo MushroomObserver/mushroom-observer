@@ -33,8 +33,8 @@
             </td>
             <td>
               <%= if herbarium.personal_user_id.present? && !@no_user_column
-                content_tag(:span, user_link(herbarium.personal_user),
-                            title: herbarium.personal_user.unique_text_name)
+                tag.span(user_link(herbarium.personal_user),
+                         title: herbarium.personal_user.unique_text_name)
               end %>
             </td>
             <td>
@@ -52,7 +52,7 @@
                                               this: herbarium.id)
                     ) %>
               <% else %>
-                [<%= content_tag(:i, herbarium.name.t, style: "color:red") %>]
+                [<%= tag.i(herbarium.name.t, style: "color:red") %>]
               <% end %>
               <% if @user && !@merge && (herbarium.can_edit? || in_admin_mode?) %>
                 [<%= link_with_query(
