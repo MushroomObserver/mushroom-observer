@@ -234,7 +234,7 @@ class CuratorTest < IntegrationTestCase
     )
   end
 
-  def test_add_curators
+  def test_add_curator
     # Make sure nobody broke the fixtures
     assert(nybg.curators.include?(roy),
            "Need different fixture: herbarium where roy is a curator")
@@ -252,11 +252,11 @@ class CuratorTest < IntegrationTestCase
     assert(nybg.curator?(mary),
            "Failed to add mary to curators of #{nybg.format_name}")
     assert_select(
-      "a:match('href', ?)",
-      /#{herbaria_curator_path(nybg)}\?user=#{mary.id}/,
-      true,
-      "Page should have a link to delete mary as a curator"
-    )
+      "form[action^='#{herbaria_curator_path(nybg, user: mary.id)}']"
+    ) do
+      assert_select("input[value='delete']", true,
+                    "Page is missing a button to remove Mary as curator")
+    end
   end
 
   def test_curator_request

@@ -61,15 +61,24 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-  def test_show_destroy_button
-    herbarium = herbaria(:curatorless_herbarium)
+  def test_show_destroy_buttons_presence
+    herbarium = nybg
+    assert(herbarium.curator?(roy))
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
     assert_select("#title-caption", text: herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
-                    "Show Herbarium page is missing a destroy button")
+                    "Show Herbarium page is missing a destroy herbarium button")
+    end
+    herbarium.curators.each do |curator|
+      assert_select(
+        "form[action^='#{herbaria_curator_path(herbarium, user: curator.id)}']"
+      ) do
+        assert_select("input[value='delete']", true,
+                      "Show Herbarium page is missing a destroy curator button")
+      end
     end
   end
 
@@ -757,8 +766,9 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_not(
       Observation.joins(:herbarium_records).
                   where("herbarium_records.id" => record_ids).exists?,
-      "There should not longer be herbarium records for the Observations " \
-      "which were in #{nybg.name}"
+      "Destroying Herbarium should destroy herbarium records -- " \
+      "There should not be records for Observations " \
+      "whose only records were in destroyed herbarium #{nybg.name}"
     )
   end
 
