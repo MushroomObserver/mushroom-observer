@@ -3,7 +3,7 @@
 module Report
   module Darwin
     # Darwin Core Observations format.
-    class TaxonImages < Report::CSV
+    class EolImages < Report::CSV
       VOTE_CUTOFF = 2.5
 
       attr_accessor :query

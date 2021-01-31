@@ -6,7 +6,7 @@ module Report
 
     def initialize(args)
       super(args)
-      self.images = Darwin::TaxonImages.new(args)
+      self.images = Darwin::EolImages.new(args)
       args[:taxa] = images.taxa
       self.taxa = Darwin::ImageTaxa.new(args)
     end
