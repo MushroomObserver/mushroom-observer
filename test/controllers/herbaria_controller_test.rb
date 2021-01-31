@@ -48,12 +48,15 @@ class HerbariaControllerTest < FunctionalTestCase
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
   def test_show
-    get(:show, params: { id: nybg.id })
+    herbarium = nybg
+    assert_not(herbarium.curator?(mary))
+    login("mary")
+    get(:show, params: { id: herbarium.id })
 
-    assert_select("#title-caption", text: nybg.format_name, count: 1)
+    assert_select("#title-caption", text: herbarium.format_name, count: 1)
     assert_select(
-      "a[href^='#{new_herbaria_curator_request_path(id: nybg)}']",
-      { text: ":show_herbarium_curator_request.l" },
+      "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
+      { text: :show_herbarium_curator_request.l },
       "Fungarium page missing a link to #{:show_herbarium_curator_request.l}"
     )
   end
