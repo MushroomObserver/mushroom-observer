@@ -5,9 +5,11 @@
   if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
     tabs += [
       link_with_query(:edit_herbarium.t, edit_herbarium_path(@herbarium.id)),
-      link_with_query(:destroy_object.t(type: :herbarium),
-                      herbarium_path(@herbarium),
-                      method: :delete, back: url_after_delete(@herbarium))
+      button_to(:destroy_object.t(type: :herbarium),
+                herbarium_path(@herbarium,
+                               back: url_after_delete(@herbarium)),
+                method: :delete,
+                data: { confirm: "Are you sure?" })
     ]
   end
   tabs += [

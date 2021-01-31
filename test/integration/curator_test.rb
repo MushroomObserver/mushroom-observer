@@ -196,17 +196,14 @@ class CuratorTest < IntegrationTestCase
     )
   end
 
-  def test_herbarium_create
+  def test_herbarium_create_and_destroy
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
     get(herbaria_path)
     click(label: :create_herbarium.l)
 
-    open_form(
-      # form POSTs to herbaria, not new_herbarium_path
-      "form[action^='#{herbaria_path}']"
-    ) do |form|
+    open_form("form[action^='#{herbaria_path}']") do |form|
       form.assert_value("herbarium_name", "")
       form.assert_value("code", "")
       form.assert_value("place_name", "")
@@ -222,9 +219,17 @@ class CuratorTest < IntegrationTestCase
     assert_not_empty(user.curated_herbaria)
 
     assert_select(
-      "#title-caption",
-      { text: "Mary’s Herbarium" }, # smart apostrophe
+      "#title-caption", { text: "Mary’s Herbarium" }, # smart apostrophe
       "Creating a Fungarium should show the new Fungarium"
+    )
+
+    # looks like a link, but is really a button
+    open_form("form[action^='#{herbarium_path(Herbarium.last)}']") do |form|
+      form.submit(:destroy_object.t(type: :herbarium))
+    end
+    assert_select(
+      "#title-caption", { text: "Fungaria by Name" },
+      "Destroying a Fungarium should display #{:query_title_nonpersonal.l}"
     )
   end
 

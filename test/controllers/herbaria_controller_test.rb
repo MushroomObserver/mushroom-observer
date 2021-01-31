@@ -58,6 +58,18 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_destroy_button
+    herbarium = herbaria(:curatorless_herbarium)
+    login("rolf")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select("#title-caption", text: herbarium.format_name)
+    assert_select("form[action^='#{herbarium_path(herbarium)}']") do
+      assert_select("input[value='delete']", true,
+                    "Show Herbarium page is missing a destroy button")
+    end
+  end
+
   def test_index
     get(:index)
 
