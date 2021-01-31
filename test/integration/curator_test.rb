@@ -116,10 +116,11 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_herbarium_index_from_create_herbarium_record
+    obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
-    get("/herbarium_record/create_herbarium_record/" +
-        observations(:minimal_unknown_obs).id.to_s)
+    get("/herbarium_record/create_herbarium_record/#{obs.id}")
     click(label: :herbarium_index.l)
+
     assert_select(
       "#title-caption", { text: :query_title_nonpersonal.l },
       "Clicking #{:herbarium_index.l} should display " \
@@ -268,16 +269,13 @@ class CuratorTest < IntegrationTestCase
     click(label: :show_herbarium_curator_request.l)
     assert_select("#title-caption").text.
       starts_with?(:show_herbarium_curator_request.l)
-
-    open_form(
-      "form[action^='#{herbaria_curator_requests_path(id: nybg)}']"
-    ) do |form|
-      form.submit
-    end
+    open_form("form[action^='#{herbaria_curator_requests_path(id: nybg)}']",
+              &:submit)
 
     assert_flash_text(:show_herbarium_request_sent.t)
     assert_select(
       "#title-caption", { text: nybg.format_name },
-      "Submitting a curator request should return to herbarium page")
+      "Submitting a curator request should return to herbarium page"
+    )
   end
 end
