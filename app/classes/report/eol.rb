@@ -8,7 +8,7 @@ module Report
       super(args)
       self.images = Darwin::EolImages.new(args)
       args[:taxa] = images.taxa
-      self.taxa = Darwin::ImageTaxa.new(args)
+      self.taxa = Darwin::EolTaxa.new(args)
     end
 
     def filename

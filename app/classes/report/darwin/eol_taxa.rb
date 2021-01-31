@@ -2,7 +2,7 @@
 
 module Report
   module Darwin
-    class ImageTaxa < Report::CSV
+    class EolTaxa < Report::CSV
       attr_accessor :taxa
 
       self.separator = "\t"
