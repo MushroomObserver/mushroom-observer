@@ -82,6 +82,28 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  def test_next
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    get(:next, params: { id: number1.id, q: q })
+    assert_redirected_to(herbarium_path(number2, q: q))
+  end
+
+  def test_prev
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    get(:prev, params: { id: number2.id, q: q })
+    assert_redirected_to(herbarium_path(number1, q: q))
+  end
+
   def test_index
     get(:index)
 
@@ -201,28 +223,6 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
-  end
-
-  def test_next
-    query = Query.lookup_and_save(:Herbarium, :all)
-    assert_operator(query.num_results, :>, 1)
-    number1 = query.results[0]
-    number2 = query.results[1]
-    q = query.record.id.alphabetize
-
-    get(:next, params: { id: number1.id, q: q })
-    assert_redirected_to(herbarium_path(number2, q: q))
-  end
-
-  def test_prev
-    query = Query.lookup_and_save(:Herbarium, :all)
-    assert_operator(query.num_results, :>, 1)
-    number1 = query.results[0]
-    number2 = query.results[1]
-    q = query.record.id.alphabetize
-
-    get(:prev, params: { id: number2.id, q: q })
-    assert_redirected_to(herbarium_path(number1, q: q))
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
