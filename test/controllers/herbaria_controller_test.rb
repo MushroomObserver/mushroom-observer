@@ -767,7 +767,7 @@ class HerbariaControllerTest < FunctionalTestCase
       Observation.joins(:herbarium_records).
                   where("herbarium_records.id" => record_ids).exists?,
       "Destroying Herbarium should destroy herbarium records -- " \
-      "There should not be records for Observations " \
+      "There should not be herbarium records for Observations " \
       "whose only records were in destroyed herbarium #{nybg.name}"
     )
   end

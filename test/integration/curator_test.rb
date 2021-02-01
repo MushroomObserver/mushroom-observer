@@ -115,6 +115,26 @@ class CuratorTest < IntegrationTestCase
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
 
+  def test_index_sort_links
+    get(herbaria_path)
+
+    herbaria_links = assert_select("a:match('href', ?)",
+                                   %r{#{herbaria_path}/\d+})
+    assert_equal(Herbarium.count, herbaria_links.size,
+                 "Index should display links to all herbaria")
+
+    normal_first_link_href = herbaria_links.first.attributes["href"].value
+    click(label: :sort_by_reverse.l)
+    reverse_herbaria_links = assert_select("a:match('href', ?)",
+                                           %r{#{herbaria_path}/\d+})
+
+    assert_equal(
+      normal_first_link_href,
+      reverse_herbaria_links.last.attributes["href"].value,
+      "Reverse ordered last herbarium should be the normal first herbarium"
+    )
+  end
+
   def test_herbarium_index_from_create_herbarium_record
     obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
