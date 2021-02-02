@@ -4,7 +4,7 @@ module Herbaria
   # Controls viewing and modifying herbaria.
   class AllsController < ApplicationController
     # filters
-    before_action: :store_location
+    before_action :store_location
 
     # Old MO Action (method)        New "Normalized" Action (method)
     # ----------------------        --------------------------------
