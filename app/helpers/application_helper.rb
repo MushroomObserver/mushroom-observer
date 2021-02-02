@@ -3,10 +3,33 @@
 #
 #  = Application Helpers
 #
-#  These methods are available to all templates in the application:
+#  Methods available to all templates in the application:
 #
-################################################################################
-
+#  safe_br                      # <br/>,html_safe
+#  safe_empty
+#  safe_nbsp
+#  escape_html                  # Return escaped HTML
+#  link_to_coerced_query        # link to query coerced into different model
+#  link_with_query              # link_to with query params
+#  create_link                  # convert links into list of tabs
+#  indent                       # in-lined white-space element of n pixels
+#  content_tag_if
+#  content_tag_unless
+#  add content_help             # help text viewable on mouse-over
+#  add_header                   # add to html header from within view
+#  make_table                   # make table from list of arrays
+#  reload_with_args             # add args to url that got us to this page
+#  add_args_to_url              # change params of arbitrary url
+#  url_after_delete             # url to return to after deleting object
+#  get_next_id
+#  textilize_without_paragraph  # override Rails method of same name
+#  textilize                    # override Rails method of same name
+#  custom_file_field            # stylable file input field with
+#                               # client-side size validation
+#  date_select_opts
+#  title_tag_contents           # text to put in html header <title>
+#  destroy_button               # button to destroy object
+#
 module ApplicationHelper
   include AutocompleteHelper
   include DescriptionHelper
