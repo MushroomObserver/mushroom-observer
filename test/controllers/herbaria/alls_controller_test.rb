@@ -3,10 +3,9 @@
 require("test_helper")
 
 module Herbaria
-    # Test display of all Herbaria
-    class AllsControllerTest < FunctionalTestCase
+  # Test display of all Herbaria
+  class AllsControllerTest < FunctionalTestCase
     # ---------- Helpers ----------
-
     def nybg
       herbaria(:nybg_herbarium)
     end
