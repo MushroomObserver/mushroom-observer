@@ -27,7 +27,7 @@ module Herbaria
       result = perform_or_request_merge(this, that) || return
 
       # redirect_to_herbarium_index(result)
-      redirect_with_query(herbaria_filtereds_path(id: result.try(&:id)))
+      redirect_with_query(herbaria_path(id: result.try(&:id)))
     end
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
