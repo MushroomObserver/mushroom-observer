@@ -54,12 +54,13 @@
               <% else %>
                 [<%= tag.i(herbarium.name.t, style: "color:red") %>]
               <% end %>
-              <% if @user && !@merge && (herbarium.can_edit? || in_admin_mode?) %>
+              <% if @user && !@merge && (herbarium.can_edit? ||
+                    in_admin_mode?) %>
                 [<%= link_with_query(
                        :EDIT.t, edit_herbarium_path(herbarium)
                      ) %> |
                  <%= link_to(
-                       :MERGE.t, reload_with_args(merge: herbarium.id)
+                       :MERGE.t, herbaria_path(merge: herbarium.id)
                      ) %>]
               <% end %>
             </td>

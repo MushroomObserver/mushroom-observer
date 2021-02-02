@@ -3,22 +3,11 @@
 # Controls viewing and modifying herbaria.
 class HerbariaController < ApplicationController
   # filters
-  before_action(
-    :login_required,
-    only: [:create, :destroy, :edit, :new, :update]
-  )
-  before_action(
-    :store_location,
-    only: [:create, :edit, :index, :new, :show, :update]
-  )
-  before_action(
-    :pass_query_params,
-    only: [:create, :destroy, :edit, :new, :show, :update]
-  )
-  before_action(
-    :keep_track_of_referrer,
-    only: [:destroy, :edit, :new]
-  )
+  before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
+  before_action :store_location, only: [:create, :edit, :new, :show, :update]
+  before_action :pass_query_params,
+                only: [:create, :destroy, :edit, :new, :show, :update]
+  before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
   # Old MO Action (method)        New "Normalized" Action (method)
   # ---------------------------   --------------------------------
@@ -30,8 +19,8 @@ class HerbariaController < ApplicationController
   # edit_herbarium (post)         update (patch)
   # herbarium_search (get)        Herbaria::Searches#index (get)
   # index (get)                   Herbaria::Nonpersonals#index (get)
-  # index_herbarium (get)         Herbaria::Filtereds#index (get)
-  # list_herbaria (get)           index (get)
+  # index_herbarium (get)         index (get) - lists query results
+  # list_herbaria (get)           Herbaria::Alls#index (get) - all herbaria
   # merge_herbaria (get)          Herbaria::Merges#new (get)
   # next_herbarium (get)          next (get)
   # prev_herbarium (get)          prev (get)
@@ -42,10 +31,12 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # List all herbaria
+  # Display selected Herbaria based on current Query
+  # Sort links land on this action
+  # Note: Herbaria::All#index lists all herbaria regardless of any query
   def index
-    query = create_query(:Herbarium, :all, by: :name)
-    show_selected_herbaria(query, always_index: true)
+    query = find_or_create_query(:Herbarium, by: params[:by])
+    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
   def show
@@ -101,7 +92,7 @@ class HerbariaController < ApplicationController
     if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referrer ||
-        redirect_with_query(herbaria_filtereds_path(id: @herbarium.try(&:id)))
+        redirect_with_query(herbaria_path(id: @herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
       redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))

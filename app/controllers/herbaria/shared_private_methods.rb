@@ -55,7 +55,7 @@ module Herbaria::SharedPrivateMethods
   def right_tab_links(query, links)
     links ||= []
     unless query.flavor == :all
-      links << [:herbarium_index_list_all_herbaria.l, herbaria_path]
+      links << [:herbarium_index_list_all_herbaria.l, herbaria_alls_path]
     end
     unless query.flavor == :nonpersonal
       links << [:herbarium_index_nonpersonal_herbaria.l,

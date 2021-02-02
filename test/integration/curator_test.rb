@@ -116,21 +116,22 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_index_sort_links
-    get(herbaria_path)
+    get(herbaria_alls_path)
 
     herbaria_links = assert_select("a:match('href', ?)",
                                    %r{#{herbaria_path}/\d+})
     assert_equal(Herbarium.count, herbaria_links.size,
                  "Index should display links to all herbaria")
 
-    normal_first_link_href = herbaria_links.first.attributes["href"].value
+    first_herbarium_path = herbaria_links.first.attributes["href"].value.
+                                          sub(/\?.*/, "") # strip query string
+
     click(label: :sort_by_reverse.l)
     reverse_herbaria_links = assert_select("a:match('href', ?)",
                                            %r{#{herbaria_path}/\d+})
-
     assert_equal(
-      normal_first_link_href,
-      reverse_herbaria_links.last.attributes["href"].value,
+      first_herbarium_path,
+      reverse_herbaria_links.last.attributes["href"].value.sub(/\?.*/, ""),
       "Reverse ordered last herbarium should be the normal first herbarium"
     )
   end
@@ -221,7 +222,7 @@ class CuratorTest < IntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get(herbaria_path)
+    get(herbaria_alls_path)
     click(label: :create_herbarium.l)
 
     open_form("form[action^='#{herbaria_path}']") do |form|
@@ -249,8 +250,8 @@ class CuratorTest < IntegrationTestCase
       form.submit(:destroy_object.t(type: :herbarium))
     end
     assert_select(
-      "#title-caption", { text: "Fungaria by Name" },
-      "Destroying a Fungarium should display #{:query_title_nonpersonal.l}"
+      "#title-caption", { text: :herbarium_index.l },
+      "Destroying a Fungarium should display #{:herbarium_index.l}"
     )
   end
 
