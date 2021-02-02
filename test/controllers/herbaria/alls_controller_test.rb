@@ -3,78 +3,39 @@
 require("test_helper")
 
 module Herbaria
-  # Test display of all Herbaria
-  class AllsControllerTest < FunctionalTestCase
+    # Test display of all Herbaria
+    class AllsControllerTest < FunctionalTestCase
     # ---------- Helpers ----------
 
-  def nybg
-    herbaria(:nybg_herbarium)
-  end
+    def nybg
+      herbaria(:nybg_herbarium)
+    end
 
-  def fundis
-    herbaria(:fundis_herbarium)
-  end
+    def fundis
+      herbaria(:fundis_herbarium)
+    end
 
-  def dicks_personal
-    herbaria(:dick_herbarium)
-  end
+    def dicks_personal
+      herbaria(:dick_herbarium)
+    end
 
-  def herbarium_params
-    {
-      name: "",
-      personal: "",
-      code: "",
-      place_name: "",
-      email: "",
-      mailing_address: "",
-      description: ""
-    }.freeze
-  end
+    def herbarium_params
+      {
+        name: "",
+        personal: "",
+        code: "",
+        place_name: "",
+        email: "",
+        mailing_address: "",
+        description: ""
+      }.freeze
+    end
 
-  def field_museum
-    herbaria(:field_museum)
-  end
+    def field_museum
+      herbaria(:field_museum)
+    end
 
     # ---------- Actions to Display data (index, show, etc.) -------------------
-=begin
-    def test_filtered_no_query
-      get(:index)
-
-      assert_response(:success)
-      Herbarium.find_each do |herbarium|
-        assert_select(
-          "a[href *= '#{herbarium_path(herbarium)}']", true,
-          "Herbarium Index missing link to #{herbarium.format_name})"
-        )
-      end
-    end
-
-    def test_filtered_all
-      Query.lookup_and_save(:Herbarium, :all)
-      get(:index)
-
-      assert_response(:success)
-      Herbarium.find_each do |herbarium|
-        assert_select(
-          "a[href *= '#{herbarium_path(herbarium)}']", true,
-          "Herbarium Index missing link to #{herbarium.format_name})"
-        )
-      end
-    end
-
-    def test_filtered_set
-      skip("under construction")
-      set = [nybg, herbaria(:rolf_herbarium)]
-      Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
-      get(:index, params: { id: nybg.id })
-
-      assert_response(:success)
-      assert_select(
-        "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
-        "Filtered index should have exactly one link to each herbarium"
-      )
-    end
-=end
 
     def test_index
       get(:index)

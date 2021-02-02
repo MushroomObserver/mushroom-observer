@@ -112,7 +112,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
-      "Filtered index should list the results of the latest Herbaria query")
+      "Filtered index should list the results of the latest Herbaria query"
+    )
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------

@@ -124,7 +124,7 @@ class CuratorTest < IntegrationTestCase
                  "Index should display links to all herbaria")
 
     first_herbarium_path = herbaria_links.first.attributes["href"].value.
-                                          sub(/\?.*/, "") # strip query string
+                           sub(/\?.*/, "") # strip query string
 
     click(label: :sort_by_reverse.l)
     reverse_herbaria_links = assert_select("a:match('href', ?)",
