@@ -106,7 +106,8 @@ class ObserverController
   def email_name_change_request
     @name = Name.safe_find(params[:name_id])
     @new_name = params[:new_name]
-    unless @name && @name.text_name != @new_text_name
+
+    unless @name && @name.search_name != @new_name
       redirect_back_or_default(action: :index)
       return
     end
@@ -157,7 +158,7 @@ class ObserverController
       user: @user.login,
       name: @name.search_name,
       name_url: @name.show_url,
-      new_text_name: @new_text_name,
+      new_name: @new_name,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
