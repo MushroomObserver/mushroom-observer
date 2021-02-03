@@ -86,19 +86,6 @@ module ApplicationHelper
     link_to(*link)
   end
 
-  # button to destroy object
-  # Used instead of link because DESTROY link requires js
-  # Sample usage:
-  #   destroy_button(object: article)
-  #   destroy_button(object: term, name: :destroy_glossary_term)
-  def destroy_button(object:, name: :DESTROY)
-    button_to(
-      name.t,
-      { action: "destroy", id: object.id },
-      method: :delete, data: { confirm: "Are you sure?" }
-    )
-  end
-
   # link to next object in query results
   def link_next(object)
     path = if object.type_tag == :herbarium
@@ -119,6 +106,26 @@ module ApplicationHelper
                action: object.prev_action, id: object.id }
            end
     link_with_query("« #{:BACK.t}", path)
+  end
+
+  # button to destroy object
+  # Used instead of link because DESTROY link requires js
+  # Sample usage:
+  #   destroy_button(object: article)
+  #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
+  #   destroy_button(
+  #     name: :destroy_object.t(type: :herbarium),
+  #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
+  #   )
+  def destroy_button(target:, name: :DESTROY.t)
+    options = if target.is_a?(String)
+                target
+              else
+                { action: "destroy", id: target.id }
+              end
+    button_to(
+      name, options, method: :delete, data: { confirm: :are_you_sure.t }
+    )
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.

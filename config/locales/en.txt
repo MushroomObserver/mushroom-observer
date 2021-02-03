@@ -2380,9 +2380,6 @@
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
-  # glossary_term#destroy
-  destroy_glossary_term: "[:destroy_object(type=:glossary_term)]"
-
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
   glossary_error_duplicate_name: Name must be unique.
