@@ -5,8 +5,9 @@ class HerbariaController < ApplicationController
   # filters
   before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
-  before_action :pass_query_params,
-                only: [:create, :destroy, :edit, :new, :show, :update]
+  before_action :pass_query_params, only: [
+    :create, :destroy, :edit, :new, :show, :update
+  ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
   # Old MO Action (method)        New "Normalized" Action (method)
