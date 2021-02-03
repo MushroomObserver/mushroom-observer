@@ -687,13 +687,7 @@ MushroomObserver::Application.routes.draw do
     resources :nonpersonals, only: [:index]
     resources :searches, only: [:index]
   end
-  resources :herbaria, id: /\d+/ do
-    # non-CRUD actions
-    member do
-      get "next"
-      get "prev"
-    end
-  end
+  resources :herbaria, id: /\d+/
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications

@@ -23,8 +23,8 @@ class HerbariaController < ApplicationController
   # index_herbarium (get)         index (get) - lists query results
   # list_herbaria (get)           Herbaria::Alls#index (get) - all herbaria
   # merge_herbaria (get)          Herbaria::Merges#new (get)
-  # next_herbarium (get)          next (get)
-  # prev_herbarium (get)          prev (get)
+  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
+  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
   # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
   # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
   # show_herbarium (get)          show (get)
@@ -78,7 +78,6 @@ class HerbariaController < ApplicationController
     return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
     return unless make_sure_can_edit!
 
-    # update_herbarium
     @herbarium.attributes = herbarium_params
     normalize_parameters
     return unless validate_herbarium!
@@ -101,16 +100,6 @@ class HerbariaController < ApplicationController
   end
 
   # ========== Non=standard REST Actions =======================================
-
-  # ---------- Display data
-
-  def next
-    redirect_to_next_object(:next, Herbarium, params[:id].to_s)
-  end
-
-  def prev
-    redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
-  end
 
   ##############################################################################
 
