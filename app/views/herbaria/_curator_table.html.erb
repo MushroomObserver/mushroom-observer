@@ -13,17 +13,13 @@
       <tr>
         <% if can_delete %>
           <td>
-             <%= button_to(
-                   "X",
-                   herbaria_curator_path(herbarium, user: user.id),
-                   method: :delete,
-                   data: { confirm: "Are you sure?" }
+             <%= destroy_button(
+                   name: "X",
+                   target: herbaria_curator_path(herbarium, user: user.id)
                  ) %>
           </td>
         <% end %>
-        <td>
-          <%= user_link(user, user.legal_name) %>
-        </td>
+        <td><%= user_link(user, user.legal_name) %></td>
       </tr>
     <% end %>
   </tbody>
