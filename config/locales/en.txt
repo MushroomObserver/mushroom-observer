@@ -3276,7 +3276,7 @@
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold_identifier : [old_identifier]\nnew_identifier : [new_identifier]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nurl : [url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
-  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nname : [name] \nurl : [name_url] \nnew text name : [new_text_name] \nnotes : [notes]"
+  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nname : [name] \nurl : [name_url] \nnew name : [new_name] \nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
