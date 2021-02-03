@@ -99,16 +99,18 @@ module ApplicationHelper
     )
   end
 
+  # link to next object in query results
   def link_next(object)
     path = if object.type_tag == :herbarium
              herbaria_next_path(object.id, next: "next")
            else
              { controller: object.show_controller,
-               action: object.prev_action, id: object.id }
+               action: object.next_action, id: object.id }
            end
     link_with_query("#{:FORWARD.t} »", path)
   end
 
+  # link to previous object in query results
   def link_prev(object)
     path = if object.type_tag == :herbarium
              herbaria_next_path(object.id, next: "prev")
