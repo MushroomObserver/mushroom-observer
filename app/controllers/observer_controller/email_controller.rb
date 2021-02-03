@@ -105,7 +105,7 @@ class ObserverController
 
   def email_name_change_request
     @name = Name.safe_find(params[:name_id])
-    @new_name = params[:new_name]
+    @new_text_name = params[:new_name]
     unless @name && @name.text_name != @new_text_name
       redirect_back_or_default(action: :index)
       return
