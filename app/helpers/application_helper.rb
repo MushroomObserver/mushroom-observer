@@ -9,9 +9,18 @@
 #  safe_empty
 #  safe_nbsp
 #  escape_html                  # Return escaped HTML
+#
+#  --- links and buttons ----
+#
 #  link_to_coerced_query        # link to query coerced into different model
 #  link_with_query              # link_to with query params
+#  link_next                    # link to next object
+#  link_prev                    # link to prev object
+#  destroy_button               # button to destroy object
 #  create_link                  # convert links into list of tabs
+#
+#  --------------------------
+#
 #  indent                       # in-lined white-space element of n pixels
 #  content_tag_if
 #  content_tag_unless
@@ -28,7 +37,6 @@
 #                               # client-side size validation
 #  date_select_opts
 #  title_tag_contents           # text to put in html header <title>
-#  destroy_button               # button to destroy object
 #
 module ApplicationHelper
   include AutocompleteHelper
@@ -62,6 +70,8 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # --------- links and buttons ------------------------------------------------
+
   # Call link_to with query params added.
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
@@ -76,12 +86,47 @@ module ApplicationHelper
     link_to(*link)
   end
 
+  # button to destroy object
+  # Used instead of link because DESTROY link requires js
+  # Sample usage:
+  #   destroy_button(object: article)
+  #   destroy_button(object: term, name: :destroy_glossary_term)
+  def destroy_button(object:, name: :DESTROY)
+    button_to(
+      name.t,
+      { action: "destroy", id: object.id },
+      method: :delete, data: { confirm: "Are you sure?" }
+    )
+  end
+
+  def link_next(object)
+    path = if object.type_tag == :herbarium
+             herbaria_next_path(object.id, next: "next")
+           else
+             { controller: object.show_controller,
+               action: object.prev_action, id: object.id }
+           end
+    link_with_query("#{:FORWARD.t} »", path)
+  end
+
+  def link_prev(object)
+    path = if object.type_tag == :herbarium
+             herbaria_next_path(object.id, next: "prev")
+           else
+             { controller: object.show_controller,
+               action: object.prev_action, id: object.id }
+           end
+    link_with_query("« #{:BACK.t}", path)
+  end
+
   # Convert @links in index views into a list of tabs for RHS tab set.
   def create_links(links)
     return [] unless links
 
     links.reject(&:nil?).map { |str, url| link_to(str, url) }
   end
+
+  # ----------------------------------------------------------------------------
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
@@ -315,18 +360,5 @@ module ApplicationHelper
     else
       action_name.tr("_", " ").titleize
     end
-  end
-
-  # button to destroy object
-  # Used instead of link because DESTROY link requires js
-  # Sample usage:
-  #   destroy_button(object: article)
-  #   destroy_button(object: term, name: :destroy_glossary_term)
-  def destroy_button(object:, name: :DESTROY)
-    button_to(
-      name.t,
-      { action: "destroy", id: object.id },
-      method: :delete, data: { confirm: "Are you sure?" }
-    )
   end
 end
