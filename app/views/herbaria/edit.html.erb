@@ -11,10 +11,5 @@
 %>
 
 <div class="max-width-text">
-  <%= form_tag(
-        add_query_param(herbarium_path(@herbarium)),
-        method: :patch, back: @back
-      ) do %>
-    <%= render(partial: "form", locals: { button: :SAVE }) %>
-  <% end %>
+  <%= render(partial: "form", locals: { button_name: :SAVE }) %>
 </div>
