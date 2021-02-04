@@ -22,15 +22,16 @@
           <%= f.text_field(:personal_user_name, class: "form-control-xxx") %>
          <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
         </div>
-        <% if button != :CREATE %>
+        <% if button_name != :CREATE %>
           <div class="well well-sm push-down help-block">
             <div class="arrow-up" style="margin-top:6px"></div>
-            <% top_herbarium_users.each do |name, login, count| %>
+            <% top_users = herbarium_top_users
+               top_users.each do |name, login, count| %>
               <%= :edit_herbarium_user_records.t(
                     name: "#{name} (#{login})", num: count
                   ) %><br/>
             <% end %>
-            <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
+            <%= :edit_herbarium_no_herbarium_records.t if top_users.empty? %>
           </div>
         <% end %>
       </div>
@@ -116,4 +117,3 @@
   <%= f.submit(button_name.t, class: "btn center-block push-down") %>
 
 <% end %>
-
