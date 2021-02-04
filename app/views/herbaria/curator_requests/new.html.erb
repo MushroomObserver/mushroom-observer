@@ -14,21 +14,22 @@
 <div class="max-width-text">
   <%= :show_herbarium_curator_help.tp %>
 
-  <%= form_with(url: herbaria_curator_requests_path, method: :post) do |f| %>
-    <%= f.hidden_field :back, value: @back %>
-    <%= f.hidden_field :q, value: get_query_param %>
-    <%= f.hidden_field :id, value: @herbarium.id %>
+  <%= form_with(
+        url: add_query_param(
+               herbaria_curator_requests_path(id: @herbarium, back: @back)
+        )
+      ) do |f| %>
 
     <div class="form-group push-down">
       <%= f.label(:name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
     </div>
     <div class="form-group push-down">
       <%= f.label(:notes, "#{:NOTES.t}:") %>
-      <%= f.text_area(:notes,
-                      rows: 10,
-                      class: "form-control", data: { autofocus: true }) %>
+      <%= f.text_area(:notes, rows: 10, class: "form-control",
+                      data: { autofocus: true }) %>
     </div>
 
     <%= f.submit(:SEND.l, class: "btn center-block push-down") %>
+
   <% end %>
 </div>
