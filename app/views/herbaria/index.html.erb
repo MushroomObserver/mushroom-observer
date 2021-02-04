@@ -59,8 +59,7 @@
                 [<%= link_with_query(
                        :EDIT.t, edit_herbarium_path(herbarium)
                      ) %> |
-                 <%= link_to(
-                       :MERGE.t, herbaria_path(merge: herbarium.id)
+                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id)
                      ) %>]
               <% end %>
             </td>
