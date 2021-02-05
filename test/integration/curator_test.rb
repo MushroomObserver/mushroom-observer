@@ -203,13 +203,14 @@ class CuratorTest < IntegrationTestCase
     login!(curator.login, "testpassword", true)
     get(edit_herbarium_path(herbarium))
     open_form(
-      # edit posts to update; this is the update url
+      # The edit form posts to update; this is the update url
       "form[action^='#{herbarium_path(herbarium)}']"
     ) do |form|
-      form.assert_value("code", herbarium.code)
-      form.change("code", new_code)
+      form.assert_value("[code]", herbarium.code)
+      form.change("[code]", new_code)
       form.submit(:SAVE.t)
     end
+
     assert_equal(new_code, herbarium.reload.code)
     assert_select(
       "#title-caption",
@@ -226,16 +227,17 @@ class CuratorTest < IntegrationTestCase
     click(label: :create_herbarium.l)
 
     open_form("form[action^='#{herbaria_path}']") do |form|
-      form.assert_value("herbarium_name", "")
-      form.assert_value("code", "")
-      form.assert_value("place_name", "")
-      form.assert_value("email", "")
-      form.assert_value("mailing_address", "")
-      form.assert_value("description", "")
-      form.assert_unchecked("personal")
-      form.change("herbarium_name", "Mary's Herbarium")
-      form.check("personal")
-      form.submit(:CREATE.t)
+      form.assert_value("[name]", "")
+      form.assert_value("[code]", "")
+      form.assert_value("[place_name]", "")
+      form.assert_value("[email]", "")
+      form.assert_value("[mailing_address]", "")
+      form.assert_value("[description]", "")
+      form.assert_unchecked("[personal]")
+
+      form.change("[name]", "Mary's Herbarium")
+      form.check("[personal]")
+      form.submit(:CREATE.l)
     end
     user = User.find(user.id)
     assert_not_empty(user.curated_herbaria)

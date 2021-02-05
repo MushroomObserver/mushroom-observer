@@ -37,6 +37,8 @@
 #  assert_disabled::  Make sure a given field is disabled.
 #  assert_hidden::    Make sure a given field is there but hidden
 #  assert_select::    Call assert_select on the form.
+#  assert_checked::   Make sure a checkbox is checked
+#  assert_unchecked:: Make sure a checkbox is unchecked
 #
 ################################################################################
 
@@ -245,6 +247,36 @@ module SessionExtensions
       results.first
     end
 
+    # Find the checkbox whose name ends in the given String or matches the given
+    # Regexp. Returns an instance of IntegrationSession::Form::Field or +nil+.
+    # Check boxes must be dealt with separately from other inputs because Rails
+    # check_box(x) creates 2 inputs with name="x".
+    # (The one of interest other has type="checkbox".)
+    def get_checkbox_by_name!(name, strict = false)
+      results = []
+      inputs.each do |field|
+        next unless field.type == :checkbox
+
+        nm2 = field.name
+        if name.is_a?(Regexp) && nm2.match(name)
+          results << field
+        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+          results << field
+        end
+      end
+
+      if strict
+        context.assert(results.any?,
+                       "Couldn't find checkbox with name ending in " \
+                       "#{name.inspect}.\n" \
+                       "Have these: #{inputs.map(&:name).inspect}")
+        context.assert(results.length == 1,
+                       "Multiple checkboxes with name ending in " \
+                       "#{name.inspect}: #{results.map(&:name).inspect}")
+      end
+      results.first
+    end
+
     # Call get_field and flunk an assertion if field not found.
     def get_field_by_name!(name)
       get_field_by_name(name, :strict)
@@ -308,7 +340,8 @@ module SessionExtensions
     end
 
     def get_field_by_identifier(identifier)
-      if /^\[.*\]$/ =~ identifier # Does it begin with "[" and end with "]"?
+      # Does it begin with "[" and end with "]"?
+      if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
         get_field_by_name!(identifier)
       else
         get_field!(identifier)
@@ -319,14 +352,22 @@ module SessionExtensions
       assert_checked(id, false, msg)
     end
 
-    def assert_checked(id, checked = true, msg = nil)
-      field = get_field!(id)
+    # Assert that the identified check box is checked
+    # identifier: bracketed string "[...]" to match check_box by its name
+    #             another string or a regexp to match check_box by its id
+    def assert_checked(identifier, checked = true, msg = nil)
+      # Does it begin with "[" and end with "]"?
+      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                 get_checkbox_by_name!(identifier)
+               else
+                 get_field!(identifier)
+               end
       val = field.node["checked"]
       if checked
-        msg ||= "Expected value of form checkbox #{id.inspect} to be checked."
+        msg ||= "Expected checkbox #{identifier.inspect} to be checked."
         context.assert_equal("checked", val, msg)
       else
-        msg ||= "Expected value of form checkbox #{id.inspect} to be unchecked."
+        msg ||= "Expected checkbox #{identifier.inspect} to be unchecked."
         context.assert_nil(val, msg)
       end
     end
@@ -372,9 +413,17 @@ module SessionExtensions
       end
     end
 
-    # Check a given check-box.
-    def check(id)
-      field = assert_enabled(id)
+    # Check the identified check box.
+    # identifier: bracketed string "[...]" to match check_box by its name
+    #             another string or a regexp to match check_box by its id
+    def check(identifier)
+      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                 get_checkbox_by_name!(identifier)
+               else
+                 get_field!(identifier)
+               end
+      msg ||= "Expected field #{identifier.inspect} to be enabled."
+      context.refute(field.disabled, msg)
       context.assert([:checkbox, :radio].include?(field.type),
                      "Must be a check-box or radio-box.")
 
@@ -384,7 +433,7 @@ module SessionExtensions
       # Uncheck all the other radio-boxes in this group.
       if field.type == :radio
         field.value = true
-        for field2 in inputs
+        inputs.each do |field2|
           if (field2 != field) && (field2.name == field.name)
             field2.value = false
           end
@@ -392,9 +441,17 @@ module SessionExtensions
       end
     end
 
-    # Uncheck a given check-box.
-    def uncheck(id)
-      field = assert_enabled(id)
+    # Uncheck the identified check box.
+    # identifier: bracketed string "[...]" to match check_box by its name
+    #             another string or a regexp to match check_box by its id
+    def uncheck(identifier)
+      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                 get_checkbox_by_name!(identifier)
+               else
+                 get_field!(identifier)
+               end
+      msg ||= "Expected field #{identifier.inspect} to be enabled."
+      context.refute(field.disabled, msg)
       context.assert([:checkbox].include?(field.type), "Must be a check-box.")
       field.node.remove_attribute("checked")
     end
