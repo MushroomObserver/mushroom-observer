@@ -122,7 +122,7 @@ module SessionExtensions
     # by the constructor.
     def fill_in_initial_values!
       context.assert_select(form, "input, textarea, select") do |elems|
-        for elem in elems
+        elems.each do |elem|
           id   = find_value(elem, "id")
           name = find_value(elem, "name")
           val  = find_value(elem, "value")
@@ -219,6 +219,37 @@ module SessionExtensions
       get_field(id, :strict)
     end
 
+    # Find the field whose name ends in the given String or matches the given
+    # Regexp.  Returns an instance of IntegrationSession::Form::Field or +nil+.
+    def get_field_by_name(name, strict = false)
+      results = []
+      inputs.each do |field|
+        nm2 = field.name
+        if name.is_a?(Regexp) && nm2.match(name)
+          results << field
+        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+          results << field
+        end
+      end
+
+      if strict
+        context.assert(results.any?,
+                       "Couldn't find input field with name ending in " \
+                       "#{name.inspect}.\n" \
+                       "Have these: #{inputs.map(&:name).inspect}")
+        context.assert(results.length == 1,
+                       "Multiple input fields field with name ending in " \
+                       "#{name.inspect}: #{results.map(&:name).inspect}")
+      end
+
+      results.first
+    end
+
+    # Call get_field and flunk an assertion if field not found.
+    def get_field_by_name!(name)
+      get_field_by_name(name, :strict)
+    end
+
     def string_value(field)
       return field unless field.respond_to?(:value)
 
@@ -258,19 +289,29 @@ module SessionExtensions
       field.value.to_s.strip
     end
 
-    # Assert the value of a given input field.  Change the value of the given
-    # input field.  Matches field whose ID _ends_ in the given String.
+    # Assert the value of a given input field.
+    # If first argument is enclosed in brackets (e.g. "[code]"),
+    #   matches the field whose _name_ _ends_ in the given String.
+    #   else matches field whose _ID_ _ends_ in the given String.
     # Converts everything to String since +nil+ isn't distinguished from
     # <tt>""</tt> by HTML forms.  Pass in either a String or a Regexp for the
     # expected value.
     def assert_value(id, val, msg = nil)
-      field = get_field!(id)
-      val2 = field_value(field)
+      field = get_field_by_identifier(id)
       msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
+      val2 = field_value(field)
       if val.is_a?(Regexp)
         context.assert_match(val, val2.to_s, msg)
       else
         context.assert_equal(val.to_s, val2.to_s, msg)
+      end
+    end
+
+    def get_field_by_identifier(identifier)
+      if /^\[.*\]$/ =~ identifier # Does it begin with "[" and end with "]"?
+        get_field_by_name!(identifier)
+      else
+        get_field!(identifier)
       end
     end
 
@@ -292,7 +333,7 @@ module SessionExtensions
 
     # Make sure a given field is enabled for editing.
     def assert_enabled(id, msg = nil)
-      field = get_field!(id)
+      field = get_field_by_identifier(id)
       msg ||= "Expected field #{id.inspect} to be enabled."
       context.refute(field.disabled, msg)
       field
