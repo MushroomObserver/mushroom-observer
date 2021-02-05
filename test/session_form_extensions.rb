@@ -357,11 +357,11 @@ module SessionExtensions
     #             another string or a regexp to match check_box by its id
     def assert_checked(identifier, checked = true, msg = nil)
       # Does it begin with "[" and end with "]"?
-      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
-                 get_checkbox_by_name!(identifier)
-               else
-                 get_field!(identifier)
-               end
+      field = if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                get_checkbox_by_name!(identifier)
+              else
+                get_field!(identifier)
+              end
       val = field.node["checked"]
       if checked
         msg ||= "Expected checkbox #{identifier.inspect} to be checked."
@@ -417,11 +417,11 @@ module SessionExtensions
     # identifier: bracketed string "[...]" to match check_box by its name
     #             another string or a regexp to match check_box by its id
     def check(identifier)
-      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
-                 get_checkbox_by_name!(identifier)
-               else
-                 get_field!(identifier)
-               end
+      field = if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                get_checkbox_by_name!(identifier)
+              else
+                get_field!(identifier)
+              end
       msg ||= "Expected field #{identifier.inspect} to be enabled."
       context.refute(field.disabled, msg)
       context.assert([:checkbox, :radio].include?(field.type),
@@ -445,11 +445,11 @@ module SessionExtensions
     # identifier: bracketed string "[...]" to match check_box by its name
     #             another string or a regexp to match check_box by its id
     def uncheck(identifier)
-      field =  if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
-                 get_checkbox_by_name!(identifier)
-               else
-                 get_field!(identifier)
-               end
+      field = if identifier.is_a?(String) && /^\[.*\]$/ =~ identifier
+                get_checkbox_by_name!(identifier)
+              else
+                get_field!(identifier)
+              end
       msg ||= "Expected field #{identifier.inspect} to be enabled."
       context.refute(field.disabled, msg)
       context.assert([:checkbox].include?(field.type), "Must be a check-box.")
