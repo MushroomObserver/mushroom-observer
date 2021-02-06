@@ -397,7 +397,15 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_update_with_nonexisting_place_name
-    params = herbarium_params.merge(place_name: "New Location")
+    params = {
+      name: nybg.name,
+      personal: nybg.personal_user_id,
+      code: nybg.code,
+      place_name: "New Location",
+      email: nybg.email,
+      mailing_address: nybg.mailing_address,
+      description: nybg.description
+    }
     login("rolf")
     patch(:update, params: { herbarium: params, id: nybg.id })
 
