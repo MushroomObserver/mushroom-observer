@@ -19,7 +19,9 @@
         <div class="form-inline">
           <%= f.label(:personal_user_name,
                       :edit_herbarium_admin_make_personal.t) %>:
-          <%= f.text_field(:personal_user_name, class: "form-control-xxx") %>
+          <%# workaround for auto completer; creates an id %>
+          <%= text_field(:herbarium, :personal_user_name,
+                         class: "form-control-xxx") %>
          <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
         </div>
         <% if button_name != :CREATE %>
@@ -84,7 +86,8 @@
     <div class="col-xs-12">
       <%= f.label(:place_name, "#{:LOCATION.t}:") %>
       <span class="HelpNote">(<%= :optional.t %>)</span>
-      <%= f.text_field(:place_name, class: "form-control") %>
+      <%# workaround for auto completer; creates an id %>
+      <%= text_field(:herbarium, :place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:herbarium_place_name) %>
     </div>
   </div>
