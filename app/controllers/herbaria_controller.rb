@@ -66,7 +66,7 @@ class HerbariaController < ApplicationController
   def create
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
-    return unless validate_herbarium!
+    return render :new unless validate_herbarium!
 
     @herbarium.save
     @herbarium.add_curator(@user) if @herbarium.personal_user
