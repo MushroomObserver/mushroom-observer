@@ -183,6 +183,17 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_create_blank_name
+    herbarium_count = Herbarium.count
+    login("rolf")
+    params = herbarium_params
+    post(:create, params: { herbarium: params })
+
+    assert_equal(herbarium_count, Herbarium.count)
+    assert_flash_text(:create_herbarium_name_blank.t)
+    assert_response(:success) # Back to form for creating herbarium
+  end
+
   def test_create_duplicate_name
     herbarium_count = Herbarium.count
     login("rolf")

@@ -2456,6 +2456,7 @@
   create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
   create_herbarium_personal_already_exists: You've already created a personal fungarium called '[name]'.
   create_herbarium_must_define_location: You must define this location before we can use it for this fungarium. Any other information you provided has been saved.
+  create_herbarium_name_blank: Herbarium name must not be blank.
 
   # herbaria/edit
   edit_herbarium: Edit Fungarium

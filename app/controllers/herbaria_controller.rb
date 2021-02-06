@@ -132,6 +132,11 @@ class HerbariaController < ApplicationController
   end
 
   def validate_name!
+    if @herbarium.name.blank?
+      flash_error(:create_herbarium_name_blank.t)
+      return false
+    end
+
     other = Herbarium.where(name: @herbarium.name).first
     return true if !other || other == @herbarium
 
