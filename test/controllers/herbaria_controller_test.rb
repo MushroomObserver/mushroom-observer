@@ -18,6 +18,10 @@ class HerbariaControllerTest < FunctionalTestCase
     herbaria(:dick_herbarium)
   end
 
+  def field_museum
+    herbaria(:field_museum)
+  end
+
   def herbarium_params
     {
       name: "",
@@ -28,10 +32,6 @@ class HerbariaControllerTest < FunctionalTestCase
       mailing_address: "",
       description: ""
     }.freeze
-  end
-
-  def field_museum
-    herbaria(:field_museum)
   end
 
   # params used in test_create
