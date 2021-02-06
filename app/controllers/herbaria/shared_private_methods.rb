@@ -61,7 +61,7 @@ module Herbaria::SharedPrivateMethods
       links << [:herbarium_index_nonpersonal_herbaria.l,
                 herbaria_nonpersonals_path]
     end
-    links << [:create_herbarium.l, new_herbarium_path(method: :post)]
+    links << [:create_herbarium.l, new_herbarium_path]
   end
 
   # ---------- Merges ----------------------------------------------------------
