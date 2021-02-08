@@ -6,6 +6,7 @@ module Report
 
     def output_row(row)
       @row = row
+      reset
       observation_info + name_info + date_info + location_info
     end
 
@@ -104,7 +105,7 @@ module Report
     end
 
     def name_rank
-      Name.ranks[@row["rank"]]
+      Name.all_ranks[@row["rank"] - 1]
     end
 
     def obs_when
