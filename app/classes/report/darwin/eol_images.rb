@@ -32,11 +32,11 @@ module Report
         query.where(table[:ok_for_export].eq(1))
         query.where(table[:deprecated].eq(0))
         query.where(table[:text_name].does_not_match('%"%'))
-        add_rank_condition(table, [:Species, :Genus])
+        add_rank_condition(table)
       end
 
-      def add_rank_condition(table, ranks)
-        query.where(table[:rank].in(ranks.map { |rank| Name.ranks[rank] }))
+      def add_rank_condition(table)
+        query.where(table[:rank].lteq(Name.ranks[:Genus]))
       end
 
       def tables
@@ -69,6 +69,7 @@ module Report
         query.project(attribute(:images, :id),
                       attribute(:observations, :name_id),
                       attribute(:names, :text_name),
+                      attribute(:names, :classification),
                       attribute(:images, :when),
                       attribute(:users, :name),
                       attribute(:users, :login),
