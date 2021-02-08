@@ -229,16 +229,20 @@ class Name < AbstractModel
       next if name == text_name || name[-1] == "."
 
       parent = Name.best_match(name)
-      parents << parent if parent
-      return [parent] if !all && parent && !parent.deprecated
+      if parent
+        parents << parent
+        return [parent] if !all && parent && !parent.deprecated
+      end
     end
 
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
     lines.reverse_each do |(_line_rank, line_name)|
       parent = Name.best_match(line_name)
-      parents << parent if parent
-      return [parent] if !all && !parent.deprecated
+      if parent
+        parents << parent
+        return [parent] if !all && !parent.deprecated
+      end
     end
 
     # Get rid of deprecated names unless all the results are deprecated.
