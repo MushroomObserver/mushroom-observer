@@ -182,10 +182,10 @@ module Report
     end
 
     def split_name_string(name)
-      @form = Regexp.last_match(1) if name.sub!(/ f. (\S+)$/, "")
-      @variety = Regexp.last_match(1) if name.sub!(/ var. (\S+)$/, "")
-      @subspecies = Regexp.last_match(1) if name.sub!(/ ssp. (\S+)$/, "")
-      @species = Regexp.last_match(1) if name.sub!(/ (\S.*)$/, "")
+      @form = name.sub!(/ f. (\S+)$/, "") ? Regexp.last_match(1) : nil
+      @variety = name.sub!(/ var. (\S+)$/, "") ? Regexp.last_match(1) : nil
+      @subspecies = name.sub!(/ ssp. (\S+)$/, "") ? Regexp.last_match(1) : nil
+      @species = name.sub!(/ (\S.*)$/, "") ? Regexp.last_match(1) : nil
       @genus = name
     end
 
