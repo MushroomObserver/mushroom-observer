@@ -79,7 +79,7 @@ class RedirectsTest < IntegrationTestCase
                  @response.header["Location"])
   end
 
-  #######
+  # ----------------------------------------------------------------------------
 
   def test_controller_glossary
     get("/glossary")
@@ -141,5 +141,76 @@ class RedirectsTest < IntegrationTestCase
     get("/glossary/show_past_glossary_term/#{term.id}?version=1")
     assert_equal(show_past_glossary_term_path(term.id, version: 1),
                  @response.request.fullpath)
+  end
+
+  # ----------------------------------------------------------------------------
+
+  # Old MO Action (method)        New "Normalized" Action (method)
+  # ---------------------------   --------------------------------
+  # create_herbarium (get)        new (get)
+  # create_herbarium (post)       create (post)
+  # delete_curator (delete)       Herbaria::Curators#destroy (delete)
+  # destroy_herbarium (delete)    destroy (delete)
+  # edit_herbarium (get)          edit (get)
+  # edit_herbarium (post)         update (patch)
+  # herbarium_search (get)        Herbaria::Searches#index (get)
+  # index (get)                   Herbaria::Nonpersonals#index (get)
+  # index_herbarium (get)         index (get) - lists query results
+  # list_herbaria (get)           Herbaria::Alls#index (get) - all herbaria
+  # merge_herbaria (get)          Herbaria::Merges#new (get)
+  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
+  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
+  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
+  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
+  # show_herbarium (get)          show (get)
+  # show_herbarium (post)         Herbaria::Curators#create (post)
+
+  def test_create_herbarium_get
+    login rolf
+    assert_old_url_redirected_to_new_path(
+      :get, "/herbarium/create_herbarium", new_herbarium_path
+    )
+  end
+
+  def test_create_herbarium_post
+    login rolf
+    assert_old_url_redirected_to_new_path(
+      :post, "/herbarium/create_herbarium", new_herbarium_path
+    )
+  end
+
+  def test_delete_herbarium_curator_post
+    nybg = herbaria(:nybg_herbarium)
+    assert(nybg.curator?(rolf))
+    assert(nybg.curator?(roy))
+    login rolf
+
+    # Test the results of the redirect because
+    # There is no way to test the redirect directly (unlike other actions).
+    # Due to the routing scheme, Rails actually follows the redirect.
+    assert_old_url_redirected_to_new_path(
+      :post,
+      "/herbarium/delete_curator/#{nybg.id}?user=#{roy.id}",
+      herbarium_path(nybg)
+    )
+    assert_response(:success)
+    assert_not(nybg.reload.curator?(roy))
+  end
+
+  def assert_old_url_redirected_to_new_path(old_method, old_url, new_path)
+    case old_method
+    when :get
+      get(old_url)
+    when :delete
+      delete(old_url)
+    when :patch
+      patch(old_url)
+    when :post
+      post(old_url)
+    when :put
+      put(old_url)
+    end
+
+    assert_equal(new_path, @response.request.fullpath)
   end
 end
