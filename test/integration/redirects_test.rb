@@ -4,6 +4,26 @@ require("test_helper")
 
 # Test whether actions redirected correctly
 class RedirectsTest < IntegrationTestCase
+  # helpers
+  def assert_old_url_redirected_to_new_path(old_method, old_url, new_path)
+    case old_method
+    when :get
+      get(old_url)
+    when :delete
+      delete(old_url)
+    when :patch
+      patch(old_url)
+    when :post
+      post(old_url)
+    when :put
+      put(old_url)
+    end
+
+    assert_equal(new_path, @response.request.fullpath)
+  end
+
+  # ============================================================================
+
   def test_controller_article
     get("/article")
     assert_equal(articles_path,
@@ -206,20 +226,21 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  def assert_old_url_redirected_to_new_path(old_method, old_url, new_path)
-    case old_method
-    when :get
-      get(old_url)
-    when :delete
-      delete(old_url)
-    when :patch
-      patch(old_url)
-    when :post
-      post(old_url)
-    when :put
-      put(old_url)
-    end
+  def test_edit_herbarium_get
+    login(rolf)
+    assert_old_url_redirected_to_new_path(
+      :get,
+      "/herbarium/edit_herbarium/#{herbaria(:rolf_herbarium).id}",
+      edit_herbarium_path(herbaria(:rolf_herbarium))
+    )
+  end
 
-    assert_equal(new_path, @response.request.fullpath)
+  def test_edit_herbarium_post
+    login(rolf)
+    assert_old_url_redirected_to_new_path(
+      :post,
+      "/herbarium/edit_herbarium/#{herbaria(:rolf_herbarium).id}",
+      edit_herbarium_path(herbaria(:rolf_herbarium))
+    )
   end
 end
