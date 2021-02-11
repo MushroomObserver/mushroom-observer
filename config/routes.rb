@@ -689,10 +689,8 @@ MushroomObserver::Application.routes.draw do
   end
   resources :herbaria, id: /\d+/
   redirect_legacy_actions(
-    old_controller: "herbarium",
-    actions: LEGACY_CRUD_ACTIONS - [
-      :controller, :destroy, :index, :show, :show_past
-    ]
+    old_controller: "herbarium", new_controller: "herbaria",
+    actions: LEGACY_CRUD_ACTIONS - [:controller, :index]
   )
   match("/herbarium/delete_curator/:id",
         to: redirect(path: "/herbaria/curators/%{id}"), via: [:get, :post])

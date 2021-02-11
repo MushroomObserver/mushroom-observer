@@ -197,6 +197,15 @@ class RedirectsTest < IntegrationTestCase
     assert_not(nybg.reload.curator?(roy))
   end
 
+  def test_destroy_herbarium
+    login(rolf)
+    assert_old_url_redirected_to_new_path(
+      :post,
+      "/herbarium/destroy_herbarium/#{herbaria(:rolf_herbarium).id}",
+      herbarium_path(herbaria(:rolf_herbarium))
+    )
+  end
+
   def assert_old_url_redirected_to_new_path(old_method, old_url, new_path)
     case old_method
     when :get
