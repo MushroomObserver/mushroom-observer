@@ -690,18 +690,22 @@ MushroomObserver::Application.routes.draw do
   resources :herbaria, id: /\d+/
   redirect_legacy_actions(
     old_controller: "herbarium", new_controller: "herbaria",
-    actions: LEGACY_CRUD_ACTIONS - [:controller, :index]
+    actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
   )
   match("/herbarium/delete_curator/:id",
         to: redirect(path: "/herbaria/curators/%{id}"), via: [:get, :post])
   # The route above actually redirects
+  #   GET("/herbarium/delete_curator/nnn?user=uuu") and
   #   POST("/herbarium/delete_curator/nnn?user=uuu")
   # to
   #   GET("/herbaria/curators/nnn?user=uuu")
   # Therefore we must have the following route to prevent
   #   No route matches [GET] "/herbaria/curators/nnnnn"
   get("/herbaria/curators/:id",
-      to: "herbaria/curators#destroy", id: /\d+/, via: [:get, :post])
+      to: "herbaria/curators#destroy", id: /\d+/)
+
+  get("/herbarium/herbarium_search",
+      to: redirect(path: "herbaria/searches#index"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications

@@ -5,7 +5,7 @@ require("test_helper")
 # Test whether actions redirected correctly
 class RedirectsTest < IntegrationTestCase
   # helpers
-  def assert_old_url_redirected_to_new_path(old_method, old_url, new_path)
+  def assert_old_url_redirects_to_new_path(old_method, old_url, new_path)
     case old_method
     when :get
       get(old_url)
@@ -187,14 +187,14 @@ class RedirectsTest < IntegrationTestCase
 
   def test_create_herbarium_get
     login rolf
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :get, "/herbarium/create_herbarium", new_herbarium_path
     )
   end
 
   def test_create_herbarium_post
     login rolf
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :post, "/herbarium/create_herbarium", new_herbarium_path
     )
   end
@@ -208,7 +208,7 @@ class RedirectsTest < IntegrationTestCase
     # Test the results of the redirect because
     # There is no way to test the redirect directly (unlike other actions).
     # Due to the routing scheme, Rails actually follows the redirect.
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :post,
       "/herbarium/delete_curator/#{nybg.id}?user=#{roy.id}",
       herbarium_path(nybg)
@@ -219,7 +219,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_destroy_herbarium
     login(rolf)
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :post,
       "/herbarium/destroy_herbarium/#{herbaria(:rolf_herbarium).id}",
       herbarium_path(herbaria(:rolf_herbarium))
@@ -228,7 +228,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_edit_herbarium_get
     login(rolf)
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :get,
       "/herbarium/edit_herbarium/#{herbaria(:rolf_herbarium).id}",
       edit_herbarium_path(herbaria(:rolf_herbarium))
@@ -237,10 +237,18 @@ class RedirectsTest < IntegrationTestCase
 
   def test_edit_herbarium_post
     login(rolf)
-    assert_old_url_redirected_to_new_path(
+    assert_old_url_redirects_to_new_path(
       :post,
       "/herbarium/edit_herbarium/#{herbaria(:rolf_herbarium).id}",
       edit_herbarium_path(herbaria(:rolf_herbarium))
+    )
+  end
+
+  def test_herbarium_search
+    assert_old_url_redirects_to_new_path(
+      :get,
+      "/herbarium/herbarium_search",
+      herbaria_searches_path
     )
   end
 end
