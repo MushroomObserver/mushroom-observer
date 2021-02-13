@@ -268,10 +268,63 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
+  # merge_herbaria (get)          Herbaria::Merges#new (get)
+  def test_merge_herbaria
+      skip("Under Construction, probable bug in herbaria/merge#new")
+      fundis = herbaria(:fundis_herbarium)
+      assert_true(fundis.owns_all_records?(mary))
+      marys = mary.create_personal_herbarium
+      login("mary")
+
+      # get(:new, params: { this: fundis.id, that: marys.id })
+      assert_old_url_redirects_to_new_path(
       :get,
-      "/herbarium/herbarium_search",
-      herbaria_searches_path
+      "/herbarium/merge_herbaria?this=#{marys.id}&that=#{fundis.id}",
+      new_herbaria_merge_path
     )
+  end
+
+  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
+  def test_next_herbarium
+    skip
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    q = query.record.id.alphabetize
+    number1 = query.results[0]
+    number2 = query.results[1]
+
+    assert_old_url_redirects_to_new_path(
+      :get,
+      "/herbarium/next_herbarium?id=#{number1.id}&q=#{q}",
+      herbarium_path(number2)
+    )
+=begin
+      query = Query.lookup_and_save(:Herbarium, :all)
+      assert_operator(query.num_results, :>, 1)
+      number1 = query.results[0]
+      number2 = query.results[1]
+      q = query.record.id.alphabetize
+
+      login
+      get(:show, params: { id: number1.id, q: q, next: "next" })
+=end
+  end
+
+  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
+  def test_prev_herbarium
+    skip
+  end
+
+  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
+  def test_request_to_be_herbarium_curator_get
+    skip
+  end
+
+  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
+  def test_request_to_be_herbarium_curator_post
+    skip
+  end
+
   # show_herbarium (get)          show (get)
   def test_show_herbarium_get
     nybg = herbaria(:nybg_herbarium)
@@ -280,5 +333,8 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
+  # show_herbarium (post)         Herbaria::Curators#create (post)
+  def test_show_herbarium_post
+    skip
   end
 end

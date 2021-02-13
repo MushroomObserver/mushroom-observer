@@ -692,22 +692,25 @@ MushroomObserver::Application.routes.draw do
     old_controller: "herbarium", new_controller: "herbaria",
     actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
   )
-  match("/herbarium/delete_curator/:id",
-        to: redirect(path: "/herbaria/curators/%{id}"), via: [:get, :post])
-  # The route above actually redirects
+  # The immediately following "match" and "get" combine to redirect
+  # the legacy herbarium/delete_curator to the new herbaria/curators
+  # The "match" redirects
   #   GET("/herbarium/delete_curator/nnn?user=uuu") and
   #   POST("/herbarium/delete_curator/nnn?user=uuu")
   # to
   #   GET("/herbaria/curators/nnn?user=uuu")
-  # Therefore we must have the following route to prevent
+  # Therefore we need the following "get" to prevent
   #   No route matches [GET] "/herbaria/curators/nnnnn"
-  get("/herbaria/curators/:id",
-      to: "herbaria/curators#destroy", id: /\d+/)
+  match("/herbarium/delete_curator/:id",
+        to: redirect(path: "/herbaria/curators/%{id}"), via: [:get, :post])
+  get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
 
   get("/herbarium/herbarium_search",
       to: redirect(path: "herbaria/searches#index"))
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria/alls#index"))
+  # get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
+  # get("/herbarium/next_herbarium", to: redirect(path: "herbaria/nexts#show"))
   get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
 
   get "publications/:id/destroy" => "publications#destroy"
