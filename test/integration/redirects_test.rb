@@ -272,5 +272,13 @@ class RedirectsTest < IntegrationTestCase
       "/herbarium/herbarium_search",
       herbaria_searches_path
     )
+  # show_herbarium (get)          show (get)
+  def test_show_herbarium_get
+    nybg = herbaria(:nybg_herbarium)
+    assert_old_url_redirects_to_new_path(
+      :get,"/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
+    )
+  end
+
   end
 end
