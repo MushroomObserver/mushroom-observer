@@ -246,6 +246,28 @@ class RedirectsTest < IntegrationTestCase
 
   def test_herbarium_search
     assert_old_url_redirects_to_new_path(
+      :get, "/herbarium/herbarium_search", herbaria_searches_path
+    )
+  end
+
+  def test_herbarium
+    assert_old_url_redirects_to_new_path(
+      :get, "/herbarium", herbaria_nonpersonals_path
+    )
+  end
+
+  def test_index_herbarium
+    assert_old_url_redirects_to_new_path(
+      :get, "/herbarium/index", herbaria_path
+    )
+  end
+
+  def test_list_herbaria
+    assert_old_url_redirects_to_new_path(
+      :get, "/herbarium/list_herbaria", herbaria_alls_path
+    )
+  end
+
       :get,
       "/herbarium/herbarium_search",
       herbaria_searches_path

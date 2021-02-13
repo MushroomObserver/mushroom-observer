@@ -706,6 +706,9 @@ MushroomObserver::Application.routes.draw do
 
   get("/herbarium/herbarium_search",
       to: redirect(path: "herbaria/searches#index"))
+  get("/herbarium/index", to: redirect(path: "herbaria"))
+  get("/herbarium/list_herbaria", to: redirect(path: "herbaria/alls#index"))
+  get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
