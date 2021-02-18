@@ -286,33 +286,33 @@ class RedirectsTest < IntegrationTestCase
 
   # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
   def test_next_herbarium
-    skip
     query = Query.lookup_and_save(:Herbarium, :all)
-    assert_operator(query.num_results, :>, 1)
-    q = query.record.id.alphabetize
+    assert_operator(query.num_results, :>, 1,
+                    "Test needs query with > 1 result")
     number1 = query.results[0]
     number2 = query.results[1]
 
     assert_old_url_redirects_to_new_path(
       :get,
-      "/herbarium/next_herbarium?id=#{number1.id}&q=#{q}",
-      herbarium_path(number2)
+      "/herbarium/next_herbarium/#{number1.id}",
+      herbarium_path(number2, q: query.record.id.alphabetize)
     )
-=begin
-      query = Query.lookup_and_save(:Herbarium, :all)
-      assert_operator(query.num_results, :>, 1)
-      number1 = query.results[0]
-      number2 = query.results[1]
-      q = query.record.id.alphabetize
-
-      login
-      get(:show, params: { id: number1.id, q: q, next: "next" })
-=end
   end
 
   # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
   def test_prev_herbarium
-    skip
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1,
+                    "Test needs query with > 1 result")
+
+    number1 = query.results[0]
+    number2 = query.results[1]
+
+    assert_old_url_redirects_to_new_path(
+      :get,
+      "/herbarium/prev_herbarium/#{number2.id}",
+      herbarium_path(number1, q: query.record.id.alphabetize)
+    )
   end
 
   # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)

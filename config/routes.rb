@@ -710,7 +710,10 @@ MushroomObserver::Application.routes.draw do
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria/alls#index"))
   # get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
-  # get("/herbarium/next_herbarium", to: redirect(path: "herbaria/nexts#show"))
+  get("/herbarium/next_herbarium/:id",
+      to: redirect(path: "herbaria/nexts/%{id}?next=next"))
+  get("/herbarium/prev_herbarium/:id",
+      to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
   get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
 
   get "publications/:id/destroy" => "publications#destroy"
