@@ -186,14 +186,14 @@ class RedirectsTest < IntegrationTestCase
   # show_herbarium (post)         Herbaria::Curators#create (post)
 
   def test_create_herbarium_get
-    login rolf
+    login(rolf)
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/create_herbarium", new_herbarium_path
     )
   end
 
   def test_create_herbarium_post
-    login rolf
+    login(rolf)
     assert_old_url_redirects_to_new_path(
       :post, "/herbarium/create_herbarium", new_herbarium_path
     )
@@ -201,9 +201,11 @@ class RedirectsTest < IntegrationTestCase
 
   def test_delete_herbarium_curator_post
     nybg = herbaria(:nybg_herbarium)
+    # make sure nobody messed up the fixtures
     assert(nybg.curator?(rolf))
     assert(nybg.curator?(roy))
-    login rolf
+
+    login(rolf)
 
     # Test the results of the redirect because
     # There is no way to test the redirect directly (unlike other actions).
@@ -270,14 +272,14 @@ class RedirectsTest < IntegrationTestCase
 
   # merge_herbaria (get)          Herbaria::Merges#new (get)
   def test_merge_herbaria
-      skip("Under Construction, probable bug in herbaria/merge#new")
-      fundis = herbaria(:fundis_herbarium)
-      assert_true(fundis.owns_all_records?(mary))
-      marys = mary.create_personal_herbarium
-      login("mary")
+    skip("Under Construction, probable bug in herbaria/merge#new")
+    fundis = herbaria(:fundis_herbarium)
+    assert_true(fundis.owns_all_records?(mary))
+    marys = mary.create_personal_herbarium
+    login("mary")
 
-      # get(:new, params: { this: fundis.id, that: marys.id })
-      assert_old_url_redirects_to_new_path(
+    # get(:new, params: { this: fundis.id, that: marys.id })
+    assert_old_url_redirects_to_new_path(
       :get,
       "/herbarium/merge_herbaria?this=#{marys.id}&that=#{fundis.id}",
       new_herbaria_merge_path
@@ -317,19 +319,32 @@ class RedirectsTest < IntegrationTestCase
 
   # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
   def test_request_to_be_herbarium_curator_get
-    skip
+    nybg = herbaria(:nybg_herbarium)
+    login("mary")
+
+    assert_old_url_redirects_to_new_path(
+      :get, "/herbarium/request_to_be_curator/#{nybg.id}",
+      new_herbaria_curator_request_path(id: nybg)
+    )
   end
 
   # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
   def test_request_to_be_herbarium_curator_post
-    skip
+    nybg = herbaria(:nybg_herbarium)
+    email_count = ActionMailer::Base.deliveries.count
+    login("mary")
+    post("/herbarium/request_to_be_curator/#{nybg.id}")
+
+    # Rails seems to follow the redirect, instead of just redirecting
+    assert_equal(herbarium_path(nybg), @response.request.fullpath)
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
   end
 
   # show_herbarium (get)          show (get)
   def test_show_herbarium_get
     nybg = herbaria(:nybg_herbarium)
     assert_old_url_redirects_to_new_path(
-      :get,"/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
+      :get, "/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
     )
   end
 

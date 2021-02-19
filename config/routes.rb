@@ -714,6 +714,12 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "herbaria/nexts/%{id}?next=next"))
   get("/herbarium/prev_herbarium/:id",
       to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
+  get("/herbarium/request_to_be_curator/:id",
+      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
+  post("/herbarium/request_to_be_curator/:id",
+       to: redirect(path: "herbaria/curator_requests?id=%{id}"))
+  get("/herbaria/curator_requests",
+      to: "herbaria/curator_requests#create", id: /\d+/)
   get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
 
   get "publications/:id/destroy" => "publications#destroy"
