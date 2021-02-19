@@ -22,7 +22,7 @@ module Herbaria
       this = find_or_goto_index(Herbarium, params[:this]) || return
       that = find_or_goto_index(Herbarium, params[:that]) || return
 
-      # Calls shared private methods, also used by
+      # Calls shared private methods that are also used by
       # Herbaria#create and Herbaria#update
       result = perform_or_request_merge(this, that) || return
 

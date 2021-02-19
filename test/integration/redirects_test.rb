@@ -272,18 +272,14 @@ class RedirectsTest < IntegrationTestCase
 
   # merge_herbaria (get)          Herbaria::Merges#new (get)
   def test_merge_herbaria
-    skip("Under Construction, probable bug in herbaria/merge#new")
     fundis = herbaria(:fundis_herbarium)
     assert_true(fundis.owns_all_records?(mary))
     marys = mary.create_personal_herbarium
     login("mary")
 
-    # get(:new, params: { this: fundis.id, that: marys.id })
-    assert_old_url_redirects_to_new_path(
-      :get,
-      "/herbarium/merge_herbaria?this=#{marys.id}&that=#{fundis.id}",
-      new_herbaria_merge_path
-    )
+    get("/herbarium/merge_herbaria?this=#{fundis.id}&that=#{marys.id}")
+    # fundis ends up being the destination because it is older.
+    assert_equal(herbaria_path(id: fundis.id), @response.request.fullpath)
   end
 
   # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
