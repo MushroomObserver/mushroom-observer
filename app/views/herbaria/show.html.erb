@@ -36,8 +36,7 @@
     </div>
 
     <div class="push-down">
-      <%= render(partial: "curator_table",
-                 locals: { herbarium: @herbarium }) %>
+      <%= render(partial: "curator_table", locals: { herbarium: @herbarium }) %>
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
         <%= form_with(
               url: add_query_param(herbaria_curators_path(id: @herbarium))
@@ -46,7 +45,7 @@
             <%# workaround for auto completer; creates id="add_curator" %>
             <%= text_field("", :add_curator, class: "form-control") %>
             <% turn_into_user_auto_completer(:add_curator) %>
-           <label for="add_curator">
+            <label for="add_curator">
               <%= f.submit(:show_herbarium_add_curator.t, class: "btn") %>
             </label>
           </div>

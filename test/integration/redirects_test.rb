@@ -350,6 +350,13 @@ class RedirectsTest < IntegrationTestCase
 
   # show_herbarium (post)         Herbaria::Curators#create (post)
   def test_show_herbarium_post
-    skip
+    nybg = herbaria(:nybg_herbarium)
+    assert(nybg.curators.include?(rolf))
+    curator_count = nybg.curators.count
+    login("rolf")
+    post("/herbarium/show_herbarium?id=#{nybg.id}&add_curator=#{mary.login}")
+
+    assert_equal(herbarium_path(nybg), @response.request.fullpath)
+    assert_equal(curator_count + 1, nybg.reload.curators.count)
   end
 end
