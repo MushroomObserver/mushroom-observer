@@ -692,6 +692,10 @@ MushroomObserver::Application.routes.draw do
     old_controller: "herbarium", new_controller: "herbaria",
     actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
   )
+
+  # Rails routes currently only accept template tokens
+  # rubocop:disable Style/FormatStringToken
+
   # The immediately following "match" and "get" combine to redirect
   # the legacy herbarium/delete_curator to the new herbaria/curators
   # The "match" redirects
@@ -702,7 +706,8 @@ MushroomObserver::Application.routes.draw do
   # Therefore we need the following "get" to prevent
   #   No route matches [GET] "/herbaria/curators/nnnnn"
   match("/herbarium/delete_curator/:id",
-        to: redirect(path: "/herbaria/curators/%{id}"), via: [:get, :post])
+        to: redirect(path: "/herbaria/curators/%{id}"),
+        via: [:get, :post])
   get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
 
   get("/herbarium/herbarium_search",
@@ -729,6 +734,7 @@ MushroomObserver::Application.routes.draw do
   post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
   get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
   get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
+  # rubocop:enable Style/FormatStringToken
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
