@@ -745,7 +745,7 @@ MushroomObserver::Application.routes.draw do
         controller: "ajax", action: action, id: /\S.*/)
   end
 
-  # Accept non-"#5E5E5E" ids for the /observer/lookup_xxx/id actions.
+  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   LOOKUP_XXX_ID_ACTIONS.each do |action|
     get("observer/#{action}/:id",
         controller: "observer", action: action, id: /.*/)
