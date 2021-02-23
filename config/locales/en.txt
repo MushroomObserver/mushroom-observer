@@ -2560,6 +2560,7 @@
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
+  donate_snail_mail: Donors who wish to donate by check instead of PayPal should make the check payable to "Mushroom Observer, Inc." and mail it to our registered corporate address:\nMushroom Observer, Inc. \n68 Bay Rd. \nNorth Falmouth, MA 02556-2404
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
