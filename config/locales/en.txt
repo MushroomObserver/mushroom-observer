@@ -2560,13 +2560,13 @@
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
-  donate_snail_mail: Donors who wish to donate by check instead of PayPal should make the check payable to "Mushroom Observer, Inc." and mail it to our registered corporate address:\nMushroom Observer, Inc. \n68 Bay Rd. \nNorth Falmouth, MA 02556-2404
+  donate_snail_mail: Donors who wish to donate by check should make the check payable to "Mushroom Observer, Inc." and mail it to our registered corporate address:\nMushroom Observer, Inc. \n68 Bay Rd. \nNorth Falmouth, MA 02556-2404
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
-  donate_explanation: "Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the \"Confirm\" button below\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
+  donate_explanation: "A donation can be made in any amount. There are two ways: via PayPal or by check. We encourage you to send a check for donations of $200 or more. \n\nPayPal donations can be made with most credit cards (no PayPal account needed) or via a PayPal account by clicking on the \"Confirm\" button below. \n\nFor donations by check see below. \n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors. If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
-  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
+  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are eligible to be deducted for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
   # support/confirm
   confirm_title: Donation Confirmation
