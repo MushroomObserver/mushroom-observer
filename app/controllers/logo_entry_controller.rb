@@ -1,0 +1,2 @@
+class LogoEntryController < ApplicationController
+end
