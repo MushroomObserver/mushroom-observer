@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_11_132400) do
+ActiveRecord::Schema.define(version: 2021_02_28_220153) do
 
   create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "created_at"
@@ -309,6 +309,12 @@ ActiveRecord::Schema.define(version: 2020_10_11_132400) do
     t.string "name", limit: 1024
     t.text "notes"
     t.string "scientific_name", limit: 1024
+  end
+
+  create_table "logo_entries", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "image_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "name_descriptions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
