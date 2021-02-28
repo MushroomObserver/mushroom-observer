@@ -93,7 +93,9 @@ module Report
         return @taxa if @taxa
 
         @taxa = Set.new
-        rows.each { |row| @taxa.add([row["name_id"], row["text_name"]]) }
+        rows.each do |row|
+          @taxa.add([row["name_id"], row["text_name"], row["classification"]])
+        end
         @taxa
       end
 
