@@ -8,7 +8,7 @@ class Query::LogoEntryBase < Query::Base
   def parameter_declarations
     super.merge(
       created_at?: [:time],
-      updated_at?: [:time],
+      updated_at?: [:time]
     )
   end
 

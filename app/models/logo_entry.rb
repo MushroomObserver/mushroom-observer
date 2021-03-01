@@ -8,6 +8,6 @@ class LogoEntry < AbstractModel
   end
 
   def copyright_holder
-    image&.copyright_holder || ''
+    image&.copyright_holder || ""
   end
 end

@@ -8,25 +8,12 @@ class LogoEntriesController < ApplicationController
   def create
     upload = params["logo_entry"]["image"]
     copyright_holder = params["logo_entry"]["copyright_holder"]
-    image = Image.new(image: upload,
-                      user: @user,
-                      when: Date.today,
-                      copyright_holder: copyright_holder,
-                      license: License.first)
-    if !image.save
-      flash_object_errors(image)
-    elsif !image.process_image
-      logger.error("Unable to upload image")
-      name = image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_profile_invalid_image.t(name: name))
-      flash_object_errors(image)
-    else
-      name = image.original_name
-      name = "##{image.id}" if name.empty?
-      flash_notice(:runtime_profile_uploaded_image.t(name: name))
-      @logo_entry = LogoEntry.create!(image: image)
-    end
+    image = build_image(upload,
+                        @user,
+                        Time.zone.today,
+                        copyright_holder,
+                        License.first)
+    @logo_entry = LogoEntry.create!(image: image) if image
     redirect_to(new_logo_entry_path)
   end
 
@@ -43,7 +30,7 @@ class LogoEntriesController < ApplicationController
     if (@logo_entry = find_or_goto_index(LogoEntry, params[:id]))
       @canonical_url = logo_entry_url(@logo_entry.id)
     else
-      return false
+      false
     end
   end
 end
