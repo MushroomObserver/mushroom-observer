@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module LogoEntryHelper
+module LogoEntriesHelper
   def build_image(param_image, user, date, copyright_holder, license)
     image = Image.new(image: param_image,
                       user: user,
