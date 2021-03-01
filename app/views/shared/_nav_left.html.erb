@@ -9,6 +9,8 @@
               { class: "list-group-item" }) %>
   <%= link_to(:app_privacy_policy.t, policy_privacy_path,
               { class: "list-group-item" }) %>
+  <%= link_to(:app_donate.t, support_donate_path,
+              { class: "list-group-item indent" }) %>
 
   <% if in_admin_mode? %>
     <div class="list-group-item disabled bold"><%= :app_admin.t %>: </div>
@@ -124,8 +126,6 @@
     <%= :app_more.t %>
   </div>
   <%= link_to(:app_how_to_help.t, observer_how_to_help_path,
-              { class: "list-group-item indent" }) %>
-  <%= link_to(:app_donate.t, support_donate_path,
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_feature_tracker.t, pivotal_index_path,
               { class: "list-group-item indent" }) %>
