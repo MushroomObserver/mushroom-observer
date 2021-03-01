@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class LogoEntry < AbstractModel
+class ContestEntry < AbstractModel
   belongs_to :image
 
   def title
-    "#{:LOGO_ENTRY.t}: #{copyright_holder}"
+    "#{:CONTEST_ENTRY.t}: #{copyright_holder}"
   end
 
   def copyright_holder

@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
-class LogoEntriesController < ApplicationController
+class ContestEntriesController < ApplicationController
   def new
-    @logo_entry = LogoEntry.new
+    @contest_entry = ContestEntry.new
   end
 
   def create
-    upload = params["logo_entry"]["image"]
-    copyright_holder = params["logo_entry"]["copyright_holder"]
+    upload = params["contest_entry"]["image"]
+    copyright_holder = params["contest_entry"]["copyright_holder"]
     image = build_image(upload,
                         @user,
                         Time.zone.today,
                         copyright_holder,
                         License.first)
-    @logo_entry = LogoEntry.create!(image: image) if image
-    redirect_to(new_logo_entry_path)
+    @contest_entry = ContestEntry.create!(image: image) if image
+    redirect_to(new_contest_entry_path)
   end
 
   def index
     query = create_query(
-      :LogoEntry,
+      :ContestEntry,
       :all,
       by: :created_at
     )
@@ -27,8 +27,8 @@ class LogoEntriesController < ApplicationController
   end
 
   def show
-    if (@logo_entry = find_or_goto_index(LogoEntry, params[:id]))
-      @canonical_url = logo_entry_url(@logo_entry.id)
+    if (@contest_entry = find_or_goto_index(ContestEntry, params[:id]))
+      @canonical_url = contest_entry_url(@contest_entry.id)
     else
       false
     end

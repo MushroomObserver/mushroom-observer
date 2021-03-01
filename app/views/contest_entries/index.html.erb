@@ -1,8 +1,9 @@
 <%
-  @title ||= :LOGO_ENTRIES.t
+  @title ||= :CONTEST_ENTRIES.t
   tabs = index_tabs_for_user(@user) + create_links(@links)
   @tabsets = {
-    right: draw_tab_set([link_to(:create_logo_entry_title.t, new_logo_entry_path)])
+    right: draw_tab_set([link_to(:create_contest_entry_title.t,
+                                 new_contest_entry_path)])
   }
 
   flash_error(@error) if @error && @objects.empty?

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class LogoEntryTest < ActiveSupport::TestCase
+class ContestEntryControllerTest < ActionDispatch::IntegrationTest
   # test "the truth" do
   #   assert true
   # end

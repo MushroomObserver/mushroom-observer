@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class Query::LogoEntryBase < Query::Base
+class Query::ContestEntryBase < Query::Base
   def model
-    LogoEntry
+    ContestEntry
   end
 
   def parameter_declarations
