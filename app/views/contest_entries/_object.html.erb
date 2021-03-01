@@ -1,9 +1,17 @@
 <div class="list-group-item">
-  <%= content_tag(
-        :big,
-        link_to(object.title.t, contest_entry_path(object, q: get_query_param))
-      ) %>
+  <table style="width: 100%">
+    <tr>
+      <td>
+	<%= link_to(object.title.t, contest_entry_path(object, q: get_query_param)) %><br/>
+        <%= content_tag(:small, object.created_at.web_time) %>:
+      </td>
+      <td>
+	<%= content_tag(
+            :big,
+	    thumbnail(object.image_id, {votes: false})) %>
+      </td>
+    </tr>
+  </table>
   <br>
-  <%= content_tag(:small, object.created_at.web_time) %>:
   <br>
 </div>
