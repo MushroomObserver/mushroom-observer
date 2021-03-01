@@ -6,7 +6,7 @@
   <%= :confirm_text.tp %>
 
   <p>
-    <%= :confirm_amount.t %>: <%= @donation.amount.to_s %><br/>
+    <%= :confirm_amount.t %>: $<%= sprintf("%0.2f", @donation.amount || 0) %><br/>
     <%= :confirm_recurring.t %>: <%= @donation.recurring ? :YEP.t : :NOPE.t %><br/>
     <% if @donation.anonymous %>
       <%= :donate_anonymous.t %><br/>
@@ -15,7 +15,7 @@
       <%= :donate_email.t %>: <%= @donation.email %><br/>
     <% end %>
   </p>
-   
+
   <div class="text-center">
     <form id="donate_form" name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
       <input type="hidden" name="business" value="<%= MO.donation_business %>">
@@ -38,4 +38,3 @@
     </form>
   </div>
 </div>
-
