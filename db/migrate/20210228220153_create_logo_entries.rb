@@ -5,7 +5,6 @@ class CreateLogoEntries < ActiveRecord::Migration[5.2]
     create_table(:logo_entries,
                  options: "ENGINE=InnoDB DEFAULT CHARSET=utf8") do |t|
       t.integer(:image_id)
-      t.string(:copyright_holder)
       t.timestamps
     end
   end

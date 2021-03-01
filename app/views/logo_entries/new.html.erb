@@ -1,4 +1,9 @@
-Hello!
+<%
+  @tabsets = {
+    right: draw_tab_set([link_to(:index_logo_entry.t, logo_entries_path)])
+  }
+%>
+
 <div class="max-width-text">
   <%= form_for(:logo_entry, url: {action: :create}, html: {multipart: true}) do |form| %>
     <%= form.label(:copyright_holder, :COPYRIGHT_HOLDER.t + ":") %>

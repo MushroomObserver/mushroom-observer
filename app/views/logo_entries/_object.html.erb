@@ -1,0 +1,9 @@
+<div class="list-group-item">
+  <%= content_tag(
+        :big,
+        link_to(object.title.t, logo_entry_path(object, q: get_query_param))
+      ) %>
+  <br>
+  <%= content_tag(:small, object.created_at.web_time) %>:
+  <br>
+</div>

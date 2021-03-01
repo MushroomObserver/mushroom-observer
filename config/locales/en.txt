@@ -293,6 +293,10 @@
   log: log
   LOGS: Logs
   logs: logs
+  LOGO_ENTRY: Logo Entry
+  logo_entry: logo entry
+  LOGO_ENTRIES: Logo Entries
+  logo_entries: logo entries
   MAP: Map
   map: map
   MAPS: Maps
@@ -2404,6 +2408,10 @@
   # article/index_article
   index_article: "[:ARTICLE] Index"
 
+  # logo_entry fields
+  create_logo_entry_title: "[:create_object(type=:logo_entry)]"
+  index_logo_entry: "[:LOGO_ENTRY] Index"
+  
   # publication fields
   publication_full: Full Reference
   publication_link: Link

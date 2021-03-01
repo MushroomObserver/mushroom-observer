@@ -1,0 +1,9 @@
+<%
+  @title = @logo_entry.title
+  @tabsets = {
+    right: draw_tab_set([link_to(:index_logo_entry.t, logo_entries_path)])
+  }
+%>
+<div>
+  <%= thumbnail(@logo_entry.image_id, {votes: false}) if @logo_entry.image_id %>
+</div>
