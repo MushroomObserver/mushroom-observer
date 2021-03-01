@@ -6,6 +6,7 @@
   <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
   <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
   <%= link_to(:app_privacy_policy.t, {controller: :policy, action: :privacy}, {class: "list-group-item"}) %>
+  <%= link_to(:app_donate.t, {controller: :support, action: :donate}, {class: "list-group-item"}) %>
 
   <% if in_admin_mode? %>
     <div class="list-group-item disabled bold">
@@ -81,7 +82,6 @@
     <%= :app_more.t %>
   </div>
   <%= link_to(:app_how_to_help.t, {controller: :observer, action: :how_to_help}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_donate.t, {controller: :support, action: :donate}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_feature_tracker.t, {controller: :pivotal, action: :index}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_send_a_comment.t, {controller: :observer, action: :ask_webmaster_question}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_contributors.t, {controller: :observer, action: :users_by_contribution}, {class: "list-group-item indent"}) %>
