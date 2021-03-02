@@ -1,0 +1,35 @@
+<%
+  @title ||= :contest_ballot_title.t
+%>
+
+<div class="list-group-item">
+  <div>
+    <%= :contest_ballot_intro.t %><br/><br/>
+  </div>
+
+  <%= form_for(:contest_entry, url: {action: :create}) do |form| %>
+    <table>
+      <% vote_options = (1..@votes.count).to_a %>
+      <% @votes.each do |vote| %>
+        <tr>
+          <td>
+            <%= form.select("vote_#{vote.id}", vote_options,
+		{ selected: vote.vote }, { onchange: 'this.form.submit()' }) %>
+          </td>
+          <td>
+            <%= content_tag(:big, thumbnail(vote.contest_entry.image_id, {votes: false})) %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+    <div>
+      <%= :contest_ballot_check_text.t %>
+      <%= form.check_box(:confirmed,
+                         { checked: @votes.first.confirmed,
+                           onclick: 'this.form.submit()' }) %>
+    </div>
+    <div class="hidden">
+      <%= submit_tag "Submit" %>
+    </div>
+  <% end %>
+</div>

@@ -2411,7 +2411,10 @@
   # contest_entry fields
   create_contest_entry_title: "[:create_object(type=:contest_entry)]"
   index_contest_entry: "[:CONTEST_ENTRY] Index"
-  
+  contest_ballot_intro: This is your ballot for the Mushroom Observer Logo Contest.  Put the logos in your order of preference using the drop down menus.  The initial order is random.  When you are ready for your ballot to count, check the box at the bottom of the ballot.  You may revise your votes at any time until voting closes.
+  contest_ballot_check_text: If this box is checked then the above votes will be counted
+  contest_ballot_title: Mushroom Observer Logo Contest Ballot
+
   # publication fields
   publication_full: Full Reference
   publication_link: Link
