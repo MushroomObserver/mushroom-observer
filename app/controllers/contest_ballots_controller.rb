@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ContestBallotsController < ApplicationController
+  before_action :login_required
+
   def index
     @votes = find_or_create_votes
   end

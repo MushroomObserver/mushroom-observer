@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ContestEntriesController < ApplicationController
+  before_action :admin_required
+
   def new
     @contest_entry = ContestEntry.new
   end
@@ -35,6 +37,14 @@ class ContestEntriesController < ApplicationController
   end
 
   private
+
+  def admin_required
+    return true if in_admin_mode?
+
+    flash_error(:admins_only)
+    redirect_to(controller: "observer", action: "list_rss_logs")
+    false
+  end
 
   def build_image(param_image, user, date, copyright_holder, license)
     image = Image.new(image: param_image,
