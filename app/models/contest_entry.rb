@@ -2,6 +2,7 @@
 
 class ContestEntry < AbstractModel
   belongs_to :image
+  belongs_to :alternate_image, class_name: "Image"
 
   def title
     "#{:CONTEST_ENTRY.t}: #{copyright_holder}"

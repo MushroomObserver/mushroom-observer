@@ -10,15 +10,21 @@
   <%= form_for(:contest_entry, url: {action: :create}) do |form| %>
     <table>
       <% vote_options = (1..@votes.count).to_a %>
-      <% @votes.each do |vote| %>
+      <% @votes.each do |vote|
+	   entry = vote.contest_entry %>
         <tr>
           <td>
             <%= form.select("vote_#{vote.id}", vote_options,
 		{ selected: vote.vote }, { onchange: 'this.form.submit()' }) %>
           </td>
           <td>
-            <%= content_tag(:big, thumbnail(vote.contest_entry.image_id, {votes: false})) %>
+            <%= content_tag(:big, thumbnail(entry.image_id, {votes: false})) %>
           </td>
+	  <% if entry.alternate_image_id %>
+            <td>
+              <%= content_tag(:big, thumbnail(entry.alternate_image_id, {votes: false})) %>
+            </td>
+	  <% end %>
         </tr>
       <% end %>
     </table>

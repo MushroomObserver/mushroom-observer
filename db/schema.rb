@@ -56,6 +56,7 @@ ActiveRecord::Schema.define(version: 2021_03_01_122443) do
 
   create_table "contest_entries", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "image_id"
+    t.integer "alternate_image_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

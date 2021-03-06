@@ -2,13 +2,18 @@
   <table style="width: 100%">
     <tr>
       <td>
-	<%= link_to(object.title.t, contest_entry_path(object, q: get_query_param)) %><br/>
+        <%= link_to(object.title.t, contest_entry_path(object, q: get_query_param)) %><br/>
         <%= content_tag(:small, object.created_at.web_time) %>:
       </td>
       <td>
-	<%= content_tag(
-            :big,
-	    thumbnail(object.image_id, {votes: false})) %>
+        <%= content_tag(:big,
+                        thumbnail(object.image_id, {votes: false})) %>
+      </td>
+      <td>
+        <% if object.alternate_image.present? %>
+          <%= content_tag(:big,
+                          thumbnail(object.alternate_image_id, {votes: false})) %>
+        <% end %>
       </td>
     </tr>
   </table>

@@ -8,14 +8,17 @@ class ContestEntriesController < ApplicationController
   end
 
   def create
-    upload = params["contest_entry"]["image"]
     copyright_holder = params["contest_entry"]["copyright_holder"]
-    image = build_image(upload,
+    image = build_image(params["contest_entry"]["image"],
                         @user,
-                        Time.zone.today,
-                        copyright_holder,
-                        License.first)
-    @contest_entry = ContestEntry.create!(image: image) if image
+                        copyright_holder)
+    alternate_image = build_image(params["contest_entry"]["alternate_image"],
+                                  @user,
+                                  copyright_holder)
+    if image
+      @contest_entry = ContestEntry.create!(image: image,
+                                            alternate_image: alternate_image)
+    end
     redirect_to(new_contest_entry_path)
   end
 
@@ -46,7 +49,11 @@ class ContestEntriesController < ApplicationController
     false
   end
 
-  def build_image(param_image, user, date, copyright_holder, license)
+  def build_image(param_image, user, copyright_holder)
+    return nil unless param_image
+
+    date = Time.zone.today
+    license = License.first
     image = Image.new(image: param_image,
                       user: user,
                       when: date,

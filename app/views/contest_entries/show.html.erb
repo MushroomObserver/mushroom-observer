@@ -8,4 +8,7 @@
   <% if @contest_entry.image_id %>
     <%= thumbnail(@contest_entry.image_id, {votes: false}) %>
   <% end %>
+  <% if @contest_entry.alternate_image_id %>
+    <%= thumbnail(@contest_entry.alternate_image_id, {votes: false}) %>
+  <% end %>
 </div>
