@@ -44,7 +44,7 @@ class ContestEntriesController < ApplicationController
   def admin_required
     return true if in_admin_mode?
 
-    flash_error(:admins_only)
+    flash_error(:admins_only.t)
     redirect_to(controller: "observer", action: "list_rss_logs")
     false
   end
