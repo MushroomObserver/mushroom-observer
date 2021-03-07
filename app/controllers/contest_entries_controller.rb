@@ -52,21 +52,15 @@ class ContestEntriesController < ApplicationController
   def build_image(param_image, user, copyright_holder)
     return nil unless param_image
 
-    date = Time.zone.today
-    license = License.first
     image = Image.new(image: param_image,
                       user: user,
-                      when: date,
+                      when: Time.zone.today,
                       copyright_holder: copyright_holder,
-                      license: license)
+                      license: License.first)
     if !image.save
       flash_object_errors(image)
     elsif !image.process_image
-      logger.error("Unable to upload image")
-      name = image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_profile_invalid_image.t(name: name))
-      flash_object_errors(image)
+      unable_to_upload(image)
     else
       name = image.original_name
       name = "##{image.id}" if name.empty?
@@ -74,5 +68,13 @@ class ContestEntriesController < ApplicationController
       return image
     end
     nil
+  end
+
+  def unable_to_upload(image)
+    logger.error("Unable to upload image")
+    name = image.original_name
+    name = "???" if name.empty?
+    flash_error(:runtime_profile_invalid_image.t(name: name))
+    flash_object_errors(image)
   end
 end
