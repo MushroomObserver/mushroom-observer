@@ -38,4 +38,61 @@ class ContestEntriesControllerTest < FunctionalTestCase
     get(:new)
     assert_form_action(action: :create)
   end
+
+  def test_create
+    setup_image_dirs
+    login(:rolf)
+    make_admin
+    before = ContestEntry.count
+    file = Rack::Test::UploadedFile.new(
+      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+    )
+    params = {
+      contest_entry: {
+        copyright_holder: rolf.name,
+        image: file
+      }
+    }
+    post(:create, params)
+    assert_equal(ContestEntry.count, before + 1)
+  end
+
+  def test_create_save_fails
+    Image.any_instance.stubs(:save).returns(false)
+    setup_image_dirs
+    login(:rolf)
+    make_admin
+    before = ContestEntry.count
+    file = Rack::Test::UploadedFile.new(
+      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+    )
+    params = {
+      contest_entry: {
+        copyright_holder: rolf.name,
+        image: file
+      }
+    }
+    post(:create, params)
+    assert_equal(ContestEntry.count, before)
+  end
+
+  def test_create_process_image_fails
+    Image.any_instance.stubs(:process_image).returns(false)
+    setup_image_dirs
+    login(:rolf)
+    make_admin
+    before = ContestEntry.count
+    file = Rack::Test::UploadedFile.new(
+      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+    )
+    params = {
+      contest_entry: {
+        copyright_holder: rolf.name,
+        image: file
+      }
+    }
+    post(:create, params)
+    assert_equal(ContestEntry.count, before)
+    assert_flash_error
+  end
 end

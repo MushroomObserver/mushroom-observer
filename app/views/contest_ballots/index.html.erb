@@ -7,7 +7,7 @@
     <%= :contest_ballot_intro.t %><br/><br/>
   </div>
 
-  <%= form_for(:contest_entry, url: {action: :create}) do |form| %>
+  <%= form_for(:contest_ballot, url: {action: :create}) do |form| %>
     <div class="hidden">
       <%= submit_tag "Submit" %>
     </div>

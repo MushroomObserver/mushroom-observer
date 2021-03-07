@@ -11,8 +11,4 @@ class Query::ContestEntryBase < Query::Base
       updated_at?: [:time]
     )
   end
-
-  def default_order
-    "created_at"
-  end
 end

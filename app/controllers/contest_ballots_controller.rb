@@ -4,17 +4,17 @@ class ContestBallotsController < ApplicationController
   before_action :login_required
 
   def index
-    @votes = find_or_create_votes
+    @votes = ContestVote.find_or_create_votes(@user)
   end
 
   def create
     count = ContestVote.where(user: @user).count
-    params["contest_entry"].each do |key, value|
+    params["contest_ballot"].each do |key, value|
       if key.starts_with?("vote_")
         break if process_vote(Integer(key.split("_")[-1], 10), value, count)
       end
     end
-    confirm_votes(params["contest_entry"]["confirmed"] == "1")
+    confirm_votes(params["contest_ballot"]["confirmed"] == "1")
     redirect_to(contest_ballots_path)
   end
 
@@ -56,19 +56,5 @@ class ContestBallotsController < ApplicationController
       where("vote >= ? and vote <= ?", low, high).each do |v|
       v.update(vote: v.vote + delta)
     end
-  end
-
-  def find_or_create_votes
-    if ContestVote.where(user: @user).count.zero?
-      count = 1
-      ContestEntry.all.shuffle.each do |entry|
-        ContestVote.create!(contest_entry: entry,
-                            user: @user,
-                            vote: count,
-                            confirmed: false)
-        count += 1
-      end
-    end
-    ContestVote.where(user: @user).order(:vote)
   end
 end
