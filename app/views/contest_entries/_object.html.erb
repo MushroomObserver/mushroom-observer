@@ -6,8 +6,10 @@
         <%= content_tag(:small, object.created_at.web_time) %>:
       </td>
       <td>
-        <%= content_tag(:big,
-                        thumbnail(object.image_id, {votes: false})) %>
+	<% if object.image.present? %>
+          <%= content_tag(:big,
+                          thumbnail(object.image_id, {votes: false})) %>
+        <% end %>
       </td>
       <td>
         <% if object.alternate_image.present? %>

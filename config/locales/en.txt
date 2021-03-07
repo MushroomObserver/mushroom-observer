@@ -295,8 +295,8 @@
   logs: logs
   CONTEST_ENTRY: Contest Entry
   contest_entry: contest entry
-  CONTEST_ENTRIES: Contest Entries
-  contest_entries: contest entries
+  CONTEST_ENTRYS: Contest Entries
+  contest_entrys: contest entries
   MAP: Map
   map: map
   MAPS: Maps
