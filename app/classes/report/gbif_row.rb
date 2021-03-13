@@ -57,7 +57,7 @@ module Report
     end
 
     def url
-      "#{MO.http_domain}/#{observation_id}"
+      "https://mushroomobserver.org/#{observation_id}"
     end
 
     def observation_id
