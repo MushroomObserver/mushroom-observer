@@ -10,7 +10,8 @@ module PatternSearch
         when /^\d{4}$/
           yyyymmdd([a, 1, 1], [a, 12, 31])
         when /^\d{4}-\d\d?$/
-          yyyymmdd([a, b, 1], [a, b, end_of_month(a, b)])
+          # yyyymmdd([a, b, 1], [a, b, end_of_month(a, b)])
+          yyyymmdd([a, b, 1], [a, b, 31])
         when /^\d{4}-\d\d?-\d\d?$/
           yyyymmdd([a, b, c], [a, b, c])
         when /^\d{4}-\d{4}$/
@@ -35,7 +36,8 @@ module PatternSearch
       def yyyymmdd(from, to)
         [format("%04d-%02d-%02d", from.first, from.second.to_i,
                 from.third.to_i),
-         format("%04d-%02d-%02d", to.first, to.second.to_i, to.third.to_i)]
+         format("%04d-%02d-%02d", to.first, to.second.to_i,
+                [to.third.to_i, end_of_month(to.first, to.second).to_i].min)]
       end
 
       def mmdd(from, to)
