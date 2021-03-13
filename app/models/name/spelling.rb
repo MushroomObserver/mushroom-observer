@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
   # Is this Name misspelled?
   def is_misspelling?
-    correct_spelling_id.present?
+    !correctly_spelt?
+  end
+
+  def correctly_spelt?
+    correct_spelling_id.blank?
   end
 
   # Do some simple queries to try to find alternate spellings of the given
@@ -70,7 +76,7 @@ class Name < AbstractModel
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
         conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-                      synonym.text_name + " " + child_pat]
+                      "#{synonym.text_name} #{child_pat}"]
         result += Name.where(conditions).select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)

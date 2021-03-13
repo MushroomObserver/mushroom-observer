@@ -11,7 +11,7 @@
 
   if description.writer_groups.include?(UserGroup.all_users)
     write = :public.t
-  elsif in_admin_mode? || description.is_writer?(@user)
+  elsif in_admin_mode? || description.writer?(@user)
     write = :restricted.t
   else
     write = :private.t

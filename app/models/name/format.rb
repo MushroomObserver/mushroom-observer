@@ -23,6 +23,10 @@ class Name < AbstractModel
     display_name + " (#{id || "?"})"
   end
 
+  def unique_search_name
+    "#{search_name} (#{id || "?"})"
+  end
+
   # (This gives us the ability to format names slightly differently when
   # applied to observations.  For example, we might tack on "sp." to some
   # higher-ranked taxa here.)

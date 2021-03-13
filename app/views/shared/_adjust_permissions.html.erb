@@ -66,8 +66,8 @@
                       words << g.name
                     end
                   end
-                  words << :author.t if description.is_author?(user)
-                  words << :editor.t if description.is_editor?(user)
+                  words << :author.t if description.author?(user)
+                  words << :editor.t if description.editor?(user)
                   words << :owner.t if description.user == user
                   words << :adjust_permissions_site_admin.t if user.admin
                   words << :reviewer.t if user.in_group?("reviewers")

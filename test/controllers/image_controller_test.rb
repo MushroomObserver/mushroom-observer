@@ -269,6 +269,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images")
   end
 
+  def test_advanced_search_invalid_q_param
+    get(:advanced_search, params: { q: "xxxxx" })
+
+    assert_flash_text(:advanced_search_bad_q_error.l)
+    assert_redirected_to(observer_advanced_search_form_path)
+  end
+
   def test_add_image
     requires_login(:add_image, id: observations(:coprinus_comatus_obs).id)
     assert_form_action(action: "add_image",
