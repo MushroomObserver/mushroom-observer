@@ -133,7 +133,6 @@ module Report
           format
           accessURL
           furtherInformationURL
-          taxonID
           created
           creator
           license
@@ -161,7 +160,6 @@ module Report
          "image/jpeg",
          image_url(row["id"]),
          show_image_url(row["id"]),
-         row["name_id"].to_s,
          row["when"].to_s,
          row["name"].to_s == "" ? row["login"] : row["name"],
          row["license_url"],
