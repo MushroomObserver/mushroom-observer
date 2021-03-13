@@ -2,6 +2,7 @@
 
 module PatternSearch
   class Term
+    # parse the date variable in pattern searches
     module Dates
       def parse_date_range
         val = parse_date_words
@@ -10,14 +11,13 @@ module PatternSearch
         when /^\d{4}$/
           yyyymmdd([a, 1, 1], [a, 12, 31])
         when /^\d{4}-\d\d?$/
-          # yyyymmdd([a, b, 1], [a, b, end_of_month(a, b)])
           yyyymmdd([a, b, 1], [a, b, 31])
         when /^\d{4}-\d\d?-\d\d?$/
           yyyymmdd([a, b, c], [a, b, c])
         when /^\d{4}-\d{4}$/
           yyyymmdd([a, 1, 1], [b, 12, 31])
         when /^\d{4}-\d\d?-\d{4}-\d\d?$/
-          yyyymmdd([a, b, 1], [c, d, end_of_month(c, d)])
+          yyyymmdd([a, b, 1], [c, d, 31])
         when /^\d{4}-\d\d?-\d\d?-\d{4}-\d\d?-\d\d?$/
           yyyymmdd([a, b, c], [d, e, f])
         when /^\d\d?$/
@@ -31,21 +31,27 @@ module PatternSearch
         end
       end
 
+      ##########################################################################
+
       private
 
       def yyyymmdd(from, to)
-        [format("%04d-%02d-%02d", from.first, from.second.to_i,
-                from.third.to_i),
-         format("%04d-%02d-%02d", to.first, to.second.to_i,
-                [to.third.to_i, end_of_month(to.first, to.second).to_i].min)]
+        [format("%04<year>d-%02<month>d-%02<day>d",
+                year: from.first, month: from.second.to_i,
+                day: from.third.to_i),
+         format("%04<year>d-%02<month>d-%02<day>d",
+                year: to.first, month: to.second.to_i,
+                day: [to.third.to_i, eom(to.first, to.second).to_i].min)]
       end
 
       def mmdd(from, to)
-        [format("%02d-%02d", from.first.to_i, from.second.to_i),
-         format("%02d-%02d", to.first.to_i, to.second.to_i)]
+        [format("%02<year>d-%02<month>d",
+                year: from.first.to_i, month: from.second.to_i),
+         format("%02<year>d-%02<month>d",
+                year: to.first.to_i, month: to.second.to_i)]
       end
 
-      def end_of_month(year, month)
+      def eom(year, month)
         Date.new(year.to_i, month.to_i).end_of_month.strftime("%d")
       end
 
