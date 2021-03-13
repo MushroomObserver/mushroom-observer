@@ -10,14 +10,12 @@ module PatternSearch
         when /^\d{4}$/
           yyyymmdd([a, 1, 1], [a, 12, 31])
         when /^\d{4}-\d\d?$/
-          # yyyymmdd([a, b, 1], [a, b, 31])
           yyyymmdd([a, b, 1], [a, b, end_of_month(a, b)])
         when /^\d{4}-\d\d?-\d\d?$/
           yyyymmdd([a, b, c], [a, b, c])
         when /^\d{4}-\d{4}$/
           yyyymmdd([a, 1, 1], [b, 12, 31])
         when /^\d{4}-\d\d?-\d{4}-\d\d?$/
-          # yyyymmdd([a, b, 1], [c, d, 31])
           yyyymmdd([a, b, 1], [c, d, end_of_month(c, d)])
         when /^\d{4}-\d\d?-\d\d?-\d{4}-\d\d?-\d\d?$/
           yyyymmdd([a, b, c], [d, e, f])
