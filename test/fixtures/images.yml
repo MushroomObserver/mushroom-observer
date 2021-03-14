@@ -128,3 +128,9 @@ locally_sequenced_obs_image:
 
 unused_image: # not associated with any object
   <<: *DEFAULTS
+
+contest_entry_image:
+  <<: *DEFAULTS
+
+contest_entry_alt_image:
+  <<: *DEFAULTS
