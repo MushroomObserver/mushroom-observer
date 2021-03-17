@@ -293,6 +293,10 @@
   log: log
   LOGS: Logs
   logs: logs
+  CONTEST_ENTRY: Contest Entry
+  contest_entry: contest entry
+  CONTEST_ENTRYS: Contest Entries
+  contest_entrys: contest entries
   MAP: Map
   map: map
   MAPS: Maps
@@ -3193,6 +3197,17 @@
   review_anon: Anon
   review_amount: Amount
   review_email: Email
+
+  # contest_entry pages
+  create_contest_entry_title: "[:create_object(type=:contest_entry)]"
+  index_contest_entry: "[:CONTEST_ENTRY] Index"
+  admins_only: Only admins can access that page
+
+  # contest_ballot pages
+  contest_ballot_intro: This is your ballot for the Mushroom Observer Logo Contest.  Put the logos in your order of preference using the drop down menus.  The initial order is random.  When you are ready for your ballot to count, make sure you've checked the box at the top of the ballot.  You may revise your votes at any time until voting closes.
+  contest_ballot_check_text: If this box is checked then the votes on this page will be counted when voting closes.
+  contest_ballot_title: Mushroom Observer Logo Contest Ballot
+
 
   ##############################################################################
 

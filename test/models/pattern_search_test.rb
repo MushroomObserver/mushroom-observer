@@ -301,8 +301,12 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::TooManyValuesError) { x.parse_date_range }
     x.vals = ["2010"]
     assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
+    # Thirty days hath September ....
+    # Otherwise, mySQL says Mysql2::Error: Incorrect DATE value: '2020-09-31'
     x.vals = ["2010-9"]
-    assert_equal(%w[2010-09-01 2010-09-31], x.parse_date_range)
+    assert_equal(%w[2010-09-01 2010-09-30], x.parse_date_range)
+    x.vals = ["2010-10"]
+    assert_equal(%w[2010-10-01 2010-10-31], x.parse_date_range)
     x.vals = ["2010-9-5"]
     assert_equal(%w[2010-09-05 2010-09-05], x.parse_date_range)
     x.vals = ["2010-09-05"]
@@ -311,6 +315,8 @@ class PatternSearchTest < UnitTestCase
     assert_equal(%w[2010-01-01 2012-12-31], x.parse_date_range)
     x.vals = ["2010-3-2010-5"]
     assert_equal(%w[2010-03-01 2010-05-31], x.parse_date_range)
+    x.vals = ["2010-3-2010-6"]
+    assert_equal(%w[2010-03-01 2010-06-30], x.parse_date_range)
     x.vals = ["2010-3-12-2010-5-1"]
     assert_equal(%w[2010-03-12 2010-05-01], x.parse_date_range)
     x.vals = ["6"]

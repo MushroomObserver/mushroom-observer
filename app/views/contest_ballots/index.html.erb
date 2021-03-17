@@ -1,0 +1,47 @@
+<%
+  @title ||= :contest_ballot_title.t
+%>
+
+<div class="list-group-item">
+  <div>
+    <%= :contest_ballot_intro.t %><br/><br/>
+  </div>
+
+  <%= form_for(:contest_ballot, url: {action: :create}) do |form| %>
+    <div class="hidden">
+      <%= submit_tag "Submit" %>
+    </div>
+    <div><h3>
+      <%= form.check_box(:confirmed,
+                         { checked: @votes.first.confirmed,
+                           onclick: 'this.form.submit()' }) %>
+      <%= :contest_ballot_check_text.t %>
+    </h3></div>
+    <table style="width:100%">
+      <tr>
+        <th style="text-align: center"><h3>Your Votes</h3></th>
+        <th style="text-align: center"><h3>Logo</h3></th>
+        <th style="text-align: center"><h3>Variations</h3></th>
+      </tr>
+      <% vote_options = (1..@votes.count).to_a %>
+      <% @votes.each do |vote|
+           entry = vote.contest_entry %>
+        <tr><td colspan="3" style="height:5px;background-color:gray"></td></tr>
+        <tr>
+          <td style="text-align: center"><h1>
+            <%= form.select("vote_#{vote.id}", vote_options,
+                { selected: vote.vote }, { onchange: 'this.form.submit()' }) %>
+          </h1></td>
+          <td style="padding-top:40px;padding-bottom:20px">
+            <%= content_tag(:big, thumbnail(entry.image_id, {votes: false})) %>
+          </td>
+          <td style="padding-top:40px;padding-bottom:20px">
+            <% if entry.alternate_image_id %>
+              <%= content_tag(:big, thumbnail(entry.alternate_image_id, {votes: false})) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>

@@ -1,0 +1,14 @@
+<%
+  @title = @contest_entry.title
+  @tabsets = {
+    right: draw_tab_set([link_to(:index_contest_entry.t, contest_entries_path)])
+  }
+%>
+<div>
+  <% if @contest_entry.image_id %>
+    <%= thumbnail(@contest_entry.image_id, {votes: false}) %>
+  <% end %>
+  <% if @contest_entry.alternate_image_id %>
+    <%= thumbnail(@contest_entry.alternate_image_id, {votes: false}) %>
+  <% end %>
+</div>
