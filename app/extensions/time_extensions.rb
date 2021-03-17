@@ -90,13 +90,10 @@ class ActiveSupport::TimeWithZone
   private
 
   def diff_corrected_for_dst_change(ref)
-    if dst? && !ref.dst?
-      ref - self - 1.hour
-    elsif !dst? && ref.dst?
-      ref - self + 1.hour
-    else
-      ref - self
-    end
+    return ref - self - 1.hour if dst? && !ref.dst?
+    return ref - self + 1.hour if !dst? && ref.dst?
+
+    ref - self
   end
 end
 
