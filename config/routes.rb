@@ -143,30 +143,20 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbaria: {
-    # create_herbarium: {}, # aliased only
-    # delete_curator: {},
-    # destroy_herbarium: {}, # aliased only
-    # edit_herbarium: {}, # aliased only
-    # search: {},
-    # index_herbaria: {},
-    # index_nonpersonal_herbaria: {},
-    # list_herbaria: {}, # aliased only
-    # merge: {},
-    # next_herbarium: {}, # aliased only
-    # prev_herbarium: {}, # aliased only
-    # request_to_be_curator: {},
-    # show_herbarium: {}, # aliased only
-    # next: {},
-    # prev: {}
-    # resources
-    # create: {},
-    # destroy: {},
-    # edit: {},
-    # index: {},
-    # new: {},
-    # show: {},
-    # update: {}
+  herbarium: {
+    create_herbarium: {},
+    delete_curator: {},
+    destroy_herbarium: {},
+    edit_herbarium: {},
+    herbarium_search: {},
+    index: {},
+    index_herbarium: {},
+    list_herbaria: {},
+    merge_herbaria: {},
+    next_herbarium: {},
+    prev_herbarium: {},
+    request_to_be_curator: {},
+    show_herbarium: {}
   },
   herbarium_record: {
     create_herbarium_record: {},
@@ -678,66 +668,12 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  namespace :herbaria do
-    resources :alls, only: [:index]
-    resources :curator_requests, only: [:new, :create]
-    resources :curators, only: [:create, :destroy], id: /\d+/
-    resources :merges, only: [:new]
-    resources :nexts, only: [:show], id: /\d+/
-    resources :nonpersonals, only: [:index]
-    resources :searches, only: [:index]
-  end
-  resources :herbaria, id: /\d+/
-  redirect_legacy_actions(
-    old_controller: "herbarium", new_controller: "herbaria",
-    actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
-  )
-
-  # Rails routes currently only accept template tokens
-  # rubocop:disable Style/FormatStringToken
-
-  # The immediately following "match" and "get" combine to redirect
-  # the legacy herbarium/delete_curator to the new herbaria/curators
-  # The "match" redirects
-  #   GET("/herbarium/delete_curator/nnn?user=uuu") and
-  #   POST("/herbarium/delete_curator/nnn?user=uuu")
-  # to
-  #   GET("/herbaria/curators/nnn?user=uuu")
-  # Therefore we need the following "get" to prevent
-  #   No route matches [GET] "/herbaria/curators/nnnnn"
-  match("/herbarium/delete_curator/:id",
-        to: redirect(path: "/herbaria/curators/%{id}"),
-        via: [:get, :post])
-  get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
-
-  get("/herbarium/herbarium_search",
-      to: redirect(path: "herbaria/searches#index"))
-  get("/herbarium/index", to: redirect(path: "herbaria"))
-  get("/herbarium/list_herbaria", to: redirect(path: "herbaria/alls#index"))
-  get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
-  get("/herbarium/next_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=next"))
-  get("/herbarium/prev_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
-  get("/herbarium/request_to_be_curator/:id",
-      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
-  # The next post and get combine to redirect the legacy
-  #   POST /herbarium/request_to_be_curator to
-  #   POST herbaria/curator_requests#create
-  post("/herbarium/request_to_be_curator/:id",
-       to: redirect(path: "/herbaria/curator_requests?id=%{id}"))
-  get("/herbaria/curator_requests",
-      to: "herbaria/curator_requests#create", id: /\d+/)
-  # The next post and get combine to redirect the legacy
-  #   POST /herbarium/show_herbarium/:id to
-  #   POST herbaria/curators#create
-  post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
-  get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
-  get("/herbarium", to: redirect(path: "herbaria/nonpersonals#index"))
-  # rubocop:enable Style/FormatStringToken
-
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
+
+  resources :contest_ballots, id: /\d+/
+  resources :contest_entries, id: /\d+/
+
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   AJAX_ACTIONS.each do |action|

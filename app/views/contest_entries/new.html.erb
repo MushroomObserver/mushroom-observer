@@ -1,0 +1,23 @@
+<%
+  @tabsets = {
+    right: draw_tab_set([link_to(:index_contest_entry.t, contest_entries_path)])
+  }
+%>
+
+<div class="max-width-text">
+  <%= form_for(:contest_entry, url: {action: :create}, html: {multipart: true}) do |form| %>
+    <%= form.label(:copyright_holder, :COPYRIGHT_HOLDER.t + ":") %>
+    <div class="row">
+      <div class="col-xs-8">
+        <%= form.text_field(:copyright_holder, class: "form-control") %>
+      </div>
+    </div>
+    <div class="form-group push-down">
+      <%= custom_file_field(:contest_entry, :image) %>
+    </div>
+    <div class="form-group push-down">
+      <%= custom_file_field(:contest_entry, :alternate_image) %>
+    </div>
+    <%= form.submit(:SAVE.l, class: "btn center-block push-down") %>
+  <% end %>
+</div>
