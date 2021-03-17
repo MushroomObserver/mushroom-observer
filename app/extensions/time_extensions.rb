@@ -56,7 +56,7 @@ class ActiveSupport::TimeWithZone
 
   # Format time as "5 days ago", etc.
   def fancy_time(ref = Time.zone.now)
-    diff = ref - self
+    diff = diff_corrected_for_dst_change(ref)
     if -diff > 1.minute
       web_time
     elsif diff < 1.minute
@@ -82,6 +82,20 @@ class ActiveSupport::TimeWithZone
       :"time_one_#{unit}_ago".l(date: web_date)
     else
       :"time_#{unit}s_ago".l(n: n, date: web_date)
+    end
+  end
+
+  ##############################################################################
+
+  private
+
+  def diff_corrected_for_dst_change(ref)
+    if dst? && !ref.dst?
+      ref - self - 1.hour
+    elsif !dst? && ref.dst?
+      ref - self + 1.hour
+    else
+      ref - self
     end
   end
 end
