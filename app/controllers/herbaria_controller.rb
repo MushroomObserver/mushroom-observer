@@ -10,8 +10,8 @@ class HerbariaController < ApplicationController
   ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
-  # Old MO Action (method)        New "Normalized" Action (method)
-  # ---------------------------   --------------------------------
+  # old herbarium Action (method) upddated herbaria Action (method)
+  # ----------------------------  ---------------------------------
   # create_herbarium (get)        new (get)
   # create_herbarium (post)       create (post)
   # delete_curator (delete)       Herbaria::Curators#destroy (delete)
@@ -21,7 +21,7 @@ class HerbariaController < ApplicationController
   # herbarium_search (get)        Herbaria::Searches#index (get)
   # index (get)                   Herbaria::Nonpersonals#index (get)
   # index_herbarium (get)         index (get) - lists query results
-  # list_herbaria (get)           Herbaria::Alls#index (get) - all herbaria
+  # list_herbaria (get)           index (get, flavor: all) - all herbaria
   # merge_herbaria (get)          Herbaria::Merges#new (get)
   # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
   # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
@@ -32,12 +32,21 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # Display selected Herbaria based on current Query
-  # Sort links land on this action
-  # Note: Herbaria::All#index lists all herbaria regardless of any query
+  # Display list of herbaria. One of the following, based on params
+  # All Herbaria, regardless of query
+  # All nonpersonal (institutional) Herbaria
+  # Herbaria based on current Query (# Sort links land on this action)
+  # Herbaria based on Pattern Search
   def index
-    query = find_or_create_query(:Herbarium, by: params[:by])
-    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+    if params[:flavor] == "all"
+      # Display all Herbaria
+      # linked (conditionally) from HerbariaIndex
+      query = create_query(:Herbarium, :all, by: :name)
+      show_selected_herbaria(query, always_index: true)
+    else
+      query = find_or_create_query(:Herbarium, by: params[:by])
+      show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+    end
   end
 
   def show
