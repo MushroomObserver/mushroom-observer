@@ -53,35 +53,30 @@ class HerbariaController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # Display list of herbaria, based on params
-  #   default - Herbaria based on current Query (Sort links land on this action)
+  # Display list of selected herbaria, based on params
+  #   params[:pattern].present? - Herbaria based on Pattern Search
   #   [:flavor] == "all" - all Herbaria, regardless of query
   #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
-  #   params[:pattern].present? - Herbaria based on Pattern Search
+  #   default - Herbaria based on current Query (Sort links land on this action)
   def index
-    if params[:flavor] == "all"
-      # List all Herbaria
-      # linked (conditionally) from HerbariaIndex
-      query = create_query(:Herbarium, :all, by: :name)
-      show_selected_herbaria(query, always_index: true)
-    elsif params[:flavor] == "nonpersonal"
-      # List institutional Herbaria
-      # linked (conditionally) from HerbariaIndex
+    return patterned_index if params[:pattern].present?
+
+    case params[:flavor]
+    when "all" # List all herbaria
+      show_selected_herbaria(
+        create_query(:Herbarium, :all, by: :name), always_index: true
+      )
+    when "nonpersonal" # List institutional Herbaria
       store_location
-      query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
-      show_selected_herbaria(query, always_index: true)
-    elsif params[:pattern].present?
-      # List Herbaria matching a string pattern
-      pattern = params[:pattern].to_s
-      if pattern.match(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-        redirect_to(herbarium_path(herbarium.id))
-      else
-        query = create_query(:Herbarium, :pattern_search, pattern: pattern)
-        show_selected_herbaria(query)
-      end
-    else
-      query = find_or_create_query(:Herbarium, by: params[:by])
-      show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+      show_selected_herbaria(
+        create_query(:Herbarium, :nonpersonal, by: :code_then_name),
+        always_index: true
+      )
+    else # default List herbaria resulting from query
+      show_selected_herbaria(
+        find_or_create_query(:Herbarium, by: params[:by]),
+        id: params[:id].to_s, always_index: true
+      )
     end
   end
 
@@ -154,10 +149,15 @@ class HerbariaController < ApplicationController
 
   # ---------- Index -----------------------------------------------------------
 
-  def safe_numeric_pattern
-    return false unless (pattern = params[:pattern]).match?(/^\d+$/)
-
-    Herbarium.safe_find(pattern)
+  def patterned_index
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
+      redirect_to(herbarium_path(herbarium.id))
+    else
+      show_selected_herbaria(
+        create_query(:Herbarium, :pattern_search, pattern: pattern)
+      )
+    end
   end
 
   def show_selected_herbaria(query, args = {})
@@ -224,9 +224,7 @@ class HerbariaController < ApplicationController
   end
 
   def validate_herbarium!
-    validate_name! &&
-      validate_location! &&
-      validate_personal_herbarium! &&
+    validate_name! && validate_location! && validate_personal_herbarium! &&
       validate_admin_personal_user!
   end
 
@@ -251,7 +249,6 @@ class HerbariaController < ApplicationController
     return true if @herbarium.place_name.blank?
 
     @herbarium.location =
-      # Location.find_by_name_or_reverse_name(@herbarium.place_name)
       Location.where(name: @herbarium.place_name).
       or(Location.where(scientific_name: @herbarium.place_name)).first
     # Will redirect to create location if not found.
@@ -259,8 +256,7 @@ class HerbariaController < ApplicationController
   end
 
   def validate_personal_herbarium!
-    return true  if in_admin_mode?
-    return true  if @herbarium.personal != "1"
+    return true  if in_admin_mode? || @herbarium.personal != "1"
     return false if already_have_personal_herbarium!
     return false if cant_make_this_personal_herbarium!
 
