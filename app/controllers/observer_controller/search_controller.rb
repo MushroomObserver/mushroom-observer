@@ -31,7 +31,7 @@ class ObserverController
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: herbaria_searches_path(pattern: pattern),
-        index_path: herbaria_alls_path
+        index_path: herbaria_path(flavor: :all)
       )
       return
     when :google

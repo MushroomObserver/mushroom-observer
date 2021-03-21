@@ -625,7 +625,7 @@ class ObserverControllerTest < FunctionalTestCase
     # rather than the index that lists query results.
     params = { search: { pattern: "", type: :herbarium } }
     get(:pattern_search, params: params)
-    assert_redirected_to(herbaria_alls_path)
+    assert_redirected_to(herbaria_path(flavor: :all))
   end
 
   def test_observation_search_help

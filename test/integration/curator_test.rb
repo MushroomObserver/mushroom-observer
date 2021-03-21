@@ -116,7 +116,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_index_sort_links
-    get(herbaria_alls_path)
+    get(herbaria_path(flavor: :all))
 
     herbaria_links = assert_select("a:match('href', ?)",
                                    %r{#{herbaria_path}/\d+})
@@ -223,7 +223,7 @@ class CuratorTest < IntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
-    get(herbaria_alls_path)
+    get(herbaria_path(flavor: :all))
     click(label: :create_herbarium.l)
 
     open_form("form[action^='#{herbaria_path}']") do |form|
