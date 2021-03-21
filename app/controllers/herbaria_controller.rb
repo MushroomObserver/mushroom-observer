@@ -1,6 +1,47 @@
 # frozen_string_literal: true
 
-# Controls viewing and modifying herbaria.
+# View and modify Herbaria (displayed as "Fungaria")
+#
+# Actions
+# -------
+# create (post)
+# destroy (delete)
+# edit (get)
+# index (get)                      (default) list query results
+# index (get, pattern: present)    list Herbaria matching a string pattern
+# index (get, flavor: nonpersonal) list institutional Herbaria registered in IH
+# index (get, flavor: all)         list all Herbaria
+# new (get)
+# show (get)
+# update (patch)
+# Herbaria::Curators#create (post)
+# Herbaria::Curators#destroy (delete)
+# Herbaria::Merges#new (get)
+# herbaria::Nexts#show { next: "next" } (get)
+# herbaria::Nexts#show { next: "prev" } (get)
+# Herbaria::CuratorRequest#new (get)
+# Herbaria::CuratorRequest#create (post)
+
+# legacy herbarium Action (method)  upddated herbaria Action (method)
+# --------------------------------  ---------------------------------
+# create_herbarium (get)            new (get)
+# create_herbarium (post)           create (post)
+# delete_curator (delete)           Herbaria::Curators#destroy (delete)
+# destroy_herbarium (delete)        destroy (delete)
+# edit_herbarium (get)              edit (get)
+# edit_herbarium (post)             update (patch)
+# herbarium_search (get)            index (get, pattern: present)
+# index (get)                       index (get, flavor: nonpersonal)
+# index_herbarium (get)             index (get) - lists query results
+# list_herbaria (get)               index (get, flavor: all) - all herbaria
+# merge_herbaria (get)              Herbaria::Merges#new (get)
+# next_herbarium (get)              herbaria::Nexts#show { next: "next" } (get)
+# prev_herbarium (get)              herbaria::Nexts#show { next: "prev" } (get)
+# request_to_be_curator (get)       Herbaria::CuratorRequest#new (get)
+# request_to_be_curator (post)      Herbaria::CuratorRequest#create (post)
+# show_herbarium (get)              show (get)
+# show_herbarium (post)             Herbaria::Curators#create (post)
+#
 class HerbariaController < ApplicationController
   # filters
   before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
@@ -10,34 +51,13 @@ class HerbariaController < ApplicationController
   ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
-  # old herbarium Action (method) upddated herbaria Action (method)
-  # ----------------------------  ---------------------------------
-  # create_herbarium (get)        new (get)
-  # create_herbarium (post)       create (post)
-  # delete_curator (delete)       Herbaria::Curators#destroy (delete)
-  # destroy_herbarium (delete)    destroy (delete)
-  # edit_herbarium (get)          edit (get)
-  # edit_herbarium (post)         update (patch)
-  # herbarium_search (get)        Herbaria::Searches#index (get)
-  # index (get)                   index (get, flavor: nonpersonal)
-  #                               - institutional herbaria registered in IH
-  # index_herbarium (get)         index (get) - lists query results
-  # list_herbaria (get)           index (get, flavor: all) - all herbaria
-  # merge_herbaria (get)          Herbaria::Merges#new (get)
-  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
-  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
-  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
-  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
-  # show_herbarium (get)          show (get)
-  # show_herbarium (post)         Herbaria::Curators#create (post)
-
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
-  # Display list of herbaria. One of the following, based on params
-  # All Herbaria, regardless of query
-  # All nonpersonal (institutional) Herbaria
-  # Herbaria based on current Query (# Sort links land on this action)
-  # Herbaria based on Pattern Search
+  # Display list of herbaria, based on params
+  #   default - Herbaria based on current Query (Sort links land on this action)
+  #   [:flavor] == "all" - all Herbaria, regardless of query
+  #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
+  #   params[:pattern].present? - Herbaria based on Pattern Search
   def index
     if params[:flavor] == "all"
       # List all Herbaria
