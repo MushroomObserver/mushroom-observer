@@ -273,7 +273,6 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
-
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def test_new
