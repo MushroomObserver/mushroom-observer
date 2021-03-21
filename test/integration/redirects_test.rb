@@ -248,7 +248,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_herbarium_search
     assert_old_url_redirects_to_new_path(
-      :get, "/herbarium/herbarium_search", herbaria_searches_path
+      :get, "/herbarium/herbarium_search", herbaria_path
     )
   end
 

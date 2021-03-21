@@ -659,7 +659,6 @@ MushroomObserver::Application.routes.draw do
     resources :curators, only: [:create, :destroy], id: /\d+/
     resources :merges, only: [:new]
     resources :nexts, only: [:show], id: /\d+/
-    resources :searches, only: [:index]
   end
   resources :herbaria, id: /\d+/
   redirect_legacy_actions(
@@ -683,8 +682,7 @@ MushroomObserver::Application.routes.draw do
         via: [:get, :post])
   get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
 
-  get("/herbarium/herbarium_search",
-      to: redirect(path: "herbaria/searches#index"))
+  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
   get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))

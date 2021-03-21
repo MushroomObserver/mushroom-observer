@@ -50,6 +50,15 @@ class HerbariaController < ApplicationController
       store_location
       query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
       show_selected_herbaria(query, always_index: true)
+    elsif params[:pattern].present?
+      # List Herbaria matching a string pattern
+      pattern = params[:pattern].to_s
+      if pattern.match(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
+        redirect_to(herbarium_path(herbarium.id))
+      else
+        query = create_query(:Herbarium, :pattern_search, pattern: pattern)
+        show_selected_herbaria(query)
+      end
     else
       query = find_or_create_query(:Herbarium, by: params[:by])
       show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
