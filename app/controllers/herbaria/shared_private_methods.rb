@@ -60,7 +60,7 @@ module Herbaria::SharedPrivateMethods
     end
     unless query.flavor == :nonpersonal
       links << [:herbarium_index_nonpersonal_herbaria.l,
-                herbaria_nonpersonals_path]
+                herbaria_path(flavor: :nonpersonal)]
     end
     links << [:create_herbarium.l, new_herbarium_path]
   end

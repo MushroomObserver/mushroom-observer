@@ -12,7 +12,7 @@
                             @back_object.show_link_args)
   end
   tabs << link_with_query(:create_herbarium.t, new_herbarium_path)
-  tabs << link_to(:herbarium_index.t, herbaria_nonpersonals_path)
+  tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
 
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -27,7 +27,8 @@
 
   <div class="col-xs-12 col-sm-5 max-width-text">
     <% @herbarium_record.observations.each do |obs| %>
-      <%= render(partial: "shared/matrix_box", locals: { object: obs.rss_log }) %>
+      <%= render(partial: "shared/matrix_box",
+          locals: { object: obs.rss_log }) %>
     <% end %>
   </div>
 </div>

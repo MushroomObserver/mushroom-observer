@@ -4,12 +4,14 @@
   tabs = []
   if in_admin_mode? || @herbarium_record.can_edit?
     tabs << link_with_query(:edit_herbarium_record.t,
-                            action: :edit_herbarium_record, id: @herbarium_record.id, back: :show)
+                            action: :edit_herbarium_record,
+                            id: @herbarium_record.id, back: :show)
     tabs << link_with_query(:delete_herbarium_record.t,
-                            {action: :destroy_herbarium_record, id: @herbarium_record.id},
+                            { action: :destroy_herbarium_record,
+                              id: @herbarium_record.id },
                             data: {confirm: :are_you_sure.t})
   end
-  tabs << link_to(:herbarium_index.t, herbaria_nonpersonals_path)
+  tabs << link_to(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
 
   @tabsets = {
     pager_for: @herbarium_record,
@@ -32,7 +34,8 @@
   <% end %>
 
   <div class="push-down">
-    <%= render(partial: "shared/matrix_box", collection: @herbarium_record.observations, as: :object) %>
+    <%= render(partial: "shared/matrix_box",
+               collection: @herbarium_record.observations, as: :object) %>
   </div>
 
   <center>

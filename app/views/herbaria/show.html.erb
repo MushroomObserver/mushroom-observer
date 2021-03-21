@@ -13,7 +13,7 @@
   end
   tabs += [
     link_with_query(:create_herbarium.t, new_herbarium_path),
-    link_with_query(:herbarium_index.t, herbaria_nonpersonals_path)
+    link_with_query(:herbarium_index.t, herbaria_path(flavor: :nonpersonal))
   ]
 
   @tabsets = {

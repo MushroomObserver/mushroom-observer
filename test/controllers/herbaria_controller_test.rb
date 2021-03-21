@@ -221,6 +221,27 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
+  def test_index_nonpersonal
+    get(:index, params: { flavor: :nonpersonal })
+
+    assert_select("#title-caption", text: :query_title_nonpersonal.l)
+    Herbarium.where(personal_user_id: nil).each do |herbarium|
+      assert_select(
+        "a[href ^= '#{herbarium_path(herbarium)}']", true,
+        "List of Institutional Fungaria is missing a link to " \
+        "#{herbarium.format_name})"
+      )
+    end
+    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+      assert_select(
+        "a[href ^= '#{herbarium_path(herbarium)}']", false,
+        "List of Institutional Fungaria should not have a link to " \
+        "#{herbarium.format_name})"
+      )
+    end
+  end
+
+
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def test_new

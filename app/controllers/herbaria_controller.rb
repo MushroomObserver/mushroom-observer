@@ -19,7 +19,8 @@ class HerbariaController < ApplicationController
   # edit_herbarium (get)          edit (get)
   # edit_herbarium (post)         update (patch)
   # herbarium_search (get)        Herbaria::Searches#index (get)
-  # index (get)                   Herbaria::Nonpersonals#index (get)
+  # index (get)                   index (get, flavor: nonpersonal)
+  #                               - institutional herbaria registered in IH
   # index_herbarium (get)         index (get) - lists query results
   # list_herbaria (get)           index (get, flavor: all) - all herbaria
   # merge_herbaria (get)          Herbaria::Merges#new (get)
@@ -39,9 +40,15 @@ class HerbariaController < ApplicationController
   # Herbaria based on Pattern Search
   def index
     if params[:flavor] == "all"
-      # Display all Herbaria
+      # List all Herbaria
       # linked (conditionally) from HerbariaIndex
       query = create_query(:Herbarium, :all, by: :name)
+      show_selected_herbaria(query, always_index: true)
+    elsif params[:flavor] == "nonpersonal"
+      # List institutional Herbaria
+      # linked (conditionally) from HerbariaIndex
+      store_location
+      query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
       show_selected_herbaria(query, always_index: true)
     else
       query = find_or_create_query(:Herbarium, by: params[:by])
