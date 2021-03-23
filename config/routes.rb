@@ -653,7 +653,7 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  # ----- herbaria: standard actions, redirects of some legacy crud actions
+  # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
     resources :curator_requests, only: [:new, :create]
     resources :curators, only: [:create, :destroy], id: /\d+/
@@ -661,13 +661,28 @@ MushroomObserver::Application.routes.draw do
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
+  # Herbaria: standard redirects of Herbarium legacy actions
   redirect_legacy_actions(
     old_controller: "herbarium", new_controller: "herbaria",
     actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
   )
-  # ----- herbaria: complicated redirects of remaining legacy actions
+  # Herbaria: non-standard redirects of legacy Herbarium actions
+  get("/herbarium/next_herbarium/:id",
+      to: redirect(path: "herbaria/nexts/%{id}?next=next"))
+  get("/herbarium/prev_herbarium/:id",
+      to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
+  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
+  get("/herbarium/index", to: redirect(path: "herbaria"))
+  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
+  get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
   # Rails routes currently only accept template tokens
   # rubocop:disable Style/FormatStringToken
+  get("/herbarium/request_to_be_curator/:id",
+      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
+
+  # Herbaria: complicated redirects of legacy Herbarium actions
+  # Actions needeing two routes in order to successfully redirect
+  #
   # The immediately following "match" and "get" combine to redirect
   # the legacy herbarium/delete_curator to the new herbaria/curators
   # The "match" redirects
@@ -681,17 +696,6 @@ MushroomObserver::Application.routes.draw do
         to: redirect(path: "/herbaria/curators/%{id}"),
         via: [:get, :post])
   get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
-
-  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
-  get("/herbarium/index", to: redirect(path: "herbaria"))
-  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
-  get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
-  get("/herbarium/next_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=next"))
-  get("/herbarium/prev_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
-  get("/herbarium/request_to_be_curator/:id",
-      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
 
   # The next post and get combine to redirect the legacy
   #   POST /herbarium/request_to_be_curator to
@@ -707,8 +711,11 @@ MushroomObserver::Application.routes.draw do
   post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
   get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
 
-  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
   # rubocop:enable Style/FormatStringToken
+
+  # Herbaria: non-standard redirect
+  # Must be the final route in order to avoid intercepting the above routes
+  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
