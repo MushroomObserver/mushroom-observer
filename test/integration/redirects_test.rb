@@ -270,7 +270,7 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  # merge_herbaria (get)          Herbaria::Merges#new (get)
+  # merge_herbaria (get)          Herbaria::Merges#create (post)
   def test_merge_herbaria
     fundis = herbaria(:fundis_herbarium)
     assert_true(fundis.owns_all_records?(mary))
@@ -282,7 +282,7 @@ class RedirectsTest < IntegrationTestCase
     assert_equal(herbaria_path(id: fundis.id), @response.request.fullpath)
   end
 
-  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
+  # next_herbarium (get)          herbaria#show { flow: "next" } (get)
   def test_next_herbarium
     query = Query.lookup_and_save(:Herbarium, :all)
     q_alphabetized = query.record.id.alphabetize
@@ -295,7 +295,7 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
+  # prev_herbarium (get)          herbaria#show { flow: "prev" } (get)
   def test_prev_herbarium
     query = Query.lookup_and_save(:Herbarium, :all)
     q_alphabetized = query.record.id.alphabetize

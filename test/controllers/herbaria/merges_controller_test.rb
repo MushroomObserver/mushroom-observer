@@ -35,6 +35,8 @@ module Herbaria
 
     # ---------- Actions to Display forms -- (new, edit, etc.) -----------------
 
+    # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
+
     def test_merge
       # Rule is non-admins can only merge herbaria in which they own all records
       # into their own personal herbarium. Nothing else. Mary owns all the
@@ -43,7 +45,7 @@ module Herbaria
       assert_true(fundis.owns_all_records?(mary))
       marys = mary.create_personal_herbarium
       login("mary")
-      get(:new, params: { this: fundis.id, that: marys.id })
+      get(:create, params: { this: fundis.id, that: marys.id })
 
       assert_flash_success
       # fundis ends up being the destination because it is older.
@@ -52,7 +54,7 @@ module Herbaria
 
     def test_merge_admin
       make_admin("mary")
-      get(:new, params: { this: nybg.id, that: field_museum.id })
+      get(:create, params: { this: nybg.id, that: field_museum.id })
       assert_flash_success
       # nybg survives because it is older.
       assert_redirected_to(herbaria_path(id: nybg))
@@ -60,14 +62,14 @@ module Herbaria
 
     def test_merge_no_login
       marys = mary.create_personal_herbarium
-      get(:new, params: { this: fundis.id, that: marys.id })
+      get(:create, params: { this: fundis.id, that: marys.id })
       assert_redirected_to(account_login_path)
     end
 
     def test_merge_by_record_nonowner
       marys = mary.create_personal_herbarium
       login("rolf")
-      get(:new, params: { this: fundis.id, that: marys.id })
+      get(:create, params: { this: fundis.id, that: marys.id })
 
       assert_redirected_to(
         observer_email_merge_request_path(
@@ -78,32 +80,32 @@ module Herbaria
 
     def test_merge_no_params
       login("mary")
-      get(:new)
+      get(:create)
       assert_flash_error
     end
 
     def test_merge_personal_herbarium_into_itself
       marys = mary.create_personal_herbarium
       login("mary")
-      get(:new, params: { this: marys.id, that: marys.id })
+      get(:create, params: { this: marys.id, that: marys.id })
       assert_no_flash
     end
 
     def test_merge_non_existent_merge_source
       login("mary")
-      get(:new, params: { this: 666 })
+      get(:create, params: { this: 666 })
       assert_flash_error
     end
 
     def test_merge_non_existent_merge_target
       login("mary")
-      get(:new, params: { this: fundis.id, that: 666 })
+      get(:create, params: { this: fundis.id, that: 666 })
       assert_flash_error
     end
 
     def test_merge_identical_non_personal_herbaria
       login("mary")
-      get(:new, params: { this: nybg.id, that: nybg.id })
+      get(:create, params: { this: nybg.id, that: nybg.id })
 
       assert_redirected_to(
         observer_email_merge_request_path(
@@ -114,14 +116,12 @@ module Herbaria
 
     def test_merge_valid_source_into_non_personal_target
       login("mary")
-      get(:new, params: { this: fundis.id, that: nybg.id })
+      get(:create, params: { this: fundis.id, that: nybg.id })
       assert_redirected_to(
         observer_email_merge_request_path(
           type: :Herbarium, old_id: fundis.id, new_id: nybg.id
         )
       )
     end
-
-    # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
   end
 end

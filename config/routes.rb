@@ -657,7 +657,7 @@ MushroomObserver::Application.routes.draw do
   namespace :herbaria do
     resources :curator_requests, only: [:new, :create]
     resources :curators, only: [:create, :destroy], id: /\d+/
-    resources :merges, only: [:new]
+    resources :merges, only: [:create]
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
@@ -672,12 +672,11 @@ MushroomObserver::Application.routes.draw do
   get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
-  get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
   get("/herbarium/request_to_be_curator/:id",
       to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
 
   # Herbaria: complicated redirects of legacy Herbarium actions
-  # Actions needeing two routes in order to successfully redirect
+  # Actions needing two routes in order to successfully redirect
   #
   # The immediately following "match" and "get" combine to redirect
   # the legacy herbarium/delete_curator to the new herbaria/curators
@@ -686,8 +685,8 @@ MushroomObserver::Application.routes.draw do
   #   POST("/herbarium/delete_curator/nnn?user=uuu")
   # to
   #   GET("/herbaria/curators/nnn?user=uuu")
-  # Therefore we need the following "get" to prevent
-  #   No route matches [GET] "/herbaria/curators/nnnnn"
+  # which would throw: No route matches [GET] "/herbaria/curators/nnnnn"
+  # absent the following get
   match("/herbarium/delete_curator/:id",
         to: redirect(path: "/herbaria/curators/%{id}"),
         via: [:get, :post])
@@ -712,6 +711,8 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "herbaria/%{id}?flow=next"))
   get("/herbarium/prev_herbarium/:id",
       to: redirect(path: "herbaria/%{id}?flow=prev"))
+  get("/herbarium/merge_herbaria",
+      to: redirect(path: "herbaria/merges#create"), that: /\d+/, this: /\d+/)
 
   # rubocop:enable Style/FormatStringToken
 

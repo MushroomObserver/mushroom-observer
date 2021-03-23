@@ -18,7 +18,7 @@
 # update (patch)
 # Herbaria::Curators#create (post)
 # Herbaria::Curators#destroy (delete)
-# Herbaria::Merges#new (get)
+# Herbaria::Merges#create (post)
 # herbaria::Nexts#show { next: "next" } (get)
 # herbaria::Nexts#show { next: "prev" } (get)
 # Herbaria::CuratorRequest#new (get)
@@ -36,7 +36,7 @@
 # index (get)                       index (get, flavor: nonpersonal)
 # index_herbarium (get)             index (get) - lists query results
 # list_herbaria (get)               index (get, flavor: all) - all herbaria
-# merge_herbaria (get)              Herbaria::Merges#new (get)
+# merge_herbaria (get)              Herbaria::Merges#create (post)
 # next_herbarium (get)              show { flow: :next } (get)
 # prev_herbarium (get)              show { flow: :prev } (get)
 # request_to_be_curator (get)       Herbaria::CuratorRequest#new (get)
