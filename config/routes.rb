@@ -667,6 +667,8 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
   )
   # Herbaria: non-standard redirects of legacy Herbarium actions
+  # Rails routes currently accept only template tokens
+  # rubocop:disable Style/FormatStringToken
   get("/herbarium/next_herbarium/:id",
       to: redirect(path: "herbaria/nexts/%{id}?next=next"))
   get("/herbarium/prev_herbarium/:id",
@@ -675,8 +677,6 @@ MushroomObserver::Application.routes.draw do
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
   get("/herbarium/merge_herbaria", to: redirect(path: "herbaria/merges/new"))
-  # Rails routes currently only accept template tokens
-  # rubocop:disable Style/FormatStringToken
   get("/herbarium/request_to_be_curator/:id",
       to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
 
