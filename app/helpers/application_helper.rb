@@ -89,7 +89,7 @@ module ApplicationHelper
   # link to next object in query results
   def link_next(object)
     path = if object.type_tag == :herbarium
-             herbaria_next_path(object.id, next: "next")
+             herbarium_path(object.id, flow: "next")
            else
              { controller: object.show_controller,
                action: object.next_action, id: object.id }
@@ -100,7 +100,7 @@ module ApplicationHelper
   # link to previous object in query results
   def link_prev(object)
     path = if object.type_tag == :herbarium
-             herbaria_next_path(object.id, next: "prev")
+             herbarium_path(object.id, flow: "prev")
            else
              { controller: object.show_controller,
                action: object.prev_action, id: object.id }

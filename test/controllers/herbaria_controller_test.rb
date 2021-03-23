@@ -82,6 +82,30 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
+  def test_show_next
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    login
+    get(:show, params: { id: number1.id, q: q, flow: "next" })
+    assert_redirected_to(herbarium_path(number2, q: q))
+  end
+
+  def test_show_prev
+    query = Query.lookup_and_save(:Herbarium, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    login
+    get(:show, params: { id: number2.id, q: q, flow: "prev" })
+    assert_redirected_to(herbarium_path(number1, q: q))
+  end
+
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
     query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)

@@ -285,21 +285,20 @@ class RedirectsTest < IntegrationTestCase
   # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
   def test_next_herbarium
     query = Query.lookup_and_save(:Herbarium, :all)
-    assert_operator(query.num_results, :>, 1,
-                    "Test needs query with > 1 result")
-    number1 = query.results[0]
-    number2 = query.results[1]
+    q_alphabetized = query.record.id.alphabetize
+    first_result = query.results.first
 
     assert_old_url_redirects_to_new_path(
       :get,
-      "/herbarium/next_herbarium/#{number1.id}",
-      herbarium_path(number2, q: query.record.id.alphabetize)
+      "/herbarium/next_herbarium/#{first_result.id}?q=#{q_alphabetized}",
+      herbarium_path(first_result, q: q_alphabetized, flow: :next)
     )
   end
 
   # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
   def test_prev_herbarium
     query = Query.lookup_and_save(:Herbarium, :all)
+    q_alphabetized = query.record.id.alphabetize
     assert_operator(query.num_results, :>, 1,
                     "Test needs query with > 1 result")
 
@@ -308,8 +307,8 @@ class RedirectsTest < IntegrationTestCase
 
     assert_old_url_redirects_to_new_path(
       :get,
-      "/herbarium/prev_herbarium/#{number2.id}",
-      herbarium_path(number1, q: query.record.id.alphabetize)
+      "/herbarium/prev_herbarium/#{number2.id}?q=#{q_alphabetized}",
+      herbarium_path(number1, q: q_alphabetized, flow: :prev)
     )
   end
 

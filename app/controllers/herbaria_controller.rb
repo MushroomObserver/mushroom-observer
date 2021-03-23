@@ -12,7 +12,9 @@
 # index (get, flavor: nonpersonal) list institutional Herbaria registered in IH
 # index (get, flavor: all)         list all Herbaria
 # new (get)
-# show (get)
+# show (get)                       show one herbarium
+# show { flow: :prev } (get)       show next herbarium in search results
+# show { flow: :prev } (get)       show previous herbarium in search results
 # update (patch)
 # Herbaria::Curators#create (post)
 # Herbaria::Curators#destroy (delete)
@@ -35,8 +37,8 @@
 # index_herbarium (get)             index (get) - lists query results
 # list_herbaria (get)               index (get, flavor: all) - all herbaria
 # merge_herbaria (get)              Herbaria::Merges#new (get)
-# next_herbarium (get)              herbaria::Nexts#show { next: "next" } (get)
-# prev_herbarium (get)              herbaria::Nexts#show { next: "prev" } (get)
+# next_herbarium (get)              show { flow: :next } (get)
+# prev_herbarium (get)              show { flow: :prev } (get)
 # request_to_be_curator (get)       Herbaria::CuratorRequest#new (get)
 # request_to_be_curator (post)      Herbaria::CuratorRequest#create (post)
 # show_herbarium (get)              show (get)
@@ -80,9 +82,17 @@ class HerbariaController < ApplicationController
     end
   end
 
+  # Display a single herbarium
   def show
-    @canonical_url = herbarium_url(params[:id])
-    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    case params[:flow]
+    when "next" # see prev_next_page partial, ApplicationHelper#link_next
+      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+    else
+      @canonical_url = herbarium_url(params[:id])
+      @herbarium = find_or_goto_index(Herbarium, params[:id])
+    end
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------

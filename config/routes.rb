@@ -669,10 +669,6 @@ MushroomObserver::Application.routes.draw do
   # Herbaria: non-standard redirects of legacy Herbarium actions
   # Rails routes currently accept only template tokens
   # rubocop:disable Style/FormatStringToken
-  get("/herbarium/next_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=next"))
-  get("/herbarium/prev_herbarium/:id",
-      to: redirect(path: "herbaria/nexts/%{id}?next=prev"))
   get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
   get("/herbarium/index", to: redirect(path: "herbaria"))
   get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
@@ -710,6 +706,12 @@ MushroomObserver::Application.routes.draw do
   #   POST herbaria/curators#create
   post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
   get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
+
+  # Herbaria: broken redirects of legacy Herbarium actions
+  get("/herbarium/next_herbarium/:id",
+      to: redirect(path: "herbaria/%{id}?flow=next"))
+  get("/herbarium/prev_herbarium/:id",
+      to: redirect(path: "herbaria/%{id}?flow=prev"))
 
   # rubocop:enable Style/FormatStringToken
 
