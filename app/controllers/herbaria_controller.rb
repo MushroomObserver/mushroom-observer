@@ -75,10 +75,8 @@ class HerbariaController < ApplicationController
         always_index: true
       )
     else # default List herbaria resulting from query
-      show_selected_herbaria(
-        find_or_create_query(:Herbarium, by: params[:by]),
-        id: params[:id].to_s, always_index: true
-      )
+      show_selected_herbaria(find_or_create_query(:Herbarium, by: params[:by]),
+                             id: params[:id].to_s, always_index: true)
     end
   end
 
@@ -193,14 +191,13 @@ class HerbariaController < ApplicationController
       include: [:curators, :herbarium_records, :personal_user]
     }.merge(args,
             template: "/herbaria/index.html.erb", # render with this template
-            sorting_links: [ # Add some alternate sorting criteria.
-              ["records",     :sort_by_records.t],
-              ["user",        :sort_by_user.t],
-              ["code",        :sort_by_code.t],
-              ["name",        :sort_by_name.t],
-              ["created_at",  :sort_by_created_at.t],
-              ["updated_at",  :sort_by_updated_at.t]
-            ])
+            # Add some alternate sorting criteria.
+            sorting_links: [["records",     :sort_by_records.t],
+                            ["user",        :sort_by_user.t],
+                            ["code",        :sort_by_code.t],
+                            ["name",        :sort_by_name.t],
+                            ["created_at",  :sort_by_created_at.t],
+                            ["updated_at",  :sort_by_updated_at.t]])
   end
 
   def right_tab_links(query, links)
@@ -315,11 +312,9 @@ class HerbariaController < ApplicationController
   def flash_personal_herbarium?(user)
     return false if user.personal_herbarium.blank?
 
-    flash_error(
-      :edit_herbarium_user_already_has_personal_herbarium.t(
-        user: user.login, herbarium: user.personal_herbarium.name
-      )
-    )
+    flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
+                  user: user.login, herbarium: user.personal_herbarium.name
+                ))
     true
   end
 
@@ -348,14 +343,12 @@ class HerbariaController < ApplicationController
   end
 
   def user_can_destroy_herbarium?
-    in_admin_mode? ||
-      @herbarium.curator?(@user) ||
+    in_admin_mode? || @herbarium.curator?(@user) ||
       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
   end
 
   def redirect_to_create_location_or_referrer_or_show_location
-    redirect_to_create_location ||
-      redirect_to_referrer ||
+    redirect_to_create_location || redirect_to_referrer ||
       redirect_with_query(herbarium_path(@herbarium))
   end
 
