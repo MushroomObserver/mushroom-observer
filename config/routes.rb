@@ -678,8 +678,9 @@ MushroomObserver::Application.routes.draw do
   # Herbaria: complicated redirects of legacy Herbarium actions
   # Actions needing two routes in order to successfully redirect
   #
-  # The immediately following "match" and "get" combine to redirect
-  # the legacy herbarium/delete_curator to the new herbaria/curators
+  # The next two routes combine to redirect
+  #   GET herbarium/delete_curator
+  #   DELETE herbaria/curators
   # The "match" redirects
   #   GET("/herbarium/delete_curator/nnn?user=uuu") and
   #   POST("/herbarium/delete_curator/nnn?user=uuu")
@@ -700,24 +701,16 @@ MushroomObserver::Application.routes.draw do
   get("/herbaria/curator_requests",
       to: "herbaria/curator_requests#create", id: /\d+/)
 
-  # The next post and get combine to redirect the legacy
+  # The next post and get combine to redirect
   #   POST /herbarium/show_herbarium/:id to
   #   POST herbaria/curators#create
   post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
   get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
 
-  # Herbaria: broken redirects of legacy Herbarium actions
-  get("/herbarium/next_herbarium/:id",
-      to: redirect(path: "herbaria/%{id}?flow=next"))
-  get("/herbarium/prev_herbarium/:id",
-      to: redirect(path: "herbaria/%{id}?flow=prev"))
-  get("/herbarium/merge_herbaria",
-      to: redirect(path: "herbaria/merges#create"), that: /\d+/, this: /\d+/)
-
   # rubocop:enable Style/FormatStringToken
 
   # Herbaria: non-standard redirect
-  # Must be the final route in order to avoid intercepting the above routes
+  # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
 
   get "publications/:id/destroy" => "publications#destroy"

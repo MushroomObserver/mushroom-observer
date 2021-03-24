@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# View and modify Herbaria (displayed as "Fungaria")
-#
 # Actions
 # -------
 # create (post)
@@ -19,12 +17,12 @@
 # Herbaria::Curators#create (post)
 # Herbaria::Curators#destroy (delete)
 # Herbaria::Merges#create (post)
-# herbaria::Nexts#show { next: "next" } (get)
-# herbaria::Nexts#show { next: "prev" } (get)
 # Herbaria::CuratorRequest#new (get)
 # Herbaria::CuratorRequest#create (post)
 
-# legacy herbarium Action (method)  upddated herbaria Action (method)
+# Table: legacy Herbariums actions vs updated Herbaria actions
+#
+# legacy Herbarium action (method)  upddated Herbaria action (method)
 # --------------------------------  ---------------------------------
 # create_herbarium (get)            new (get)
 # create_herbarium (post)           create (post)
@@ -36,14 +34,17 @@
 # index (get)                       index (get, flavor: nonpersonal)
 # index_herbarium (get)             index (get) - lists query results
 # list_herbaria (get)               index (get, flavor: all) - all herbaria
-# merge_herbaria (get)              Herbaria::Merges#create (post)
-# next_herbarium (get)              show { flow: :next } (get)
-# prev_herbarium (get)              show { flow: :prev } (get)
+# *merge_herbaria (get)             Herbaria::Merges#create (post)
+# *next_herbarium (get)             show { flow: :next } (get))
+# *prev_herbarium (get)             show { flow: :prev } (get)
 # request_to_be_curator (get)       Herbaria::CuratorRequest#new (get)
 # request_to_be_curator (post)      Herbaria::CuratorRequest#create (post)
 # show_herbarium (get)              show (get)
 # show_herbarium (post)             Herbaria::Curators#create (post)
-#
+# * == legacy action is not redirected
+# See https://tinyurl.com/ynapvpt7
+
+# View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController
   # filters
   before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
@@ -80,10 +81,11 @@ class HerbariaController < ApplicationController
     end
   end
 
-  # Display a single herbarium
+  # Display a single herbarium, based on :flow params
+  # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
   def show
     case params[:flow]
-    when "next" # see prev_next_page partial, ApplicationHelper#link_next
+    when "next"
       redirect_to_next_object(:next, Herbarium, params[:id].to_s)
     when "prev"
       redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
@@ -146,8 +148,6 @@ class HerbariaController < ApplicationController
       redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
     end
   end
-
-  # ========== Non=standard REST Actions =======================================
 
   ##############################################################################
 

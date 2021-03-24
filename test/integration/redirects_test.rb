@@ -24,6 +24,8 @@ class RedirectsTest < IntegrationTestCase
 
   # ============================================================================
 
+  # Article to Articles------ --------------------------------------------------
+
   def test_controller_article
     get("/article")
     assert_equal(articles_path,
@@ -99,7 +101,7 @@ class RedirectsTest < IntegrationTestCase
                  @response.header["Location"])
   end
 
-  # ----------------------------------------------------------------------------
+  # Glossary to GlossaryTerms --------------------------------------------------
 
   def test_controller_glossary
     get("/glossary")
@@ -163,27 +165,29 @@ class RedirectsTest < IntegrationTestCase
                  @response.request.fullpath)
   end
 
-  # ----------------------------------------------------------------------------
-
-  # Old MO Action (method)        New "Normalized" Action (method)
-  # ---------------------------   --------------------------------
-  # create_herbarium (get)        new (get)
-  # create_herbarium (post)       create (post)
-  # delete_curator (delete)       Herbaria::Curators#destroy (delete)
-  # destroy_herbarium (delete)    destroy (delete)
-  # edit_herbarium (get)          edit (get)
-  # edit_herbarium (post)         update (patch)
-  # herbarium_search (get)        Herbaria::Searches#index (get)
-  # index (get)                   Herbaria::Nonpersonals#index (get)
-  # index_herbarium (get)         index (get) - lists query results
-  # list_herbaria (get)           Herbaria::Alls#index (get) - all herbaria
-  # merge_herbaria (get)          Herbaria::Merges#new (get)
-  # next_herbarium (get)          herbaria::Nexts#show { next: "next" } (get)
-  # prev_herbarium (get)          herbaria::Nexts#show { next: "prev" } (get)
-  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
-  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
-  # show_herbarium (get)          show (get)
-  # show_herbarium (post)         Herbaria::Curators#create (post)
+  # Herbarium to Herbaria ------------------------------------------------------
+  #
+  # legacy Herbarium action (method)  upddated Herbaria action (method)
+  # --------------------------------  ---------------------------------
+  # create_herbarium (get)            new (get)
+  # create_herbarium (post)           create (post)
+  # delete_curator (delete)           Herbaria::Curators#destroy (delete)
+  # destroy_herbarium (delete)        destroy (delete)
+  # edit_herbarium (get)              edit (get)
+  # edit_herbarium (post)             update (patch)
+  # herbarium_search (get)            index (get, pattern: present)
+  # index (get)                       index (get, flavor: nonpersonal)
+  # index_herbarium (get)             index (get) - query results
+  # list_herbaria (get)               index (get, flavor: all) - all herbaria
+  # *merge_herbaria (get)             Herbaria::Merges#create (post)
+  # *next_herbarium (get)             show { flow: :next } (get))
+  # *prev_herbarium (get)             show { flow: :prev } (get)
+  # request_to_be_curator (get)       Herbaria::CuratorRequest#new (get)
+  # request_to_be_curator (post)      Herbaria::CuratorRequest#create (post)
+  # show_herbarium (get)              show (get)
+  # show_herbarium (post)             Herbaria::Curators#create (post)
+  # * == legacy action is not redirected
+  # See https://tinyurl.com/ynapvpt7
 
   def test_create_herbarium_get
     login(rolf)
@@ -270,49 +274,6 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  # merge_herbaria (get)          Herbaria::Merges#create (post)
-  def test_merge_herbaria
-    fundis = herbaria(:fundis_herbarium)
-    assert_true(fundis.owns_all_records?(mary))
-    marys = mary.create_personal_herbarium
-    login("mary")
-
-    get("/herbarium/merge_herbaria?this=#{fundis.id}&that=#{marys.id}")
-    # fundis ends up being the destination because it is older.
-    assert_equal(herbaria_path(id: fundis.id), @response.request.fullpath)
-  end
-
-  # next_herbarium (get)          herbaria#show { flow: "next" } (get)
-  def test_next_herbarium
-    query = Query.lookup_and_save(:Herbarium, :all)
-    q_alphabetized = query.record.id.alphabetize
-    first_result = query.results.first
-
-    assert_old_url_redirects_to_new_path(
-      :get,
-      "/herbarium/next_herbarium/#{first_result.id}?q=#{q_alphabetized}",
-      herbarium_path(first_result, q: q_alphabetized, flow: :next)
-    )
-  end
-
-  # prev_herbarium (get)          herbaria#show { flow: "prev" } (get)
-  def test_prev_herbarium
-    query = Query.lookup_and_save(:Herbarium, :all)
-    q_alphabetized = query.record.id.alphabetize
-    assert_operator(query.num_results, :>, 1,
-                    "Test needs query with > 1 result")
-
-    number1 = query.results[0]
-    number2 = query.results[1]
-
-    assert_old_url_redirects_to_new_path(
-      :get,
-      "/herbarium/prev_herbarium/#{number2.id}?q=#{q_alphabetized}",
-      herbarium_path(number1, q: q_alphabetized, flow: :prev)
-    )
-  end
-
-  # request_to_be_curator (get)   Herbaria::CuratorRequest#new (get)
   def test_request_to_be_herbarium_curator_get
     nybg = herbaria(:nybg_herbarium)
     login("mary")
@@ -323,7 +284,6 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  # request_to_be_curator (post)  Herbaria::CuratorRequest#create (post)
   def test_request_to_be_herbarium_curator_post
     nybg = herbaria(:nybg_herbarium)
     email_count = ActionMailer::Base.deliveries.count
@@ -335,7 +295,6 @@ class RedirectsTest < IntegrationTestCase
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
   end
 
-  # show_herbarium (get)          show (get)
   def test_show_herbarium_get
     nybg = herbaria(:nybg_herbarium)
     assert_old_url_redirects_to_new_path(
@@ -343,7 +302,6 @@ class RedirectsTest < IntegrationTestCase
     )
   end
 
-  # show_herbarium (post)         Herbaria::Curators#create (post)
   def test_show_herbarium_post
     nybg = herbaria(:nybg_herbarium)
     assert(nybg.curators.include?(rolf))
