@@ -9,13 +9,13 @@
   </tr>
   <% @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50].each do |ip| %>
     <tr>
-      <td><%= link_to(ip, { controller: :account, action: :blocked_ips,
-                            report: ip }) %></td>
+      <td><%= link_to(ip, account_blocked_ips_path(report: ip)) %></td>
       <td><% unless IpStats.blocked?(ip) %>
-        [<%= link_to("Block", { controller: :account, action: :blocked_ips,
-                                add_bad: ip }) %>]
-      <% end %></td>
+               [<%= link_to("Block", account_blocked_ips_path(add_bad: ip)) %>]
+          <% end %>
+      </td>
       <td>
+<% byebug %>
         <% if user_id = @stats[ip][:user] %>
           User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
         <% end %>
