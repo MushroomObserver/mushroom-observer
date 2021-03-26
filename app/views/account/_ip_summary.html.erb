@@ -15,9 +15,10 @@
           <% end %>
       </td>
       <td>
-<% byebug %>
         <% if user_id = @stats[ip][:user] %>
-          User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+             User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+        <% elsif browser.bot? %>
+             Bot <%= browser&.name %><br/>
         <% end %>
         <% if api_key_str = @stats[ip][:api_key]
           api_key = ApiKey.find_by_key(api_key_str) %>
