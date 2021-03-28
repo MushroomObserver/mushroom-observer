@@ -4,50 +4,58 @@
 
 <div class="row">
   <div class="col-xs-6 max-width-text">
-    <p><%= link_to("Refresh Stats", {controller: :account,
-                   action: :blocked_ips}) %></p>
+    <p><%= link_to("Refresh Stats", account_blocked_ips_path) %></p>
 
+    <%# ----- Okay IPs ----- %>
     <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+      <%= form_tag({}, { class: "pad-bottom-2x" }) %>
         <div class="form-group form-inline">
           <big>Okay IPs:</big> &nbsp;&nbsp;
-          <%= text_field_tag(:add_okay, "", size: 20, data: {autofocus: true}, class: "form-control") %>
+          <%= text_field_tag(:add_okay, "", size: 20, data: { autofocus: true },
+                             class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
-          [<%= link_to("Clear List", {controller: :account,
-                       action: :blocked_ips, clear_okay: 1}) %>]
+          [<%= link_to(
+                 "Clear List", account_blocked_ips_path(clear_okay: 1)
+               ) %>]
         </div>
       </form>
       <table class="ips">
         <% @okay_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
-            <td>[<%= link_to(:REMOVE.t, {controller: :account,
-                             action: :blocked_ips, remove_okay: ip}) %>]</td>
+            <td>[<%= link_to(
+                       :REMOVE.l, account_blocked_ips_path(remove_okay: ip)
+                     ) %>]</td>
         <% end %>
       </table>
     </div>
 
+    <%# ----- Blocked IPs ----- %>
     <div style="padding:1em; margin:1em; background:#f7f">
-      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+      <%= form_tag({}, { class: "pad-bottom-2x" }) %>
         <div class="form-group form-inline">
           <big>Blocked IPs:</big> &nbsp;&nbsp;
-          <%= text_field_tag(:add_bad, "", size: 20, data: {autofocus: true}, class: "form-control") %>
+          <%= text_field_tag(:add_bad, "", size: 20, data: { autofocus: true },
+                             class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
-          [<%= link_to("Clear List", {controller: :account,
-                       action: :blocked_ips, clear_bad: 1}) %>]
+          [<%= link_to(
+                 "Clear List", account_blocked_ips_path(clear_bad: 1)
+               ) %>]
         </div>
       </form>
       <table class="ips">
         <% @blocked_ips.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
-            <td>[<%= link_to(:REMOVE.t, {controller: :account,
-                             action: :blocked_ips, remove_bad: ip}) %>]</td>
-        <% end %>
+            <td>[<%= link_to(
+                       :REMOVE.l, account_blocked_ips_path(remove_bad: ip)
+                     ) %>]</td>
+       <% end %>
       </table>
     </div>
   </div>
 
+  <%# ----- Stats / Most Active Users ----- %>
   <div class="col-xs-6 max-width-text">
     <% if @ip.present? %><p><%= render partial: "ip_stats" %></p><% end %>
     <p><%= render partial: "ip_summary" %></p>
