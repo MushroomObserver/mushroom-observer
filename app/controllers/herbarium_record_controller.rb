@@ -148,7 +148,7 @@ class HerbariumRecordController < ApplicationController
 
     @links ||= []
     @links << [:create_herbarium.l,
-               { controller: :herbarium, action: :create_herbarium }]
+               { controller: :herbaria, action: :create }]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
