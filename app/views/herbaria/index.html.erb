@@ -50,7 +50,8 @@
                 <%= post_button(
                       name: herbarium.name.t,
                       path: herbaria_merges_path(this: @merge.id,
-                                                 that: herbarium.id)
+                                                 that: herbarium.id),
+                      confirm: :are_you_sure.t
                     ) %>
               <% else %>
                 [<%= tag.i(herbarium.name.t, style: "color:red") %>]

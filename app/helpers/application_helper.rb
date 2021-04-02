@@ -131,11 +131,11 @@ module ApplicationHelper
 
   # POST to a path; used instead of a link because POST link requires js
   # post_button(name: herbarium.name.t,
-  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id))
-  def post_button(name:, path:, confirm: false)
-    button_to(
-      name, path, method: :post, data: { confirm: :are_you_sure.t }
-    )
+  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
+  #             confirm: :are_you_sure.t)
+  def post_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :post, data: data)
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.
