@@ -45,7 +45,7 @@ module Herbaria
       assert_true(fundis.owns_all_records?(mary))
       marys = mary.create_personal_herbarium
       login("mary")
-      get(:create, params: { this: fundis.id, that: marys.id })
+      post(:create, params: { this: fundis.id, that: marys.id })
 
       assert_flash_success
       # fundis ends up being the destination because it is older.
@@ -54,7 +54,7 @@ module Herbaria
 
     def test_merge_admin
       make_admin("mary")
-      get(:create, params: { this: nybg.id, that: field_museum.id })
+      post(:create, params: { this: nybg.id, that: field_museum.id })
       assert_flash_success
       # nybg survives because it is older.
       assert_redirected_to(herbaria_path(id: nybg))
@@ -62,14 +62,14 @@ module Herbaria
 
     def test_merge_no_login
       marys = mary.create_personal_herbarium
-      get(:create, params: { this: fundis.id, that: marys.id })
+      post(:create, params: { this: fundis.id, that: marys.id })
       assert_redirected_to(account_login_path)
     end
 
     def test_merge_by_record_nonowner
       marys = mary.create_personal_herbarium
       login("rolf")
-      get(:create, params: { this: fundis.id, that: marys.id })
+      post(:create, params: { this: fundis.id, that: marys.id })
 
       assert_redirected_to(
         observer_email_merge_request_path(
@@ -80,32 +80,32 @@ module Herbaria
 
     def test_merge_no_params
       login("mary")
-      get(:create)
+      post(:create)
       assert_flash_error
     end
 
     def test_merge_personal_herbarium_into_itself
       marys = mary.create_personal_herbarium
       login("mary")
-      get(:create, params: { this: marys.id, that: marys.id })
+      post(:create, params: { this: marys.id, that: marys.id })
       assert_no_flash
     end
 
     def test_merge_non_existent_merge_source
       login("mary")
-      get(:create, params: { this: 666 })
+      post(:create, params: { this: 666 })
       assert_flash_error
     end
 
     def test_merge_non_existent_merge_target
       login("mary")
-      get(:create, params: { this: fundis.id, that: 666 })
+      post(:create, params: { this: fundis.id, that: 666 })
       assert_flash_error
     end
 
     def test_merge_identical_non_personal_herbaria
       login("mary")
-      get(:create, params: { this: nybg.id, that: nybg.id })
+      post(:create, params: { this: nybg.id, that: nybg.id })
 
       assert_redirected_to(
         observer_email_merge_request_path(
@@ -116,7 +116,7 @@ module Herbaria
 
     def test_merge_valid_source_into_non_personal_target
       login("mary")
-      get(:create, params: { this: fundis.id, that: nybg.id })
+      post(:create, params: { this: fundis.id, that: nybg.id })
       assert_redirected_to(
         observer_email_merge_request_path(
           type: :Herbarium, old_id: fundis.id, new_id: nybg.id

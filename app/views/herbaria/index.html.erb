@@ -33,8 +33,8 @@
             </td>
             <td>
               <%= if herbarium.personal_user_id.present? && !@no_user_column
-                tag.span(user_link(herbarium.personal_user),
-                         title: herbarium.personal_user.unique_text_name)
+                    tag.span(user_link(herbarium.personal_user),
+                             title: herbarium.personal_user.unique_text_name)
               end %>
             </td>
             <td>
@@ -46,9 +46,11 @@
                       herbarium.name.t, herbarium_path(herbarium)
                     ) %>
               <% elsif @merge != herbarium %>
-                <%= link_with_query(
-                      herbarium.name.t,
-                      herbaria_merges_path(that: @merge.id, this: herbarium.id)
+                <%# Cannot POST from a link without js; Use buttons instead %>
+                <%= post_button(
+                      name: herbarium.name.t,
+                      path: herbaria_merges_path(this: @merge.id,
+                                                 that: herbarium.id)
                     ) %>
               <% else %>
                 [<%= tag.i(herbarium.name.t, style: "color:red") %>]

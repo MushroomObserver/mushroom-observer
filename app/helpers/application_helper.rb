@@ -17,6 +17,7 @@
 #  link_next                    # link to next object
 #  link_prev                    # link to prev object
 #  destroy_button               # button to destroy object
+#  post_button                  # button to post to a path
 #  create_link                  # convert links into list of tabs
 #
 #  --------------------------
@@ -125,6 +126,15 @@ module ApplicationHelper
               end
     button_to(
       name, options, method: :delete, data: { confirm: :are_you_sure.t }
+    )
+  end
+
+  # POST to a path; used instead of a link because POST link requires js
+  # post_button(name: herbarium.name.t,
+  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id))
+  def post_button(name:, path:, confirm: false)
+    button_to(
+      name, path, method: :post, data: { confirm: :are_you_sure.t }
     )
   end
 

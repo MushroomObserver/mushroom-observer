@@ -191,28 +191,22 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_index_all_merge_target_links_presence_rolf
+  def test_index_all_merge_target_buttons_presence_rolf
     source = field_museum
     assert_true(nybg.can_edit?(rolf)) # rolf id curator
     assert_true(fundis.can_edit?(rolf)) # no curators
     assert_false(dicks_personal.can_edit?(rolf)) # another user's hebarium
 
-    login("dick")
-    get(:index, params: { flavor: :all, merge: source.id })
-    assert_select("a[href*='this=#{source.id}']", count: 0)
-    assert_select("a[href*='this=#{nybg.id}']", count: 1)
-    assert_select("a[href*='this=#{fundis.id}']", count: 1)
-    assert_select("a[href*='this=#{dicks_personal.id}']", count: 1)
-
     login("rolf")
     get(:index, params: { flavor: :all, merge: source.id })
-    assert_select("a[href*='this=#{source.id}']", count: 0)
-    assert_select("a[href*='this=#{nybg.id}']", count: 1)
-    assert_select("a[href*='this=#{fundis.id}']", count: 1)
-    assert_select("a[href*='this=#{dicks_personal.id}']", count: 1)
+
+    assert_select("form[action *= 'that=#{source.id}']", count: 0)
+    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
   end
 
-  def test_index_all_merge_target_links_presence_dick
+  def test_index_all_merge_target_buttons_presence_dick
     source = field_museum
     assert_false(nybg.can_edit?(dick)) # dick is not a curator
     assert_true(fundis.can_edit?(dick)) # no curators
@@ -220,29 +214,29 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("dick")
     get(:index, params: { flavor: :all, merge: source.id })
-    assert_select("a[href*='this=#{source.id}']", count: 0)
-    assert_select("a[href*='this=#{nybg.id}']", count: 1)
-    assert_select("a[href*='this=#{fundis.id}']", count: 1)
-    assert_select("a[href*='this=#{dicks_personal.id}']", count: 1)
+    assert_select("form[action *= 'that=#{source.id}']", count: 0)
+    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
   end
 
-  def test_index_all_merge_target_links_presence_admin
+  def test_index_all_merge_target_buttons_presence_admin
     source = field_museum
     make_admin("zero")
     get(:index, params: { flavor: :all, merge: source.id })
 
-    assert_select("a[href*='this=#{source.id}']", count: 0)
-    assert_select("a[href*='this=#{nybg.id}']", count: 1)
-    assert_select("a[href*='this=#{fundis.id}']", count: 1)
-    assert_select("a[href*='this=#{dicks_personal.id}']", count: 1)
+    assert_select("form[action *= 'that=#{source.id}']", count: 0)
+    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
   end
 
-  def test_index_all_merge_target_links_presence_no_login
+  def test_index_all_merge_target_buttons_presence_no_login
     source = field_museum
     get(:index, params: { flavor: :all, merge: source.id })
 
     assert_select("a[href*=edit]", count: 0)
-    assert_select("a[href^='herbaria_merge_path']", count: 0)
+    assert_select("form[action *= 'herbaria_merges_path']", count: 0)
   end
 
   def test_index_nonpersonal

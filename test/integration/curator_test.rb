@@ -301,4 +301,22 @@ class CuratorTest < IntegrationTestCase
       "Submitting a curator request should return to herbarium page"
     )
   end
+
+  def test_merge
+    fundis = herbaria(:fundis_herbarium)
+    assert_true(fundis.owns_all_records?(mary),
+                "Need different fixture: #{mary.name} must own all records")
+    mary_herbarium = mary.create_personal_herbarium
+
+    login!("mary", "testpassword", true)
+    get(herbaria_path(flavor: :all))
+    click(href: herbaria_path(merge: fundis))
+    form = open_form( # merge button
+      "form[action *= 'that=#{mary_herbarium.id}']"
+    )
+    form.submit("#{mary.name} (#{mary.login}): Personal Fungarium")
+
+    assert_response(:success) # Rails follows the redirect
+    assert_select("#title-caption", text: :herbarium_index.l)
+  end
 end
