@@ -37,6 +37,7 @@
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
 #  sort_name::              Stripped-down version of name for sorting.
+#  merge(other_herbarium):: merge other_herbarium into this one
 #
 #  == Callbacks
 #

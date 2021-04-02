@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: move this into a new SearchController
+# searches defined by the url query string
 class ObserverController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
@@ -23,9 +24,16 @@ class ObserverController
     case type
     when :observation, :user
       ctrlr = :observer
-    when :comment, :herbarium, :image, :location,
-      :name, :project, :species_list, :herbarium_record
+    when :comment, :image, :location, :name, :project, :species_list,
+      :herbarium_record
       ctrlr = type
+    when :herbarium
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: herbaria_path(pattern: pattern),
+        index_path: herbaria_path(flavor: :all)
+      )
+      return
     when :google
       site_google_search(pattern)
       return
@@ -35,13 +43,7 @@ class ObserverController
       return
     end
 
-    # If pattern is blank, this would devolve into a very expensive index.
-    if pattern.blank?
-      redirect_to(controller: ctrlr, action: "list_#{type.to_s.pluralize}")
-    else
-      redirect_to(controller: ctrlr, action: "#{type}_search",
-                  pattern: pattern)
-    end
+    redirect_to_search_or_list(ctrlr, type, pattern)
   end
 
   def site_google_search(pattern)
@@ -110,5 +112,27 @@ class ObserverController
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
+  end
+
+  ##############################################################################
+
+  private
+
+  def redirect_to_search_or_list(ctrlr, type, pattern)
+    # If pattern is blank, this would devolve into a very expensive index.
+    if pattern.blank?
+      redirect_to(controller: ctrlr, action: "list_#{type.to_s.pluralize}")
+    else
+      redirect_to(controller: ctrlr, action: "#{type}_search", pattern: pattern)
+    end
+  end
+
+  def redirect_to_search_or_index(pattern: nil, search_path:, index_path:)
+    # If pattern is blank, this would devolve into a very expensive index.
+    if pattern.blank?
+      redirect_to(index_path)
+    else
+      redirect_to(search_path)
+    end
   end
 end
