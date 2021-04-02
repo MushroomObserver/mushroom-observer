@@ -269,7 +269,7 @@ module ApplicationHelper
 
     # Parse parameters off of current URL.
     addr, parms = url.split("?")
-    for arg in parms ? parms.split("&") : []
+    (parms ? parms.split("&") : []).each do |arg|
       var, val = arg.split("=")
       next unless var && var != ""
 
@@ -287,15 +287,14 @@ module ApplicationHelper
     end
 
     # Merge in new arguments, deleting where new values are nil.
-    for var in new_args.keys
+    new_args.each_key do |var|
       val = new_args[var]
-      var = var.to_s
       if val.nil?
-        args.delete(var)
+        args.delete(var.to_s)
       elsif val.is_a?(ActiveRecord::Base)
-        args[var] = val.id.to_s
+        args[var.to_s] = val.id.to_s
       else
-        args[var] = CGI.escape(val.to_s)
+        args[var.to_s] = CGI.escape(val.to_s)
       end
     end
 
