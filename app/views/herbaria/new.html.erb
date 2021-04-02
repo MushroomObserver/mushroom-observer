@@ -1,0 +1,13 @@
+<%# Display form to creat a new herbarium %>
+<%
+  @title = :create_herbarium_title.l
+
+  tabs = [link_with_query(
+            :herbarium_index.t, herbaria_path(flavor: :nonpersonal)
+         )]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= render(partial: "form", locals: { button_name: :CREATE }) %>
+</div>

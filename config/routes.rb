@@ -143,21 +143,6 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  herbarium: {
-    create_herbarium: {},
-    delete_curator: {},
-    destroy_herbarium: {},
-    edit_herbarium: {},
-    herbarium_search: {},
-    index: {},
-    index_herbarium: {},
-    list_herbaria: {},
-    merge_herbaria: {},
-    next_herbarium: {},
-    prev_herbarium: {},
-    request_to_be_curator: {},
-    show_herbarium: {}
-  },
   herbarium_record: {
     create_herbarium_record: {},
     destroy_herbarium_record: {},
@@ -667,6 +652,66 @@ MushroomObserver::Application.routes.draw do
     old_controller: "glossary", new_controller: "glossary_terms",
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
+
+  # ----- Herbaria: standard actions -------------------------------------------
+  namespace :herbaria do
+    resources :curator_requests, only: [:new, :create]
+    resources :curators, only: [:create, :destroy], id: /\d+/
+    resources :merges, only: [:create]
+    resources :nexts, only: [:show], id: /\d+/
+  end
+  resources :herbaria, id: /\d+/
+  # Herbaria: standard redirects of Herbarium legacy actions
+  redirect_legacy_actions(
+    old_controller: "herbarium", new_controller: "herbaria",
+    actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
+  )
+  # Herbaria: non-standard redirects of legacy Herbarium actions
+  # Rails routes currently accept only template tokens
+  # rubocop:disable Style/FormatStringToken
+  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
+  get("/herbarium/index", to: redirect(path: "herbaria"))
+  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
+  get("/herbarium/request_to_be_curator/:id",
+      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
+
+  # Herbaria: complicated redirects of legacy Herbarium actions
+  # Actions needing two routes in order to successfully redirect
+  #
+  # The next two routes combine to redirect
+  #   GET herbarium/delete_curator
+  #   DELETE herbaria/curators
+  # The "match" redirects
+  #   GET("/herbarium/delete_curator/nnn?user=uuu") and
+  #   POST("/herbarium/delete_curator/nnn?user=uuu")
+  # to
+  #   GET("/herbaria/curators/nnn?user=uuu")
+  # which would throw: No route matches [GET] "/herbaria/curators/nnnnn"
+  # absent the following get
+  match("/herbarium/delete_curator/:id",
+        to: redirect(path: "/herbaria/curators/%{id}"),
+        via: [:get, :post])
+  get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
+
+  # The next post and get combine to redirect the legacy
+  #   POST /herbarium/request_to_be_curator to
+  #   POST herbaria/curator_requests#create
+  post("/herbarium/request_to_be_curator/:id",
+       to: redirect(path: "/herbaria/curator_requests?id=%{id}"))
+  get("/herbaria/curator_requests",
+      to: "herbaria/curator_requests#create", id: /\d+/)
+
+  # The next post and get combine to redirect
+  #   POST /herbarium/show_herbarium/:id to
+  #   POST herbaria/curators#create
+  post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
+  get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
+
+  # rubocop:enable Style/FormatStringToken
+
+  # Herbaria: non-standard redirect
+  # Must be the final route in order to give the others priority
+  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
