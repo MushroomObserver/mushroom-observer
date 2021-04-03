@@ -6,13 +6,13 @@ module Query::Modules::Ordering
     # Let queries define custom order spec in "order", but have explicitly
     # passed-in "by" parameter take precedence.  If neither is given, then
     # fall back on the "default_order" finally.
-    if by || order.blank?
-      by ||= default_order
-      by = by.dup
-      reverse = !!by.sub!(/^reverse_/, "")
-      result = initialize_order_specs(by)
-      self.order = reverse ? reverse_order(result) : result
-    end
+    return unless by || order.blank?
+
+    by ||= default_order
+    by = by.dup
+    reverse = !!by.sub!(/^reverse_/, "")
+    result = initialize_order_specs(by)
+    self.order = reverse ? reverse_order(result) : result
   end
 
   def initialize_order_specs(by)
@@ -155,7 +155,8 @@ module Query::Modules::Ordering
       "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
 
     when "records"
-      add_join(:herbarium_records)
+      # outer_join needed to show herbaria with no records
+      add_join(:herbarium_records!)
       self.group = "herbaria.id"
       "count(herbarium_records.id) DESC"
 
