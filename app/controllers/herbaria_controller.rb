@@ -313,8 +313,8 @@ class HerbariaController < ApplicationController
     return false if user.personal_herbarium.blank?
 
     flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
-      user: user.login, herbarium: user.personal_herbarium.name
-    ))
+                  user: user.login, herbarium: user.personal_herbarium.name
+                ))
     true
   end
 
