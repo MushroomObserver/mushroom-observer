@@ -18,15 +18,15 @@ module Herbaria
 
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
-    # Merges :this into :that Herbarium if user has sufficient privileges
+    # Merge :src into :dest Herbarium if user has sufficient privileges
     # Otherwise sends an email to the webmaster requesting a merger
     def create
-      this = find_or_goto_index(Herbarium, params[:this]) || return
-      that = find_or_goto_index(Herbarium, params[:that]) || return
+      src = find_or_goto_index(Herbarium, params[:src]) || return
+      dest = find_or_goto_index(Herbarium, params[:dest]) || return
 
       # Calls shared private methods that are also used by
       # Herbaria#create and Herbaria#update
-      result = perform_or_request_merge(this, that) || return
+      result = perform_or_request_merge(src, dest) || return
 
       # redirect_to_herbarium_index(result)
       redirect_with_query(herbaria_path(id: result.try(&:id)))

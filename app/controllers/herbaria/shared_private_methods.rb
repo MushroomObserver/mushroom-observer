@@ -21,29 +21,29 @@ module Herbaria::SharedPrivateMethods
 
   # Used by create, edit and HerbariaMerges
 
-  def perform_or_request_merge(this, that)
-    if in_admin_mode? || this.can_merge_into?(that)
-      perform_merge(this, that)
+  def perform_or_request_merge(src, dest)
+    if in_admin_mode? || src.can_merge_into?(dest)
+      perform_merge(src, dest)
     else
-      request_merge(this, that)
+      request_merge(src, dest)
     end
   end
 
-  def perform_merge(this, that)
-    old_name = this.name_was
-    result = this.merge(that)
+  def perform_merge(src, dest)
+    old_name = src.name_was
+    result = dest.merge(src)
     flash_notice(
       :runtime_merge_success.t(
-        type: :herbarium, this: old_name, that: result.name
+        type: :herbarium, src: old_name, dest: result.name
       )
     )
     result
   end
 
-  def request_merge(this, that)
+  def request_merge(src, dest)
     redirect_with_query(
       observer_email_merge_request_path(
-        type: :Herbarium, old_id: this.id, new_id: that.id
+        type: :Herbarium, old_id: src.id, new_id: dest.id
       )
     )
     false
