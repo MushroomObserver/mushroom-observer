@@ -761,6 +761,26 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(true, obs.specimen)
   end
 
+  def test_create_blank_year
+    params = {
+      species_list: {
+        place_name: "Earth",
+        title: "List without year",
+        "when(1i)" => "", # year
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+      }
+    }
+    login("rolf")
+    post(:create_species_list, params: params)
+    spl = SpeciesList.last
+
+    assert_equal(
+      spl.created_at.to_date, spl.when,
+      "SpeciesList.when should be current date if user makes When year blank"
+    )
+  end
+
   # -----------------------------------------------
   #  Test changing species lists in various ways.
   # -----------------------------------------------
