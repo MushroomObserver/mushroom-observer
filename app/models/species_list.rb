@@ -488,8 +488,8 @@ class SpeciesList < AbstractModel
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 
-    if !user && !User.current
-      errors.add(:user, :validate_species_list_user_missing.t)
-    end
+    return unless !user && !User.current
+
+    errors.add(:user, :validate_species_list_user_missing.t)
   end
 end
