@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 # validations used by multiple objects
 module Validations
   extend ActiveSupport::Concern
 
-  # Validates obj.when attribute
+  # Validates obj.when
   # used by: Observation, SpeciesList
   def validate_when
     self.when ||= Time.zone.now
