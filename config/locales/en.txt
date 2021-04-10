@@ -3537,8 +3537,8 @@
   validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
-  validate_observation_invalid_year: Year is invalid.  Should be between 1500 and present.
-  validate_observation_future_time: Time travel is not allowed, pick a date from the past.
+  validate_invalid_year: Year is invalid.  Should be between 1500 and present.
+  validate_future_time: Time travel is not allowed, pick a date from the past.
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].

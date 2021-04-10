@@ -911,7 +911,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days)
     end
-    assert_match(:validate_observation_future_time.t, exception.message)
+    assert_match(:validate_future_time.t, exception.message)
   end
 
   def test_check_requirements_future_time
@@ -921,7 +921,7 @@ class ObservationTest < UnitTestCase
       # Note that 'when' gets automagically converted to Date
       Observation.create!(name_id: fungi.id, when: Time.zone.now + 2.days)
     end
-    assert_match(:validate_observation_future_time.t, exception.message)
+    assert_match(:validate_future_time.t, exception.message)
   end
 
   def test_check_requirements_invalid_year
@@ -930,7 +930,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1))
     end
-    assert_match(:validate_observation_invalid_year.t, exception.message)
+    assert_match(:validate_invalid_year.t, exception.message)
   end
 
   def test_check_requirements_where_too_long

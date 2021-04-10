@@ -13,7 +13,7 @@ module Validations
     return true unless self.when.is_a?(Date) && self.when > Time.zone.tomorrow
 
     errors.add(:when, when_message("Time.zone.today=#{Time.zone.today}"))
-    errors.add(:when, :validate_observation_future_time.t)
+    errors.add(:when, :validate_future_time.t)
     false
   end
 
@@ -32,7 +32,7 @@ module Validations
     # As of July 5, 2020 these statements appear to be unreachable
     # because 'when' is a 'date' in the database.
     errors.add(:when, when_message("Time.now=#{Time.zone.now + 6.hours}"))
-    errors.add(:when, :validate_observation_future_time.t)
+    errors.add(:when, :validate_future_time.t)
     false
   end
 
@@ -41,7 +41,7 @@ module Validations
                        self.when.year > (Time.zone.now + 1.day).year
 
     errors.add(:when, when_message)
-    errors.add(:when, :validate_observation_invalid_year.t)
+    errors.add(:when, :validate_invalid_year.t)
     false
   end
 end
