@@ -467,8 +467,11 @@ class SpeciesList < AbstractModel
 
   protected
 
-  validate :check_requirements
-  def check_requirements # :nodoc:
+  include Validations
+
+  validate :check_requirements, :validate_when
+
+  def check_requirements
     # Clean off leading/trailing whitespace from +where+.
     self.where = where.strip_squeeze if where
     self.where = nil if where == ""
