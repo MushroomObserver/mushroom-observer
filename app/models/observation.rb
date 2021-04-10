@@ -842,14 +842,13 @@ class Observation < AbstractModel
 
   def find_new_favorite(user)
     max = max_positive_vote(user)
+    return unless max.positive?
 
-    if max.positive?
-      user_votes(user).each do |v|
-        next if v.value != max || v.favorite
+    user_votes(user).each do |v|
+      next if v.value != max || v.favorite
 
-        v.favorite = true
-        v.save
-      end
+      v.favorite = true
+      v.save
     end
   end
 
@@ -881,13 +880,13 @@ class Observation < AbstractModel
   def downgrade_totally_confident_votes(value, user)
     # First downgrade any existing 100% votes (if casting a 100% vote).
     v80 = Vote.next_best_vote
-    if value > v80
-      user_votes(user).each do |v|
-        if v.value > v80
-          v.value = v80
-          v.save
-        end
-      end
+    return if value <= v80
+
+    user_votes(user).each do |v|
+      next unless v.value > v80
+
+      v.value = v80
+      v.save
     end
   end
 
@@ -1098,10 +1097,11 @@ class Observation < AbstractModel
     recipients.uniq.each do |recipient|
       next if !recipient || recipient == sender
 
-      if action == :destroy
+      case action
+      when :destroy
         QueuedEmail::ObservationChange.destroy_observation(sender, recipient,
                                                            self)
-      elsif action == :change
+      when :change
         QueuedEmail::ObservationChange.change_observation(sender, recipient,
                                                           self)
       else
@@ -1204,9 +1204,9 @@ class Observation < AbstractModel
   end
 
   def check_user
-    if !user && !User.current
-      errors.add(:user, :validate_observation_user_missing.t)
-    end
+    return if user || User.current
+
+    errors.add(:user, :validate_observation_user_missing.t)
   end
 
   def check_coordinates
@@ -1230,10 +1230,10 @@ class Observation < AbstractModel
   end
 
   def check_altitude
-    if alt.present? && !Location.parse_altitude(alt)
-      # As of July 5, 2020 this statement appears to be unreachable
-      # because .to_i returns 0 for unparsable strings.
-      errors.add(:alt, :runtime_altitude_error.t)
-    end
+    return unless alt.present? && !Location.parse_altitude(alt)
+
+    # As of July 5, 2020 this statement appears to be unreachable
+    # because .to_i returns 0 for unparsable strings.
+    errors.add(:alt, :runtime_altitude_error.t)
   end
 end
