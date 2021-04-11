@@ -4,12 +4,17 @@
 module Validations
   extend ActiveSupport::Concern
 
-  # Validates obj.when
+  # Validates obj.when.
+  # Includes setting it to current date if user set it to nil.
   # used by: Observation, SpeciesList
   def validate_when
     self.when ||= Time.zone.now
     check_date && check_time && check_year
   end
+
+  ##############################################################################
+
+  private
 
   def check_date
     return true unless self.when.is_a?(Date) && self.when > Time.zone.tomorrow
