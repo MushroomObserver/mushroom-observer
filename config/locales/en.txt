@@ -3644,7 +3644,7 @@
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 N\n123 27.402 N\n123 24 24.12 N\n123° 24’ 24.12” N\n123deg 24min 24.12sec N"
   runtime_altitude_error: "Elevation must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."
-  runtime_merge_success: Successfully merged [type] [this] into [that].
+  runtime_merge_success: Successfully merged [type] [src] into [dest].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
   runtime_no_create: Unable to create [type].
@@ -3764,7 +3764,7 @@
   runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
   runtime_edit_name_description_no_change: "[:runtime_no_changes]"
   runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
-  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
+  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,src=this,dest=that)]"
   runtime_edit_name_no_change: "[:runtime_no_changes]"
   runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
   runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
@@ -3792,7 +3792,7 @@
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
   runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
   runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
-  runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
+  runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
   runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
   runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"

@@ -9,7 +9,7 @@ class QueryTest < UnitTestCase
     expect = expect.to_a unless expect.respond_to?(:map!)
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results
-    msg = "Query results are wrong. SQL is:\n" + query.last_query
+    msg = "Query results are wrong. SQL is:\n#{query.last_query}"
     if test_ids
       assert_equal(expect.sort, actual.sort, msg)
     else
@@ -1438,6 +1438,16 @@ class QueryTest < UnitTestCase
   def test_herbarium_all
     expect = Herbarium.all.sort_by(&:name)
     assert_query(expect, :Herbarium, :all)
+  end
+
+  def test_herbarium_by_records
+    expect = Herbarium.
+             left_joins(:herbarium_records).
+             group(:id).
+             # Wrap known safe argument in Arel
+             # to prevent "Dangerous query method" Deprecation Warning
+             order(Arel.sql("COUNT(herbarium_records.id) DESC"))
+    assert_query(expect, :Herbarium, :all, by: :records)
   end
 
   def test_herbarium_in_set
