@@ -241,14 +241,14 @@ class HerbariaController < ApplicationController
       return false
     end
 
-    other = Herbarium.where(name: @herbarium.name).first
-    return true if !other || other == @herbarium
+    dest = Herbarium.where(name: @herbarium.name).first
+    return true if !dest || dest == @herbarium
 
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       false
     else
-      @herbarium = perform_or_request_merge(@herbarium, other)
+      @herbarium = perform_or_request_merge(@herbarium, dest)
     end
   end
 
@@ -312,9 +312,11 @@ class HerbariaController < ApplicationController
   def flash_personal_herbarium?(user)
     return false if user.personal_herbarium.blank?
 
-    flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
-      user: user.login, herbarium: user.personal_herbarium.name
-    ))
+    flash_error(
+      :edit_herbarium_user_already_has_personal_herbarium.t(
+        user: user.login, herbarium: user.personal_herbarium.name
+      )
+    )
     true
   end
 
