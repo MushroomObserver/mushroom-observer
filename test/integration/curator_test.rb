@@ -312,7 +312,7 @@ class CuratorTest < IntegrationTestCase
     get(herbaria_path(flavor: :all))
     click(href: herbaria_path(merge: fundis))
     form = open_form( # merge button
-      "form[action *= 'that=#{mary_herbarium.id}']"
+      "form[action *= 'dest=#{mary_herbarium.id}']"
     )
     form.submit("#{mary.name} (#{mary.login}): Personal Fungarium")
 
