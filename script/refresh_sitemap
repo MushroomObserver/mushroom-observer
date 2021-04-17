@@ -100,6 +100,7 @@ ROBOTS_HEADER = <<~"EOB"
 
   # Completely disallowed bots
   User-agent: ltx71
+  User-agent: AdsBot-Google
   User-agent: AhrefsBot
   User-agent: Applebot
   User-agent: DAUM
