@@ -436,7 +436,6 @@ def write_robots_file(disallowed_paths, allowed_paths)
   File.open(ROBOTS_FILE, "w") do |fh|
     fh.write(ROBOTS_HEADER)
     disallowed_paths.sort.each do |path|
-      path = "#{path}/" unless path.last == "/"
       fh.puts("Disallow: #{path}")
     end
     allowed_paths.each do |path|
