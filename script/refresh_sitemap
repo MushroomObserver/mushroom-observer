@@ -92,7 +92,7 @@ LOCALES = Language.connection.select_values(%(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 ))
 
-ROBOTS_HEADER = <<~"EOB"
+ROBOTS_HEADER = <<~"TXT"
   # For documentation, see:
   # https://developers.google.com/search/docs/advanced/robots/robots_txt
   # http://www.robotstxt.org
@@ -127,41 +127,41 @@ ROBOTS_HEADER = <<~"EOB"
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
-EOB
-ROBOTS_FOOTER = <<"EOB"
-EOB
+TXT
+ROBOTS_FOOTER = <<"TXT"
+TXT
 
-SITEMAP_ROOT_HEADER = <<~"EOB"
+SITEMAP_ROOT_HEADER = <<~"XML"
   <?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-EOB
-SITEMAP_ROOT_FOOTER = <<~"EOB"
+XML
+SITEMAP_ROOT_FOOTER = <<~"XML"
   </sitemapindex>
-EOB
+XML
 
-SITEMAP_LEAF_HEADER = <<~"EOB"
+SITEMAP_LEAF_HEADER = <<~"XML"
   <?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-EOB
-SITEMAP_LEAF_FOOTER = <<~"EOB"
+XML
+SITEMAP_LEAF_FOOTER = <<~"XML"
   </urlset>
-EOB
+XML
 
-INDEX_HEADER = <<~"EOB"
+INDEX_HEADER = <<~"HTML"
   <html><head></head><body>
-EOB
-INDEX_FOOTER = <<~"EOB"
+HTML
+INDEX_FOOTER = <<~"HTML"
   </body></html>
-EOB
+HTML
 
 ################################################################################
 
 def update_sitemap_files
   FileUtils.mkpath(File.dirname(SITEMAP_FILE))
-  last_update = get_last_update
+  last_update = formatted_last_update
   comments = get_new_comments(last_update)
   sitemaps = []
-  for object_type in OBJECT_TYPES
+  OBJECT_TYPES.each do |object_type|
     sitemaps += map_one_object_type(object_type, comments, last_update)
   end
   sitemaps += map_static_pages
@@ -196,15 +196,15 @@ def map_one_object_type(params, comments, last_update)
 end
 
 def update_times_of_new_objects(times, table, last_update)
-  for id, time in Name.connection.select_rows(%(
+  Name.connection.select_rows(%(
     SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
-  ))
+  )).each do |id, time|
     times[id.to_i] = parse_mysql_time(time)
   end
 end
 
 def update_times_of_objects_with_new_images(times, last_update)
-  for id, time in get_new_images(last_update)
+  get_new_images(last_update).each do |id, time|
     id = id.to_i
     time = parse_mysql_time(time)
     times[id] = time if !times[id] || times[id] < time
@@ -212,7 +212,7 @@ def update_times_of_objects_with_new_images(times, last_update)
 end
 
 def update_times_of_objects_with_new_comments(times, comments, type)
-  for target_type, target_id, target_time in comments
+  comments.each do |target_type, target_id, target_time|
     target_id = target_id.to_i
     target_time = parse_mysql_time(target_time)
     if target_type == type && (!times[target_id] ||
@@ -226,9 +226,9 @@ def read_old_files(table)
   result = {}
   pat = Regexp.new("<loc>.*/(\\d+)</loc><lastmod>(.*)</lastmod>")
   wildcard = SITEMAP_FILE.sub("NAME", "#{table}-*")
-  for file in Dir.glob(wildcard)
+  Dir.glob(wildcard).each do |file|
     File.open(file).readlines.each do |line|
-      if match = pat.match(line)
+      if (match = pat.match(line))
         result[match[1].to_i] = match[2]
       end
     end
@@ -238,7 +238,7 @@ end
 
 def write_new_files(times, table, path_template)
   pages = []
-  for id in times.keys.sort
+  times.keys.sort.each do |id|
     str  = "#{table} ##{id}"
     path = path_template.sub("ID", id.to_s)
     time = "<lastmod>#{times[id]}</lastmod>"
@@ -259,8 +259,8 @@ end
 def map_static_pages
   name = "static"
   pages = []
-  for str, path, freq in STATIC_PAGES
-    for locale in LOCALES
+  STATIC_PAGES.each do |str, path, freq|
+    LOCALES.each do |locale|
       lang = locale == "en" ? "" : "?user_locale=#{locale}"
       time = "<changefreq>#{freq}</changefreq>"
       pages << ["#{str} in #{locale}", "#{path}#{lang}", time]
@@ -294,11 +294,11 @@ def write_sitemap_html(name, pages)
 end
 
 def write_index_xml(sitemaps)
-  now = get_current_time
+  now = formatted_current_time
   file = SITEMAP_FILE.sub("NAME", "index")
   File.open(file, "w") do |fh|
     fh.write(SITEMAP_ROOT_HEADER)
-    for sitemap in sitemaps
+    sitemaps.each do |sitemap|
       url  = "<loc>#{SITEMAP_URL.sub("NAME", sitemap)}</loc>"
       time = "<lastmod>#{now}</lastmod>"
       fh.puts("<sitemap>#{url}#{time}</sitemap>")
@@ -311,7 +311,7 @@ def write_index_html(sitemaps)
   file = INDEX_FILE.sub("NAME", "index")
   File.open(file, "w") do |fh|
     fh.write(INDEX_HEADER)
-    for sitemap in sitemaps
+    sitemaps.each do |sitemap|
       fh.puts("<a href=\"#{sitemap}.html\">#{sitemap}</a><br/>")
     end
     fh.write(INDEX_FOOTER)
@@ -331,7 +331,7 @@ def format_time(time)
   time.utc.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 end
 
-def get_last_update
+def formatted_last_update
   file = SITEMAP_FILE.sub("NAME", "index")
   begin
     format_time(File.mtime(file))
@@ -340,7 +340,7 @@ def get_last_update
   end
 end
 
-def get_current_time
+def formatted_current_time
   format_time(Time.zone.now)
 end
 
@@ -349,7 +349,7 @@ end
 def update_robots_file
   allowed_actions = deduce_allowed_actions
   disallowed_paths = []
-  for controller in get_list_of_controllers
+  list_of_controllers.each do |controller|
     actions  = controller_actions(controller)
     allow    = allowed_actions[controller] || []
     disallow = actions - allow
@@ -383,12 +383,12 @@ def parse_path(path)
   [controller, action]
 end
 
-def get_list_of_controllers
+def list_of_controllers
   # We could use ApplicationController.descendants, but controllers are loaded
   # lazily, so there won't actually be any loaded yet.  This is safer.
   result = []
   wildcard = CONTROLLER_FILE.sub("NAME", "*")
-  for file in Dir.glob(wildcard)
+  Dir.glob(wildcard).each do |file|
     match = file.match(/(\w+)_controller.rb/)
     result << match[1] if match
   end
@@ -405,8 +405,8 @@ end
 
 def flatten_allowed_actions(allowed_actions)
   results = []
-  for controller in allowed_actions.keys.sort
-    for action in allowed_actions[controller].uniq
+  allowed_actions.keys.sort.each do |controller|
+    allowed_actions[controller].uniq.each do |action|
       results << "/#{controller}/#{action}"
     end
   end
