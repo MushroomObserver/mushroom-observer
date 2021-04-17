@@ -716,9 +716,6 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  resources :contest_ballots, id: /\d+/
-  resources :contest_entries, id: /\d+/
-
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   AJAX_ACTIONS.each do |action|
