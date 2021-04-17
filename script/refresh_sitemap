@@ -93,8 +93,28 @@ LOCALES = Language.connection.select_values(%(
 ))
 
 ROBOTS_HEADER = <<~"EOB"
-  # See http://www.robotstxt.org for documentation.
+  # For documentation, see:
+  # https://developers.google.com/search/docs/advanced/robots/robots_txt
+  # http://www.robotstxt.org
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
+
+  # Completely disallowed bots
+  User-agent: ltx71
+  User-agent: AhrefsBot
+  User-agent: Applebot
+  User-agent: DAUM
+  User-agent: MauiBot
+  User-agent: MJ12bot
+  User-agent: SpiderLing
+  User-agent: spbot
+  Disallow: /
+
+  # Rules applying to some allowed bots
+  User-agent: CCBot
+  Crawl-Delay: 30
+
+  # Rules applying to all alloed bots
+  # (Note: the rest of #write_robots_file output follows this immeediately.)
   User-agent: *
   Crawl-Delay: 15
   Disallow: *page=*
@@ -105,34 +125,6 @@ ROBOTS_HEADER = <<~"EOB"
   Disallow: */show*user_locale=*
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
-
-  User-agent: CCBot
-  Crawl-Delay: 30
-
-  User-agent: ltx71
-  Disallow: /
-
-  User-agent: SpiderLing
-  Disallow: /
-
-  User-agent: Applebot
-  Disallow: /
-
-  User-agent: spbot
-  Disallow: /
-
-  User-agent: MJ12bot
-  Disallow: /
-
-  User-agent : DAUM
-  Disallow : /
-
-  User-agent: AhrefsBot
-  Disallow: /
-
-  User-agent: MauiBot
-  Disallow: /
-
 EOB
 ROBOTS_FOOTER = <<"EOB"
 EOB
