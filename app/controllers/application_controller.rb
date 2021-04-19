@@ -162,11 +162,13 @@ class ApplicationController < ActionController::Base
 
     logger.warn("BLOCKED #{request.remote_ip}")
     msg = "We have noticed a lot of server-intensive traffic from this IP" \
-          "address (#{request.remote_ip}).  There may be better ways of" \
-          "doing what you are trying to do.  Please contact the webmaster" \
+          "address (#{request.remote_ip}). There may be better ways of" \
+          "doing what you are trying to do. Please contact the webmaster" \
           "(#{MO.webmaster_email_address}) so that we can talk about it." \
-          "Please include a copy of this message in your email.  Apologies " \
-          "for the inconvenience."
+          "So that we can best help you, please: \n" \
+          "- include a copy of this message; \n" \
+          "- tell how you generally use Mushroom Observer; \n" \
+          "- tell us what you were doing when you received this message."
     render(plain: msg,
            status: :too_many_requests,
            layout: false)
