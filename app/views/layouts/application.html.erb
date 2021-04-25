@@ -78,8 +78,13 @@
   <div class="row row-offcanvas row-offcanvas-left">
 
     <!--NAVIGATION-->
-    <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print" id="navigation">
-      <%= render(partial: "/shared/nav_left") %>
+    <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print">
+      <a href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+        <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/ width="165px">
+      </a>
+      <div id="navigation">
+        <%= render(partial: "/shared/nav_left") %>
+      </div>
     </div>
     <!--/NAVIGATION-->
 
