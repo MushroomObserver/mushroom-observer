@@ -515,7 +515,7 @@ class LocationController < ApplicationController
       user_name = Location.user_name(@user, @display_name)
       if @display_name
         @dubious_where_reasons = Location.
-                                 dubious_name?(user_name, true)
+                                 dubious_name?(user_name, provide_reasons: true)
       end
       @location = Location.new
       geocoder = Geocoder.new(user_name)
@@ -558,7 +558,9 @@ class LocationController < ApplicationController
         # Validate name.
         @dubious_where_reasons = []
         if @display_name != @approved_name
-          @dubious_where_reasons = Location.dubious_name?(db_name, true)
+          @dubious_where_reasons = Location.dubious_name?(
+            db_name, provide_reasons: true
+          )
         end
 
         if @dubious_where_reasons.empty?
@@ -673,7 +675,9 @@ class LocationController < ApplicationController
       @location.low   = params[:location][:low]   if params[:location][:low]
       @location.display_name = @display_name
       if @display_name != params[:approved_where]
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
+        @dubious_where_reasons = Location.dubious_name?(
+          db_name, provide_reasons: true
+        )
       end
     end
     return unless @dubious_where_reasons.empty?

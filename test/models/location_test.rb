@@ -4,7 +4,7 @@ require("test_helper")
 
 class LocationTest < UnitTestCase
   def bad_location(str)
-    assert(Location.dubious_name?(str, true) != [])
+    assert(Location.dubious_name?(str, provide_reasons: true) != [])
   end
 
   def good_location(str)
@@ -68,6 +68,31 @@ class LocationTest < UnitTestCase
     assert_not(Location.understood_continent?("Atlantis"))
     assert(Location.countries_in_continent("Europe").include?("France"))
     assert_not(Location.countries_in_continent("Europe").include?("Canada"))
+  end
+
+  def test_suggestions_for_latlon
+    point_arena = locations(:point_arena)
+    suggestions = Location.suggestions_for_latlong(
+      (point_arena.north + point_arena.south) / 2,
+      (point_arena.east + point_arena.west) / 2
+    )
+
+    assert_includes(
+      suggestions,
+      locations(:point_arena_mendocino_co),
+      "Suggestions should include Locations whose name is precise enough " \
+      "and whose area is small enough"
+    )
+    assert_not_includes(
+      suggestions,
+      locations(:point_arena),
+      "Suggestions should exclude Locations whose name is not precise enough"
+    )
+    assert_not_includes(
+      suggestions,
+      locations(:frannys_point_arena_with_global_lat_lon),
+      "Suggestions should exclude Locations whose area is too large"
+    )
   end
 
   def test_versioning
@@ -399,7 +424,8 @@ class LocationTest < UnitTestCase
   def do_merge_test(obj)
     loc1 = locations(:albion)
     loc2 = locations(:nybg_location)
-    obj.update_attribute(:location, loc1)
+    # Disable cop because we want to skip validations
+    obj.update_attribute(:location, loc1) # rubocop:disable Rails/SkipsModelValidations
     obj.reload
     assert_equal(loc1.id, obj.location_id)
     loc2.merge(loc1)
@@ -412,13 +438,15 @@ class LocationTest < UnitTestCase
 
     User.current = rolf
     assert_equal(:postal, User.current_location_format)
-    loc.update_attribute(:display_name, "One, Two, Three")
+    # Disable cop because we want to skip validations
+    loc.update_attribute(:display_name, "One, Two, Three") # rubocop:disable Rails/SkipsModelValidations
     assert_equal("One, Two, Three", loc.name)
     assert_equal("Three, Two, One", loc.scientific_name)
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    loc.update_attribute(:display_name, "Un, Deux, Trois")
+    # Disable cop because we want to skip validations
+    loc.update_attribute(:display_name, "Un, Deux, Trois") # rubocop:disable Rails/SkipsModelValidations
     assert_equal("Trois, Deux, Un", loc.name)
     assert_equal("Un, Deux, Trois", loc.scientific_name)
   end

@@ -1351,6 +1351,19 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def test_destroy_observation_failure
+    obs = observations(:minimal_unknown_obs)
+    params = { id: obs.id.to_s }
+    login(obs.user.login)
+
+    Observation.any_instance.stubs(:destroy).returns(false)
+    post(:destroy_observation, params: params)
+
+    assert_redirected_to(/#{obs.id}/)
+    assert_not(obs.destroyed?)
+    assert(Observation.where(id: obs.id).exists?)
+  end
+
   # Prove that recalc redirects to show_observation, and
   # corrects an Observation's name.
   def test_recalc
@@ -1367,6 +1380,14 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_observation, id: obs.id)
     assert_equal(accurate_consensus, obs.name)
+  end
+
+  def test_recalc_error
+    login
+    # Make recalc throw an error with Observation.find(-1)
+    get(:recalc, params: { id: -1 })
+
+    assert_flash_text(/Caught exception/)
   end
 
   def test_some_admin_pages
@@ -1865,6 +1886,35 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
     assert_input_value(:herbarium_record_herbarium_id, "1234")
+  end
+
+  def test_create_observation_herbarium_record_already_used
+    record = herbarium_records(:field_museum_record)
+    user = dick
+    assert_not(
+      record.can_edit?(user),
+      "Test needs different fixture: herbarim_record not editable by user"
+    )
+    old_record_obs_count = record.observations.count
+    included_in_flash = :create_herbarium_record_already_used_by_someone_else.t(
+      herbarium_name: record.herbarium.name
+    )
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: record.herbarium.name,
+          herbarium_id: record.accession_number
+        },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0, dick
+    )
+    obs = assigns(:observation)
+
+    assert(obs.specimen)
+    assert_flash_text(/#{included_in_flash}/)
+    assert(obs.herbarium_records.count.zero?)
+    assert_equal(old_record_obs_count, record.observations.count)
   end
 
   def test_create_observation_with_herbarium_no_id
@@ -2692,6 +2742,25 @@ class ObserverControllerTest < FunctionalTestCase
     assert_false(old_img2.reload.gps_stripped)
   end
 
+  def test_create_observation_pending_naming_notification
+    params = {
+      observation: {
+        when: Time.zone.now,
+        place_name: locations(:albion).name,
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      name: {},
+      vote: { value: "3" }
+    }
+    login("rolf")
+
+    ObserverController.any_instance.stubs(:unshown_notifications?).returns(true)
+    post(:create_observation, params: params)
+
+    assert_redirected_to(/#{observer_show_notifications_path}/)
+  end
+
   # ----------------------------------------------------------------
   #  Test edit_observation, both "get" and "post".
   # ----------------------------------------------------------------
@@ -2871,7 +2940,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
-      Rails.root.join("test", "fixtures", "projects.yml").to_s, "text/plain"
+      Rails.root.join("test/fixtures/projects.yml").to_s, "text/plain"
     )
     params = {
       id: obs.id,
@@ -2957,6 +3026,76 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  def test_edit_observation_save_failure
+    obs = observations(:minimal_unknown_obs)
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: { other: "new notes" },
+        place_name: obs.where,
+        "when(1i)" => "2006",
+        "when(2i)" => "05",
+        "when(3i)" => "11",
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Observation.any_instance.stubs(:save).returns(false)
+    assert_no_difference(
+      "Observation.count", "An Observation should not be created"
+    ) do
+      post(:edit_observation, params: params)
+    end
+
+    assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
+    assert_response(:success, "Edit form should be reloaded")
+  end
+
+  def test_edit_observation_image_save_failure
+    obs = observations(:detailed_unknown_obs)
+    # more detailed location to avoid location flash warning and redirection
+    location = locations(:point_reyes)
+    obs.update(location: location)
+    img = obs.images.first
+    img_notes = img.notes
+
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: obs.notes,
+        place_name: obs.where,
+        "when(1i)" => obs.when.strftime("%Y"),
+        "when(2i)" => obs.when.strftime("%m"),
+        "when(3i)" => obs.when.strftime("%d"),
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image: {
+        img.id.to_s => {
+          notes: "change something to force image to be saved",
+          original_name: img.original_name,
+          copyright_holder: img.copyright_holder,
+          "when(1i)" => img.when.strftime("%Y"),
+          "when(2i)" => img.when.strftime("%m"),
+          "when(3i)" => img.when.strftime("%d"),
+          license_id: img.license_id
+        }
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:edit_observation, params: params)
+
+    assert_redirected_to(/#{obs.id}$/)
+    assert_equal(img_notes, img.reload.notes)
   end
 
   # --------------------------------------------------------------------
@@ -3493,7 +3632,8 @@ class ObserverControllerTest < FunctionalTestCase
       approved_where: approved ? str : "something else"
     }
     login("rolf") unless User.current
-    post(:create_observation, modified_generic_params(params, User.current))
+    post(:create_observation,
+         params: modified_generic_params(params, User.current))
     if succeed
       expect_obs_form_to_succeed
     else
@@ -3750,7 +3890,7 @@ class ObserverControllerTest < FunctionalTestCase
       approved_where: "something else",
       location_suggestions: { name: loc.name }
     }
-    post(:create_observation, modified_generic_params(params, user))
+    post(:create_observation, params: modified_generic_params(params, user))
     assert_response(:redirect, "expected this to submit successfully")
     obs = Observation.last
     assert_objs_equal(loc, obs.location)
@@ -3769,7 +3909,7 @@ class ObserverControllerTest < FunctionalTestCase
       county: "Mendocino Co.",
       city: "Gualala"
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_missing.t)
     assert_suggestions_include(loc)
@@ -3786,7 +3926,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { place_name: "California, USA", lat: lat, long: long }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_inaccurate.t)
     assert_suggestions_include(loc)
@@ -3803,7 +3943,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { place_name: str }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
     assert_suggestions_include(loc)
@@ -3821,7 +3961,7 @@ class ObserverControllerTest < FunctionalTestCase
       id: obs.id.to_s,
       observation: { lat: lat, long: long }
     }
-    post(:edit_observation, params)
+    post(:edit_observation, params: params)
     expect_obs_form_to_fail
     assert_includes(@reasons, :form_observations_location_outside.t)
     assert_suggestions_include(locations(:california))

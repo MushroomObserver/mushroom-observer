@@ -148,8 +148,8 @@ class Location < AbstractModel
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
   \s*$/x.freeze
 
@@ -273,7 +273,7 @@ class Location < AbstractModel
   def self.official_unknown
     # yikes! need to make sure we always include the English words
     # for "unknown", even when viewing the site in another language
-    Language.official.translation_strings.find_by_tag("unknown_locations").
+    Language.official.translation_strings.find_by(tag: "unknown_locations").
       text.split(/, */)
   rescue StandardError
     []
@@ -346,10 +346,10 @@ class Location < AbstractModel
   #     :conditions => ['name LIKE "%?%"', pattern]
   #   )
   #
-  def self.clean_name(str, leave_stars = false)
+  def self.clean_name(str, leave_stars: false)
     str = str.to_ascii
     if leave_stars
-      str.gsub!(/[^\w\*]+/, " ")
+      str.gsub!(/[^\w*]+/, " ")
       str.gsub!(/ +\*/, "*")
       str.gsub!(/\* +/, "*")
     else
@@ -417,8 +417,7 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    find_by_name(name) ||
-      find_by_scientific_name(name)
+    find_by(name: name) || find_by(scientific_name: name)
   end
 
   def self.user_name(user, name)
@@ -472,7 +471,7 @@ class Location < AbstractModel
       if OK_PREFIXES.member?(s)
         count += 1
       else
-        trimmed = tokens[count..-1].join(" ")
+        trimmed = tokens[count..].join(" ")
         return trimmed if understood_places.member?(trimmed)
       end
     end
@@ -527,7 +526,7 @@ class Location < AbstractModel
   end
 
   # Decide if the given name is dubious for any reason
-  def self.dubious_name?(name, provide_reasons = false, check_db = true)
+  def self.dubious_name?(name, provide_reasons: false, check_db: true)
     reasons = []
     unless check_db && location_exists(name)
       reasons += check_for_empty_name(name)
@@ -803,7 +802,7 @@ class Location < AbstractModel
   protected
 
   validate :check_requirements
-  def check_requirements # :nodoc:
+  def check_requirements
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end

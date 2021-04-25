@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
+#  Actions:
+#
+#    create_observation::
+#    edit_observation::
+#    destroy_observation::
+#    hide_thumbnail_map::
+#    recalc::               recalculate consensus ID
+#
 class ObserverController
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
@@ -41,6 +49,10 @@ class ObserverController
       create_observation_post(params)
     end
   end
+
+  ##############################################################################
+
+  private
 
   def create_observation_get
     @observation = Observation.new
@@ -187,7 +199,9 @@ class ObserverController
   # a chance to fix it or choose an existing location.
   def location_doesnt_exist
     db_name = Location.user_name(@user, @place_name)
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @dubious_where_reasons = Location.dubious_name?(
+      db_name, provide_reasons: true
+    )
     @location_suggestion_reasons << :form_observations_location_doesnt_exist.t
     @location_suggestions = Location.suggestions(db_name, geolocation(params))
     @dubious_where_reasons.any? || @location_suggestions.any?
@@ -215,7 +229,7 @@ class ObserverController
     close = obs.location&.close?(obs.lat, obs.long)
     # If current location isn't even close, then suggest *any* location that
     # contains the point, otherwise restrict to more accurate locations.
-    area = close ? obs.location.pseudoarea : 360*360
+    area = close ? obs.location.pseudoarea : 360 * 360
     Location.suggestions_for_latlong(obs.lat, obs.long).
       select { |loc| loc.pseudoarea <= area }.
       reject { |loc| loc == obs.location }
@@ -370,6 +384,10 @@ class ObserverController
     init_list_vars_for_reload(@observation)
   end
 
+  ##############################################################################
+
+  public
+
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -461,6 +479,10 @@ class ObserverController
     end
   end
 
+  ##############################################################################
+
+  private
+
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}
   end
@@ -476,7 +498,11 @@ class ObserverController
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
 
-  # Callback to destroy an observation (and associated namings, votes, etc.)
+  ##############################################################################
+
+  public
+
+  # Destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
@@ -528,6 +554,10 @@ class ObserverController
     # render(plain: "", layout: true)
     redirect_with_query(action: "show_observation", id: id)
   end
+
+  ##############################################################################
+
+  private
 
   ##############################################################################
   #
@@ -585,10 +615,10 @@ class ObserverController
       @collectors_name   = params[:collection_number][:name]
       @collectors_number = params[:collection_number][:number]
     end
-    if params[:herbarium_record]
-      @herbarium_name = params[:herbarium_record][:herbarium_name]
-      @herbarium_id   = params[:herbarium_record][:herbarium_id]
-    end
+    return unless params[:herbarium_record]
+
+    @herbarium_name = params[:herbarium_record][:herbarium_name]
+    @herbarium_id   = params[:herbarium_record][:herbarium_id]
   end
 
   def init_project_vars
@@ -805,6 +835,10 @@ class ObserverController
     image
   end
 
+  ##############################################################################
+
+  public
+
   def hide_thumbnail_map
     pass_query_params
     id = params[:id].to_s
@@ -817,6 +851,10 @@ class ObserverController
     redirect_with_query(action: :show_observation, id: id)
   end
 
+  ##############################################################################
+
+  private
+
   def strip_images!
     @observation.images.each do |img|
       error = img.strip_gps!
@@ -824,37 +862,13 @@ class ObserverController
     end
   end
 
-  ##############################################################################
-  #
-  #  Methods relating to User#notes_template
-  #
-  ##############################################################################
-
-  def use_notes_template?
-    @user.notes_template? && @observation.notes.blank?
-  end
-
-  # String combining the note parts defined in the User's notes_template
-  # with their filled-in values, ignoring parts with blank values
-  def combined_notes_parts
-    @user.notes_template_parts.each_with_object("") do |part, notes|
-      key   = Observation.notes_part_id(part).to_sym
-      value = params[key]
-      notes << "#{part}: #{value}\n" if value.present?
-    end
-  end
-
-  ##############################################################################
-
-  private
-
   def update_naming(reason)
-    if @name
-      @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_log(@naming)
-      @observation.reload
-      @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
-    end
+    return unless @name
+
+    @naming.create_reasons(reason, params[:was_js_on] == "yes")
+    save_with_log(@naming)
+    @observation.reload
+    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def whitelisted_observation_args

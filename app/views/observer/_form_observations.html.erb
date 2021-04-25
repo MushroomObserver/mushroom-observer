@@ -31,6 +31,7 @@
     <% end %>
     <% if @location_suggestions.any? %>
       <%= :form_observations_location_suggestions.t %>
+      <br>
       <% @location_suggestions.each do |location| %>
         <%= indent + radio_button(:location_suggestions, :name,
                                   location.name, checked: false) %>

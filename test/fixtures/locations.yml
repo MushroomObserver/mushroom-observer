@@ -245,6 +245,36 @@ california:
   high: 4421
   low: -86
 
+# 3 levels of verbal precisiom; lacks county
+point_arena:
+  <<: *DEFAULTS
+  name: Point Arena, California, USA
+  scientific_name: USA, California, Point Arena
+  north: 38.918445
+  south: 38.903790
+  east: -123.676634
+  west: -123.726771
+
+# same as above, but with 4 levels of precision, including county
+point_arena_mendocino_co:
+  <<: *DEFAULTS
+  name: Point Arena, Mendocino Co., California, USA
+  scientific_name: USA, California, Mendocino Co., Point Arena
+  north: 38.918445
+  south: 38.903790
+  east: -123.676634
+  west: -123.726771
+
+# 5 levels of verbal precision, but bogus lat/lon the same as Earth
+frannys_point_arena_with_global_lat_lon:
+  <<: *DEFAULTS
+  name: Franny's Cup and Saucer, Point Arena, Mendocino Co., California, USA
+  scientific_name: USA, California, Mendocino Co., Point Arena, Frannys Cup and Saucer
+  north: 80.0
+  south: -80.0
+  east: 179.0
+  west: -179.0
+
 birgu:
   <<: *DEFAULTS
   name: Birgu, Malta
