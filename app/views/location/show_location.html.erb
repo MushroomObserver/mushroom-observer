@@ -46,7 +46,7 @@
   </div>
 
   <div class="col-xs-12 max-width-text-plus-padding">
-    <% if @description && @description.has_any_notes? %>
+    <% if @description&.notes? %>
       <hr/>
       <%= show_embedded_description_title(@description, @location) %>
       <%= render(partial: "location_description", object: @description) %>

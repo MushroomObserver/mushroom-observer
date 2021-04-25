@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
   # Is this Name misspelled?
   def is_misspelling?
-    correct_spelling_id.present?
+    !correctly_spelt?
+  end
+
+  def correctly_spelt?
+    correct_spelling_id.blank?
   end
 
   # Do some simple queries to try to find alternate spellings of the given
@@ -36,67 +42,6 @@ class Name < AbstractModel
 
     results
   end
-
-  private
-
-  # Guess correct name of partial string.
-  def self.guess_word(prefix, word) # :nodoc:
-    str = "#{prefix} #{word}"
-    results = guess_with_errors(str, 1)
-    results = guess_with_errors(str, 2) if results.empty?
-    results = guess_with_errors(str, 3) if results.empty?
-    results
-  end
-
-  # Look up name replacing n letters at a time with a star.
-  def self.guess_with_errors(name, count) # :nodoc:
-    patterns = []
-
-    # Restrict search to names close in length.
-    min_len = Name.connection.quote((name.length - 2).to_s)
-    max_len = Name.connection.quote((name.length + 2).to_s)
-
-    # Create a bunch of SQL "like" patterns.
-    name = name.gsub(/ \w+\. /, " % ")
-    words = name.split
-    (0..(words.length - 1)).each do |i|
-      word = words[i]
-      if word != "%"
-        if word.length < count
-          patterns << guess_pattern(words, i, "%")
-        else
-          (0..(word.length - count)).each do |j|
-            sub = ""
-            sub += word[0..(j - 1)] if j.positive?
-            sub += "%"
-            sub += word[(j + count)..-1] if j + count < word.length
-            patterns << guess_pattern(words, i, sub)
-          end
-        end
-      end
-    end
-
-    # Create SQL query out of these patterns.
-    conds = patterns.map do |pat|
-      "text_name LIKE #{Name.connection.quote(pat)}"
-    end.join(" OR ")
-    all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
-                "AND (#{conds}) AND correct_spelling_id IS NULL"
-    names = where(all_conds).limit(10).to_a
-
-    names
-  end
-
-  # String words together replacing the one at +index+ with +sub+.
-  def self.guess_pattern(words, index, sub) # :nodoc:
-    result = []
-    (0..(words.length - 1)).each do |j|
-      result << (index == j ? sub : words[j])
-    end
-    result.join(" ")
-  end
-
-  public
 
   # Check if the reason that the given name (String) is unrecognized is because
   # it's within a deprecated genus.  Use case: Cladina has been included back
@@ -131,7 +76,7 @@ class Name < AbstractModel
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
         conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-                      synonym.text_name + " " + child_pat]
+                      "#{synonym.text_name} #{child_pat}"]
         result += Name.where(conditions).select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)
@@ -157,4 +102,67 @@ class Name < AbstractModel
     end
     true
   end
+
+  ##############################################################################
+
+  # Guess correct name of partial string.
+  # This method should be private.
+  # See https://www.pivotaltracker.com/story/show/176098819
+  def self.guess_word(prefix, word)
+    str = "#{prefix} #{word}"
+    results = guess_with_errors(str, 1)
+    results = guess_with_errors(str, 2) if results.empty?
+    results = guess_with_errors(str, 3) if results.empty?
+    results
+  end
+
+  # Look up name replacing n letters at a time with a star.
+  # This method should be private.
+  # See https://www.pivotaltracker.com/story/show/176098819
+  def self.guess_with_errors(name, count)
+    patterns = []
+
+    # Restrict search to names close in length.
+    min_len = Name.connection.quote((name.length - 2).to_s)
+    max_len = Name.connection.quote((name.length + 2).to_s)
+
+    # Create a bunch of SQL "like" patterns.
+    name = name.gsub(/ \w+\. /, " % ")
+    words = name.split
+    (0..(words.length - 1)).each do |i|
+      word = words[i]
+      if word != "%"
+        if word.length < count
+          patterns << guess_pattern(words, i, "%")
+        else
+          (0..(word.length - count)).each do |j|
+            sub = ""
+            sub += word[0..(j - 1)] if j.positive?
+            sub += "%"
+            sub += word[(j + count)..-1] if j + count < word.length
+            patterns << guess_pattern(words, i, sub)
+          end
+        end
+      end
+    end
+
+    # Create SQL query out of these patterns.
+    conds = patterns.map do |pat|
+      "text_name LIKE #{Name.connection.quote(pat)}"
+    end.join(" OR ")
+    all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
+                "AND (#{conds}) AND correct_spelling_id IS NULL"
+    where(all_conds).limit(10).to_a
+  end
+
+  # String words together replacing the one at +index+ with +sub+.
+  def self.guess_pattern(words, index, sub) # :nodoc:
+    result = []
+    (0..(words.length - 1)).each do |j|
+      result << (index == j ? sub : words[j])
+    end
+    result.join(" ")
+  end
+
+  private_class_method :guess_pattern
 end

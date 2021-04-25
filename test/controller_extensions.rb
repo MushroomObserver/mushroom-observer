@@ -246,9 +246,9 @@ module ControllerExtensions
       count += 1
       next unless count > 100
 
-      raise(RangeError.new(
-        "More than 100 files found with a label of '#{label}'"
-      ))
+      raise(
+        RangeError.new("More than 100 files found with a label of '#{label}'")
+      )
     end
     print("Creating html_dump file: #{file_name}\n")
     file = File.new(file_name, "w")
@@ -348,7 +348,7 @@ module ControllerExtensions
     url = @controller.url_for(url_opts)
     url.force_encoding("UTF-8") if url.respond_to?(:force_encoding)
     url = URI.decode_www_form_component(url)
-    # Find each occurrance of <form action="blah" method="post">.
+    # Find each occurrence of <form action="blah" method="post">.
     found_it = false
     found = {}
     @response.body.split(/<form [^<>]*action/).each do |str|

@@ -102,9 +102,9 @@ class NameSorter
 
     @has_new_synonyms                = false
     @has_unapproved_deprecated_names = false
+
     @synonym_data              = [] # Array of [NameParse, [Name, Name, ...]]
     @all_names                 = [] # Array of Name's
-
     @deprecated_name_strs      = [] # Array of String's
     @deprecated_names          = [] # Array of Name's
     @multiple_line_strs        = [] # Array of String's

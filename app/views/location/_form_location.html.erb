@@ -89,7 +89,7 @@
               </center>
             </div>
           </div>
-        </div>    
+        </div>
         <div class="col-sm-4">
           <center>
             <div class="form-group push-down">
@@ -128,8 +128,8 @@
       <%= content_tag(:b, :EAST.t) %>: <%= @location.east %>°<br/>
       <%= content_tag(:b, :WEST.t) %>: <%= @location.west %>°<br/>
       <% if @location.high.present? && @location.low.present? %>
-        <%= content_tag(:b, show_location_highest.t) %>: <%= @location.high %> m<br/>
-        <%= content_tag(:b, show_location_lowest.t) %>: <%= @location.low %> m<br/>
+        <%= content_tag(:b, :show_location_highest.t) %>: <%= @location.high %> m<br/>
+        <%= content_tag(:b, :show_location_lowest.t) %>: <%= @location.low %> m<br/>
       <% end %>
       <div class="help-block"><%= :show_location_locked.tp %></div>
       <%= hidden_field(:location, :display_name, value: @display_name) %>

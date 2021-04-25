@@ -67,7 +67,7 @@ for desc in NameDescription.all
       notes = "" if notes.blank?
 
       desc.notes = ""
-      if desc.has_any_notes? && (
+      if desc.notes? && (
          !notes.to_s.match(/^The preferred name is/)
       )
         update_desc(desc, notes)
@@ -100,7 +100,7 @@ for desc in NameDescription.all
     else
       notes.sub!(/\s+\Z/, "")
       desc.notes = ""
-      if !desc.has_any_notes? &&
+      if !desc.notes? &&
          !old_notes.match(/^Images of Myxomycetes/) &&
          !old_notes.match(/^An online key/) &&
          !old_notes.match(/^This is an interesting segregate genus/) &&

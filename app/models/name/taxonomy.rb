@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  scope :with_classification_like,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+        }
+  scope :with_rank_below,
+        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+
   def self.all_ranks
     [:Form, :Variety, :Subspecies, :Species,
      :Stirps, :Subsection, :Section, :Subgenus, :Genus,
@@ -193,7 +203,7 @@ class Name < AbstractModel
       return unless text_name.include?(" ")
 
       genus_name = text_name.split(" ", 2).first
-      genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
+      genera     = Name.with_correct_spelling.where(text_name: genus_name)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
       nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
@@ -257,10 +267,10 @@ class Name < AbstractModel
   # arbitrarily where there is still ambiguity.  Useful if you just need a
   # name and it's not so critical that it be the exactly correct one.
   def self.best_match(name)
-    matches = Name.where(search_name: name, correct_spelling_id: nil)
+    matches = Name.with_correct_spelling.where(search_name: name)
     return matches.first if matches.any?
 
-    matches  = Name.where(text_name: name, correct_spelling_id: nil)
+    matches  = Name.with_correct_spelling.where(text_name: name)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
     nonsensu = matches.reject { |match| match.author.start_with?("sensu ") }
@@ -527,5 +537,50 @@ class Name < AbstractModel
         AND COALESCE(nd.classification, "") != ""
     ))
     []
+  end
+
+  # ----------------------------------------------------------------------------
+
+  # Does another Name "depend" on this Name?
+  def dependents?
+    approved_synonym_of_correctly_spelt_proposed_name? ||
+      correctly_spelled_ancestor_of_proposed_name? ||
+      ancestor_of_correctly_spelled_name?
+  end
+
+  ################
+
+  private
+
+  def approved_synonym_of_correctly_spelt_proposed_name?
+    !deprecated &&
+      Naming.joins(:name).where(name: other_synonyms).
+        merge(Name.with_correct_spelling).any?
+  end
+
+  def ancestor_of_correctly_spelled_name?
+    if at_or_below_genus?
+      Name.where("text_name LIKE ?", "#{text_name} %").
+        with_correct_spelling.any?
+    else
+      Name.with_classification_like(rank, text_name).with_correct_spelling.any?
+    end
+  end
+
+  def correctly_spelled_ancestor_of_proposed_name?
+    return false if correct_spelling.present?
+    return above_genus_is_ancestor? unless at_or_below_genus?
+    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+
+    false
+  end
+
+  def above_genus_is_ancestor?
+    Name.joins(:namings).with_classification_like(rank, text_name).any?
+  end
+
+  def genus_or_species_is_ancestor?
+    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
+      with_rank_below(rank).any?
   end
 end

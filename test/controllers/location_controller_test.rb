@@ -112,6 +112,13 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_location_pattern_search_id
+    loc = locations(:salt_point)
+
+    get(:location_search, params: { pattern: loc.id.to_s })
+    assert_redirected_to("#{location_show_location_path}/#{loc.id}")
+  end
+
   def test_location_advanced_search
     query = Query.lookup_and_save(:Location, :advanced_search,
                                   location: "California")
@@ -455,6 +462,26 @@ class LocationControllerTest < FunctionalTestCase
     assert_form_action(action: "edit_location", id: loc.id.to_s,
                        approved_where: loc.display_name)
     assert_input_value(:location_display_name, loc.display_name)
+  end
+
+  def test_edit_locked_location
+    location = locations(:albion)
+    location.update(locked: true)
+    login(mary.login)
+
+    get(:edit_location, params: { id: location.id })
+
+    assert_select(
+      "input:match('name', ?)", /location/, { minimum: 2 },
+      "Location form for locked Location should have location input fields"
+    ) do |location_input_fields|
+      location_input_fields.each do |field|
+        assert_equal(
+          "hidden", field["type"],
+          "Location input fields should be hidden for locked Locations"
+        )
+      end
+    end
   end
 
   def test_edit_unknown_location

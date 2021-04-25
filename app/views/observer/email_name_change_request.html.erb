@@ -1,0 +1,30 @@
+<%
+  @title = :email_name_change_request_title.t
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: Name), @name.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= :email_name_change_request_help.tp %>
+  <%= form_tag(name_id: @name.id, new_name: @new_name) do %>
+    <div class="form-group push-down">
+      <%= label_tag(:name, :NAME.t) %>:
+          <%= @name.unique_search_name %>
+    </div>
+
+    <div class="form-group push-down">
+      <%= label_tag(:new_name.t) %>: <%= @new_name %>
+    </div>
+
+    <div class="form-group push-down">
+      <%= label_tag(:notes, "#{:Notes.t}:") %>
+      <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
+                        data: {autofocus: true}) %>
+    </div>
+
+    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+  <% end %>
+</div>

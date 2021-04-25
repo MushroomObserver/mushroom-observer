@@ -126,6 +126,28 @@ class DescriptionTest < UnitTestCase
     end
   end
 
+  # ------------------------------------------------------------------
+
+  def test_destroy_default_description
+    name = names(:suillus)
+    desc = name.description
+    desc.destroy
+
+    assert_nil(name.reload.description,
+               "Destroying default description should reset name.description")
+  end
+
+  def test_editor
+    desc = name_descriptions(:coprinus_comatus_desc)
+
+    assert(desc.editor?(mary),
+           "Mary should be an editor of #{desc.text_name}")
+    assert(desc.editor?(rolf),
+           "Rolf should be an editor of #{desc.text_name}")
+    assert_not(desc.editor?(katrina),
+               "Katrina should be an editor of #{desc.text_name}")
+  end
+
   def test_parent_setters
     albion = locations(:albion)
     obj = LocationDescription.new(location_id: albion.id,
@@ -151,5 +173,89 @@ class DescriptionTest < UnitTestCase
            "`permitted?` should accept user.id")
     error = assert_raises(Exception) { desc.permitted?(table, "bad argument") }
     assert_equal(ArgumentError, error.class)
+  end
+
+  def test_formats
+    desc = name_descriptions(:suillus_desc)
+    assert(desc.text_name.start_with?("Public Description of "),
+           "Description text_name should start with description source type")
+    assert(desc.text_name.end_with?(desc.parent.search_name),
+           "Description text_name should end with parent's search_name")
+    assert_equal(ActionView::Base.full_sanitizer.sanitize(desc.text_name),
+                 desc.text_name,
+                 "Description text_name should not have HTML")
+
+    assert(desc.unique_text_name.include?(desc.id.to_s),
+           "Description unique_text_name should include id")
+
+    assert(desc.unique_format_name.include?(desc.id.to_s),
+           "Description unique_format_name should include id")
+
+    assert(desc.partial_text_name.exclude?(desc.parent.text_name),
+           "Description partial_text_name should omit parent")
+
+    assert(desc.unique_partial_text_name.exclude?(desc.parent.text_name),
+           "Description unique_partial_text_name should omit parent")
+    assert(desc.unique_partial_text_name.include?(desc.id.to_s),
+           "Description unique_partial_text_name should include id")
+  end
+
+  def test_user_sourced_description_with_unknown_user
+    desc = name_descriptions(:peltigera_user_desc)
+    desc.update(user_id: nil)
+
+    assert(desc.text_name.start_with?("?'s "),
+           "text_name of user sourced Description with unknown user should " \
+           "start_with \"?'s\" ")
+  end
+
+  def test_source_object
+    desc = name_descriptions(:suillus_desc) # public source
+    assert_nil(desc.source_object)
+
+    desc = name_descriptions(:peltigera_user_desc)
+    assert_equal(desc.user, desc.source_object)
+
+    desc = name_descriptions(:draft_boletus_edulis)
+    assert_equal(desc.project, desc.source_object)
+  end
+
+  def test_groups
+    desc = name_descriptions(:coprinus_comatus_desc)
+    assert_equal([rolf], desc.admins)
+    assert_equal([rolf.id], desc.admin_ids)
+    assert_equal(User.all, desc.writers)
+    assert_equal(User.pluck(:id), desc.writer_ids)
+    assert_equal(User.all, desc.readers)
+    assert_equal(User.pluck(:id), desc.reader_ids)
+
+    desc = name_descriptions(:draft_coprinus_comatus)
+    assert_equal([rolf, mary, katrina], desc.admins)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.admin_ids)
+    assert_equal([rolf, mary, katrina], desc.writers)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.writer_ids)
+    assert_equal([rolf, mary, katrina], desc.readers)
+    assert_equal([rolf, mary, katrina].map(&:id), desc.reader_ids)
+  end
+
+  def test_add_remove_user_group_to_description_group
+    desc = name_descriptions(:peltigera_user_desc)
+    user_group = user_groups(:bolete_users)
+
+    desc.add_admin(user_group)
+    desc.add_writer(user_group)
+    desc.add_reader(user_group)
+
+    assert(desc.admins.include?(user_group))
+    assert(desc.writers.include?(user_group))
+    assert(desc.readers.include?(user_group))
+
+    desc.remove_admin(user_group)
+    desc.remove_writer(user_group)
+    desc.remove_reader(user_group)
+
+    assert(desc.admins.exclude?(user_group))
+    assert(desc.writers.exclude?(user_group))
+    assert(desc.readers.exclude?(user_group))
   end
 end

@@ -37,6 +37,7 @@
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
 #  sort_name::              Stripped-down version of name for sorting.
+#  merge(other_herbarium):: merge other_herbarium into this one
 #
 #  == Callbacks
 #
@@ -117,47 +118,47 @@ class Herbarium < AbstractModel
     "#{:HERBARIUM.l} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
   end
 
-  def merge(that)
-    return that if that == self
+  def merge(src)
+    return src if src == self
 
-    this = self
+    dest = self
     [:code, :location, :email, :mailing_address].each do |var|
-      this.merge_field(that, var)
+      dest.merge_field(src, var)
     end
-    this.merge_notes(that)
-    this.personal_user_id ||= that.personal_user_id
-    this.save
-    this.merge_associatied_records(that)
-    that.destroy
-    this
+    dest.merge_notes(src)
+    dest.personal_user_id ||= src.personal_user_id
+    dest.save
+    dest.merge_associated_records(src)
+    src.destroy
+    dest
   end
 
-  def merge_field(that, var)
-    this = self
-    val1 = this.send(var)
-    val2 = that.send(var)
+  def merge_field(src, var)
+    dest = self
+    val1 = dest.send(var)
+    val2 = src.send(var)
     return if val1.present?
 
-    this.send(:"#{var}=", val2)
+    dest.send(:"#{var}=", val2)
   end
 
-  def merge_notes(that)
-    this   = self
-    notes1 = this.description
-    notes2 = that.description
+  def merge_notes(src)
+    dest   = self
+    notes1 = dest.description
+    notes2 = src.description
     if notes1.blank?
-      this.description = notes2
+      dest.description = notes2
     elsif notes2.present?
-      this.description = "#{notes1}\n\n" \
+      dest.description = "#{notes1}\n\n" \
                          "[Merged at #{Time.now.utc.web_time}]\n\n" +
                          notes2
     end
   end
 
-  def merge_associatied_records(that)
-    this = self
-    this.curators          += that.curators - this.curators
-    this.herbarium_records += that.herbarium_records - this.herbarium_records
+  def merge_associated_records(src)
+    dest = self
+    dest.curators          += src.curators - dest.curators
+    dest.herbarium_records += src.herbarium_records - dest.herbarium_records
   end
 
   # Look at the most recent HerbariumRecord's the current User has created.

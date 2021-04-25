@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: move this into a new EmailController
+# Send emails directly to webmaster and users via the application
 class ObserverController
   def email_features
     if in_admin_mode?
@@ -102,6 +103,22 @@ class ObserverController
     send_request if request.method == "POST"
   end
 
+  def email_name_change_request
+    @name = Name.safe_find(params[:name_id])
+    @new_name = params[:new_name]
+
+    unless @name && @name.search_name != @new_name
+      redirect_back_or_default(action: :index)
+      return
+    end
+
+    send_name_change_request if request.method == "POST"
+  end
+
+  ##########
+
+  private
+
   def validate_merge_model!(val)
     case val
     when "Herbarium"
@@ -132,5 +149,20 @@ class ObserverController
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:email_merge_request_success.t)
     redirect_to(@old_obj.show_link_args)
+  end
+
+  def send_name_change_request
+    change_locale_if_needed(MO.default_locale)
+    subject = "Request to change Name having dependents"
+    content = :email_name_change_request.l(
+      user: @user.login,
+      name: @name.search_name,
+      name_url: @name.show_url,
+      new_name: @new_name,
+      notes: params[:notes].to_s.strip_html.strip_squeeze
+    )
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    flash_notice(:email_change_name_request_success.t)
+    redirect_to(@name.show_link_args)
   end
 end

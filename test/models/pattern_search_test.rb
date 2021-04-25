@@ -301,8 +301,12 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::TooManyValuesError) { x.parse_date_range }
     x.vals = ["2010"]
     assert_equal(%w[2010-01-01 2010-12-31], x.parse_date_range)
+    # Thirty days hath September ....
+    # Otherwise, mySQL says Mysql2::Error: Incorrect DATE value: '2020-09-31'
     x.vals = ["2010-9"]
-    assert_equal(%w[2010-09-01 2010-09-31], x.parse_date_range)
+    assert_equal(%w[2010-09-01 2010-09-30], x.parse_date_range)
+    x.vals = ["2010-10"]
+    assert_equal(%w[2010-10-01 2010-10-31], x.parse_date_range)
     x.vals = ["2010-9-5"]
     assert_equal(%w[2010-09-05 2010-09-05], x.parse_date_range)
     x.vals = ["2010-09-05"]
@@ -311,6 +315,8 @@ class PatternSearchTest < UnitTestCase
     assert_equal(%w[2010-01-01 2012-12-31], x.parse_date_range)
     x.vals = ["2010-3-2010-5"]
     assert_equal(%w[2010-03-01 2010-05-31], x.parse_date_range)
+    x.vals = ["2010-3-2010-6"]
+    assert_equal(%w[2010-03-01 2010-06-30], x.parse_date_range)
     x.vals = ["2010-3-12-2010-5-1"]
     assert_equal(%w[2010-03-12 2010-05-01], x.parse_date_range)
     x.vals = ["6"]
@@ -748,12 +754,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_deprecated
-    expect = Name.where(deprecated: true, correct_spelling_id: nil)
+    expect = Name.where(deprecated: true).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where(deprecated: false, correct_spelling_id: nil)
+    expect = Name.where(deprecated: false).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:no")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -765,7 +771,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("include_misspellings:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where(correct_spelling_id: nil)
+    expect = Name.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("include_misspellings:no")
     assert_name_list_equal(expect, x.query.results, :sort)

@@ -1,0 +1,26 @@
+<% can_delete = herbarium.curator?(@user) || in_admin_mode? %>
+
+<table class="table-striped table-curators">
+  <thead>
+    <tr>
+      <th colspan="<%= can_delete ? 2 : 1 %>">
+        <%= "#{pluralize(herbarium.curators.length, :herbarium_curator.t)}:" %>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <% herbarium.curators.each do |user| %>
+      <tr>
+        <% if can_delete %>
+          <td>
+             <%= destroy_button(
+                   name: "X",
+                   target: herbaria_curator_path(herbarium, user: user.id)
+                 ) %>
+          </td>
+        <% end %>
+        <td><%= user_link(user, user.legal_name) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -19,18 +19,18 @@ module Query::Modules::Sql
     our_join += args[:join] if args[:join].is_a?(Array)
     our_join << args[:join] if args[:join].is_a?(Hash)
     our_join << args[:join] if args[:join].is_a?(Symbol)
-    our_tables  = tables.dup
+    our_tables = tables.dup
     our_tables += args[:tables] if args[:tables].is_a?(Array)
     our_tables << args[:tables] if args[:tables].is_a?(Symbol)
     our_from    = calc_from_clause(our_join, our_tables)
     our_where   = where.dup
     our_where += args[:where] if args[:where].is_a?(Array)
     our_where << args[:where] if args[:where].is_a?(String)
-    our_where   = calc_where_clause(our_where)
-    our_group   = args[:group] || group
-    our_order   = args[:order] || order
-    our_order   = reverse_order(order) if our_order == :reverse
-    our_limit   = args[:limit]
+    our_where = calc_where_clause(our_where)
+    our_group = args[:group] || group
+    our_order = args[:order] || order
+    our_order = reverse_order(order) if our_order == :reverse
+    our_limit = args[:limit]
 
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)

@@ -621,10 +621,11 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :observer, action: :list_observations)
 
-    # Make sure this redirects correctly to list_herbaria not list_herariums.
+    # Make sure this redirects to the index that lists all herbaria,
+    # rather than the index that lists query results.
     params = { search: { pattern: "", type: :herbarium } }
     get(:pattern_search, params: params)
-    assert_redirected_to(controller: :herbarium, action: :list_herbaria)
+    assert_redirected_to(herbaria_path(flavor: :all))
   end
 
   def test_observation_search_help
@@ -657,8 +658,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations)
     assert_empty(@controller.instance_variable_get("@title"))
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal(css_select("title").text,
-                 "Mushroom Observer: Observation Search",
+    assert_equal("Mushroom Observer: Observation Search",
+                 css_select("title").text,
                  "metadata <title> tag incorrect")
 
     # If pattern is id of a real Observation, go directly to that Observation.

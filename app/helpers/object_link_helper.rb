@@ -90,9 +90,16 @@ module ObjectLinkHelper
       "#{name.text_name.tr(" ", "+")}"
   end
 
-  # url of SF page with "official" synonyms
+  # url of SF page with "official" synonyms by category
+  # works for species, infra-specific ranks
   def species_fungorum_gsd_synonymy(record_id)
     "http://www.speciesfungorum.org/Names/GSDspecies.asp?RecordID=#{record_id}"
+  end
+
+  # url of SF page with "official" synonyms in alpha order
+  # works for species, genus, family
+  def species_fungorum_sf_synonymy(record_id)
+    "http://www.speciesfungorum.org/Names/SynSpecies.asp?RecordID=#{record_id}"
   end
 
   # ----------------------------------------------------------------------------
@@ -108,10 +115,10 @@ module ObjectLinkHelper
   def user_link(user, name = nil)
     if user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, User.show_link_args(user))
+      link_to(name, "#{observer_show_user_path}/#{user}")
     elsif user
       name ||= user.unique_text_name
-      link_to(name, user.show_link_args)
+      link_to(name, "#{observer_show_user_path}/#{user.id}")
     else
       "?"
     end

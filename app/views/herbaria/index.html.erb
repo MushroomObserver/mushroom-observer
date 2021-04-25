@@ -1,0 +1,73 @@
+<%
+  @title ||= :list_herbaria_title.t
+
+  tabs = create_links(@links)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<% if @merge %>
+  <div class="alert alert-warning max-width-text push-down">
+    <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
+                                       url: reload_with_args(merge: nil)) %>
+  </div>
+<% end %>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table-striped table-herbarium push-down">
+      <thead>
+        <tr>
+          <th><%= :herbarium_index_records.t %></th>
+          <th><%= :USER.t unless @no_user_column %></th>
+          <th><%= :herbarium_code.t %></th>
+          <th><%= :NAME.t %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @objects.each do |herbarium| %>
+          <tr>
+            <td>
+              <%= herbarium.herbarium_records.length %>
+            </td>
+            <td>
+              <%= if herbarium.personal_user_id.present? && !@no_user_column
+                    tag.span(user_link(herbarium.personal_user),
+                             title: herbarium.personal_user.unique_text_name)
+              end %>
+            </td>
+            <td>
+              <%= herbarium.code %>
+            </td>
+            <td>
+              <% if !@merge || !@user %>
+                <%= link_with_query(
+                      herbarium.name.t, herbarium_path(herbarium)
+                    ) %>
+              <% elsif @merge != herbarium %>
+                <%# Cannot POST from a link without js; Use buttons instead %>
+                <%= post_button(
+                      name: herbarium.name.t,
+                      path: herbaria_merges_path(src: @merge.id,
+                                                 dest: herbarium.id),
+                      confirm: :are_you_sure.t
+                    ) %>
+              <% else %>
+                [<%= tag.i(herbarium.name.t, style: "color:red") %>]
+              <% end %>
+              <% if @user && !@merge && (herbarium.can_edit? ||
+                    in_admin_mode?) %>
+                [<%= link_with_query(
+                       :EDIT.t, edit_herbarium_path(herbarium)
+                     ) %> |
+                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id)
+                     ) %>]
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>

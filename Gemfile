@@ -23,9 +23,12 @@ gem("sassc-rails")
 # Use jquery as the JavaScript library
 gem("jquery-rails")
 
-# Use thebuyracer as JavaScript runtime for ExecJS
+# Use therubyracer as JavaScript runtime for ExecJS
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem("therubyracer", platforms: :ruby)
+# gem("therubyracer", platforms: :ruby)
+
+# Use mini_racer as a substitute for therubyracer
+gem("mini_racer")
 
 # Use CoffeeScript for .js.coffee assets and views
 gem("coffee-rails")
@@ -68,10 +71,13 @@ gem("rtf")
 gem("xmlrpc")
 
 # Simple versioning
-gem("cure_acts_as_versioned")
+# Use our own fork, which stores enum attrs as integers in the db
+gem("cure_acts_as_versioned",
+    git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # In Rails 4.0, use simple_enum to replace enum_column3
-# In Rails >= 4.1, use Rails built-in enums instead (available only in >= 4.1)
+# In the future, replace simple_enum with Rails native enums
+# https://www.pivotaltracker.com/story/show/90595194
 gem("simple_enum")
 
 # Amazon S3 SDK, for access to images on dreamhost S3
@@ -106,7 +112,10 @@ gem("byebug", group: [:development, :test])
 gem("web-console", group: :development)
 
 # Automatically track code test coverage
-gem("coveralls", require: false)
+# Use coveralls_reborn gem instead of coveralls gem
+# With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
+# when Travis submits the coverage report to Coveralls
+gem("coveralls_reborn", "~> 0.20.0", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/

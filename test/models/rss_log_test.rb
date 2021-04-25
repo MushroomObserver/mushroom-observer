@@ -11,8 +11,9 @@ class RssLogTest < UnitTestCase
     normalized_rss_log_types.each do |type|
       rss_log = create_rss_log(type)
       id = rss_log.target_id
-      assert_match(type_normalized_show_path(type, id), rss_log.url,
-                   "rss_log.url incorrect for #{model(type)}")
+
+      assert(rss_log.url.starts_with?("#{model(type).show_controller}/#{id}"),
+             "rss_log.url incorrect for #{model(type)}")
     end
   end
 
@@ -45,9 +46,5 @@ class RssLogTest < UnitTestCase
     rss_log["#{type}_id".to_sym] = target.id
     rss_log.updated_at = Time.zone.now
     rss_log
-  end
-
-  def type_normalized_show_path(type, id)
-    %r{/#{model(type).show_controller}/#{id}}
   end
 end

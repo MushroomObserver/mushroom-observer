@@ -37,7 +37,7 @@ class NameControllerTest < FunctionalTestCase
   ].freeze
 
   # Create a draft for a project.
-  def create_draft_tester(project, name, user = nil, success = true)
+  def create_draft_tester(project, name, user = nil, success: true)
     count = NameDescription.count
     params = {
       id: name.id,
@@ -56,7 +56,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Edit a draft for a project (GET).
-  def edit_draft_tester(draft, user = nil, success = true, reader = true)
+  def edit_draft_tester(draft, user = nil, success: true, reader: true)
     if user
       assert_not_equal(user, draft.user)
     else
@@ -113,7 +113,7 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
-  def publish_draft_helper(draft, user = nil, merged = true, conflict = false)
+  def publish_draft_helper(draft, user = nil, merged: true, conflict: false)
     if user
       assert_not_equal(draft.user, user)
     else
@@ -161,7 +161,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Destroy a draft of a project.
-  def destroy_draft_helper(draft, user, success = true)
+  def destroy_draft_helper(draft, user, success: true)
     assert(draft)
     count = NameDescription.count
     params = {
@@ -262,7 +262,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
-  def test_show_name_icn_id_info
+  def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
     get(:show_name, params: { id: name.id })
@@ -276,7 +276,17 @@ class NameControllerTest < FunctionalTestCase
     )
     assert_select(
       "body a[href='#{species_fungorum_gsd_synonymy(name.icn_id)}']", true,
-      "Page is missing a link to SF GSD Species Synonymy record"
+      "Page is missing a link to GSD Synonymy record"
+    )
+  end
+
+  def test_show_name_genus_with_icn_id
+    # Name's icn_id is filled in
+    name = names(:tubaria)
+    get(:show_name, params: { id: name.id })
+    assert_select(
+      "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
+      "Page is missing a link to SF Synonymy record"
     )
   end
 
@@ -1663,22 +1673,23 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_and_update_locked_name
-    name = names(:fungi)
+    name = names(:stereum_hirsutum)
+    name.update(locked: true)
     params = {
       id: name.id,
       name: {
         locked: "0",
         icn_id: 666,
         rank: "Genus",
-        deprecated: "true",
+        deprecated: true,
         text_name: "Foo",
         author: "Bar",
         citation: "new citation",
         notes: "new notes"
       }
     }
-
     login("rolf")
+
     get(:edit_name, params: { id: name.id })
     # Rolf is not an admin, so form should not show locked fields as changeable
     assert_select("input[type=text]#name_icn_id", count: 0)
@@ -1694,16 +1705,16 @@ class NameControllerTest < FunctionalTestCase
     # locked attributes should not change
     assert_true(name.locked)
     assert_nil(name.icn_id)
-    assert_equal(:Kingdom, name.rank)
+    assert_equal(:Species, name.rank)
     assert_false(name.deprecated)
-    assert_equal("Fungi", name.text_name)
-    assert_equal("", name.author)
+    assert_equal("Stereum hirsutum", name.text_name)
+    assert_equal("(Willd.) Pers.", name.author)
     assert_nil(name.correct_spelling_id)
     # unlocked attributes should change
     assert_equal("new citation", name.citation)
     assert_equal("new notes", name.notes)
 
-    make_admin("mary")
+    make_admin("rolf")
     get(:edit_name, params: { id: name.id })
     assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
@@ -1716,11 +1727,11 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
     name.reload
     assert_equal(params[:name][:icn_id], name.icn_id)
-    assert_false(name.locked)
-    assert_equal(:Genus, name.rank)
-    assert_true(name.deprecated)
     assert_equal("Foo", name.text_name)
     assert_equal("Bar", name.author)
+    assert_equal(:Genus, name.rank)
+    assert_false(name.locked)
+    assert_redirected_to("#{name_deprecate_name_path}/#{name.id}")
   end
 
   def test_edit_misspelled_name
@@ -1731,8 +1742,92 @@ class NameControllerTest < FunctionalTestCase
     assert_select("input[type=text]#name_correct_spelling", count: 1)
   end
 
+  def test_update_change_text_name_of_ancestor
+    name = names(:boletus)
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Superboletus",
+        author: name.author,
+        rank: name.rank
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params: params)
+
+    assert_redirected_to(
+      { controller: :observer, action: :email_name_change_request,
+        name_id: name.id, new_name: "Superboletus" },
+      "User should be unable to change text_name of Name with dependents"
+    )
+  end
+
+  def test_update_minor_change_to_ancestor
+    name = names(:boletus)
+    assert(name.children.present? &&
+           name.icn_id.blank? && name.author.blank? && name.citation.blank?,
+           "Test needs different fixture: " \
+           "Name with a child, and without icn_id, author, or citation")
+    params = {
+      id: name.id,
+      name: {
+        text_name: name.text_name,
+        rank: name.rank,
+        # adding these should be a minor change
+        icn_id: "17175",
+        author: "L.",
+        citation: "Sp. pl. 2: 1176 (1753)"
+      }
+    }
+
+    login(name.user.login)
+    post(:edit_name, params: params)
+
+    assert_flash_success(
+      "User should be able to make minor changes to Name that has offspring"
+    )
+    assert_no_emails
+    name.reload
+    assert_equal(params[:name][:icn_id], name.icn_id.to_s)
+    assert_equal(params[:name][:author], name.author)
+    assert_equal(params[:name][:citation], name.citation)
+  end
+
+  def test_update_change_text_name_of_approved_synonym
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    login("rolf")
+    Naming.create(name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      !approved_synonym.deprecated &&
+        Naming.where(name: approved_synonym).none? &&
+        deprecated_name.synonym == approved_synonym.synonym,
+      "Test needs different fixture: " \
+      "an Approved Name without Namings, with a synonym having Naming(s)"
+    )
+    changed_name = names(:agaricus_campestris) # can be any other name
+
+    params = {
+      id: approved_synonym.id,
+      name: {
+        text_name: changed_name.text_name,
+        author: changed_name.author,
+        rank: changed_name.rank,
+        deprecated: changed_name.deprecated
+      }
+    }
+    post(:edit_name, params: params)
+
+    assert_redirected_to(
+      /#{observer_email_name_change_request_path}/,
+      "User should be unable to change an approved synonym of a Naming"
+    )
+  end
+
   def test_update_add_icn_id
     name = names(:stereum_hirsutum)
+    rank = name.rank
     params = {
       id: name.id,
       name: {
@@ -1740,7 +1835,7 @@ class NameControllerTest < FunctionalTestCase
         text_name: name.text_name,
         author: name.author,
         sort_name: name.sort_name,
-        rank: name.rank,
+        rank: rank,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false"),
         icn_id: 189_826
@@ -1756,6 +1851,9 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(189_826, name.reload.icn_id)
     assert_no_emails
+
+    assert_equal(rank, Name.ranks.key(name.versions.first.rank),
+                 "Rank versioned incorrectly.")
   end
 
   def test_update_icn_id_unchanged
@@ -2603,6 +2701,8 @@ class NameControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
+
+    make_admin(old_style_name.user.login)
     post(:edit_name, params: params)
 
     assert_flash_success
@@ -2643,7 +2743,6 @@ class NameControllerTest < FunctionalTestCase
       correct_spelling: nil,
       synonym: syn
     )
-
     params = {
       id: name2.id,
       name: {
@@ -2653,7 +2752,9 @@ class NameControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
+    make_admin(name1.user.login)
     post(:edit_name, params: params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
@@ -2720,6 +2821,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
+
     assert_difference("survivor.versions.count", 1) do
       post(:edit_name, params: params)
     end
@@ -2771,6 +2873,31 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     assert_not(Name.exists?(merged_name.id))
     assert_equal(189_826, edited_name.reload.icn_id)
+  end
+
+  def test_update_name_multiple_matches
+    old_name = names(:agaricus_campestrus)
+    new_name = names(:agaricus_campestris)
+    duplicate = new_name.dup
+    duplicate.save(validate: false)
+
+    params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        deprecated: new_name.deprecated
+      }
+    }
+    login("rolf")
+    make_admin
+
+    assert_no_difference("Name.count") do
+      post(:edit_name, params: params)
+    end
+    assert_response(:success) # form reloaded
+    assert_flash_error(:edit_name_multiple_names_match.l)
   end
 
   # ----------------------------
@@ -4166,7 +4293,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_create_draft_not_member
     create_draft_tester(projects(:eol_project),
-                        names(:agaricus_campestris), dick, false)
+                        names(:agaricus_campestris), dick, success: false)
   end
 
   def test_edit_draft
@@ -4185,7 +4312,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("EOL Project",
                  name_descriptions(:draft_agaricus_campestris).source_name)
     edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
-                      katrina, false)
+                      katrina, success: false)
   end
 
   def test_edit_draft_non_member
@@ -4193,7 +4320,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("EOL Project",
                  name_descriptions(:draft_coprinus_comatus).source_name)
     edit_draft_tester(name_descriptions(:draft_coprinus_comatus),
-                      dick, false, false)
+                      dick, success: false, reader: false)
   end
 
   def test_edit_draft_post_owner
@@ -4246,25 +4373,28 @@ class NameControllerTest < FunctionalTestCase
   # Owner can publish.
   def test_publish_draft
     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil,
-                         :merged, false)
+                         merged: :merged, conflict: false)
   end
 
   # Admin can, too.
   def test_publish_draft_admin
     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary,
-                         :merged, false)
+                         merged: :merged, conflict: false)
   end
 
   # Other members cannot.
   def test_publish_draft_member
     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina,
-                         false, false)
+                         merged: false, conflict: false)
   end
 
   # Non-members certainly can't.
   def test_publish_draft_non_member
     publish_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), dick, false, false
+      name_descriptions(:draft_agaricus_campestris),
+      dick,
+      merged: false,
+      conflict: false
     )
   end
 
@@ -4288,7 +4418,7 @@ class NameControllerTest < FunctionalTestCase
     # It should make the draft both public and default, "true" below tells it
     # that the default gen_desc should look like the draft's after done.  No
     # more conflicts.
-    publish_draft_helper(draft.reload, nil, true, false)
+    publish_draft_helper(draft.reload, nil, merged: true, conflict: false)
   end
 
   def test_destroy_draft_owner
@@ -4301,13 +4431,13 @@ class NameControllerTest < FunctionalTestCase
 
   def test_destroy_draft_member
     destroy_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), katrina, false
+      name_descriptions(:draft_agaricus_campestris), katrina, success: false
     )
   end
 
   def test_destroy_draft_non_member
     destroy_draft_helper(
-      name_descriptions(:draft_agaricus_campestris), dick, false
+      name_descriptions(:draft_agaricus_campestris), dick, success: false
     )
   end
 

@@ -1428,6 +1428,12 @@
   email_merge_request_help: By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types].
   email_merge_request_success: Your request has been sent.  Thank you!
 
+  # observer/email_name_change_request
+  email_name_change_request_title: Send Name Change Request
+  email_name_change_request_help: "Changing this Name will indirectly affect other Names that depend on this Name. For instance, another Name may: include this Name as part of its Classification; or have this Name as an approved synonym. If you really want to change this Name, please explain why. This will send a request to the admins, and if we agree with you, we will make the change."
+  new_name: New Name
+  email_change_name_request_success: Your request has been sent. Thank you!
+
   # observer/_form_comments
   form_comments_comment: "[:Comment]"
   form_comments_summary: "[:Summary]"
@@ -1595,7 +1601,7 @@
   form_synonyms_deprecate_synonyms: Deprecate Synonyms
   form_synonyms_deprecate_synonyms_help: If checked all listed synonyms become deprecated names.  Otherwise, they are left as they are with new names created as not deprecated.
   form_synonyms_missing_names: The following names could not be found.
-  form_synonyms_missing_names_help: Click 'Add' to create these names.  If you want to correct any names, do so in the area below and click 'Add' to re-evaluate the list.
+  form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names.  If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
   # image/add_image
   image_set_default: Set as default thumbnail
@@ -2044,6 +2050,7 @@
   mycobank: MycoBank
   mycobank_search: MycoBank search
   gsd_species_synonymy: GSD Species Synonymy
+  sf_species_synonymy: SF Species Synonymy
 
   # name/show_name - links to observations
   show_name_observations: More [:OBSERVATIONS]
@@ -2377,9 +2384,6 @@
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
-  # glossary_term#destroy
-  destroy_glossary_term: "[:destroy_object(type=:glossary_term)]"
-
   # glossary_term errors
   glossary_error_name_blank: Name cannot be blank.
   glossary_error_duplicate_name: Name must be unique.
@@ -2436,7 +2440,7 @@
   herbarium_code: Code
   user_personal_herbarium: "[name]: Personal Fungarium"
 
-  # herbarium/show_herbarium
+  # herbaria/show
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
@@ -2444,7 +2448,7 @@
   show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this fungarium.  When we add curators to an MO fungarium, those curators are given exclusive rights to edit the fungarium's addresses and notes.  Curators are also allowed to create fungarium records for other users' observations.  For example, when a fungarium accessions a contributor's specimen, the fungarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your fungarium and what its accession number is.  Please ask how MO can help your fungarium IT people automate this process via our API.
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
-  # herbarium/create_herbarium
+  # herbaria/create
   create_herbarium: Create New Fungarium
   create_herbarium_title: Create New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
@@ -2456,8 +2460,9 @@
   create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
   create_herbarium_personal_already_exists: You've already created a personal fungarium called '[name]'.
   create_herbarium_must_define_location: You must define this location before we can use it for this fungarium. Any other information you provided has been saved.
+  create_herbarium_name_blank: Herbarium name must not be blank.
 
-  # herbarium/edit_herbarium
+  # herbaria/edit
   edit_herbarium: Edit Fungarium
   edit_herbarium_title: Editing Fungarium
   edit_herbarium_this_is_personal_herbarium: This is your personal fungarium. You are only allowed one personal fungarium. If you would like to change which fungarium is your personal fungarium, please contact the admins and explain the situation.
@@ -2469,17 +2474,15 @@
   edit_herbarium_successfully_made_personal: Successfully made this the personal fungarium of "[user]".
   edit_herbarium_successfully_made_nonpersonal: Successfully made this nobody's personal fungarium.
 
-
-
-  # herbarium/list_herbaria
-  list_herbaria_title: "[:list_objects(type=:herbarium)]"
-
-  # herbarium/index
+  # herbaria/index
   herbarium_index: Fungarium Index
   herbarium_index_list_all_herbaria: List All Fungaria
   herbarium_index_nonpersonal_herbaria: List Institutional Fungaria
   herbarium_index_records: Records
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into.  This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium.  If you do not have permission to perform the merge, it will send a request to the admins.  ("+Cancel merge.+":[url])
+
+  # herbaria/filtered
+  list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
 
   # herbarium record fields
@@ -2557,12 +2560,13 @@
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
+  donate_snail_mail: Donors who wish to donate by check should make the check payable to "Mushroom Observer, Inc." and mail it to our registered corporate address:\nMushroom Observer, Inc. \n68 Bay Rd. \nNorth Falmouth, MA 02556-2404
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
-  donate_explanation: "Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the \"Confirm\" button below\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
+  donate_explanation: "A donation can be made in any amount. There are two ways: via PayPal or by check. We encourage you to send a check for donations of $200 or more. \n\nPayPal donations can be made with most credit cards (no PayPal account needed) or via a PayPal account by clicking on the \"Confirm\" button below. \n\nFor donations by check see below. \n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors. If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
-  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
+  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are eligible to be deducted for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
   # support/confirm
   confirm_title: Donation Confirmation
@@ -3269,6 +3273,7 @@
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold_identifier : [old_identifier]\nnew_identifier : [new_identifier]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nurl : [url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
+  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nname : [name] \nurl : [name_url] \nnew name : [new_name] \nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
@@ -3624,7 +3629,7 @@
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 N\n123 27.402 N\n123 24 24.12 N\n123° 24’ 24.12” N\n123deg 24min 24.12sec N"
   runtime_altitude_error: "Elevation must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."
-  runtime_merge_success: Successfully merged [type] [this] into [that].
+  runtime_merge_success: Successfully merged [type] [src] into [dest].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
   runtime_no_create: Unable to create [type].
@@ -3744,7 +3749,7 @@
   runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
   runtime_edit_name_description_no_change: "[:runtime_no_changes]"
   runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
-  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
+  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,src=this,dest=that)]"
   runtime_edit_name_no_change: "[:runtime_no_changes]"
   runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
   runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
@@ -3772,7 +3777,7 @@
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
   runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
   runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
-  runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
+  runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
   runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
   runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
@@ -3866,6 +3871,9 @@
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
   pattern_search_user_me_not_logged_in_error: The term '[:search_term_user]:[:search_value_me]' doesn't make sense unless you are logged in!
+
+  # Advanced search error messages
+  advanced_search_bad_q_error: Search expired or cannot be found. Please re-enter search criteria.
 
   # content for html header title tag,
   # used when there are no hits for a list or search

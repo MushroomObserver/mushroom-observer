@@ -3,22 +3,33 @@
       <span id="logo-text"><%= :app_banner.t %></span>
   </a>
 
-  <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
-  <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
-  <%= link_to(:app_privacy_policy.t, {controller: :policy, action: :privacy}, {class: "list-group-item"}) %>
+  <%= link_to(:app_intro.t, observer_intro_path,
+              { class: "list-group-item" }) %>
+  <%= link_to(:app_how_to_use.t, observer_how_to_use_path,
+              { class: "list-group-item" }) %>
+  <%= link_to(:app_privacy_policy.t, policy_privacy_path,
+              { class: "list-group-item" }) %>
+  <%= link_to(:app_donate.t, support_donate_path,
+              { class: "list-group-item indent" }) %>
 
   <% if in_admin_mode? %>
-    <div class="list-group-item disabled bold">
-      <%= :app_admin.t %>:
-    </div>
-    <%= link_to(:app_blocked_ips.t, {controller: :account, action: :blocked_ips}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:app_switch_users.t, {controller: :account, action: :switch_users}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:app_users.t, {controller: :observer, action: :users_by_name}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:change_banner_title.t, {controller: :observer, action: :change_banner}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:app_email_all_users.t, {controller: :observer, action: :email_features}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:app_add_to_group.t, {controller: :account, action: :add_user_to_group}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:account_manager_title.t, {controller: :account, action: :manager}, {class: "list-group-item list-group-item-danger indent"}) %>
-    <%= link_to(:app_turn_admin_off.t, {controller: :account, action: :turn_admin_off}, {class: "list-group-item list-group-item-danger indent"}) %>
+    <div class="list-group-item disabled bold"><%= :app_admin.t %>: </div>
+    <%= link_to(:app_blocked_ips.t, account_blocked_ips_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:app_switch_users.t, account_switch_users_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:app_users.t, observer_users_by_name_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:change_banner_title.t, observer_change_banner_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:app_email_all_users.t, observer_email_features_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:app_add_to_group.t, account_add_user_to_group_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:account_manager_title.t, account_manager_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
+    <%= link_to(:app_turn_admin_off.t, account_turn_admin_off_path,
+                { class: "list-group-item list-group-item-danger indent" }) %>
   <% end %>
 
   <% if @user.nil? %>
@@ -26,80 +37,122 @@
       <i class="glyphicon glyphicon-user"> </i>
       <span> <%= :app_account.t %>:</span>
     </div>
-    <%= link_to(:app_login.t, {controller: :account, action: :login}, {class: "list-group-item indent"}) %>
-    <%= link_to(:app_create_account.t, {controller: :account, action: :signup}, {class: "list-group-item indent"}) %>
+    <%= link_to(:app_login.t, account_login_path,
+                { class: "list-group-item indent" }) %>
+    <%= link_to(:app_create_account.t, account_signup_path,
+                { class: "list-group-item indent" }) %>
   <% else %>
     <div class="list-group-item visible-xs">
       <i class="glyphicon glyphicon-user"> </i>
       <span> <%= h(@user.login) %></span>
-      <span class="pull-right"><%= link_to(:app_logout.t, {controller: :account, action: :logout_user}) %></span>
+      <span class="pull-right">
+        <%= link_to(:app_logout.t, account_logout_user_path) %>
+      </span>
     </div>
-    <%= link_to(:app_comments_for_you.t, {controller: :comment, action: :show_comments_for_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_your_observations.t, {controller: :observer, action: :observations_by_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_your_interests.t, {controller: :interest, action: :list_interests}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_your_summary.t, {controller: :observer, action: :show_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_join_mailing_list.t, "https://groups.google.com/forum/?fromgroups=#!forum/mo-general", class: "list-group-item visible-xs") %>
-    <%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: "list-group-item visible-xs"}) if @user.admin && !in_admin_mode? %>
+    <%= link_to(:app_comments_for_you.t,
+                "#{comment_show_comments_by_user_path}/#{@user.id}",
+                { class: "list-group-item visible-xs" }) %>
+    <%= link_to(:app_your_observations.t,
+                "#{observer_observations_by_user_path}/#{@user.id}",
+                { class: "list-group-item visible-xs" }) %>
+    <%= link_to(:app_your_interests.t, interest_list_interests_path,
+                { class: "list-group-item visible-xs" }) %>
+    <%= link_to(:app_your_summary.t, "#{observer_show_user_path}/#{@user.id}",
+                { class: "list-group-item visible-xs" }) %>
+    <%= link_to(:app_preferences.t, account_prefs_path,
+                { class: "list-group-item visible-xs" }) %>
+    <%= link_to(:app_join_mailing_list.t,
+                "https://groups.google.com/forum/?fromgroups=#!forum/mo-general",
+                class: "list-group-item visible-xs") %>
+    <% if @user.admin && !in_admin_mode? %>
+      <%= link_to(:app_turn_admin_on.t, account_turn_admin_on_path,
+                  { class: "list-group-item visible-xs" }) %>
+    <% end %>
   <% end %>
 
   <div class="list-group-item disabled bold">
     <%= :app_observations_left.t %>
   </div>
-  <%= link_to(:app_create_observation.t, {controller: :observer, action: :create_observation}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_your_observations.t, {controller: :observer, action: :observations_by_user, id: @user.id}, {class: "list-group-item indent"}) if @user%>
-  <%= link_to(:app_sort_by_date_obs.t, {controller: :observer, action: :list_observations}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_create_observation.t, observer_create_observation_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_your_observations.t,
+              "#{observer_observations_by_user_path}/#{@user.id}",
+              { class: "list-group-item indent" }) if @user %>
+  <%= link_to(:app_sort_by_date_obs.t, observer_list_observations_path,
+              { class: "list-group-item indent" }) %>
 
   <div class="list-group-item disabled bold">
     <%= :app_latest.t %>
   </div>
-  <%= link_to(:app_latest_changes.t, {controller: :observer, action: :list_rss_logs}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_newest_images.t, {controller: :image, action: :list_images}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_comments.t, {controller: :comment, action: :list_comments}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_latest_changes.t, observer_list_rss_logs_path,
+                { class: "list-group-item indent" }) %>
+  <%= link_to(:app_newest_images.t, image_list_images_path,
+                { class: "list-group-item indent" }) %>
+  <%= link_to(:app_comments.t, comment_list_comments_path,
+                { class: "list-group-item indent" }) %>
 
   <div class="list-group-item disabled bold">
     <%= :app_species_list.t %>
   </div>
   <% unless @user.nil? %>
-    <%= link_to(:app_your_lists.t, {controller: :species_list, action: :species_lists_by_user, id: @user.id}, {class: "list-group-item indent"} ) %>
+    <%= link_to(:app_your_lists.t,
+                "#{species_list_species_lists_by_user_path}/#{@user.id}",
+                { class: "list-group-item indent" } ) %>
   <% end%>
-  <%= link_to(:app_create_list.t, {controller: :species_list, action: :name_lister}, {class: "list-group-item indent"} ) %>
-  <%= link_to(:app_sort_by_date_spl.t, {controller: :species_list, action: :list_species_lists}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_sort_by_title.t, {controller: :species_list, action: :species_lists_by_title}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_create_list.t, species_list_name_lister_path,
+                { class: "list-group-item indent" } ) %>
+  <%= link_to(:app_sort_by_date_spl.t, species_list_list_species_lists_path,
+                { class: "list-group-item indent" }) %>
+  <%= link_to(:app_sort_by_title.t, species_list_species_lists_by_title_path,
+                { class: "list-group-item indent" }) %>
 
   <div class="list-group-item disabled bold">
     <%= :INDEXES.t %>
   </div>
-  <%= link_to(:GLOSSARY.t, glossary_terms_path, {class: "list-group-item indent"}) %>
-  <%= link_to(:HERBARIA.t, {controller: :herbarium, action: :index}, {class: "list-group-item indent"}) %>
-  <%= link_to(:LOCATIONS.t, {controller: :location, action: :list_locations}, {class: "list-group-item indent"}) %>
-  <%= link_to(:NAMES.t, {controller: :name, action: :observation_index}, {class: "list-group-item indent"}) %>
-  <%= link_to(:NEWS.t, articles_path, {class: "list-group-item indent"}) %>
-  <%= link_to(:PROJECTS.t, {controller: :project, action: :list_projects}, {class: "list-group-item indent"}) %>
+  <%= link_to(:GLOSSARY.t, glossary_terms_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:HERBARIA.t, herbaria_path(flavor: :all),
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:LOCATIONS.t, location_list_locations_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:NAMES.t, name_observation_index_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:NEWS.t, articles_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:PROJECTS.t, project_list_projects_path,
+              { class: "list-group-item indent" }) %>
 
   <div class="list-group-item disabled bold">
     <%= :app_more.t %>
   </div>
-  <%= link_to(:app_how_to_help.t, {controller: :observer, action: :how_to_help}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_donate.t, {controller: :support, action: :donate}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_feature_tracker.t, {controller: :pivotal, action: :index}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_send_a_comment.t, {controller: :observer, action: :ask_webmaster_question}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_contributors.t, {controller: :observer, action: :users_by_contribution}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_site_stats.t, {controller: :observer, action: :show_site_stats}, {class: "list-group-item indent"}) %>
-  <%= link_to(:translators_note_title.t, {controller: :observer, action: :translators_note}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_publications.t, {controller: :publications, action: :index}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_how_to_help.t, observer_how_to_help_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_feature_tracker.t, pivotal_index_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_send_a_comment.t, observer_ask_webmaster_question_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_contributors.t, observer_users_by_contribution_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_site_stats.t, observer_show_site_stats_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:translators_note_title.t, observer_translators_note_path,
+              { class: "list-group-item indent" }) %>
+  <%= link_to(:app_publications.t, publications_index_path,
+              { class: "list-group-item indent" }) %>
 
   <% unless browser.bot?%>
     <div class="list-group-item indent" style="overflow:visible">
       <div class="dropdown">
         <%= content_tag(:span, "#{:app_languages.t}:") %>
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+           role="button" aria-expanded="false">
           <%= I18n.locale.upcase %>
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
           <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-            <li><%= link_to(h(lang.name), reload_with_args(user_locale: lang.locale)) %></li>
+            <li><%= link_to(h(lang.name),
+                    reload_with_args(user_locale: lang.locale)) %></li>
           <% end %>
         </ul>
       </div>
