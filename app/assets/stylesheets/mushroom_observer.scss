@@ -284,6 +284,11 @@ ul.tight-list {
     padding-bottom: 10px;
 }
 
+
+#logo-link:hover {
+    background-color: transparent;
+}
+
 #navigation {
     #logo {
         background-color: $LOGO_BG_COLOR;
