@@ -1222,9 +1222,6 @@
   # it's up to you.
   app_title: Mushroom Observer
 
-  # This goes in the left-hand column.  The "<br/>" forces a line-break.
-  app_banner: Mushroom<br/>Observer
-
   # This goes in a box at the top of the page.
   app_banner_box: "Image server is back online!<br/>\nWe're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
 
