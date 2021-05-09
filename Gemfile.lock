@@ -198,7 +198,7 @@ GEM
     raindrops (0.19.1)
     rake (13.0.1)
     regexp_parser (1.7.1)
-    rexml (3.2.4)
+    rexml (3.2.5)
     rtf (0.3.3)
     rubocop (0.89.0)
       parallel (~> 1.10)
