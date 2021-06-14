@@ -185,6 +185,11 @@
           <%= label_tag(:herbarium_record_herbarium_id, :herbarium_record_accession_number.t + ":") %>
           <%= text_field(:herbarium_record, :herbarium_id, value: @herbarium_id, class: "form-control") %>
         </div>
+        <div class="form-group">
+          <%= label_tag(:herbarium_record_notes, "#{:herbarium_record_notes.t}:") %>
+          <%= text_field(:herbarium_record, :herbarium_record_notes, 
+          		value: "", class: "form-control") %>
+        </div>
       </div>
       <div class="col-sm-6">
         <div class="well well-sm ">

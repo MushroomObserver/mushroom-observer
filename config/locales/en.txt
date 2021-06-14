@@ -2483,6 +2483,7 @@
   herbarium_record_initial_det: Initial Determination
   herbarium_record_accession_number: Accession Number
   herbarium_record_user: Record Creator
+  herbarium_record_notes: Fungarium Record Notes
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record

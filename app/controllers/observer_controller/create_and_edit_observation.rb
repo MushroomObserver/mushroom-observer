@@ -185,14 +185,14 @@ class ObserverController
   end
 
   def save_herbarium_record(obs, params)
-    herbarium, initial_det, accession_number =
+    herbarium, initial_det, accession_number, herbarium_record_notes =
       normalize_herbarium_record_params(obs, params)
     return if not_creating_record?(obs, herbarium, accession_number)
 
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
       herbarium_record = create_herbarium_record(herbarium, initial_det,
-                                                 accession_number)
+                                                 accession_number, herbarium_record_notes)
     elsif herbarium_record.can_edit?
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
@@ -225,7 +225,8 @@ class ObserverController
     init_det  = initial_determination(obs)
     accession = params2[:herbarium_id].to_s.strip_html.strip_squeeze
     accession = default_accession_number(obs, params) if accession.blank?
-    [herbarium, init_det, accession]
+    notes = params2[:herbarium_record_notes]
+    [herbarium, init_det, accession, notes]
   end
 
   def initial_determination(obs)
@@ -260,11 +261,13 @@ class ObserverController
     ).first
   end
 
-  def create_herbarium_record(herbarium, initial_det, accession_number)
+  def create_herbarium_record(herbarium, initial_det, accession_number, 
+  														herbarium_record_notes)
     HerbariumRecord.create(
       herbarium: herbarium,
       initial_det: initial_det,
-      accession_number: accession_number
+      accession_number: accession_number,
+      notes: herbarium_record_notes
     )
   end
 
