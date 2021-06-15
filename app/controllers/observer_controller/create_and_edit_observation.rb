@@ -191,8 +191,9 @@ class ObserverController
 
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
-      herbarium_record = create_herbarium_record(herbarium, initial_det,
-                                                 accession_number, herbarium_record_notes)
+      herbarium_record = create_herbarium_record(
+        herbarium, initial_det, accession_number, herbarium_record_notes
+      )
     elsif herbarium_record.can_edit?
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
@@ -261,8 +262,8 @@ class ObserverController
     ).first
   end
 
-  def create_herbarium_record(herbarium, initial_det, accession_number, 
-  														herbarium_record_notes)
+  def create_herbarium_record(herbarium, initial_det, accession_number,
+                              herbarium_record_notes)
     HerbariumRecord.create(
       herbarium: herbarium,
       initial_det: initial_det,
