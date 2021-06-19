@@ -2488,7 +2488,7 @@
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
   create_herbarium_record_title: Add Fungarium Record
-  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013."
+  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419 \n&nbsp;&nbsp;BRY-L-0025845 \n&nbsp;&nbsp;MO 174623 \n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
   create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
