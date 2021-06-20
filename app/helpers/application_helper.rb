@@ -3,10 +3,42 @@
 #
 #  = Application Helpers
 #
-#  These methods are available to all templates in the application:
+#  Methods available to all templates in the application:
 #
-################################################################################
-
+#  safe_br                      # <br/>,html_safe
+#  safe_empty
+#  safe_nbsp
+#  escape_html                  # Return escaped HTML
+#
+#  --- links and buttons ----
+#
+#  link_to_coerced_query        # link to query coerced into different model
+#  link_with_query              # link_to with query params
+#  link_next                    # link to next object
+#  link_prev                    # link to prev object
+#  destroy_button               # button to destroy object
+#  post_button                  # button to post to a path
+#  create_link                  # convert links into list of tabs
+#
+#  --------------------------
+#
+#  indent                       # in-lined white-space element of n pixels
+#  content_tag_if
+#  content_tag_unless
+#  add content_help             # help text viewable on mouse-over
+#  add_header                   # add to html header from within view
+#  make_table                   # make table from list of arrays
+#  reload_with_args             # add args to url that got us to this page
+#  add_args_to_url              # change params of arbitrary url
+#  url_after_delete             # url to return to after deleting object
+#  get_next_id
+#  textilize_without_paragraph  # override Rails method of same name
+#  textilize                    # override Rails method of same name
+#  custom_file_field            # stylable file input field with
+#                               # client-side size validation
+#  date_select_opts
+#  title_tag_contents           # text to put in html header <title>
+#
 module ApplicationHelper
   include AutocompleteHelper
   include DescriptionHelper
@@ -39,6 +71,8 @@ module ApplicationHelper
     h(html.to_str)
   end
 
+  # --------- links and buttons ------------------------------------------------
+
   # Call link_to with query params added.
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
@@ -53,12 +87,65 @@ module ApplicationHelper
     link_to(*link)
   end
 
+  # link to next object in query results
+  def link_next(object)
+    path = if object.type_tag == :herbarium
+             herbarium_path(object.id, flow: "next")
+           else
+             { controller: object.show_controller,
+               action: object.next_action, id: object.id }
+           end
+    link_with_query("#{:FORWARD.t} »", path)
+  end
+
+  # link to previous object in query results
+  def link_prev(object)
+    path = if object.type_tag == :herbarium
+             herbarium_path(object.id, flow: "prev")
+           else
+             { controller: object.show_controller,
+               action: object.prev_action, id: object.id }
+           end
+    link_with_query("« #{:BACK.t}", path)
+  end
+
+  # button to destroy object
+  # Used instead of link because DESTROY link requires js
+  # Sample usage:
+  #   destroy_button(object: article)
+  #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
+  #   destroy_button(
+  #     name: :destroy_object.t(type: :herbarium),
+  #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
+  #   )
+  def destroy_button(target:, name: :DESTROY.t)
+    options = if target.is_a?(String)
+                target
+              else
+                { action: "destroy", id: target.id }
+              end
+    button_to(
+      name, options, method: :delete, data: { confirm: :are_you_sure.t }
+    )
+  end
+
+  # POST to a path; used instead of a link because POST link requires js
+  # post_button(name: herbarium.name.t,
+  #             path: herbaria_merges_path(that: @merge.id,this: herbarium.id),
+  #             confirm: :are_you_sure.t)
+  def post_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :post, data: data)
+  end
+
   # Convert @links in index views into a list of tabs for RHS tab set.
   def create_links(links)
     return [] unless links
 
     links.reject(&:nil?).map { |str, url| link_to(str, url) }
   end
+
+  # ----------------------------------------------------------------------------
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
@@ -182,7 +269,7 @@ module ApplicationHelper
 
     # Parse parameters off of current URL.
     addr, parms = url.split("?")
-    for arg in parms ? parms.split("&") : []
+    (parms ? parms.split("&") : []).each do |arg|
       var, val = arg.split("=")
       next unless var && var != ""
 
@@ -200,15 +287,14 @@ module ApplicationHelper
     end
 
     # Merge in new arguments, deleting where new values are nil.
-    for var in new_args.keys
+    new_args.each_key do |var|
       val = new_args[var]
-      var = var.to_s
       if val.nil?
-        args.delete(var)
+        args.delete(var.to_s)
       elsif val.is_a?(ActiveRecord::Base)
-        args[var] = val.id.to_s
+        args[var.to_s] = val.id.to_s
       else
-        args[var] = CGI.escape(val.to_s)
+        args[var.to_s] = CGI.escape(val.to_s)
       end
     end
 
@@ -292,18 +378,5 @@ module ApplicationHelper
     else
       action_name.tr("_", " ").titleize
     end
-  end
-
-  # button to destroy object
-  # Used instead of link because DESTROY link requires js
-  # Sample usage:
-  #   destroy_button(object: article)
-  #   destroy_button(object: term, name: :destroy_glossary_term)
-  def destroy_button(object:, name: :DESTROY)
-    button_to(
-      name.t,
-      { action: "destroy", id: object.id },
-      method: :delete, data: { confirm: "Are you sure?" }
-    )
   end
 end

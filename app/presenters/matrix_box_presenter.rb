@@ -28,9 +28,9 @@ class MatrixBoxPresenter
     target = rss_log.target
     name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     get_rss_log_details(rss_log, target)
-    self.when  = target.when.web_date if target&.respond_to?(:when)
-    self.who   = view.user_link(target.user) if target&.user
-    self.what  =
+    self.when = target.when&.web_date if target.respond_to?(:when)
+    self.who  = view.user_link(target.user) if target&.user
+    self.what =
       if target
         view.link_with_query(name,
                              controller: target.show_controller,
@@ -113,6 +113,8 @@ class MatrixBoxPresenter
   def fancy_time
     time&.fancy_time
   end
+
+  ##############################################################################
 
   private
 
