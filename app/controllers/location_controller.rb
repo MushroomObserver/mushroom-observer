@@ -97,15 +97,23 @@ class LocationController < ApplicationController
 
   # Displays a list of locations matching a given string.
   def location_search
-    query = create_query(
-      :Location, :pattern_search,
-      pattern: Location.user_name(@user, params[:pattern].to_s)
-    )
-    show_selected_locations(query, link_all_sorts: true)
+    pattern = params[:pattern].to_s
+    loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
+    if loc
+      redirect_to(action: "show_location", id: loc.id)
+    else
+      query = create_query(
+        :Location, :pattern_search,
+        pattern: Location.user_name(@user, pattern)
+      )
+      show_selected_locations(query, link_all_sorts: true)
+    end
   end
 
   # Displays matrix of advanced search results.
   def advanced_search
+    return if handle_advanced_search_invalid_q_param?
+
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
@@ -587,9 +595,7 @@ class LocationController < ApplicationController
           if (herbarium = Herbarium.safe_find(@set_herbarium))
             herbarium.location = @location
             herbarium.save
-            redirect_to(controller: :herbarium,
-                        action: :show_herbarium,
-                        id: @set_herbarium)
+            redirect_to(herbarium_path(@set_herbarium))
           end
         elsif @set_user
           if (user = User.safe_find(@set_user))

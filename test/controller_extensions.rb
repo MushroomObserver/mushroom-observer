@@ -348,7 +348,7 @@ module ControllerExtensions
     url = @controller.url_for(url_opts)
     url.force_encoding("UTF-8") if url.respond_to?(:force_encoding)
     url = URI.decode_www_form_component(url)
-    # Find each occurrance of <form action="blah" method="post">.
+    # Find each occurrence of <form action="blah" method="post">.
     found_it = false
     found = {}
     @response.body.split(/<form [^<>]*action/).each do |str|

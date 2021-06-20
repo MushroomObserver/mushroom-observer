@@ -19,7 +19,7 @@ module ArticlesHelper
 
     tabs.push(link_to(:create_article_title.t, new_article_path),
               link_to(:EDIT.t, edit_article_path(article.id)),
-              destroy_button(object: article))
+              destroy_button(target: article))
   end
 
   # Can user modify all articles

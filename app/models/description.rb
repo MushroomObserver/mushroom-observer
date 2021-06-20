@@ -27,7 +27,7 @@
 #  versioned_table_name:: Table used to keep past versions.
 #
 #  ==== Descriptive Text
-#  has_any_notes?::       Are any of the notes fields non-empty?
+#  notes?::               Are any of the notes fields non-empty?
 #  all_notes::            Return all the notes fields via a Hash.
 #  all_notes=::           Change all the notes fields via a Hash.
 #  note_status::          Return some basic stats on notes fields.
@@ -46,7 +46,7 @@
 #  writer_ids::           User's with write privileges, as Array of ids.
 #  reader_ids::           User's with read privileges, as Array of ids.
 #  is_admin?::            Does a given User have admin privileges?
-#  is_writer?::           Does a given User have write privileges?
+#  writer?::              Does a given User have write privileges?
 #  is_reader?::           Does a given User have read privileges?
 #  add_admin::            Give a User or UserGroup admin privileges.
 #  add_writer::           Give a User or UserGroup writer privileges.
@@ -55,8 +55,8 @@
 #  remove_writer::        Remove a User's or UserGroup's writer privileges.
 #  remove_reader::        Remove a User's or UserGroup's reader privileges.
 #  permitted?::           Does a given User have a given type of permission?
-#  group_user_ids::       Get list of user ids from a given permissions table.
-#  group_ids::      Get list of user_group ids from a given permissions table.
+#  group_user_ids::       List of user ids from a given permissions table.
+#  group_ids::            List of user_group ids from a given permissions table.
 #  admins_join_table::    Table used to list admin groups.
 #  writers_join_table::   Table used to list writer groups.
 #  readers_join_table::   Table used to list reader groups.
@@ -66,8 +66,8 @@
 #  ==== Authors and Editors
 #  editors::              User's that have edited this Name.
 #  authors::              User's that have made "significant" contributions.
-#  is_editor?::           Is a given User an editor?
-#  is_author?::           Is a given User an author?
+#  editor?::              Is a given User an editor?
+#  author?::              Is a given User an author?
 #  add_editor::           Make given user an "editor".
 #  add_author::           Make given user an "author".
 #  remove_author::        Demote given user to "editor".
@@ -79,10 +79,12 @@
 #  before_destroy::       Subtract authorship/editorship contributions
 #                         before destroy.
 #
-############################################################################
-
+#
 class Description < AbstractModel
   self.abstract_class = true
+
+  before_save :add_author_or_editor
+  before_destroy :update_users_and_parent
 
   # Aliases for location / name.
   def parent
@@ -152,7 +154,7 @@ class Description < AbstractModel
 
   # Descriptive title without parent name, in plain text.
   def partial_text_name
-    build_name(:part).t.html_to_ascii
+    put_together_name(:part).t.html_to_ascii
   end
 
   # Same as +partial_text_name+ but with id tacked on.
@@ -170,28 +172,6 @@ class Description < AbstractModel
     string_with_id(partial_format_name)
   end
 
-  # Descriptive subtitle for this description (when it is not necessary to
-  # include the title of the parent object), in plain text.  [I'm not sure
-  # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
-  def put_together_name(full_or_part) # :nodoc:
-    tag = :"description_#{full_or_part}_title_#{source_type}"
-    user_name = begin
-                  user.legal_name
-                rescue StandardError
-                  "?"
-                end
-    args = {
-      text: source_name,
-      user: user_name
-    }
-    if full_or_part == :full
-      args[:object] = parent.format_name
-    elsif source_name.present?
-      tag = :"#{tag}_with_text"
-    end
-    tag.l(args)
-  end
-
   ##############################################################################
   #
   #  :section: Descriptions
@@ -199,9 +179,9 @@ class Description < AbstractModel
   ##############################################################################
 
   # Are any of the descriptive text fields non-empty?
-  def has_any_notes?
+  def notes?
     result = false
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       result = send(field).to_s.match(/\S/)
       break if result
     end
@@ -212,7 +192,7 @@ class Description < AbstractModel
   # counterpart writer-method +all_notes=+.)
   def all_notes
     result = {}
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       value = send(field).to_s
       result[field] = value.presence
     end
@@ -226,7 +206,7 @@ class Description < AbstractModel
   #   name.all_notes = hash
   #
   def all_notes=(notes)
-    for field in self.class.all_note_fields
+    self.class.all_note_fields.each do |field|
       send("#{field}=", notes[field])
     end
   end
@@ -237,14 +217,14 @@ class Description < AbstractModel
   #   num_fields, total_length = name.note_status
   #
   def note_status
-    fieldCount = sizeCount = 0
+    field_count = size_count = 0
     all_notes.each_value do |v|
       if v.present?
-        fieldCount += 1
-        sizeCount += v.strip_squeeze.length
+        field_count += 1
+        size_count += v.strip_squeeze.length
       end
     end
-    [fieldCount, sizeCount]
+    [field_count, size_count]
   end
 
   ##############################################################################
@@ -296,9 +276,9 @@ class Description < AbstractModel
     "#{table_name}_admins".to_sym
   end
 
-  # Name of the join table used to keep admin groups.
+  # Wrapper around class method of same name
   def admins_join_table
-    "#{self.class.table_name}_admins".to_sym
+    self.class.admins_join_table
   end
 
   # Name of the join table used to keep writer groups.
@@ -306,9 +286,9 @@ class Description < AbstractModel
     "#{table_name}_writers".to_sym
   end
 
-  # Name of the join table used to keep writer groups.
+  # Wrapper around class method of same name
   def writers_join_table
-    "#{self.class.table_name}_writers".to_sym
+    self.class.writers_join_table
   end
 
   # Name of the join table used to keep reader groups.
@@ -316,22 +296,22 @@ class Description < AbstractModel
     "#{table_name}_readers".to_sym
   end
 
-  # Name of the join table used to keep reader groups.
+  # Wrapper around class method of same name
   def readers_join_table
-    "#{self.class.table_name}_readers".to_sym
+    self.class.readers_join_table
   end
 
-  # List of all the admins for this description, as ids.
+  # List of all the admins for this description
   def admins
     group_users(admins_join_table)
   end
 
-  # List of all the writers for this description, as ids.
+  # List of all the writers for this description
   def writers
     group_users(writers_join_table)
   end
 
-  # List of all the readers for this description, as ids.
+  # List of all the readers for this description
   def readers
     group_users(readers_join_table)
   end
@@ -357,7 +337,7 @@ class Description < AbstractModel
   end
 
   # Is a given user an writer for this description?
-  def is_writer?(user)
+  def writer?(user)
     public_write || permitted?(writers_join_table, user)
   end
 
@@ -396,18 +376,6 @@ class Description < AbstractModel
     chg_permission(readers, arg, :remove)
   end
 
-  # Change a given User's or UserGroup's privileges.
-  def chg_permission(groups, arg, mode)
-    arg = UserGroup.one_user(arg) if arg.is_a?(User)
-    if (mode == :add) &&
-       !groups.include?(arg)
-      groups.push(arg)
-    elsif (mode == :remove) &&
-          groups.include?(arg)
-      groups.delete(arg)
-    end
-  end
-
   # Check if a given user has the given type of permission.
   def permitted?(table, user)
     if user.is_a?(User)
@@ -425,14 +393,7 @@ class Description < AbstractModel
   # Array of User instances.  Caches result.
   def group_users(table)
     @group_users ||= {}
-    return @group_users[table] if @group_users[table]
-
-    ids = group_user_ids(table)
-    ids = ["-1"] if ids.empty?
-    id_list = ids.map(&:to_s).join(",")
-    @group_users[table] = User.find_by_sql(%(
-      SELECT * FROM users
-      WHERE id IN (#{id_list})))
+    @group_users[table] ||= User.where(id: group_user_ids(table)).to_a
   end
 
   # Do minimal query to enumerate the users in a list of groups.  Return as an
@@ -469,9 +430,9 @@ class Description < AbstractModel
     "#{table_name}_authors".to_sym
   end
 
-  # Name of the join table used to keep authors.
+  # Wrapper around class method of same name
   def authors_join_table
-    "#{self.class.table_name}_authors".to_sym
+    self.class.authors_join_table
   end
 
   # Name of the join table used to keep editors.
@@ -479,31 +440,31 @@ class Description < AbstractModel
     "#{table_name}_editors".to_sym
   end
 
-  # Name of the join table used to keep editors.
+  # Wrapper around class method of same name
   def editors_join_table
-    "#{self.class.table_name}_editors".to_sym
+    self.class.editors_join_table
   end
 
-  # Is the given User and author?
-  def is_author?(user)
+  # Is the given User an author?
+  def author?(user)
     authors.member?(user)
   end
 
-  # Is the given User and editor?
-  def is_editor?(user)
+  # Is the given User an editor?
+  def editor?(user)
     editors.member?(user)
   end
 
   # Add a User on as an "author".  Saves User if changed.  Returns nothing.
   def add_author(user)
-    unless authors.member?(user)
-      authors.push(user)
-      SiteData.update_contribution(:add, authors_join_table, user.id)
-      if editors.member?(user)
-        editors.delete(user)
-        SiteData.update_contribution(:del, editors_join_table, user.id)
-      end
-    end
+    return if authors.member?(user)
+
+    authors.push(user)
+    SiteData.update_contribution(:add, authors_join_table, user.id)
+    return unless editors.member?(user)
+
+    editors.delete(user)
+    SiteData.update_contribution(:del, editors_join_table, user.id)
   end
 
   # Demote a User to "editor".  Saves User if changed.  Returns nothing.
@@ -512,24 +473,19 @@ class Description < AbstractModel
 
     authors.delete(user)
     SiteData.update_contribution(:del, authors_join_table, user.id)
-    if !editors.member?(user) &&
-       # Make sure user has actually made at least one change.
-       self.class.connection.select_value(%(
-         SELECT id FROM #{versioned_table_name}
-         WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
-         LIMIT 1
-       ))
-      editors.push(user)
-      SiteData.update_contribution(:add, editors_join_table, user.id)
-    end
+
+    return unless !editors.member?(user) && user_made_a_change?(user)
+
+    editors.push(user)
+    SiteData.update_contribution(:add, editors_join_table, user.id)
   end
 
   # Add a user on as an "editor".
   def add_editor(user)
-    if !authors.member?(user) && !editors.member?(user)
-      editors.push(user)
-      SiteData.update_contribution(:add, editors_join_table, user.id)
-    end
+    return unless !authors.member?(user) && !editors.member?(user)
+
+    editors.push(user)
+    SiteData.update_contribution(:add, editors_join_table, user.id)
   end
 
   ##############################################################################
@@ -538,16 +494,10 @@ class Description < AbstractModel
   #
   ##############################################################################
 
-  # By default make first user to add any text an author.
-  def author_worthy?
-    has_any_notes?
-  end
-
   # Callback that updates editors and/or authors after a User makes a change.
   # If the Name has no author and they've made sufficient contributions, they
   # get promoted to author by default.  In all cases make sure the user is
   # added on as an editor.
-  before_save :add_author_or_editor
   def add_author_or_editor
     return unless !@save_without_our_callbacks && (user = User.current)
 
@@ -556,7 +506,6 @@ class Description < AbstractModel
 
   # When destroying an object, subtract contributions due to
   # authorship/editorship.
-  before_destroy :update_users_and_parent
   def update_users_and_parent
     # Update editors' and authors' contributions.
     authors.each do |user|
@@ -566,10 +515,61 @@ class Description < AbstractModel
       SiteData.update_contribution(:del, editors_join_table, user.id)
     end
 
+    return unless parent.description_id == id
+
     # Make sure parent doesn't point to a nonexisting object.
-    if parent.description_id == id
-      parent.description_id = nil
-      parent.save_without_our_callbacks
+    parent.description_id = nil
+    parent.save_without_our_callbacks
+  end
+
+  ##############################################################################
+
+  private
+
+  # Descriptive subtitle for this description (when it is not necessary to
+  # include the title of the parent object), in plain text.  [I'm not sure
+  # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
+  def put_together_name(full_or_part)
+    tag = :"description_#{full_or_part}_title_#{source_type}"
+    user_name = begin
+                  user.legal_name
+                rescue StandardError
+                  "?"
+                end
+    args = {
+      text: source_name,
+      user: user_name
+    }
+    if full_or_part == :full
+      args[:object] = parent.format_name
+    elsif source_name.present?
+      tag = :"#{tag}_with_text"
     end
+    tag.l(args)
+  end
+
+  # Change a given User's or UserGroup's privileges.
+  def chg_permission(groups, arg, mode)
+    arg = UserGroup.one_user(arg) if arg.is_a?(User)
+    if (mode == :add) &&
+       !groups.include?(arg)
+      groups.push(arg)
+    elsif (mode == :remove) &&
+          groups.include?(arg)
+      groups.delete(arg)
+    end
+  end
+
+  def user_made_a_change?(user)
+    self.class.connection.select_value(%(
+      SELECT id FROM #{versioned_table_name}
+      WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
+      LIMIT 1
+    ))
+  end
+
+  # By default make first user to add any text an author.
+  def author_worthy?
+    notes?
   end
 end

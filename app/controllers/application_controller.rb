@@ -162,11 +162,13 @@ class ApplicationController < ActionController::Base
 
     logger.warn("BLOCKED #{request.remote_ip}")
     msg = "We have noticed a lot of server-intensive traffic from this IP" \
-          "address (#{request.remote_ip}).  There may be better ways of" \
-          "doing what you are trying to do.  Please contact the webmaster" \
+          "address (#{request.remote_ip}). There may be better ways of" \
+          "doing what you are trying to do. Please contact the webmaster" \
           "(#{MO.webmaster_email_address}) so that we can talk about it." \
-          "Please include a copy of this message in your email.  Apologies " \
-          "for the inconvenience."
+          "So that we can best help you, please: \n" \
+          "- include a copy of this message; \n" \
+          "- tell how you generally use Mushroom Observer; \n" \
+          "- tell us what you were doing when you received this message."
     render(plain: msg,
            status: :too_many_requests,
            layout: false)
@@ -1018,10 +1020,27 @@ class ApplicationController < ActionController::Base
   helper_method :query_params
 
   def add_query_param(params, query = nil)
-    params[:q] = get_query_param(query) unless browser.bot?
-    params
+    return params if browser.bot?
+
+    query_param = get_query_param(query)
+    if params.is_a?(String) # i.e., if params is a path
+      append_query_param_to_path(params, query_param)
+    else
+      params[:q] = query_param
+      params
+    end
   end
   helper_method :add_query_param
+
+  def append_query_param_to_path(path, query_param)
+    return path unless query_param
+
+    if path.match?(/\?/) # Does path already have a query string?
+      "#{path}&q=#{query_param}" # add query_param to existing query string
+    else
+      "#{path}?q=#{query_param}" # create a query string comprising query_param
+    end
+  end
 
   # Allows us to add query to a path helper:
   #   object_path(@object, q: get_query_param)
@@ -1098,6 +1117,17 @@ class ApplicationController < ActionController::Base
     result = find_new_query_for_model(model, query)
     save_updated_query(result) if update && result
     result
+  end
+
+  # Handle advanced_search actions with an invalid q param,
+  # so that they get just one flash msg if the query has expired.
+  # This method avoids a call to find_safe, which would add
+  # "undefined method `id' for nil:NilClass" if there's no QueryRecord for q
+  def handle_advanced_search_invalid_q_param?
+    return unless invalid_q_param?
+
+    flash_error(:advanced_search_bad_q_error.t)
+    redirect_to(observer_advanced_search_form_path)
   end
 
   private ##########
@@ -1178,6 +1208,11 @@ class ApplicationController < ActionController::Base
 
   def query_needs_update?(new_args, query)
     new_args.any? { |_arg, val| query.params[:arg] != val }
+  end
+
+  def invalid_q_param?
+    params && params[:q] &&
+      !QueryRecord.where(id: params[:q].dealphabetize).exists?
   end
 
   public ##########
@@ -1506,8 +1541,11 @@ class ApplicationController < ActionController::Base
         end
       end
 
-      # Render the list if given template.
-      render(action: args[:action]) if args[:action]
+      if args[:template]
+        render(template: args[:template]) # Render the list if given template.
+      elsif args[:action]
+        render(action: args[:action])
+      end
     end
   end
 

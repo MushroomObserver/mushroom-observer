@@ -33,9 +33,10 @@ class NameTest < UnitTestCase
       :author
     ].each do |var|
       expect = expects[var]
-      actual = if var == :real_text_name
+      actual = case var
+               when :real_text_name
                  Name.display_to_real_text(parse)
-               elsif var == :real_search_name
+               when :real_search_name
                  Name.display_to_real_search(parse)
                else
                  parse.send(var)
@@ -45,8 +46,10 @@ class NameTest < UnitTestCase
         any_errors = true
         var = "#{var} (*)"
       end
-      msg << format("%-20s %-40s %-40s", var.to_s, expect.inspect,
-                    actual.inspect)
+      msg << format(
+        "%-20<var>s %-40<expect>s %-40<actual>s",
+        var: var.to_s, expect: expect.inspect, actual: actual.inspect
+      )
     end
     assert_not(any_errors, msg.join("\n"))
   end
@@ -63,32 +66,32 @@ class NameTest < UnitTestCase
   end
 
   def assert_name_match_various_authors(pattern, string, first_match)
-    assert_name_match(pattern, string + " Author", first_match, " Author")
-    assert_name_match(pattern, string + " Śliwa", first_match, " Śliwa")
-    assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
-    assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
-    assert_name_match(pattern, string + " (One) Two", first_match, " (One) Two")
-    assert_name_match(pattern, string + " auct", first_match, " auct")
-    assert_name_match(pattern, string + " auct non Aurora",
+    assert_name_match(pattern, "#{string} Author", first_match, " Author")
+    assert_name_match(pattern, "#{string} Śliwa", first_match, " Śliwa")
+    assert_name_match(pattern, %(#{string} "Author"), first_match, ' "Author"')
+    assert_name_match(pattern, %(#{string} "Česka"), first_match, ' "Česka"')
+    assert_name_match(pattern, "#{string} (One) Two", first_match, " (One) Two")
+    assert_name_match(pattern, "#{string} auct", first_match, " auct")
+    assert_name_match(pattern, "#{string} auct non Aurora",
                       first_match, " auct non Aurora")
-    assert_name_match(pattern, string + " auct Borealis",
+    assert_name_match(pattern, "#{string} auct Borealis",
                       first_match, " auct Borealis")
-    assert_name_match(pattern, string + " auct. N. Amer.",
+    assert_name_match(pattern, "#{string} auct. N. Amer.",
                       first_match, " auct. N. Amer.")
-    assert_name_match(pattern, string + " ined",
+    assert_name_match(pattern, "#{string} ined",
                       first_match, " ined")
-    assert_name_match(pattern, string + " in ed.", first_match, " in ed.")
-    assert_name_match(pattern, string + " nomen nudum",
+    assert_name_match(pattern, "#{string} in ed.", first_match, " in ed.")
+    assert_name_match(pattern, "#{string} nomen nudum",
                       first_match, " nomen nudum")
-    assert_name_match(pattern, string + " nom. prov.",
+    assert_name_match(pattern, "#{string} nom. prov.",
                       first_match, " nom. prov.")
-    assert_name_match(pattern, string + " comb. prov.",
+    assert_name_match(pattern, "#{string} comb. prov.",
                       first_match, " comb. prov.")
-    assert_name_match(pattern, string + " sensu Author",
+    assert_name_match(pattern, "#{string} sensu Author",
                       first_match, " sensu Author")
-    assert_name_match(pattern, string + ' sens. "Author"',
+    assert_name_match(pattern, %(#{string} sens. "Author"),
                       first_match, ' sens. "Author"')
-    assert_name_match(pattern, string + ' "(One) Two"',
+    assert_name_match(pattern, %(#{string} "(One) Two"),
                       first_match, ' "(One) Two"')
   end
 
@@ -2231,8 +2234,211 @@ class NameTest < UnitTestCase
   end
 
   # --------------------------------------
+  #  Synonymy
+  # --------------------------------------
 
-  # Prove that display_name_brief_authors is shortened correctly
+  def test_synonym_ids
+    # Although this test is coupled to synonym_ids' details
+    # I can't find a better way to cover all the paths through that method
+
+    # If a Name has synonym(s), then
+    # synonym_ids will hit the db unless @synonyms exists, and vice versa
+    name_with_other_synonyms = names(:chlorophyllum_rachodes)
+    synonym = name_with_other_synonyms.synonym
+    synonym_ids = Name.where(synonym: synonym).pluck(:id)
+
+    # Prove that synonym_ids is correct when @synonyms doesn't exist
+    assert_equal(synonym_ids, name_with_other_synonyms.synonym_ids)
+
+    # Prove that synonym_ids is correct when @synonyms already exists
+    # synonyms = name_with_other_synonyms
+    assert_equal(
+      name_with_other_synonyms.synonyms.map(&:id), # creates @synonyms
+      name_with_other_synonyms.synonym_ids
+    )
+
+    # Prove that synonym_ids is correct when name lacks synonyms
+    name_without_other_synonyms = names(:conocybe_filaris)
+    assert_equal([name_without_other_synonyms.id],
+                 name_without_other_synonyms.synonym_ids)
+  end
+
+  def test_other_approved_synonyms
+    assert_equal([names(:chlorophyllum_rachodes)],
+                 names(:chlorophyllum_rhacodes).other_approved_synonyms)
+    assert_empty(names(:lactarius_alpinus).other_approved_synonyms)
+  end
+
+  def test_best_preferred_synonym
+    # no preferred synonyms
+    assert_empty(names(:pluteus_petasatus_deprecated).best_preferred_synonym)
+
+    # only 1 preferred synonym
+    assert_equal(names(:lactarius_alpinus),
+                 names(:lactarius_alpigenes).best_preferred_synonym)
+
+    # > 1 preferred synonym, none with observations
+    # Macrolepiota rachodes & rhacodes are synonyms, approved, and have
+    # no observations
+    # Create a deprecated synonym and test it
+    deprecated_name = Name.create!(
+      text_name: "Lepiota rhacodes",
+      author: "(Vittad.) Quél.",
+      display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
+      synonym: synonyms(:macrolepiota_rachodes_synonym),
+      deprecated: true,
+      rank: :Species, user: users(:rolf)
+    )
+    # M. rachodes & rhacodes are tied with 0 Observations
+    # "Best" one is the one last updated
+    assert_equal(names(:macrolepiota_rachodes),
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, one with observations
+    # C. rachodes is approved, has 1 Observation
+    # C. rachodes is approved, has 0 Observations
+    # Create a deprecated synonym and test it
+    deprecated_name = Name.create!(
+      text_name: "Agaricus rhacodes",
+      author: "Vittad.",
+      display_name: "__Agaricus rhacodes__ Vittad.",
+      synonym: synonyms(:chlorophyllum_rachodes_synonym),
+      deprecated: true,
+      rank: :Species, user: users(:rolf)
+    )
+    assert_equal(names(:chlorophyllum_rachodes),
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, > 1 with observations,
+    # Neither has more Observations
+    # Create an Observation for the other approved synonym, so that they'll
+    # be tied in # of Observations
+    revised_best_synonym = names(:chlorophyllum_rhacodes)
+    Observation.create(
+      name: revised_best_synonym,
+      user: users(:rolf), when: Time.current, location: locations(:albion)
+    )
+    # other_approved_synonyms.name.observations is cached by Rails, so
+    # it didn't change when we created the Observation above.
+    # So reload it
+    deprecated_name.other_approved_synonyms.
+      find { |n| n == revised_best_synonym }.observations.reload
+    assert_equal(revised_best_synonym,
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, > 1 with observations,
+    # 1 has more obs than all the others
+    # Make C. rachodes have 2 observations
+    revised_best_synonym = names(:chlorophyllum_rachodes)
+    Observation.create(
+      name: revised_best_synonym,
+      user: users(:rolf), when: Time.current, location: locations(:albion)
+    )
+    # other_approved_synonyms.name.observations is cached by Rails, so
+    # it didn't change when we created the Observation above.
+    # So reload it
+    deprecated_name.other_approved_synonyms.
+      find { |n| n == revised_best_synonym }.observations.reload
+    assert_equal(revised_best_synonym,
+                 deprecated_name.best_preferred_synonym)
+  end
+
+  def test_homonyms
+    name = names(:hygrocybe_russocoriacea_good_author)
+    expect = Name.where(text_name: name.text_name).pluck(:id)
+    assert_equal(expect, name.other_author_ids, "Homonym ids incorrect")
+
+    # This know too much about other_author_ids internals,
+    # But how else can I do it? -- JDC 2020-12-16
+    name.other_authors # sets @other_authors (in the context of name)
+    assert_equal(expect, name.other_author_ids, "Homonym ids incorrect")
+
+    name = names(:hygrocybe_russocoriacea_bad_author)
+    expect = Name.where(text_name: name.text_name).to_a
+    assert_equal(expect, name.other_authors, "Homonyms incorrect")
+
+    name.other_author_ids # sets @other_author_ids (in the context of name)
+    assert_equal(expect, name.other_authors, "Homonyms incorrect")
+  end
+
+  def test_clear_synonym
+    name = names(:peltigera)
+    misspelt = names(:petigera)
+    assert(name.synonym)
+    assert(misspelt.synonym)
+    assert_equal(
+      2, name.synonyms.count, "Test needs fixture with one other synonym"
+    )
+
+    name.clear_synonym
+
+    assert_nil(name.synonym, "Failed to unsynonymize name")
+    assert_nil(misspelt.reload.synonym,
+               "Failed to unsynonymize misspelling of unsynonymized name")
+    assert_nil(
+      misspelt.correct_spelling,
+      "Failed to clear misspelling when correct spelling un-synonymized"
+    )
+  end
+
+  def test_more_popular
+    approved_name = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    assert_equal(approved_name, approved_name.more_popular(deprecated_name),
+                 "Approved name should be more popular than deprecated one")
+    assert_equal(approved_name, deprecated_name.more_popular(approved_name),
+                 "Approved name should be more popular than deprecated one")
+
+    # Prove that more observed, approved Name is more popular than
+    # less observed, but more recently proposed, approved Name
+    more_observed_name = names(:fungi)
+    less_observed_name = names(:coprinus_comatus)
+    assert_operator(more_observed_name.observation_count, :>,
+                    less_observed_name.observation_count,
+                    "Test needs different fixtures")
+    less_observed_naming = Naming.where(name: less_observed_name).first
+    less_observed_naming.update(created_at: Time.zone.now + 1.hour)
+    assert_equal(
+      more_observed_name,
+      more_observed_name.more_popular(less_observed_name),
+      "More observed name should be more popular than " \
+      "less observed, more-recently proposed name"
+    )
+    assert_equal(
+      more_observed_name,
+      less_observed_name.more_popular(more_observed_name),
+      "More observed name should be more popular than " \
+      "less observed, more-recently proposed name"
+    )
+
+    # Prove that more recently proposed, approved Name is more popular than
+    # less recently proposed, approved Name with equal number of observations
+    later_proposed_name = names(:tremella)
+    earlier_proposed_name = names(:tremella_mesenterica)
+    assert_equal(earlier_proposed_name.observation_count,
+                 later_proposed_name.observation_count,
+                 "Test needs different fixtures")
+    later_proposed_naming = Naming.where(name: later_proposed_name).first
+    later_proposed_naming.update(created_at: Time.zone.now + 1.hour)
+
+    assert_equal(
+      later_proposed_name,
+      later_proposed_name.more_popular(earlier_proposed_name),
+      "More recently proposed name should be more popular than " \
+      "less recently proposed, approved Name with same number of observations"
+    )
+    assert_equal(
+      later_proposed_name,
+      earlier_proposed_name.more_popular(later_proposed_name),
+      "More recently proposed name should be more popular than " \
+      "less recently proposed, approved Name with same number of observations"
+    )
+  end
+
+  # --------------------------------------
+  #  formatting
+  # --------------------------------------
+
   def test_display_name_brief_authors
     # Name 0 authors
     assert_equal(names(:russula_brevipes_no_author).display_name,
@@ -2399,6 +2605,16 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_make_sure_names_are_bolded_correctly
+    name = names(:suilus)
+    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
+    Name.make_sure_names_are_bolded_correctly
+    name.reload
+    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
+
+  # --------------------------------------
+
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
     return unless sql_collates_accents?
@@ -2547,13 +2763,12 @@ class NameTest < UnitTestCase
 
   def test_names_from_synonymous_genera
     User.current = rolf
-
-    a  = create_test_name("Agaricus")
+    a = create_test_name("Agaricus")
     a1 = create_test_name("Agaricus testus")
     a3 = create_test_name("Agaricus testii")
-    b  = create_test_name("Pseudoagaricum")
+    b = create_test_name("Pseudoagaricum")
     b1 = create_test_name("Pseudoagaricum testum")
-    c  = create_test_name("Hyperagarica")
+    c = create_test_name("Hyperagarica")
     c1 = create_test_name("Hyperagarica testa")
     d = names(:lepiota)
     b.change_deprecated(true)
@@ -2646,111 +2861,140 @@ class NameTest < UnitTestCase
                            Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
 
-  def test_synonym_ids
-    # Although this test is coupled to synonym_ids' details
-    # I can't find a better way to cover all the paths through that method
+  # --------------------------------------
 
-    # If a Name has synonym(s), then
-    # synonym_ids will hit the db unless @synonyms exists, and vice versa
-    name_with_other_synonyms = names(:chlorophyllum_rachodes)
-    synonym = name_with_other_synonyms.synonym
-    synonym_ids = Name.where(synonym: synonym).pluck(:id)
+  def test_approved_synonym_of_proposed_name_has_dependents
+    approved_synonym = names(:lactarius_alpinus)
+    deprecated_name = names(:lactarius_alpigenes)
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym &&
+           deprecated_name.correctly_spelt?,
+           "Test needs different fixture(s): " \
+           "an Approved Name, with a Deprecated Synonym" \
+           "the Deprecated Name being correctly spelt")
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
 
-    # Prove that synonym_ids is correct when @synonyms doesn't exist
-    assert_equal(synonym_ids, name_with_other_synonyms.synonym_ids)
-
-    # Prove that synonym_ids is correct when @synonyms already exists
-    # synonyms = name_with_other_synonyms
-    assert_equal(
-      name_with_other_synonyms.synonyms.map(&:id), # creates @synonyms
-      name_with_other_synonyms.synonym_ids
+    assert(
+      approved_synonym.dependents?,
+      "`dependents?` should be true for an approved synonym " \
+      "(#{approved_synonym.text_name}) of " \
+      "a correctly spelt Proposed Name (#{deprecated_name.text_name})"
     )
-
-    # Prove that synonym_ids is correct when name lacks synonyms
-    name_without_other_synonyms = names(:conocybe_filaris)
-    assert_equal([name_without_other_synonyms.id],
-                 name_without_other_synonyms.synonym_ids)
   end
 
-  def test_other_approved_synonyms
-    assert_equal([names(:chlorophyllum_rachodes)],
-                 names(:chlorophyllum_rhacodes).other_approved_synonyms)
-    assert_empty(names(:lactarius_alpinus).other_approved_synonyms)
+  def test_approved_synonym_of_mispelt_name_has_no_dependents
+    approved_synonym = names(:peltigera)
+    deprecated_name = names(:petigera)
+    assert(!approved_synonym.deprecated &&
+           deprecated_name.synonym == approved_synonym.synonym &&
+           deprecated_name.is_misspelling?,
+           "Test needs different fixture(s): " \
+           "an Approved Name, with a Deprecated Synonym" \
+           "the Deprecated Name being misspelt")
+    Naming.create(user: mary,
+                  name: deprecated_name,
+                  observation: observations(:minimal_unknown_obs))
+
+    assert_not(
+      approved_synonym.dependents?,
+      "`dependents?` should be false for an approved synonym " \
+      "(#{approved_synonym.text_name}) of " \
+      "a misspelt Proposed Name (#{deprecated_name.text_name})"
+    )
   end
 
-  def test_best_preferred_synonym
-    # no preferred synonyms
-    assert_empty(names(:pluteus_petasatus_deprecated).best_preferred_synonym)
-
-    # only 1 preferred synonym
-    assert_equal(names(:lactarius_alpinus),
-                 names(:lactarius_alpigenes).best_preferred_synonym)
-
-    # > 1 preferred synonym, none with observations
-    # Macrolepiota rachodes & rhacodes are synonyms, approved, and have
-    # no observations
-    # Create a deprecated synonym and test it
-    deprecated_name = Name.create!(
-      text_name: "Lepiota rhacodes",
-      author: "(Vittad.) Quél.",
-      display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
-      synonym: synonyms(:macrolepiota_rachodes_synonym),
-      deprecated: true,
-      rank: :Species, user: users(:rolf)
+  def test_correctly_spelled_ancestor_of_proposed_name_has_dependents
+    ancestor = names(:basidiomycetes)
+    assert(
+      !ancestor.is_misspelling? &&
+      Name.joins(:namings).where(
+        "classification LIKE ?",
+        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
+      ).any?,
+      "Test needs different fixture: A correctly spelled Name " \
+      "at a rank that has Namings classified with that rank."
     )
-    # M. rachodes & rhacodes are tied with 0 Observations
-    # "Best" one is the one last updated
-    assert_equal(names(:macrolepiota_rachodes),
-                 deprecated_name.best_preferred_synonym)
-
-    # > 1 preferred synonyms, one with observations
-    # C. rachodes is approved, has 1 Observation
-    # C. rachodes is approved, has 0 Observations
-    # Create a deprecated synonym and test it
-    deprecated_name = Name.create!(
-      text_name: "Agaricus rhacodes",
-      author: "Vittad.",
-      display_name: "__Agaricus rhacodes__ Vittad.",
-      synonym: synonyms(:chlorophyllum_rachodes_synonym),
-      deprecated: true,
-      rank: :Species, user: users(:rolf)
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for a Name above genus " \
+      "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
+      "of a Proposed Name"
     )
-    assert_equal(names(:chlorophyllum_rachodes),
-                 deprecated_name.best_preferred_synonym)
 
-    # > 1 preferred synonyms, > 1 with observations,
-    # Neither has more Observations
-    # Create an Observation for the other approved synonym, so that they'll
-    # be tied in # of Observations
-    revised_best_synonym = names(:chlorophyllum_rhacodes)
-    Observation.create(
-      name: revised_best_synonym,
-      user: users(:rolf), when: Time.current, location: locations(:albion)
+    ancestor = names(:boletus)
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for a Genus (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
     )
-    # other_approved_synonyms.name.observations is cached by Rails, so
-    # it didn't change when we created the Observation above.
-    # So reload it
-    deprecated_name.other_approved_synonyms.
-      find { |n| n == revised_best_synonym }.observations.reload
-    assert_equal(revised_best_synonym,
-                 deprecated_name.best_preferred_synonym)
 
-    # > 1 preferred synonyms, > 1 with observations,
-    # 1 has more obs than all the others
-    # Make C. rachodes have 2 observations
-    revised_best_synonym = names(:chlorophyllum_rachodes)
-    Observation.create(
-      name: revised_best_synonym,
-      user: users(:rolf), when: Time.current, location: locations(:albion)
+    ancestor = names(:amanita_boudieri)
+    Naming.create(user: mary,
+                  name: names(:amanita_boudieri_var_beillei),
+                  observation: observations(:minimal_unknown_obs))
+    assert(
+      ancestor.dependents?,
+      "`dependents?` should be true for Species (#{ancestor.text_name}) " \
+      "that is an ancestor of a Proposed Name."
     )
-    # other_approved_synonyms.name.observations is cached by Rails, so
-    # it didn't change when we created the Observation above.
-    # So reload it
-    deprecated_name.other_approved_synonyms.
-      find { |n| n == revised_best_synonym }.observations.reload
-    assert_equal(revised_best_synonym,
-                 deprecated_name.best_preferred_synonym)
   end
+
+  def test_misspelt_ancestor_of_misspelt_proposed_name_has_no_dependents
+    misspelt_genus = names(:suilus)
+    species_of_missplet_genus = Name.create(
+      text_name: "#{misspelt_genus.text_name} lakei",
+      display_name: "__#{misspelt_genus.text_name} lakei__",
+      rank: :Species,
+      user: dick,
+      correct_spelling: names(:boletus_edulis) # anything will do
+    )
+    Naming.create(user: mary,
+                  name: species_of_missplet_genus,
+                  observation: observations(:minimal_unknown_obs))
+
+    assert_not(
+      misspelt_genus.dependents?,
+      "`dependents?` should be false for " \
+      "misspelt genus of misspelt Proposed Name " \
+    )
+  end
+
+  def test_ancestor_of_correctly_spelled_unproposed_name_has_dependents
+    ancestor = Name.create(
+      text_name: "Phyllotopsidaceae",
+      search_name: "Phyllotopsidaceae",
+      sort_name: "Phyllotopsidaceae",
+      display_name: "**__Phyllotopsidaceae__**",
+      rank: Name.ranks[:Family],
+      user: dick
+    )
+    descendant = Name.create(
+      text_name: "Macrotyphula",
+      search_name: "Macrotyphula",
+      sort_name: "Macrotyphula",
+      display_name: "**__Macrotyphula__**",
+      rank: Name.ranks[:Genus],
+      classification: "Family: _#{ancestor.text_name}_",
+      user: dick
+    )
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
+
+    ancestor = names(:tubaria)
+    descendant = names(:tubaria_furfuracea)
+    assert(
+      Naming.where(name: descendant).none? && !descendant.is_misspelling?,
+      "Test needs different fixture: correctly spelled, without Namings"
+    )
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
+  end
+
+  # --------------------------------------
 
   def test_imageless
     assert_true(names(:imageless).imageless?)
@@ -2774,12 +3018,11 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
     assert_not(Name.names_matching_desired_new_name(parsed).
                 include?(names(:unauthored_with_naming)))
-
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
-    extant  = names(:authored_group)
+    extant = names(:authored_group)
     desired = extant.text_name
-    parsed  = Name.parse_name(desired)
+    parsed = Name.parse_name(desired)
     assert_not(Name.names_matching_desired_new_name(parsed).include?(extant),
                "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
@@ -2878,14 +3121,6 @@ class NameTest < UnitTestCase
     assert_objs_equal(good.synonym, bad.synonym)
   end
 
-  def test_make_sure_names_are_bolded_correctly
-    name = names(:suilus)
-    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
-    Name.make_sure_names_are_bolded_correctly
-    name.reload
-    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
-  end
-
   def test_registability
     name = names(:boletus_edulis_group)
     assert(name.unregistrable?, "Groups should be unregistrable")
@@ -2965,12 +3200,21 @@ class NameTest < UnitTestCase
   def test_guess_name_with_colon_in_pattern
     # Apparently assert_nothing_raised hides debug information but gives
     # nothing useful in return.
-    # Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
-    #
-    # Reverted to `assert_nothing_raised` to avoid direct testing of private
-    # class method `Name.guess_with_errors`.
-    assert_nothing_raised do
-      Name.suggest_alternate_spellings("Crepidotus applanatus(Pers.:Fr.)Kummer")
-    end
+    Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
+  end
+
+  def test_merge_interests
+    old_name = names(:agaricus_campestros)
+    interests = old_name.interests
+    assert(interests.any?, "Test needs a fixture with an interest")
+    target = names(:agaricus_campestras)
+    assert(target.interests.none?, "Test needs a fixture without interests")
+
+    target.merge(old_name)
+    assert_equal(
+      interests, target.interests,
+      "Old name (#{old_name.text_name}) interests " \
+      "were not moved to target (#{target.text_name})"
+    )
   end
 end
