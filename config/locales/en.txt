@@ -2909,12 +2909,13 @@
   # observer/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
-  sandbox_link4: The RedCloth manual.
-  sandbox_link5: The old hobix.com tutorial.
-  sandbox_link6: Cheatsheet courtesy warpedivisions.org.
+  sandbox_link4: The RedCloth manual
+  sandbox_link5: The old hobix.com tutorial
+  sandbox_link6: Cheatsheet courtesy warpedivisions.org
   sandbox_look_like: This is what it will look like
+  sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "__italics__        trademark(tm)  \\\n**boldface**       copyright(c)    | (must follow letters, not punctuation)\n+underline+        registered(r)  /\n@monospace@\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_comment 12345_\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote or indent a paragraph.\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm) \n**boldface**       copyright(c) \n+underline+        registered(r) \n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote \n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
