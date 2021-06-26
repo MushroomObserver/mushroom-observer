@@ -2,8 +2,6 @@
 
 # validations used by multiple objects
 module Validations
-  extend ActiveSupport::Concern
-
   # Validates obj.when.
   # Includes setting it to current date if user set it to nil.
   # used by: Observation, SpeciesList
