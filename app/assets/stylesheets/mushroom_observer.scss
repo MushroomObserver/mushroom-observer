@@ -277,6 +277,18 @@ ul.tight-list {
 // Mushroom Observer logo
 // --------------------------------------------------
 
+#logo-trim {
+    max-width: 100%;
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+#logo-link:hover {
+    background-color: transparent;
+}
+
 #navigation {
     #logo {
         background-color: $LOGO_BG_COLOR;

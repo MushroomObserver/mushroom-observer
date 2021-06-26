@@ -293,10 +293,6 @@
   log: log
   LOGS: Logs
   logs: logs
-  CONTEST_ENTRY: Contest Entry
-  contest_entry: contest entry
-  CONTEST_ENTRYS: Contest Entries
-  contest_entrys: contest entries
   MAP: Map
   map: map
   MAPS: Maps
@@ -1225,9 +1221,6 @@
   # This goes in the title bar of the browser.  You don't need to translate this,
   # it's up to you.
   app_title: Mushroom Observer
-
-  # This goes in the left-hand column.  The "<br/>" forces a line-break.
-  app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
   app_banner_box: "Image server is back online!<br/>\nWe're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
@@ -2490,11 +2483,12 @@
   herbarium_record_initial_det: Initial Determination
   herbarium_record_accession_number: Accession Number
   herbarium_record_user: Record Creator
+  herbarium_record_notes: Fungarium Record Notes
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
   create_herbarium_record_title: Add Fungarium Record
-  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013."
+  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419 \n&nbsp;&nbsp;BRY-L-0025845 \n&nbsp;&nbsp;MO 174623 \n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
   create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
@@ -2915,12 +2909,13 @@
   # observer/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
-  sandbox_link4: The RedCloth manual.
-  sandbox_link5: The old hobix.com tutorial.
-  sandbox_link6: Cheatsheet courtesy warpedivisions.org.
+  sandbox_link4: The RedCloth manual
+  sandbox_link5: The old hobix.com tutorial
+  sandbox_link6: Cheatsheet courtesy warpedivisions.org
   sandbox_look_like: This is what it will look like
+  sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "__italics__        trademark(tm)  \\\n**boldface**       copyright(c)    | (must follow letters, not punctuation)\n+underline+        registered(r)  /\n@monospace@\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_comment 12345_\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote or indent a paragraph.\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm) \n**boldface**       copyright(c) \n+underline+        registered(r) \n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote \n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
@@ -3189,17 +3184,6 @@
   review_anon: Anon
   review_amount: Amount
   review_email: Email
-
-  # contest_entry pages
-  create_contest_entry_title: "[:create_object(type=:contest_entry)]"
-  index_contest_entry: "[:CONTEST_ENTRY] Index"
-  admins_only: Only admins can access that page
-
-  # contest_ballot pages
-  contest_ballot_intro: This is your ballot for the Mushroom Observer Logo Contest.  Put the logos in your order of preference using the drop down menus.  The initial order is random.  When you are ready for your ballot to count, make sure you've checked the box at the top of the ballot.  You may revise your votes at any time until voting closes.
-  contest_ballot_check_text: If this box is checked then the votes on this page will be counted when voting closes.
-  contest_ballot_title: Mushroom Observer Logo Contest Ballot
-
 
   ##############################################################################
 
@@ -3640,7 +3624,7 @@
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 N\n123 27.402 N\n123 24 24.12 N\n123° 24’ 24.12” N\n123deg 24min 24.12sec N"
   runtime_altitude_error: "Elevation must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."
-  runtime_merge_success: Successfully merged [type] [this] into [that].
+  runtime_merge_success: Successfully merged [type] [src] into [dest].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
   runtime_no_create: Unable to create [type].
@@ -3760,7 +3744,7 @@
   runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
   runtime_edit_name_description_no_change: "[:runtime_no_changes]"
   runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
-  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
+  runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,src=this,dest=that)]"
   runtime_edit_name_no_change: "[:runtime_no_changes]"
   runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
   runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
@@ -3788,7 +3772,7 @@
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
   runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
   runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
-  runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
+  runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
   runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
   runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"

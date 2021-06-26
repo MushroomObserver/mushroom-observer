@@ -677,7 +677,7 @@ class AccountController < ApplicationController
     elsif str.match?(/^\d+$/)
       User.safe_find(str)
     else
-      User.find_by_login(str.sub(/ <.*>$/, ""))
+      User.find_by_login(str) || User.find_by_email(str.sub(/ <.*>$/, ""))
     end
   end
 

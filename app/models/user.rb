@@ -254,7 +254,6 @@ class User < AbstractModel
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
-  has_many :contest_votes
   has_many :donations
   has_many :external_links
   has_many :images

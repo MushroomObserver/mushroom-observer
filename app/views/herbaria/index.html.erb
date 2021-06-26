@@ -49,8 +49,8 @@
                 <%# Cannot POST from a link without js; Use buttons instead %>
                 <%= post_button(
                       name: herbarium.name.t,
-                      path: herbaria_merges_path(this: @merge.id,
-                                                 that: herbarium.id),
+                      path: herbaria_merges_path(src: @merge.id,
+                                                 dest: herbarium.id),
                       confirm: :are_you_sure.t
                     ) %>
               <% else %>

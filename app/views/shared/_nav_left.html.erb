@@ -1,7 +1,4 @@
 <div class="list-group list-group-compact">
-  <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>" class="list-group-item">
-      <span id="logo-text"><%= :app_banner.t %></span>
-  </a>
 
   <%= link_to(:app_intro.t, observer_intro_path,
               { class: "list-group-item" }) %>
@@ -137,7 +134,7 @@
               { class: "list-group-item indent" }) %>
   <%= link_to(:translators_note_title.t, observer_translators_note_path,
               { class: "list-group-item indent" }) %>
-  <%= link_to(:app_publications.t, publications_index_path,
+  <%= link_to(:app_publications.t, publications_path,
               { class: "list-group-item indent" }) %>
 
   <% unless browser.bot?%>

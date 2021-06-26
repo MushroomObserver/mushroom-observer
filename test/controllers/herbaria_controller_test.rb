@@ -200,10 +200,10 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:index, params: { flavor: :all, merge: source.id })
 
-    assert_select("form[action *= 'that=#{source.id}']", count: 0)
-    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
-    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
-    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{source.id}']", count: 0)
+    assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{dicks_personal.id}']", count: 1)
   end
 
   def test_index_all_merge_target_buttons_presence_dick
@@ -214,10 +214,10 @@ class HerbariaControllerTest < FunctionalTestCase
 
     login("dick")
     get(:index, params: { flavor: :all, merge: source.id })
-    assert_select("form[action *= 'that=#{source.id}']", count: 0)
-    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
-    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
-    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{source.id}']", count: 0)
+    assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{dicks_personal.id}']", count: 1)
   end
 
   def test_index_all_merge_target_buttons_presence_admin
@@ -225,10 +225,10 @@ class HerbariaControllerTest < FunctionalTestCase
     make_admin("zero")
     get(:index, params: { flavor: :all, merge: source.id })
 
-    assert_select("form[action *= 'that=#{source.id}']", count: 0)
-    assert_select("form[action *= 'that=#{nybg.id}']", count: 1)
-    assert_select("form[action *= 'that=#{fundis.id}']", count: 1)
-    assert_select("form[action *= 'that=#{dicks_personal.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{source.id}']", count: 0)
+    assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{fundis.id}']", count: 1)
+    assert_select("form[action *= 'dest=#{dicks_personal.id}']", count: 1)
   end
 
   def test_index_all_merge_target_buttons_presence_no_login
@@ -583,14 +583,16 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_update_with_duplicate_name_by_owner_of_all_records
-    other = herbaria(:rolf_herbarium)
-    params = herbarium_params.merge(name: other.name)
-    # Rolf can both edit and does own all the records.  Should merge.
+    dest = herbaria(:rolf_herbarium)
+    params = herbarium_params.merge(name: dest.name)
+    # Rolf can both edit and does own all the records.
+    # When he changes nybg's name == Rolf's personal herbarium name,
+    # Should merge nybg into Rolf's personal herbarium.
     login("rolf")
     patch(:update, params: { herbarium: params, id: nybg.id })
 
-    assert_nil(Herbarium.safe_find(other.id))
-    assert_not_nil(Herbarium.safe_find(nybg.id))
+    assert_not_nil(Herbarium.safe_find(dest.id))
+    assert_nil(Herbarium.safe_find(nybg.id))
   end
 
   def test_update_with_nonexisting_place_name
