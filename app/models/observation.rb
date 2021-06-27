@@ -1172,7 +1172,7 @@ class Observation < AbstractModel
   include Validations
 
   validate :check_requirements, :validate_when
-  
+
   def check_requirements
     check_where
     check_user
