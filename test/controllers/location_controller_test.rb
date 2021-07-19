@@ -707,6 +707,22 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(10, location.low)
   end
 
+  def test_destroy_location
+    location = locations(:california)
+    params = { id: location.id }
+
+    login(location.user.login)
+    delete(:destroy_location, params: params)
+    assert(Location.exists?(location.id),
+           "Location should be destroyable only if user is in admin mode")
+
+    make_admin
+    delete(:destroy_location, params: params)
+    assert_redirected_to(location_list_locations_path)
+    assert_not(Location.exists?(location.id),
+               "Failed to destroy Location #{location.id}, '#{location.name}'")
+  end
+
   def test_list_merge_options
     albion = locations(:albion)
 

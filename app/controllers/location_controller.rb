@@ -480,7 +480,7 @@ class LocationController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create/Edit Location
+  #  :section: Create/Edit/Destroy Location
   #
   ##############################################################################
   def create_location
@@ -634,6 +634,16 @@ class LocationController < ApplicationController
     else
       post_edit_location_change(db_name)
     end
+  end
+
+  def destroy_location
+    return unless in_admin_mode?
+    return unless (@location = find_or_goto_index(Location, params[:id].to_s))
+
+    if @location.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Location, value: params[:id]))
+    end
+    redirect_to(location_list_locations_path)
   end
 
   # Merge this location with another.
