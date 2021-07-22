@@ -107,7 +107,7 @@ class ObserverController
     @name = Name.safe_find(params[:name_id])
     @new_name = params[:new_name]
 
-    unless @name && @name.search_name != @new_name
+    if @name&.search_name == @new_name
       redirect_back_or_default(action: :index)
       return
     end
