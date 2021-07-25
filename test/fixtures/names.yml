@@ -315,6 +315,7 @@ lactarius:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
   rank: <%= Name.ranks[:Genus] %>
+  icn_id: 17895
 
 lactarius_alpinus:
   <<: *DEFAULTS

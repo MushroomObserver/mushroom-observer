@@ -1884,6 +1884,36 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
   end
 
+  def test_update_change_icn_id_name_with_dependents
+    name = names(:lactarius)
+    assert((old_icn_id = name.icn_id), "Test needs a fixture with an icn_id")
+    assert(name.dependents?, "Test needs a fixture with dependents")
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_id: name.icn_id + 1,
+        notes: name.notes
+      }
+    }
+    user = name.user
+    login(user.login)
+
+    post(:edit_name, params: params)
+    assert_redirected_to(
+      { controller: :observer, action: :email_name_change_request,
+        params: { name_id: name.id,
+                  new_name: name.search_name, new_icn_id: name.icn_id + 1 } },
+      "Editing icn_id of Name with dependents should ask webmaster to make change"
+    )
+  end
+
   def test_update_icn_id_unregistrable
     name = names(:authored_group)
     params = {
