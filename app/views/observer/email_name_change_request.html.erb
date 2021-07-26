@@ -13,16 +13,19 @@
     <div class="form-group push-down">
       <%= label_tag(:name, :NAME.t) %>:
           <%= @name.unique_search_name %>
+          [#<%= @name.icn_id.to_s %>]
     </div>
 
     <div class="form-group push-down">
-      <%= label_tag(:new_name.t) %>: <%= @new_name %>
+      <%= label_tag(:new_name.t) %>: <%= @new_name_with_icn_id %>
+      <%# pass this thru to the Update side of the action %>
+      <%= hidden_field_tag(:new_name_with_icn_id, @new_name_with_icn_id) %>
     </div>
 
     <div class="form-group push-down">
       <%= label_tag(:notes, "#{:Notes.t}:") %>
       <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
-                        data: {autofocus: true}) %>
+                        data: { autofocus: true }) %>
     </div>
 
     <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>

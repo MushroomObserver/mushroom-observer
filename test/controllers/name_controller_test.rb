@@ -1757,7 +1757,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_redirected_to(
       { controller: :observer, action: :email_name_change_request,
-        name_id: name.id, new_name: "Superboletus" },
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]" },
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -1908,8 +1908,10 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
     assert_redirected_to(
       { controller: :observer, action: :email_name_change_request,
-        params: { name_id: name.id,
-                  new_name: name.search_name, new_icn_id: name.icn_id + 1 } },
+        params: {
+          name_id: name.id,
+          new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
+        } },
       "Editing icn_id of Name with dependents should ask webmaster to make change"
     )
   end

@@ -114,9 +114,15 @@ class NameController
   def update
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
+      # Auricularia Bull. [#17132]
+      @new_name_with_icn_id = "#{@parse.search_name} [##{params[:name][:icn_id]}]"
       redirect_with_query(
         controller: :observer, action: :email_name_change_request,
-        name_id: @name.id, new_name: @parse.search_name
+        params: {
+          name_id: @name.id,
+          # Auricularia Bull. [#17132]
+          new_name_with_icn_id: "#{@parse.search_name} [##{params[:name][:icn_id]}]"
+        }
       )
       return
     end
