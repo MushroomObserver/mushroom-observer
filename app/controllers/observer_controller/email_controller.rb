@@ -104,7 +104,9 @@ class ObserverController
   end
 
   # get email_name_change_request(
-  #   params: { name_id: 1258, new_name_with_icn_id: "Auricularia Bull. [#17132]" }
+  #   params: {
+  #     name_id: 1258, new_name_with_icn_id: "Auricularia Bull. [#17132]"
+  #   }
   # )
   def email_name_change_request
     @name = Name.safe_find(params[:name_id])
