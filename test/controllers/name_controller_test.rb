@@ -1912,7 +1912,7 @@ class NameControllerTest < FunctionalTestCase
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
         } },
-      "Editing icn_id of Name with dependents should ask admin to make change"
+      "Editing id# of Name w/dependents should show Name Change Request form"
     )
   end
 
