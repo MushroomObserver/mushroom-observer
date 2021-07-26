@@ -1886,7 +1886,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_update_change_icn_id_name_with_dependents
     name = names(:lactarius)
-    assert((old_icn_id = name.icn_id), "Test needs a fixture with an icn_id")
+    assert(name.icn_id, "Test needs a fixture with an icn_id")
     assert(name.dependents?, "Test needs a fixture with dependents")
     params = {
       id: name.id,
@@ -1912,7 +1912,7 @@ class NameControllerTest < FunctionalTestCase
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
         } },
-      "Editing icn_id of Name with dependents should ask webmaster to make change"
+      "Editing icn_id of Name with dependents should ask admin to make change"
     )
   end
 
@@ -3648,6 +3648,7 @@ class NameControllerTest < FunctionalTestCase
         existing_synonyms[n.id.to_s] = "1" # Check the rest
       end
     end
+
     split_version = split_name.version
     kept_version = kept_name.version
     params = {
