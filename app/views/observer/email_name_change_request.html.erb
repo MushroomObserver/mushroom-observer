@@ -18,7 +18,7 @@
 
     <div class="form-group push-down">
       <%= label_tag(:new_name.t) %>: <%= @new_name_with_icn_id %>
-      <%# pass this thru to the Update side of the action %>
+      <%# pass it back to the action, else it's clobbered there %>
       <%= hidden_field_tag(:new_name_with_icn_id, @new_name_with_icn_id) %>
     </div>
 

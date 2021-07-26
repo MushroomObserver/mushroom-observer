@@ -116,9 +116,11 @@ class ObserverController
       redirect_back_or_default(action: :index)
       return
     end
+
+    @new_name_with_icn_id = params[:new_name_with_icn_id]
     return unless request.method == "POST"
 
-    send_name_change_request(name_with_icn_id, params[:new_name_with_icn_id])
+    send_name_change_request(name_with_icn_id, @new_name_with_icn_id)
   end
 
   ##########
