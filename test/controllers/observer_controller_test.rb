@@ -2827,7 +2827,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
       Rails.root.join("test/fixtures/projects.yml").to_s, "text/plain"
-   )
+    )
     params = {
       id: obs.id,
       observation: {
