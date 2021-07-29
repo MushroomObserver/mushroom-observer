@@ -22,7 +22,7 @@
 
 # Table: legacy Herbariums actions vs updated Herbaria actions
 #
-# legacy Herbarium action (method)  upddated Herbaria action (method)
+# legacy Herbarium action (method)  updated Herbaria action (method)
 # --------------------------------  ---------------------------------
 # create_herbarium (get)            new (get)
 # create_herbarium (post)           create (post)
@@ -142,7 +142,7 @@ class HerbariaController < ApplicationController
     if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referrer ||
-        redirect_with_query(herbaria_path(id: @herbarium.try(&:id)))
+        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
       redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
