@@ -291,6 +291,27 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_reverse_records
+    get(:index, params: { by: "reverse_records" })
+
+    assert_response(:success)
+    assert_select(
+      "#title-caption",
+      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
+      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
+    )
+    assert_select(
+      "#sorts", true,
+      "Fungaria by #Records Reversed is missing sort tabs"
+    )
+    Herbarium.find_each do |herbarium|
+      assert_select(
+        "a[href *= '#{herbarium_path(herbarium)}']", true,
+        "Fungaria by reverse #Records missing link to #{herbarium.format_name})"
+      )
+    end
+  end
+
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def test_new
