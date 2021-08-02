@@ -103,16 +103,24 @@ class ObserverController
     send_request if request.method == "POST"
   end
 
+  # get email_name_change_request(
+  #   params: {
+  #     name_id: 1258, new_name_with_icn_id: "Auricularia Bull. [#17132]"
+  #   }
+  # )
   def email_name_change_request
     @name = Name.safe_find(params[:name_id])
-    @new_name = params[:new_name]
+    name_with_icn_id = "#{@name.search_name} [##{@name.icn_id}]"
 
-    unless @name && @name.search_name != @new_name
+    if name_with_icn_id == params[:new_name_with_icn_id]
       redirect_back_or_default(action: :index)
       return
     end
 
-    send_name_change_request if request.method == "POST"
+    @new_name_with_icn_id = params[:new_name_with_icn_id]
+    return unless request.method == "POST"
+
+    send_name_change_request(name_with_icn_id, @new_name_with_icn_id)
   end
 
   ##########
@@ -151,14 +159,14 @@ class ObserverController
     redirect_to(@old_obj.show_link_args)
   end
 
-  def send_name_change_request
+  def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
     change_locale_if_needed(MO.default_locale)
     subject = "Request to change Name having dependents"
     content = :email_name_change_request.l(
       user: @user.login,
-      name: @name.search_name,
+      name: name_with_icn_id,
       name_url: @name.show_url,
-      new_name: @new_name,
+      new_name: new_name_with_icn_id,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now

@@ -1502,6 +1502,39 @@ class ObserverControllerTest < FunctionalTestCase
     assert_match(/SHAZAM/, ActionMailer::Base.deliveries.last.to_s)
   end
 
+  def test_email_name_change_request_get
+    name = names(:lactarius)
+    assert(name.icn_id, "Test needs a fixture with an icn_id")
+    assert(name.dependents?, "Test needs a fixture with dependents")
+    params = {
+      name_id: name.id,
+      new_name_with_icn_id: "#{name.search_name} [#777]"
+    }
+    login("mary")
+
+    get(:email_name_change_request, params: params)
+    assert_select(
+      "#title-caption", text: :email_name_change_request_title.l, count: 1
+    )
+  end
+
+  def test_email_name_change_request_post
+    name = names(:lactarius)
+    assert(name.icn_id, "Test needs a fixture with an icn_id")
+    assert(name.dependents?, "Test needs a fixture with dependents")
+    params = {
+      name_id: name.id,
+      new_name_with_icn_id: "#{name.search_name} [#777]"
+    }
+    login("mary")
+
+    post(:email_name_change_request, params: params)
+    assert_redirected_to(
+      "#{name_show_name_path}/#{name.id}",
+      "Sending Name Change Request should redirect to Name page"
+    )
+  end
+
   def test_show_notifications
     # First, create a naming notification email, making sure it has a template,
     # and making sure the person requesting the notifcation is not the same
@@ -2793,7 +2826,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
-      Rails.root.join("test", "fixtures", "projects.yml").to_s, "text/plain"
+      Rails.root.join("test/fixtures/projects.yml").to_s, "text/plain"
     )
     params = {
       id: obs.id,
