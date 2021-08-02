@@ -29,7 +29,7 @@ module Herbaria
       result = perform_or_request_merge(src, dest) || return
 
       # redirect_to_herbarium_index(result)
-      redirect_with_query(herbaria_path(id: result.try(&:id)))
+      redirect_with_query(herbarium_path(result.try(&:id)))
     end
 
     ############################################################################

@@ -317,6 +317,6 @@ class CuratorTest < IntegrationTestCase
     form.submit("#{mary.name} (#{mary.login}): Personal Fungarium")
 
     assert_response(:success) # Rails follows the redirect
-    assert_select("#title-caption", text: :herbarium_index.l)
+    assert_select("#title-caption", text: mary_herbarium.format_name, count: 1)
   end
 end
