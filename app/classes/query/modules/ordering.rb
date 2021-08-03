@@ -148,7 +148,6 @@ module Query::Modules::Ordering
       "collection_numbers.name ASC, collection_numbers.number ASC"
 
     when "code"
-      where << "herbaria.code != ''"
       "herbaria.code ASC"
 
     when "code_then_name"
