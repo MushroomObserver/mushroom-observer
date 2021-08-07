@@ -17,8 +17,9 @@ module Validations
   def check_date(when_date, errors)
     return true unless when_date.is_a?(Date) && when_date > Time.zone.tomorrow
 
-    errors.add(:when,
-               when_message(when_date, "Time.zone.today=#{Time.zone.today}"))
+    errors.add(
+      :when, when_message(when_date, " #{:validate_today.t} #{Time.zone.today}")
+    )
     errors.add(:when, :validate_future_time.t)
     false
   end
@@ -46,7 +47,7 @@ module Validations
   end
 
   def when_message(when_date, details = nil)
-    start = "#{when_date.class.name}:#{when_date}"
+    start = "#{:validate_user_selection.t}: #{when_date}"
     return start unless details
 
     "#{start} #{details}"

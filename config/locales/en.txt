@@ -3515,6 +3515,8 @@
   validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
+  validate_user_selection: "You selected"
+  validate_today: "today is"
 
   # One-time-use error messages.
   validate_image_content_type_images_only: You can only upload [:images].
@@ -3522,7 +3524,7 @@
   validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
   validate_invalid_year: Year is invalid.  Should be between 1500 and present.
-  validate_future_time: Time travel is not allowed, pick a date from the past.
+  validate_future_time: Time travel is not allowed; use a past date or the current date.
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
