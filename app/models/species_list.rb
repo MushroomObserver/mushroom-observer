@@ -469,7 +469,7 @@ class SpeciesList < AbstractModel
 
   include Validations
 
-  validate :check_requirements, :validate_when
+  validate :check_requirements, :check_when
 
   def check_requirements
     # Clean off leading/trailing whitespace from +where+.
@@ -491,5 +491,10 @@ class SpeciesList < AbstractModel
     return unless !user && !User.current
 
     errors.add(:user, :validate_species_list_user_missing.t)
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    validate_when(self.when, errors)
   end
 end

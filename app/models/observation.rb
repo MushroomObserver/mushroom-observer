@@ -1171,7 +1171,7 @@ class Observation < AbstractModel
 
   include Validations
 
-  validate :check_requirements, :validate_when
+  validate :check_requirements, :check_when
 
   def check_requirements
     check_where
@@ -1236,5 +1236,10 @@ class Observation < AbstractModel
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
     errors.add(:alt, :runtime_altitude_error.t)
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    validate_when(self.when, errors)
   end
 end
