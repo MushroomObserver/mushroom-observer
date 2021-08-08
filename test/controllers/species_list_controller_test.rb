@@ -107,17 +107,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     sl_id = species_lists(:first_species_list).id
 
     # Show empty list with no one logged in.
-    get(:show_species_list, id: sl_id)
+    get(:show_species_list, params: { id: sl_id })
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
-    get(:show_species_list, id: sl_id)
+    get(:show_species_list, params: { id: sl_id })
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show non-empty list with owner logged in.
     get(:show_species_list,
-        id: species_lists(:unknown_species_list).id)
+        params: { id: species_lists(:unknown_species_list).id })
     assert_template(:show_species_list, partial: "_show_comments")
   end
 
@@ -182,13 +182,13 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_by_user
-    get(:species_lists_by_user, id: rolf.id)
+    get(:species_lists_by_user, params: { id: rolf.id })
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_for_project
     get(:species_lists_for_project,
-        id: projects(:bolete_project).id)
+        params: { id: projects(:bolete_project).id })
     assert_template(:list_species_lists)
   end
 
@@ -204,14 +204,14 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_list_species_list_by_user
     query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
     query_params = @controller.query_params(query)
-    get(:index_species_list, query_params)
+    get(:index_species_list, params: query_params)
     assert_template(:list_species_lists)
 
-    get(:next_species_list, query_params.merge(id: query.result_ids[0]))
+    get(:next_species_list, params: query_params.merge(id: query.result_ids[0]))
     assert_redirected_to(query_params.merge(action: "show_species_list",
                                             id: query.result_ids[1]))
 
-    get(:prev_species_list, query_params.merge(id: query.result_ids[1]))
+    get(:prev_species_list, params: query_params.merge(id: query.result_ids[1]))
     assert_redirected_to(query_params.merge(action: "show_species_list",
                                             id: query.result_ids[0]))
   end
@@ -232,7 +232,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_manage_species_lists
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id.to_s }
-    requires_login(:manage_species_lists, params)
+    requires_login(:manage_species_lists, params: params)
 
     assert(assigns_exist, "Missing species lists!")
   end
@@ -253,7 +253,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not(sp.observations.member?(obs))
     params = { species_list: sp.id, observation: obs.id }
     login("dick")
-    get(:add_observation_to_species_list, params)
+    get(:add_observation_to_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: sp.id)
     assert_not(sp.reload.observations.member?(obs))
   end
@@ -273,7 +273,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.member?(obs))
 
     login(owner)
-    get(:remove_observation_from_species_list, params)
+    get(:remove_observation_from_species_list, params: params)
     assert_redirected_to(action: "manage_species_lists", id: obs.id)
     assert_not(spl.reload.observations.member?(obs))
   end
@@ -372,7 +372,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
-        title: "  " + list_title.sub(/ /, "  ") + "  ",
+        title: "  #{list_title.sub(/ /, "  ")}  ",
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
@@ -761,6 +761,26 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(true, obs.specimen)
   end
 
+  def test_create_blank_year
+    params = {
+      species_list: {
+        place_name: "Earth",
+        title: "List without year",
+        "when(1i)" => "", # year
+        "when(2i)" => "3",
+        "when(3i)" => "14"
+      }
+    }
+    login("rolf")
+    post(:create_species_list, params: params)
+    spl = SpeciesList.last
+
+    assert_equal(
+      spl.created_at.to_date, spl.when,
+      "SpeciesList.when should be current date if user makes When year blank"
+    )
+  end
+
   # -----------------------------------------------
   #  Test changing species lists in various ways.
   # -----------------------------------------------
@@ -801,7 +821,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(sp_count, spl.reload.observations.size)
 
     login(owner)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
@@ -852,7 +872,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.size == sp_count)
 
     login(owner)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
@@ -1075,7 +1095,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post(:upload_species_list, params)
+    post(:upload_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
@@ -1096,7 +1116,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf", "testpassword")
-    post(:upload_species_list, params)
+    post(:upload_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     new_data = @controller.instance_variable_get("@list_members")
@@ -1160,7 +1180,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :in_species_list,
                                   species_list: spl)
     query_params = @controller.query_params(query)
-    get(:print_labels, id: spl.id)
+    get(:print_labels, params: { id: spl.id })
     assert_redirected_to(query_params.merge(controller: "observer",
                                             action: "print_labels"))
   end
@@ -1170,7 +1190,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :in_species_list,
                                   species_list: spl)
 
-    get(:download, id: spl.id)
+    get(:download, params: { id: spl.id })
 
     args = { controller: "observer", action: "print_labels" }
     url = url_for(@controller.add_query_param(args, query))
@@ -1406,7 +1426,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # Owner of list always can.
     login("mary")
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_response(:success)
   end
 
@@ -1848,18 +1868,18 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_no_flash
     assert_not_equal(0, spl.reload.observations.count)
 
-    get(:clear_species_list, id: spl.id)
+    get(:clear_species_list, params: { id: spl.id })
     assert_no_flash
     assert_not_equal(0, spl.reload.observations.count)
 
     login("rolf")
-    get(:clear_species_list, id: spl.id)
+    get(:clear_species_list, params: { id: spl.id })
     assert_flash_error
     assert_not_equal(0, spl.reload.observations.count)
 
     login("mary")
     expected_score = mary.contribution - spl.observations.count
-    get(:clear_species_list, id: spl.id)
+    get(:clear_species_list, params: { id: spl.id })
     assert_flash_success
     assert_equal(0, spl.reload.observations.count)
     assert_equal(expected_score, mary.reload.contribution)
@@ -1879,19 +1899,19 @@ class SpeciesListControllerTest < FunctionalTestCase
                                    species_list: spl2.id, by: :name)
 
     # make sure the "Set Source" link is on the page somewhere
-    get(:show_species_list, id: spl1.id)
+    get(:show_species_list, params: { id: spl1.id })
     link_args = { controller: :species_list, action: :show_species_list,
                   id: spl1.id, set_source: 1 }
     assert_link_in_html(:species_list_show_set_source.t, link_args)
 
     # make sure clicking on "Set Source" changes the session
     @request.session[:checklist_source] = nil
-    get(:show_species_list, id: spl1.id, set_source: 1)
+    get(:show_species_list, params: { id: spl1.id, set_source: 1 })
     assert_equal(query1.id, @controller.session[:checklist_source])
 
     # make sure showing another list doesn't override the source
     @request.session[:checklist_source] = query1.id
-    get(:show_species_list, id: spl2.id)
+    get(:show_species_list, params: { id: spl2.id })
     # (Non-integration tests apparently don't actually let the controller
     # change the @request.session.  Instead it gives the controller a blank
     # session to record any changes the controller tries to make.)
@@ -1903,7 +1923,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_select("div#checklist_data", count: 0)
 
     @request.session[:checklist_source] = nil
-    get(:edit_species_list, id: spl2.id)
+    get(:edit_species_list, params: { id: spl2.id })
     assert_select("div#checklist_data", count: 0)
 
     # make sure the source observations appear if source set
@@ -1915,7 +1935,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     login(spl1.user.login)
     @request.session[:checklist_source] = query2.id
-    get(:edit_species_list, id: spl1.id)
+    get(:edit_species_list, params: { id: spl1.id })
     assert_select("div#checklist_data")
     name2 = spl2.observations.last.name.id
     assert_select("input[name='checklist_data[#{name2}]']")
