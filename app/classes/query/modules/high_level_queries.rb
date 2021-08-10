@@ -43,11 +43,7 @@ module Query::Modules::HighLevelQueries
       else
         rows = select_rows(args.merge(select: "count(*)"))
         begin
-          # Herbaria by records returns multiple rows -- 1 row/herbarium --
-          # where each row is the number of records for that herbarium
-          # The number of results is the number of rows,
-          # NOT the number of herbarium_records for the 1st herbarium
-          rows.size > 1 ? rows.size : rows[0][0].to_i
+          rows[0][0].to_i
         rescue StandardError
           0
         end
