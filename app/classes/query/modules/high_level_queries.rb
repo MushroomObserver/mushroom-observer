@@ -41,7 +41,12 @@ module Query::Modules::HighLevelQueries
       if @result_ids
         @result_ids.count
       else
-        rows = select_rows(args.merge(select: "count(*)"))
+        # Explicitly disable GROUP BY and ORDER clauses for the purposes of
+        # simply counting the number of results.  This is important because
+        # GROUP BY in particular will mess up the COUNT(*) spec.  Passing in
+        # empty strings for group and order will tell it to explicitly override
+        # anything in self.group and self.order.
+        rows = select_rows(args.merge(select: "COUNT(*)", group: "", order: ""))
         begin
           rows[0][0].to_i
         rescue StandardError
