@@ -49,6 +49,10 @@ class Name < AbstractModel
     rank == :Genus || below_genus?
   end
 
+  def above_genus?
+    Name.ranks_above_genus.include?(rank)
+  end
+
   def below_genus?
     Name.ranks_below_genus.include?(rank) ||
       rank == :Group && text_name.include?(" ")
@@ -200,7 +204,7 @@ class Name < AbstractModel
   # Beyond that it just chooses the first one arbitrarily.
   def genus
     @genus ||= begin
-      accepted = deprecated && approved_synonyms.first || self
+      accepted = approved_name
       return unless accepted.text_name.include?(" ")
 
       genus_name = accepted.text_name.split(" ", 2).first
@@ -525,18 +529,14 @@ class Name < AbstractModel
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
     subtaxa = Name.where("deprecated IS FALSE AND " \
-                         "`rank` < ? AND " \
-                         "text_name LIKE ? AND " \
-                         "classification != ?",
-                         Name.ranks[:Genus],
-                         "#{text_name} %",
-                         classification).to_a
-    subtaxa.map(&:id) +
-      Name.where("deprecated IS TRUE AND " \
-                 "synonym_id IN (?) AND " \
-                 "classification != ?",
-                 subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
-                 classification).pluck(&:id)
+                         "text_name LIKE ?",
+                         "#{text_name} %").to_a
+    synonyms = Name.where("deprecated IS TRUE AND " \
+                          "synonym_id IN (?) AND " \
+                          "classification != ?",
+                          subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
+                          classification)
+    (subtaxa + synonyms).map(&:id).uniq
   end
 
   # This is meant to be run nightly to ensure that all the classification

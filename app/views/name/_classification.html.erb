@@ -1,4 +1,4 @@
-<% parents = @name.all_parents %>
+<% parents = @name.approved_name.all_parents.select(&:above_genus?) %>
 <% if parents.any? %>
   <div style="margin-bottom:0.5em">
     <% parents.reverse.each do |n| %>
@@ -14,7 +14,7 @@
   <p><%= link_to(:show_object.t(type: @name.at_or_below_genus? && !@name.at_or_below_species? ? :rank_species : :show_subtaxa_obss),
                  add_query_param({ action: :index_name }, @children_query)) %></p>
 <% end %>
-<% if @name.below_genus? && @name.genus.try(&:classification) != @name.classification %>
+<% if @name.below_genus? && @name.genus.try(&:classification).to_s.strip != @name.classification.to_s.strip %>
   <p><%= link_with_query(:show_name_refresh_classification.t,
                          controller: :name, action: :refresh_classification,
                          id: @name.id) %></p>

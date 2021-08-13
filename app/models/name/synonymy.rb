@@ -38,6 +38,12 @@ class Name < AbstractModel
     approved_synonyms - [self]
   end
 
+  # Returns the first approved synonym unless the name itself is approved.
+  # If no synonyms are approved, it just returns itself.
+  def approved_name
+    deprecated && approved_synonyms.first || self
+  end
+
   # Returns an Array of approved Synonym Name's and an Array of deprecated
   # Synonym Name's, including misspellings, but _NOT_ including itself.
   #
