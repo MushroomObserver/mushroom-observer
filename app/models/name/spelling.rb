@@ -177,11 +177,11 @@ class Name < AbstractModel
     )).map do |id, text_name, author|
       "Name ##{id} #{text_name} #{author} was a misspelling of itself."
     end
-    Name.connection.execute %(
+    Name.connection.execute(%(
       UPDATE names
       SET correct_spelling_id = null
       WHERE correct_spelling_id = id
-    )
+    ))
     msgs
   end
 end

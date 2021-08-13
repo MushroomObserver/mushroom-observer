@@ -3207,7 +3207,7 @@ class NameTest < UnitTestCase
     assert_empty(msgs)
 
     name = names(:coprinus)
-    name.update_attributes(correct_spelling_id: name.id)
+    name.update(correct_spelling_id: name.id)
     msgs = Name.fix_self_referential_misspellings
     assert_equal(1, msgs.length)
     name.reload
