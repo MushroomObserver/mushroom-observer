@@ -200,7 +200,7 @@ class Name < AbstractModel
   # Beyond that it just chooses the first one arbitrarily.
   def genus
     @genus ||= begin
-      accepted   = deprecated && approved_synonyms.first || self
+      accepted = deprecated && approved_synonyms.first || self
       return unless accepted.text_name.include?(" ")
 
       genus_name = accepted.text_name.split(" ", 2).first
@@ -506,13 +506,17 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
+    # Rubocop complains that update_all skips validations.
+    # Well, duh, that's why I'm using it, Sherlock! :)
+    # rubocop:disable Rails/SkipsModelValidations
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
-         update_all(classification: classification)
+      update_all(classification: classification)
     NameDescription.where(name_id: subtaxa).
-                    update_all(classification: classification)
+      update_all(classification: classification)
     Observation.where(name_id: subtaxa).
-                update_all(classification: classification)
+      update_all(classification: classification)
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Get list of subtaxa whose classification doesn't match (and therefore
