@@ -3046,22 +3046,6 @@ class NameTest < UnitTestCase
     assert_equal(good, name.description.reload.classification)
   end
 
-  # def test_propagate_generic_classifications
-  #   msgs = Name.propagate_generic_classifications
-  #   assert_empty(msgs, msgs.join("\n"))
-  #
-  #   a = names(:agaricus)
-  #   ac = names(:agaricus_campestris)
-  #   ac.update_attributes(classification: "")
-  #   msgs = Name.propagate_generic_classifications
-  #   assert_equal(["Updating Agaricus campestris"], msgs)
-  #   assert_equal(a.classification, ac.reload.classification)
-  #
-  #   a.destroy
-  #   msgs = Name.propagate_generic_classifications
-  #   assert(msgs.include?("Missing genus Agaricus"))
-  # end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)
@@ -3216,5 +3200,17 @@ class NameTest < UnitTestCase
       "Old name (#{old_name.text_name}) interests " \
       "were not moved to target (#{target.text_name})"
     )
+  end
+
+  def test_fix_self_referential_misspellings
+    msgs = Name.fix_self_referential_misspellings
+    assert_empty(msgs)
+
+    name = names(:coprinus)
+    name.update_attributes(correct_spelling_id: name.id)
+    msgs = Name.fix_self_referential_misspellings
+    assert_equal(1, msgs.length)
+    name.reload
+    assert_nil(name.correct_spelling_id)
   end
 end
