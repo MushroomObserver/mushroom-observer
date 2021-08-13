@@ -1,10 +1,14 @@
-<% parents = @name.approved_name.all_parents.select(&:above_genus?) %>
-<% if parents.any? %>
+<% approved_name = @name.approved_name %>
+<% parents = approved_name.all_parents %>
+<% if approved_name.classification.present? && parents.any? %>
   <div style="margin-bottom:0.5em">
-    <% parents.reverse.each do |n| %>
+    <% ([approved_name] + parents).reverse.each do |n| %>
       <p>
         <%= rank_as_string(n.rank) %>:
         <i><%= link_with_query(n.text_name.t, n.show_link_args) %></i>
+        <% if n == approved_name && approved_name != @name %>
+          <br/>&nbsp;&nbsp;(= <i><%= @name.text_name.t %></i>)
+        <% end %>
       </p>
     <% end %>
   </div>
@@ -14,7 +18,7 @@
   <p><%= link_to(:show_object.t(type: @name.at_or_below_genus? && !@name.at_or_below_species? ? :rank_species : :show_subtaxa_obss),
                  add_query_param({ action: :index_name }, @children_query)) %></p>
 <% end %>
-<% if @name.below_genus? && @name.genus.try(&:classification).to_s.strip != @name.classification.to_s.strip %>
+<% if @name.below_genus? && @name.accepted_genus.try(&:classification).to_s.strip != @name.classification.to_s.strip %>
   <p><%= link_with_query(:show_name_refresh_classification.t,
                          controller: :name, action: :refresh_classification,
                          id: @name.id) %></p>

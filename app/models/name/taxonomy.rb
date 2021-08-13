@@ -202,8 +202,8 @@ class Name < AbstractModel
   # Returns the Name of the genus above this taxon.  If there are multiple
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
-  def genus
-    @genus ||= begin
+  def accepted_genus
+    @accepted_genus ||= begin
       accepted = approved_name
       return unless accepted.text_name.include?(" ")
 
@@ -464,10 +464,10 @@ class Name < AbstractModel
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
-    return unless genus # this sets the name instance @genus as side-effect
+    return unless at_or_below_genus?
 
-    self.classification ||= genus.classification
-    self.lifeform       ||= genus.lifeform
+    self.classification ||= accepted_genus.classification
+    self.lifeform       ||= accepted_genus.lifeform
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -495,7 +495,7 @@ class Name < AbstractModel
   # Change this name's classification.  Change its synonyms and its parent
   # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
   def change_classification(new_str)
-    root = below_genus? && genus || self
+    root = below_genus? && accepted_genus || self
     root.synonyms.each do |name|
       name.update(classification: new_str)
       name.description.update(classification: new_str) if name.description_id
