@@ -32,14 +32,13 @@ def propagate_generic_classifications(dry_run: false)
   accepted_names = build_accepted_names_lookup_table
   classifications = accepted_generic_classification_strings
   Name.select(:id, :synonym_id, :text_name, :classification).
-       where(rank: 0..Name.ranks[:Genus] - 1).
-       each do |id, synonym_id, text_name, classification|
-         genus = (accepted_names[synonym_id] || text_name).split.first
-         next if (classification = clean(classification)) == 
-                 classifications[genus]
+    where(rank: 0..Name.ranks[:Genus] - 1).
+    each do |id, synonym_id, text_name, classification|
+      genus = (accepted_names[synonym_id] || text_name).split.first
+      next if (classification = clean(classification)) == classifications[genus]
 
-         fixes << [id, text_name, classification, classifications[genus]]
-       end
+      fixes << [id, text_name, classification, classifications[genus]]
+    end
   execute_fixes(fixes, dry_run)
 end
 
@@ -50,28 +49,28 @@ end
 def build_accepted_names_lookup_table
   accepted_names = {}
   Name.select(:synonym_id, :text_name).
-       where(rank: 0..Name.ranks[:Genus], deprecated: false).
-       where.not(synonym_id: nil).
-       each do |synonym_id, text_name|
-         accepted_names[synonym_id] = text_name
-       end
+    where(rank: 0..Name.ranks[:Genus], deprecated: false).
+    where.not(synonym_id: nil).
+    each do |synonym_id, text_name|
+      accepted_names[synonym_id] = text_name
+    end
   accepted_names
 end
 
 def accepted_generic_classification_strings
   classifications = {}
   Name.select(:text_name, :classification).
-       where(rank: Name.ranks[:Genus], deprecated: false).
-       where("author NOT LIKE 'sensu lato%'").
-       each do |text_name, classification|
-         next if classification.blank?
-      
-         if classifications[text_name].present?
-           warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-         else
-           classifications[text_name] = classification.strip
-         end
-       end
+    where(rank: Name.ranks[:Genus], deprecated: false).
+    where("author NOT LIKE 'sensu lato%'").
+    each do |text_name, classification|
+      next if classification.blank?
+    
+      if classifications[text_name].present?
+        warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+      else
+        classifications[text_name] = classification.strip
+      end
+    end
   classifications
 end
 
