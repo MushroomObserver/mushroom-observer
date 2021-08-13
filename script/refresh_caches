@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
-#
+
 #  USAGE::
 #
 #    script/refresh_caches
@@ -30,21 +30,22 @@ require(File.expand_path("../config/environment.rb", __dir__))
 def propagate_generic_classifications(dry_run: false)
   fixes = []
   accepted_names = build_accepted_names_lookup_table
-  classifications = get_accepted_generic_classification_strings
+  classifications = accepted_generic_classification_strings
   Name.connection.select_rows(%(
-    SELECT id, synonym_id, text_name, author, `rank`, classification
+    SELECT id, synonym_id, text_name, classification
     FROM names
     WHERE `rank` < #{Name.ranks[:Genus]}
-  )).each do |id, synonym_id, text_name, author, rank, classification|
+  )).each do |id, synonym_id, text_name, classification|
     genus = (accepted_names[synonym_id] || text_name).split.first
-    classification = nil if classification.blank?
-    classification.strip! if classification
-    next if classification == classifications[genus]
+    next if (classification = clean(classification)) == classifications[genus]
 
-    fixes << [id, text_name, author, classification, genus,
-              classifications[genus]]
+    fixes << [id, text_name, classification, classifications[genus]]
   end
   execute_fixes(fixes, dry_run)
+end
+
+def clean(classification)
+  classification.strip if classification.present?
 end
 
 def build_accepted_names_lookup_table
@@ -61,7 +62,7 @@ def build_accepted_names_lookup_table
   accepted_names
 end
 
-def get_accepted_generic_classification_strings
+def accepted_generic_classification_strings
   classifications = {}
   Name.connection.select_rows(%(
     SELECT text_name, classification
@@ -73,7 +74,7 @@ def get_accepted_generic_classification_strings
     next if classification.blank?
 
     if classifications[text_name].present?
-      warn "Multiple accepted non-sensu lato genera for #{text_name}!"
+      warn("Multiple accepted non-sensu lato genera for #{text_name}!")
     else
       classifications[text_name] = classification.strip
     end
@@ -81,7 +82,7 @@ def get_accepted_generic_classification_strings
   classifications
 end
 
-def get_hash_of_names_with_observations
+def hash_of_names_with_observations
   Hash[
     Observation.distinct.pluck(:text_name).collect do |text_name|
       [text_name, true]
@@ -91,14 +92,14 @@ end
 
 def execute_fixes(fixes, dry_run)
   bundles = {}
-  used_names = get_hash_of_names_with_observations
-  msgs = fixes.map do |id, text_name, author, old_class, genus, new_class|
-    bundles[new_class] = [] unless bundles[new_class].present?
+  used_names = hash_of_names_with_observations
+  msgs = fixes.map do |id, text_name, old_class, new_class|
+    bundles[new_class] = [] if bundles[new_class].blank?
     bundles[new_class] << id
     next unless used_names[text_name]
 
     if new_class.blank?
-      "Please fill in classification for #{genus}: #{old_class.inspect}"
+      "Stripping classification from #{text_name}"
     elsif old_class.blank?
       "Filling in classification for #{text_name}"
     else
@@ -113,15 +114,15 @@ def execute_bundled_fixes(bundles, dry_run)
   bundles.each do |classification, ids|
     next if classification.blank?
 
-    id_list = ids.map {|id| Name.connection.quote(id)}.join(",")
+    id_list = ids.map { |id| Name.connection.quote(id) }.join(",")
     msgs << "Setting classifications for #{id_list}"
     next if dry_run
 
-    Name.connection.execute %(
+    Name.connection.execute(%(
       UPDATE names
       SET classification = #{Name.connection.quote(classification)}
       WHERE id IN (#{id_list})
-    )
+    ))
   end
   msgs
 end
@@ -149,22 +150,22 @@ ARGV.each do |flag|
   when "-n", "--dry-run"
     dry_run = true
   else
-    puts "USAGE: script/refresh_caches [-n|--dry-run]"
-    exit 1
+    puts("USAGE: script/refresh_caches [-n|--dry-run]")
+    exit(1)
   end
 end
 
 msgs = if dry_run
-  propagate_generic_classifications(dry_run: true)
-else
-  Synonym.make_sure_all_referenced_synonyms_exist +
-  Name.fix_self_referential_misspellings +
-  Name.make_sure_names_are_bolded_correctly +
-  Name.refresh_classification_caches +
-  propagate_generic_classifications +
-  Observation.make_sure_no_observations_are_misspelled +
-  Observation.refresh_content_filter_caches
-end
+         propagate_generic_classifications(dry_run: true)
+       else
+         Synonym.make_sure_all_referenced_synonyms_exist +
+           Name.fix_self_referential_misspellings +
+           Name.make_sure_names_are_bolded_correctly +
+           Name.refresh_classification_caches +
+           propagate_generic_classifications +
+           Observation.make_sure_no_observations_are_misspelled +
+           Observation.refresh_content_filter_caches
+       end
 warn(msgs.join("\n")) if msgs.any?
 
 exit(0)
