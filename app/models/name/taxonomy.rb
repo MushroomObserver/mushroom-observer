@@ -200,9 +200,10 @@ class Name < AbstractModel
   # Beyond that it just chooses the first one arbitrarily.
   def genus
     @genus ||= begin
-      return unless text_name.include?(" ")
+      accepted   = deprecated ? approved_synonyms.first : self
+      return unless accepted.text_name.include?(" ")
 
-      genus_name = text_name.split(" ", 2).first
+      genus_name = accepted.text_name.split(" ", 2).first
       genera     = Name.with_correct_spelling.where(text_name: genus_name)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?

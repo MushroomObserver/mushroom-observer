@@ -3213,4 +3213,11 @@ class NameTest < UnitTestCase
     name.reload
     assert_nil(name.correct_spelling_id)
   end
+
+  def test_genus_of_synonym
+    names(:coprinus_comatus).merge_synonyms(names(:stereum_hirsutum))
+    names(:coprinus_comatus).update(deprecated: true)
+    assert_names_equal(names(:stereum), names(:coprinus_comatus).genus)
+    assert_names_equal(names(:stereum), names(:stereum_hirsutum).genus)
+  end
 end
