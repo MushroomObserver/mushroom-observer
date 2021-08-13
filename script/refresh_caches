@@ -64,7 +64,7 @@ def accepted_generic_classification_strings
     where("author NOT LIKE 'sensu lato%'").
     each do |text_name, classification|
       next if classification.blank?
-    
+
       if classifications[text_name].present?
         warn("Multiple accepted non-sensu lato genera for #{text_name}!")
       else
@@ -106,7 +106,7 @@ def execute_bundled_fixes(bundles, dry_run)
   bundles.each do |classification, ids|
     next if classification.blank?
 
-    msgs << "Setting classifications for #{ids.join(',')}"
+    msgs << "Setting classifications for #{ids.join(",")}"
     next if dry_run
 
     # Deliberately skip validations
