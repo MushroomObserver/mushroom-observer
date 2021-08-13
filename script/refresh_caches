@@ -95,17 +95,17 @@ def execute_fixes(fixes, dry_run)
   msgs = fixes.map do |id, text_name, author, old_class, genus, new_class|
     bundles[new_class] = [] unless bundles[new_class].present?
     bundles[new_class] << id
+    next unless used_names[text_name]
+
     if new_class.blank?
       "Please fill in classification for #{genus}: #{old_class.inspect}"
     elsif old_class.blank?
       "Filling in classification for #{text_name}"
-    elsif used_names[text_name]
-      "Fixing classification of #{text_name}: #{changes(old_class, new_class)}"
     else
-      "Fixing classification of unused name #{text_name}: #{changes(old_class, new_class)}"
+      "Fixing classification of #{text_name}: #{changes(old_class, new_class)}"
     end
   end
-  msgs + execute_bundled_fixes(bundles, dry_run)
+  msgs.reject(&:nil?) + execute_bundled_fixes(bundles, dry_run)
 end
 
 def execute_bundled_fixes(bundles, dry_run)
