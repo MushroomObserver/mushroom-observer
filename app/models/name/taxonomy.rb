@@ -200,7 +200,7 @@ class Name < AbstractModel
   # Beyond that it just chooses the first one arbitrarily.
   def genus
     @genus ||= begin
-      accepted   = deprecated ? approved_synonyms.first : self
+      accepted   = deprecated && approved_synonyms.first || self
       return unless accepted.text_name.include?(" ")
 
       genus_name = accepted.text_name.split(" ", 2).first
@@ -488,13 +488,14 @@ class Name < AbstractModel
     change_classification(str)
   end
 
-  # Change this name's classification.  Change parent genus, too, if below
-  # genus.  Propagate to subtaxa if changing genus.
+  # Change this name's classification.  Change its synonyms and its parent
+  # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
   def change_classification(new_str)
     root = below_genus? && genus || self
-    root.update(classification: new_str)
-    root.description.update(classification: new_str) if
-      root.description_id
+    root.synonyms.each do |name|
+      name.update(classification: new_str)
+      name.description.update(classification: new_str) if name.description_id
+    end
     root.propagate_classification if root.rank == :Genus
   end
 
@@ -505,25 +506,33 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
-    escaped_string = Name.connection.quote(classification)
-    Name.connection.execute(%(
-      UPDATE names SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE name_descriptions nd, names n
-      SET nd.classification = #{escaped_string}
-      WHERE nd.id = n.description_id
-        AND n.text_name LIKE "#{text_name} %"
-        AND nd.classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE observations
-      SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
+    subtaxa = subtaxa_whose_classification_needs_to_be_changed
+    Name.where(id: subtaxa).
+         update_all(classification: classification)
+    NameDescription.where(name_id: subtaxa).
+                    update_all(classification: classification)
+    Observation.where(name_id: subtaxa).
+                update_all(classification: classification)
+  end
+
+  # Get list of subtaxa whose classification doesn't match (and therefore
+  # needs to be updated to be in sync with this name).  Start with approved
+  # names below genus with the same generic epithet.  Then add all those
+  # names' synonyms.
+  def subtaxa_whose_classification_needs_to_be_changed
+    subtaxa = Name.where("deprecated IS FALSE AND " \
+                         "`rank` < ? AND " \
+                         "text_name LIKE ? AND " \
+                         "classification != ?",
+                         Name.ranks[:Genus],
+                         "#{text_name} %",
+                         classification).to_a
+    subtaxa.map(&:id) +
+      Name.where("deprecated IS TRUE AND " \
+                 "synonym_id IN (?) AND " \
+                 "classification != ?",
+                 subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
+                 classification).pluck(&:id)
   end
 
   # This is meant to be run nightly to ensure that all the classification
