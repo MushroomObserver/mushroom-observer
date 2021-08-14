@@ -34,17 +34,25 @@ def propagate_generic_classifications(dry_run: false)
   Name.select(:id, :synonym_id, :text_name, :classification).
     where(rank: 0..(Name.ranks[:Genus] - 1)).
     each do |name|
-      genus = (accepted_names[name.synonym_id] || name.text_name).split.first
-      classification = clean(name.classification)
-      next if classification == classifications[genus]
+      old_class = old_classification(name)
+      new_class = new_classification(name, accepted_names, classifications)
+      next if old_class == new_class
 
-      fixes << [name, classification, classifications[genus]]
+      fixes << [name, old_class, new_class]
     end
   execute_fixes(fixes, dry_run)
 end
 
-def clean(classification)
-  classification.strip if classification.present?
+def old_classification(name)
+  str = name.classification
+  str.present? && str.strip
+end
+
+def new_classification(name, accepted_names, classifications)
+  accepted_text_name = accepted_names[name.synonym_id] || name.text_name
+  genus = accepted_text_name.split.first
+  str = classifications[genus]
+  str.present? && str.strip
 end
 
 def build_accepted_names_lookup_table
@@ -69,7 +77,7 @@ def accepted_generic_classification_strings
       if classifications[name.text_name].present?
         warn("Multiple accepted non-sensu lato genera for #{text_name}!")
       else
-        classifications[name.text_name] = name.classification.strip
+        classifications[name.text_name] = name.classification
       end
     end
   classifications
@@ -91,15 +99,20 @@ def execute_fixes(fixes, dry_run)
     bundles[new_class] << name.id
     next unless used_names[name.text_name]
 
-    if new_class.blank?
-      "Stripping classification from #{name.text_name}"
-    elsif old_class.blank?
-      "Filling in classification for #{name.text_name}"
-    else
-      "Fixing classification of #{name.text_name}: #{changes(old_class, new_class)}"
-    end
+    describe_fix(name, old_class, new_class)
   end
   msgs.reject(&:nil?) + execute_bundled_fixes(bundles, dry_run)
+end
+
+def describe_fix(name, old_class, new_class)
+  if new_class.blank?
+    "Stripping classification from #{name.text_name}"
+  elsif old_class.blank?
+    "Filling in classification for #{name.text_name}"
+  else
+    "Fixing classification of #{name.text_name}: " \
+      "#{changes(old_class, new_class)}"
+  end
 end
 
 def execute_bundled_fixes(bundles, dry_run)
