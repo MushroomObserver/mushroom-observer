@@ -177,7 +177,7 @@ class Name < AbstractModel
   #    Eukarya
   #
   def all_parents
-    parents(:all)
+    parents(all: true)
   end
 
   # Returns an Array of all Name's under this one.  Ignores misspellings, but
@@ -196,7 +196,7 @@ class Name < AbstractModel
   #   'Letharia vulpina f. californica'
   #
   def all_children
-    children(:all)
+    children(all: true)
   end
 
   # Returns the Name of the genus above this taxon.  If there are multiple
@@ -231,7 +231,7 @@ class Name < AbstractModel
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
-  def parents(all = false)
+  def parents(all: false)
     parents = []
 
     # Start with infrageneric and genus names.
@@ -309,7 +309,7 @@ class Name < AbstractModel
   #   # BUT NOT THIS!!
   #   'Letharia vulpina var. bogus f. foobar'
   #
-  def children(all = false)
+  def children(all: false)
     if at_or_below_genus?
       sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
       sql_args = "#{text_name} %"
@@ -541,15 +541,14 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    Name.
-      where(rank: 0..Name.ranks[:Genus]).
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
+    Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
       where("name_descriptions.classification != names.classification").
       where("COALESCE(name_descriptions.classification, '') != ''").
-      # Deliberately skip validations
-      # rubocop:disable Rails/SkipsModelValidations
       update_all("names.classification = name_descriptions.classification")
-      # rubocop:enable Rails/SkipsModelValidations
+    # rubocop:enable Rails/SkipsModelValidations
     []
   end
 
