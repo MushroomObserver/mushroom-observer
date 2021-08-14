@@ -32,12 +32,13 @@ def propagate_generic_classifications(dry_run: false)
   accepted_names = build_accepted_names_lookup_table
   classifications = accepted_generic_classification_strings
   Name.select(:id, :synonym_id, :text_name, :classification).
-    where(rank: 0..Name.ranks[:Genus] - 1).
-    each do |id, synonym_id, text_name, classification|
-      genus = (accepted_names[synonym_id] || text_name).split.first
-      next if (classification = clean(classification)) == classifications[genus]
+    where(rank: 0..(Name.ranks[:Genus] - 1)).
+    each do |name|
+      genus = (accepted_names[name.synonym_id] || name.text_name).split.first
+      classification = clean(name.classification)
+      next if classification == classifications[genus]
 
-      fixes << [id, text_name, classification, classifications[genus]]
+      fixes << [name, classification, classifications[genus]]
     end
   execute_fixes(fixes, dry_run)
 end
@@ -51,8 +52,8 @@ def build_accepted_names_lookup_table
   Name.select(:synonym_id, :text_name).
     where(rank: 0..Name.ranks[:Genus], deprecated: false).
     where.not(synonym_id: nil).
-    each do |synonym_id, text_name|
-      accepted_names[synonym_id] = text_name
+    each do |name|
+      accepted_names[name.synonym_id] = name.text_name
     end
   accepted_names
 end
@@ -62,13 +63,13 @@ def accepted_generic_classification_strings
   Name.select(:text_name, :classification).
     where(rank: Name.ranks[:Genus], deprecated: false).
     where("author NOT LIKE 'sensu lato%'").
-    each do |text_name, classification|
-      next if classification.blank?
+    each do |name|
+      next if name.classification.blank?
 
-      if classifications[text_name].present?
+      if classifications[name.text_name].present?
         warn("Multiple accepted non-sensu lato genera for #{text_name}!")
       else
-        classifications[text_name] = classification.strip
+        classifications[name.text_name] = name.classification.strip
       end
     end
   classifications
@@ -85,17 +86,17 @@ end
 def execute_fixes(fixes, dry_run)
   bundles = {}
   used_names = hash_of_names_with_observations
-  msgs = fixes.map do |id, text_name, old_class, new_class|
+  msgs = fixes.map do |name, old_class, new_class|
     bundles[new_class] = [] if bundles[new_class].blank?
-    bundles[new_class] << id
-    next unless used_names[text_name]
+    bundles[new_class] << name.id
+    next unless used_names[name.text_name]
 
     if new_class.blank?
-      "Stripping classification from #{text_name}"
+      "Stripping classification from #{name.text_name}"
     elsif old_class.blank?
-      "Filling in classification for #{text_name}"
+      "Filling in classification for #{name.text_name}"
     else
-      "Fixing classification of #{text_name}: #{changes(old_class, new_class)}"
+      "Fixing classification of #{name.text_name}: #{changes(old_class, new_class)}"
     end
   end
   msgs.reject(&:nil?) + execute_bundled_fixes(bundles, dry_run)
