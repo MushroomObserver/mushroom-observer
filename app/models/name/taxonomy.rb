@@ -510,8 +510,7 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
-    # Rubocop complains that update_all skips validations.
-    # Well, duh, that's why I'm using it, Sherlock! :)
+    # Deliberately skip validations
     # rubocop:disable Rails/SkipsModelValidations
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
@@ -547,7 +546,10 @@ class Name < AbstractModel
       joins(:description).
       where("name_descriptions.classification != names.classification").
       where("COALESCE(name_descriptions.classification, '') != ''").
+      # Deliberately skip validations
+      # rubocop:disable Rails/SkipsModelValidations
       update_all("names.classification = name_descriptions.classification")
+      # rubocop:enable Rails/SkipsModelValidations
     []
   end
 
