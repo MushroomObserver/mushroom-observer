@@ -4,7 +4,7 @@ class Name < AbstractModel
   class << self
     # This is used only by script/refresh_caches.  I have placed it here in
     # order to make it easily accessible to unit testing.  As a separate file,
-    # it should ever be loaded by the web server, so it's safe from causing
+    # it should never be loaded by the web server, so it's safe from causing
     # even more unnecessary bloat.  I think. -JPH 20210814
     def propagate_generic_classifications(dry_run: false)
       fixes = []
@@ -26,14 +26,14 @@ class Name < AbstractModel
 
     def old_classification(name)
       str = name.classification
-      str.present? && str.strip
+      str.present? && str.strip || nil
     end
 
     def new_classification(name, accepted_names, classifications)
       accepted_text_name = accepted_names[name.synonym_id] || name.text_name
       genus = accepted_text_name.split.first
       str = classifications[genus]
-      str.present? && str.strip
+      str.present? && str.strip || nil
     end
 
     def build_accepted_names_lookup_table
@@ -88,8 +88,6 @@ class Name < AbstractModel
     def execute_bundled_propagation_fixes(bundles, dry_run)
       msgs = []
       bundles.each do |classification, ids|
-        next if classification.blank?
-
         msgs << "Setting classifications for #{ids.join(",")}"
         next if dry_run
 
@@ -108,7 +106,7 @@ class Name < AbstractModel
         "Filling in classification for #{name.text_name}"
       else
         "Fixing classification of #{name.text_name}: " \
-          "#{changesin_classification_string(old_class, new_class)}"
+          "#{changes_in_classification_string(old_class, new_class)}"
       end
     end
 
