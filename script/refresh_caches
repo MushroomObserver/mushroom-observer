@@ -22,132 +22,6 @@
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
-# -----------------------------------------------------------------------------
-
-# I was going to put this in Name, but it's such a specialized and complicated
-# operation that I decided I'd rather not pollute the main code with it unless
-# other folks disagree strongly with me. -JPH 20210812
-def propagate_generic_classifications(dry_run: false)
-  fixes = []
-  accepted_names = build_accepted_names_lookup_table
-  classifications = accepted_generic_classification_strings
-  Name.select(:id, :synonym_id, :text_name, :classification).
-    where(rank: 0..(Name.ranks[:Genus] - 1)).
-    each do |name|
-      old_class = old_classification(name)
-      new_class = new_classification(name, accepted_names, classifications)
-      next if old_class == new_class
-
-      fixes << [name, old_class, new_class]
-    end
-  execute_fixes(fixes, dry_run)
-end
-
-def old_classification(name)
-  str = name.classification
-  str.present? && str.strip
-end
-
-def new_classification(name, accepted_names, classifications)
-  accepted_text_name = accepted_names[name.synonym_id] || name.text_name
-  genus = accepted_text_name.split.first
-  str = classifications[genus]
-  str.present? && str.strip
-end
-
-def build_accepted_names_lookup_table
-  accepted_names = {}
-  Name.select(:synonym_id, :text_name).
-    where(rank: 0..Name.ranks[:Genus], deprecated: false).
-    where.not(synonym_id: nil).
-    each do |name|
-      accepted_names[name.synonym_id] = name.text_name
-    end
-  accepted_names
-end
-
-def accepted_generic_classification_strings
-  classifications = {}
-  Name.select(:text_name, :classification).
-    where(rank: Name.ranks[:Genus], deprecated: false).
-    where("author NOT LIKE 'sensu lato%'").
-    each do |name|
-      next if name.classification.blank?
-
-      if classifications[name.text_name].present?
-        warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-      else
-        classifications[name.text_name] = name.classification
-      end
-    end
-  classifications
-end
-
-def hash_of_names_with_observations
-  Hash[
-    Observation.distinct.pluck(:text_name).collect do |text_name|
-      [text_name, true]
-    end
-  ]
-end
-
-def execute_fixes(fixes, dry_run)
-  bundles = {}
-  used_names = hash_of_names_with_observations
-  msgs = fixes.map do |name, old_class, new_class|
-    bundles[new_class] = [] if bundles[new_class].blank?
-    bundles[new_class] << name.id
-    next unless used_names[name.text_name]
-
-    describe_fix(name, old_class, new_class)
-  end
-  msgs.reject(&:nil?) + execute_bundled_fixes(bundles, dry_run)
-end
-
-def describe_fix(name, old_class, new_class)
-  if new_class.blank?
-    "Stripping classification from #{name.text_name}"
-  elsif old_class.blank?
-    "Filling in classification for #{name.text_name}"
-  else
-    "Fixing classification of #{name.text_name}: " \
-      "#{changes(old_class, new_class)}"
-  end
-end
-
-def execute_bundled_fixes(bundles, dry_run)
-  msgs = []
-  bundles.each do |classification, ids|
-    next if classification.blank?
-
-    msgs << "Setting classifications for #{ids.join(",")}"
-    next if dry_run
-
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
-    Name.where(id: ids).update_all(classification: classification)
-    # rubocop:enable Rails/SkipsModelValidations
-  end
-  msgs
-end
-
-def changes(old_classification, new_classification)
-  msgs = []
-  Name.all_ranks.each do |rank|
-    old_name = parse_classification(old_classification, rank)
-    new_name = parse_classification(new_classification, rank)
-    msgs << "#{old_name} => #{new_name}" if old_name != new_name
-  end
-  msgs.join(", ")
-end
-
-def parse_classification(str, rank)
-  match = str.to_s.match(/#{rank}: _([^_]+)_/)
-  match ? match[1] : "-"
-end
-
-# -----------------------------------------------------------------------------
-
 dry_run = false
 ARGV.each do |flag|
   case flag
@@ -160,13 +34,13 @@ ARGV.each do |flag|
 end
 
 msgs = if dry_run
-         propagate_generic_classifications(dry_run: true)
+         Name.propagate_generic_classifications(dry_run: true)
        else
          Synonym.make_sure_all_referenced_synonyms_exist +
            Name.fix_self_referential_misspellings +
            Name.make_sure_names_are_bolded_correctly +
            Name.refresh_classification_caches +
-           propagate_generic_classifications +
+           Name.propagate_generic_classifications +
            Observation.make_sure_no_observations_are_misspelled +
            Observation.refresh_content_filter_caches
        end

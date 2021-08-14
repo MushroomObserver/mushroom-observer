@@ -1,0 +1,130 @@
+# frozen_string_literal: true
+
+class Name < AbstractModel
+  class << self
+    # This is used only by script/refresh_caches.  I have placed it here in
+    # order to make it easily accessible to unit testing.  As a separate file,
+    # it should ever be loaded by the web server, so it's safe from causing
+    # even more unnecessary bloat.  I think. -JPH 20210814
+    def propagate_generic_classifications(dry_run: false)
+      fixes = []
+      accepted_names = build_accepted_names_lookup_table
+      classifications = accepted_generic_classification_strings
+      Name.select(:id, :synonym_id, :text_name, :classification).
+        where(rank: 0..(Name.ranks[:Genus] - 1)).
+        each do |name|
+          old_class = old_classification(name)
+          new_class = new_classification(name, accepted_names, classifications)
+          next if old_class == new_class
+
+          fixes << [name, old_class, new_class]
+        end
+      execute_propagation_fixes(fixes, dry_run)
+    end
+
+    private
+
+    def old_classification(name)
+      str = name.classification
+      str.present? && str.strip
+    end
+
+    def new_classification(name, accepted_names, classifications)
+      accepted_text_name = accepted_names[name.synonym_id] || name.text_name
+      genus = accepted_text_name.split.first
+      str = classifications[genus]
+      str.present? && str.strip
+    end
+
+    def build_accepted_names_lookup_table
+      accepted_names = {}
+      Name.select(:synonym_id, :text_name).
+        where(rank: 0..Name.ranks[:Genus], deprecated: false).
+        where.not(synonym_id: nil).
+        each do |name|
+          accepted_names[name.synonym_id] = name.text_name
+        end
+      accepted_names
+    end
+
+    def accepted_generic_classification_strings
+      classifications = {}
+      Name.select(:text_name, :classification).
+        where(rank: Name.ranks[:Genus], deprecated: false).
+        where("author NOT LIKE 'sensu lato%'").
+        each do |name|
+          next if name.classification.blank?
+
+          if classifications[name.text_name].present?
+            warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+          else
+            classifications[name.text_name] = name.classification
+          end
+        end
+      classifications
+    end
+
+    def hash_of_names_with_observations
+      Hash[
+        Observation.distinct.pluck(:text_name).collect do |text_name|
+          [text_name, true]
+        end
+      ]
+    end
+
+    def execute_propagation_fixes(fixes, dry_run)
+      bundles = {}
+      used_names = hash_of_names_with_observations
+      msgs = fixes.map do |name, old_class, new_class|
+        bundles[new_class] = [] if bundles[new_class].blank?
+        bundles[new_class] << name.id
+        next unless used_names[name.text_name]
+
+        describe_propagation_fix(name, old_class, new_class)
+      end
+      msgs.reject(&:nil?) + execute_bundled_propagation_fixes(bundles, dry_run)
+    end
+
+    def execute_bundled_propagation_fixes(bundles, dry_run)
+      msgs = []
+      bundles.each do |classification, ids|
+        next if classification.blank?
+
+        msgs << "Setting classifications for #{ids.join(",")}"
+        next if dry_run
+
+        # Deliberately skip validations
+        # rubocop:disable Rails/SkipsModelValidations
+        Name.where(id: ids).update_all(classification: classification)
+        # rubocop:enable Rails/SkipsModelValidations
+      end
+      msgs
+    end
+
+    def describe_propagation_fix(name, old_class, new_class)
+      if new_class.blank?
+        "Stripping classification from #{name.text_name}"
+      elsif old_class.blank?
+        "Filling in classification for #{name.text_name}"
+      else
+        "Fixing classification of #{name.text_name}: " \
+          "#{changesin_classification_string(old_class, new_class)}"
+      end
+    end
+
+    def changes_in_classification_string(old_class, new_class)
+      msgs = []
+      Name.all_ranks.each do |rank|
+        old_name = grab_name_from_classification_string(old_class, rank)
+        new_name = grab_name_from_classification_string(new_class, rank)
+        msgs << "#{old_name} => #{new_name}" if old_name != new_name
+      end
+      msgs.join(", ")
+    end
+
+    def grab_name_from_classification_string(str, rank)
+      match = str.to_s.match(/#{rank}: _([^_]+)_/)
+      match ? match[1] : "-"
+    end
+  end
+end
