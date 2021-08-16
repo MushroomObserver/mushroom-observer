@@ -1450,11 +1450,6 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Herbarium, :all, by: :records)
   end
 
-  def test_herbarium_by_code
-    expect = Herbarium.all.sort_by(&:code)
-    assert_query(expect, :Herbarium, :all, by: :code)
-  end
-
   def test_herbarium_in_set
     expect = [
       herbaria(:dick_herbarium),
