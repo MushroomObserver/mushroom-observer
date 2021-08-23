@@ -21,19 +21,12 @@ class ObserverController
   end
 
   def ask_webmaster_question
-    init_webmaster_question_instance_vars
-    if @email.blank? || @email.index("@").nil?
-      flash_error(:runtime_ask_webmaster_need_address.t)
-      @email_error = true
-    elsif @content.blank?
-      flash_error(:runtime_ask_webmaster_need_content.t)
-    elsif non_user_potential_spam?
-      flash_error(:runtime_ask_webmaster_antispam.t)
-    else
-      WebmasterEmail.build(@email, @content).deliver_now
-      flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(action: "list_rss_logs")
-    end
+    @email = params.dig(:user, :email)
+    @content = params.dig(:question, :content)
+    @email_error = false
+    return create_webmaster_question if request.method == "POST"
+
+    @email = @user.email if @user
   end
 
   def ask_user_question
@@ -122,19 +115,27 @@ class ObserverController
 
   private
 
-  def init_webmaster_question_instance_vars
-    @email = params.dig(:user, :email)
-    @content = params.dig(:question, :content)
-    @email_error = false
-    return if request.method == "POST"
-
-    @email = @user.email if @user
+  def create_webmaster_question
+    if @email.blank? || @email.index("@").nil?
+      flash_error(:runtime_ask_webmaster_need_address.t)
+      @email_error = true
+    elsif @content.blank?
+      flash_error(:runtime_ask_webmaster_need_content.t)
+    elsif non_user_potential_spam?
+      flash_error(:runtime_ask_webmaster_antispam.t)
+    else
+      WebmasterEmail.build(@email, @content).deliver_now
+      flash_notice(:runtime_ask_webmaster_success.t)
+      redirect_to(action: "list_rss_logs")
+    end
   end
 
   def non_user_potential_spam?
-    !@user &&
-      (/https?:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
-       !@content.include?(" "))
+    !@user && (
+      /https?:/.match?(@content) ||
+      %r{<[/a-zA-Z]+>}.match?(@content) ||
+      !@content.include?(" ")
+    )
   end
 
   def validate_merge_model!(val)
