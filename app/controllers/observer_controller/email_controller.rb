@@ -21,19 +21,13 @@ class ObserverController
   end
 
   def ask_webmaster_question
-    @email = params[:user][:email] if params[:user]
-    @content = params[:question][:content] if params[:question]
-    @email_error = false
-    if request.method != "POST"
-      @email = @user.email if @user
-    elsif @email.blank? || @email.index("@").nil?
+    init_webmaster_question_instance_vars
+    if @email.blank? || @email.index("@").nil?
       flash_error(:runtime_ask_webmaster_need_address.t)
       @email_error = true
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
-    elsif !@user &&
-            (/https?:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
-            !@content.include?(" "))
+    elsif non_user_potential_spam?
       flash_error(:runtime_ask_webmaster_antispam.t)
     else
       WebmasterEmail.build(@email, @content).deliver_now
@@ -127,6 +121,21 @@ class ObserverController
   ##########
 
   private
+
+  def init_webmaster_question_instance_vars
+    @email = params.dig(:user, :email)
+    @content = params.dig(:question, :content)
+    @email_error = false
+    return if request.method == "POST"
+
+    @email = @user.email if @user
+  end
+
+  def non_user_potential_spam?
+    !@user &&
+      (/https?:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
+       !@content.include?(" "))
+  end
 
   def validate_merge_model!(val)
     case val
