@@ -831,7 +831,6 @@ class ObserverControllerTest < FunctionalTestCase
                        flash: :runtime_delivered_message.t)
   end
 
-
   def ask_webmaster_test(email, args)
     response = args[:response] || :success
     flash = args[:flash]
