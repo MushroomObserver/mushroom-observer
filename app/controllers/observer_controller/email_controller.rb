@@ -31,8 +31,9 @@ class ObserverController
       @email_error = true
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
-    elsif /http:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
-          !@content.include?(" ")
+    elsif !@user &&
+            (/http:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
+            !@content.include?(" "))
       flash_error(:runtime_ask_webmaster_antispam.t)
     else
       WebmasterEmail.build(@email, @content).deliver_now

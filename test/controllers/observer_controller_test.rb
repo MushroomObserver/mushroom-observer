@@ -821,6 +821,17 @@ class ObserverControllerTest < FunctionalTestCase
                        flash: :runtime_ask_webmaster_antispam.t)
   end
 
+  def test_send_webmaster_question_antispam_logged_in
+    disable_unsafe_html_filter
+    user = users(:rolf)
+    login(user.login)
+    ask_webmaster_test(user.email,
+                       content: "https://",
+                       response: :redirect,
+                       flash: :runtime_delivered_message.t)
+  end
+
+
   def ask_webmaster_test(email, args)
     response = args[:response] || :success
     flash = args[:flash]
