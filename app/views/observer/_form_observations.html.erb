@@ -36,7 +36,6 @@
       <% turn_into_location_auto_completer(
            :observation_place_name, primer: Location.primer
          ) %>
-      <span class="map-locate map-btn">Locate on Map</span>
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
@@ -51,6 +50,15 @@
         end
         :form_observations_where_help.t(loc1: loc1, loc2: loc2)
       %>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-xs-12 col-sm-6 max-width-text">
+    <span class="map-locate map-btn">Locate on Map</span>
+    <div class="well well-sm push-down max-width-text help-block">
+      <div class="arrow-up push-down hidden-xs"></div>
+      <%= :form_observations_locate_on_map_help.t %>
     </div>
   </div>
 </div>
