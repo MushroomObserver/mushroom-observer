@@ -84,19 +84,19 @@ fi
 
 # Image processing theory says that reducing images by 50% at a time is optimal.
 wait_for "(convert|jpegresize)"
-log_cmd jpegresize 1280x1280 -q 93 --max-size $full_file $huge_file
-log_cmd jpegresize 960x960   -q 94 --max-size $full_file $large_file
-log_cmd jpegresize 640x640   -q 95 --max-size $huge_file $medium_file
-log_cmd jpegresize 320x320   -q 95 --max-size $medium_file $small_file
-log_cmd jpegresize 160x160   -q 95 --max-size $small_file $thumb_file
+# log_cmd jpegresize 1280x1280 -q 93 --max-size $full_file $huge_file
+# log_cmd jpegresize 960x960   -q 94 --max-size $full_file $large_file
+# log_cmd jpegresize 640x640   -q 95 --max-size $huge_file $medium_file
+# log_cmd jpegresize 320x320   -q 95 --max-size $medium_file $small_file
+# log_cmd jpegresize 160x160   -q 95 --max-size $small_file $thumb_file
 
 # ImageMagick slurps the entire image into memory all at once.
 # Our jpegresize is much more memory-efficient but otherwise equivalent.
-# log_cmd convert -thumbnail "1280x1280>" -quality 70 $full_file $huge_file
-# log_cmd convert -thumbnail "960x960>"   -quality 70 $huge_file $large_file
-# log_cmd convert -thumbnail "640x640>"   -quality 70 $huge_file $medium_file
-# log_cmd convert -thumbnail "320x320>"   -quality 80 $medium_file $small_file
-# log_cmd convert -thumbnail "160x160>"   -quality 90 $small_file $thumb_file
+log_cmd convert -thumbnail "1280x1280>" -quality 93 $full_file $huge_file
+log_cmd convert -thumbnail "960x960>"   -quality 94 $huge_file $large_file
+log_cmd convert -thumbnail "640x640>"   -quality 95 $huge_file $medium_file
+log_cmd convert -thumbnail "320x320>"   -quality 95 $medium_file $small_file
+log_cmd convert -thumbnail "160x160>"   -quality 95 $small_file $thumb_file
 
 transferred_any=0
 if (( !$development )); then
