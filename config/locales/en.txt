@@ -596,8 +596,8 @@
   what: what
   WHEN: When
   when: when
-  WHERE: Where
-  where: where
+  WHERE: Locality
+  where: locality
   WHO: Who
   who: who
 
@@ -1553,7 +1553,7 @@
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\n[loc1]\n[loc2]\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.** Examples: \n&nbsp;&nbsp; [loc1] \n&nbsp;&nbsp; [loc2]\n Include administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\n&nbsp;\n Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
