@@ -594,8 +594,8 @@
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
-  WHAT: What
-  what: what
+  WHAT: Scientific Name
+  what: scientific name
   WHEN: When
   when: when
   WHERE: Locality
@@ -1525,8 +1525,7 @@
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
-  form_naming_name_help_create: The name you would apply to this observation.  If you don't know what it is, just leave it blank.  If you find a better name in the future, you can always propose a name later.
-  form_naming_name_help: "<strong>Scientific names are currently required</strong>, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo."
+  form_naming_name_help_create: "The **scientific name** (without author) which identifies this Observation. If you cannot identify the Observation (or don't know its scientific name) leave this field blank. You can propose a name later. You can include a common name in **[:NOTES]**."
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
   form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
