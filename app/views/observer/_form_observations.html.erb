@@ -82,7 +82,7 @@
 <!-- LAT_LONG_ALT -->
 <div class="row push-down max-width-text-times-two">
   <div class="col-sm-6">
-    <label>Location:</label>
+    <%= tag.label("#{:GEOLOCATION.t}: (#{:optional.t})") %>
     <div id="observationFormMap" class="form-observation-map hidden"></div>
     <div>
       <span class="map-open map-btn"><%= :form_observations_open_map.t %></span>
