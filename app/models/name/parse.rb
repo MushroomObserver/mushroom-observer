@@ -435,7 +435,7 @@ class Name < AbstractModel
                  elsif /^stirps/i.match?(words[i])
                    "stirps"
                  elsif /^subg/i.match?(words[i])
-                   "subgenus"
+                   "subg."
                  elsif /^subsect/i.match?(words[i])
                    "subsect."
                  else
@@ -498,7 +498,7 @@ class Name < AbstractModel
           gsub(/_+/, " "). # put genus at the top
           sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
           gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-          sub(" subgenus ", " {1subgenus ").
+          sub(" subg. ", " {1subg. ").
           sub(" sect. ",    " {2sect. ").
           sub(" subsect. ", " {3subsect. ").
           sub(" stirps ",   " {4stirps ").
