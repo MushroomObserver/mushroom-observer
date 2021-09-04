@@ -190,8 +190,12 @@ class NameTest < UnitTestCase
 
   def test_standardize_name
     assert_equal("Amanita", Name.standardize_name("Amanita"))
-    assert_equal("Amanita subgenus Vaginatae",
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgenus Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
                  Name.standardize_name("Amanita SUBG. Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgen. Vaginatae"))
     assert_equal("Amanita subsect. Vaginatae",
                  Name.standardize_name("Amanita subsect Vaginatae"))
     assert_equal("Amanita stirps Vaginatae",
