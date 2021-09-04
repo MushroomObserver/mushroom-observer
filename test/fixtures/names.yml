@@ -868,10 +868,10 @@ abortiporus_biennis_for_eol:
 amanita_subgenus_lepidella:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Subgenus] %>
-  text_name: Amanita subgenus Lepidella
-  search_name: Amanita subgenus Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
-  sort_name: Amanita subgenus Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
-  display_name: '**__Amanita__ subgenus __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
+  text_name: Amanita subg. Lepidella
+  search_name: Amanita subg. Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
+  sort_name: Amanita subg. Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
+  display_name: '**__Amanita__ subg. __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01

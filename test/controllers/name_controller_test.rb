@@ -2753,9 +2753,9 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     syn = Synonym.create
     name1 = Name.create!(
-      text_name: "Cortinarius subgenus Sericeocybe",
-      search_name: "Cortinarius subgenus Sericeocybe",
-      sort_name: "Cortinarius subgenus Sericeocybe",
+      text_name: "Cortinarius subg. Sericeocybe",
+      search_name: "Cortinarius subg. Sericeocybe",
+      sort_name: "Cortinarius subg. Sericeocybe",
       display_name: "**__Cortinarius__** subg. **__Sericeocybe__**",
       author: "",
       rank: :Subgenus,
@@ -2794,7 +2794,7 @@ class NameControllerTest < FunctionalTestCase
     assert(name1.reload)
     assert_not(name1.correct_spelling)
     assert_not(name1.deprecated)
-    assert_equal("Cortinarius subgenus Sericeocybe", name1.text_name)
+    assert_equal("Cortinarius subg. Sericeocybe", name1.text_name)
     assert_equal("", name1.author)
   end
 
