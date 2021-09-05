@@ -1648,17 +1648,6 @@ class NameTest < UnitTestCase
     assert(name.at_or_below_species?)
   end
 
-  def test_text_before_rank
-    name_above_genus = names(:fungi)
-    assert_equal("Fungi", name_above_genus.text_before_rank)
-
-    name_between_genus_and_species = names(:amanita_subgenus_lepidella)
-    assert_equal("Amanita", name_between_genus_and_species.text_before_rank)
-
-    variety_name = names(:amanita_boudieri_var_beillei)
-    assert_equal("Amanita boudieri var. beillei", variety_name.text_before_rank)
-  end
-
   # ------------------------------
   #  Test ancestors and parents.
   # ------------------------------
