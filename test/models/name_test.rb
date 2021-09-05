@@ -633,7 +633,7 @@ class NameTest < UnitTestCase
       search_name: "Synchytrium subg. Endochytrium du Plessis",
       real_search_name: "Synchytrium subg. Endochytrium du Plessis",
       sort_name: "Synchytrium  {1subg.  Endochytrium  du Plessis",
-      display_name: "**__Synchytrium__** subg. **__Endochytrium__** du Plessis", # rubocop:disable Layout/LineLength
+      display_name: "**__Synchytrium__** subg. **__Endochytrium__** du Plessis",
       parent_name: "Synchytrium",
       rank: :Subgenus,
       author: "du Plessis"
