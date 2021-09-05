@@ -11,8 +11,7 @@
 #   end
 #
 class RankMatcher
-  attr_reader :rank
-  attr_reader :pattern
+  attr_reader :pattern, :rank
 
   def initialize(rank, pattern)
     @rank = rank
