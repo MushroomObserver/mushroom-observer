@@ -1525,7 +1525,7 @@
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
-  form_naming_name_help: "The **scientific name** (without author) which identifies this Observation. If you cannot identify the Observation (or don't know its scientific name) leave this field blank. You can propose a name later. You can include a common name in **[:NOTES]**."
+  form_naming_name_help: "The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**"
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
   form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
