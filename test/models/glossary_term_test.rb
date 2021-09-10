@@ -23,10 +23,10 @@ class GlossaryTermTest < UnitTestCase
     image = glossary_term.thumb_image
     images = glossary_term.images
     assert(image)
-    assert_equal([], images)
+    assert_equal(1, images.length)
     glossary_term.add_image(nil)
     assert_equal(image, glossary_term.thumb_image)
-    assert_equal(images, glossary_term.images)
+    assert_equal(1, glossary_term.images.length)
   end
 
   def test_add_image_additional
@@ -49,18 +49,18 @@ class GlossaryTermTest < UnitTestCase
     first_image = images(:convex_image)
     glossary_term.add_image(first_image)
     assert_equal(first_image, glossary_term.thumb_image)
-    assert_equal(0, glossary_term.images.length)
+    assert_equal(1, glossary_term.images.length)
   end
 
   def test_add_image_second
     glossary_term = glossary_terms(:conic_glossary_term)
     thumb = glossary_term.thumb_image
     assert(thumb)
-    assert_equal(0, glossary_term.images.length)
+    assert_equal(1, glossary_term.images.length)
     second_image = images(:convex_image)
     glossary_term.add_image(second_image)
     assert_equal(thumb, glossary_term.thumb_image)
-    assert_equal(1, glossary_term.images.length)
+    assert_equal(2, glossary_term.images.length)
     assert(glossary_term.images.member?(second_image))
   end
 
