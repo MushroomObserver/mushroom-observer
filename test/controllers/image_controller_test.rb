@@ -562,6 +562,22 @@ class ImageControllerTest < FunctionalTestCase
     assert(glossary_term.reload.images.member?(image))
   end
 
+  def test_reuse_image_for_glossary_term_post_without_thumbnail
+    glossary_term = glossary_terms(:convex_glossary_term)
+    image = images(:commercial_inquiry_image)
+    assert_empty(glossary_term.images)
+    assert_nil(glossary_term.thumb_image)
+    params = {
+      id: glossary_term.id.to_s,
+      img_id: image.id.to_s
+    }
+    login("mary")
+    get_with_dump(:reuse_image_for_glossary_term, params)
+    assert_redirected_to(glossary_term_path(glossary_term.id))
+    assert(glossary_term.reload.images.member?(image))
+    assert_objs_equal(image, glossary_term.thumb_image)
+  end
+
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
