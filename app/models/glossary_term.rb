@@ -71,7 +71,7 @@ class GlossaryTerm < AbstractModel
     return false unless image
     return false if images.include?(image)
 
-    self.thumb_image = image if thumb_image.empty?
+    self.thumb_image = image if thumb_image.nil?
     images.push(image)
   end
 
