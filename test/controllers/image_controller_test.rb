@@ -578,6 +578,23 @@ class ImageControllerTest < FunctionalTestCase
     assert_objs_equal(image, glossary_term.thumb_image)
   end
 
+  def test_reuse_image_for_glossary_term_add_image_fails
+    GlossaryTerm.any_instance.stubs(:add_image).returns(false)
+    glossary_term = glossary_terms(:convex_glossary_term)
+    image = images(:commercial_inquiry_image)
+    assert_empty(glossary_term.images)
+    assert_nil(glossary_term.thumb_image)
+    params = {
+      id: glossary_term.id.to_s,
+      img_id: image.id.to_s
+    }
+    login("mary")
+    get(:reuse_image_for_glossary_term, params)
+    assert_form_action(action: "reuse_image_for_glossary_term",
+                       id: glossary_term.id)
+    assert_flash_error
+  end
+
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
