@@ -68,10 +68,11 @@ class GlossaryTerm < AbstractModel
   end
 
   def add_image(image)
-    return unless image
+    return false unless image
+    return false if images.include?(image)
 
-    self.thumb_image = image if thumb_image.nil?
-    images.push(image) unless images.include?(image)
+    self.thumb_image = image if thumb_image.empty?
+    images.push(image)
   end
 
   def all_images
