@@ -806,17 +806,6 @@ class AbstractModel < ApplicationRecord
     save
   end
 
-  def process_image_reuse(image, query_params)
-    add_image(image)
-    log_reuse_image(image)
-    {
-      controller: show_controller,
-      action: show_action,
-      id: id,
-      q: query_params[:q]
-    }
-  end
-
   def can_edit?(user = User.current)
     !respond_to?("user") || (user && (self.user == user))
   end
