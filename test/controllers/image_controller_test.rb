@@ -572,7 +572,7 @@ class ImageControllerTest < FunctionalTestCase
       img_id: image.id.to_s
     }
     login("mary")
-    get_with_dump(:reuse_image_for_glossary_term, params)
+    get(:reuse_image_for_glossary_term, params)
     assert_redirected_to(glossary_term_path(glossary_term.id))
     assert(glossary_term.reload.images.member?(image))
     assert_objs_equal(image, glossary_term.thumb_image)
