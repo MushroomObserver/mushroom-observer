@@ -565,9 +565,13 @@ class ImageController < ApplicationController
     pass_query_params
     @object = GlossaryTerm.safe_find(params[:id])
     image = look_for_image(request.method, params)
-    if image
-      redirect_to(@object.process_image_reuse(image, query_params))
+    if image &&
+       @object.add_image(image) &&
+       @object.save
+      @object.log_reuse_image(image)
+      redirect_with_query(glossary_term_path(@object.id))
     else
+      flash_error(:runtime_no_save.t(:glossary_term)) if image
       serve_reuse_form(params)
     end
   end
