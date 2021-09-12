@@ -286,6 +286,7 @@ class Name < AbstractModel
   require_dependency "name/notify"
   require_dependency "name/parse"
   require_dependency "name/primer"
+  require_dependency "name/propagate_generic_classifications"
   require_dependency "name/resolve"
   require_dependency "name/synonymy"
   require_dependency "name/taxonomy"

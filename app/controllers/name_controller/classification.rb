@@ -19,9 +19,9 @@ class NameController
     return unless make_sure_name_below_genus!(name)
     return unless make_sure_genus_has_classification!(name)
 
-    name.update(classification: name.genus.classification)
+    name.update(classification: name.accepted_genus.classification)
     desc = name.description
-    desc&.update(classification: name.genus.classification)
+    desc&.update(classification: name.accepted_genus.classification)
     redirect_with_query(name.show_link_args)
   end
 
@@ -96,7 +96,7 @@ class NameController
   end
 
   def make_sure_genus_has_classification!(name)
-    return true if name.genus&.classification.present?
+    return true if name.accepted_genus&.classification.present?
 
     flash_error(:edit_name_fill_in_classification_for_genus_first.t)
     redirect_with_query(name.show_link_args)
