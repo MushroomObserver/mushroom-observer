@@ -11,8 +11,7 @@
 #   end
 #
 class RankMatcher
-  attr_reader :rank
-  attr_reader :pattern
+  attr_reader :pattern, :rank
 
   def initialize(rank, pattern)
     @rank = rank
@@ -33,7 +32,9 @@ TEXT_NAME_MATCHERS = [
   RankMatcher.new(:Stirps,     / stirps /),
   RankMatcher.new(:Subsection, / subsect\. /),
   RankMatcher.new(:Section,    / sect\. /),
-  RankMatcher.new(:Subgenus,   / subgenus /),
+  # TODO: Can delete "subgenus" from the next line
+  # after all subgenus Names are converted to "subg."
+  RankMatcher.new(:Subgenus,   / (sub\.|subgenus) /),
   RankMatcher.new(:Species,    / /),
   RankMatcher.new(:Family,     /^\S+aceae$/),
   RankMatcher.new(:Family,     /^\S+ineae$/),     # :Suborder

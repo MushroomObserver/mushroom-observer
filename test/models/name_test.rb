@@ -190,14 +190,18 @@ class NameTest < UnitTestCase
 
   def test_standardize_name
     assert_equal("Amanita", Name.standardize_name("Amanita"))
-    assert_equal("Amanita subgenus Vaginatae",
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgenus Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
                  Name.standardize_name("Amanita SUBG. Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgen. Vaginatae"))
     assert_equal("Amanita subsect. Vaginatae",
                  Name.standardize_name("Amanita subsect Vaginatae"))
     assert_equal("Amanita stirps Vaginatae",
                  Name.standardize_name("Amanita Stirps Vaginatae"))
     assert_equal(
-      "Amanita subgenus One sect. Two stirps Three",
+      "Amanita subg. One sect. Two stirps Three",
       Name.standardize_name("Amanita Subg One Sect Two Stirps Three")
     )
     assert_equal("Amanita vaginata", Name.standardize_name("Amanita vaginata"))
@@ -623,13 +627,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_1d
     do_name_parse_test(
-      "Synchytrium subgenus Endochytrium du Plessis",
-      text_name: "Synchytrium subgenus Endochytrium",
-      real_text_name: "Synchytrium subgenus Endochytrium",
-      search_name: "Synchytrium subgenus Endochytrium du Plessis",
-      real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
-      sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
-      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable Layout/LineLength
+      "Synchytrium subg. Endochytrium du Plessis",
+      text_name: "Synchytrium subg. Endochytrium",
+      real_text_name: "Synchytrium subg. Endochytrium",
+      search_name: "Synchytrium subg. Endochytrium du Plessis",
+      real_search_name: "Synchytrium subg. Endochytrium du Plessis",
+      sort_name: "Synchytrium  {1subg.  Endochytrium  du Plessis",
+      display_name: "**__Synchytrium__** subg. **__Endochytrium__** du Plessis",
       parent_name: "Synchytrium",
       rank: :Subgenus,
       author: "du Plessis"
@@ -989,14 +993,14 @@ class NameTest < UnitTestCase
   def test_name_parse_26
     do_name_parse_test(
       "Amanita subgenus Vaginatae stirps Vaginatae",
-      text_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      search_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      sort_name: "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae",
+      text_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      real_text_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      search_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      real_search_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      sort_name: "Amanita  {1subg.  Vaginatae  {4stirps  !Vaginatae",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**",
-      parent_name: "Amanita subgenus Vaginatae",
+        "**__Amanita__** subg. **__Vaginatae__** stirps **__Vaginatae__**",
+      parent_name: "Amanita subg. Vaginatae",
       rank: :Stirps,
       author: ""
     )
@@ -1141,20 +1145,20 @@ class NameTest < UnitTestCase
   def test_name_parse_37
     do_name_parse_test(
       "Amanita subg. Amidella Singer sect. Amidella stirps Amidella",
-      text_name: "Amanita subgenus Amidella sect. Amidella stirps Amidella",
+      text_name: "Amanita subg. Amidella sect. Amidella stirps Amidella",
       real_text_name:
-        "Amanita subgenus Amidella sect. Amidella stirps Amidella",
+        "Amanita subg. Amidella sect. Amidella stirps Amidella",
       search_name:
-        "Amanita subgenus Amidella sect. Amidella stirps Amidella Singer",
+        "Amanita subg. Amidella sect. Amidella stirps Amidella Singer",
       real_search_name:
-        "Amanita subgenus Amidella Singer sect. Amidella stirps Amidella",
+        "Amanita subg. Amidella Singer sect. Amidella stirps Amidella",
       sort_name:
-        "Amanita  {1subgenus  Amidella  {2sect.  !Amidella  {4stirps  " \
+        "Amanita  {1subg.  Amidella  {2sect.  !Amidella  {4stirps  " \
         "!Amidella  Singer",
       display_name:
-        "**__Amanita__** subgenus **__Amidella__** Singer " \
+        "**__Amanita__** subg. **__Amidella__** Singer " \
         "sect. **__Amidella__** stirps **__Amidella__**",
-      parent_name: "Amanita subgenus Amidella sect. Amidella",
+      parent_name: "Amanita subg. Amidella sect. Amidella",
       rank: :Stirps,
       author: "Singer"
     )
@@ -1322,29 +1326,29 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # subgenus group, with author
       "Amanita subg. Vaginatae group (L.) Ach.",
-      text_name: "Amanita subgenus Vaginatae group",
-      real_text_name: "Amanita subgenus Vaginatae group",
-      search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
-      real_search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
-      sort_name: "Amanita  {1subgenus  Vaginatae   group  (L.) Ach.",
+      text_name: "Amanita subg. Vaginatae group",
+      real_text_name: "Amanita subg. Vaginatae group",
+      search_name: "Amanita subg. Vaginatae group (L.) Ach.",
+      real_search_name: "Amanita subg. Vaginatae group (L.) Ach.",
+      sort_name: "Amanita  {1subg.  Vaginatae   group  (L.) Ach.",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** group (L.) Ach.",
+        "**__Amanita__** subg. **__Vaginatae__** group (L.) Ach.",
       parent_name: "Amanita",
       rank: :Group,
       author: "(L.) Ach."
     )
     do_name_parse_test( # stirps group, with sub-genus parent
       "Amanita subgenus Vaginatae stirps Vaginatae group",
-      text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      text_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      real_text_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      search_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      real_search_name: "Amanita subg. Vaginatae stirps Vaginatae group",
       sort_name:
-        "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae   group",
+        "Amanita  {1subg.  Vaginatae  {4stirps  !Vaginatae   group",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** stirps " \
+        "**__Amanita__** subg. **__Vaginatae__** stirps " \
         "**__Vaginatae__** group",
-      parent_name: "Amanita subgenus Vaginatae",
+      parent_name: "Amanita subg. Vaginatae",
       rank: :Group,
       author: ""
     )
@@ -1642,17 +1646,6 @@ class NameTest < UnitTestCase
     assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
-  end
-
-  def test_text_before_rank
-    name_above_genus = names(:fungi)
-    assert_equal("Fungi", name_above_genus.text_before_rank)
-
-    name_between_genus_and_species = names(:amanita_subgenus_lepidella)
-    assert_equal("Amanita", name_between_genus_and_species.text_before_rank)
-
-    variety_name = names(:amanita_boudieri_var_beillei)
-    assert_equal("Amanita boudieri var. beillei", variety_name.text_before_rank)
   end
 
   # ------------------------------

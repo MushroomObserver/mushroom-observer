@@ -457,10 +457,6 @@ class Name < AbstractModel
     notes&.match(/\S/)
   end
 
-  def text_before_rank
-    text_name.split(" #{rank.to_s.downcase}").first
-  end
-
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
