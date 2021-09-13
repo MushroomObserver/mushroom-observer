@@ -32,9 +32,7 @@ TEXT_NAME_MATCHERS = [
   RankMatcher.new(:Stirps,     / stirps /),
   RankMatcher.new(:Subsection, / subsect\. /),
   RankMatcher.new(:Section,    / sect\. /),
-  # TODO: Can delete "subgenus" from the next line
-  # after all subgenus Names are converted to "subg."
-  RankMatcher.new(:Subgenus,   / (sub\.|subgenus) /),
+  RankMatcher.new(:Subgenus,   / subg\. /),
   RankMatcher.new(:Species,    / /),
   RankMatcher.new(:Family,     /^\S+aceae$/),
   RankMatcher.new(:Family,     /^\S+ineae$/),     # :Suborder
