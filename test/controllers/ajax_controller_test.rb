@@ -32,7 +32,7 @@ class AjaxControllerTest < FunctionalTestCase
     args = params.each_with_object([]) do |var, val, memo|
       memo << "#{var}=#{val}" if var != :type && var != :id
     end
-    url += "?" + args.join("&") if args.any?
+    url += "?#{args.join("&")}" if args.any?
     url
   end
 
@@ -561,8 +561,8 @@ class AjaxControllerTest < FunctionalTestCase
            "Expected #{@response.body} to include #{item2}.")
     assert(@response.body.include?(item3),
            "Expected #{@response.body} to include #{item3}.")
-    assert(!@response.body.include?("Lactarius alpigenes"),
-           "Didn't expect primer to include Lactarius alpigenes.")
+    assert_not(@response.body.include?("Lactarius alpigenes"),
+               "Didn't expect primer to include Lactarius alpigenes.")
   end
 
   def test_location_primer
