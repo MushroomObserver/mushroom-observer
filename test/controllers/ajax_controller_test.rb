@@ -537,7 +537,7 @@ class AjaxControllerTest < FunctionalTestCase
   def test_name_primer
     name = names(:agaricus_campestris)
     item = "[#{name.id},\"#{name.text_name}\",\"#{name.author}\"," \
-           "#{name.synonym_id || "null"}]"
+           "#{name.deprecated ? 1 : 0},#{name.synonym_id || "null"}]"
     get(:name_primer)
     assert(@response.body.include?(item),
            "Expected #{@response.body} to include #{item}.")

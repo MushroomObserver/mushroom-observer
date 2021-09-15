@@ -16,12 +16,13 @@ class AjaxController
 
   def name_list
     name_ids = Observation.select(:name_id).distinct
-    fields = [:id, :text_name, :author, :synonym_id]
+    fields = [:id, :text_name, :author, :deprecated, :synonym_id]
     names = Name.where(id: name_ids).select(*fields)
     synonyms = names.to_a.map(&:synonym_id).reject(&:nil?).uniq
     names |= Name.where(deprecated: false, synonym_id: synonyms).select(*fields)
     names.map do |name|
-      [name.id, name.text_name, name.author, name.synonym_id]
+      [name.id, name.text_name, name.author, name.deprecated ? 1 : 0,
+       name.synonym_id]
     end
   end
 
