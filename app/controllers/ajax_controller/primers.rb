@@ -27,7 +27,7 @@ class AjaxController
   end
 
   def location_list
-    Observation.where("location_id IS NOT NULL").
+    Observation.where.not(location: nil).
       select(:location_id, :where).distinct.map do |obs|
       [obs.location_id, obs.where]
     end
