@@ -535,12 +535,34 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_name_primer
-    name = names(:agaricus_campestris)
-    item = "[#{name.id},\"#{name.text_name}\",\"#{name.author}\"," \
-           "#{name.deprecated ? 1 : 0},#{name.synonym_id || "null"}]"
+    # This name is not deprecated and is used by an observation or two.
+    name1 = names(:boletus_edulis)
+    item1 = "[#{name1.id},\"#{name1.text_name}\",\"#{name1.author}\"," \
+            "#{name1.deprecated ? 1 : 0},#{name1.synonym_id || "null"}]"
+
+    # This name is not deprecated and not used by an observation, but a
+    # synonym *is* used by an observation, so it should be included.
+    name2 = names(:chlorophyllum_rhacodes)
+    item2 = "[#{name2.id},\"#{name2.text_name}\",\"#{name2.author}\"," \
+            "#{name2.deprecated ? 1 : 0},#{name2.synonym_id || "null"}]"
+
+    # This name is deprecated but is used by an observation so it should
+    # be included.
+    name3 = names(:coprinus_comatus)
+    name3.update_attribute(:deprecated, true)
+    name3.reload
+    item3 = "[#{name3.id},\"#{name3.text_name}\",\"#{name3.author}\"," \
+            "#{name3.deprecated ? 1 : 0},#{name3.synonym_id || "null"}]"
+
     get(:name_primer)
-    assert(@response.body.include?(item),
-           "Expected #{@response.body} to include #{item}.")
+    assert(@response.body.include?(item1),
+           "Expected #{@response.body} to include #{item1}.")
+    assert(@response.body.include?(item2),
+           "Expected #{@response.body} to include #{item2}.")
+    assert(@response.body.include?(item3),
+           "Expected #{@response.body} to include #{item3}.")
+    assert(!@response.body.include?("Lactarius alpigenes"),
+           "Didn't expect primer to include Lactarius alpigenes.")
   end
 
   def test_location_primer
