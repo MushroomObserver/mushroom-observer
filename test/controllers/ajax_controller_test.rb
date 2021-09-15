@@ -533,4 +533,18 @@ class AjaxControllerTest < FunctionalTestCase
                    key.match(/latitude|longitude|gps/i)
                  end)
   end
+
+  def test_name_primer
+    name = names(:agaricus_campestris)
+    item = "[#{name.id},\"#{name.search_name}\"]"
+    get(:name_primer)
+    assert(@response.body.include?(item))
+  end
+
+  def test_location_primer
+    loc = locations(:burbank)
+    item = "[#{loc.id},\"#{loc.name}\"]"
+    get(:location_primer)
+    assert(@response.body.include?(item))
+  end
 end
