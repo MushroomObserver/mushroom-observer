@@ -76,6 +76,8 @@ ACTIONS = {
     external_link: {},
     geocode: {},
     image: {},
+    location_primer: {},
+    name_primer: {},
     multi_image_template: {},
     old_translation: {},
     pivotal: {},
