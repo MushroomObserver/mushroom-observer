@@ -536,15 +536,18 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_name_primer
     name = names(:agaricus_campestris)
-    item = "[#{name.id},\"#{name.search_name}\"]"
+    item = "[#{name.id},\"#{name.text_name}\",\"#{name.author}\"," \
+           "#{name.synonym_id || "null"}]"
     get(:name_primer)
-    assert(@response.body.include?(item))
+    assert(@response.body.include?(item),
+           "Expected #{@response.body} to include #{item}.")
   end
 
   def test_location_primer
     loc = locations(:burbank)
     item = "[#{loc.id},\"#{loc.name}\"]"
     get(:location_primer)
-    assert(@response.body.include?(item))
+    assert(@response.body.include?(item),
+           "Expected #{@response.body} to include #{item}.")
   end
 end
