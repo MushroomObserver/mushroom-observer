@@ -566,13 +566,16 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def build_name_primer_item(name)
-    {id: name.id, text_name: name.text_name, deprecated: name.deprecated,
-     synonym_id: name.synonym_id, author: name.author}.to_json
+    { id: name.id,
+      text_name: name.text_name,
+      deprecated: name.deprecated,
+      synonym_id: name.synonym_id,
+      author: name.author }.to_json
   end
 
   def test_location_primer
     loc = locations(:burbank)
-    item = {id:loc.id, name:loc.name}.to_json
+    item = { id: loc.id, name: loc.name }.to_json
     get(:location_primer)
     assert(@response.body.include?(item),
            "Expected #{@response.body} to include #{item}.")
