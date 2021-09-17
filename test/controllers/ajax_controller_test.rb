@@ -537,24 +537,24 @@ class AjaxControllerTest < FunctionalTestCase
   def test_name_primer
     # This name is not deprecated and is used by an observation or two.
     name1 = names(:boletus_edulis)
-    item1 = "[#{name1.id},\"#{name1.text_name}\",\"#{name1.author}\"," \
-            "#{name1.deprecated ? 1 : 0},#{name1.synonym_id || "null"}]"
+    item1 = build_name_primer_item(name1)
 
     # This name is not deprecated and not used by an observation, but a
     # synonym *is* used by an observation, so it should be included.
     name2 = names(:chlorophyllum_rhacodes)
-    item2 = "[#{name2.id},\"#{name2.text_name}\",\"#{name2.author}\"," \
-            "#{name2.deprecated ? 1 : 0},#{name2.synonym_id || "null"}]"
+    item2 = build_name_primer_item(name2)
 
     # This name is deprecated but is used by an observation so it should
     # be included.
     name3 = names(:coprinus_comatus)
     name3.update_attribute(:deprecated, true)
     name3.reload
-    item3 = "[#{name3.id},\"#{name3.text_name}\",\"#{name3.author}\"," \
-            "#{name3.deprecated ? 1 : 0},#{name3.synonym_id || "null"}]"
+    item3 = build_name_primer_item(name3)
 
     get(:name_primer)
+    # These assertions may not be stable, in which case we may need to parse
+    # the respond body as JSON structure, and test that the structure contains
+    # the right elements.
     assert(@response.body.include?(item1),
            "Expected #{@response.body} to include #{item1}.")
     assert(@response.body.include?(item2),
@@ -565,9 +565,14 @@ class AjaxControllerTest < FunctionalTestCase
                "Didn't expect primer to include Lactarius alpigenes.")
   end
 
+  def build_name_primer_item(name)
+    {id: name.id, text_name: name.text_name, deprecated: name.deprecated,
+     synonym_id: name.synonym_id, author: name.author}.to_json
+  end
+
   def test_location_primer
     loc = locations(:burbank)
-    item = "[#{loc.id},\"#{loc.name}\"]"
+    item = {id:loc.id, name:loc.name}.to_json
     get(:location_primer)
     assert(@response.body.include?(item),
            "Expected #{@response.body} to include #{item}.")
