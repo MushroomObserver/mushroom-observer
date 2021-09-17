@@ -15,7 +15,7 @@ class API2
       {
         notes: parse(:string, :app, help: 1),
         user: @for_user,
-        verified: (@for_user == @user ? Time.zone.now : nil)
+        verified: (valid_password? ? Time.zone.now : nil)
       }
     end
 
@@ -24,7 +24,7 @@ class API2
     end
 
     def after_create(api_key)
-      return if @for_user == @user
+      return if api_key.verified
 
       VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
     end
@@ -39,6 +39,16 @@ class API2
 
     def delete
       raise(NoMethodForAction.new("DELETE", :api_keys))
+    end
+
+    private
+
+    def valid_password?
+      password = parse(:string, :password, help: :api_key_password)
+      return @for_user == @user if password.blank?
+      return true if User.authenticate(@for_user.login, password) == @for_user
+
+      raise(PasswordIncorrect.new)
     end
   end
 end

@@ -428,7 +428,7 @@ class Api2Test < UnitTestCase
       app: @app
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting api key")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
@@ -436,7 +436,7 @@ class Api2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
-  def test_posting_api_key_for_another_user
+  def test_posting_api_key_for_another_user_without_password
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
     @app = "  Mushroom  Mapper  "
@@ -449,7 +449,7 @@ class Api2Test < UnitTestCase
       for_user: @for_user.id
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting api key")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
@@ -457,6 +457,27 @@ class Api2Test < UnitTestCase
     assert_api_fail(params.merge(app: ""))
     assert_api_fail(params.merge(for_user: 123_456))
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_for_another_user_with_password
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = katrina
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app,
+      for_user: @for_user.id,
+      password: "testpassword"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.merge(password: "bogus"))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
   def test_patching_api_keys
@@ -3363,7 +3384,7 @@ class Api2Test < UnitTestCase
       password: "secret"
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting user")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
@@ -3404,7 +3425,7 @@ class Api2Test < UnitTestCase
       create_key: @new_key
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting user")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     params[:login] = "miles"

@@ -3938,6 +3938,7 @@
   api_help_message: "Usage: [help]"
   api_herbarium_record_already_exists: There is already a record for [number] at [herbarium].
   api_image_upload_failed: "Failed to upload image: [error]"
+  api_incorrect_password: Incorrect password.
   api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
   api_location_already_exists: The location "[location]" already exists.
   api_missing_method: Missing "method" parameter.
@@ -4021,6 +4022,7 @@
   api_help_obs_notes_has: search within observation notes
   api_help_observer: observer
   api_help_original_name: original file name or other private identifier
+  api_help_password: password of the user you are creating an API key for
   api_help_postal: in postal format with country last regardless of user preference
   api_help_region: matches locations which end in this, e.g. "California, USA"
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
