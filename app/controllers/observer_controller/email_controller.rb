@@ -161,8 +161,10 @@ class ObserverController
       type: @model.type_tag,
       this: @old_obj.merge_info,
       that: @new_obj.merge_info,
-      this_url: @old_obj.show_url,
-      that_url: @new_obj.show_url,
+      show_this_url: @old_obj.show_url,
+      show_that_url: @new_obj.show_url,
+      edit_this_url: @old_obj.edit_url,
+      edit_that_url: @new_obj.edit_url,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
@@ -175,9 +177,10 @@ class ObserverController
     subject = "Request to change Name having dependents"
     content = :email_name_change_request.l(
       user: @user.login,
-      name: name_with_icn_id,
-      name_url: @name.show_url,
+      old_name: name_with_icn_id,
       new_name: new_name_with_icn_id,
+      show_url: @name.show_url,
+      edit_url: @name.edit_url,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
