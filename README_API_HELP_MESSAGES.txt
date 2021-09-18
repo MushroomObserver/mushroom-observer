@@ -1,6 +1,7 @@
 POST api_key
   app:	string (identifier used to help user distinguish which api key belongs to which app)
   for_user:	user (user you are creating api key for)
+  password:	string (password of the user you are creating an API key for)
 
 GET comment
   content_has:	string (search within body)
