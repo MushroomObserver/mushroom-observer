@@ -2714,7 +2714,7 @@ class NameTest < UnitTestCase
     assert_equal(:Subsection, Name.guess_rank("Amanita subsect. Amanita"))
     assert_equal(:Section, Name.guess_rank("Amanita sect. Amanita"))
     assert_equal(:Section, Name.guess_rank("Hygrocybe sect. Coccineae"))
-    assert_equal(:Subgenus, Name.guess_rank("Amanita subgenus Amanita"))
+    assert_equal(:Subgenus, Name.guess_rank("Amanita subg. Amanita"))
     assert_equal(:Family, Name.guess_rank("Amanitaceae"))
     assert_equal(:Family, Name.guess_rank("Peltigerineae"))
     assert_equal(:Order, Name.guess_rank("Peltigerales"))
