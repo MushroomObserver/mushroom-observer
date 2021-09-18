@@ -2631,7 +2631,9 @@
   advanced_search_none_found: No matches found
   advanced_search_observer_help: Who observed the mushroom
   advanced_search_result_type: Result Type
-  advanced_search_result_type_help: Do you want [:observations], [:images], [:locations] or [:names]/[:descriptions]?
+  # Image search UI temporarily disabled for performance. 2021-09-12 JDC
+  # advanced_search_result_type_help: Do you want [:observations], [:images], [:locations] or [:names]/[:descriptions]?
+  advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
