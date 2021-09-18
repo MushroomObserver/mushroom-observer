@@ -397,10 +397,10 @@ class LocationControllerTest < FunctionalTestCase
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 
-    # rubocop:disable Rails/DynamicFindBy
-    # find_by_name_or_reverse_name is an MO method, not a Rails finder
+    # find_by_name_or_reverse_name is an MO method, not a Rails finder.
+    # We used to have to disable a cop for this, but that seems no longer
+    # to be the case. [JPH 2021-09-18]
     loc = Location.find_by_name_or_reverse_name(display_name)
-    # rubocop:enable Rails/DynamicFindBy
     assert_nil(loc.description)
     assert_not_nil(loc.rss_log)
   end
