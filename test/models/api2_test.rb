@@ -224,6 +224,19 @@ class Api2Test < UnitTestCase
     assert_in_delta(Time.zone.now, naming.updated_at, 1.minute)
     assert_equal(1, naming.votes.length)
     assert_objs_equal(vote, naming.votes.first)
+    assert_last_reasons_correct(naming) if @reasons
+  end
+
+  def assert_last_reasons_correct(naming)
+    naming.get_reasons.each do |reason|
+      expect = @reasons[reason.num]
+      if expect.nil?
+        assert_false(reason.used?)
+      else
+        assert_true(reason.used?)
+        assert_equal(expect.to_s, reason.notes.to_s)
+      end
+    end
   end
 
   def assert_last_observation_correct
@@ -2322,6 +2335,12 @@ class Api2Test < UnitTestCase
       Stipe: "smooth",
       Other: "These are notes.\nThey look like this."
     }
+    @reasons = {
+      1 => "because I say",
+      2 => "",
+      3 => nil,
+      4 => "K+ paisley"
+    }
     @vote = 2.0
     @specimen = true
     @is_col_loc = true
@@ -2344,6 +2363,9 @@ class Api2Test < UnitTestCase
       altitude: "50m",
       has_specimen: "yes",
       name: "Coprinus comatus",
+      reason_1: @reasons[1],
+      reason_2: @reasons[2],
+      reason_4: @reasons[4],
       vote: "2",
       projects: @proj.id,
       species_lists: @spl.id,
