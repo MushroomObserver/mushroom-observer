@@ -3359,9 +3359,8 @@ class Api2Test < UnitTestCase
 
   def test_getting_users
     params = { method: :get, action: :user }
-    user = User.all.sample
-    assert_api_pass(params.merge(id: user.id))
-    assert_api_results([user])
+    assert_api_pass(params.merge(detail: :low))
+    assert_api_results(User.all)
   end
 
   def test_posting_minimal_user
