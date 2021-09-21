@@ -38,7 +38,7 @@ Note that we update a set of CSV files nightly which are straight dumps of the
 database.  If you are looking for large quantities of data, e.g. for data
 anaylsis or image recognition, plase look at these files first to see if they
 have the information you need.  That will save our server a considerable amount
-of unnecessary traffic, and probably save you a lot of work! 
+of unnecessary traffic, and probably save you a lot of work!
 
 * https://mushroomobserver.org/observations.csv
 * https://mushroomobserver.org/images_observations.csv
