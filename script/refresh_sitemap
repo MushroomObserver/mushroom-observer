@@ -135,7 +135,6 @@ ROBOTS_HEADER = <<~"TXT"
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
-  # Disallow: *_by_* # block <objects>_by_<object> e.g., observations_by_user
   Disallow: /name/show_name
 
 TXT
