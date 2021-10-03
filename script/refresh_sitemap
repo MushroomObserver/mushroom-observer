@@ -92,31 +92,37 @@ LOCALES = Language.connection.select_values(%(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 ))
 
-ROBOTS_HEADER = <<~"TXT"
-  # Control behavior of crowlers that follow robots.txt rules
-  # For documentation, see:
-  # https://developers.google.com/search/docs/advanced/robots/robots_txt
-  # http://www.robotstxt.org
+# Control behavior of crowlers that follow robots.txt rules
+# For documentation, see:
+# https://developers.google.com/search/docs/advanced/robots/robots_txt
+# http://www.robotstxt.org
 
-  # Other ways for MO to block/control robots include:
-  # - Manually block ip address ranges at the firewall
-  # - Automatically block in Rails an anonymous user (including robots)
-  #   that's hogging the webserver. See script/update_ip_stats.rb
-  # - Automatically block in Rails a fake GoogleBot.
-  #    See script/update_googlebots.rb
-  # - Manually block in Rails an anonymous user via the Admin UI
-  # - Limit them via browser gem and #bot? method
+# Other ways for MO to block/control robots include:
+# - Manually block ip address ranges at the firewall
+# - Automatically block in Rails an anonymous user (including robots)
+#   that's hogging the webserver. See script/update_ip_stats.rb
+# - Automatically block in Rails a fake GoogleBot.
+#    See script/update_googlebots.rb
+# - Manually block in Rails an anonymous user via the Admin UI
+# - Limit them via browser gem and #bot? method
+ROBOTS_HEADER = <<~"TXT"
 
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
-  # Rules applying to some allowed bots
-  # Whitelist Common Crawler (used by WayBack Machine)
-  User-agent: CCBot
-  Crawl-Delay: 30
+  # Completely block all robots that are not explicitly whitelisted below
+  User-agent: *
+  Disallow: /
 
-  # Rules applying to all other allowed bots
-  # Whitelist Bing, Google, Facebook
+  # Google AdBot crawlers must be named explicitly
+  # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
+  User-agent: AdsBot-Google
+  User-agent: AdsBot-Google-Mobile
+  User-agent: AdsBot-Google-Mobile-Apps
+  Disallow: /
+
+  # Whitelisted crawlers
   User-agent: bingbot
+  User-agent: CCBot
   User-agent: GoogleBot
   User-agent: Facebot
   Crawl-Delay: 15
@@ -129,19 +135,12 @@ ROBOTS_HEADER = <<~"TXT"
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
+  # Disallow: *_by_* # block <objects>_by_<object> e.g., observations_by_user
   Disallow: /name/show_name
 
-  # (Note: the rest of #write_robots_file output follows this immeediately.)
-  # Completely block all robots that are not whitelisted above
-  User-agent: *
-  # Google AdBot crawlers must be named explicitly
-  # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
-  User-agent: AdsBot-Google
-  User-agent: AdsBot-Google-Mobile
-  User-agent: AdsBot-Google-Mobile-Apps
-  Disallow: /
-
 TXT
+# The rest of #write_robots_file mjust follow immeediately
+# abd aookues to the group of whitelisted user agents immediatelyu above.
 ROBOTS_FOOTER = <<"TXT"
 TXT
 
