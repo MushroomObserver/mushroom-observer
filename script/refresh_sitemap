@@ -109,21 +109,18 @@ ROBOTS_HEADER = <<~"TXT"
 
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
-  # Completely block all robots that are not explicitly whitelisted below
-  User-agent: *
-  Disallow: /
-
+  # Block non-whitelisted crawlers
   # Google AdBot crawlers must be named explicitly
   # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
   User-agent: AdsBot-Google
   User-agent: AdsBot-Google-Mobile
   User-agent: AdsBot-Google-Mobile-Apps
-  # Unofficial Facebook crawlers (subset of facebookexternalhit)
-  User-agent: Facebot
+  User-agent: Facebot # Unofficial Facebook bots (subset of facebookexternalhit)
+  User-agent: * # Block everything else not whitelisted below
   Disallow: /
 
-
   # Whitelisted crawlers
+  # All are assume to use wildcards in their robots.txt parser
   User-agent: bingbot
   User-agent: CCBot
   User-agent: GoogleBot
