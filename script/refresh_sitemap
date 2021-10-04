@@ -118,13 +118,16 @@ ROBOTS_HEADER = <<~"TXT"
   User-agent: AdsBot-Google
   User-agent: AdsBot-Google-Mobile
   User-agent: AdsBot-Google-Mobile-Apps
+  # Unofficial Facebook crawlers (subset of facebookexternalhit)
+  User-agent: Facebot
   Disallow: /
+
 
   # Whitelisted crawlers
   User-agent: bingbot
   User-agent: CCBot
   User-agent: GoogleBot
-  User-agent: Facebot
+  User-agent: facebookexternalhit
   Crawl-Delay: 15
   Disallow: *page=*
   Disallow: *letter=*
