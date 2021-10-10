@@ -181,56 +181,50 @@ class ArticlesControllerIntegrationTest < FunctionalIntegrationTestCase
       article: { title: new_title, body: new_body }
     }
     login(users(:zero_user).login)
-    # post(:update, params: params)
-    # patch(article_path(params))
-    puts "-" * 80
-    puts '@controller.instance_variable_get("@last_notice")'
-    pp @controller.instance_variable_get("@last_notice")
-    puts '@controller.instance_variable_get(:@last_notice)'
-    pp @controller.instance_variable_get(:@last_notice)
-    puts '@controller.view_assigns[:@last_notice])'
-    pp @controller.view_assigns[:@last_notice]
-    puts '@controller.view_assigns["@last_notice"])'
-    pp @controller.view_assigns["@last_notice"]
-    byebug
-    assert_flash_text(:permission_denied.l)
-    # byebug
-    # assert_equal(:permission_denied.l, session[:notice])
+    patch(article_path(params))
+    assert_flash(:permission_denied.l)
     assert_redirected_to(articles_path)
-    # assert_equal(articles_path, path)
 
     # Prove authorized user can edit article
     login(users(:article_writer).login)
     make_admin
-    # post(:update, params: params)
     patch(article_path(params))
     article.reload
 
     assert_flash_success
-    # assert_redirected_to(article_path(article.id))
     assert_equal(article_path(article.id), path)
     assert_equal(new_title, article.title)
     assert_equal(new_body, article.body)
 
     # Prove that saving without changes provokes warning
     # save it again without changes
-    # post(:update, params: params)
     patch(article_path(params))
+    puts "session[:notice]"
+    pp session[:notice]
     article.reload
+    puts "session[:notice] after reload"
+    pp session[:notice]
     assert_flash_warning
-    # assert_redirected_to(article_path(article.id))
     assert_equal(article_path(article.id), path)
 
     # Prove removing title provokes warning
     params[:article][:title] = ""
-    # post(:update, params: params)
+    puts "session[:notice] before removing title"
+    pp session[:notice]
     patch(article_path(params))
-    # NOTE: The flash text is perplexing! It seems to give a Both/And!
-    # <p>Successfully updated article #788338338.</p><p>No changes made.</p><p>Title Required</p>
+    puts "session[:notice] after removing title"
+    pp session[:notice]
+
+    # For some reason THIS one doesn't get any got.
+    # New form already rendered, so...
+    # Flash has been flash_clear'ed and is printed in response.body
+    # div class="alert push-down..."
     assert_flash_text(:article_title_required.l)
-    # assert_equal(:article_title_required.l, flash[:notice])
-    # assert_template(:edit)
-    assert_equal(edit_article_path(params), path)
+    # assert_match(:article_title_required.l, @response.body)
+    follow_redirect!
+    byebug
+    # This is not getting the form
+    assert_equal(edit_article_path(article), path)
     assert_form_action(action: :update) # "edit" form
   end
 

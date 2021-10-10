@@ -45,6 +45,8 @@ class ArticlesController < ApplicationController
   end
 
   def edit
+    puts "-" * 100 
+    puts "rendering edit"
     @article = find_or_goto_index(Article, params[:id])
   end
 
@@ -64,8 +66,10 @@ class ArticlesController < ApplicationController
 
   def update
     @article = Article.find(params[:id])
+    puts "updating"
     return render(:edit) if flash_missing_title?
-
+    puts "-" * 90
+    puts "still going"
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
 
