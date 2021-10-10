@@ -10,7 +10,7 @@ class API2
       # quoted, but that gets really confusing with backslashes, etc. Lastly,
       # this is too permissive with respect to the domain part for a few
       # unimportant reasons.  Whatever.  Close enough!
-      EMAIL = /^[\w.!#$%&'*+\/=?^_‘{|}~-]+@[\w\-]+(\.[\w\-]+)+$/.freeze
+      EMAIL = %r(^[\w.!#$%&'*+\/=?^_‘{|}~-]+@[\w\-]+(\.[\w\-]+)+$).freeze
 
       def parse(str)
         val = super || return
