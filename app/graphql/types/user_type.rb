@@ -53,11 +53,5 @@ module Types
     field :view_owner_id, Boolean, null: false
     field :content_filter, String, null: true
     field :notes_template, String, null: true
-    field :login, String, null: false
-    field :password, String, null: false
-    field :email, String, null: false
-    field :theme, String, null: true
-    field :name, String, null: true
-    field :admin, Boolean, null: true
   end
 end
