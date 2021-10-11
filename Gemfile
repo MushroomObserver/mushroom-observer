@@ -102,12 +102,6 @@ gem("rubyzip")
 
 ########## Development, Testing, and Analysis ##################################
 
-# Use byebug as debugging gem
-gem("byebug", group: [:development, :test])
-
-# Calling `console` creates irb session in the browser (instead of the terminal)
-gem("web-console", group: :development)
-
 # Automatically track code test coverage
 # Use coveralls_reborn gem instead of coveralls gem
 # With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
@@ -136,6 +130,14 @@ gem("mry", require: false)
 gem("graphql")
 gem("graphql-batch")
 
+group :test, :development do
+  # Use byebug as debugging gem
+  gem "byebug"
+  
+  # GraphiQL for GraphQL development
+  gem "graphiql-rails"
+end
+
 group :test do
   # Use capybara to simulate user-browser interaction
   gem "capybara"
@@ -159,15 +161,14 @@ group :test do
   gem "webmock"
 end
 
-# GraphiQL for GraphQL development
-group :test, :development do
-  gem 'graphiql-rails'
-end
-
-# Spring and Listen for GraphQL development
 group :development do
-  gem 'listen', '>= 3.0.5', '< 3.2'
+  # Calling `console` creates irb session in the browser (instead of the terminal)
+  gem "web-console"
+
+  # Listen for development 
+  gem "listen", ">= 3.0.5", "< 3.2"
+
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem "spring"
+  gem "spring-watcher-listen", "~> 2.0.0"
 end
