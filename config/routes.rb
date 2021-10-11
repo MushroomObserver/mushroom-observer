@@ -586,7 +586,7 @@ MushroomObserver::Application.routes.draw do
   post "/graphql", to: "graphql#execute"
 
   if Rails.env.development?
-    mount GraphiQL::Rails::Engine, at: "/graphiql" , graphql_path: "/graphql"
+    mount GraphiQL::Rails::Engine, at: "/graphiql" , graphql_path: "/graphql#execute"
   end
 
   get "policy/privacy"
