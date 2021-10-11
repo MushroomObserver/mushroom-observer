@@ -12,7 +12,9 @@ module Types
     field :license_id, Integer, null: false
     field :contribution, Integer, null: true
     field :location_id, Integer, null: true
+    field :location, Types::LocationType, null: true
     field :image_id, Integer, null: true
+    field :image, Types::ImageType, null: true
     field :locale, String, null: true
     field :bonuses, String, null: true
     field :email_comments_owner, Boolean, null: false
@@ -51,6 +53,7 @@ module Types
     field :mailing_address, String, null: true
     field :layout_count, Integer, null: true
     field :view_owner_id, Boolean, null: false
+    field :view_owner, Types::UserType, null: false
     field :content_filter, String, null: true
     field :notes_template, String, null: true
   end
