@@ -7,7 +7,7 @@ module Queries
       argument :id, Integer, required: true
       
       def resolve(id:)
-        ::User.find(id)
+        User.find(id)
       end
     end
 end

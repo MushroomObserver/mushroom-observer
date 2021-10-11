@@ -2,8 +2,8 @@
 class Users < Queries::BaseQuery
     description 'list all users'
     
-    type Types::UserType.connection_type, null: false
+    type Types::UserType, null: false
     def resolve
-      ::User.all
+      User.all
     end
 end

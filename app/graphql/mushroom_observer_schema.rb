@@ -1,9 +1,10 @@
 class MushroomObserverSchema < GraphQL::Schema
-  mutation(Types::MutationType)
   query(Types::QueryType)
+  mutation(Types::MutationType)
+  # subscription(Types::Subscription)
 
   # GraphQL::Batch setup:
-  use GraphQL::Batch
+  # use GraphQL::Batch
 
   # Union and Interface Resolution
   def self.resolve_type(abstract_type, obj, ctx)
