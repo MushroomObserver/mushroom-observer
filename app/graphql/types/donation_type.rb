@@ -9,6 +9,7 @@ module Types
     field :anonymous, Boolean, null: false
     field :reviewed, Boolean, null: false
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: true
     field :recurring, Boolean, null: true
   end
 end

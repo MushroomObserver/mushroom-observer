@@ -5,10 +5,12 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :content_type, String, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: false
     field :when, GraphQL::Types::ISO8601Date, null: true
     field :notes, String, null: true
     field :copyright_holder, String, null: true
     field :license_id, Integer, null: false
+    field :license, Types::LicenseType, null: false
     field :num_views, Integer, null: false
     field :last_view, GraphQL::Types::ISO8601DateTime, null: true
     field :width, Integer, null: true

@@ -5,10 +5,13 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: false
     field :name_id, Integer, null: true
+    field :name, Types::NameType, null: false
     field :review_status, Integer, null: true
     field :last_review, GraphQL::Types::ISO8601DateTime, null: true
     field :reviewer_id, Integer, null: true
+    field :reviewer, Types::UserType, null: false
     field :ok_for_export, Boolean, null: false
     field :num_views, Integer, null: true
     field :last_view, GraphQL::Types::ISO8601DateTime, null: true
@@ -17,6 +20,7 @@ module Types
     field :locale, String, null: true
     field :public, Boolean, null: true
     field :license_id, Integer, null: true
+    field :license, Types::LicenseType, null: false
     field :merge_source_id, Integer, null: true
     field :gen_desc, String, null: true
     field :diag_desc, String, null: true
@@ -28,5 +32,6 @@ module Types
     field :refs, String, null: true
     field :classification, String, null: true
     field :project_id, Integer, null: true
+    field :project, Types::ProjectType, null: true
   end
 end

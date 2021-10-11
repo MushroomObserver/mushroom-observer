@@ -5,8 +5,11 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: false
     field :description_id, Integer, null: true
+    field :description, Types::NameDescription, null: true
     field :rss_log_id, Integer, null: true
+    field :rss_log, Types::RssLogType, null: true
     field :num_views, Integer, null: true
     field :last_view, GraphQL::Types::ISO8601DateTime, null: true
     field :rank, Integer, null: true
@@ -17,7 +20,9 @@ module Types
     field :citation, String, null: true
     field :deprecated, Boolean, null: false
     field :synonym_id, Integer, null: true
+    field :synonym, Types::NameType, null: true
     field :correct_spelling_id, Integer, null: true
+    field :correct_spelling, Types::NameType, null: true
     field :notes, String, null: true
     field :classification, String, null: true
     field :ok_for_export, Boolean, null: false

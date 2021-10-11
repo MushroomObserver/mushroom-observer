@@ -4,6 +4,7 @@ module Types
     field :target_type, String, null: true
     field :target_id, Integer, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: false
     field :state, Boolean, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
   end

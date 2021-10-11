@@ -2,7 +2,9 @@ module Types
   class SequenceType < Types::BaseObject
     field :id, ID, null: false
     field :observation_id, Integer, null: true
+    field :observation, Types::ObservationType, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: true
     field :locus, String, null: true
     field :bases, String, null: true
     field :archive, String, null: true

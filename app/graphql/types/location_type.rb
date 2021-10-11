@@ -5,8 +5,11 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
+    field :user, Types::UserType, null: false
     field :description_id, Integer, null: true
+    field :description, Types::LocationDescription, null: true
     field :rss_log_id, Integer, null: true
+    field :rss_log, Types::RssLogType, null: true
     field :num_views, Integer, null: true
     field :last_view, GraphQL::Types::ISO8601DateTime, null: true
     field :north, Float, null: true
