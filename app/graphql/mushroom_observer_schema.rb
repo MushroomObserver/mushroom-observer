@@ -1,6 +1,6 @@
 class MushroomObserverSchema < GraphQL::Schema
   query(Types::QueryType)
-  # mutation(Types::MutationType)
+  mutation(Types::MutationType)
   # subscription(Types::Subscription)
 
   # GraphQL::Batch setup:

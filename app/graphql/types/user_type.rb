@@ -10,12 +10,12 @@ module Types
     field :last_login, GraphQL::Types::ISO8601DateTime, null: true
     field :verified, GraphQL::Types::ISO8601DateTime, null: true
     field :license_id, Integer, null: false
-    # field :license_id, Types::LicenseType, null: false
+    field :license_id, Types::LicenseType, null: false
     field :contribution, Integer, null: true
     field :location_id, Integer, null: true
-    # field :location, Types::LocationType, null: true
+    field :location, Types::LocationType, null: true
     field :image_id, Integer, null: true
-    # field :image, Types::ImageType, null: true
+    field :image, Types::ImageType, null: true
     field :locale, String, null: true
     field :bonuses, String, null: true
     field :email_comments_owner, Boolean, null: false
