@@ -32,6 +32,7 @@ class Resolvers::ObservationsSearch < GraphQL::Schema::Resolver
   end
 
   # when "filter" is passed "apply_filter" would be called to narrow the scope
+  # note this example was conceived as an OR filter, we could set the filter args as options directly
   option :filter, type: ObservationFilter, with: :apply_filter
 
   # apply_filter recursively loops through "OR" branches

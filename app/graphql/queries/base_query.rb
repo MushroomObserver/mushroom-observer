@@ -1,5 +1,4 @@
 module Queries
-    class BaseQuery < GraphQL::Schema::Resolver
-    end
+  class BaseQuery < GraphQL::Schema::Resolver
+  end
 end
-  
