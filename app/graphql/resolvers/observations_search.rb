@@ -29,7 +29,7 @@ module Resolvers
       argument :before, Boolean, required: false
       argument :when, GraphQL::Types::ISO8601Date, required: false
       argument :notes_like, String, required: false
-      argument :with_image, Types::EitherWithWithout, required: false # with, without, or either
+      argument :with_image, Boolean, required: false # with, without, or either
       argument :with_specimen, Boolean, required: false # with, without or either
       argument :with_lichen, Boolean, required: false # with, without or either
     end
@@ -51,6 +51,7 @@ module Resolvers
         scope = scope.where("text_name LIKE ?", "%#{value[:name_like]}%")
       end
       scope = scope.where("user_id = ?", value[:user_id]) if value[:user_id]
+      # This one now a prob?
       scope = scope.where("where LIKE ?", "%#{value[:where]}%") if value[:where]
       if value[:when]
         scope = if value[:before]
@@ -63,19 +64,20 @@ module Resolvers
         scope = scope.where("notes LIKE ?", "%#{value[:notes_like]}%")
       end
       case value[:with_image]
-      when "WITH"
-        puts("___________________________#{value[:with_image]} IMAGE")
+      when true
+        # puts("___________________________#{value[:with_image]} IMAGE")
         scope = scope.where.not("thumb_image_id IS NOT NULL")
-      when "WITHOUT"
-        puts("___________________________#{value[:with_image]} IMAGE")
+      when false
+        # puts("___________________________#{value[:with_image]} IMAGE")
         scope = scope.where("thumb_image_id IS NULL")
       else
-        puts("___________________________EITHER IMAGE")
+        # puts("___________________________EITHER IMAGE")
       end
       case value[:with_specimen]
       when true
         scope = scope.where("specimen IS TRUE")
       when false
+        # puts("___________________________#{value[:with_specimen]} SPECIMEN")
         scope = scope.where("specimen IS FALSE")
       end
       case value[:with_lichen]
