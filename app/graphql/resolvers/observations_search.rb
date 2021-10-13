@@ -65,24 +65,28 @@ module Resolvers
       case value[:with_image]
       when "WITH"
         puts("___________________________#{value[:with_image]} IMAGE")
-        scope.where.not(thumb_image_id: [nil, ""])
+        scope = scope.where.not("thumb_image_id IS NOT NULL")
       when "WITHOUT"
         puts("___________________________#{value[:with_image]} IMAGE")
-        scope.where(thumb_image_id: [nil, ""])
+        scope = scope.where("thumb_image_id IS NULL")
       else
         puts("___________________________EITHER IMAGE")
       end
       case value[:with_specimen]
       when true
-        scope.where(specimen: true)
+        scope = scope.where("specimen IS TRUE")
       when false
-        scope.where(specimen: false)
+        scope = scope.where("specimen IS FALSE")
       end
       case value[:with_lichen]
+      # Note the critical difference -- the extra spaces in the negative
+      # version.  This allows all lifeforms containing the word "lichen" to be
+      # selected for in the positive version, but only excudes the one lifeform
+      # in the negative.
       when true
-        scope.where.not(lifeform: [nil, "", " "])
+        scope = scope.where("lifeform LIKE '%lichen%'")
       when false
-        scope.where(lifeform: [nil, "", " "])
+        scope = scope.where("lifeform NOT LIKE '% lichen %'")
       end
 
       branches << scope
