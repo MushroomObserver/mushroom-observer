@@ -29,7 +29,7 @@ module Resolvers
       argument :before, Boolean, required: false
       argument :when, GraphQL::Types::ISO8601Date, required: false
       argument :notes_like, String, required: false
-      argument :with_image, Boolean, required: false # with, without, or either
+      argument :with_image, Types::EitherWithWithout, required: false # with, without, or either
       argument :with_specimen, Boolean, required: false # with, without or either
       argument :with_lichen, Boolean, required: false # with, without or either
     end
@@ -63,12 +63,12 @@ module Resolvers
         scope = scope.where("notes LIKE ?", "%#{value[:notes_like]}%")
       end
       case value[:with_image]
-      when true
-        puts("___________________________WITH IMAGE")
-        scope.where.not(thumb_image_id: nil)
-      when false
-        puts("___________________________WITHOUT IMAGE")
-        scope.where(thumb_image_id: nil)
+      when "WITH"
+        puts("___________________________#{value[:with_image]} IMAGE")
+        scope.where.not(thumb_image_id: [nil, ""])
+      when "WITHOUT"
+        puts("___________________________#{value[:with_image]} IMAGE")
+        scope.where(thumb_image_id: [nil, ""])
       else
         puts("___________________________EITHER IMAGE")
       end
@@ -80,9 +80,9 @@ module Resolvers
       end
       case value[:with_lichen]
       when true
-        scope.where("lifeform EXISTS")
+        scope.where.not(lifeform: [nil, "", " "])
       when false
-        scope.where("lifeform NOT EXISTS")
+        scope.where(lifeform: [nil, "", " "])
       end
 
       branches << scope
