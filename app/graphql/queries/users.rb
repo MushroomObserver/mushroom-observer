@@ -2,7 +2,7 @@
 module Queries
   class Users < Queries::BaseQuery
     description "list all users"
-    type Types::UserType, null: false
+    type [Types::UserType], null: false
 
     def resolve
       ::User.all
