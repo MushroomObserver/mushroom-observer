@@ -6,7 +6,7 @@ module Types
     field :user, resolver: Queries::User
     field :users, resolver: Queries::Users
     field :observation, resolver: Queries::Observation
-    field :observations, resolver: Queries::Observations
+    field :observations, resolver: Resolvers::ObservationsSearch
     field :location, resolver: Queries::Location
     field :locations, resolver: Queries::Locations
 

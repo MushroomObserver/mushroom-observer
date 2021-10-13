@@ -1,19 +1,19 @@
 require("search_object")
 require("search_object/plugin/graphql")
 
-class Resolvers::ObservationsSearch
+class Resolvers::ObservationsSearch < GraphQL::Schema::Resolver
   # include SearchObject for GraphQL
   include SearchObject.module(:graphql)
 
   # scope is starting point for search
   scope { Observation.all }
 
-  type types[Types::ObservationType]
+  type types[Types::ObservationType], null: false
 
   # inline input type definition for the advanced filter
   class ObservationFilter < ::Types::BaseInputObject
-    argument :OR, [self], required: false
-    # search for like string in name.text_name
+    # argument :OR, [self], required: false
+    # taxa: search for like string in name.text_name
     argument :text_name, String, required: false
     # alternative: use select w/ autocomplete for taxa
     # argument :name_id, Int, required: false
@@ -23,13 +23,12 @@ class Resolvers::ObservationsSearch
     # argument :user_like, String, required: false
     # must search string for location, becase locations are not nested.
     argument :where, String, required: false # this is location.name
+    argument :before, Boolean, required: false
     argument :when, GraphQL::Types::ISO8601Date, required: false
-    argument :notes, String, required: false # this is location.name
-    argument :with_image, Boolean, required: false # this is location.name
-    argument :without_image, Boolean, required: false # this is location.name
-    argument :with_specimen, Boolean, required: false # this is location.name
-    argument :without_specimen, Boolean, required: false # this is location.name
-    argument :lichen, Boolean, required: false # this is location.name
+    argument :notes, String, required: false
+    argument :image, Types::EitherWithWithout, required: false # with, without, or either
+    argument :specimen, Types::EitherWithWithout, required: false # with, without or either
+    argument :lichen, Types::EitherWithWithout, required: false # with, without or either
   end
 
   # when "filter" is passed "apply_filter" would be called to narrow the scope
@@ -43,18 +42,17 @@ class Resolvers::ObservationsSearch
 
   def normalize_filters(value, branches = [])
     scope = Observation.all
-    if value[:description_contains]
-      scope = scope.where("description LIKE ?", "%#{value[:description_contains]}%")
+    if value[:text_name]
+      scope = scope.where("text_name LIKE ?", "%#{value[:text_name]}%")
     end
-    if value[:url_contains]
-      scope = scope.where("url LIKE ?", "%#{value[:url_contains]}%")
-    end
+    scope = scope.where("url LIKE ?", "%#{value[:where]}%") if value[:where]
+    scope = scope.where("notes LIKE ?", "%#{value[:notes]}%") if value[:notes]
 
     branches << scope
 
-    if value[:OR].present?
-      value[:OR].reduce(branches) { |s, v| normalize_filters(v, s) }
-    end
+    # if value[:OR].present?
+    #   value[:OR].reduce(branches) { |s, v| normalize_filters(v, s) }
+    # end
 
     branches
   end
