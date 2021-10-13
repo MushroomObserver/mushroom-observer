@@ -9,11 +9,11 @@ module Types
     field :specimen, Boolean, null: false
     field :notes, String, null: true
     field :thumb_image_id, Integer, null: true
-    field :thumb_image, Types::ImageType, null: true
+    # field :thumb_image, Types::ImageType, null: true
     field :name_id, Integer, null: true
     field :name, Types::NameType, null: true
     field :location_id, Integer, null: true
-    field :location, Types::LocationType, null: true
+    # field :location, Types::LocationType, null: true
     field :is_collection_location, Boolean, null: false
     field :vote_cache, Float, null: true
     field :num_views, Integer, null: false

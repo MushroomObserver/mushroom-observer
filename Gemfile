@@ -129,6 +129,9 @@ gem("mry", require: false)
 # GraphQL API gems 
 gem("graphql")
 gem("graphql-batch")
+# Search Object (and GraphQL extension) for filtering queries
+# gem("search_object")
+# gem("search_object_graphql")
 
 group :test, :development do
   # Use byebug as debugging gem
