@@ -5,7 +5,7 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :content_type, String, null: true
     field :user_id, Integer, null: true
-    field :user, Types::UserType, null: false
+    field :user, Types::UserType, null: true
     field :when, GraphQL::Types::ISO8601Date, null: true
     field :notes, String, null: true
     field :copyright_holder, String, null: true

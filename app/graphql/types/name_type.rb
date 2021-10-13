@@ -5,7 +5,7 @@ module Types
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
-    field :user, Types::UserType, null: false
+    field :user, Types::UserType, null: true
     field :description_id, Integer, null: true
     # field :description, Types::NameDescription, null: true
     field :rss_log_id, Integer, null: true

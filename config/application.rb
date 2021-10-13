@@ -52,6 +52,10 @@ module MushroomObserver
     # Still validating 5.2 deploy and want to allow rollback
     # TODO: Remove this once we are satisfied with 5.2 deplay.
     config.action_dispatch.use_authenticated_cookie_encryption = false
+
+    # debugging - keep this in case
+    # config.paths.add Rails.root.join('app', 'graphql', 'types').to_s, eager_load: true
+    # config.paths.add Rails.root.join('app', 'graphql', 'mutations').to_s, eager_load: true
   end
 end
 

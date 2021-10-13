@@ -7,6 +7,8 @@ module Types
     field :users, resolver: Queries::Users
     field :observation, resolver: Queries::Observation
     field :observations, resolver: Queries::Observations
+    field :location, resolver: Queries::Location
+    field :locations, resolver: Queries::Locations
 
     # TODO: remove me
     field :test_field, String, null: false,

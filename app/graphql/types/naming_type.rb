@@ -8,7 +8,7 @@ module Types
     field :name_id, Integer, null: true
     field :name, Types::NameType, null: true
     field :user_id, Integer, null: true
-    field :user, Types::UserType, null: false
+    field :user, Types::UserType, null: true
     field :vote_cache, Float, null: true
     field :reasons, String, null: true
   end

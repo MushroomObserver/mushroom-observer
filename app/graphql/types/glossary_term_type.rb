@@ -3,7 +3,7 @@ module Types
     field :id, ID, null: false
     field :version, Integer, null: true
     field :user_id, Integer, null: true
-    field :user, Types::UserType, null: false
+    field :user, Types::UserType, null: true
     field :name, String, null: true
     field :thumb_image_id, Integer, null: true
     field :thumb_image, Types::ImageType, null: true
