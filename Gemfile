@@ -153,18 +153,19 @@ gem("graphql-sugar")
 # https://github.com/Shopify/graphql-batch
 gem("graphql-batch")
 
+# (Similar to graphql-batch and maybe ar_lazy_preload)
+# Provides a generic lazy batching mechanism to avoid N+1 DB queries,
+# HTTP queries, etc. Maybe better than the above?
+# https://github.com/exAspArk/batch-loader
+# https://github.com/exAspArk/batch-loader#alternatives
+# gem("batch-loader")
+
 # Brings association lazy load functionality to your Rails applications
 # https://github.com/DmitryTsepelev/ar_lazy_preload
 # https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one
 gem("ar_lazy_preload")
 
-# (Similar to above)
-# Provides a generic lazy batching mechanism to avoid N+1 DB queries,
-# HTTP queries, etc.
-# https://github.com/exAspArk/batch-loader
-# gem("batch-loader")
-
-# (Similar to above)
+# (Similar to ar_lazy_preload)
 # Old add-on to graphql-ruby that allows your field resolvers to minimize N+1
 # SELECTS issued by ActiveRecord. Possibly overlaps above ar_lazy_preload
 # https://github.com/nettofarah/graphql-query-resolver
