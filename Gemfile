@@ -142,16 +142,25 @@ gem("rubocop-graphql", require: false)
 gem("search_object")
 gem("search_object_graphql")
 
-# A sweet, extended DSL written on top of the graphql-ruby gem, maybe outdated
+# A sweet, extended DSL written on top of the graphql-ruby gem. Outdated! :(
 # Easily write object and input types that are backed by ActiveRecord models
 # Easily write resolvers and mutators to encapsulate query and mutation logic
 # https://github.com/keepworks/graphql-sugar
 # https://github.com/keepworks/graphql-sugar/issues/7
-gem("graphql-sugar")
+# gem("graphql-sugar")
+
+# Dataloading gems
+# Note that dataloader comes shipped with graphql gem as of 1.12
+# It's also experimental. Below are some alternatives
+# https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one
 
 # Provides an executor for the graphql gem which allows queries to be batched.
 # https://github.com/Shopify/graphql-batch
 gem("graphql-batch")
+
+# Brings association lazy load functionality to your Rails applications
+# https://github.com/DmitryTsepelev/ar_lazy_preload
+gem("ar_lazy_preload")
 
 # (Similar to graphql-batch and maybe ar_lazy_preload)
 # Provides a generic lazy batching mechanism to avoid N+1 DB queries,
@@ -160,16 +169,13 @@ gem("graphql-batch")
 # https://github.com/exAspArk/batch-loader#alternatives
 # gem("batch-loader")
 
-# Brings association lazy load functionality to your Rails applications
-# https://github.com/DmitryTsepelev/ar_lazy_preload
-# https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one
-gem("ar_lazy_preload")
-
 # (Similar to ar_lazy_preload)
 # Old add-on to graphql-ruby that allows your field resolvers to minimize N+1
 # SELECTS issued by ActiveRecord. Possibly overlaps above ar_lazy_preload
 # https://github.com/nettofarah/graphql-query-resolver
 # gem("graphql-query-resolver")
+
+# Caching gems
 
 # Persisted Queries. Backend will cache all the queries, while frontend will
 # send the full query only when it's not found at the backend storage.
@@ -180,6 +186,8 @@ gem("ar_lazy_preload")
 # Cache response fragments: you can mark any field as cached
 # https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
 # gem("graphql-fragment_cache")
+
+# Pagination gems 
 
 # Implements page-based pagination returning collection and pagination metadata.
 # It works with kaminari or other pagination tools implementing similar methods.
