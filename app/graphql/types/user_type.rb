@@ -57,5 +57,36 @@ module Types
     field :view_owner, Types::UserType, null: false
     field :content_filter, String, null: true
     field :notes_template, String, null: true
+
+    # Relationship fields has_many
+    field :api_keys, [Types::ApiKeyType], null: true
+    field :comments, [Types::CommentType], null: true
+    field :donations, [Types::DonationType], null: true
+    field :external_links, [Types::ExternalLinkType], null: true
+    field :images, [Types::ImageType], null: true
+    field :interests, [Types::InterestType], null: true
+    field :locations, [Types::LocationType], null: true
+    # field :location_descriptions, [Types::LocationDescriptionType], null: true
+    field :names, [Types::NameType], null: true
+    # field :name_descriptions, [Types::NameDescriptionType], null: true
+    field :namings, [Types::NamingType], null: true
+    field :notifications, [Types::NotificationType], null: true
+    field :observations, [Types::ObservationType], null: true
+    field :projects_created, [Types::ProjectType], null: true
+    field :publications, [Types::PublicationType], null: true
+    # field :queued_emails, [Types::QueuedEmailType], null: true
+    field :sequences, [Types::SequenceType], null: true
+    field :species_lists, [Types::SpeciesListType], null: true
+    field :herbarium_records, [Types::HerbariumRecordType], null: true
+    field :votes, [Types::VoteType], null: true
+    field :reviewed_images, [Types::ImageType], null: true
+    # field :reviewed_name_descriptions, [Types::NameDescriptionType], null: true
+    # field :to_emails, [Types::QueuedEmailType], null: true
+    field :user_groups, [Types::UserGroupType], null: true
+    # field :authored_names, [Types::NameDescriptionType], null: true
+    # field :edited_names, [Types::NameDescriptionType], null: true
+    # field :authored_locations, [Types::LocationDescriptionType], null: true
+    # field :edited_locations, [Types::LocationDescriptionType], null: true
+    field :curated_herbaria, [Types::HerbariumType], null: true
   end
 end
