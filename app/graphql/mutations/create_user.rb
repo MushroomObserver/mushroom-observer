@@ -1,23 +1,20 @@
 module Mutations
-  class CreateUser < BaseMutation
-    # often we will need input types for specific mutation
-    # in those cases we can define those input types in the mutation class itself
-    # class AuthProviderSignupData < Types::BaseInputObject
-    argument :name, String, required: true
-    # argument :credentials, Types::SignInCredentials, required: false
-    argument :email, String, required: true
-    argument :password, String, required: true
-    # end
+  class CreateUser < Mutations::BaseMutation
+    description "Sign Up a new user"
 
-    # argument :auth_provider, AuthProviderSignupData, required: false
+    input_object_class Types::SignUpInput
+
+    # argument :input, Types::SignUpInput, required: true
 
     type Types::UserType
 
-    def resolve(name: nil, auth_provider: nil)
+    def resolve(login: nil, name: nil, email: nil, password: nil, password_confirmation: nil)
       User.create!(
+        login: login,
         name: name,
         email: email,
-        password: password
+        password: password,
+        password_confirmation: password_confirmation
       )
     end
   end
