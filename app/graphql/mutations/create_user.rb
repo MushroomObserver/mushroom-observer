@@ -4,11 +4,13 @@ module Mutations
 
     input_object_class Types::SignUpInput
 
-    # argument :input, Types::SignUpInput, required: true
-
     type Types::UserType
 
-    def resolve(login: nil, name: nil, email: nil, password: nil, password_confirmation: nil)
+    def resolve(login: nil,
+                name: nil,
+                email: nil,
+                password: nil,
+                password_confirmation: nil)
       User.create!(
         login: login,
         name: name,

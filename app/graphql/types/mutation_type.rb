@@ -1,7 +1,7 @@
 module Types
   class MutationType < Types::BaseObject
     field :create_user, mutation: Mutations::CreateUser
-    field :sign_in, mutation: Mutations::SignIn
+    field :log_in, mutation: Mutations::LogIn
 
     # TODO: remove me
     field :test_field, String, null: false,
