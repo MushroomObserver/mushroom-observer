@@ -12,13 +12,14 @@ module Mutations
 
     def resolve(login: String,
                 password: String)
-      User.authenticate(login, password)
+      user = User.authenticate(login, password)
+      return {} unless user
 
-      # token = Base64.encode64(user.login)
-      # {
-      #   token: token,
-      #   user: user
-      # }
+      token = Base64.encode64(user.login)
+      {
+        token: token,
+        user: user
+      }
     rescue ActiveRecord::RecordNotFound
       raise(GraphQL::ExecutionError.new("user not found"))
     end

@@ -6,18 +6,8 @@ module Mutations
 
     type Types::UserType
 
-    def resolve(login: nil,
-                name: nil,
-                email: nil,
-                password: nil,
-                password_confirmation: nil)
-      User.create!(
-        login: login,
-        name: name,
-        email: email,
-        password: password,
-        password_confirmation: password_confirmation
-      )
+    def resolve(**arguments)
+      User.create!(arguments)
     end
   end
 end
