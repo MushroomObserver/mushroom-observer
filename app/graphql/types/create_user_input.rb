@@ -1,8 +1,8 @@
 module Types
-  class SignUpInput < Types::BaseInputObject
+  class CreateUserInput < Types::BaseInputObject
     description "Fields necessary for user sign-up"
     # the name is usually inferred by class name but can be overwritten
-    graphql_name "SignUpInput"
+    graphql_name "CreateUserInput"
 
     argument :login, String, required: true
     argument :name, String, required: true

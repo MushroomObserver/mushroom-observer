@@ -2,7 +2,7 @@ module Mutations
   class CreateUser < Mutations::BaseMutation
     description "Sign Up a new user"
 
-    input_object_class Types::SignUpInput
+    input_object_class Types::CreateUserInput
 
     type Types::UserType
 
