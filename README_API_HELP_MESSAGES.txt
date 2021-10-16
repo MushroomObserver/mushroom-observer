@@ -354,10 +354,6 @@ POST observation
   notes:	string
   notes[$field]:	string (set value of the custom notes template field, substitute field name for "$field")
   projects:	project list (must be member)
-  reason_1:	string
-  reason_2:	string
-  reason_3:	string
-  reason_4:	string
   species_lists:	species_list list (must have edit permission)
   thumbnail:	image
   vote:	float (default=3)
