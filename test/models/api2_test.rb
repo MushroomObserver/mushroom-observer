@@ -3421,7 +3421,7 @@ class Api2Test < UnitTestCase
   def test_posting_maximal_user
     @login = "stephane"
     @name = "Stephane Grappelli"
-    @email = "stephane@grappelli.com"
+    @email = "_Rea||y+{$tran&e}-e#ai1!?_@123.whosi-whatsit.com"
     @locale = "el"
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
@@ -3949,6 +3949,13 @@ class Api2Test < UnitTestCase
                  limit: limit)
     assert_parse_a(:object, [obs, nam],
                    "observation #{obs.id}, name #{nam.id}", limit: limit)
+  end
+
+  def test_parse_email
+    assert_parse(:email, API2::BadParameterValue, "blah blah blah")
+    assert_parse(:email, "simple@email.com", "simple@email.com")
+    assert_parse(:email, "Ab3!#$%&'*+/=?^_'{|}~-@crazy-email.123",
+                 "Ab3!#$%&'*+/=?^_'{|}~-@crazy-email.123")
   end
 
   # ---------------------------
