@@ -92,31 +92,39 @@ LOCALES = Language.connection.select_values(%(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 ))
 
+# Control behavior of crowlers that follow robots.txt rules
+# For documentation, see:
+# https://developers.google.com/search/docs/advanced/robots/robots_txt
+# http://www.robotstxt.org
+
+# Other ways for MO to block/control robots include:
+# - Manually block ip address ranges at the firewall
+# - Automatically block in Rails an anonymous user (including robots)
+#   that's hogging the webserver. See script/update_ip_stats.rb
+# - Automatically block in Rails a fake GoogleBot.
+#    See script/update_googlebots.rb
+# - Manually block in Rails an anonymous user via the Admin UI
+# - Limit them via browser gem and #bot? method
 ROBOTS_HEADER = <<~"TXT"
-  # For documentation, see:
-  # https://developers.google.com/search/docs/advanced/robots/robots_txt
-  # http://www.robotstxt.org
+
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
-  # Completely disallowed bots
-  User-agent: ltx71
+  # Block non-whitelisted crawlers
+  # Google AdBot crawlers must be named explicitly
+  # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
   User-agent: AdsBot-Google
-  User-agent: AhrefsBot
-  User-agent: Applebot
-  User-agent: DAUM
-  User-agent: MauiBot
-  User-agent: MJ12bot
-  User-agent: SpiderLing
-  User-agent: spbot
+  User-agent: AdsBot-Google-Mobile
+  User-agent: AdsBot-Google-Mobile-Apps
+  User-agent: Facebot # Unofficial Facebook bots (subset of facebookexternalhit)
+  User-agent: * # Block everything else not whitelisted below
   Disallow: /
 
-  # Rules applying to some allowed bots
+  # Whitelisted crawlers
+  # All are assume to use wildcards in their robots.txt parser
+  User-agent: bingbot
   User-agent: CCBot
-  Crawl-Delay: 30
-
-  # Rules applying to all alloed bots
-  # (Note: the rest of #write_robots_file output follows this immeediately.)
-  User-agent: *
+  User-agent: GoogleBot
+  User-agent: facebookexternalhit
   Crawl-Delay: 15
   Disallow: *page=*
   Disallow: *letter=*
@@ -128,7 +136,10 @@ ROBOTS_HEADER = <<~"TXT"
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
   Disallow: /name/show_name
+
 TXT
+# The rest of #write_robots_file mjust follow immeediately
+# abd aookues to the group of whitelisted user agents immediatelyu above.
 ROBOTS_FOOTER = <<"TXT"
 TXT
 

@@ -206,11 +206,7 @@ WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6
 AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
 ORDER BY observations.id ASC
 ```
-See also the print out of all the help messages here"
-
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API_HELP_MESSAGES.txt>
-
-and the database diagram here:
+See also the database diagram here:
 
 * <https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif>
 

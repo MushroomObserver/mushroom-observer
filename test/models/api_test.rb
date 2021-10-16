@@ -4009,7 +4009,7 @@ class ApiTest < UnitTestCase
     assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
   end
 
-  def test_api_key_help
+  def test_help
     do_help_test(:get, :api_key, :fail)
     do_help_test(:post, :api_key)
     do_help_test(:patch, :api_key, :fail)
