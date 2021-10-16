@@ -10,9 +10,8 @@ module Mutations
 
     def resolve(login: nil,
                 password: nil)
-      user = User.find_by!(login: login)
+      user = User.authenticate!(login: login, password: password)
       return {} unless user
-      return {} unless password == user.password
 
       token = Base64.encode64(user.login)
       {
