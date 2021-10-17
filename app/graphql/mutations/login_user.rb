@@ -8,7 +8,6 @@ module Mutations
 
     input_object_class Types::LoginInput
 
-    # type Types::UserType
     field :token, String, null: true
     field :user, Types::UserType, null: true
 
