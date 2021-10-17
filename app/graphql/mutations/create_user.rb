@@ -8,6 +8,10 @@ module Mutations
 
     def resolve(**arguments)
       User.create!(arguments)
+
+      # update the token?
+      # token.provide_defaults
+      # token.verified = nil
     end
   end
 end

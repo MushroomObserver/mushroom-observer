@@ -11,5 +11,7 @@ module Types
     field :user, Types::UserType, null: true
     field :vote_cache, Float, null: true
     field :reasons, String, null: true
+
+    field :votes, [Types::VoteType], null: true
   end
 end

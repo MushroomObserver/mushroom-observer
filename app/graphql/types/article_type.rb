@@ -1,5 +1,11 @@
 module Types
   class ArticleType < Types::BaseObject
+    # graphql-sugar style!
+    # model_class Article
+
+    # attribute :id, :title
+
+    # long way:
     field :id, ID, null: false
     field :title, String, null: true
     field :body, String, null: true

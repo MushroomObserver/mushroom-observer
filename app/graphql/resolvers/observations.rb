@@ -2,7 +2,7 @@ require("search_object")
 require("search_object/plugin/graphql")
 
 module Resolvers
-  class ObservationsSearch < GraphQL::Schema::Resolver
+  class Observations < GraphQL::Schema::Resolver
     # include SearchObject for GraphQL
     include SearchObject.module(:graphql)
 

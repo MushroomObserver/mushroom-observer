@@ -20,5 +20,14 @@ module Types
     field :original_name, String, null: true
     field :transferred, Boolean, null: false
     field :gps_stripped, Boolean, null: false
+
+    field :observations, [Types::ObservationType], null: true
+    field :projects, [Types::ProjectType], null: true
+    field :glossary_terms, [Types::GlossaryTermType], null: true
+    field :best_glossary_terms, [Types::GlossaryTermType], null: true
+    field :thumb_clients, [Types::ObservationType], null: true
+    field :image_votes, [Types::VoteType], null: true
+    field :subjects, [Types::UserType], null: true
+    field :copyright_changes, [Types::CopyrightChangeType], null: true
   end
 end

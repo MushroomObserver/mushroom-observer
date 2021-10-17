@@ -12,5 +12,7 @@ module Types
     field :rss_log, Types::RssLogType, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+
+    field :images, [Types::ImageType], null: true
   end
 end

@@ -13,5 +13,11 @@ module Types
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :rss_log_id, Integer, null: true
     field :rss_log, Types::RssLogType, null: true
+
+    field :comments, [Types::CommentType], null: true
+    field :interests, [Types::InterestType], null: true
+    field :images, [Types::ImageType], null: true
+    field :observations, [Types::ObservationType], null: true
+    field :species_lists, [Types::SpeciesListType], null: true
   end
 end

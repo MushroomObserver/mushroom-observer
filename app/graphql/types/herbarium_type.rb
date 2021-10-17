@@ -12,5 +12,8 @@ module Types
     field :code, String, null: false
     field :personal_user_id, Integer, null: true
     field :personal_user, Types::UserType, null: true
+
+    field :herbarium_records, [Types::HerbariumRecordType], null: true
+    field :curators, [Types::UserType], null: true
   end
 end

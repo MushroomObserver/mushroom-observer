@@ -30,5 +30,12 @@ module Types
     field :lifeform, String, null: false
     field :locked, Boolean, null: false
     field :icn_id, Integer, null: true
+
+    # field :descriptions, [Types::NameDescriptionType], null: true
+    # field :misspellings, [Types::NameType], null: true
+    field :comments, [Types::CommentType], null: true
+    field :interests, [Types::InterestType], null: true
+    field :namings, [Types::NamingType], null: true
+    field :observations, [Types::ObservationType], null: true
   end
 end

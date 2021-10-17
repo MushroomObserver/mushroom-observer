@@ -147,7 +147,7 @@ gem("search_object_graphql")
 # Easily write resolvers and mutators to encapsulate query and mutation logic
 # https://github.com/keepworks/graphql-sugar
 # https://github.com/keepworks/graphql-sugar/issues/7
-# gem("graphql-sugar")
+gem("graphql-sugar", path: "../graphql-sugar")
 
 # Dataloading gems
 # Note that dataloader comes shipped with graphql gem as of 1.12
@@ -187,7 +187,7 @@ gem("ar_lazy_preload")
 # https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
 # gem("graphql-fragment_cache")
 
-# Pagination gems 
+# Pagination gems
 
 # Implements page-based pagination returning collection and pagination metadata.
 # It works with kaminari or other pagination tools implementing similar methods.

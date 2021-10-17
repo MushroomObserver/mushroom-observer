@@ -10,6 +10,9 @@ Bundler.require(*Rails.groups)
 
 module MushroomObserver
   class Application < Rails::Application
+    config.eager_load_paths += Dir["#{config.root}/app/graphql/resolvers/**/"]
+    config.eager_load_paths += Dir["#{config.root}/app/graphql/mutators/**/"]
+    config.eager_load_paths += Dir["#{config.root}/app/graphql/functions/**/"]
     # Settings in config/environments/* take precedence over those
     # specified here.
     # Application configuration should go into files in config/initializers

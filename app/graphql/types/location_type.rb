@@ -23,5 +23,13 @@ module Types
     field :name, String, null: true
     field :scientific_name, String, null: true
     field :locked, Boolean, null: false
+
+    # field :descriptions, [Types::LocationDescriptionType], null: true
+    field :comments, [Types::CommentType], null: true
+    field :interests, [Types::InterestType], null: true
+    field :observations, [Types::ObservationType], null: true
+    field :species_lists, [Types::SpeciesListType], null: true
+    field :herbaria, [Types::HerbariumType], null: true
+    field :users, [Types::UserType], null: true
   end
 end

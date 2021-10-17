@@ -7,5 +7,7 @@ module Types
     field :user, Types::UserType, null: true
     field :name, String, null: true
     field :number, String, null: true
+
+    field :observations, [Types::ObservationType], null: true
   end
 end

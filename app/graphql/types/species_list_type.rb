@@ -13,5 +13,10 @@ module Types
     field :rss_log, Types::RssLogType, null: true
     field :location_id, Integer, null: true
     field :location, Types::LocationType, null: true
+
+    field :projects, [Types::ProjectType], null: true
+    field :observations, [Types::ObservationType], null: true
+    field :comments, [Types::CommentType], null: true
+    field :interests, [Types::InterestType], null: true
   end
 end
