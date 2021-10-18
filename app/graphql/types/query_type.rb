@@ -22,7 +22,8 @@ module Types
     # field :herbarium_record, resolver: Queries::HerbariumRecord
     # field :herbarium_records, resolver: Resolvers::HerbariumRecords
     field :herbarium, resolver: Queries::Herbarium
-    field :herbaria, resolver: Queries::Herbaria
+    field :herbaria, Types::HerbariumType.connection_type, null: true,
+                                                           max_page_size: 25
     # field :image, resolver: Queries::Image
     # field :images, resolver: Resolvers::Images
     # field :interest, resolver: Queries::Interest
@@ -59,6 +60,11 @@ module Types
     field :users, resolver: Queries::Users
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes
+
+    def herbaria(**_args)
+      Herbarium.order(:id)
+      # object.herbaria
+    end
 
     # TODO: remove me
     field :test_field, String, null: false,

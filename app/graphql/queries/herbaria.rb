@@ -7,7 +7,7 @@ module Queries
     type [Types::HerbariumType.connection_type], null: false
 
     def resolve
-      HerbariaConnection.new(Herbarium.order(:id))
+      Connections::HerbariumConnection.new(Herbarium.order(:id))
     end
   end
 end

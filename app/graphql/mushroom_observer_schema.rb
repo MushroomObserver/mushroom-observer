@@ -3,6 +3,8 @@ class MushroomObserverSchema < GraphQL::Schema
   mutation(Types::MutationType)
   # subscription(Types::Subscription)
 
+  default_max_page_size 50
+
   # GraphQL::Batch setup:
   # use GraphQL::Batch
 
