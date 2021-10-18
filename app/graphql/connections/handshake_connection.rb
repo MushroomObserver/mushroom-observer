@@ -1,6 +1,7 @@
 # Check https://joinhandshake.com/blog/our-team/implementing-custom-pagination-with-graphql-ruby/
+# Documentation is inconsistent, not sure this can work as typed
 
-class CursorConnection < GraphQL::Pagination::Connection
+class HandshakeConnection < GraphQL::Pagination::Connection
   def nodes
     results.slice(0, page_size) # Remove the extra result we fetched to check if there's another page
   end

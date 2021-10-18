@@ -1,11 +1,13 @@
 # app/graphql/queries/herbaria.rb
+# Experimental pagination
+
 module Queries
   class Herbaria < Queries::BaseQuery
-    description "list all herbaria"
-    type [Types::HerbariumType], null: false
+    description "list paginated herbaria"
+    type [Types::HerbariumType.connection_type], null: false
 
     def resolve
-      ::Herbarium.all
+      HerbariaConnection.new(Herbarium.order(:id))
     end
   end
 end

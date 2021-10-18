@@ -187,17 +187,18 @@ gem("ar_lazy_preload")
 # https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
 # gem("graphql-fragment_cache")
 
-# Pagination gems
+# Pagination & Connection gems
+
+# Additional implementations of cursor-based paginations for GraphQL Ruby.
+# Extends classes of graphql-ruby
+# https://github.com/bibendi/graphql-connections
+gem("graphql-connections")
 
 # Implements page-based pagination returning collection and pagination metadata.
 # It works with kaminari or other pagination tools implementing similar methods.
 # https://github.com/RenoFi/graphql-pagination
 # gem("graphql-pagination")
 # gem("kaminari-activerecord")
-
-# Additional implementations of cursor-based paginations for GraphQL Ruby.
-# https://github.com/bibendi/graphql-connections
-# gem("graphql-connections")
 
 group :test, :development do
   # Use byebug as debugging gem

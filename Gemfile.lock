@@ -126,6 +126,9 @@ GEM
     graphql-batch (0.4.3)
       graphql (>= 1.3, < 2)
       promise.rb (~> 0.7.2)
+    graphql-connections (1.1.0)
+      activerecord (>= 5)
+      graphql (~> 1.10)
     hashdiff (1.0.1)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
@@ -355,6 +358,7 @@ DEPENDENCIES
   graphiql-rails
   graphql
   graphql-batch
+  graphql-connections
   graphql-sugar!
   i18n
   jbuilder
