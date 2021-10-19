@@ -491,7 +491,7 @@ class User < AbstractModel
   def self.authenticate(login: nil, password: nil)
     find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
               password != '' ",
-            login, login, login, sha1(pass))
+            login, login, login, sha1(password))
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
