@@ -22,8 +22,7 @@ module Types
     # field :herbarium_record, resolver: Queries::HerbariumRecord
     # field :herbarium_records, resolver: Resolvers::HerbariumRecords
     field :herbarium, resolver: Queries::Herbarium
-    field :herbaria, Types::HerbariumType.connection_type, null: true,
-                                                           max_page_size: 25
+    field :herbaria, Types::HerbariumType.connection_type, null: true
     # field :image, resolver: Queries::Image
     # field :images, resolver: Resolvers::Images
     # field :interest, resolver: Queries::Interest
@@ -68,9 +67,10 @@ module Types
 
     # TODO: remove me
     field :test_field, String, null: false,
-                               description: "An example field added by the generator"
-    def test_field
-      "Hello World!"
-    end
+                               description: "An example field added by the generator",
+                               resolver: Resolvers::TestField
+    # def test_field
+    #   "Hello World!"
+    # end
   end
 end

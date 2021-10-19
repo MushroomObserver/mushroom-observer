@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # app/graphql/mutations/login_user.rb
+# For some reason this doesn't work with resolve(**arguments)
 
 module Mutations
   class LoginUser < Mutations::BaseMutation
@@ -11,10 +12,8 @@ module Mutations
     field :token, String, null: true
     field :user, Types::UserType, null: true
 
-    def resolve(login: String,
-                password: String)
-      user = User.authenticate(login, password)
-      user ||= User.authenticate(@login, @password.strip)
+    def resolve(**arguments)
+      user = User.authenticate(arguments)
 
       return {} unless user
 

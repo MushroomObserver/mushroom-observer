@@ -3,7 +3,10 @@ class MushroomObserverSchema < GraphQL::Schema
   mutation(Types::MutationType)
   # subscription(Types::Subscription)
 
-  default_max_page_size 50
+  default_max_page_size 24
+  # https://github.com/bibendi/graphql-connections
+  # https://relay.dev/graphql/connections.htm
+  connections.add(ActiveRecord::Relation, GraphQL::Connections::Stable)
 
   # GraphQL::Batch setup:
   # use GraphQL::Batch
