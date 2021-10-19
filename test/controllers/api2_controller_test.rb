@@ -351,4 +351,11 @@ class Api2ControllerTest < FunctionalTestCase
     get(:observations, id: obs.id, detail: :high, format: :xml)
     assert_no_match(/34.1622|118.3521/, @response.body)
   end
+
+  def test_get_empty_results
+    get(:observations, date: "2100-01-01", format: :json, detail: :none)
+    get(:observations, date: "2100-01-01", format: :json, detail: :high)
+    get(:observations, date: "2100-01-01", format: :xml, detail: :none)
+    get(:observations, date: "2100-01-01", format: :xml, detail: :high)
+  end
 end

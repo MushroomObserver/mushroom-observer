@@ -14,6 +14,8 @@ unless @api.errors.any?(&:fatal)
 
   if @api.detail == :none
     json.results(@api.result_ids)
+  elsif @api.results.empty?
+    json.results([])
   else
     type = @api.results.first.class.type_tag
     json.results(@api.results,
