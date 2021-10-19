@@ -76,7 +76,7 @@ module ControllerExtensions
 
   # Log a user in (affects session only).
   def login(user = "rolf", password = "testpassword")
-    user = User.authenticate(user, password)
+    user = User.authenticate(login: user, password: password)
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
     @request.session[:user_id] = user.id

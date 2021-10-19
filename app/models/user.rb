@@ -484,14 +484,14 @@ class User < AbstractModel
   # Look up User record by login and hashed password.  Accepts any of +login+,
   # +name+ or +email+ in place of +login+.
   #
-  #   user = User.authenticate('fred', 'password')
-  #   user = User.authenticate('Fred Flintstone', 'password')
-  #   user = User.authenticate('fred99@aol.com', 'password')
+  #   user = User.authenticate(login: 'fred', password: 'password')
+  #   user = User.authenticate(login: 'Fred Flintstone', password: 'password')
+  #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
-  def self.authenticate(login, pass)
+  def self.authenticate(login: nil, password: nil)
     find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
               password != '' ",
-            login, login, login, sha1(pass))
+            login, login, login, sha1(password))
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -633,9 +633,10 @@ class User < AbstractModel
           AND target_id = #{object.id}
         LIMIT 1
       )).to_s
-      if state == "1"
+      case state
+      when "1"
         :watching
-      elsif state == "0"
+      when "0"
         :ignoring
       end
     end
