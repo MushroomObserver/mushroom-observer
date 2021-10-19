@@ -488,7 +488,7 @@ class User < AbstractModel
   #   user = User.authenticate('Fred Flintstone', 'password')
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
-  def self.authenticate(login, pass)
+  def self.authenticate(login: nil, password: nil)
     find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
               password != '' ",
             login, login, login, sha1(pass))
@@ -633,9 +633,10 @@ class User < AbstractModel
           AND target_id = #{object.id}
         LIMIT 1
       )).to_s
-      if state == "1"
+      case state
+      when "1"
         :watching
-      elsif state == "0"
+      when "0"
         :ignoring
       end
     end
