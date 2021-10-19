@@ -4,17 +4,17 @@ require("test_helper")
 
 class UserTest < UnitTestCase
   def test_auth
-    assert_equal(rolf, User.authenticate("rolf", "testpassword"))
-    assert_nil(User.authenticate("nonrolf", "testpassword"))
+    assert_equal(rolf, User.authenticate(login: "rolf", password: "testpassword"))
+    assert_nil(User.authenticate(login: "nonrolf", password: "testpassword"))
   end
 
   def test_password_change
     mary.change_password("marypasswd")
-    assert_equal(mary, User.authenticate("mary", "marypasswd"))
-    assert_nil(User.authenticate("mary", "longtest"))
+    assert_equal(mary, User.authenticate(login: "mary", password: "marypasswd"))
+    assert_nil(User.authenticate(login: "mary", password: "longtest"))
     mary.change_password("longtest")
-    assert_equal(mary, User.authenticate("mary", "longtest"))
-    assert_nil(User.authenticate("mary", "marypasswd"))
+    assert_equal(mary, User.authenticate(login: "mary", password: "longtest"))
+    assert_nil(User.authenticate(login: "mary", password: "marypasswd"))
   end
 
   def test_disallowed_passwords

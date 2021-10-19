@@ -484,9 +484,9 @@ class User < AbstractModel
   # Look up User record by login and hashed password.  Accepts any of +login+,
   # +name+ or +email+ in place of +login+.
   #
-  #   user = User.authenticate('fred', 'password')
-  #   user = User.authenticate('Fred Flintstone', 'password')
-  #   user = User.authenticate('fred99@aol.com', 'password')
+  #   user = User.authenticate(login: 'fred', password: 'password')
+  #   user = User.authenticate(login: 'Fred Flintstone', password: 'password')
+  #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
   def self.authenticate(login: nil, password: nil)
     find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
