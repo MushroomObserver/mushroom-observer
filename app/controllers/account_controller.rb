@@ -219,8 +219,8 @@ class AccountController < ApplicationController
     @login = user_params[:login].to_s
     @password = user_params[:password].to_s
     @remember = user_params[:remember_me] == "1"
-    user = User.authenticate(@login, @password)
-    user ||= User.authenticate(@login, @password.strip)
+    user = User.authenticate(login: @login, password: @password)
+    user ||= User.authenticate(login: @login, password: @password.strip)
 
     return flash_error(:runtime_login_failed.t) unless user
 
