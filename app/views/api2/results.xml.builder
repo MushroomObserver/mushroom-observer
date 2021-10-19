@@ -14,12 +14,16 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
       xml_integer(xml, :page_number, @api.page_number)
     end
 
-    xml.results(number: @api.result_ids.length) do
-      if @api.detail == :none
+    if @api.detail == :none
+      xml.results(number: @api.result_ids.length) do
         @api.result_ids.each do |result_id|
           xml_minimal_object(xml, :result, @api.model.type_tag, result_id)
         end
-      else
+      end
+    elsif @api.results.empty?
+      xml.results(number: 0) {}
+    else
+      xml.results(number: @api.results.length) do
         xml.target! << render(
           partial: @api.results.first.class.type_tag.to_s,
           collection: @api.results,
