@@ -46,7 +46,8 @@ class API2
     def valid_password?
       password = parse(:string, :password, help: :api_key_password)
       return @for_user == @user if password.blank?
-      if User.authenticate(login: @for_user.login, password: password) == @for_user
+      if User.authenticate(login: @for_user.login,
+                           password: password) == @for_user
         return true
       end
 

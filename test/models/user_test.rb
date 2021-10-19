@@ -4,7 +4,8 @@ require("test_helper")
 
 class UserTest < UnitTestCase
   def test_auth
-    assert_equal(rolf, User.authenticate(login: "rolf", password: "testpassword"))
+    assert_equal(rolf,
+                 User.authenticate(login: "rolf", password: "testpassword"))
     assert_nil(User.authenticate(login: "nonrolf", password: "testpassword"))
   end
 
