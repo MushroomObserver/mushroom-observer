@@ -1,18 +1,21 @@
 module Mutations
   class UpdateUser < Mutations::BaseMutation
+    description "Update user profile"
     # check logged in
-    check_logged_in!
+    # check_logged_in!
+
+    input_object_class Inputs::UpdateUserInput
 
     # define return fields
     field :user, Types::Models::User, null: false
 
     # define arguments
-    argument :id, Integer, required: true
-    argument :attributes, Inputs::UpdateUserInput, required: true
+    # argument :id, Integer, required: true
+    # argument :attributes, Inputs::UpdateUserInput, required: true
 
     # define resolve method
-    def resolve(id:, attributes:)
-      user = User.find(id)
+    def resolve(**arguments)
+      user = User.find(arguments)
       # Add logic for authorization
       # if user.id != context[:session_user]
       # The MO way is more complicated because admins
@@ -21,7 +24,7 @@ module Mutations
         raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
       end
 
-      if user.update(attributes.to_h)
+      if user.update(arguments.to_h)
         { user: user }
       else
         raise(GraphQL::ExecutionError.new(user.errors.full_messages.join(", ")))

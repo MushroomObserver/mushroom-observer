@@ -235,6 +235,9 @@ group :development do
   # Calling `console` creates irb session in the browser (instead of the terminal)
   gem "web-console"
 
+  # Additional generators for input types, search objects, and mutations
+  # gem "graphql-rails-generators"
+
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   gem "rails_db"
 

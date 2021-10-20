@@ -15,15 +15,15 @@ class GraphqlController < ApplicationController
       # Below we're making methods from application_rb available to graphql
       autologin: autologin,
       # Reminder: MO method fetches user from session, not a token. Insecure?
-      session_user: session_user,
+      session_user: session_user
       # These require the user or obj as an arg. # Hmm - Nimmo
       # session_user_set: session_user_set,
       # check_permission: check_permission,
       # check_permission!: check_permission!,
       # reviewer?: reviewer?,
-      in_admin_mode?: in_admin_mode?,
+      # in_admin_mode?: in_admin_mode?,
       # unshown_notifications?: unshown_notifications?,
-      set_locale: set_locale
+      # set_locale: set_locale
       # all_locales: all_locales,
       # set_timezone: set_timezone,
       # sorted_locales_from_request_header: sorted_locales_from_request_header,
