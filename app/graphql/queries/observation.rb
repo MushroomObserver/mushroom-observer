@@ -2,7 +2,7 @@
 module Queries
   class Observation < Queries::BaseQuery
     description "get observation by id"
-    type Types::ObservationType, null: false
+    type Types::Models::Observation, null: false
     argument :id, Integer, required: true
 
     def resolve(id:)

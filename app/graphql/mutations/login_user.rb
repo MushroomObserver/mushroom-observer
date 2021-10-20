@@ -7,10 +7,10 @@ module Mutations
   class LoginUser < Mutations::BaseMutation
     description "Login a user"
 
-    input_object_class Types::LoginInput
+    input_object_class Inputs::LoginInput
 
     field :token, String, null: true
-    field :user, Types::UserType, null: true
+    field :user, Types::Models::User, null: true
 
     def resolve(**arguments)
       user = User.authenticate(arguments)

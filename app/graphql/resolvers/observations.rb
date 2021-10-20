@@ -11,10 +11,10 @@ module Resolvers
     # scope is starting point for search
     scope { Observation.all }
 
-    type types[Types::ObservationType], null: false
+    type types[Types::Models::Observation], null: false
 
     # inline input type definition for the advanced filter
-    class ObservationFilter < ::Types::BaseInputObject
+    class ObservationFilter < ::Inputs::BaseInputObject
       # argument :OR, [self], required: false
       # alternative: use select w/ autocomplete for taxa
       argument :name_id, Int, required: false

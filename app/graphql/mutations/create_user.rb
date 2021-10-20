@@ -2,9 +2,9 @@ module Mutations
   class CreateUser < Mutations::BaseMutation
     description "Sign Up a new user"
 
-    input_object_class Types::CreateUserInput
+    input_object_class Inputs::CreateUserInput
 
-    type Types::UserType
+    type Types::Models::User
 
     def resolve(**arguments)
       User.create!(arguments)

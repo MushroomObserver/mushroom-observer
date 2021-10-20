@@ -2,7 +2,7 @@
 module Queries
   class User < Queries::BaseQuery
     description "get user by id"
-    type Types::UserType, null: false
+    type Types::Models::User, null: false
     argument :id, Integer, required: false
     # argument :login, String, required: false
     # argument :name, String, required: false

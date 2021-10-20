@@ -2,7 +2,7 @@
 module Queries
   class Locations < Queries::BaseQuery
     description "list all locations"
-    type [Types::LocationType], null: false
+    type [Types::Models::Location], null: false
 
     def resolve
       ::Location.all

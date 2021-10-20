@@ -2,7 +2,7 @@
 module Queries
   class Herbarium < Queries::BaseQuery
     description "get herbarium by id"
-    type Types::HerbariumType, null: false
+    type Types::Models::Herbarium, null: false
     argument :id, Integer, required: true
 
     def resolve(id:)
