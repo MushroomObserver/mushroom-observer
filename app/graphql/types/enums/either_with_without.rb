@@ -1,4 +1,4 @@
-module Types
+module Types::Enums
   class EitherWithWithout < Types::BaseEnum
     value "EITHER", "Results with or without this argument"
     value "WITH", "Results with this argument"

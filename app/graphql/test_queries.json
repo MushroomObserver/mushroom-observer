@@ -1,0 +1,107 @@
+query observations {
+  observations(first: 10, filter: {}) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        textName
+      }
+    }
+  }
+}
+
+query herbaria{
+  herbaria {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation createUser {
+  createUser(
+    input: {
+      login:"nimmo",
+      email:"nimmo@gmail.com",
+      name:"Nimmo Waite",
+      password:"123333",
+      passwordConfirmation:"123333"
+    }
+  ) {
+    id 
+    name
+    email 
+  }
+}
+
+query checkUser {
+  user(id:76718){
+    id
+    login
+    name
+    email
+    password
+  }
+}
+
+mutation loginUser {
+  loginUser( 
+    input: {
+      login:"tutuwaite",
+      password:"123333"
+    }
+	) {
+    user {
+      id 
+      name
+      email
+    }
+    token 
+  }
+}
+
+query allUsers {
+  users (first: 10) {
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+query herbarium {
+  herbarium(id:1) {
+    id
+    name
+    curators {
+      id
+      name
+    }
+  }
+}
+

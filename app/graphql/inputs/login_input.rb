@@ -10,5 +10,5 @@ module Inputs
     argument :login, String, required: true
     argument :password, String, required: true
   end
-  end
+end
 # end

@@ -17,10 +17,12 @@ module Mutations
 
       return {} unless user
 
+      # Sets this user id in the client browser session
+      session_user_set(user)
       verified = user.verified
-
+      # Session maybe MO's way? in lieu of passing a token? - Nimmo
       token = Base64.encode64(user.login)
-
+      # This is what the resolver returns:
       {
         token: token,
         user: user,
