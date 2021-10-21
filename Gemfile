@@ -137,6 +137,10 @@ gem("graphql")
 # http://github.com/DmitryTsepelev/rubocop-graphql
 gem("rubocop-graphql", require: false)
 
+# Debug future changes in our GraphQL API
+# Takes two GraphQL schemas and outputs a list of changes between versions
+# gem("graphql-schema_comparator")
+
 # Search Object (and GraphQL extension) for filtering queries
 # https://github.com/RStankov/SearchObjectGraphQL
 gem("search_object")

@@ -46,8 +46,8 @@ MushroomObserver::Application.configure do
   # Don't care if the mailer can't send
   config.action_mailer.raise_delivery_errors = false
 
-  # Disable request forgery protection in dev environment
-  config.action_controller.allow_forgery_protection = false
+  # Disable request forgery protection in dev environment... not a good idea?
+  # config.action_controller.allow_forgery_protection = false
 
   # Tell ActionMailer not to deliver emails to the real world.
   # The :file delivery method accumulates sent emails in the
