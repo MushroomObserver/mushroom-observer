@@ -1,5 +1,7 @@
-module Mutations
-  class UpdateUser < Mutations::BaseMutation
+# frozen_string_literal: true
+
+module Mutations::User
+  class Update < Mutations::BaseMutation
     description "Update user profile"
     # check logged in
     # check_logged_in!

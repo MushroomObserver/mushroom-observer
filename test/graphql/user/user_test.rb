@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Mutations::CreateUserTest < IntegrationTestCase # ActionDispatch::IntegrationTest # ActiveSupport::TestCase
+class Mutations::UserTest < IntegrationTestCase # ActionDispatch::IntegrationTest # ActiveSupport::TestCase
   # def setup
   #   context = {
   #     session_user: context[:session_user]
@@ -22,8 +22,8 @@ class Mutations::CreateUserTest < IntegrationTestCase # ActionDispatch::Integrat
     GRAPHQL
 
     # user = rolf
-    user_id = rolf.id
     # user_id = MushroomObserverSchema.id_from_object(rolf, Types::Models::User, {})
+    user_id = rolf.id
 
     result = MushroomObserverSchema.execute(query_string, variables: { id: user_id })
     user_result = result["data"]["user"]
@@ -33,20 +33,22 @@ class Mutations::CreateUserTest < IntegrationTestCase # ActionDispatch::Integrat
     assert_equal("rolf", user_result["login"])
   end
 
+  def good_signup_input
+    {
+      login: "Fred",
+      email: "Fred@gmail.com",
+      name: "Fred Waite",
+      password: "123333",
+      password_confirmation: "123333"
+    }
+  end
+
   def create_user(args = {}, context = {})
     Mutations::CreateUser.new(object: nil, field: nil, context: context).resolve(args)
   end
 
   def test_create_valid_user
-    user = create_user(
-      {
-        login: "Fred",
-        email: "Fred@gmail.com",
-        name: "Fred Waite",
-        password: "123333",
-        password_confirmation: "123333"
-      }
-    )
+    user = create_user(good_signup_input)
 
     assert(user.persisted?)
     assert_equal(user.name, "Fred Waite")

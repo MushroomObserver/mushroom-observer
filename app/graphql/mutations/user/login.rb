@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-# app/graphql/mutations/login_user.rb
-# For some reason this doesn't work with resolve(**arguments)
+# frozen_string_literal: true
 
-module Mutations
-  class LoginUser < Mutations::BaseMutation
+module Mutations::User
+  class Login < Mutations::BaseMutation
     description "Login a user"
 
     input_object_class Inputs::LoginUserInput

@@ -1,5 +1,7 @@
-module Mutations
-  class DeleteUser < Mutations::BaseMutation
+# frozen_string_literal: true
+
+module Mutations::User
+  class Delete < Mutations::BaseMutation
     description "Delete a user"
     # check logged in
     # check_logged_in!

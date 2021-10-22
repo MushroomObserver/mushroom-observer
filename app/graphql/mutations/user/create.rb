@@ -1,5 +1,7 @@
-module Mutations
-  class CreateUser < Mutations::BaseMutation
+# frozen_string_literal: true
+
+module Mutations::User
+  class Create < Mutations::BaseMutation
     description "Sign up a new user"
 
     input_object_class Inputs::CreateUserInput

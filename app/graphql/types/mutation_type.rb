@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 module Types
   class MutationType < Types::BaseObject
-    field :delete_user, mutation: Mutations::DeleteUser
-    field :update_user, mutation: Mutations::UpdateUser
-    field :create_user, mutation: Mutations::CreateUser
-    field :login_user, mutation: Mutations::LoginUser
+    field :delete_user, mutation: Mutations::User::Delete
+    field :update_user, mutation: Mutations::User::Update
+    field :create_user, mutation: Mutations::User::Create
+    field :login_user, mutation: Mutations::User::Login
 
     # TODO: remove me
     field :test_field, String, null: false,
