@@ -1,6 +1,6 @@
 module Types::Models
   class Herbarium < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :mailing_address, String, null: true
     field :location_id, Integer, null: true
     field :location, Types::Models::Location, null: true

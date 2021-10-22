@@ -1,6 +1,6 @@
 module Types::Models
   class License < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :display_name, String, null: true
     field :url, String, null: true
     field :deprecated, Boolean, null: false

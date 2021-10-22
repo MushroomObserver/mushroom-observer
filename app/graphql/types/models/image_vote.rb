@@ -1,6 +1,6 @@
 module Types::Models
   class ImageVote < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :value, Integer, null: false
     field :anonymous, Boolean, null: false
     field :user_id, Integer, null: true

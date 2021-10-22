@@ -1,6 +1,6 @@
 module Types::Models
   class GlossaryTerm < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :version, Integer, null: true
     field :user_id, Integer, null: true
     field :user, Types::Models::User, null: true

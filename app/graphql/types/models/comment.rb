@@ -1,6 +1,6 @@
 module Types::Models
   class Comment < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
     field :user, Types::Models::User, null: true

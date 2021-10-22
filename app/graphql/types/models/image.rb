@@ -1,6 +1,6 @@
 module Types::Models
   class Image < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :content_type, String, null: true

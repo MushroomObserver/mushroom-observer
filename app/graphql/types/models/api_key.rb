@@ -1,6 +1,6 @@
 module Types::Models
   class ApiKey < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :last_used, GraphQL::Types::ISO8601DateTime, null: true
     field :num_uses, Integer, null: true

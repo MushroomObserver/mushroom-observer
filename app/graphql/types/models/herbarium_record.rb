@@ -1,6 +1,6 @@
 module Types::Models
   class HerbariumRecord < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :herbarium_id, Integer, null: false
     field :herbarium, Types::Models::Herbarium, null: false
     field :notes, String, null: true

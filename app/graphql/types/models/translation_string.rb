@@ -1,6 +1,6 @@
 module Types::Models
   class TranslationString < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :version, Integer, null: true
     field :language_id, Integer, null: false
     field :language, Types::Models::Language, null: false

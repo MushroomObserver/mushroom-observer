@@ -1,6 +1,6 @@
 module Types::Models
   class Donation < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :amount, Float, null: true
     field :who, String, null: true
     field :email, String, null: true

@@ -1,6 +1,6 @@
 module Types::Models
   class Notification < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :user_id, Integer, null: false
     field :user, Types::Models::User, null: false
     field :flavor, Integer, null: true

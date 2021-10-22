@@ -1,6 +1,6 @@
 module Types::Models
   class Interest < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :target_type, String, null: true
     field :target_id, Integer, null: true
     field :user_id, Integer, null: true

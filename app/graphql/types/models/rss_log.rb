@@ -1,6 +1,6 @@
 module Types::Models
   class RssLog < Types::BaseObject
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :observation_id, Integer, null: true
     field :observation, Types::Models::Observation, null: true
     field :species_list_id, Integer, null: true

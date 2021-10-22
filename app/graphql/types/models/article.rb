@@ -6,7 +6,7 @@ module Types::Models
     # attribute :id, :title
 
     # long way:
-    field :id, ID, null: false
+    field :id, Integer, null: false
     field :title, String, null: true
     field :body, String, null: true
     field :user_id, Integer, null: true

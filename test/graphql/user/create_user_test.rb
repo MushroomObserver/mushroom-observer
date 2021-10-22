@@ -9,53 +9,54 @@ class Mutations::CreateUserTest < IntegrationTestCase # ActionDispatch::Integrat
   #   }
   # end
 
-  def perform(args = {}, context = {})
-    Mutations::CreateUser.new(object: nil, field: nil, context: context).resolve(args)
-  end
-
-  # def test_create_valid_user
-  #   user = perform(
-  #     input: {
-  #       login: "Fred",
-  #       email: "Fred@gmail.com",
-  #       name: "Fred Waite",
-  #       password: "123333",
-  #       passwordConfirmation: "123333"
-  #     }
-  #   )
-
-  #   assert(user.persisted?)
-  #   assert_equal(user.name, "Fred Waite")
-  #   assert_equal(user.email, "Fred@gmail.com")
-  # end
-
   def test_find_user_by_id
     query_string = <<-GRAPHQL
-      query($id: ID!){
-        node(id: $id) {
-          ... on User {
-            name
-            id
-            email
-          }
+      query($id: Int){
+        user(id: $id) {
+          name
+          id
+          email
+          login
         }
       }
     GRAPHQL
 
-    user = rolf
-    user_id = MushroomObserverSchema.id_from_object(user, Types::Models::User, {})
-    result = MushroomObserverSchema.execute(query_string, variables: { id: user_id })
+    # user = rolf
+    user_id = rolf.id
+    # user_id = MushroomObserverSchema.id_from_object(rolf, Types::Models::User, {})
 
-    user_result = result["data"]["node"]
+    result = MushroomObserverSchema.execute(query_string, variables: { id: user_id })
+    user_result = result["data"]["user"]
+
     # Make sure the query worked
     assert_equal(user_id, user_result["id"])
     assert_equal("rolf", user_result["login"])
   end
 
+  def create_user(args = {}, context = {})
+    Mutations::CreateUser.new(object: nil, field: nil, context: context).resolve(args)
+  end
+
+  def test_create_valid_user
+    user = create_user(
+      {
+        login: "Fred",
+        email: "Fred@gmail.com",
+        name: "Fred Waite",
+        password: "123333",
+        password_confirmation: "123333"
+      }
+    )
+
+    assert(user.persisted?)
+    assert_equal(user.name, "Fred Waite")
+    assert_equal(user.email, "Fred@gmail.com")
+  end
+
   def test_create_valid_user_integration
     query_string = <<-GRAPHQL
     mutation {
-      create_user(
+      createUser(
         input: {
           login: "Fred",
           email: "Fred@gmail.com",
@@ -72,8 +73,10 @@ class Mutations::CreateUserTest < IntegrationTestCase # ActionDispatch::Integrat
     GRAPHQL
 
     user_result = MushroomObserverSchema.execute(query_string, context: {}, variables: {})
+    # currently responds with a user not a node, or true. do we need to use connection?
+    # puts(user_result.to_h)
+    # {"data"=>{"createUser"=>{"id"=>1030180662, "name"=>"Fred Waite", "email"=>"Fred@gmail.com"}}}
 
-    puts(user_result)
-    assert_equal(true, user_result["data"]["node"])
+    assert_equal("Fred Waite", user_result["data"]["createUser"]["name"])
   end
 end
