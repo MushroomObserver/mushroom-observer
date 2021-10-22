@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # module Types
-module Inputs
-  class CreateUserInput < Inputs::BaseInputObject
+module Inputs::User
+  class Create < Inputs::BaseInputObject
     description "Fields necessary for user sign-up"
     # the name is usually inferred by class name but can be overwritten
     graphql_name "CreateUserInput"

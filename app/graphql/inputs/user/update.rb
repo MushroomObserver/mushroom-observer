@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # module Types
-module Inputs
-  class UpdateUserInput < Inputs::BaseInputObject
+module Inputs::User
+  class Update < Inputs::BaseInputObject
     description "Arguments necessary for editing a user profile. \
                  Should be the whole form serialized."
     # the name is usually inferred by class name but can be overwritten

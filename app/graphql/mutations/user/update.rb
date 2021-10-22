@@ -6,7 +6,7 @@ module Mutations::User
     # check logged in
     # check_logged_in!
 
-    input_object_class Inputs::UpdateUserInput
+    input_object_class Inputs::User::Update
 
     # define return fields
     field :user, Types::Models::User, null: false
@@ -17,7 +17,8 @@ module Mutations::User
 
     # define resolve method
     def resolve(**arguments)
-      user = User.find(arguments)
+      puts(arguments)
+      user = User.find(arguments.input.id)
       # Add logic for authorization
       # if user.id != context[:session_user]
       # The MO way is more complicated because admins

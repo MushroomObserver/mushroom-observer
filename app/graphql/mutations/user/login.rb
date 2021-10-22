@@ -6,7 +6,7 @@ module Mutations::User
   class Login < Mutations::BaseMutation
     description "Login a user"
 
-    input_object_class Inputs::LoginUserInput
+    input_object_class Inputs::User::Login
 
     field :token, String, null: true
     field :user, Types::Models::User, null: true
