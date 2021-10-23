@@ -6,7 +6,7 @@ module Types::Models
     field :content_type, String, null: true
     field :user_id, Integer, null: true
     field :user, Types::Models::User, null: true
-    field :when, GraphQL::Types::ISO8601Date, null: true
+    field :when, GraphQL::Types::ISO8601Date, null: true, resolver_method: :when_observed
     field :notes, String, null: true
     field :copyright_holder, String, null: true
     field :license_id, Integer, null: false

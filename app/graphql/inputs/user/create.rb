@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-# module Types
 module Inputs::User
   class Create < Inputs::BaseInputObject
-    description "Fields necessary for user sign-up"
+    description "Fields necessary for first user Sign-up"
     # the name is usually inferred by class name but can be overwritten
     graphql_name "CreateUserInput"
 
@@ -14,4 +13,3 @@ module Inputs::User
     argument :password_confirmation, String, required: true
   end
 end
-# end

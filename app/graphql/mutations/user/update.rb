@@ -3,13 +3,13 @@
 module Mutations::User
   class Update < Mutations::BaseMutation
     description "Update user profile"
-    # check logged in
-    # check_logged_in!
 
     input_object_class Inputs::User::Update
 
+    type Types::Models::User
+
     # define return fields
-    field :user, Types::Models::User, null: false
+    # field :user, Types::Models::User, null: false
 
     # define arguments
     # argument :id, Integer, required: true
@@ -17,18 +17,29 @@ module Mutations::User
 
     # define resolve method
     def resolve(**arguments)
-      puts(arguments)
-      user = User.find(arguments.input.id)
+      # puts("Arguments\n")
+      # puts(arguments)
+
+      user_id = arguments[:id]
+      user = User.find(user_id)
+      # update does not need an ID.
+      update_args = arguments.except(:id)
+
+      # puts("User to update\n")
+      # puts(user.inspect)
       # Add logic for authorization
       # if user.id != context[:session_user]
       # The MO way is more complicated because admins
       # from application_controller.rb#check_permission(obj)
-      unless check_permission(user)
-        raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
-      end
-
-      if user.update(arguments.to_h)
-        { user: user }
+      # unless check_permission(user)
+      #   raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
+      # end
+      # puts("Update Arguments\n")
+      # puts(update_args)
+      # what we're returning
+      if user.update(update_args)
+        # return user
+        user
       else
         raise(GraphQL::ExecutionError.new(user.errors.full_messages.join(", ")))
       end

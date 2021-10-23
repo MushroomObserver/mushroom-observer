@@ -16,7 +16,7 @@ query observations {
   }
 }
 
-query herbaria{
+query herbaria {
   herbaria {
     pageInfo {
       startCursor
@@ -34,24 +34,8 @@ query herbaria{
   }
 }
 
-mutation createUser {
-  createUser(
-    input: {
-      login:"nimmo",
-      email:"nimmo@gmail.com",
-      name:"Nimmo Waite",
-      password:"123333",
-      passwordConfirmation:"123333"
-    }
-  ) {
-    id 
-    name
-    email 
-  }
-}
-
-query checkUser {
-  user(id:76718){
+query userCheck {
+  user(id: 76720) {
     id
     login
     name
@@ -60,24 +44,45 @@ query checkUser {
   }
 }
 
-mutation loginUser {
-  loginUser( 
+mutation userCreate {
+  userCreate(
     input: {
-      login:"tutuwaite",
-      password:"123333"
+      login: "hiya"
+      email: "hiya@gmail.com"
+      name: "Hiya Waite"
+      password: "123333"
+      passwordConfirmation: "123333"
     }
-	) {
+  ) {
+    id
+    name
+    email
+  }
+}
+
+mutation userUpdate {
+  userUpdate(
+    input: { id: 76720, email: "leia@bmail.com", password: "123333" }
+  ) {
+    id
+    name
+    email
+  }
+}
+
+mutation userLogin {
+  userLogin(input: { login: "tutuwaite", password: "123333" }) {
     user {
-      id 
+      id
       name
       email
     }
-    token 
+    token
   }
 }
 
 query allUsers {
-  users (first: 10) {
+  users(first: 10) {
     pageInfo {
       startCursor
       endCursor
@@ -95,7 +100,7 @@ query allUsers {
 }
 
 query herbarium {
-  herbarium(id:1) {
+  herbarium(id: 1) {
     id
     name
     curators {
@@ -104,4 +109,3 @@ query herbarium {
     }
   }
 }
-
