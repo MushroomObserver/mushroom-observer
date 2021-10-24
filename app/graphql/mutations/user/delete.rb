@@ -22,12 +22,14 @@ module Mutations::User
       # if user.id != context[:session_user]
       # The MO way is more complicated because admins
       # from application_controller.rb#check_permission(obj)
-      unless check_permission(delete_user)
-        raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
+      if delete_user != context[:current_user]
+        raise(GraphQL::ExecutionError.new("You are not authorized to delete another user's profile."))
       end
 
+      vanishing_login = delete_user.login
+
       if delete_user.erase_user(attributes.to_h)
-        { user: delete_user } # questionable if exists at this point, maybe just message
+        { message: "User #{vanishing_login} deleted" }
       else
         raise(GraphQL::ExecutionError.new(delete_user.errors.full_messages.join(", ")))
       end

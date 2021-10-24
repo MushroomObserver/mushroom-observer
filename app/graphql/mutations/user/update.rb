@@ -23,17 +23,20 @@ module Mutations::User
       user_id = arguments[:id]
       user = User.find(user_id)
       # update does not need an ID.
-      update_args = arguments.except(:id)
+      update_args = arguments.except(:id, :password)
 
-      # puts("User to update\n")
-      # puts(user.inspect)
+      puts("Session user\n")
+      puts(context[:current_user].inspect)
+      puts("User to update\n")
+      puts(user.inspect)
       # Add logic for authorization
-      # if user.id != context[:session_user]
-      # The MO way is more complicated because admins
+      # if user.id != context[:current_user]
+
       # from application_controller.rb#check_permission(obj)
-      # unless check_permission(user)
-      #   raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
-      # end
+      if user != context[:current_user]
+        raise(GraphQL::ExecutionError.new("You are not authorized to edit another user's profile."))
+      end
+
       # puts("Update Arguments\n")
       # puts(update_args)
       # what we're returning
