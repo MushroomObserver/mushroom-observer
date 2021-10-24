@@ -14,7 +14,7 @@ class GraphqlController < ApplicationController
       # "current_user" is a default method. MO uses "session_user" - Nimmo
       current_user: current_user,
       # Below we're making methods from application_rb available to graphql
-      autologin: autologin
+      autologin: autologin,
       # Reminder: MO method fetches user from session, not a token. Insecure?
       # session_user: session_user
       # These require the user or obj as an arg. # Hmm - Nimmo
@@ -22,7 +22,7 @@ class GraphqlController < ApplicationController
       # check_permission: check_permission,
       # check_permission!: check_permission!,
       # reviewer?: reviewer?,
-      # in_admin_mode?: in_admin_mode?,
+      in_admin_mode: in_admin_mode
       # unshown_notifications?: unshown_notifications?,
       # set_locale: set_locale
       # all_locales: all_locales,
@@ -44,27 +44,35 @@ class GraphqlController < ApplicationController
   # gets current user from token stored in the session
   def current_user
     # if we want to change the sign-in strategy, this is the place to do it
-    if session[:user_id]
-      puts("YES TOKEN")
-    else
-      puts("NO TOKEN")
-      return
-    end
+    # if session[:user_id]
+    #   puts("YES TOKEN")
+    # else
+    #   puts("NO TOKEN")
+    #   return
+    # end
 
     # This just pulls Rails front end's session. We can't modify this with mutations.
     # return unless session[:user_id]
-    user_id = session[:user_id]
+    # user_id = session[:user_id]
     # user_id = Base64.decode64(session[:token]).to_i
 
     # Should use something like this:
     # https://www.howtographql.com/graphql-ruby/4-authentication/
-    # crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-    # token = crypt.decrypt_and_verify session[:token]
-    # user_id = token.gsub('user-id:', '').to_i
+    crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
+    puts(crypt)
+    token = crypt.decrypt_and_verify(session[:token])
+    user_id = token.gsub("user-id:", "").to_i
 
     User.safe_find(user_id)
   rescue ActiveSupport::MessageVerifier::InvalidSignature
     nil
+  end
+
+  def in_admin_mode
+    # crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
+    # token = crypt.decrypt_and_verify(session[:token])
+    # in_admin_mode = token.gsub("in_admin_mode:", "").to_boolean
+    false
   end
 
   # Handle variables in form data, JSON body, or a blank value

@@ -209,7 +209,7 @@ group :test, :development do
   gem "byebug"
 
   # GraphiQL for GraphQL development
-  gem "graphiql-rails"
+  gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
 end
 
 group :test do

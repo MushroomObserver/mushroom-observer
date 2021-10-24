@@ -27,10 +27,10 @@ module Mutations::User
       user.update(args)
 
       # session[:user_id] is MO's way? in lieu of passing a token? - Nimmo
-      token = Base64.encode64(user.id.to_s)
+      # token = Base64.encode64(user.id.to_s)
       # should be more like this:
-      # crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-      # token = crypt.encrypt_and_sign("user-id:#{ user.id }")
+      crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
+      token = crypt.encrypt_and_sign("user-id:#{user.id}")
 
       context[:session][:token] = token
 
