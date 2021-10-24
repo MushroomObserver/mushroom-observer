@@ -9,8 +9,8 @@ module Mutations::User
     type Types::Models::User
 
     def resolve(**arguments)
-      User.create!(arguments)
-
+      user = User.create!(arguments)
+      VerifyEmail.build(user).deliver_now
       # currently responds with a user not a node. do we need to use connection?
       # update the token?
       # token.provide_defaults
