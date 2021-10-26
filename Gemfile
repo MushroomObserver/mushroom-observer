@@ -100,6 +100,9 @@ gem("mimemagic")
 # for creating zip files
 gem("rubyzip")
 
+# to handle frontend requests from same origin
+gem("rack-cors")
+
 ########## Development, Testing, and Analysis ##################################
 
 # Automatically track code test coverage
