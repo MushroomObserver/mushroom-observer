@@ -26,14 +26,10 @@ module Types::Models
     field :keep_filenames, Integer, null: false
     field :layout_count, Integer, null: true
     field :view_owner_id, Boolean, null: false
-    field :view_owner, Types::Models::User, null: false
     field :content_filter, String, null: true
     field :license_id, Integer, null: false
-    field :license, Types::Models::License, null: false
     field :image_id, Integer, null: true
-    field :image, Types::Models::Image, null: true
     field :location_id, Integer, null: true
-    field :location, Types::Models::Location, null: true
     field :locale, String, null: true
     field :votes_anonymous, Integer, null: true
     field :bonuses, String, null: true
@@ -57,8 +53,11 @@ module Types::Models
     field :email_html, Boolean, null: false
     field :email_locations_admin, Boolean, null: true
     field :email_names_admin, Boolean, null: true
-
-    # Relationship fields has_many
+    # belongs to
+    field :image, Types::Models::Image, null: true
+    field :license, Types::Models::License, null: false
+    field :location, Types::Models::Location, null: true
+    # has many
     field :api_keys, [Types::Models::ApiKey], null: true
     field :comments, [Types::Models::Comment], null: true
     field :donations, [Types::Models::Donation], null: true
@@ -66,27 +65,28 @@ module Types::Models
     field :images, [Types::Models::Image], null: true
     field :interests, [Types::Models::Interest], null: true
     field :locations, [Types::Models::Location], null: true
-    # field :location_descriptions, [Types::Models::LocationDescription], null: true
+    field :location_descriptions, [Types::Models::LocationDescription], null: true
     field :names, [Types::Models::Name], null: true
-    # field :name_descriptions, [Types::Models::NameDescription], null: true
+    field :name_descriptions, [Types::Models::NameDescription], null: true
     field :namings, [Types::Models::Naming], null: true
     field :notifications, [Types::Models::Notification], null: true
     field :observations, [Types::Models::Observation], null: true
     field :projects_created, [Types::Models::Project], null: true
     field :publications, [Types::Models::Publication], null: true
-    # field :queued_emails, [Types::QueuedEmail], null: true
+    field :queued_emails, [Types::QueuedEmail], null: true
     field :sequences, [Types::Models::Sequence], null: true
     field :species_lists, [Types::Models::SpeciesList], null: true
     field :herbarium_records, [Types::Models::HerbariumRecord], null: true
     field :votes, [Types::Models::Vote], null: true
     field :reviewed_images, [Types::Models::Image], null: true
-    # field :reviewed_name_descriptions, [Types::Models::NameDescription], null: true
-    # field :to_emails, [Types::Models::QueuedEmail], null: true
+    field :reviewed_name_descriptions, [Types::Models::NameDescription], null: true
+    field :to_emails, [Types::Models::QueuedEmail], null: true
+    # has and belongs to many
     field :user_groups, [Types::Models::UserGroup], null: true
-    # field :authored_names, [Types::Models::NameDescription], null: true
-    # field :edited_names, [Types::Models::NameDescription], null: true
-    # field :authored_locations, [Types::Models::LocationDescription], null: true
-    # field :edited_locations, [Types::Models::LocationDescription], null: true
+    field :authored_names, [Types::Models::NameDescription], null: true
+    field :edited_names, [Types::Models::NameDescription], null: true
+    field :authored_locations, [Types::Models::LocationDescription], null: true
+    field :edited_locations, [Types::Models::LocationDescription], null: true
     field :curated_herbaria, [Types::Models::Herbarium], null: true
   end
 end

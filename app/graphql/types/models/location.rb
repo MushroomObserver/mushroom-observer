@@ -5,11 +5,8 @@ module Types::Models
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
-    field :user, Types::Models::User, null: true
     field :description_id, Integer, null: true
-    # field :description, Types::Models::LocationDescription, null: true
     field :rss_log_id, Integer, null: true
-    field :rss_log, Types::Models::RssLog, null: true
     field :num_views, Integer, null: true
     field :last_view, GraphQL::Types::ISO8601DateTime, null: true
     field :north, Float, null: true
@@ -23,8 +20,12 @@ module Types::Models
     field :name, String, null: true
     field :scientific_name, String, null: true
     field :locked, Boolean, null: false
-
-    # field :descriptions, [Types::Models::LocationDescription], null: true
+    # belongs to
+    field :description, Types::Models::LocationDescription, null: true
+    field :rss_log, Types::Models::RssLog, null: true
+    field :user, Types::Models::User, null: true
+    # has many
+    field :descriptions, [Types::Models::LocationDescription], null: true
     field :comments, [Types::Models::Comment], null: true
     field :interests, [Types::Models::Interest], null: true
     field :observations, [Types::Models::Observation], null: true

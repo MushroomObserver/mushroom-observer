@@ -9,7 +9,8 @@ module Types::Models
     field :anonymous, Boolean, null: false
     field :reviewed, Boolean, null: false
     field :user_id, Integer, null: true
-    field :user, Types::Models::User, null: true
     field :recurring, Boolean, null: true
+    # belongs to
+    field :user, Types::Models::User, null: true
   end
 end

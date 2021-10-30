@@ -5,17 +5,19 @@ module Types::Models
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :when, GraphQL::Types::ISO8601Date, null: true, resolver_method: :when_observed
     field :user_id, Integer, null: true
-    field :user, Types::Models::User, null: true
     field :where, String, null: true
     field :title, String, null: true
     field :notes, String, null: true
     field :rss_log_id, Integer, null: true
-    field :rss_log, Types::Models::RssLog, null: true
     field :location_id, Integer, null: true
+    # belongs to
     field :location, Types::Models::Location, null: true
-
+    field :rss_log, Types::Models::RssLog, null: true
+    field :user, Types::Models::User, null: true
+    # has and belongs to many
     field :projects, [Types::Models::Project], null: true
     field :observations, [Types::Models::Observation], null: true
+    # has many
     field :comments, [Types::Models::Comment], null: true
     field :interests, [Types::Models::Interest], null: true
   end

@@ -5,9 +5,10 @@ module Types::Models
     field :last_used, GraphQL::Types::ISO8601DateTime, null: true
     field :num_uses, Integer, null: true
     field :user_id, Integer, null: false
-    field :user, Types::Models::User, null: false
     field :key, String, null: false
     field :notes, String, null: true
     field :verified, GraphQL::Types::ISO8601DateTime, null: true
+    # belongs to
+    field :user, Types::Models::User, null: false
   end
 end

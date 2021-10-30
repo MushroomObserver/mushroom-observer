@@ -2,7 +2,6 @@ module Types::Models
   class Publication < Types::BaseObject
     field :id, Integer, null: false
     field :user_id, Integer, null: true
-    field :user, Types::Models::User, null: true
     field :full, String, null: true
     field :link, String, null: true
     field :how_helped, String, null: true
@@ -10,5 +9,7 @@ module Types::Models
     field :peer_reviewed, Boolean, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+    # belongs to
+    field :user, Types::Models::User, null: true
   end
 end

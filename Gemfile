@@ -100,7 +100,7 @@ gem("mimemagic")
 # for creating zip files
 gem("rubyzip")
 
-# to handle frontend requests from same origin
+# to handle frontend requests from different port
 gem("rack-cors")
 
 ########## Development, Testing, and Analysis ##################################
