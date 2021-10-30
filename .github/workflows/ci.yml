@@ -1,0 +1,114 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+# High-level tasks. See https://bit.ly/3BRTq5n
+#  Checks out the latest version of the code
+#  Sets up a base image with Ruby, Node, and some browser testing stuff
+#  Sets up a PostgreSQL database service
+#  Installs dependencies (bundler, yarn, npm) and
+#  cache the results to speed up builds when they don’t change
+#  Sets up the test database
+#  Runs any linters/checkers (rubocop, eslint, brakeman, etc)
+#  Runs the tests
+
+# current .travis.yml
+# dist: focal # use Ubuntu 20.04
+# services:
+#   - mysql
+#
+# language: ruby
+# rvm:
+#   - "2.6.6"
+#
+# # make Travis use its legacy infrastructure
+# sudo: true
+#
+# # uncomment this line if your project needs to run something other than `rake`:
+# # script: bundle exec rake lang:update
+#
+# before_install:
+#   - sudo apt-get install exiftool
+#
+# install: ./script/travis_setup
+#
+# before_script:
+#   - rake db:schema:load
+#   - rake db:fixtures:load
+#   - rake lang:update
+
+# Travis build log top level commands
+# $ sudo systemctl start mysql
+# $ git clone --depth=50 https://github.com/MushroomObserver/mushroom-observer.git MushroomObserver/mushroom-observer
+#
+# $ rvm use 2.6.6 --install --binary --fuzzy
+#
+# $ export BUNDLE_GEMFILE=$PWD/Gemfile
+# $ ruby --version
+#
+# $ sudo apt-get install exiftool
+# $ ./script/travis_setup
+# $ rake db:schema:load
+# $ rake db:fixtures:load
+# $ rake lang:update
+
+name: Continuous Integration
+
+# on:
+  # push:
+    # branches: master
+# Run on pushes on all branches
+on: [push]
+  pull_request:
+    branches: master
+
+jobs:
+  test:
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    # strategy:
+      # matrix:
+        # ruby-version: ['2.6', '2.7', '3.0']
+        # ruby-version: ['2.6.6']
+
+    # https://ovirium.com/blog/how-to-make-mysql-work-in-your-github-actions/
+    env:
+      DB_DATABASE: test_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2 #
+
+    # https://boringrails.com/articles/building-a-rails-ci-pipeline-with-github-actions/
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+
+    - name: Install additional tools
+      run: |
+        sudo apt-get install exiftool
+
+    # https://ovirium.com/blog/how-to-make-mysql-work-in-your-github-actions/
+    # plus .travis.yml
+    - name: Set up MySQL
+      run: |
+        sudo /etc/init.d/mysql start
+        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+        rake db:schema:load
+        rake db:fixtures:load
+
+    # from .travis.yml
+    - name: Update translation files
+      run: |
+        rake lang:update
+
+    - name: Run tests
+      # from .travis.yml
+      run: |
+        bundle exec rake
