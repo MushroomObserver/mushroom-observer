@@ -589,10 +589,6 @@ MushroomObserver::Application.routes.draw do
     mount(GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql#execute")
   end
 
-  # for CORS
-  # global options responder -> makes sure OPTION request for CORS endpoints work
-  match "*path", via: [:options], to: ->(_) { [204, { "Content-Type" => "text/plain" }] }
-
   get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
