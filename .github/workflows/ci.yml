@@ -61,10 +61,7 @@ name: Continuous Integration
   # push:
     # branches: master
 # Run on pushes on all branches
-on: 
-  push:
-    branches: 
-      - "*"
+on: [push]
   pull_request:
     branches: master
 
