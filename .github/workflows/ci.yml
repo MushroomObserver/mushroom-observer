@@ -103,13 +103,13 @@ jobs:
       run: |
         sudo /etc/init.d/mysql start
         mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-        bundle exec rake db:schema:load
-        bundle exec rake db:fixtures:load
+        rake db:schema:load
+        rake db:fixtures:load
 
     # from .travis.yml
     - name: Update translation files
       run: |
-        bundle exec rake lang:update
+        rake lang:update
 
     - name: Run tests
       # from .travis.yml
