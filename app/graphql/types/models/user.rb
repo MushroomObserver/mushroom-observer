@@ -73,14 +73,14 @@ module Types::Models
     field :observations, [Types::Models::Observation], null: true
     field :projects_created, [Types::Models::Project], null: true
     field :publications, [Types::Models::Publication], null: true
-    field :queued_emails, [Types::QueuedEmail], null: true
+    # field :queued_emails, [Types::QueuedEmail], null: true
     field :sequences, [Types::Models::Sequence], null: true
     field :species_lists, [Types::Models::SpeciesList], null: true
     field :herbarium_records, [Types::Models::HerbariumRecord], null: true
     field :votes, [Types::Models::Vote], null: true
     field :reviewed_images, [Types::Models::Image], null: true
     field :reviewed_name_descriptions, [Types::Models::NameDescription], null: true
-    field :to_emails, [Types::Models::QueuedEmail], null: true
+    # field :to_emails, [Types::Models::QueuedEmail], null: true
     # has and belongs to many
     field :user_groups, [Types::Models::UserGroup], null: true
     field :authored_names, [Types::Models::NameDescription], null: true

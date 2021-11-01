@@ -1,58 +1,30 @@
 require("search_object")
 require("search_object/plugin/graphql")
 
-module Resolvers
-  class Observations < GraphQL::Schema::Resolver
-    # include SearchObject for GraphQL
-    include SearchObject.module(:graphql)
+# frozen_string_literal: true
 
+module Resolvers
+  class Observations < Resolvers::BaseSearchResolver
+    type Types::Models::Observation.connection_type, null: false
     description "List or filter all observations"
 
     # scope is starting point for search
-    scope { Observation.all }
+    scope { object.respond_to?(:observations) ? object.observations : Observation.all }
 
-    type types[Types::Models::Observation], null: false
-
-    # inline input type definition for the advanced filter
-    class ObservationFilter < ::Inputs::BaseInputObject
-      # argument :OR, [self], required: false
-      # alternative: use select w/ autocomplete for taxa
-      argument :name_id, Int, required: false
-      # taxa: search for like string in name.text_name
-      argument :name_like, String, required: false
-      # use select w/ autocomplete and force an ID
-      argument :user_id, Integer, required: false
-      # alternative: search for string in user.name? expensive query
-      # argument :user_like, String, required: false
-      # must search string for location, becase locations are not nested.
-      argument :where, String, required: false # where == location.name
-      argument :before, Boolean, required: false
-      argument :when, GraphQL::Types::ISO8601Date, required: false
-      argument :notes_like, String, required: false
-      argument :with_image, Boolean, required: false # with, without, or either
-      argument :with_specimen, Boolean, required: false # with, without or either
-      argument :with_lichen, Boolean, required: false # with, without or either
-    end
-
-    # when "filter" is passed "apply_filter" would be called to narrow the scope
-    # note this example was conceived as an OR filter, we could set the filter args as options directly
-    option :filter, type: ObservationFilter, with: :apply_filter
+    option :filter, type: Inputs::Observation::Filters, with: :apply_filter
 
     # apply_filter recursively loops through "OR" branches
     def apply_filter(scope, value)
-      branches = normalize_filters(value).reduce { |a, b| a.or(b) }
-      scope.merge(branches)
-    end
-
-    def normalize_filters(value, branches = [])
-      scope = Observation.all
+      # scope = scope
       scope = scope.where("name_id = ?", value[:name_id]) if value[:name_id]
       if value[:name_like]
-        scope = scope.where("text_name LIKE ?", "%#{value[:name_like]}%")
+        scope = scope.where("`text_name` LIKE ?", escape_search_term(value[:name_like]))
       end
       scope = scope.where("user_id = ?", value[:user_id]) if value[:user_id]
       # This one now a prob?
-      scope = scope.where("where LIKE ?", "%#{value[:where]}%") if value[:where]
+      if value[:where]
+        scope = scope.where("`where` LIKE ?", escape_search_term(value[:where]))
+      end
       if value[:when]
         scope = if value[:before]
                   scope.where("created_at <= ?", value[:when])
@@ -61,7 +33,7 @@ module Resolvers
                 end
       end
       if value[:notes_like]
-        scope = scope.where("notes LIKE ?", "%#{value[:notes_like]}%")
+        scope = scope.where("notes LIKE ?", escape_search_term(value[:notes_like]))
       end
       case value[:with_image]
       when true
@@ -90,14 +62,7 @@ module Resolvers
       when false
         scope = scope.where("lifeform NOT LIKE '% lichen %'")
       end
-
-      branches << scope
-
-      # if value[:OR].present?
-      #   value[:OR].reduce(branches) { |s, v| normalize_filters(v, s) }
-      # end
-
-      branches
+      scope
     end
   end
 end
