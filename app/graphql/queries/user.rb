@@ -2,13 +2,14 @@
 module Queries
   class User < Queries::BaseQuery
     description "get user by id"
-    type Types::Models::User, null: false
+    type Types::Models::UserType, null: false
     argument :id, Integer, required: false
     # argument :login, String, required: false
     # argument :name, String, required: false
 
     def resolve(id:)
-      ::User.find(id)
+      # ::User.find(id)
+      RecordLoader.for(User).load(id)
       # return {} unless args
 
       # puts(args)

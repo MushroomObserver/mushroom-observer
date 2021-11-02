@@ -6,7 +6,7 @@ module Mutations::User
 
     input_object_class Inputs::User::Create
 
-    type Types::Models::User
+    type Types::Models::UserType
 
     def resolve(**arguments)
       user = User.create!(arguments)

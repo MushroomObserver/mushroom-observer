@@ -5,7 +5,7 @@ require("search_object/plugin/graphql")
 
 module Resolvers
   class Observations < Resolvers::BaseSearchResolver
-    type Types::Models::Observation.connection_type, null: false
+    type Types::Models::ObservationType.connection_type, null: false
     description "List or filter all observations"
 
     # scope is starting point for search

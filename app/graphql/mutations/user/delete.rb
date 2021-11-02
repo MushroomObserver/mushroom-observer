@@ -9,7 +9,7 @@ module Mutations::User
     # input_object_class Inputs::DeleteUserInput
 
     # define return fields. deleted so no?
-    field :user, Types::Models::User, null: false
+    field :user, Types::Models::UserType, null: false
 
     # define arguments
     argument :id, Integer, required: true

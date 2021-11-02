@@ -194,6 +194,10 @@ gem("ar_lazy_preload")
 # https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
 # gem("graphql-fragment_cache")
 
+# Need to cache and instrument your GraphQL code in Ruby? Look no further!
+# https://github.com/chatterbugapp/cacheql
+# gem("cacheql")
+
 # Pagination & Connection gems
 
 # Additional implementations of cursor-based paginations for GraphQL Ruby.

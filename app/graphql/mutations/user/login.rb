@@ -9,7 +9,7 @@ module Mutations::User
     input_object_class Inputs::User::Login
 
     field :token, String, null: true
-    field :user, Types::Models::User, null: true
+    field :user, Types::Models::UserType, null: true
 
     def resolve(**arguments)
       user = User.authenticate(arguments.except(:remember_me))

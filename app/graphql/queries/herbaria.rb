@@ -4,7 +4,7 @@
 module Queries
   class Herbaria < Queries::BaseQuery
     description "list paginated herbaria"
-    type [Types::Models::Herbarium.connection_type], null: false
+    type [Types::Models::HerbariumType.connection_type], null: false
 
     def resolve
       ::Herbarium.all

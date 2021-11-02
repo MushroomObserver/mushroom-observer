@@ -2,7 +2,7 @@
 module Queries
   class Articles < Queries::BaseQuery
     description "list all articles"
-    type [Types::Models::Article], null: false
+    type [Types::Models::ArticleType], null: false
 
     def resolve
       ::Article.all

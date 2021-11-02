@@ -2,7 +2,7 @@
 module Queries
   class Location < Queries::BaseQuery
     description "get location by id"
-    type Types::Models::Location, null: false
+    type Types::Models::LocationType, null: false
     argument :id, Integer, required: true
 
     def resolve(id:)

@@ -2,7 +2,7 @@
 module Queries
   class Users < Queries::BaseQuery
     description "list all users"
-    type [Types::Models::User.connection_type], null: false
+    type [Types::Models::UserType.connection_type], null: false
 
     def resolve
       ::User.all

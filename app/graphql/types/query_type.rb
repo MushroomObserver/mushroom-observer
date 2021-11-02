@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require("graphql/batch")
+require("loaders/record_loader")
+
 module Types
   class QueryType < Types::BaseObject
     # Add root-level fields here.
@@ -24,7 +27,7 @@ module Types
     # field :herbarium_record, resolver: Queries::HerbariumRecord
     # field :herbarium_records, resolver: Resolvers::HerbariumRecords
     field :herbarium, resolver: Queries::Herbarium
-    field :herbaria, Types::Models::Herbarium.connection_type, null: true
+    field :herbaria, Types::Models::HerbariumType.connection_type, null: true
     # field :image, resolver: Queries::Image
     # field :images, resolver: Resolvers::Images
     # field :interest, resolver: Queries::Interest
@@ -40,7 +43,7 @@ module Types
     # field :notification, resolver: Queries::Notification
     # field :notifications, resolver: Resolvers::Notifications
     field :observation, resolver: Queries::Observation
-    field :observations, Types::Models::Observation.connection_type, null: false, resolver: Resolvers::Observations
+    field :observations, Types::Models::ObservationType.connection_type, null: false, resolver: Resolvers::Observations
     # field :observation_view, resolver: Queries::ObservationView
     # field :observation_views, resolver: Resolvers::ObservationViews
     # field :project, resolver: Queries::Project
@@ -58,7 +61,7 @@ module Types
     # field :user_group, resolver: Queries::UserGroup
     # field :user_groups, resolver: Resolvers::UserGroups
     field :user, resolver: Queries::User
-    field :users, Types::Models::User.connection_type, null: false, resolver: Queries::Users
+    field :users, Types::Models::UserType.connection_type, null: false, resolver: Queries::Users
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes
 

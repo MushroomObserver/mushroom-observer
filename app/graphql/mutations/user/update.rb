@@ -6,10 +6,10 @@ module Mutations::User
 
     input_object_class Inputs::User::Update
 
-    type Types::Models::User
+    type Types::Models::UserType
 
     # define return fields
-    # field :user, Types::Models::User, null: false
+    # field :user, Types::Models::UserType, null: false
 
     # define arguments
     # argument :id, Integer, required: true

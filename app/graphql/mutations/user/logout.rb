@@ -5,7 +5,7 @@ module Mutations::User
     description "Logout a user"
 
     # field :token, String, null: true
-    # field :user, Types::Models::User, null: true
+    # field :user, Types::Models::UserType, null: true
 
     def resolve
       # user = User.authenticate(arguments)

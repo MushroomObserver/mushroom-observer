@@ -7,7 +7,7 @@ module Mutations
 
     # https://evilmartians.com/chronicles/graphql-on-rails-3-on-the-way-to-perfection
     def check_logged_in!
-      return if context[:session_user]
+      return if context[:current_user]
 
       raise(GraphQL::ExecutionError.new("You need to login to perform this action"))
     end

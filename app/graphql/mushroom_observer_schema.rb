@@ -9,7 +9,7 @@ class MushroomObserverSchema < GraphQL::Schema
   connections.add(ActiveRecord::Relation, GraphQL::Connections::Stable)
 
   # GraphQL::Batch setup:
-  # use GraphQL::Batch
+  use GraphQL::Batch
 
   # Union and Interface Resolution
   def self.resolve_type(_abstract_type, _obj, _ctx)
