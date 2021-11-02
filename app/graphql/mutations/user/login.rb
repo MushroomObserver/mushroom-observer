@@ -26,9 +26,7 @@ module Mutations::User
       }
       user.update(args)
 
-      # session[:user_id] is MO's way? in lieu of passing a token? - Nimmo
-      # token = Base64.encode64(user.id.to_s)
-      # should be more like this:
+      # https://www.howtographql.com/graphql-ruby/4-authentication/
       crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
       token = crypt.encrypt_and_sign("user-id:#{user.id}")
 

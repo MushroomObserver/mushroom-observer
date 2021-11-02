@@ -46,22 +46,8 @@ class GraphqlController < ApplicationController
   # gets current user from token stored in the session
   def current_user
     # if we want to change the sign-in strategy, this is the place to do it
-    # if session[:user_id]
-    #   puts("YES TOKEN")
-    # else
-    #   puts("NO TOKEN")
-    #   return
-    # end
 
-    # This just pulls Rails front end's session. We can't modify this with mutations.
-    # return unless session[:user_id]
-    # user_id = session[:user_id]
-    # user_id = Base64.decode64(session[:token]).to_i
-
-    # Should use something like this:
-    # https://www.howtographql.com/graphql-ruby/4-authentication/
     crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-    puts(crypt)
     token = crypt.decrypt_and_verify(session[:token])
     user_id = token.gsub("user-id:", "").to_i
 
