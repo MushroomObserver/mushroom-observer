@@ -43,7 +43,7 @@ class MatrixBoxPresenter
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
-    self.detail = rss_log.detail
+    self.detail = rss_log.detail.notice + rss_log.detail.by
     self.time = rss_log.updated_at
 
     self.thumbnail =
@@ -86,7 +86,7 @@ class MatrixBoxPresenter
                                     observation.location)
     return unless observation.rss_log
 
-    self.detail = observation.rss_log.detail
+    self.detail = observation.rss_log.detail.notice
     self.time = observation.rss_log.updated_at
     return unless observation.thumb_image
 
