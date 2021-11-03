@@ -143,6 +143,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
+#  detail::             Figure out the detail message for the most recent update.
 #
 #  == Callbacks
 #
