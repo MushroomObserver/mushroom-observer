@@ -27,7 +27,7 @@ class MatrixBoxPresenter
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
     name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
-    get_rss_log_details(rss_log, target)
+    # get_rss_log_details(rss_log, target)
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = view.user_link(target.user) if target&.user
     self.what =
@@ -44,6 +44,8 @@ class MatrixBoxPresenter
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
+    self.detail = rss_log.detail
+    self.time = rss_log.updated_at
 
     self.thumbnail =
       if target&.respond_to?(:thumb_image) && target&.thumb_image
@@ -76,7 +78,7 @@ class MatrixBoxPresenter
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation, view)
     name = observation.unique_format_name.t
-    get_rss_log_details(observation.rss_log, observation)
+    # get_rss_log_details(observation.rss_log, observation)
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
     self.what  = view.link_with_query(name, controller: :observer,
@@ -84,6 +86,8 @@ class MatrixBoxPresenter
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
                                     observation.location)
+    self.detail = observation.rss_log.detail
+    self.time = observation.rss_log.updated_at
     return unless observation.thumb_image
 
     self.thumbnail =
@@ -112,54 +116,5 @@ class MatrixBoxPresenter
 
   def fancy_time
     time&.fancy_time
-  end
-
-  ##############################################################################
-
-  private
-
-  # Figure out what the detail messages should be.
-  # TODO: This should probably all live in RssLog.
-  def get_rss_log_details(rss_log, target)
-    target_type = target ? target.type_tag : rss_log.target_type
-    begin
-      tag, args, time = rss_log.parse_log.first
-    rescue StandardError
-      []
-    end
-    if !target_type
-      self.detail = :rss_destroyed.t(type: :object)
-    elsif !target ||
-          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
-      self.detail = :rss_destroyed.t(type: target_type)
-    elsif !time || time < target.created_at + 1.minute
-      self.detail = :rss_created_at.t(type: target_type)
-      unless [:observation, :species_list].include?(target_type)
-        begin
-          self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
-        rescue StandardError
-          nil
-        end
-      end
-    else
-      if [:observation, :species_list].include?(target_type) &&
-         [target.user.login, target.user.name, target.user.legal_name].
-         include?(args[:user])
-        # This will remove redundant user from observation logs.
-        tag2 = :"#{tag}0"
-        self.detail = tag2.t(args) if tag2.has_translation?
-      end
-      unless self.detail
-        tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        self.detail = tag2.t(args) if tag2.has_translation?
-      end
-      begin
-        self.detail ||= tag.t(args)
-      rescue StandardError
-        nil
-      end
-    end
-    time ||= rss_log.updated_at if rss_log
-    self.time = time
   end
 end
