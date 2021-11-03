@@ -55,6 +55,10 @@ module Types::Models
       RecordLoader.for(Name).load(object.name_id)
     end
 
+    def rss_log
+      RecordLoader.for(RssLog).load(object.rss_log_id)
+    end
+
     # custom fields
     field :img_src_thumb, String, null: true
     field :img_src_sm, String, null: true
@@ -62,6 +66,9 @@ module Types::Models
     field :img_src_lg, String, null: true
     field :img_src_huge, String, null: true
     field :img_src_full, String, null: true
+
+    field :format_name, String, null: true
+    field :detail, String, null: true
 
     def img_src_thumb
       Image.url(:thumbnail, object.thumb_image_id)
@@ -85,6 +92,17 @@ module Types::Models
 
     def img_src_full
       Image.url(:full_size, object.thumb_image_id)
+    end
+
+    def format_name
+      RecordLoader.for(Name).load(object.name_id)
+      object.format_name.
+        delete_suffix(object.name.author).t
+    end
+
+    def detail
+      RecordLoader.for(RssLog).load(object.rss_log_id)
+      object.rss_log.detail
     end
   end
 end
