@@ -375,31 +375,23 @@ class RssLog < AbstractModel
     target_type = target ? target.type_tag : target_type
     begin
       tag, args, time = parse_log.first
-      pp(args[:user])
       by = args[:user] ? " ".html_safe + :rss_by.t(user: args[:user]) : nil
     rescue StandardError
       []
     end
-    if !target_type
-      notice = :rss_destroyed.t(type: :object)
-    elsif !target ||
-          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
-      notice = :rss_destroyed.t(type: target_type)
-    elsif !time || time < target.created_at + 1.minute
-      notice = :rss_created_at.t(type: target_type)
-    else
-      unless notice
+    notice =
+      if !target_type
+        :rss_destroyed.t(type: :object)
+      elsif !target ||
+            tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
+        :rss_destroyed.t(type: target_type)
+      elsif !time || time < target.created_at + 1.minute
+        :rss_created_at.t(type: target_type)
+      else
         tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        notice = tag2.t(args) if tag2.has_translation?
+        tag2.t(args) if tag2.has_translation?
       end
-      begin
-        notice ||= tag.t(args).to_s
-        result = { notice: notice, by: by }
-      rescue StandardError
-        nil
-      end
-    end
-    result
+    { notice: notice, by: by }
   end
 
   ##############################################################################
