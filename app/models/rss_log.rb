@@ -393,7 +393,7 @@ class RssLog < AbstractModel
         notice = tag2.t(args) if tag2.has_translation?
       end
       begin
-        notice ||= tag.t(args)
+        notice ||= tag.t(args).to_s
         result = { notice: notice, by: by }
       rescue StandardError
         nil

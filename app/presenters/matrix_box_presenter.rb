@@ -43,7 +43,6 @@ class MatrixBoxPresenter
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
-    self.detail = rss_log.detail.notice + rss_log.detail.by
     self.time = rss_log.updated_at
 
     self.thumbnail =
@@ -52,6 +51,9 @@ class MatrixBoxPresenter
                        link: { controller: target.show_controller,
                                action: target.show_action, id: target.id })
       end
+    return unless rss_log.detail
+
+    self.detail = rss_log.detail.map { |_k, v| v.t }.join("").html_safe
   end
 
   # Grabs all the information needed for view from Image instance.
