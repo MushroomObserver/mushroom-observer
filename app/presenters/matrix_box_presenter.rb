@@ -27,7 +27,6 @@ class MatrixBoxPresenter
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
     name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
-    # get_rss_log_details(rss_log, target)
     self.when = target.when&.web_date if target.respond_to?(:when)
     self.who  = view.user_link(target.user) if target&.user
     self.what =
@@ -78,7 +77,6 @@ class MatrixBoxPresenter
   # Grabs all the information needed for view from Observation instance.
   def observation_to_presenter(observation, view)
     name = observation.unique_format_name.t
-    # get_rss_log_details(observation.rss_log, observation)
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
     self.what  = view.link_with_query(name, controller: :observer,

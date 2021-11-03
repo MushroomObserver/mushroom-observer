@@ -371,7 +371,6 @@ class RssLog < AbstractModel
 
   # Figure out the detail message for the most recent update.
   def detail
-    # target_type = target ? target.type_tag : target_type
     begin
       tag, args, time = parse_log.first
     rescue StandardError
@@ -401,7 +400,7 @@ class RssLog < AbstractModel
       end
       unless result
         tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        detail = tag2.t(args) if tag2.has_translation?
+        result = tag2.t(args) if tag2.has_translation?
       end
       begin
         result ||= tag.t(args)
