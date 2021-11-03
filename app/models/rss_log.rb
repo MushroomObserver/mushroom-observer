@@ -371,6 +371,7 @@ class RssLog < AbstractModel
 
   # Figure out the detail message for the most recent update.
   def detail
+    target_type = target ? target.type_tag : target_type
     begin
       tag, args, time = parse_log.first
     rescue StandardError

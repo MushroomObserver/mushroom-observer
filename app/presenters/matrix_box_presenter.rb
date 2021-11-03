@@ -84,6 +84,8 @@ class MatrixBoxPresenter
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
                                     observation.location)
+    return unless observation.rss_log
+
     self.detail = observation.rss_log.detail
     self.time = observation.rss_log.updated_at
     return unless observation.thumb_image
