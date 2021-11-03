@@ -370,42 +370,31 @@ class RssLog < AbstractModel
     results
   end
 
-  # Figure out the detail message for the most recent update.
+  # Figure out a detail message for most recent update.
   def detail
     target_type = target ? target.type_tag : target_type
     begin
       tag, args, time = parse_log.first
+      pp(args[:user])
+      by = args[:user] ? " ".html_safe + :rss_by.t(user: args[:user]) : nil
     rescue StandardError
       []
     end
     if !target_type
-      result = :rss_destroyed.t(type: :object)
+      notice = :rss_destroyed.t(type: :object)
     elsif !target ||
           tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
-      result = :rss_destroyed.t(type: target_type)
+      notice = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
-      result = :rss_created_at.t(type: target_type)
-      unless [:observation, :species_list].include?(target_type)
-        begin
-          result += " ".html_safe + :rss_by.t(user: target.user.legal_name)
-        rescue StandardError
-          nil
-        end
-      end
+      notice = :rss_created_at.t(type: target_type)
     else
-      if [:observation, :species_list].include?(target_type) &&
-         [target.user.login, target.user.name, target.user.legal_name].
-         include?(args[:user])
-        # This will remove redundant user from observation logs.
-        tag2 = :"#{tag}0"
-        result = tag2.t(args) if tag2.has_translation?
-      end
-      unless result
+      unless notice
         tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        result = tag2.t(args) if tag2.has_translation?
+        notice = tag2.t(args) if tag2.has_translation?
       end
       begin
-        result ||= tag.t(args)
+        notice ||= tag.t(args)
+        result = { notice: notice, by: by }
       rescue StandardError
         nil
       end
