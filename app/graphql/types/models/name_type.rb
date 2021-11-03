@@ -38,5 +38,12 @@ module Types::Models
     field :interests, [Types::Models::InterestType], null: true
     field :namings, [Types::Models::NamingType], null: true
     field :observations, [Types::Models::ObservationType], null: true
+
+    # custom fields
+    field :format_name, String, null: true
+
+    def format_name
+      object.display_name.delete_suffix(object.author).t
+    end
   end
 end

@@ -18,5 +18,13 @@ module Types::Models
     field :observation, Types::Models::ObservationType, null: true
     field :project, Types::Models::ProjectType, null: true
     field :species_list, Types::Models::SpeciesListType, null: true
+
+    # custom fields
+    field :detail, String, null: true
+    field :parse_log, String, null: true
+
+    # This is initiating n queries on user
+    delegate :detail, to: :object
+    delegate :parse_log, to: :object
   end
 end
