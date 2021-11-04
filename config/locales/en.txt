@@ -1091,7 +1091,7 @@
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
-  log_consensus_changed: Consensus changed from [old] to [new].
+  log_consensus_changed: "Consensus changed from: [old]."
   log_consensus_created: Initial name [name].
   log_consensus_created_at: "[:log_consensus_created]"
   log_consensus_reached: "Consensus established: [name]"
