@@ -1,15 +1,40 @@
-require("search_object")
-require("search_object/plugin/graphql")
-
 # frozen_string_literal: true
 
 module Resolvers
   class Observations < Resolvers::BaseSearchResolver
+    include SearchObject.module(:graphql)
+
     type Types::Models::ObservationType.connection_type, null: false
     description "List or filter all observations"
 
     # scope is starting point for search
     scope { object.respond_to?(:observations) ? object.observations : Observation.all }
+
+    option :order, type: Types::Enums::OrderBy, default: "WHEN"
+
+    def apply_order_with_when(scope)
+      scope.order("when DESC")
+    end
+
+    def apply_order_with_created_at(scope)
+      scope.order("created_at DESC")
+    end
+
+    def apply_order_with_updated_at(scope)
+      scope.order("updated_at DESC")
+    end
+
+    def apply_order_with_text_name(scope)
+      scope.order("text_name DESC")
+    end
+
+    # def apply_order_with_votes(scope)
+    #   scope.order("votes DESC")
+    # end
+
+    # def apply_order_with_image_votes(scope)
+    #   scope.order("image_votes DESC")
+    # end
 
     option :filter, type: Inputs::Observation::Filters, with: :apply_filter
 

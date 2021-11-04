@@ -4,7 +4,7 @@ module Types::Enums
     value "CREATED_AT", "When created"
     value "UPDATED_AT", "When updated"
     value "TEXT_NAME", "Current name"
-    value "VOTES", "Votes"
-    value "IMAGE_VOTES", "Image Votes"
+    # value "VOTES", "Votes"
+    # value "IMAGE_VOTES", "Image Votes"
   end
 end

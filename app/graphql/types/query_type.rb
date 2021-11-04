@@ -2,6 +2,8 @@
 
 require("graphql/batch")
 require("loaders/record_loader")
+require("search_object")
+require("search_object/plugin/graphql")
 
 module Types
   class QueryType < Types::BaseObject
