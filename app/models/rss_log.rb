@@ -143,7 +143,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
-#  detail::             Figure out a detail message for most recent update.
+#  detail::             Figure out a message for most recent update.
 #
 #  == Callbacks
 #
@@ -370,7 +370,7 @@ class RssLog < AbstractModel
     results
   end
 
-  # Figure out a detail message for most recent update.
+  # Figure out a message for most recent update.
   def detail
     target_type = target ? target.type_tag : target_type
     begin
@@ -379,19 +379,16 @@ class RssLog < AbstractModel
     rescue StandardError
       []
     end
-    notice =
-      if !target_type
-        :rss_destroyed.t(type: :object)
-      elsif !target ||
-            tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
-        :rss_destroyed.t(type: target_type)
-      elsif !time || time < target.created_at + 1.minute
-        :rss_created_at.t(type: target_type)
-      else
-        tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        tag2.t(args) if tag2.has_translation?
+    if !target_type
+      :rss_destroyed.t(type: :object)
+    elsif !target ||
+          tag.to_s.match(/^log_#{target_type}_(merged|destroyed)/)
+      :rss_destroyed.t(type: target_type)
+    elsif !time || time < target.created_at + 1.minute
+      :rss_created_at.t(type: target_type)
+    else
+      tag.t(args)
       end
-    { notice: notice, by: by }
   end
 
   ##############################################################################

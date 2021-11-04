@@ -53,12 +53,7 @@ class MatrixBoxPresenter
       end
     return unless rss_log.detail
 
-    self.detail =
-      if [:observation, :species_list].include?(target.type_tag)
-        rss_log.detail[:notice]
-      else
-        rss_log.detail.map { |_k, v| v }.join("").html_safe
-      end
+    self.detail = rss_log.detail
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -93,7 +88,7 @@ class MatrixBoxPresenter
                                     observation.location)
     return unless observation.rss_log
 
-    self.detail = observation.rss_log.detail.notice
+    self.detail = observation.rss_log.detail
     self.time = observation.rss_log.updated_at
     return unless observation.thumb_image
 
