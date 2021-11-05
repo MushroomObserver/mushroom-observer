@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
 module Resolvers
-  class Observations < Resolvers::BaseSearchResolver
-    include SearchObject.module(:graphql)
-
+  class Observations < Resolvers::BaseResolver
     type Types::Models::ObservationType.connection_type, null: false
     description "List or filter all observations"
 
     # scope is starting point for search
-    scope { object.respond_to?(:observations) ? object.observations : Observation.all }
+    # scope { object.respond_to?(:observations) ? object.observations : Observation.all }
+    # scope { ::Observation.order(when: :desc) }
 
-    option :order, type: Types::Enums::OrderBy, default: "WHEN"
+    # option :filter, type: Inputs::Observation::Filters, with: :apply_filter
+    # option :order, type: Types::Enums::OrderBy, default: "WHEN"
+    def resolve
+      ::Observation.order(created_at: :desc)
+    end
 
     def apply_order_with_when(scope)
       scope.order("when DESC")
@@ -35,8 +38,6 @@ module Resolvers
     # def apply_order_with_image_votes(scope)
     #   scope.order("image_votes DESC")
     # end
-
-    option :filter, type: Inputs::Observation::Filters, with: :apply_filter
 
     # apply_filter recursively loops through "OR" branches
     def apply_filter(scope, value)
