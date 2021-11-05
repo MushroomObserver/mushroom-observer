@@ -23,7 +23,7 @@ module Types::Models
     field :detail, String, null: true
     field :parse_log, String, null: true
 
-    # This is initiating n queries on user
+    # This is initiating n queries on the target type
     delegate :detail, to: :object
     delegate :parse_log, to: :object
   end
