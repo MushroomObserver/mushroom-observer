@@ -1,34 +1,34 @@
 # frozen_string_literal: true
 
 module Resolvers
-  class Observations < Resolvers::BaseResolver
-    type Types::Models::ObservationType.connection_type, null: false
+  class Observations < Resolvers::BaseSearchResolver
+    type [Types::Models::ObservationType.connection_type], null: false
     description "List or filter all observations"
 
     # scope is starting point for search
     # scope { object.respond_to?(:observations) ? object.observations : Observation.all }
-    # scope { ::Observation.order(when: :desc) }
+    scope { ::Observation.all }
 
-    # option :filter, type: Inputs::Observation::Filters, with: :apply_filter
-    # option :order, type: Types::Enums::OrderBy, default: "WHEN"
-    def resolve
-      ::Observation.order(created_at: :desc)
-    end
+    option :filter, type: Inputs::Observation::Filters, with: :apply_filter
+    option :order, type: Types::Enums::OrderBy, default: "WHEN"
+    # def resolve
+    #   ::Observation.all.order(created_at: :desc)
+    # end
 
     def apply_order_with_when(scope)
-      scope.order("when DESC")
+      scope.order("`when` DESC")
     end
 
     def apply_order_with_created_at(scope)
-      scope.order("created_at DESC")
+      scope.order("`created_at` DESC")
     end
 
     def apply_order_with_updated_at(scope)
-      scope.order("updated_at DESC")
+      scope.order("`updated_at` DESC")
     end
 
     def apply_order_with_text_name(scope)
-      scope.order("text_name DESC")
+      scope.order("`text_name` DESC")
     end
 
     # def apply_order_with_votes(scope)

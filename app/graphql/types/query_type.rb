@@ -68,7 +68,7 @@ module Types
     # field :votes, resolver: Resolvers::Votes
 
     def herbaria(**_args)
-      Herbarium.order(:id)
+      Herbarium.order("created_at DESC")
       # object.herbaria
     end
 
