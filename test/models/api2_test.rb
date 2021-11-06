@@ -493,6 +493,33 @@ class Api2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
+  def test_posting_api_key_where_key_already_exists
+    email_count = ActionMailer::Base.deliveries.size
+    api_key = api_keys(:rolfs_mo_app_api_key)
+    @for_user = rolf
+    @app = api_key.notes
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app,
+      for_user: @for_user.id,
+      password: "testpassword"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_list_equal([api_key], api.results)
+    assert_api_fail(params.merge(password: "bogus"))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+
+    api_key.update(verified: nil)
+    assert_nil(api_key.reload.verified)
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_not_nil(api_key.reload.verified)
+  end
+
   def test_patching_api_keys
     params = {
       method: :patch,
