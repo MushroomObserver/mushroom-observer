@@ -1,0 +1,70 @@
+# Use the file format compatible with Docker Compose 3.8
+version: "3.8"
+
+# Each thing that Docker Compose runs is referred to as
+# a "service". In our case, our Rails application is one
+# service ("web") and our MySQL database instance
+# is another service ("database").
+services:
+
+  database:
+    # Use the mysql 8.0.27 base image for this container.
+    image: mysql:8.0.27
+    
+    command: --default-authentication-plugin=mysql_native_password
+
+    environment:
+      MYSQL_ROOT_PASSWORD: mo
+      MYSQL_DATABASE: mo_development
+      MYSQL_USER: mo
+      MYSQL_PASSWORD: mo
+
+    volumes:
+      # We need to tell Docker where on the MySQL
+      # container we want to keep the MySQL data.
+      # In this case we're telling it to use a directory
+      # called /var/lib/mysql/data, although it
+      # conceivably could have been something else.
+      #
+      # We're associating this directory with something
+      # called a volume. (You can see all your Docker
+      # volumes by running +docker volume ls+.) The name
+      # of our volume is db_data.
+      - db_data:/var/lib/mysql
+
+  web:
+    # The root directory from which we're building.
+    build: .
+
+    # This makes it so any code changes inside the project
+    # directory get synced with Docker. Without this line,
+    # we'd have to restart the container every time we
+    # changed a file.
+    volumes:
+      - .:/code:cached
+
+    # The command to be run when we run "docker-compose up".
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+
+    # Expose port 3000.
+    ports:
+      - "3000:3000"
+
+    # Specify that this container depends on the other
+    # container which we've called "database".
+    depends_on:
+      - database
+
+    # Specify the values of the environment variables
+    # used in this container.
+    environment:
+      RAILS_ENV: development
+      DATABASE_NAME: mo_development
+      DATABASE_USER: mo
+      DATABASE_PASSWORD: mo
+      DATABASE_HOST: database
+
+
+# Declare the volumes that our application uses.
+volumes:
+  db_data:

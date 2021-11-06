@@ -1,0 +1,48 @@
+From example: https://www.codewithjason.com/dockerize-rails-application/
+
+Run:
+
+docker-compose build
+docker-compose up
+
+Then:
+
+docker-compose run web rake db:setup
+
+---
+
+Issues:
+
+* config/database.yml needs to be created
+
+Contents:
+v-----------------------------------------------------v
+default: &default
+  adapter: mysql2
+  encoding: utf8
+  database: <%= ENV['DATABASE_NAME'] %>
+  username: <%= ENV['DATABASE_USER'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  port: 3306
+  host: <%= ENV['DATABASE_HOST'] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
+^-----------------------------------------------------^
+
+* gmaps_api_key.yml needs to be supplied
+
+Workaround: Create a dummy one from the template
+Resolution: Provide secrets as necessary
+
+* Locale isn't set
+
+Note: Have not fixed this yet
