@@ -1,0 +1,116 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+# Building a Rails CI pipeline with GitHub Actions https://bit.ly/3BRTq5n 
+# High-level tasks. 
+#  Checks out the latest version of the code
+#  Sets up a base image with Ruby, Node, and some browser testing stuff
+#  Sets up a PostgreSQL database service
+#  Installs dependencies (bundler, yarn, npm) and
+#  cache the results to speed up builds when they don’t change
+#  Sets up the test database
+#  Runs any linters/checkers (rubocop, eslint, brakeman, etc)
+#  Runs the tests
+
+name: Continuous Integration
+
+on: 
+  push:
+    # branches: master
+    branches: 
+      - "*" # Run on pushes on all branches
+  pull_request:
+    branches: master
+
+jobs:
+  test:
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # focal
+    # strategy:
+      # matrix:
+        # ruby-version: ['2.6', '2.7', '3.0']
+        # ruby-version: ['2.6.6']
+
+    # https://ovirium.com/blog/how-to-make-mysql-work-in-your-github-actions/
+    # Unused at the moment
+    env:
+      DB_DATABASE: test_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+    steps:
+    # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
+    # https://github.com/actions/checkout
+    - name: Checkout code
+      uses: actions/checkout@v2  
+
+    # https://boringrails.com/articles/building-a-rails-ci-pipeline-with-github-actions/
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+
+    # .travis.yml before_install
+    - name: Install additional tools
+      run: sudo apt-get install exiftool
+
+    # MySQL is installed but does not run by default
+    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
+    - name: Start mySQL
+      run: sudo systemctl start mysql.service
+      
+    # travis.yml before_install calls script/travis_setup
+
+    # from travis_setup
+    - name: Create and configure db
+      run: |
+        mysql -u mo -pmo mo_development -e '' 
+        mysql -u root < db/initialize.sql
+        cp db/vagrant/database.yml config
+      
+    # from travis_setup
+    - name: Configure gmaps api key
+      run: |
+        cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
+
+    # from travis_setup
+    - name: Create test image directories
+      run: |
+        for dir in images test_images;
+        do
+            for subdir in thumb 320 640 960 1280 orig;
+            do
+              mkdir -p public/$dir/$subdir
+            done
+        done
+
+    # from travis_setup
+    - name: install exifautotran
+      run: | 
+        sudo cp script/exifautotran /usr/local/bin/exifautotran
+        sudo chmod 755 /usr/local/bin/exifautotran
+
+    # from travis_setup
+    - name: install gems
+      run: | 
+        git pull
+        gem install bundler
+        bundle install
+
+    # from .travis.yml before_script
+    - name: Load fixtures
+      run: |
+        rake db:schema:load
+        rake db:fixtures:load
+
+    # from .travis.yml before_script
+    - name: Update translation files
+      run: rake lang:update
+
+    # And finally we can run the test suite
+    - name: Run tests
+      run: rails t
