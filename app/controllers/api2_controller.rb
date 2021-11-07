@@ -92,6 +92,7 @@ class Api2Controller < ApplicationController
     if request.method == "POST"
       if args[:upload].present?
         args[:upload] = upload_from_multipart_form_data(args[:upload])
+        logger.warn("API UPLOAD: #{args[:upload].inspect}")
       elsif is_request_body_an_upload?
         args[:upload] = upload_from_request_body
       end
