@@ -68,7 +68,7 @@ jobs:
     # from travis_setup
     - name: Create and configure db
       run: |
-        mysql -u mo -pmo mo_development -e '' 
+        # mysql -u mo -pmo mo_development -e '' 
         mysql -u root < db/initialize.sql
         cp db/vagrant/database.yml config
       
