@@ -216,6 +216,18 @@ class Api2ControllerTest < FunctionalTestCase
     assert_obj_list_equal([], img.observations)
   end
 
+  def test_post_minimal_image_via_multipart_form_data
+    setup_image_dirs
+    count = Image.count
+    file = "#{::Rails.root}/test/images/sticky.jpg"
+    File.stub(:rename, false) do
+      post(:images, api_key: api_keys(:rolfs_api_key).key,
+                    upload: Rack::Test::UploadedFile.new(file, "image/jpeg"))
+    end
+    assert_no_api_errors
+    assert_equal(count + 1, Image.count)
+  end
+
   def test_post_maximal_image
     setup_image_dirs
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
