@@ -63,8 +63,7 @@ jobs:
     - name: Start mySQL
       run: sudo systemctl start mysql.service
       
-    # travis.yml before_install calls script/travis_setup
-
+    # travis.yml before_install invokes script/travis_setup
     # from travis_setup
     - name: Create and configure db
       run: |
@@ -112,3 +111,9 @@ jobs:
     # And finally we can run the test suite
     - name: Run tests
       run: bundle exec rails test
+
+    # https://github.com/marketplace/actions/coveralls-github-action
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
