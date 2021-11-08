@@ -96,7 +96,6 @@ jobs:
     # from travis_setup
     - name: install gems
       run: | 
-        git pull
         gem install bundler
         bundle install
 
