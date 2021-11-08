@@ -111,4 +111,4 @@ jobs:
 
     # And finally we can run the test suite
     - name: Run tests
-      run: rails t
+      run: bundle exec rails test
