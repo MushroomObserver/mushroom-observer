@@ -40,41 +40,49 @@ module Resolvers
       if value[:when]
         observation_when = ::Observation.arel_table[:when]
         scope = if value[:before]
-                  scope.where(observation_when.lt(value[:when]))
+                  scope.where(observation_when.lteq(value[:when]))
                 else
-                  scope.where(observation_when.gt(value[:when]))
+                  scope.where(observation_when.gteq(value[:when]))
                 end
       end
-      # if value[:notes_like]
-      #   scope = scope.where("notes LIKE ?", escape_search_term(value[:notes_like]))
-      # end
-      # case value[:with_image]
-      # when true
-      #   # puts("___________________________#{value[:with_image]} IMAGE")
-      #   scope = scope.where.not("thumb_image_id IS NOT NULL")
-      # when false
-      #   # puts("___________________________#{value[:with_image]} IMAGE")
-      #   scope = scope.where("thumb_image_id IS NULL")
-      # else
-      #   # puts("___________________________EITHER IMAGE")
-      # end
-      # case value[:with_specimen]
-      # when true
-      #   scope = scope.where("specimen IS TRUE")
-      # when false
-      #   # puts("___________________________#{value[:with_specimen]} SPECIMEN")
-      #   scope = scope.where("specimen IS FALSE")
-      # end
-      # case value[:with_lichen]
-      # # Note the critical difference -- the extra spaces in the negative
-      # # version.  This allows all lifeforms containing the word "lichen" to be
-      # # selected for in the positive version, but only excudes the one lifeform
-      # # in the negative.
-      # when true
-      #   scope = scope.where("lifeform LIKE '%lichen%'")
-      # when false
-      #   scope = scope.where("lifeform NOT LIKE '% lichen %'")
-      # end
+      if value[:notes_like]
+        observation_notes = ::Observation.arel_table[:notes]
+        scope = scope.where(observation_where.matches("%#{value[:notes_like]}%"))
+      end
+      if value[:with_image]
+        observation_image = ::Observation.arel_table[:thumb_image_id]
+        case value[:with_image]
+        when true
+          # puts("___________________________#{value[:with_image]} IMAGE")
+          scope = scope.where(observation_image.not_eq(nil))
+        when false
+          # puts("___________________________#{value[:with_image]} IMAGE")
+          scope = scope.where(observation_image.eq(nil))
+        end
+      end
+      if value[:with_specimen]
+        observation_specimen = ::Observation.arel_table[:specimen]
+        case value[:with_specimen]
+        when true
+          scope = scope.where(observation_specimen.eq(true))
+        when false
+          # puts("___________________________#{value[:with_specimen]} SPECIMEN")
+          scope = scope.where(observation_specimen.eq(false))
+        end
+      end
+      if value[:with_lichen]
+        observation_lifeform = ::Observation.arel_table[:lifeform]
+        case value[:with_lichen]
+        # Note the critical difference -- the extra spaces in the negative
+        # version.  This allows all lifeforms containing the word "lichen" to be
+        # selected for in the positive version, but only excudes the one lifeform
+        # in the negative.
+        when true
+          scope = scope.where(observation_lifeform.matches("%lichen%"))
+        when false
+          scope = scope.where(observation_lifeform.does_not_match("% lichen %"))
+        end
+      end
       scope
     end
 

@@ -47,8 +47,8 @@ module Types::Models
     field :collection_numbers, [Types::Models::CollectionNumberType], null: true
     field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
 
-    def user
-      RecordLoader.for(User).load(object.user_id)
+    def location
+      RecordLoader.for(Location).load(object.location_id)
     end
 
     def name
@@ -57,6 +57,14 @@ module Types::Models
 
     def rss_log
       RecordLoader.for(RssLog).load(object.rss_log_id)
+    end
+
+    def thumb_image
+      RecordLoader.for(Image).load(object.thumb_image_id)
+    end
+
+    def user
+      RecordLoader.for(User).load(object.user_id)
     end
 
     # custom fields
