@@ -200,6 +200,11 @@ gem("ar_lazy_preload")
 
 # Pagination & Connection gems
 
+# Allows cursor pagination through an ActiveRecord relation.
+# Supports ordering by any column, ascending or descending.
+# https://github.com/xing/rails_cursor_pagination
+gem("rails_cursor_pagination")
+
 # Additional implementations of cursor-based paginations for GraphQL Ruby.
 # Extends classes of graphql-ruby
 # https://github.com/bibendi/graphql-connections

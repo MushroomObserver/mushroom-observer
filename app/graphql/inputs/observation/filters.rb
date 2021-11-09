@@ -16,7 +16,7 @@ module Inputs::Observation
     # alternative: search for string in user.name? expensive query
     # argument :user_like, String, required: false
     # must search string for location, becase locations are not nested.
-    argument :where, String, required: false # where == location.name
+    argument :location_like, String, required: false # where == location.name
     argument :before, Boolean, required: false
     argument :when, GraphQL::Types::ISO8601Date, required: false
     argument :notes_like, String, required: false

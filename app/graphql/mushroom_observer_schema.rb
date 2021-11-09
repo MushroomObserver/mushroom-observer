@@ -4,7 +4,7 @@ class MushroomObserverSchema < GraphQL::Schema
   # subscription(Types::Subscription)
 
   default_max_page_size 24
-  # https://github.com/bibendi/graphql-connections - this d
+  # https://github.com/bibendi/graphql-connections
   # https://relay.dev/graphql/connections.htm
   # connections.add(ActiveRecord::Relation, GraphQL::Connections::Stable)
 

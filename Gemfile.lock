@@ -229,6 +229,8 @@ GEM
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.3.0)
       loofah (~> 2.3)
+    rails_cursor_pagination (0.2.0)
+      activerecord (>= 5.0)
     rails_db (2.4.1)
       activerecord
       kaminari
@@ -384,6 +386,7 @@ DEPENDENCIES
   rack-cors
   rails (~> 5.2.2)
   rails-controller-testing
+  rails_cursor_pagination
   rails_db
   rtf
   rubocop (= 0.89)
