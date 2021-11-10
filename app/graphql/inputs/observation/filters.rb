@@ -24,6 +24,6 @@ module Inputs::Observation
     argument :with_specimen, Boolean, required: false # with, without or either
     argument :with_lichen, Boolean, required: false # with, without or either
     # argument :orderby, Types::Enums::OrderBy, required: false
-    # argument :order, Boolean, required: false
+    # argument :order, Types::Enums::Order, required: false
   end
 end

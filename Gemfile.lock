@@ -14,11 +14,6 @@ GIT
       railties
       sprockets-rails
 
-PATH
-  remote: ../graphql-sugar
-  specs:
-    graphql-sugar (0.1.7a)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -288,10 +283,6 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
-    search_object (1.2.4)
-    search_object_graphql (1.0.2)
-      graphql (~> 1.8)
-      search_object (~> 1.2.2)
     simple_enum (2.3.2)
       activesupport (>= 4.0.0)
     simple_form (5.1.0)
@@ -369,7 +360,6 @@ DEPENDENCIES
   graphql
   graphql-batch
   graphql-connections
-  graphql-sugar!
   i18n
   jbuilder
   jquery-rails
@@ -395,8 +385,6 @@ DEPENDENCIES
   rubocop-rails
   rubyzip
   sassc-rails
-  search_object
-  search_object_graphql
   simple_enum
   spring
   spring-watcher-listen (~> 2.0.0)
