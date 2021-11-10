@@ -144,17 +144,18 @@ gem("rubocop-graphql", require: false)
 # Takes two GraphQL schemas and outputs a list of changes between versions
 # gem("graphql-schema_comparator")
 
-# Search Object (and GraphQL extension) for filtering queries
+# Search Object (and GraphQL extension) for filtering queries.
+# NOTE: Does not work with connections
 # https://github.com/RStankov/SearchObjectGraphQL
-gem("search_object")
-gem("search_object_graphql")
+# gem("search_object")
+# gem("search_object_graphql")
 
 # A sweet, extended DSL written on top of the graphql-ruby gem. Outdated! :(
 # Easily write object and input types that are backed by ActiveRecord models
 # Easily write resolvers and mutators to encapsulate query and mutation logic
 # https://github.com/keepworks/graphql-sugar
 # https://github.com/keepworks/graphql-sugar/issues/7
-gem("graphql-sugar", path: "../graphql-sugar")
+# gem("graphql-sugar", path: "../graphql-sugar")
 
 # Dataloading gems
 # Note that dataloader comes shipped with graphql gem as of 1.12
