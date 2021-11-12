@@ -312,6 +312,7 @@ DEPENDENCIES
   rubyzip
   sassc-rails
   simple_enum
+  simplecov
   simplecov-lcov
   sprockets
   uglifier
