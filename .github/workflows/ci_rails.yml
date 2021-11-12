@@ -52,7 +52,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        bundler-cache: true
+        bundler-cache: true # runs bundle install, caches gems
 
     # .travis.yml before_install
     - name: Install additional tools
@@ -91,12 +91,6 @@ jobs:
       run: | 
         sudo cp script/exifautotran /usr/local/bin/exifautotran
         sudo chmod 755 /usr/local/bin/exifautotran
-
-    # from travis_setup
-    - name: install gems
-      run: | 
-        gem install bundler
-        bundle install
 
     # from .travis.yml before_script
     - name: Load fixtures
