@@ -112,7 +112,9 @@ gem("web-console", group: :development)
 # Use coveralls_reborn gem instead of coveralls gem
 # With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
 # when Travis submits the coverage report to Coveralls
-gem("coveralls_reborn", "~> 0.20.0", require: false)
+gem("coveralls_reborn", "~> 0.23.0", require: false)
+# gem to generate lcov file to send to Coveralls by Github Actions
+gem("simplecov-lcov")
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
