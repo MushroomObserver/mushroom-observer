@@ -24,10 +24,10 @@ if ENV["CI"] == "true"
     config.lcov_file_name = "lcov.info"
   end
 
-  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-    SimpleCov::Formatter::LcovFormatter,
-    Coveralls::SimpleCov::Formatter
-  ])
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+    [SimpleCov::Formatter::LcovFormatter,
+     Coveralls::SimpleCov::Formatter]
+  )
 else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
