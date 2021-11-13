@@ -1,21 +1,5 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
-# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
-
-# Building a Rails CI pipeline with GitHub Actions https://bit.ly/3BRTq5n 
-# High-level tasks. 
-#  Checks out the latest version of the code
-#  Sets up a base image with Ruby, Node, and some browser testing stuff
-#  Sets up a PostgreSQL database service
-#  Installs dependencies (bundler, yarn, npm) and
-#  cache the results to speed up builds when they don’t change
-#  Sets up the test database
-#  Runs any linters/checkers (rubocop, eslint, brakeman, etc)
-#  Runs the tests
-
+# GitHub Actions Continuous Integration of MO Rails Code
+# Runs the tests and publishes the results to Coveralls
 name: Continuous Integration
 
 on: 
@@ -28,33 +12,19 @@ on:
 
 jobs:
   test:
-    # runs-on: ubuntu-latest
-    runs-on: ubuntu-20.04 # focal
-    # strategy:
-      # matrix:
-        # ruby-version: ['2.6', '2.7', '3.0']
-        # ruby-version: ['2.6.6']
-
-    # https://ovirium.com/blog/how-to-make-mysql-work-in-your-github-actions/
-    # Unused at the moment
-    env:
-      DB_DATABASE: test_db
-      DB_USER: root
-      DB_PASSWORD: root
-
+    runs-on: ubuntu-20.04 # focal, includes MySQL 5.8
     steps:
     # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
     # https://github.com/actions/checkout
     - name: Checkout code
       uses: actions/checkout@v2  
 
-    # https://boringrails.com/articles/building-a-rails-ci-pipeline-with-github-actions/
+    # https://github.com/actions/setup-ruby
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true # runs bundle install, caches gems
 
-    # .travis.yml before_install
     - name: Install additional tools
       run: sudo apt-get install exiftool
 
@@ -63,19 +33,15 @@ jobs:
     - name: Start mySQL
       run: sudo systemctl start mysql.service
       
-    # travis.yml before_install invokes script/travis_setup
-    # from travis_setup
     - name: Create and configure db
       run: |
         mysql -u root -proot < db/initialize.sql
         cp db/vagrant/database.yml config
       
-    # from travis_setup
     - name: Configure gmaps api key
       run: |
         cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
 
-    # from travis_setup
     - name: Create test image directories
       run: |
         for dir in images test_images;
@@ -86,19 +52,16 @@ jobs:
             done
         done
 
-    # from travis_setup
     - name: install exifautotran
       run: | 
         sudo cp script/exifautotran /usr/local/bin/exifautotran
         sudo chmod 755 /usr/local/bin/exifautotran
 
-    # from .travis.yml before_script
     - name: Load fixtures
       run: |
         bundle exec rake db:schema:load
         bundle exec rake db:fixtures:load
 
-    # from .travis.yml before_script
     - name: Update translation files
       run: bundle exec rake lang:update
 
