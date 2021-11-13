@@ -98,11 +98,6 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.1.8)
-    coveralls_reborn (0.23.0)
-      simplecov (>= 0.18.1, < 0.22.0)
-      term-ansicolor (~> 1.6)
-      thor (>= 0.20.3, < 2.0)
-      tins (~> 1.16)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
@@ -243,14 +238,9 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
-    sync (0.5.0)
-    term-ansicolor (1.7.1)
-      tins (~> 1.0)
     thor (1.1.0)
     thread_safe (0.3.6)
     tilt (2.0.10)
-    tins (1.29.1)
-      sync
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
     uglifier (4.2.0)
@@ -289,7 +279,6 @@ DEPENDENCIES
   byebug
   capybara
   coffee-rails
-  coveralls_reborn (~> 0.23.0)
   cure_acts_as_versioned!
   i18n
   jbuilder
