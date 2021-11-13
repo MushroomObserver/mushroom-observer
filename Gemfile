@@ -112,8 +112,6 @@ gem("web-console", group: :development)
 gem("simplecov", require: false)
 # generate lcov file to send to Coveralls by Github Actions
 gem("simplecov-lcov", require: false)
-# Automatically track code test coverage
-gem("coveralls_reborn", "~> 0.23.0", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/

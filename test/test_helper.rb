@@ -14,7 +14,6 @@
 # Code to allow Coveralls exor local coverage reports.  See:
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
-require("coveralls")
 require("simplecov")
 require("simplecov-lcov")
 
