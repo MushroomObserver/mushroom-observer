@@ -108,11 +108,10 @@ gem("byebug", group: [:development, :test])
 # Calling `console` creates irb session in the browser (instead of the terminal)
 gem("web-console", group: :development)
 
-# Automatically track code test coverage
-# Use coveralls_reborn gem instead of coveralls gem
-# With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
-# when Travis submits the coverage report to Coveralls
-gem("coveralls_reborn", "~> 0.20.0", require: false)
+# Use built-in Ruby coverage to generate html coverage file
+gem("simplecov", require: false)
+# generate lcov file to send to Coveralls by Github Actions
+gem("simplecov-lcov", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
