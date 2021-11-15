@@ -2,6 +2,9 @@
 
 source("https://rubygems.org")
 
+# security fix for CVE-2021-41817 regex denial of service vulnerability
+gem("date", ">= 3.2.1")
+
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
