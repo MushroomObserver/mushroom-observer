@@ -101,6 +101,7 @@ GEM
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
+    date (3.2.1)
     docile (1.4.0)
     erubi (1.10.0)
     execjs (2.7.0)
@@ -280,6 +281,7 @@ DEPENDENCIES
   capybara
   coffee-rails
   cure_acts_as_versioned!
+  date (>= 3.2.1)
   i18n
   jbuilder
   jquery-rails
