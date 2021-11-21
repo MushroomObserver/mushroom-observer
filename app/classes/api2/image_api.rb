@@ -126,7 +126,7 @@ class API2
         upload_length: @upload.content_length,
         upload_type: @upload.content_type,
         upload_md5sum: @upload.content_md5
-      }
+      }.compact
     end
   end
 end
