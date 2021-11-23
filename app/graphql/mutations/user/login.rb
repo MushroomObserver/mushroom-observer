@@ -6,11 +6,14 @@ module Mutations::User
   class Login < Mutations::BaseMutation
     description "Login a user"
 
+    # RelayClassicMutation only accepts single input
     input_object_class Inputs::User::Login
 
     field :token, String, null: true
     field :user, Types::Models::UserType, null: true
 
+    # was resolve(**arguments), authenticate(arguments.except)
+    # def resolve(credentials: nil, token: nil, user: nil)
     def resolve(**arguments)
       user = User.authenticate(arguments.except(:remember_me))
 

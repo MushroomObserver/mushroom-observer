@@ -14,7 +14,7 @@ module Inputs::Observation
     # use select w/ autocomplete and force an ID
     argument :user_id, Integer, required: false
     # alternative: search for string in user.name? expensive query
-    # argument :user_like, String, required: false
+    argument :user_like, String, required: false
     # must search string for location, becase locations are not nested.
     argument :location_like, String, required: false # where == location.name
     argument :before, Boolean, required: false
@@ -23,7 +23,7 @@ module Inputs::Observation
     argument :with_image, Boolean, required: false # with, without, or either
     argument :with_specimen, Boolean, required: false # with, without or either
     argument :with_lichen, Boolean, required: false # with, without or either
-    # argument :orderby, Types::Enums::OrderBy, required: false
-    # argument :order, Types::Enums::Order, required: false
+    argument :order_by, Types::Enums::OrderBy, required: false
+    argument :order, Types::Enums::Order, required: false
   end
 end

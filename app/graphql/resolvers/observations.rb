@@ -6,12 +6,12 @@ module Resolvers
     description "List or filter all observations"
 
     argument :filter, type: Inputs::Observation::Filters, required: false
-    argument :order_by, type: Types::Enums::OrderBy, required: false
-    argument :order, type: Types::Enums::Order, required: false
 
-    def resolve(filter: nil, order_by: "WHEN", order: "DESC")
+    def resolve(filter: nil)
       observations = ::Observation.arel_table
       scope = ::Observation.select(observations[Arel.star])
+      column_name = "when"
+      desc = true
 
       if filter
         if filter[:name_id]
@@ -72,33 +72,33 @@ module Resolvers
             scope = scope.where(observation[:lifeform].does_not_match("% lichen %"))
           end
         end
-      end
 
-      column_name = if order_by
-                      case order_by
-                      when "CREATED_AT"
-                        "created_at"
-                      when "UPDATED_AT"
-                        "updated_at"
-                      when "TEXT_NAME"
-                        "text_name"
+        column_name = if filter[:order_by]
+                        case filter[:order_by]
+                        when "CREATED_AT"
+                          "created_at"
+                        when "UPDATED_AT"
+                          "updated_at"
+                        when "TEXT_NAME"
+                          "text_name"
+                        else
+                          "when"
+                        end
                       else
                         "when"
-                                    end
-                    else
-                      "when"
-                    end
+                      end
 
-      desc = if order
-               case order
-               when "ASC"
-                 false
-               when "DESC"
+        desc = if filter[:order]
+                 case filter[:order]
+                 when "ASC"
+                   false
+                 when "DESC"
+                   true
+                 end
+               else
                  true
                end
-             else
-               true
-             end
+      end
 
       GraphQL::Connections::Stable.new(scope, keys: %W[#{column_name} id], desc: desc)
     end

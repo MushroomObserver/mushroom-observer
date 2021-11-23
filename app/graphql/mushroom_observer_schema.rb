@@ -1,3 +1,6 @@
+# frozen_string_literal = true
+# rails graphql:dump_schema
+
 class MushroomObserverSchema < GraphQL::Schema
   query(Types::QueryType)
   mutation(Types::MutationType)

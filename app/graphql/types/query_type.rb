@@ -43,7 +43,8 @@ module Types
     # field :notification, resolver: Queries::Notification
     # field :notifications, resolver: Resolvers::Notifications
     field :observation, resolver: Queries::Observation
-    field :observations, Types::Models::ObservationType.connection_type, null: false, resolver: Resolvers::Observations
+    field :observations, Types::Models::ObservationType.connection_type,
+          null: false, resolver: Resolvers::Observations
     # field :observation_view, resolver: Queries::ObservationView
     # field :observation_views, resolver: Resolvers::ObservationViews
     # field :project, resolver: Queries::Project
@@ -61,7 +62,8 @@ module Types
     # field :user_group, resolver: Queries::UserGroup
     # field :user_groups, resolver: Resolvers::UserGroups
     field :user, resolver: Queries::User
-    field :users, Types::Models::UserType.connection_type, null: false, resolver: Queries::Users
+    field :users, Types::Models::UserType.connection_type, null: false,
+                                                           resolver: Queries::Users
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes
 
