@@ -4,7 +4,8 @@ module Mutations::User
   class Update < Mutations::BaseMutation
     description "Update user profile"
 
-    input_object_class Inputs::User::Update
+    # input_object_class Inputs::User::Update
+    # argument :input, Inputs::User::Update, required: true
 
     type Types::Models::UserType
 

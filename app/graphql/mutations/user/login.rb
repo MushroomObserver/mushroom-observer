@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 
-# frozen_string_literal: true
-
 module Mutations::User
   class Login < Mutations::BaseMutation
     description "Login a user"
 
     # RelayClassicMutation only accepts single input
-    input_object_class Inputs::User::Login
+    # input_object_class Inputs::User::Login
+    argument :input, Inputs::User::Login, required: true
 
     field :token, String, null: true
     field :user, Types::Models::UserType, null: true
 
-    # was resolve(**arguments), authenticate(arguments.except)
+    # was resolve(**arguments), authenticate(arguments.except(:remember_me))
     # def resolve(credentials: nil, token: nil, user: nil)
-    def resolve(**arguments)
-      user = User.authenticate(arguments.except(:remember_me))
+    def resolve(input: nil, token: nil, user: nil)
+      user = User.authenticate(**input)
 
       return {} unless user
 

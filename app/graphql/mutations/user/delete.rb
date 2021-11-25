@@ -6,7 +6,8 @@ module Mutations::User
     # check logged in
     # check_logged_in!
 
-    # input_object_class Inputs::DeleteUserInput
+    # input_object_class Inputs::User::Delete
+    # argument :input, Inputs::User::Delete, required: true
 
     # define return fields. deleted so no?
     field :user, Types::Models::UserType, null: false
