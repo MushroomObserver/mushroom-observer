@@ -161,7 +161,7 @@ class RssLog < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "observer"
+    "/observer"
   end
 
   # List of all object types that can have RssLog's.  (This is the order they
