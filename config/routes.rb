@@ -577,6 +577,12 @@ def route_actions_hash
             action: action,
             via: [:get, :post],
             id: /\d+/
+      if controller =~ /^api/
+        patch "#{controller}/#{action}", controller: controller,
+              action: action
+        delete "#{controller}/#{action}", controller: controller,
+              action: action
+      end
     end
   end
 end
@@ -736,8 +742,4 @@ MushroomObserver::Application.routes.draw do
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "theme/#{scheme}" }
-
-  # accept API DELETE requests
-  delete("/api/:action", controller: "api", action: /\w+/)
-  delete("/api2/:action", controller: "api2", action: /\w+/)
 end
