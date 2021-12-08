@@ -736,4 +736,8 @@ MushroomObserver::Application.routes.draw do
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "theme/#{scheme}" }
+
+  # accept API DELETE requests
+  delete("/api/:action", controller: "api", action: /\w+/)
+  delete("/api2/:action", controller: "api2", action: /\w+/)
 end
