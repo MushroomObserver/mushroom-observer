@@ -370,4 +370,11 @@ class Api2ControllerTest < FunctionalTestCase
     get(:observations, date: "2100-01-01", format: :xml, detail: :none)
     get(:observations, date: "2100-01-01", format: :xml, detail: :high)
   end
+
+  def test_routing
+    assert_routing({ path: "/api2/comments", method: :delete },
+                   { controller: "api2", action: "comments" })
+    assert_routing({ path: "/api2/comments", method: :patch },
+                   { controller: "api2", action: "comments" })
+  end
 end
