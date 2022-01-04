@@ -1,0 +1,23 @@
+# SENSITIVE INFORMATION: This file should not be checked into subversion
+
+shared: &shared
+  adapter: mysql2
+  encoding: utf8
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: mo
+  password: mo
+  host: mo_db
+  variables:
+    sql_mode: TRADITIONAL
+
+development:
+  <<: *default
+  database: mo_development
+
+test:
+  <<: *default
+  database: mo_test
+
+production:
+  <<: *default
+  database: mo_development
