@@ -1,7 +1,7 @@
 FROM ruby:2.6.8
 
 ENV LANG C.UTF-8
-ENV APP_HOME /numbatApp
+ENV APP_HOME /moApp
 
 RUN apt-get update -qq && apt-get install -y build-essential nodejs npm python locales && npm install --global yarn && update-locale en_US.UTF-8
 RUN rm -rf /var/lib/apt/lists/*
