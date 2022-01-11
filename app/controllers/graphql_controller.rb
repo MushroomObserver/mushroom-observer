@@ -34,6 +34,8 @@ class GraphqlController < ApplicationController
       # valid_locale_from_request_header: valid_locale_from_request_header
     }
     result = MushroomObserverSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+    puts("context")
+    pp(context)
     render(json: result)
   rescue StandardError => e
     raise(e) unless Rails.env.development?
@@ -49,11 +51,27 @@ class GraphqlController < ApplicationController
     # if we want to change the sign-in strategy, this is the place to do it
 
     crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-    token = crypt.decrypt_and_verify(session[:token])
+    # token = crypt.decrypt_and_verify(session[:token])
+
+    token = crypt.decrypt_and_verify(http_auth_header)
     user_id = token.gsub("user-id:", "").to_i
 
     User.safe_find(user_id)
   rescue ActiveSupport::MessageVerifier::InvalidSignature
+    nil
+  end
+
+  # https://www.pluralsight.com/guides/token-based-authentication-with-ruby-on-rails-5-api
+  def http_auth_header
+    headers = request.headers
+    if headers["authorization"].present?
+      return headers["authorization"].split(" ").last
+    else
+      # Don't error if there's no token, we're just checking
+      # errors.add(:token, "Missing token")
+      # raise(ArgumentError.new("Missing token"))
+    end
+
     nil
   end
 
