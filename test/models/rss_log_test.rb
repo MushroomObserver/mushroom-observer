@@ -28,34 +28,10 @@ class RssLogTest < UnitTestCase
 
   def test_details
     log = rss_logs(:observation_rss_log)
-    assert_equal(log.detail, "Updated Observation &amp; Notes")
-
-    log = rss_logs(:imged_unvouchered_obs_rss_log)
-    assert_equal(log.detail, "Updated Observation &amp; Notes")
-
-    log = rss_logs(:locally_sequenced_obs_rss_log)
-    assert_equal(log.detail, "Observation Created")
-
-    log = rss_logs(:species_list_rss_log)
-    assert_equal(log.detail, "Updated Species List")
-
-    log = rss_logs(:name_rss_log)
-    assert_equal(log.detail, "Updated Name")
-
-    log = rss_logs(:location_rss_log)
-    assert_equal(log.detail, "Updated Location")
-
-    log = rss_logs(:albion_rss_log)
-    assert_equal(log.detail, "Updated Created")
-
-    log = rss_logs(:glossary_term_rss_log)
-    assert_equal(log.detail, "Updated Glossary Term")
-
-    log = rss_logs(:project_rss_log)
-    assert_equal(log.detail, "Updated Project")
-
-    log = rss_logs(:article_rss_log)
-    assert_equal(log.detail, "Updated Article")
+    detail = log.detail
+    log_decode = RssLog.decode(log.notes)
+    assert_equal(:log_observation_created.t(user: "ignatz"), detail)
+    assert_equal(Time.parse("20090722075918"), log_decode[2])
   end
 
   # ---------- helpers ---------------------------------------------------------
