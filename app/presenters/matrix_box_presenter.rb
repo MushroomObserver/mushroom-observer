@@ -51,9 +51,10 @@ class MatrixBoxPresenter
                        link: { controller: target.show_controller,
                                action: target.show_action, id: target.id })
       end
-    return unless rss_log.detail
+    return unless tempDetail = rss_log.detail
 
-    self.detail = rss_log.detail
+    # To avoid calling rss_log.detail twice
+    self.detail = tempDetail
   end
 
   # Grabs all the information needed for view from Image instance.
