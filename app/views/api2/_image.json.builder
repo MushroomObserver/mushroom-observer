@@ -17,6 +17,7 @@ json.license(object.license.display_name.to_s)
 json.content_type(object.content_type.to_s)
 json.width(object.width) if object.width.present?
 json.height(object.height) if object.height.present?
+json.original_url(object.original_url)
 if !detail
   json.owner_id(object.user_id)
 else

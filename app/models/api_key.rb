@@ -7,7 +7,7 @@ class ApiKey < AbstractModel
   KEY_LENGTH = 32
 
   def self.show_controller
-    :account
+    "/account"
   end
 
   def self.index_action
