@@ -26,6 +26,38 @@ class RssLogTest < UnitTestCase
     assert_equal(:rss_log_of_deleted_item.l, log.orphan_title)
   end
 
+  def test_details
+    log = rss_logs(:observation_rss_log)
+    assert_equal(log.detail, "Updated Observation &amp; Notes")
+
+    log = rss_logs(:imged_unvouchered_obs_rss_log)
+    assert_equal(log.detail, "Updated Observation &amp; Notes")
+
+    log = rss_logs(:locally_sequenced_obs_rss_log)
+    assert_equal(log.detail, "Observation Created")
+
+    log = rss_logs(:species_list_rss_log)
+    assert_equal(log.detail, "Updated Species List")
+
+    log = rss_logs(:name_rss_log)
+    assert_equal(log.detail, "Updated Name")
+
+    log = rss_logs(:location_rss_log)
+    assert_equal(log.detail, "Updated Location")
+
+    log = rss_logs(:albion_rss_log)
+    assert_equal(log.detail, "Updated Created")
+
+    log = rss_logs(:glossary_term_rss_log)
+    assert_equal(log.detail, "Updated Glossary Term")
+
+    log = rss_logs(:project_rss_log)
+    assert_equal(log.detail, "Updated Project")
+
+    log = rss_logs(:article_rss_log)
+    assert_equal(log.detail, "Updated Article")
+  end
+
   # ---------- helpers ---------------------------------------------------------
 
   def normalized_rss_log_types
