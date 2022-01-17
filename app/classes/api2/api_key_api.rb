@@ -23,6 +23,22 @@ class API2
       raise(MissingParameter.new(:app)) if params[:notes].blank?
     end
 
+    # If the target user already has an API Key for this app, return that
+    # instead of creating a new key.
+    def before_create(params)
+      # Too dangerous if the app doesn't have the user's password.
+      return nil unless params[:verified]
+
+      existing_key = model.where(user: @for_user, notes: params[:notes]).last
+      return nil unless existing_key
+      return existing_key if existing_key.verified
+
+      # Make sure the key is verified, because it would have immediately
+      # verified the new key if there weren't a pre-existing key.
+      existing_key.update(verified: params[:verified])
+      existing_key
+    end
+
     def after_create(api_key)
       return if api_key.verified
 

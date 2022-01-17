@@ -21,6 +21,7 @@ xml.tag!(
   xml_string(xml, :content_type, object.content_type)
   xml_integer(xml, :width, object.width)
   xml_integer(xml, :height, object.height)
+  xml_url(xml, :original_url, object.original_url)
   if !detail
     xml_minimal_object(xml, :owner, :user, object.user_id)
   else

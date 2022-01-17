@@ -35,6 +35,12 @@ module Api2Helper
     xml.tag!(tag, val.to_s, type: "string", content_type: "text/plain")
   end
 
+  def xml_url(xml, tag, val)
+    return if val.blank?
+
+    xml.tag!(tag, val.to_s, type: "url", content_type: "text/x-uri")
+  end
+
   def xml_html_string(xml, tag, val)
     return if val.blank?
 

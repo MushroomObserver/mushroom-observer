@@ -180,7 +180,7 @@ class Observation < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "observer"
+    "/observer"
   end
 
   def is_location?

@@ -1,0 +1,77 @@
+# GitHub Actions Continuous Integration of MO Rails Code
+# Runs the tests and publishes the results to Coveralls
+name: Continuous Integration
+
+on: 
+  push:
+    # branches: master
+    branches: 
+      - "*" # Run on pushes on all branches
+  pull_request:
+    branches: master
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04 # focal, includes MySQL 5.8
+    steps:
+    # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
+    # https://github.com/actions/checkout
+    - name: Checkout code
+      uses: actions/checkout@v2  
+
+    # https://github.com/actions/setup-ruby
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true # runs bundle install, caches gems
+
+    - name: Install additional tools
+      run: sudo apt-get install exiftool
+
+    # MySQL is installed but does not run by default
+    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
+    - name: Start mySQL
+      run: sudo systemctl start mysql.service
+      
+    - name: Create and configure db
+      run: |
+        mysql -u root -proot < db/initialize.sql
+        cp db/vagrant/database.yml config
+      
+    - name: Configure gmaps api key
+      run: |
+        cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
+
+    - name: Create test image directories
+      run: |
+        for dir in images test_images;
+        do
+            for subdir in thumb 320 640 960 1280 orig;
+            do
+              mkdir -p public/$dir/$subdir
+            done
+        done
+
+    - name: install exifautotran
+      run: | 
+        sudo cp script/exifautotran /usr/local/bin/exifautotran
+        sudo chmod 755 /usr/local/bin/exifautotran
+
+    - name: Load fixtures
+      run: |
+        bundle exec rake db:schema:load
+        bundle exec rake db:fixtures:load
+
+    - name: Update translation files
+      run: bundle exec rake lang:update
+
+    # And finally we can run the test suite
+    - name: Run tests
+      run: bundle exec rails test
+
+    # https://github.com/marketplace/actions/coveralls-github-action
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: ./coverage/lcov/lcov.info
