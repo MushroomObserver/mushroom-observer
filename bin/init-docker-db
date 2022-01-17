@@ -3,4 +3,3 @@
 rails db:environment:set RAILS_ENV=development
 rails db:schema:load
 rails db:fixtures:load
-rails lang:update
