@@ -105,9 +105,6 @@ gem("rubyzip")
 
 ########## Development, Testing, and Analysis ##################################
 
-# Use byebug as debugging gem
-gem("byebug", group: [:development, :test])
-
 # Use built-in Ruby coverage to generate html coverage file
 gem("simplecov", require: false)
 # generate lcov file to send to Coveralls by Github Actions
@@ -130,6 +127,11 @@ gem("rubocop-rails")
 
 # use mry to support safe updating of .rubocop.yml
 gem("mry", require: false)
+
+group :test, :development do
+  # Use byebug as debugging gem
+  gem "byebug"
+end
 
 group :test do
   # Use capybara to simulate user-browser interaction
