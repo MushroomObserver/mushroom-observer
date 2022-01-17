@@ -2,6 +2,9 @@
 
 source("https://rubygems.org")
 
+# security fix for CVE-2021-41817 regex denial of service vulnerability
+gem("date", ">= 3.2.1")
+
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
@@ -105,11 +108,10 @@ gem("rack-cors")
 
 ########## Development, Testing, and Analysis ##################################
 
-# Automatically track code test coverage
-# Use coveralls_reborn gem instead of coveralls gem
-# With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
-# when Travis submits the coverage report to Coveralls
-gem("coveralls_reborn", "~> 0.20.0", require: false)
+# Use built-in Ruby coverage to generate html coverage file
+gem("simplecov", require: false)
+# generate lcov file to send to Coveralls by Github Actions
+gem("simplecov-lcov", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
@@ -130,6 +132,9 @@ gem("rubocop-rails")
 gem("mry", require: false)
 
 # GraphQL API gems
+#
+# Note: Some of these gems are experimental at this point.
+#
 gem("graphql")
 
 # Rubocop extension for enforcing graphql-ruby best practices.
@@ -143,19 +148,6 @@ gem("rubocop-graphql", require: false)
 # Debug future changes in our GraphQL API
 # Takes two GraphQL schemas and outputs a list of changes between versions
 # gem("graphql-schema_comparator")
-
-# Search Object (and GraphQL extension) for filtering queries.
-# NOTE: Does not work with connections
-# https://github.com/RStankov/SearchObjectGraphQL
-# gem("search_object")
-# gem("search_object_graphql")
-
-# A sweet, extended DSL written on top of the graphql-ruby gem. Outdated! :(
-# Easily write object and input types that are backed by ActiveRecord models
-# Easily write resolvers and mutators to encapsulate query and mutation logic
-# https://github.com/keepworks/graphql-sugar
-# https://github.com/keepworks/graphql-sugar/issues/7
-# gem("graphql-sugar", path: "../graphql-sugar")
 
 # Dataloading gems
 # Note that dataloader comes shipped with graphql gem as of 1.12
@@ -222,6 +214,7 @@ group :test, :development do
   gem "byebug"
 
   # GraphiQL for GraphQL development
+  # Makes an IDE available to test graphql queries at '/graphiql/'
   gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
 end
 
@@ -261,7 +254,8 @@ group :development do
   # Listen for development
   gem "listen", ">= 3.0.5", "< 3.2"
 
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  # Spring speeds up development by keeping your application running in the
+  # background. Read more: https://github.com/rails/spring
   gem "spring"
   gem "spring-watcher-listen", "~> 2.0.0"
 end
