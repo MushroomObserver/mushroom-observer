@@ -31,7 +31,7 @@ class RssLogTest < UnitTestCase
     detail = log.detail
     log_decode = RssLog.decode(log.notes)
     assert_equal(:log_observation_created.t(user: "ignatz"), detail)
-    assert_equal(Time.zone.now.parse("20090722075918"), log_decode[2])
+    assert_equal(Time.parse("20090722075918"), log_decode[2])
   end
 
   # ---------- helpers ---------------------------------------------------------
