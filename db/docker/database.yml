@@ -11,13 +11,13 @@ shared: &shared
     sql_mode: TRADITIONAL
 
 development:
-  <<: *default
+  <<: *shared
   database: mo_development
 
 test:
-  <<: *default
+  <<: *shared
   database: mo_test
 
 production:
-  <<: *default
+  <<: *shared
   database: mo_development
