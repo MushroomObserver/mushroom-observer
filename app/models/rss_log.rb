@@ -374,13 +374,12 @@ class RssLog < AbstractModel
   def detail
     begin
       tag, args, time = parse_log.first
-      by = args[:user] ? " ".html_safe + :rss_by.t(user: args[:user]) : nil
     rescue StandardError
       []
     end
     if !target_type
       :rss_destroyed.t(type: :object)
-    elsif tag.to_s =~ /^log_#{target_type}_(merged|destroyed)/
+    elsif tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
       :rss_destroyed.t(type: target_type)
     elsif !time
       :rss_created_at.t(type: target_type)
