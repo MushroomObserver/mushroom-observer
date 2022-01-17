@@ -161,5 +161,5 @@ group :development do
   gem "web-console"
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem "rails_db", "2.2.1"
+  gem "rails_db", "~> 2.3.0"
 end
