@@ -17,7 +17,7 @@
     :rss, observer_rss_path, { title: :app_rss.l }
   ) %>
   <title><%= :app_title.l%>: <%= title_tag_contents(controller.action_name)%></title>
-  <link rel="SHORTCUT ICON" href="https://mushroomobserver.org/favicon.ico"/>
+  <link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
   <% if @canonical_url %>
   <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
   <% end %>
