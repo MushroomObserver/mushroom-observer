@@ -422,9 +422,7 @@ class RssLog < AbstractModel
     end
     args << "" if odd
     begin
-      time2 = Time.utc(time[0, 4], time[4, 2], time[6, 2],
-                       time[8, 2], time[10, 2], time[12, 2]).in_time_zone
-      time = time2
+      time = Time.parse(time).in_time_zone
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env.production?
