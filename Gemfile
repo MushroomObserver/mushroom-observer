@@ -249,7 +249,7 @@ group :development do
   # gem "graphql-rails-generators"
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem "rails_db"
+  gem "rails_db", "~> 2.3.0"
 
   # Listen for development
   gem "listen", ">= 3.0.5", "< 3.2"
