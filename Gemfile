@@ -166,6 +166,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the
   # background. Read more: https://github.com/rails/spring
   gem "spring", "~> 3.1.0"
+
   # Temporary: use a fork of spring-watcher-listen that allows using spring 3
   # https://github.com/rails/spring-watcher-listen/pull/26
   gem "spring-watcher-listen", github: "timdorr/spring-watcher-listen"
