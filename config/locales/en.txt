@@ -1106,23 +1106,17 @@
   log_object_accessioned: "[name] accessioned by [user]"
   log_object_added_by_user: "[Type] added by [user]."
   log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
-  log_object_added_no_user: "[Type] added."
   log_object_created_by_user: "[Type] created by [user]."
   log_object_created_by_user_with_name: "[Type] created by [user]: [name]"
-  log_object_created_no_user: "[Type] created."
   log_object_destroyed_by_user: "[Type] destroyed by [user]."
   log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]"
-  log_object_destroyed_no_user: "[Type] destroyed."
   log_object_merged_by_user: "[Type] merged into [that] by [user]."
-  log_object_merged_no_user: "[Type] merged into [that]."
   log_object_moved_by_user: "[Type] moved to [to] by [user]."
-  log_object_moved_no_user: "[Type] moved to [to]."
   log_object_removed_by_user: "[Type] removed by [user]."
   log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
   log_object_removed_no_user: "[Type] removed."
   log_object_updated_by_user: "[Type] updated by [user]."
   log_object_updated_by_user_with_name: "[Type] updated by [user]: [name]"
-  log_object_updated_no_user: "[Type] updated."
   log_orphan: "[Title]"
   log_published_description: "Description published by [user]: [name]"
   log_updated_by: Updated by [user].
@@ -1157,14 +1151,9 @@
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
-  log_image_created0: "[:log_object_added_no_user(type=:image)]"
-  log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
-  log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
   log_image_removed: "[:log_object_removed_by_user_with_name(type=:image)]"
-  log_image_reused0: "[:log_object_added_no_user(type=:image)]"
   log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
-  log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
   log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
   log_image_updated_at: "[:log_object_updated_by_user_with_name(type=:image)]"
   log_location_created: "[:log_object_created_by_user(type=:location)]"
@@ -1937,11 +1926,7 @@
   rss_created_at: "[TYPE] Created"
   rss_changed: "[TYPE] Changed"
   rss_destroyed: "[TYPE] Destroyed"
-  rss_consensus_changed: "Consensus changed from: [old]"
   rss_consensus_reached: Consensus established
-  rss_naming_created_at: "Name proposed by [user]: [name]"
-  rss_naming_destroyed: "Name proposal destroyed by [user]: [name]"
-  rss_naming_updated: "Name proposal updated by [user]: [name]"
 
   # shared/_textile_help
   general_textile_link: Can be formatted with <a href="/observer/textile" target="_new">Textile</a>.
@@ -4230,4 +4215,3 @@
   system_status_gc: GC
   system_status_textile_name_size: Textile name cache size
   system_status_title: Server Status
-

@@ -11,7 +11,7 @@
 observation_rss_log:
   observation: detailed_unknown_obs
   updated_at: 2006-03-02 21:14:00
-  notes: "Updated Observation & Notes"
+  notes: "20090722075918 log_observation_created user ignatz"
 
 imged_unvouchered_obs_rss_log:
   observation: imged_unvouchered_obs
@@ -20,8 +20,8 @@ imged_unvouchered_obs_rss_log:
 
 locally_sequenced_obs_rss_log:
   observation: locally_sequenced_obs
-  updated_at:  2004-03-02 20:14:02
-  notes:       ""
+  updated_at: 2004-03-02 20:14:02
+  notes: ""
 
 species_list_rss_log:
   species_list: first_species_list
