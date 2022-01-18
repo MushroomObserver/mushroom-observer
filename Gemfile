@@ -260,5 +260,5 @@ group :development do
   gem "spring-watcher-listen", github: "timdorr/spring-watcher-listen"
 
   # Listen for file changes in development
-  gem "listen", ">= 3.0.5", "< 3.2"
+  gem "listen", ">= 3.3.0", "< 4.0"
 end
