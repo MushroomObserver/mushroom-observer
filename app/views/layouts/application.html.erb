@@ -17,7 +17,7 @@
     :rss, observer_rss_path, { title: :app_rss.l }
   ) %>
   <title><%= :app_title.l%>: <%= title_tag_contents(controller.action_name)%></title>
-  <link rel="SHORTCUT ICON" href="https://mushroomobserver.org/favicon.ico"/>
+  <link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
   <% if @canonical_url %>
   <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
   <% end %>
@@ -61,7 +61,7 @@
 <div id="main_container" class="container-fluid">
 
   <!--CALLOUT_BANNER-->
-  <div class="row hidden-xs hidden-print">
+  <div class="row hidden-print">
     <div class="col-xs-12">
       <% if in_admin_mode? %>
         <div class="Admin">

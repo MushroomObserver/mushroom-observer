@@ -106,7 +106,8 @@ module Api2InlineHelper
                license: image.license.try(:display_name).to_s,
                notes: image.notes.to_s.tpl_nodiv,
                quality: image.vote_cache,
-               owner: json_user(image.user))
+               owner: json_user(image.user),
+               original_url: image.original_url)
   end
 
   def xml_image(xml, image)
@@ -115,6 +116,7 @@ module Api2InlineHelper
     xml_html_string(xml, :notes, image.notes.to_s.tpl_nodiv)
     xml_confidence_level(xml, :quality, image.vote_cache)
     xml_detailed_object(xml, :owner, image.user)
+    xml_url(xml, :original_url, image.original_url)
   end
 
   def json_location(location)

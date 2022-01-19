@@ -243,7 +243,7 @@ group :test do
 end
 
 group :development do
-  # Calling `console` creates irb session in the browser (instead of the terminal)
+  # Calling `console` creates irb session in the browser (instead of terminal)
   gem "web-console"
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/

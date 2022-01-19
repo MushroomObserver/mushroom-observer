@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Nested hash of permissible controllers and actions. Each entry as follows,
-# with missing element meaning use default
-# controller: {    # hash of controller ctions
+# with missing element meaning use default:
+#
+# controller: {    # hash of controller actions
 #   action_name: {    # hash of attributes for this action
 #     methods:  (array),  # allowed HTML methods, as symbols
 #                         # methods key omitted => default: [:get, :post]
@@ -12,6 +13,9 @@
 #     id_constraint: (string|regexp)  # any constraint on id, default: /d+/
 #   }
 # }
+#
+# Note that the hash of attributes is not yet actually used.
+#
 ACTIONS = {
   account: {
     activate_api_key: {},
@@ -461,31 +465,9 @@ ACTIONS = {
   }
 }.freeze
 
-AJAX_ACTIONS = %w[
-  api_key
-  auto_complete
-  exif
-  export
-  external_link
-  geocode
-  old_translation
-  pivotal
-  multi_image_template
-  create_image_object
-  vote
-].freeze
-
-LOOKUP_XXX_ID_ACTIONS = %w[
-  lookup_accepted_name
-  lookup_comment
-  lookup_image
-  lookup_location
-  lookup_name
-  lookup_observation
-  lookup_project
-  lookup_species_list
-  lookup_user
-].freeze
+# -------------------------------------------------------
+#  Deal with redirecting old routes to the modern ones.
+# -------------------------------------------------------
 
 ACTION_REDIRECTS = {
   create: {
@@ -563,6 +545,28 @@ def redirect_legacy_actions(old_controller: "",
   end
 end
 
+# ----------------------------
+#  Helpers.
+# ----------------------------
+
+# Array of "lookup_xxx" actions: these are all entry points mostly for
+# external sites.  For example, it lets an external site link directly to
+# the name page for "Amanita muscaria" without knowing the name_id of that
+# name.
+def lookup_xxx_id_actions
+  ACTIONS[:observer].keys.select do |action|
+    action.to_s.start_with?("lookup_")
+  end
+end
+
+# Get an array of API endpoints for all versions of API.
+def api_endpoints
+  ACTIONS.keys.select { |controller| controller.to_s.start_with?("api") }.
+    flat_map do |controller|
+      ACTIONS[controller].keys.map { |action| [controller, action] }
+    end
+end
+
 # declare routes for the actions in the ACTIONS hash
 def route_actions_hash
   ACTIONS.each do |controller, actions|
@@ -580,6 +584,10 @@ def route_actions_hash
     end
   end
 end
+
+# -----------------------------------------------------
+#  This is where our routes are actually established.
+# -----------------------------------------------------
 
 MushroomObserver::Application.routes.draw do
   # GraphQL development additions
@@ -727,13 +735,19 @@ MushroomObserver::Application.routes.draw do
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  AJAX_ACTIONS.each do |action|
+  ACTIONS[:ajax].each_key do |action|
     get("ajax/#{action}/:type/:id",
         controller: "ajax", action: action, id: /\S.*/)
   end
 
+  # Add support for PATCH and DELETE requests for API.
+  api_endpoints.each do |controller, action|
+    delete("#{controller}/#{action}", controller: controller, action: action)
+    patch("#{controller}/#{action}", controller: controller, action: action)
+  end
+
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  LOOKUP_XXX_ID_ACTIONS.each do |action|
+  lookup_xxx_id_actions.each do |action|
     get("observer/#{action}/:id",
         controller: "observer", action: action, id: /.*/)
   end
