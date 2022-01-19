@@ -20,8 +20,8 @@ imged_unvouchered_obs_rss_log:
 
 locally_sequenced_obs_rss_log:
   observation: locally_sequenced_obs
-  updated_at: 2004-03-02 20:14:02
-  notes: ""
+  updated_at:  2004-03-02 20:14:02
+  notes:       ""
 
 species_list_rss_log:
   species_list: first_species_list

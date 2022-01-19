@@ -23,7 +23,3 @@
 //= link Cantharellaceae.css
 //= link Hygrocybe.css
 //= link Sudo.css
-
-// GraphiQL assets
-//= link graphiql/rails/application.css
-//= link graphiql/rails/application.js

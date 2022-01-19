@@ -10,9 +10,6 @@ Bundler.require(*Rails.groups)
 
 module MushroomObserver
   class Application < Rails::Application
-    config.eager_load_paths += Dir["#{config.root}/app/graphql/resolvers/**/"]
-    config.eager_load_paths += Dir["#{config.root}/app/graphql/mutators/**/"]
-    config.eager_load_paths += Dir["#{config.root}/app/graphql/functions/**/"]
     # Settings in config/environments/* take precedence over those
     # specified here.
     # Application configuration should go into files in config/initializers
@@ -55,10 +52,6 @@ module MushroomObserver
     # Still validating 5.2 deploy and want to allow rollback
     # TODO: Remove this once we are satisfied with 5.2 deplay.
     config.action_dispatch.use_authenticated_cookie_encryption = false
-
-    # debugging - keep this in case
-    # config.paths.add Rails.root.join('app', 'graphql', 'types').to_s, eager_load: true
-    # config.paths.add Rails.root.join('app', 'graphql', 'mutations').to_s, eager_load: true
   end
 end
 

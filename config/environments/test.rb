@@ -82,14 +82,6 @@ MushroomObserver::Application.configure do
   # To control the debugger turing testing
   config.activate_debugger = false
 
-  # Enable stdout logger
-  config.logger = Logger.new($stdout)
-
-  # Set log level
-  config.log_level = :ERROR
-
-  # config.action_dispatch.show_exceptions = false
-
   config.active_support.test_order = :random
 end
 

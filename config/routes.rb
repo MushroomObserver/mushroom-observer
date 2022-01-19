@@ -590,13 +590,6 @@ end
 # -----------------------------------------------------
 
 MushroomObserver::Application.routes.draw do
-  # GraphQL development additions
-  post "/graphql", to: "graphql#execute"
-
-  if Rails.env.development?
-    mount(GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql#execute")
-  end
-
   get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
