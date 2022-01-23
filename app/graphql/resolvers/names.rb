@@ -10,7 +10,7 @@ module Resolvers
     def resolve(filter: nil)
       names = ::Name.arel_table
       scope = ::Name.select(names[Arel.star])
-      column_name = "when"
+      column_name = "created_at"
       desc = true
 
       if filter
@@ -33,10 +33,10 @@ module Resolvers
                         when "TEXT_NAME"
                           "text_name"
                         else
-                          "when"
+                          "text_name"
                         end
                       else
-                        "when"
+                        "text_name"
                       end
 
         desc = if filter[:order]
