@@ -143,6 +143,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
+#  detail::             Figure out a message for most recent update.
 #
 #  == Callbacks
 #
@@ -369,6 +370,25 @@ class RssLog < AbstractModel
     results
   end
 
+  # Figure out a message for most recent update.
+  def detail
+    begin
+      tag, args, time = parse_log.first
+    rescue StandardError
+      []
+    end
+    if !target_type
+      :rss_destroyed.t(type: :object)
+    elsif !target ||
+          tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+      :rss_destroyed.t(type: target_type)
+    elsif !time
+      :rss_created_at.t(type: target_type)
+    else
+      tag.t(args)
+    end
+  end
+
   ##############################################################################
 
   # Encode a line of the log.  Pass in a triplet:
@@ -403,9 +423,7 @@ class RssLog < AbstractModel
     end
     args << "" if odd
     begin
-      time2 = Time.utc(time[0, 4], time[4, 2], time[6, 2],
-                       time[8, 2], time[10, 2], time[12, 2]).in_time_zone
-      time = time2
+      time = Time.parse(time).in_time_zone
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env.production?
