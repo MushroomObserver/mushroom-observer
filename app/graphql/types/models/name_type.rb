@@ -25,12 +25,34 @@ module Types::Models
     field :lifeform, String, null: false
     field :locked, Boolean, null: false
     field :icn_id, Integer, null: true
+
     # belongs to
     field :correct_spelling, Types::Models::NameType, null: true
     field :description, Types::Models::NameDescriptionType, null: true
     field :rss_log, Types::Models::RssLogType, null: true
     field :synonym, Types::Models::NameType, null: true
     field :user, Types::Models::UserType, null: true
+
+    def correct_spelling
+      RecordLoader.for(Name).load(object.correct_spelling_id)
+    end
+
+    def description
+      RecordLoader.for(NameDescription).load(object.description_id)
+    end
+
+    def rss_log
+      RecordLoader.for(RssLog).load(object.rss_log_id)
+    end
+
+    def synonym
+      RecordLoader.for(Name).load(object.synonym_id)
+    end
+
+    def user
+      RecordLoader.for(User).load(object.user_id)
+    end
+
     # has many
     field :descriptions, [Types::Models::NameDescriptionType], null: true
     field :misspellings, [Types::Models::NameType], null: true

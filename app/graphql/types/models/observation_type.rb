@@ -25,27 +25,13 @@ module Types::Models
     field :text_name, String, null: true
     field :classification, String, null: true
     field :gps_hidden, Boolean, null: false
+
     # belongs to
     field :location, Types::Models::LocationType, null: true
     field :name, Types::Models::NameType, null: true
     field :rss_log, Types::Models::RssLogType, null: true
     field :thumb_image, Types::Models::ImageType, null: true
     field :user, Types::Models::UserType, null: true
-    # has many
-    field :comments, [Types::Models::CommentType], null: true
-    field :external_links, [Types::Models::ExternalLinkType], null: true
-    field :interests, [Types::Models::InterestType], null: true
-    field :namings, [Types::Models::NamingType], null: true
-    field :observation_views, [Types::Models::ObservationViewType], null: true
-    field :sequences, [Types::Models::SequenceType], null: true
-    field :viewers, [Types::Models::UserType], null: true
-    field :votes, [Types::Models::VoteType], null: true
-    # has and belongs to many
-    field :images, [Types::Models::ImageType], null: true
-    field :projects, [Types::Models::ProjectType], null: true
-    field :species_lists, [Types::Models::SpeciesListType], null: true
-    field :collection_numbers, [Types::Models::CollectionNumberType], null: true
-    field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
 
     def location
       RecordLoader.for(Location).load(object.location_id)
@@ -66,6 +52,22 @@ module Types::Models
     def user
       RecordLoader.for(User).load(object.user_id)
     end
+
+    # has many
+    field :comments, [Types::Models::CommentType], null: true
+    field :external_links, [Types::Models::ExternalLinkType], null: true
+    field :interests, [Types::Models::InterestType], null: true
+    field :namings, [Types::Models::NamingType], null: true
+    field :observation_views, [Types::Models::ObservationViewType], null: true
+    field :sequences, [Types::Models::SequenceType], null: true
+    field :viewers, [Types::Models::UserType], null: true
+    field :votes, [Types::Models::VoteType], null: true
+    # has and belongs to many
+    field :images, [Types::Models::ImageType], null: true
+    field :projects, [Types::Models::ProjectType], null: true
+    field :species_lists, [Types::Models::SpeciesListType], null: true
+    field :collection_numbers, [Types::Models::CollectionNumberType], null: true
+    field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
 
     # custom fields
     field :img_src_thumb, String, null: true

@@ -37,7 +37,8 @@ module Types
     field :location, resolver: Queries::Location
     field :locations, resolver: Queries::Locations
     # field :name, resolver: Queries::Name
-    # field :names, resolver: Resolvers::Names
+    field :names, Types::Models::NameType.connection_type,
+    null: false, resolver: Resolvers::Names
     # field :naming, resolver: Queries::Naming
     # field :namings, resolver: Resolvers::Namings
     # field :notification, resolver: Queries::Notification

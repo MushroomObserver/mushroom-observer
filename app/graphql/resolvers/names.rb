@@ -14,9 +14,7 @@ module Resolvers
       desc = true
 
       if filter
-        if filter[:name_id]
-          scope = scope.where(names[:name_id].eq(filter[:name_id]))
-        end
+        scope = scope.where(names[:id].eq(filter[:name_id])) if filter[:name_id]
 
         if filter[:name_like]
           scope = scope.where(names[:text_name].matches("%#{filter[:name_like]}%"))
@@ -24,18 +22,6 @@ module Resolvers
 
         if filter[:user_id]
           scope = scope.where(names[:user_id].eq(filter[:user_id]))
-        end
-
-        if filter[:location_like]
-          scope = scope.where(names[:where].matches("%#{filter[:location_like]}%"))
-        end
-
-        if filter[:when]
-          scope = if filter[:before]
-                    scope.where(names[:when].lteq(filter[:when]))
-                  else
-                    scope.where(names[:when].gteq(filter[:when]))
-                  end
         end
 
         column_name = if filter[:order_by]
