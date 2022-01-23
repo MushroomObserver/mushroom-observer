@@ -105,12 +105,6 @@ gem("rubyzip")
 
 ########## Development, Testing, and Analysis ##################################
 
-# Use byebug as debugging gem
-gem("byebug", group: [:development, :test])
-
-# Calling `console` creates irb session in the browser (instead of the terminal)
-gem("web-console", group: :development)
-
 # Use built-in Ruby coverage to generate html coverage file
 gem("simplecov", require: false)
 # generate lcov file to send to Coveralls by Github Actions
@@ -134,6 +128,11 @@ gem("rubocop-rails")
 # use mry to support safe updating of .rubocop.yml
 gem("mry", require: false)
 
+group :test, :development do
+  # Use byebug as debugging gem
+  gem "byebug"
+end
+
 group :test do
   # Use capybara to simulate user-browser interaction
   gem "capybara"
@@ -155,4 +154,12 @@ group :test do
   # Stub and set expectations on HTTP requests in test mode
   # Allow selective disabling of internet
   gem "webmock"
+end
+
+group :development do
+  # Calling `console` creates irb session in the browser (instead of terminal)
+  gem "web-console"
+
+  # Use Rails DB to browse database at http://localhost:3000/rails/db/
+  gem "rails_db", "~> 2.3.0"
 end
