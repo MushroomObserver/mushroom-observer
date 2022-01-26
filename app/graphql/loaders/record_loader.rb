@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# from gem graphql-batch
 class RecordLoader < GraphQL::Batch::Loader
   def initialize(model)
     @model = model

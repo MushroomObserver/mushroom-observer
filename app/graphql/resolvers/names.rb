@@ -51,6 +51,7 @@ module Resolvers
                end
       end
 
+      # uses graphql-connections gem
       GraphQL::Connections::Stable.new(scope, keys: %W[#{column_name} id], desc: desc)
     end
   end
