@@ -370,6 +370,15 @@ class RssLog < AbstractModel
     results
   end
 
+  def created_at
+    begin
+      tag, args, time = parse_log.last
+    rescue StandardError
+      []
+    end
+    time
+  end
+
   # Figure out a message for most recent update.
   def detail
     begin
@@ -379,10 +388,10 @@ class RssLog < AbstractModel
     end
     if !target_type
       :rss_destroyed.t(type: :object)
-    elsif !target ||
+    elsif !target_id ||
           tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
       :rss_destroyed.t(type: target_type)
-    elsif !time || time < target.created_at + 1.minute
+    elsif !time || time < created_at + 1.minute
       :rss_created_at.t(type: target_type)
     else
       tag.t(args)
