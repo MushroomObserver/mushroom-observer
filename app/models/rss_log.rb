@@ -382,7 +382,7 @@ class RssLog < AbstractModel
     elsif !target ||
           tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
       :rss_destroyed.t(type: target_type)
-    elsif !time
+    elsif !time || time < target.created_at + 1.minute
       :rss_created_at.t(type: target_type)
     else
       tag.t(args)
