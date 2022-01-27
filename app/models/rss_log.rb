@@ -370,15 +370,6 @@ class RssLog < AbstractModel
     results
   end
 
-  def created_at
-    begin
-      tag, args, time = parse_log.last
-    rescue StandardError
-      []
-    end
-    time
-  end
-
   # Figure out a message for most recent update.
   def detail
     log = parse_log
