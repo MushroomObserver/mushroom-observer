@@ -30,8 +30,9 @@ class RssLogTest < UnitTestCase
     log = rss_logs(:observation_rss_log)
     detail = log.detail
     log_decode = RssLog.decode(log.notes)
-    assert_equal(:log_observation_created.t(user: "ignatz"), detail)
-    assert_equal(Time.parse("20090722075918").in_time_zone, log_decode[2])
+    assert_equal(:rss_created_at.t(type: :observation), detail)
+    # Check that it's still getting the most recent updated time
+    assert_equal(Time.parse("20060302211400").in_time_zone, log_decode[2])
   end
 
   # ---------- helpers ---------------------------------------------------------
