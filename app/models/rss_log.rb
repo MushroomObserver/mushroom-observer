@@ -118,6 +118,8 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
+#  created_at::         Date/time log or object was created.
+#                       See AbstractModel#init_rss_log
 #  updated_at::         Date/time it was last updated.
 #  notes::              Log of changes.
 #  location::           Owning Location (or nil).
@@ -149,8 +151,6 @@
 #
 #  None.
 #
-################################################################################
-
 class RssLog < AbstractModel
   belongs_to :location
   belongs_to :name
@@ -315,7 +315,7 @@ class RssLog < AbstractModel
                           relevant_args(args),
                           args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
-    self.notes = entry + "\n" + notes.to_s
+    self.notes = "#{entry}\n#{notes}"
     # self.updated_at = args[:time] if args[:touch]
     save_without_our_callbacks unless args.key?(:save) && !args[:save]
     RssLog.record_timestamps = true
@@ -340,7 +340,7 @@ class RssLog < AbstractModel
   def orphan(title, key, args = {})
     args = args.merge(save: false)
     add_with_date(key, args)
-    self.notes = RssLog.escape(title) + "\n" + notes.to_s
+    self.notes = "#{RssLog.escape(title)}\n#{notes}"
     save_without_our_callbacks
   end
 
@@ -354,7 +354,7 @@ class RssLog < AbstractModel
   def parse_log(cutoff_time = nil)
     first = true
     results = []
-    for line in notes.to_s.split("\n")
+    notes.to_s.split("\n").each do |line|
       if first && !line.match(/^\d{14}/)
         tag  = :log_orphan
         args = { title: self.class.unescape(line) }
@@ -377,15 +377,14 @@ class RssLog < AbstractModel
     rescue StandardError
       []
     end
-    if !target_type
+    return tag.t(args) unless number_of_objects_changed?(tag, time)
+
+    if target_simply_destroyed?
       :rss_destroyed.t(type: :object)
-    elsif !target_id ||
-          tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+    elsif target_combined?(tag)
       :rss_destroyed.t(type: target_type)
-    elsif !time || time < created_at + 1.minute
+    else # it must have been recently created
       :rss_created_at.t(type: target_type)
-    else
-      tag.t(args)
     end
   end
 
@@ -443,5 +442,27 @@ class RssLog < AbstractModel
   # Reverse protection of special characters in string for log encoder/decoder.
   def self.unescape(str)
     str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
+  end
+
+  #############################################################################
+
+  private
+
+  def number_of_objects_changed?(tag, time)
+    target_simply_destroyed? ||
+      target_combined?(tag) ||
+      target_recently_created?(time)
+  end
+
+  def target_simply_destroyed?
+    !target_type
+  end
+
+  def target_combined?(tag)
+    !target_id || tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+  end
+
+  def target_recently_created?(time)
+    !time || time < created_at + 1.minute
   end
 end
