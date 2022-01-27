@@ -565,6 +565,7 @@ ActiveRecord::Schema.define(version: 2021_04_17_194852) do
     t.integer "project_id"
     t.integer "glossary_term_id"
     t.integer "article_id"
+    t.datetime "created_at"
   end
 
   create_table "sequences", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
