@@ -762,6 +762,7 @@ class AbstractModel < ApplicationRecord
       result = rss_log
     else
       rss_log = RssLog.new
+      rss_log.created_at = created_at unless new_record?
       # Don't attach to object if about to destroy.
       if !orphan
         rss_log.send("#{type_tag}_id=", id) if id
