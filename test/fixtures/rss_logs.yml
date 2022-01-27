@@ -11,49 +11,59 @@
 observation_rss_log:
   observation: detailed_unknown_obs
   updated_at: 2006-03-02 21:14:00
-  notes: "20090722075918 log_observation_created user ignatz"
+  created_at: 2006-03-02 21:13:05
+  notes: "20060302211400 log_image_created user ignatz\n20060302211305 log_observation_created user ignatz"
 
 imged_unvouchered_obs_rss_log:
   observation: imged_unvouchered_obs
   updated_at: 2005-03-02 21:14:00
+  created_at: 2005-03-01 15:25:02
   notes: "Updated Observation & Notes"
 
 locally_sequenced_obs_rss_log:
   observation: locally_sequenced_obs
-  updated_at:  2004-03-02 20:14:02
-  notes:       ""
+  updated_at: 2004-03-02 20:14:02
+  created_at: 2004-03-02 20:13:05
+  notes: ""
 
 species_list_rss_log:
   species_list: first_species_list
   updated_at: 2006-03-02 21:14:02
+  created_at: 2006-03-02 21:13:05
   notes: "Updated Species List"
 
 name_rss_log:
   name: fungi
   updated_at: 2006-03-02 21:14:03
+  created_at: 2006-03-02 21:13:05
   notes: "Updated Name"
 
 location_rss_log:
   location: mitrula_marsh
   updated_at: 2006-03-02 21:14:09
+  created_at: 2006-03-01 15:25:02
   notes: "Updated Location"
 
 albion_rss_log:
   location: albion
   updated_at: 2007-12-27 06:41:20
+  created_at: 2006-03-01 15:25:02
   notes: "Updated Created"
 
 glossary_term_rss_log:
   glossary_term: conic_glossary_term
   updated_at: 2013-09-01 12:49:30
+  created_at: 2010-09-01 15:25:02
   notes: "Updated Glossary Term"
 
 project_rss_log:
   project: two_list_project
   updated_at: 2016-08-08 12:00:00
+  created_at: 2016-08-07 15:25:02
   notes: "Updated Project"
 
 article_rss_log:
   article: premier_article
   updated_at: 2016-08-08 12:00:01
+  created_at: 2016-08-08 08:25:02
   notes: "Updated Article"
