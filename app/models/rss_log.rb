@@ -384,7 +384,7 @@ class RssLog < AbstractModel
     elsif target_combined?(tag)
       :rss_destroyed.t(type: target_type)
     else # it must have been recently created
-      :rss_created_at.t(type: target_type)
+      creation_detail(args)
     end
   end
 
@@ -464,5 +464,17 @@ class RssLog < AbstractModel
 
   def target_recently_created?(time)
     !time || time < created_at + 1.minute
+  end
+
+  def creation_detail(args)
+    if [:observation, :species_list].include?(target_type)
+      :rss_created_at.t(type: target_type) # user would be redundant
+    else
+      begin
+        "#{:rss_created_at.t(type: target_type)} by #{args[:user]}"
+      rescue StandardError
+        nil
+      end
+    end
   end
 end
