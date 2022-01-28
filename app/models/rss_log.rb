@@ -372,20 +372,22 @@ class RssLog < AbstractModel
 
   # Figure out a message for most recent update.
   def detail
-    begin
-      tag, args, time = parse_log.first
-    rescue StandardError
-      []
-    end
-    return tag.t(args) unless number_of_objects_changed?(tag, time)
-
+    parse = parse_log
+    latest_tag, latest_args, latest_time = parse.first
     if target_simply_destroyed?
       :rss_destroyed.t(type: :object)
-    elsif target_combined?(tag)
+    elsif target_combined?(latest_tag)
       :rss_destroyed.t(type: target_type)
-    else # it must have been recently created
-      creation_detail(args)
+    elsif !target_recently_created?(latest_time)
+      latest_tag.t(latest_args)
+    elsif [:observation, :species_list].include?(target_type)
+      :rss_created_at.t(type: target_type) # user would be redundant
+    else
+      first_tag, first_args, first_time = parse.last
+      first_tag.t(first_args)
     end
+  rescue StandardError
+    ""
   end
 
   ##############################################################################
@@ -464,14 +466,5 @@ class RssLog < AbstractModel
 
   def target_recently_created?(time)
     !time || time < created_at + 1.minute
-  end
-
-  def creation_detail(args)
-    if [:observation, :species_list].include?(target_type) ||
-       args[:user].blank?
-      :rss_created_at.t(type: target_type) # user would be redundant
-    else
-      "#{:rss_created_at.t(type: target_type)} by #{args[:user]}"
-    end
   end
 end
