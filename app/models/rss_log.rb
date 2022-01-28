@@ -378,13 +378,10 @@ class RssLog < AbstractModel
       :rss_destroyed.t(type: :object)
     elsif target_combined?(latest_tag)
       :rss_destroyed.t(type: target_type)
-    elsif !target_recently_created?(latest_time)
-      latest_tag.t(latest_args)
-    elsif [:observation, :species_list].include?(target_type)
-      :rss_created_at.t(type: target_type) # user would be redundant
+    elsif target_recently_created?(latest_time)
+      creation_message(parse.first)
     else
-      first_tag, first_args, first_time = parse.last
-      first_tag.t(first_args)
+      latest_tag.t(latest_args)
     end
   rescue StandardError
     ""
@@ -450,12 +447,6 @@ class RssLog < AbstractModel
 
   private
 
-  def number_of_objects_changed?(tag, time)
-    target_simply_destroyed? ||
-      target_combined?(tag) ||
-      target_recently_created?(time)
-  end
-
   def target_simply_destroyed?
     !target_type
   end
@@ -466,5 +457,13 @@ class RssLog < AbstractModel
 
   def target_recently_created?(time)
     !time || time < created_at + 1.minute
+  end
+
+  def creation_message(tag, args, time)
+    if [:observation, :species_list].include?(target_type)
+      :rss_created_at.t(type: target_type) # user would be redundant
+    else
+      tag.t(args)
+    end
   end
 end
