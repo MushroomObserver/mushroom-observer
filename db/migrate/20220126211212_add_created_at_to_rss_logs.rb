@@ -1,5 +1,5 @@
 class AddCreatedAtToRssLogs < ActiveRecord::Migration[5.2]
   def change
-    add_column(:rss_logs, :created_at, :datetime, null: false)
+    add_column(:rss_logs, :created_at, :datetime)
   end
 end
