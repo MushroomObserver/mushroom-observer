@@ -467,14 +467,11 @@ class RssLog < AbstractModel
   end
 
   def creation_detail(args)
-    if [:observation, :species_list].include?(target_type)
+    if [:observation, :species_list].include?(target_type) ||
+       args[:user].blank?
       :rss_created_at.t(type: target_type) # user would be redundant
     else
-      begin
-        "#{:rss_created_at.t(type: target_type)} by #{args[:user]}"
-      rescue StandardError
-        nil
-      end
+      "#{:rss_created_at.t(type: target_type)} by #{args[:user]}"
     end
   end
 end
