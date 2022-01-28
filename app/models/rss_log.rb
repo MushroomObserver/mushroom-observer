@@ -459,7 +459,7 @@ class RssLog < AbstractModel
     !time || time < created_at + 1.minute
   end
 
-  def creation_message(tag, args, time)
+  def creation_message(tag, args)
     if [:observation, :species_list].include?(target_type)
       :rss_created_at.t(type: target_type) # user would be redundant
     else
