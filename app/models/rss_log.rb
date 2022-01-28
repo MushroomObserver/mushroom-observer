@@ -372,14 +372,14 @@ class RssLog < AbstractModel
 
   # Figure out a message for most recent update.
   def detail
-    parse = parse_log
-    latest_tag, latest_args, latest_time = parse.first
+    log = parse_log
+    latest_tag, latest_args, latest_time = log.first
     if target_simply_destroyed?
       :rss_destroyed.t(type: :object)
     elsif target_combined?(latest_tag)
       :rss_destroyed.t(type: target_type)
     elsif target_recently_created?(latest_time)
-      creation_message(parse.first)
+      creation_message(log)
     else
       latest_tag.t(latest_args)
     end
@@ -459,10 +459,11 @@ class RssLog < AbstractModel
     !time || time < created_at + 1.minute
   end
 
-  def creation_message(tag, args)
+  def creation_message(log)
     if [:observation, :species_list].include?(target_type)
       :rss_created_at.t(type: target_type) # user would be redundant
     else
+      tag, args = log.last
       tag.t(args)
     end
   end
