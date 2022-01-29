@@ -257,17 +257,6 @@ group :development do
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   gem "rails_db", "~> 2.3.0"
 
-  # Spring speeds up development by keeping your application running in the
-  # background. Read more: https://github.com/rails/spring
-  gem "spring", "~> 3.1.0"
-
-  # Temporary: use a fork of spring-watcher-listen that allows using spring 3
-  # https://github.com/rails/spring-watcher-listen/pull/26
-  gem "spring-watcher-listen", github: "timdorr/spring-watcher-listen"
-
-  # Listen for file changes in development
-  gem "listen", ">= 3.3.0", "< 4.0"
-
   # Additional generators for input types, search objects, and mutations
   # gem "graphql-rails-generators"
 end
