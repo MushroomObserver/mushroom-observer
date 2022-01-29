@@ -224,6 +224,7 @@ group :test, :development do
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
+  # Until current changes are released, need to use this Github version:
   gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
 end
 
