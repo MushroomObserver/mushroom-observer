@@ -117,6 +117,13 @@ GEM
     ffi (1.15.5)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
+    graphql (1.13.7)
+    graphql-batch (0.5.0)
+      graphql (>= 1.10, < 2)
+      promise.rb (~> 0.7.2)
+    graphql-connections (1.1.0)
+      activerecord (>= 5)
+      graphql (~> 1.10)
     hashdiff (1.0.1)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
@@ -177,9 +184,12 @@ GEM
     parallel (1.19.2)
     parser (2.7.1.4)
       ast (~> 2.4.1)
+    promise.rb (0.7.4)
     public_suffix (4.0.6)
     racc (1.5.2)
     rack (2.2.3)
+    rack-cors (1.1.1)
+      rack (>= 2.0.0)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rails (5.2.6)
@@ -238,6 +248,8 @@ GEM
       unicode-display_width (>= 1.4.0, < 2.0)
     rubocop-ast (0.3.0)
       parser (>= 2.7.1.4)
+    rubocop-graphql (0.12.3)
+      rubocop (>= 0.87, < 2)
     rubocop-performance (1.6.0)
       rubocop (>= 0.71.0)
     rubocop-rails (2.5.2)
@@ -319,6 +331,10 @@ DEPENDENCIES
   coffee-rails
   cure_acts_as_versioned!
   date (>= 3.2.1)
+  graphiql-rails!
+  graphql
+  graphql-batch
+  graphql-connections
   i18n
   jbuilder
   jquery-rails
@@ -331,11 +347,13 @@ DEPENDENCIES
   mocha
   mry
   mysql2
+  rack-cors
   rails (~> 5.2.2)
   rails-controller-testing
   rails_db (~> 2.3.0)
   rtf
   rubocop (= 0.89)
+  rubocop-graphql
   rubocop-performance
   rubocop-rails
   rubyzip
