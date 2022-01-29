@@ -591,7 +591,8 @@ end
 
 MushroomObserver::Application.routes.draw do
   if Rails.env.development?
-    mount(GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql#execute")
+    mount(GraphiQL::Rails::Engine, at: "/graphiql",
+                                   graphql_path: "/graphql#execute")
     # GraphQL development additions
     post("/graphql", to: "graphql#execute")
   end
