@@ -118,6 +118,8 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
+#  created_at::         Date/time log or object was created.
+#                       See AbstractModel#init_rss_log
 #  updated_at::         Date/time it was last updated.
 #  notes::              Log of changes.
 #  location::           Owning Location (or nil).
@@ -143,13 +145,12 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
+#  detail::             Figure out a message for most recent update.
 #
 #  == Callbacks
 #
 #  None.
 #
-################################################################################
-
 class RssLog < AbstractModel
   belongs_to :location
   belongs_to :name
@@ -314,7 +315,7 @@ class RssLog < AbstractModel
                           relevant_args(args),
                           args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
-    self.notes = entry + "\n" + notes.to_s
+    self.notes = "#{entry}\n#{notes}"
     # self.updated_at = args[:time] if args[:touch]
     save_without_our_callbacks unless args.key?(:save) && !args[:save]
     RssLog.record_timestamps = true
@@ -339,7 +340,7 @@ class RssLog < AbstractModel
   def orphan(title, key, args = {})
     args = args.merge(save: false)
     add_with_date(key, args)
-    self.notes = RssLog.escape(title) + "\n" + notes.to_s
+    self.notes = "#{RssLog.escape(title)}\n#{notes}"
     save_without_our_callbacks
   end
 
@@ -353,7 +354,7 @@ class RssLog < AbstractModel
   def parse_log(cutoff_time = nil)
     first = true
     results = []
-    for line in notes.to_s.split("\n")
+    notes.to_s.split("\n").each do |line|
       if first && !line.match(/^\d{14}/)
         tag  = :log_orphan
         args = { title: self.class.unescape(line) }
@@ -367,6 +368,23 @@ class RssLog < AbstractModel
       first = false
     end
     results
+  end
+
+  # Figure out a message for most recent update.
+  def detail
+    log = parse_log
+    latest_tag, latest_args, latest_time = log.first
+    if target_simply_destroyed?
+      :rss_destroyed.t(type: :object)
+    elsif target_combined?(latest_tag)
+      :rss_destroyed.t(type: target_type)
+    elsif target_recently_created?(latest_time)
+      creation_message(log)
+    else
+      latest_tag.t(latest_args)
+    end
+  rescue StandardError
+    ""
   end
 
   ##############################################################################
@@ -403,9 +421,7 @@ class RssLog < AbstractModel
     end
     args << "" if odd
     begin
-      time2 = Time.utc(time[0, 4], time[4, 2], time[6, 2],
-                       time[8, 2], time[10, 2], time[12, 2]).in_time_zone
-      time = time2
+      time = Time.parse(time).in_time_zone
     rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env.production?
@@ -425,5 +441,30 @@ class RssLog < AbstractModel
   # Reverse protection of special characters in string for log encoder/decoder.
   def self.unescape(str)
     str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
+  end
+
+  #############################################################################
+
+  private
+
+  def target_simply_destroyed?
+    !target_type
+  end
+
+  def target_combined?(tag)
+    !target_id || tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+  end
+
+  def target_recently_created?(time)
+    !time || time < created_at + 1.minute
+  end
+
+  def creation_message(log)
+    if [:observation, :species_list].include?(target_type)
+      :rss_created_at.t(type: target_type) # user would be redundant
+    else
+      tag, args = log.last
+      tag.t(args)
+    end
   end
 end

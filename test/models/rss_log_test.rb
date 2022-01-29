@@ -26,6 +26,15 @@ class RssLogTest < UnitTestCase
     assert_equal(:rss_log_of_deleted_item.l, log.orphan_title)
   end
 
+  def test_details
+    log = rss_logs(:observation_rss_log)
+    detail = log.detail
+    log_decode = RssLog.decode(log.notes)
+    assert_equal(:rss_created_at.t(type: :observation), detail)
+    # Check that it's still getting the most recent updated time
+    assert_equal(Time.parse("20060302211400").in_time_zone, log_decode[2])
+  end
+
   # ---------- helpers ---------------------------------------------------------
 
   def normalized_rss_log_types
