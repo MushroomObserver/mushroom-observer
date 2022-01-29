@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO: Make dumps of schema for different environments - public/private!
+# Note: Make dumps of schema for different environments - public/private!
 
 namespace :graphql do
   desc "Write a dump of the entire GraphQL Schema"
