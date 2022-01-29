@@ -5,6 +5,15 @@ GIT
     cure_acts_as_versioned (0.6.3)
       activerecord (>= 3.0.9)
 
+GIT
+  remote: https://github.com/rmosolgo/graphiql-rails.git
+  revision: 6b34eb17bf13262eef6edf9a069cfc69b5db9708
+  ref: 6b34eb1
+  specs:
+    graphiql-rails (1.8.0)
+      railties
+      sprockets-rails
+
 GEM
   remote: https://rubygems.org/
   specs:
