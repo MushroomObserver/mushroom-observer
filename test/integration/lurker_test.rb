@@ -107,13 +107,15 @@ class LurkerTest < IntegrationTestCase
     assert_match(%r{^/#{observations(:coprinus_comatus_obs).id}\?},
                  @request.fullpath)
 
+    # Image pattern searches temporarily disabled for performamce
+    # 2021-09-12 JDC
     # Search for images of the same thing.  (Still only one.)
-    form.select("type", "Images")
-    form.submit("Search")
-    assert_match(
-      %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
-      @request.fullpath
-    )
+    # form.select("type", "Images")
+    # form.submit("Search")
+    # assert_match(
+    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+    #   @request.fullpath
+    # )
 
     # There should be no locations of that name, though.
     form.select("type", "Locations")

@@ -49,6 +49,10 @@ class Name < AbstractModel
     rank == :Genus || below_genus?
   end
 
+  def above_genus?
+    Name.ranks_above_genus.include?(rank)
+  end
+
   def below_genus?
     Name.ranks_below_genus.include?(rank) ||
       rank == :Group && text_name.include?(" ")
@@ -173,7 +177,7 @@ class Name < AbstractModel
   #    Eukarya
   #
   def all_parents
-    parents(:all)
+    parents(all: true)
   end
 
   # Returns an Array of all Name's under this one.  Ignores misspellings, but
@@ -192,17 +196,18 @@ class Name < AbstractModel
   #   'Letharia vulpina f. californica'
   #
   def all_children
-    children(:all)
+    children(all: true)
   end
 
   # Returns the Name of the genus above this taxon.  If there are multiple
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
-  def genus
-    @genus ||= begin
-      return unless text_name.include?(" ")
+  def accepted_genus
+    @accepted_genus ||= begin
+      accepted = approved_name
+      return unless accepted.text_name.include?(" ")
 
-      genus_name = text_name.split(" ", 2).first
+      genus_name = accepted.text_name.split(" ", 2).first
       genera     = Name.with_correct_spelling.where(text_name: genus_name)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
@@ -226,7 +231,7 @@ class Name < AbstractModel
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
-  def parents(all = false)
+  def parents(all: false)
     parents = []
 
     # Start with infrageneric and genus names.
@@ -308,7 +313,7 @@ class Name < AbstractModel
   #   # BUT NOT THIS!!
   #   'Letharia vulpina var. bogus f. foobar'
   #
-  def children(all = false)
+  def children(all: false)
     if at_or_below_genus?
       sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
       sql_args = "#{text_name} %"
@@ -456,17 +461,13 @@ class Name < AbstractModel
     notes&.match(/\S/)
   end
 
-  def text_before_rank
-    text_name.split(" #{rank.to_s.downcase}").first
-  end
-
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
-    return unless genus # this sets the name instance @genus as side-effect
+    return unless accepted_genus
 
-    self.classification ||= genus.classification
-    self.lifeform       ||= genus.lifeform
+    self.classification ||= accepted_genus.classification
+    self.lifeform       ||= accepted_genus.lifeform
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -491,13 +492,14 @@ class Name < AbstractModel
     change_classification(str)
   end
 
-  # Change this name's classification.  Change parent genus, too, if below
-  # genus.  Propagate to subtaxa if changing genus.
+  # Change this name's classification.  Change its synonyms and its parent
+  # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
   def change_classification(new_str)
-    root = below_genus? && genus || self
-    root.update(classification: new_str)
-    root.description.update(classification: new_str) if
-      root.description_id
+    root = below_genus? && accepted_genus || self
+    root.synonyms.each do |name|
+      name.update(classification: new_str)
+      name.description.update(classification: new_str) if name.description_id
+    end
     root.propagate_classification if root.rank == :Genus
   end
 
@@ -508,38 +510,45 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
-    escaped_string = Name.connection.quote(classification)
-    Name.connection.execute(%(
-      UPDATE names SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE name_descriptions nd, names n
-      SET nd.classification = #{escaped_string}
-      WHERE nd.id = n.description_id
-        AND n.text_name LIKE "#{text_name} %"
-        AND nd.classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE observations
-      SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
+    subtaxa = subtaxa_whose_classification_needs_to_be_changed
+    Name.where(id: subtaxa).
+      update_all(classification: classification)
+    NameDescription.where(name_id: subtaxa).
+      update_all(classification: classification)
+    Observation.where(name_id: subtaxa).
+      update_all(classification: classification)
+    # rubocop:enable Rails/SkipsModelValidations
+  end
+
+  # Get list of subtaxa whose classification doesn't match (and therefore
+  # needs to be updated to be in sync with this name).  Start with approved
+  # names below genus with the same generic epithet.  Then add all those
+  # names' synonyms.
+  def subtaxa_whose_classification_needs_to_be_changed
+    subtaxa = Name.where("deprecated IS FALSE AND " \
+                         "text_name LIKE ?",
+                         "#{text_name} %").to_a
+    synonyms = Name.where("deprecated IS TRUE AND " \
+                          "synonym_id IN (?) AND " \
+                          "classification != ?",
+                          subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
+                          classification)
+    (subtaxa + synonyms).map(&:id).uniq
   end
 
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    Name.connection.execute(%(
-      UPDATE names n, name_descriptions nd
-      SET n.classification = nd.classification
-      WHERE nd.id = n.description_id
-        AND n.`rank` <= #{Name.connection.quote(Name.ranks[:Genus])}
-        AND nd.classification != n.classification
-        AND COALESCE(nd.classification, "") != ""
-    ))
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
+    Name.where(rank: 0..Name.ranks[:Genus]).
+      joins(:description).
+      where("name_descriptions.classification != names.classification").
+      where("COALESCE(name_descriptions.classification, '') != ''").
+      update_all("names.classification = name_descriptions.classification")
+    # rubocop:enable Rails/SkipsModelValidations
     []
   end
 

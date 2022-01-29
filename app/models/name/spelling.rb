@@ -165,4 +165,21 @@ class Name < AbstractModel
   end
 
   private_class_method :guess_pattern
+
+  # This catches cases where correct_spelling_id = id and just clears it.
+  # Not sure why this would ever happen, but empirically there are presently
+  # three cases of it in the database.  Presumably something to do with
+  # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
+  def self.fix_self_referential_misspellings
+    msgs = Name.select(:id, :text_name, :author).
+           where("correct_spelling_id = id").
+           map do |id, text_name, author|
+             "Name ##{id} #{text_name} #{author} was a misspelling of itself."
+           end
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
+    Name.where("correct_spelling_id = id").update_all(correct_spelling_id: nil)
+    # rubocop:enable Rails/SkipsModelValidations
+    msgs
+  end
 end

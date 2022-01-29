@@ -30,3 +30,6 @@ production-logs
 .bundle
 rubocop.out
 coverage
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key

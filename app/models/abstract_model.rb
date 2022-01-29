@@ -762,6 +762,7 @@ class AbstractModel < ApplicationRecord
       result = rss_log
     else
       rss_log = RssLog.new
+      rss_log.created_at = created_at unless new_record?
       # Don't attach to object if about to destroy.
       if !orphan
         rss_log.send("#{type_tag}_id=", id) if id
@@ -804,17 +805,6 @@ class AbstractModel < ApplicationRecord
       self.notes = note
     end
     save
-  end
-
-  def process_image_reuse(image, query_params)
-    add_image(image)
-    log_reuse_image(image)
-    {
-      controller: show_controller,
-      action: show_action,
-      id: id,
-      q: query_params[:q]
-    }
   end
 
   def can_edit?(user = User.current)

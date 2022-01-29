@@ -14,6 +14,12 @@ xml.tag!(
   xml_datetime(xml, :last_activity, object.last_activity)
   xml_integer(xml, :contribution, object.contribution)
   xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  if object.notes_template.present?
+    fields = object.notes_template_parts
+    xml.tag!(:notes_template, length: fields.length) do
+      fields.each { |field| xml_string(xml, :field, field) }
+    end
+  end
   xml_string(xml, :mailing_address,
              object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
   if !detail

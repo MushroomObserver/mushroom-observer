@@ -8,7 +8,26 @@ class LocationControllerTest < FunctionalTestCase
     @chg_pts  = 5
     @auth_pts = 50
     @edit_pts = 5
+    @@emails = []
     super
+  end
+
+  def self.report_email(email)
+    @@emails << email
+  end
+
+  def assert_email_generated
+    assert_not_empty(@@emails, "Was expecting an email notification.")
+  ensure
+    @@emails = []
+  end
+
+  def assert_no_emails
+    msg = @@emails.join("\n")
+    assert(@@emails.empty?,
+           "Wasn't expecting any email notifications; got:\n#{msg}")
+  ensure
+    @@emails = []
   end
 
   # Init params based on existing location.
@@ -378,10 +397,10 @@ class LocationControllerTest < FunctionalTestCase
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
 
-    # rubocop:disable Rails/DynamicFindBy
-    # find_by_name_or_reverse_name is an MO method, not a Rails finder
+    # find_by_name_or_reverse_name is an MO method, not a Rails finder.
+    # We used to have to disable a cop for this, but that seems no longer
+    # to be the case. [JPH 2021-09-18]
     loc = Location.find_by_name_or_reverse_name(display_name)
-    # rubocop:enable Rails/DynamicFindBy
     assert_nil(loc.description)
     assert_not_nil(loc.rss_log)
   end
@@ -599,6 +618,23 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(new_scientific_name, loc.display_name)
   end
 
+  def test_nontrivial_change
+    login("rolf")
+    loc = locations(:burbank)
+    assert_equal("Burbank, California, USA", loc.display_name)
+    trivial_change = "Furbank, Kalifornia, USA"
+    nontrivial_change = "Asheville, North Carolina, USA"
+    params = update_params_from_loc(loc)
+
+    params[:location][:display_name] = trivial_change
+    post(:edit_location, params)
+    assert_no_emails
+
+    params[:location][:display_name] = nontrivial_change
+    post(:edit_location, params)
+    assert_email_generated
+  end
+
   # Burbank has observations so it stays.
   def test_update_location_user_merge
     to_go = locations(:burbank)
@@ -705,6 +741,22 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(-119, location.west)
     assert_equal(30, location.high)
     assert_equal(10, location.low)
+  end
+
+  def test_destroy_location
+    location = locations(:california)
+    params = { id: location.id }
+
+    login(location.user.login)
+    delete(:destroy_location, params: params)
+    assert(Location.exists?(location.id),
+           "Location should be destroyable only if user is in admin mode")
+
+    make_admin
+    delete(:destroy_location, params: params)
+    assert_redirected_to(location_list_locations_path)
+    assert_not(Location.exists?(location.id),
+               "Failed to destroy Location #{location.id}, '#{location.name}'")
   end
 
   def test_list_merge_options

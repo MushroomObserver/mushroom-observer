@@ -16,7 +16,9 @@
       <span class="help"><%= :advanced_search_result_type_help.t %></span><br/>
       <%= select(:search, :model, [
                                     [:OBSERVATIONS.l, :observation],
-                                    [:IMAGES.l, :image],
+                                    # temporarily disabled for performance
+                                    # 2021-09-12 JDC
+                                    # [:IMAGES.l, :image],
                                     [:LOCATIONS.l, :location],
                                     [:NAMES.l, :name],
                                   ]) %>

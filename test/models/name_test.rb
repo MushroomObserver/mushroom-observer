@@ -190,14 +190,18 @@ class NameTest < UnitTestCase
 
   def test_standardize_name
     assert_equal("Amanita", Name.standardize_name("Amanita"))
-    assert_equal("Amanita subgenus Vaginatae",
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgenus Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
                  Name.standardize_name("Amanita SUBG. Vaginatae"))
+    assert_equal("Amanita subg. Vaginatae",
+                 Name.standardize_name("Amanita subgen. Vaginatae"))
     assert_equal("Amanita subsect. Vaginatae",
                  Name.standardize_name("Amanita subsect Vaginatae"))
     assert_equal("Amanita stirps Vaginatae",
                  Name.standardize_name("Amanita Stirps Vaginatae"))
     assert_equal(
-      "Amanita subgenus One sect. Two stirps Three",
+      "Amanita subg. One sect. Two stirps Three",
       Name.standardize_name("Amanita Subg One Sect Two Stirps Three")
     )
     assert_equal("Amanita vaginata", Name.standardize_name("Amanita vaginata"))
@@ -623,13 +627,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_1d
     do_name_parse_test(
-      "Synchytrium subgenus Endochytrium du Plessis",
-      text_name: "Synchytrium subgenus Endochytrium",
-      real_text_name: "Synchytrium subgenus Endochytrium",
-      search_name: "Synchytrium subgenus Endochytrium du Plessis",
-      real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
-      sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
-      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable Layout/LineLength
+      "Synchytrium subg. Endochytrium du Plessis",
+      text_name: "Synchytrium subg. Endochytrium",
+      real_text_name: "Synchytrium subg. Endochytrium",
+      search_name: "Synchytrium subg. Endochytrium du Plessis",
+      real_search_name: "Synchytrium subg. Endochytrium du Plessis",
+      sort_name: "Synchytrium  {1subg.  Endochytrium  du Plessis",
+      display_name: "**__Synchytrium__** subg. **__Endochytrium__** du Plessis",
       parent_name: "Synchytrium",
       rank: :Subgenus,
       author: "du Plessis"
@@ -989,14 +993,14 @@ class NameTest < UnitTestCase
   def test_name_parse_26
     do_name_parse_test(
       "Amanita subgenus Vaginatae stirps Vaginatae",
-      text_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      search_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae",
-      sort_name: "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae",
+      text_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      real_text_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      search_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      real_search_name: "Amanita subg. Vaginatae stirps Vaginatae",
+      sort_name: "Amanita  {1subg.  Vaginatae  {4stirps  !Vaginatae",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**",
-      parent_name: "Amanita subgenus Vaginatae",
+        "**__Amanita__** subg. **__Vaginatae__** stirps **__Vaginatae__**",
+      parent_name: "Amanita subg. Vaginatae",
       rank: :Stirps,
       author: ""
     )
@@ -1141,20 +1145,20 @@ class NameTest < UnitTestCase
   def test_name_parse_37
     do_name_parse_test(
       "Amanita subg. Amidella Singer sect. Amidella stirps Amidella",
-      text_name: "Amanita subgenus Amidella sect. Amidella stirps Amidella",
+      text_name: "Amanita subg. Amidella sect. Amidella stirps Amidella",
       real_text_name:
-        "Amanita subgenus Amidella sect. Amidella stirps Amidella",
+        "Amanita subg. Amidella sect. Amidella stirps Amidella",
       search_name:
-        "Amanita subgenus Amidella sect. Amidella stirps Amidella Singer",
+        "Amanita subg. Amidella sect. Amidella stirps Amidella Singer",
       real_search_name:
-        "Amanita subgenus Amidella Singer sect. Amidella stirps Amidella",
+        "Amanita subg. Amidella Singer sect. Amidella stirps Amidella",
       sort_name:
-        "Amanita  {1subgenus  Amidella  {2sect.  !Amidella  {4stirps  " \
+        "Amanita  {1subg.  Amidella  {2sect.  !Amidella  {4stirps  " \
         "!Amidella  Singer",
       display_name:
-        "**__Amanita__** subgenus **__Amidella__** Singer " \
+        "**__Amanita__** subg. **__Amidella__** Singer " \
         "sect. **__Amidella__** stirps **__Amidella__**",
-      parent_name: "Amanita subgenus Amidella sect. Amidella",
+      parent_name: "Amanita subg. Amidella sect. Amidella",
       rank: :Stirps,
       author: "Singer"
     )
@@ -1322,29 +1326,29 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # subgenus group, with author
       "Amanita subg. Vaginatae group (L.) Ach.",
-      text_name: "Amanita subgenus Vaginatae group",
-      real_text_name: "Amanita subgenus Vaginatae group",
-      search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
-      real_search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
-      sort_name: "Amanita  {1subgenus  Vaginatae   group  (L.) Ach.",
+      text_name: "Amanita subg. Vaginatae group",
+      real_text_name: "Amanita subg. Vaginatae group",
+      search_name: "Amanita subg. Vaginatae group (L.) Ach.",
+      real_search_name: "Amanita subg. Vaginatae group (L.) Ach.",
+      sort_name: "Amanita  {1subg.  Vaginatae   group  (L.) Ach.",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** group (L.) Ach.",
+        "**__Amanita__** subg. **__Vaginatae__** group (L.) Ach.",
       parent_name: "Amanita",
       rank: :Group,
       author: "(L.) Ach."
     )
     do_name_parse_test( # stirps group, with sub-genus parent
       "Amanita subgenus Vaginatae stirps Vaginatae group",
-      text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
-      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      text_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      real_text_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      search_name: "Amanita subg. Vaginatae stirps Vaginatae group",
+      real_search_name: "Amanita subg. Vaginatae stirps Vaginatae group",
       sort_name:
-        "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae   group",
+        "Amanita  {1subg.  Vaginatae  {4stirps  !Vaginatae   group",
       display_name:
-        "**__Amanita__** subgenus **__Vaginatae__** stirps " \
+        "**__Amanita__** subg. **__Vaginatae__** stirps " \
         "**__Vaginatae__** group",
-      parent_name: "Amanita subgenus Vaginatae",
+      parent_name: "Amanita subg. Vaginatae",
       rank: :Group,
       author: ""
     )
@@ -1642,17 +1646,6 @@ class NameTest < UnitTestCase
     assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
-  end
-
-  def test_text_before_rank
-    name_above_genus = names(:fungi)
-    assert_equal("Fungi", name_above_genus.text_before_rank)
-
-    name_between_genus_and_species = names(:amanita_subgenus_lepidella)
-    assert_equal("Amanita", name_between_genus_and_species.text_before_rank)
-
-    variety_name = names(:amanita_boudieri_var_beillei)
-    assert_equal("Amanita boudieri var. beillei", variety_name.text_before_rank)
   end
 
   # ------------------------------
@@ -2721,7 +2714,7 @@ class NameTest < UnitTestCase
     assert_equal(:Subsection, Name.guess_rank("Amanita subsect. Amanita"))
     assert_equal(:Section, Name.guess_rank("Amanita sect. Amanita"))
     assert_equal(:Section, Name.guess_rank("Hygrocybe sect. Coccineae"))
-    assert_equal(:Subgenus, Name.guess_rank("Amanita subgenus Amanita"))
+    assert_equal(:Subgenus, Name.guess_rank("Amanita subg. Amanita"))
     assert_equal(:Family, Name.guess_rank("Amanitaceae"))
     assert_equal(:Family, Name.guess_rank("Peltigerineae"))
     assert_equal(:Order, Name.guess_rank("Peltigerales"))
@@ -3046,22 +3039,6 @@ class NameTest < UnitTestCase
     assert_equal(good, name.description.reload.classification)
   end
 
-  # def test_propagate_generic_classifications
-  #   msgs = Name.propagate_generic_classifications
-  #   assert_empty(msgs, msgs.join("\n"))
-  #
-  #   a = names(:agaricus)
-  #   ac = names(:agaricus_campestris)
-  #   ac.update_attributes(classification: "")
-  #   msgs = Name.propagate_generic_classifications
-  #   assert_equal(["Updating Agaricus campestris"], msgs)
-  #   assert_equal(a.classification, ac.reload.classification)
-  #
-  #   a.destroy
-  #   msgs = Name.propagate_generic_classifications
-  #   assert(msgs.include?("Missing genus Agaricus"))
-  # end
-
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
     child = names(:coprinus_comatus)
@@ -3216,5 +3193,94 @@ class NameTest < UnitTestCase
       "Old name (#{old_name.text_name}) interests " \
       "were not moved to target (#{target.text_name})"
     )
+  end
+
+  def test_fix_self_referential_misspellings
+    msgs = Name.fix_self_referential_misspellings
+    assert_empty(msgs)
+
+    name = names(:coprinus)
+    name.update(correct_spelling_id: name.id)
+    msgs = Name.fix_self_referential_misspellings
+    assert_equal(1, msgs.length)
+    name.reload
+    assert_nil(name.correct_spelling_id)
+  end
+
+  def test_genus_of_synonym
+    names(:coprinus_comatus).merge_synonyms(names(:stereum_hirsutum))
+    names(:coprinus_comatus).update(deprecated: true)
+    assert_names_equal(names(:stereum), names(:coprinus_comatus).accepted_genus)
+    assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
+  end
+
+  def test_propagate_generic_classifications
+    # This should result in the classification of Coprinus being copied to
+    # Chlorophyllum rachodes.
+    c_rachodes = names(:chlorophyllum_rachodes)
+    c_comatus = names(:coprinus_comatus)
+    c_rachodes.merge_synonyms(c_comatus)
+    c_rachodes.update(deprecated: true)
+    c_comatus.update(deprecated: false)
+    wrong_class = c_rachodes.classification.sub(/Agaricaceae/, "Boletaceae")
+    c_rachodes.update(classification: wrong_class)
+    c_rachodes.reload
+    c_comatus.reload
+    assert_not_empty(c_rachodes.observations)
+    assert_not_equal(c_rachodes.classification, names(:coprinus).classification)
+
+    # This should result in the species in Agaricus having their
+    # classifications stripped.  (Presently, I'm deeming this safer than
+    # trusting old classifications which cannot even be seen on the website
+    # anymore. It should be impossible to set a species's classification
+    # to be different from the genus deliberately these days.)
+    a_campestris = names(:agaricus_campestris)
+    observations(:agaricus_campestrus_obs).destroy
+    observations(:agaricus_campestras_obs).destroy
+    observations(:agaricus_campestros_obs).destroy
+    names(:agaricus).update(classification: nil)
+    assert_not_empty(a_campestris.observations)
+
+    # It should fill these in from Lepiota.
+    l_rachodes = names(:lepiota_rachodes)
+    l_rhacodes = names(:lepiota_rhacodes)
+    l_rachodes.update(classification: nil)
+    l_rhacodes.update(classification: "")
+    observations(:minimal_unknown_obs).update(
+      name: l_rhacodes,
+      text_name: l_rhacodes.text_name
+    )
+    assert_empty(l_rachodes.observations)
+    assert_not_empty(l_rhacodes.observations)
+
+    # Make sure observations.text_name mirror is fully populated!
+    Observation.refresh_content_filter_caches
+
+    msgs = Name.propagate_generic_classifications
+
+    # Should be, in any order:
+    #   Fixing classification for C... rachodes: Boletaceae => Agaricaceae
+    #   Stripping classification from Agaricus campestris
+    #   Filling in classification for Lepiota rhacodes
+    #   Setting classifications for blah,blah,blah.
+    #   Setting classifications for blah,blah,blah,blah.
+    assert(
+      msgs.include?("Fixing classification of Chlorophyllum rachodes: " \
+                    "Boletaceae => Agaricaceae") &&
+        msgs.include?("Filling in classification for Lepiota rhacodes") &&
+        msgs.include?("Stripping classification from Agaricus campestris") &&
+        !msgs.include?("Filling in classification for Lepiota rachodes") &&
+        !msgs.include?("Stripping classification from Agaricus campestras"),
+      "Messages wrong.  Got this:\n#{msgs.inspect}\n"
+    )
+
+    # Make sure reported changes were actually made...
+    assert_equal(c_comatus.classification, c_rachodes.reload.classification)
+    assert_nil(a_campestris.reload.classification)
+    assert_nil(names(:agaricus_campestrus).classification)
+    assert_equal(names(:lepiota).classification,
+                 l_rachodes.reload.classification)
+    assert_equal(names(:lepiota).classification,
+                 l_rhacodes.reload.classification)
   end
 end

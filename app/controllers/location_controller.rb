@@ -480,7 +480,7 @@ class LocationController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create/Edit Location
+  #  :section: Create/Edit/Destroy Location
   #
   ##############################################################################
   def create_location
@@ -632,8 +632,19 @@ class LocationController < ApplicationController
     if merge && merge != @location
       post_edit_location_merge(merge)
     else
+      email_admin_location_change if nontrivial_location_change?
       post_edit_location_change(db_name)
     end
+  end
+
+  def destroy_location
+    return unless in_admin_mode?
+    return unless (@location = find_or_goto_index(Location, params[:id].to_s))
+
+    if @location.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Location, value: params[:id]))
+    end
+    redirect_to(location_list_locations_path)
   end
 
   # Merge this location with another.
@@ -687,6 +698,30 @@ class LocationController < ApplicationController
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(@location.show_link_args)
     end
+  end
+
+  def nontrivial_location_change?
+    old_name = @location.display_name
+    new_name = @display_name
+    new_name.percent_match(old_name) < 0.9
+  end
+
+  def email_admin_location_change
+    subject = "Nontrivial Location Change"
+    content = email_location_change_content
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    LocationControllerTest.report_email(content) if Rails.env.test?
+  end
+
+  def email_location_change_content
+    :email_location_change.l(
+      user: @user.login,
+      old: @location.display_name,
+      new: @display_name,
+      observations: @location.observations.length,
+      show_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
+      edit_url: "#{MO.http_domain}/location/edit_location/#{@location.id}"
+    )
   end
 
   def create_location_description

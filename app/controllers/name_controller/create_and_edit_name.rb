@@ -116,7 +116,12 @@ class NameController
     if !minor_change? && @name.dependents? && !in_admin_mode?
       redirect_with_query(
         controller: :observer, action: :email_name_change_request,
-        name_id: @name.id, new_name: @parse.search_name
+        params: {
+          name_id: @name.id,
+          # Auricularia Bull. [#17132]
+          new_name_with_icn_id: "#{@parse.search_name} " \
+                                "[##{params[:name][:icn_id]}]"
+        }
       )
       return
     end
@@ -282,20 +287,23 @@ class NameController
 
   def email_admin_name_change
     subject = "Nontrivial Name Change"
-    content = :email_name_change.l(email_name_change_content)
+    content = email_name_change_content
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
   def email_name_change_content
-    { user: @user.login,
+    :email_name_change.l(
+      user: @user.login,
       old_identifier: @name.icn_id,
       new_identifier: params[:name][:icn_id],
       old: @name.real_search_name,
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}" }
+      show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
+      edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
+    )
   end
 
   # -------------
@@ -375,7 +383,8 @@ class NameController
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
       user: @user.login,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+      show_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
+      edit_url: "#{MO.http_domain}/name/edit_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?

@@ -261,6 +261,8 @@
   images: images
   ignore: ignore
   IGNORE: Ignore
+  GEOLOCATION: Geolocation
+  geolocation: geolocation
   GLOSSARY: Glossary
   glossary: glossary
   GLOSSARY_TERM: Glossary Term
@@ -592,12 +594,12 @@
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
-  WHAT: What
-  what: what
+  WHAT: Scientific Name
+  what: scientific name
   WHEN: When
   when: when
-  WHERE: Where
-  where: where
+  WHERE: Locality
+  where: locality
   WHO: Who
   who: who
 
@@ -1089,7 +1091,7 @@
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
-  log_consensus_changed: Consensus changed from [old] to [new].
+  log_consensus_changed: "Consensus changed from: [old]."
   log_consensus_created: Initial name [name].
   log_consensus_created_at: "[:log_consensus_created]"
   log_consensus_reached: "Consensus established: [name]"
@@ -1104,23 +1106,17 @@
   log_object_accessioned: "[name] accessioned by [user]"
   log_object_added_by_user: "[Type] added by [user]."
   log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
-  log_object_added_no_user: "[Type] added."
   log_object_created_by_user: "[Type] created by [user]."
   log_object_created_by_user_with_name: "[Type] created by [user]: [name]"
-  log_object_created_no_user: "[Type] created."
   log_object_destroyed_by_user: "[Type] destroyed by [user]."
   log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]"
-  log_object_destroyed_no_user: "[Type] destroyed."
   log_object_merged_by_user: "[Type] merged into [that] by [user]."
-  log_object_merged_no_user: "[Type] merged into [that]."
   log_object_moved_by_user: "[Type] moved to [to] by [user]."
-  log_object_moved_no_user: "[Type] moved to [to]."
   log_object_removed_by_user: "[Type] removed by [user]."
   log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
   log_object_removed_no_user: "[Type] removed."
   log_object_updated_by_user: "[Type] updated by [user]."
   log_object_updated_by_user_with_name: "[Type] updated by [user]: [name]"
-  log_object_updated_no_user: "[Type] updated."
   log_orphan: "[Title]"
   log_published_description: "Description published by [user]: [name]"
   log_updated_by: Updated by [user].
@@ -1155,14 +1151,9 @@
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
-  log_image_created0: "[:log_object_added_no_user(type=:image)]"
-  log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
-  log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
   log_image_removed: "[:log_object_removed_by_user_with_name(type=:image)]"
-  log_image_reused0: "[:log_object_added_no_user(type=:image)]"
   log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
-  log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
   log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
   log_image_updated_at: "[:log_object_updated_by_user_with_name(type=:image)]"
   log_location_created: "[:log_object_created_by_user(type=:location)]"
@@ -1507,7 +1498,7 @@
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
-  form_names_classification_help: "List the higher taxa containing this [rank], one name per rank.  Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
+  form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
   form_names_gen_desc_help: Describe the general appearance of this taxon.
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
@@ -1525,8 +1516,7 @@
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
-  form_naming_name_help_create: The name you would apply to this observation.  If you don't know what it is, just leave it blank.  If you find a better name in the future, you can always propose a name later.
-  form_naming_name_help: "<strong>Scientific names are currently required</strong>, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo."
+  form_naming_name_help: "The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**"
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
   form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
@@ -1545,7 +1535,7 @@
   form_observations_creating_observation: Creating Observation
   form_observations_edit_image: Edit Image
   form_observations_remove_image: Remove Image
-  form_observations_lat_long_help: "Optional GPS location. Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: Open Interactive Map
@@ -1555,7 +1545,8 @@
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\n[loc1]\n[loc2]\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n Include administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\n Examples: \n&nbsp;&nbsp; [loc1] \n&nbsp;&nbsp; [loc2]"
+  form_observations_locate_on_map_help: "Use the Locate on Map Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
@@ -1937,11 +1928,7 @@
   rss_created_at: "[TYPE] Created"
   rss_changed: "[TYPE] Changed"
   rss_destroyed: "[TYPE] Destroyed"
-  rss_consensus_changed: "Consensus changed from: [old]"
   rss_consensus_reached: Consensus established
-  rss_naming_created_at: "Name proposed by [user]: [name]"
-  rss_naming_destroyed: "Name proposal destroyed by [user]: [name]"
-  rss_naming_updated: "Name proposal updated by [user]: [name]"
 
   # shared/_textile_help
   general_textile_link: Can be formatted with <a href="/observer/textile" target="_new">Textile</a>.
@@ -2485,11 +2472,12 @@
   herbarium_record_initial_det: Initial Determination
   herbarium_record_accession_number: Accession Number
   herbarium_record_user: Record Creator
+  herbarium_record_notes: Fungarium Record Notes
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
   create_herbarium_record_title: Add Fungarium Record
-  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013."
+  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419 \n&nbsp;&nbsp;BRY-L-0025845 \n&nbsp;&nbsp;MO 174623 \n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
   create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
@@ -2630,7 +2618,9 @@
   advanced_search_none_found: No matches found
   advanced_search_observer_help: Who observed the mushroom
   advanced_search_result_type: Result Type
-  advanced_search_result_type_help: Do you want [:observations], [:images], [:locations] or [:names]/[:descriptions]?
+  # Image search UI temporarily disabled for performance. 2021-09-12 JDC
+  # advanced_search_result_type_help: Do you want [:observations], [:images], [:locations] or [:names]/[:descriptions]?
+  advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
@@ -2910,12 +2900,13 @@
   # observer/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
-  sandbox_link4: The RedCloth manual.
-  sandbox_link5: The old hobix.com tutorial.
-  sandbox_link6: Cheatsheet courtesy warpedivisions.org.
+  sandbox_link4: The RedCloth manual
+  sandbox_link5: The old hobix.com tutorial
+  sandbox_link6: Cheatsheet courtesy warpedivisions.org
   sandbox_look_like: This is what it will look like
+  sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "__italics__        trademark(tm)  \\\n**boldface**       copyright(c)    | (must follow letters, not punctuation)\n+underline+        registered(r)  /\n@monospace@\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_comment 12345_\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote or indent a paragraph.\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm) \n**boldface**       copyright(c) \n+underline+        registered(r) \n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote \n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
@@ -3265,10 +3256,11 @@
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
-  email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold_identifier : [old_identifier]\nnew_identifier : [new_identifier]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
-  email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nurl : [url]"
-  email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
-  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nname : [name] \nurl : [name_url] \nnew name : [new_name] \nnotes : [notes]"
+  email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold identifier : [old_identifier]\nnew identifier : [new_identifier]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nnamings : [namings]\nshow name : [show_url]\nedit name : [edit_url]"
+  email_location_change: "User made nontrivial change to a location:\n\nuser : [user]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nshow location : [show_url]\nedit location : [edit_url]"
+  email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nshow url : [show_url]\nedit url : [edit_url]"
+  email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nshow this : [show_this_url]\nedit this : [edit_this_url]\nshow that : [show_that_url]\nedit that : [edit_that_url]\nnotes : [notes]"
+  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
@@ -3515,14 +3507,16 @@
   validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
+  validate_user_selection: "You selected"
+  validate_today: "today is"
 
   # One-time-use error messages.
   validate_image_content_type_images_only: You can only upload [:images].
   validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
-  validate_observation_invalid_year: Year is invalid.  Should be between 1500 and present.
-  validate_observation_future_time: Time travel is not allowed, pick a date from the past.
+  validate_invalid_year: Year is invalid.  Should be between 1500 and present.
+  validate_future_time: Time travel is not allowed; use a past date or the current date.
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
@@ -3934,6 +3928,7 @@
   api_help_message: "Usage: [help]"
   api_herbarium_record_already_exists: There is already a record for [number] at [herbarium].
   api_image_upload_failed: "Failed to upload image: [error]"
+  api_incorrect_password: Incorrect password.
   api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
   api_location_already_exists: The location "[location]" already exists.
   api_missing_method: Missing "method" parameter.
@@ -3980,6 +3975,7 @@
   api_help_accession_number: unique fungarium id
   api_help_accession_number_has: search within accession number
   api_help_any_date: this date can mean anything you want
+  api_help_api_key_password: password of the user you are creating an API key for
   api_help_api_key_user: user you are creating api key for
   api_help_app: identifier used to help user distinguish which api key belongs to which app
   api_help_author_has: search within author

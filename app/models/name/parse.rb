@@ -421,23 +421,29 @@ class Name < AbstractModel
     end
   end
 
+  # matches to ranks that are included in the name proper
+  # subspecies is not included because it's the catchall default
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i.freeze
+
+  # convert rank start_match to standard form of rank
+  # subspecies is not included because it's the catchall default
+  STANDARD_SECONDARY_RANKS = {
+    f: "f.",
+    sect: "sect.",
+    stirps: "stirps",
+    subg: "subg.",
+    subsect: "subsect.",
+    v: "var."
+  }.freeze
+
   def self.standardize_name(str)
     words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i.positive?
-      words[i] = if /^f/i.match?(words[i])
-                   "f."
-                 elsif /^v/i.match?(words[i])
-                   "var."
-                 elsif /^sect/i.match?(words[i])
-                   "sect."
-                 elsif /^stirps/i.match?(words[i])
-                   "stirps"
-                 elsif /^subg/i.match?(words[i])
-                   "subgenus"
-                 elsif /^subsect/i.match?(words[i])
-                   "subsect."
+      words[i] = if (match_start_of_rank = RANK_START_MATCHER.match(words[i]))
+                   start_of_rank = match_start_of_rank[0]
+                   STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
                  else
                    "subsp."
                  end
@@ -498,7 +504,7 @@ class Name < AbstractModel
           gsub(/_+/, " "). # put genus at the top
           sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
           gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-          sub(" subgenus ", " {1subgenus ").
+          sub(" subg. ", " {1subg. ").
           sub(" sect. ",    " {2sect. ").
           sub(" subsect. ", " {3subsect. ").
           sub(" stirps ",   " {4stirps ").

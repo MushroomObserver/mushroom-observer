@@ -31,13 +31,27 @@ high detail response now
 collection_numbers, comments, external_links, herbarium_records -- only
 includes observation ids now not full details
 
+CSV files
+---------
+
+Note that we update a set of CSV files nightly which are straight dumps of the
+database.  If you are looking for large quantities of data, e.g. for data
+anaylsis or image recognition, plase look at these files first to see if they
+have the information you need.  That will save our server a considerable amount
+of unnecessary traffic, and probably save you a lot of work!
+
+* https://mushroomobserver.org/observations.csv
+* https://mushroomobserver.org/images_observations.csv
+* https://mushroomobserver.org/names.csv
+* https://mushroomobserver.org/locations.csv
+
 Overview
 --------
 
 Mushroom Observer supports a simple API based on sending GET, POST, PATCH and
 DELETE requests to URLs of the form:
 ```
-http://mushroomobserver.org/api2/<database_table>
+https://mushroomobserver.org/api2/<database_table>
 ```
 GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
@@ -83,9 +97,9 @@ responses generally include 100 results per page, low detail 1000 per page).
 It is easy to play with this aspect of the API in a browser.  Try the following
 queries, for example:
 
-* GET <http://mushroomobserver.org/api2/observations?children_of=Tulostoma>
-* GET <http://mushroomobserver.org/api2/observations?locations=Delaware&date=6>
-* GET <http://mushroomobserver.org/api2/observations?help=1>
+* GET <https://mushroomobserver.org/api2/observations?children_of=Tulostoma>
+* GET <https://mushroomobserver.org/api2/observations?locations=Delaware&date=6>
+* GET <https://mushroomobserver.org/api2/observations?help=1>
 
 These return, respectively, (1) ids of all observations of the genus Tulostoma,
 (2) ids of all observations from Delaware posted in June (any year), and (3) a
@@ -97,7 +111,7 @@ POST Requests
 Most tables accept POST requests for creating new records.  Include data for
 the new record in parameters.  Example:
 
-* POST <http://mushroomobserver.org/api2/observations?api_key=xxx&name=Agaricus&location=Pasadena,+California,+USA&date=2016-08-06&notes=growing+in+lawn>
+* POST <https://mushroomobserver.org/api2/observations?api_key=xxx&name=Agaricus&location=Pasadena,+California,+USA&date=2016-08-06&notes=growing+in+lawn>
 
 The response will include the id of the new record.
 
@@ -112,7 +126,7 @@ Structure your PATCH query the same as for GET requests, but also include
 example, this would be a way to change the location of a set of your
 observations:
 
-* PATCH <http://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&id=12300-12400&set_location=Pasadena,+California,+USA>
+* PATCH <https://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&id=12300-12400&set_location=Pasadena,+California,+USA>
 
 DELETE Requests
 ---------------
@@ -121,7 +135,7 @@ Structure the query the same as for GET requests.  MO will destroy all matching
 records (that you have permission to destroy).  For example, this should delete
 all your observations from a given location:
 
-* DELETE <http://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&locations=Madison+Heights,+Pasadena,+California,+USA>
+* DELETE <https://mushroomobserver.org/api2/observations?api_key=xxx&user=jason&locations=Madison+Heights,+Pasadena,+California,+USA>
 
 API Keys
 -------------
@@ -133,12 +147,12 @@ user, so MO will know who you are.
 The easiest way for an individual user to obtain an API key is to create one
 directly via the website:
 
-* <http://mushroomobserver.org/account/api_keys>
+* <https://mushroomobserver.org/account/api_keys>
 
 For convenience, apps may also create a key on behalf of a user using a POST
 request:
 
-* POST <http://mushroomobserver.org/api2/api_keys?api_key=xxx&user=xxx>
+* POST <https://mushroomobserver.org/api2/api_keys?api_key=xxx&user=xxx>
 
 In this latter case, the app creator must first create an API key by hand for
 that app.  This is the key that will be used in the request above to create a
@@ -192,11 +206,7 @@ WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6
 AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
 ORDER BY observations.id ASC
 ```
-See also the print out of all the help messages here"
-
-* <https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API_HELP_MESSAGES.txt>
-
-and the database diagram here:
+See also the database diagram here:
 
 * <https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif>
 

@@ -2,6 +2,9 @@
 
 source("https://rubygems.org")
 
+# security fix for CVE-2021-41817 regex denial of service vulnerability
+gem("date", ">= 3.2.1")
+
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
@@ -102,17 +105,10 @@ gem("rubyzip")
 
 ########## Development, Testing, and Analysis ##################################
 
-# Use byebug as debugging gem
-gem("byebug", group: [:development, :test])
-
-# Calling `console` creates irb session in the browser (instead of the terminal)
-gem("web-console", group: :development)
-
-# Automatically track code test coverage
-# Use coveralls_reborn gem instead of coveralls gem
-# With `coveralls` Travis CI runnning with Ubuntu focal gets an SSLError
-# when Travis submits the coverage report to Coveralls
-gem("coveralls_reborn", "~> 0.20.0", require: false)
+# Use built-in Ruby coverage to generate html coverage file
+gem("simplecov", require: false)
+# generate lcov file to send to Coveralls by Github Actions
+gem("simplecov-lcov", require: false)
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
@@ -131,6 +127,11 @@ gem("rubocop-rails")
 
 # use mry to support safe updating of .rubocop.yml
 gem("mry", require: false)
+
+group :test, :development do
+  # Use byebug as debugging gem
+  gem "byebug"
+end
 
 group :test do
   # Use capybara to simulate user-browser interaction
@@ -153,4 +154,12 @@ group :test do
   # Stub and set expectations on HTTP requests in test mode
   # Allow selective disabling of internet
   gem "webmock"
+end
+
+group :development do
+  # Calling `console` creates irb session in the browser (instead of terminal)
+  gem "web-console"
+
+  # Use Rails DB to browse database at http://localhost:3000/rails/db/
+  gem "rails_db", "~> 2.3.0"
 end

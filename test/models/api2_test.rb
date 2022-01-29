@@ -224,6 +224,19 @@ class Api2Test < UnitTestCase
     assert_in_delta(Time.zone.now, naming.updated_at, 1.minute)
     assert_equal(1, naming.votes.length)
     assert_objs_equal(vote, naming.votes.first)
+    assert_last_reasons_correct(naming) if @reasons
+  end
+
+  def assert_last_reasons_correct(naming)
+    naming.get_reasons.each do |reason|
+      expect = @reasons[reason.num]
+      if expect.nil?
+        assert_false(reason.used?)
+      else
+        assert_true(reason.used?)
+        assert_equal(expect.to_s, reason.notes.to_s)
+      end
+    end
   end
 
   def assert_last_observation_correct
@@ -428,7 +441,7 @@ class Api2Test < UnitTestCase
       app: @app
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting api key")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
@@ -436,7 +449,7 @@ class Api2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
-  def test_posting_api_key_for_another_user
+  def test_posting_api_key_for_another_user_without_password
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
     @app = "  Mushroom  Mapper  "
@@ -449,7 +462,7 @@ class Api2Test < UnitTestCase
       for_user: @for_user.id
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting api key")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
@@ -457,6 +470,54 @@ class Api2Test < UnitTestCase
     assert_api_fail(params.merge(app: ""))
     assert_api_fail(params.merge(for_user: 123_456))
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_for_another_user_with_password
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = katrina
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app,
+      for_user: @for_user.id,
+      password: "testpassword"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.merge(password: "bogus"))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_where_key_already_exists
+    email_count = ActionMailer::Base.deliveries.size
+    api_key = api_keys(:rolfs_mo_app_api_key)
+    @for_user = rolf
+    @app = api_key.notes
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app,
+      for_user: @for_user.id,
+      password: "testpassword"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_list_equal([api_key], api.results)
+    assert_api_fail(params.merge(password: "bogus"))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+
+    api_key.update(verified: nil)
+    assert_nil(api_key.reload.verified)
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_not_nil(api_key.reload.verified)
   end
 
   def test_patching_api_keys
@@ -2301,6 +2362,12 @@ class Api2Test < UnitTestCase
       Stipe: "smooth",
       Other: "These are notes.\nThey look like this."
     }
+    @reasons = {
+      1 => "because I say",
+      2 => "",
+      3 => nil,
+      4 => "K+ paisley"
+    }
     @vote = 2.0
     @specimen = true
     @is_col_loc = true
@@ -2323,6 +2390,9 @@ class Api2Test < UnitTestCase
       altitude: "50m",
       has_specimen: "yes",
       name: "Coprinus comatus",
+      reason_1: @reasons[1],
+      reason_2: @reasons[2],
+      reason_4: @reasons[4],
       vote: "2",
       projects: @proj.id,
       species_lists: @spl.id,
@@ -3338,9 +3408,8 @@ class Api2Test < UnitTestCase
 
   def test_getting_users
     params = { method: :get, action: :user }
-    user = User.all.sample
-    assert_api_pass(params.merge(id: user.id))
-    assert_api_results([user])
+    assert_api_pass(params.merge(detail: :low))
+    assert_api_results(User.all)
   end
 
   def test_posting_minimal_user
@@ -3363,7 +3432,7 @@ class Api2Test < UnitTestCase
       password: "secret"
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting user")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
@@ -3379,7 +3448,7 @@ class Api2Test < UnitTestCase
   def test_posting_maximal_user
     @login = "stephane"
     @name = "Stephane Grappelli"
-    @email = "stephane@grappelli.com"
+    @email = "_Rea||y+{$tran&e}-e#ai1!?_@123.whosi-whatsit.com"
     @locale = "el"
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
@@ -3404,7 +3473,7 @@ class Api2Test < UnitTestCase
       create_key: @new_key
     }
     api = API2.execute(params)
-    assert_no_errors(api, "Errors while posting image")
+    assert_no_errors(api, "Errors while posting user")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     params[:login] = "miles"
@@ -3909,6 +3978,13 @@ class Api2Test < UnitTestCase
                    "observation #{obs.id}, name #{nam.id}", limit: limit)
   end
 
+  def test_parse_email
+    assert_parse(:email, API2::BadParameterValue, "blah blah blah")
+    assert_parse(:email, "simple@email.com", "simple@email.com")
+    assert_parse(:email, "Ab3!#$%&'*+/=?^_'{|}~-@crazy-email.123",
+                 "Ab3!#$%&'*+/=?^_'{|}~-@crazy-email.123")
+  end
+
   # ---------------------------
   #  :section: Authentication
   # ---------------------------
@@ -4014,10 +4090,7 @@ class Api2Test < UnitTestCase
     assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
   end
 
-  def test_api_key_help
-    file = help_messages_file
-    File.open(file, "w") { |fh| fh.truncate(0) }
-
+  def test_help
     do_help_test(:get, :api_key, fail: true)
     do_help_test(:post, :api_key)
     do_help_test(:patch, :api_key, fail: true)
@@ -4084,10 +4157,6 @@ class Api2Test < UnitTestCase
     do_help_test(:delete, :user, fail: true)
   end
 
-  def help_messages_file
-    Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
-  end
-
   def do_help_test(method, action, fail: false)
     params = {
       method: method,
@@ -4102,18 +4171,6 @@ class Api2Test < UnitTestCase
       assert_equal("API2::NoMethodForAction", api.errors.first.class.name)
     else
       assert_equal("API2::HelpMessage", api.errors.first.class.name)
-      file = help_messages_file
-      return unless File.exist?(file)
-
-      File.open(file, "a") do |fh|
-        fh.puts("#{method.to_s.upcase} #{action}")
-        fh.puts(api.errors.first.to_s.gsub(/; /, "\n  ").
-          sub(/^Usage: /, "  ").
-          sub(/^  query params: */, " query params\n  ").
-          sub(/^  update params: */, " update params\n  ").
-          gsub(/^(  [^:]*:) */, "\\1\t"))
-        fh.puts
-      end
     end
   end
 end

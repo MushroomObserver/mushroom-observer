@@ -14,6 +14,7 @@ conic_glossary_term:
   name: Conic # Want to support translations, so this should be a symbol
   description: Cute little cone head. # This should be a symbol
   thumb_image: conic_image # The image for the index
+  images: conic_image # all thumb_images should also be in images
 
 convex_glossary_term:
   <<: *DEFAULTS

@@ -116,8 +116,7 @@ class API2
     def after_create(obs)
       obs.log(:log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
-      naming = obs.namings.create(name: @name)
-      obs.change_vote(naming, @vote, user)
+      create_naming(obs)
     end
 
     def validate_update_params!(params)
@@ -141,6 +140,19 @@ class API2
     ############################################################################
 
     private
+
+    def create_naming(obs)
+      naming = obs.namings.new(name: @name)
+      naming.get_reasons.each do |reason|
+        if @reasons[reason.num].nil?
+          reason.delete
+        else
+          reason.notes = @reasons[reason.num]
+        end
+      end
+      naming.save!
+      obs.change_vote(naming, @vote, user)
+    end
 
     def create_specimen_records(obs)
       provide_specimen_defaults(obs)
@@ -215,10 +227,11 @@ class API2
     # --------------------
 
     def parse_create_params!
-      @name  = parse(:name, :name, default: Name.unknown)
-      @vote  = parse(:float, :vote, default: Vote.maximum_vote)
-      @log   = parse(:boolean, :log, default: true, help: 1)
-      @notes = parse_notes_fields!
+      @name    = parse(:name, :name, default: Name.unknown)
+      @vote    = parse(:float, :vote, default: Vote.maximum_vote)
+      @log     = parse(:boolean, :log, default: true, help: 1)
+      @notes   = parse_notes_fields!
+      @reasons = parse_naming_reasons!
       parse_herbarium_and_specimen!
       parse_location_and_coordinates!
       parse_images_and_pick_thumbnail
@@ -270,6 +283,14 @@ class API2
       return keys.first.to_sym if keys.length == 1
 
       raise(BadNotesFieldParameter.new(str))
+    end
+
+    def parse_naming_reasons!
+      Naming::Reason.all_reasons.each_with_object({}) do |num, reasons|
+        val = parse(:string, :"reason_#{num}")
+        val = nil if val == "."
+        reasons[num] = val
+      end
     end
 
     def parse_set_coordinates!

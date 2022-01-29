@@ -467,8 +467,11 @@ class SpeciesList < AbstractModel
 
   protected
 
-  validate :check_requirements
-  def check_requirements # :nodoc:
+  include Validations
+
+  validate :check_requirements, :check_when
+
+  def check_requirements
     # Clean off leading/trailing whitespace from +where+.
     self.where = where.strip_squeeze if where
     self.where = nil if where == ""
@@ -485,8 +488,13 @@ class SpeciesList < AbstractModel
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 
-    if !user && !User.current
-      errors.add(:user, :validate_species_list_user_missing.t)
-    end
+    return unless !user && !User.current
+
+    errors.add(:user, :validate_species_list_user_missing.t)
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    validate_when(self.when, errors)
   end
 end

@@ -1757,7 +1757,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_redirected_to(
       { controller: :observer, action: :email_name_change_request,
-        name_id: name.id, new_name: "Superboletus" },
+        name_id: name.id, new_name_with_icn_id: "Superboletus [#]" },
       "User should be unable to change text_name of Name with dependents"
     )
   end
@@ -1882,6 +1882,38 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
+  end
+
+  def test_update_change_icn_id_name_with_dependents
+    name = names(:lactarius)
+    assert(name.icn_id, "Test needs a fixture with an icn_id")
+    assert(name.dependents?, "Test needs a fixture with dependents")
+    params = {
+      id: name.id,
+      name: {
+        version: name.version,
+        text_name: name.text_name,
+        author: name.author,
+        sort_name: name.sort_name,
+        rank: name.rank,
+        citation: name.citation,
+        deprecated: (name.deprecated ? "true" : "false"),
+        icn_id: name.icn_id + 1,
+        notes: name.notes
+      }
+    }
+    user = name.user
+    login(user.login)
+
+    post(:edit_name, params: params)
+    assert_redirected_to(
+      { controller: :observer, action: :email_name_change_request,
+        params: {
+          name_id: name.id,
+          new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
+        } },
+      "Editing id# of Name w/dependents should show Name Change Request form"
+    )
   end
 
   def test_update_icn_id_unregistrable
@@ -2721,9 +2753,9 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     syn = Synonym.create
     name1 = Name.create!(
-      text_name: "Cortinarius subgenus Sericeocybe",
-      search_name: "Cortinarius subgenus Sericeocybe",
-      sort_name: "Cortinarius subgenus Sericeocybe",
+      text_name: "Cortinarius subg. Sericeocybe",
+      search_name: "Cortinarius subg. Sericeocybe",
+      sort_name: "Cortinarius subg. Sericeocybe",
       display_name: "**__Cortinarius__** subg. **__Sericeocybe__**",
       author: "",
       rank: :Subgenus,
@@ -2762,7 +2794,7 @@ class NameControllerTest < FunctionalTestCase
     assert(name1.reload)
     assert_not(name1.correct_spelling)
     assert_not(name1.deprecated)
-    assert_equal("Cortinarius subgenus Sericeocybe", name1.text_name)
+    assert_equal("Cortinarius subg. Sericeocybe", name1.text_name)
     assert_equal("", name1.author)
   end
 
@@ -3616,6 +3648,7 @@ class NameControllerTest < FunctionalTestCase
         existing_synonyms[n.id.to_s] = "1" # Check the rest
       end
     end
+
     split_version = split_name.version
     kept_version = kept_name.version
     params = {

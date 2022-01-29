@@ -21,24 +21,12 @@ class ObserverController
   end
 
   def ask_webmaster_question
-    @email = params[:user][:email] if params[:user]
-    @content = params[:question][:content] if params[:question]
+    @email = params.dig(:user, :email)
+    @content = params.dig(:question, :content)
     @email_error = false
-    if request.method != "POST"
-      @email = @user.email if @user
-    elsif @email.blank? || @email.index("@").nil?
-      flash_error(:runtime_ask_webmaster_need_address.t)
-      @email_error = true
-    elsif @content.blank?
-      flash_error(:runtime_ask_webmaster_need_content.t)
-    elsif /http:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
-          !@content.include?(" ")
-      flash_error(:runtime_ask_webmaster_antispam.t)
-    else
-      WebmasterEmail.build(@email, @content).deliver_now
-      flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(action: "list_rss_logs")
-    end
+    return create_webmaster_question if request.method == "POST"
+
+    @email = @user.email if @user
   end
 
   def ask_user_question
@@ -103,21 +91,52 @@ class ObserverController
     send_request if request.method == "POST"
   end
 
+  # get email_name_change_request(
+  #   params: {
+  #     name_id: 1258, new_name_with_icn_id: "Auricularia Bull. [#17132]"
+  #   }
+  # )
   def email_name_change_request
     @name = Name.safe_find(params[:name_id])
-    @new_name = params[:new_name]
+    name_with_icn_id = "#{@name.search_name} [##{@name.icn_id}]"
 
-    unless @name && @name.search_name != @new_name
+    if name_with_icn_id == params[:new_name_with_icn_id]
       redirect_back_or_default(action: :index)
       return
     end
 
-    send_name_change_request if request.method == "POST"
+    @new_name_with_icn_id = params[:new_name_with_icn_id]
+    return unless request.method == "POST"
+
+    send_name_change_request(name_with_icn_id, @new_name_with_icn_id)
   end
 
   ##########
 
   private
+
+  def create_webmaster_question
+    if @email.blank? || @email.index("@").nil?
+      flash_error(:runtime_ask_webmaster_need_address.t)
+      @email_error = true
+    elsif @content.blank?
+      flash_error(:runtime_ask_webmaster_need_content.t)
+    elsif non_user_potential_spam?
+      flash_error(:runtime_ask_webmaster_antispam.t)
+    else
+      WebmasterEmail.build(@email, @content).deliver_now
+      flash_notice(:runtime_ask_webmaster_success.t)
+      redirect_to(action: "list_rss_logs")
+    end
+  end
+
+  def non_user_potential_spam?
+    !@user && (
+      /https?:/.match?(@content) ||
+      %r{<[/a-zA-Z]+>}.match?(@content) ||
+      !@content.include?(" ")
+    )
+  end
 
   def validate_merge_model!(val)
     case val
@@ -142,8 +161,10 @@ class ObserverController
       type: @model.type_tag,
       this: @old_obj.merge_info,
       that: @new_obj.merge_info,
-      this_url: @old_obj.show_url,
-      that_url: @new_obj.show_url,
+      show_this_url: @old_obj.show_url,
+      show_that_url: @new_obj.show_url,
+      edit_this_url: @old_obj.edit_url,
+      edit_that_url: @new_obj.edit_url,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
@@ -151,14 +172,15 @@ class ObserverController
     redirect_to(@old_obj.show_link_args)
   end
 
-  def send_name_change_request
+  def send_name_change_request(name_with_icn_id, new_name_with_icn_id)
     change_locale_if_needed(MO.default_locale)
     subject = "Request to change Name having dependents"
     content = :email_name_change_request.l(
       user: @user.login,
-      name: @name.search_name,
-      name_url: @name.show_url,
-      new_name: @new_name,
+      old_name: name_with_icn_id,
+      new_name: new_name_with_icn_id,
+      show_url: @name.show_url,
+      edit_url: @name.edit_url,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now

@@ -66,7 +66,7 @@ class Naming < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "observer"
+    "/observer"
   end
 
   def self.construct(args, observation)
@@ -162,7 +162,7 @@ class Naming < AbstractModel
 
       # Send email to people interested in this name.
       @initial_name_id = name_id
-      taxa = name.all_parents
+      taxa = name.approved_name.all_parents
       taxa.push(name)
       taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
       done_user = {}
