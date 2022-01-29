@@ -103,6 +103,9 @@ gem("mimemagic")
 # for creating zip files
 gem("rubyzip")
 
+# to handle frontend requests from different port, e.g. dev GraphQL client
+gem("rack-cors")
+
 ########## Development, Testing, and Analysis ##################################
 
 # Use built-in Ruby coverage to generate html coverage file
@@ -124,6 +127,13 @@ gem("brakeman", require: false)
 gem("rubocop", "= 0.89", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
+# Rubocop extension for enforcing graphql-ruby best practices.
+# You need to tell RuboCop to load the GraphQL extension. rubocop.yml
+# require:
+#  - rubocop-other-extension
+#  - rubocop-graphql
+# http://github.com/DmitryTsepelev/rubocop-graphql
+gem("rubocop-graphql", require: false)
 
 # use mry to support safe updating of .rubocop.yml
 gem("mry", require: false)
@@ -211,6 +221,10 @@ gem("graphql-batch")
 group :test, :development do
   # Use byebug as debugging gem
   gem "byebug"
+
+  # GraphiQL for GraphQL development
+  # Makes an IDE available to test graphql queries at '/graphiql/'
+  gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
 end
 
 group :test do
