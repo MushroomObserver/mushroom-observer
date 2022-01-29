@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/graphql/queries/locations.rb
 module Queries
   class Locations < Queries::BaseQuery

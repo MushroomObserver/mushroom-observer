@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/graphql/queries/herbaria.rb
 # Experimental pagination
 

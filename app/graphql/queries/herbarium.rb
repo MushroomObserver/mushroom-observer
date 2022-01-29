@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/graphql/queries/herbarium.rb
 module Queries
   class Herbarium < Queries::BaseQuery

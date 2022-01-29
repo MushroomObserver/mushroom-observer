@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Types::Models
   class LanguageType < Types::BaseObject
     field :id, Integer, null: false

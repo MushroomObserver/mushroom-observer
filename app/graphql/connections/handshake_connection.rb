@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Check https://joinhandshake.com/blog/our-team/implementing-custom-pagination-with-graphql-ruby/
 # Documentation is inconsistent, not sure this can work as typed
 

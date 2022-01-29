@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/graphql/queries/articles.rb
 module Queries
   class Articles < Queries::BaseQuery

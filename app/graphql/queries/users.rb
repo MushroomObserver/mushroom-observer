@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # app/graphql/queries/users.rb
 module Queries
   class Users < Queries::BaseQuery

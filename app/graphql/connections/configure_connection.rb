@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Types
   class ConfigureConnection < GraphQL::Types::Relay::BaseConnection
     # Currently applied to Types::BaseObject

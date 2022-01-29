@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # The MO way is more complicated because admins
 # * I log in, setting session_user
 # * I turn on admin mode

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Types::Enums
   class EitherWithWithout < Types::BaseEnum
     value "EITHER", "Results with or without this argument"
