@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require("test_helper")
-
-class Mutations::UserTest < IntegrationTestCase # ActionDispatch::IntegrationTest # ActiveSupport::TestCase
+# ActionDispatch::IntegrationTest # ActiveSupport::TestCase
+class Mutations::UserTest < IntegrationTestCase
   # def setup
   #   context = {
   #     session_user: context[:session_user]

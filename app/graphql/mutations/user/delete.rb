@@ -12,9 +12,9 @@ module Mutations::User
     # define return fields. deleted so no?
     field :user, Types::Models::UserType, null: false
 
-    # define arguments
+    # define arguments, # require pw, for example?
     argument :id, Integer, required: true
-    # argument :attributes, Types::DeleteUserInput, required: true # require pw, for example?
+    # argument :attributes, Types::DeleteUserInput, required: true
 
     # define resolve method
     def resolve(id:, attributes:)
