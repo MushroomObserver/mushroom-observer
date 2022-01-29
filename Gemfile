@@ -242,4 +242,7 @@ group :development do
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   gem "rails_db", "~> 2.3.0"
+
+  # Additional generators for input types, search objects, and mutations
+  # gem "graphql-rails-generators"
 end
