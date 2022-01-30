@@ -651,7 +651,6 @@ class ObserverController
             bad_images.push(image)
             flash_object_errors(image)
           elsif !image.process_image(observation.gps_hidden)
-            logger.error("Unable to upload image")
             name_str = name ? "'#{name}'" : "##{image.id}"
             flash_notice(:runtime_no_upload_image.t(name: name_str))
             bad_images.push(image)

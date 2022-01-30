@@ -160,7 +160,6 @@ class GlossaryTermsController < ApplicationController
       flash_object_errors(image)
       nil
     elsif !image.process_image
-      logger.error("Unable to upload image")
       name = image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))

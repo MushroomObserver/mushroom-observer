@@ -103,6 +103,9 @@ gem("mimemagic")
 # for creating zip files
 gem("rubyzip")
 
+# to handle frontend requests from different port, e.g. dev GraphQL client
+gem("rack-cors")
+
 ########## Development, Testing, and Analysis ##################################
 
 # Use built-in Ruby coverage to generate html coverage file
@@ -124,13 +127,105 @@ gem("brakeman", require: false)
 gem("rubocop", "= 0.89", require: false)
 gem("rubocop-performance")
 gem("rubocop-rails")
+# Rubocop extension for enforcing graphql-ruby best practices.
+# You need to tell RuboCop to load the GraphQL extension. rubocop.yml
+# require:
+#  - rubocop-other-extension
+#  - rubocop-graphql
+# http://github.com/DmitryTsepelev/rubocop-graphql
+gem("rubocop-graphql", require: false)
 
 # use mry to support safe updating of .rubocop.yml
 gem("mry", require: false)
 
+########## GraphQL API ########################################
+
+# GraphQL-Ruby
+# https://github.com/rmosolgo/graphql-ruby
+gem("graphql")
+#
+# Note: Some of the following gems are experimental at this point 1/22
+#
+# Debug future changes in GraphQL API
+# Takes two GraphQL schemas and outputs a list of changes between versions
+# gem("graphql-schema_comparator")
+#
+# Pagination & Connection gems
+#
+# Additional implementations of cursor-based paginations for GraphQL Ruby.
+# Extends classes of graphql-ruby
+# Use with GraphQL::Connections::Stable
+# https://github.com/bibendi/graphql-connections
+gem("graphql-connections")
+#
+# Allows cursor pagination through an ActiveRecord relation.
+# Supports ordering by any column, ascending or descending.
+# Use with the RailsCursorPagination::Paginator class.
+# https://github.com/xing/rails_cursor_pagination
+# gem("rails_cursor_pagination")
+#
+# Implements page-based pagination returning collection and pagination metadata.
+# It works with kaminari or other pagination tools implementing similar methods.
+# https://github.com/RenoFi/graphql-pagination
+# gem("graphql-pagination")
+# gem("kaminari-activerecord")
+#
+# Dataloading gems
+# Note that dataloader comes shipped with graphql gem as of 1.12
+# It's also experimental. Below are some alternatives
+# https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one
+#
+# Provides an executor for the graphql gem which allows queries to be batched.
+# Defined in loaders/record_loader.rb RecordLoader < GraphQL::Batch::Loader
+# Used in queries and resolvers like
+# def product(id:) RecordLoader.for(Product).load(id)
+# def products(ids:) RecordLoader.for(Product).load_many(ids)
+# https://github.com/Shopify/graphql-batch
+gem("graphql-batch")
+#
+# Brings association lazy load functionality to your Rails applications
+# Use like User.lazy_preload(:posts).limit(10)
+# https://github.com/DmitryTsepelev/ar_lazy_preload
+# gem("ar_lazy_preload")
+#
+# (Similar to graphql-batch and maybe ar_lazy_preload. Maybe better?)
+# Provides a generic lazy batching mechanism to avoid N+1 DB queries,
+# HTTP queries, etc.
+# https://github.com/exAspArk/batch-loader
+# https://github.com/exAspArk/batch-loader#alternatives
+# gem("batch-loader")
+#
+# (Similar to ar_lazy_preload)
+# Old add-on to graphql-ruby that allows your field resolvers to minimize N+1
+# SELECTS issued by ActiveRecord. Possibly overlaps above ar_lazy_preload
+# https://github.com/nettofarah/graphql-query-resolver
+# gem("graphql-query-resolver")
+#
+# Caching gems
+#
+# Persisted Queries. Backend will cache all the queries, while frontend will
+# send the full query only when it's not found at the backend storage.
+# Use with apollo persisted queries
+# https://github.com/DmitryTsepelev/graphql-ruby-persisted_queries
+# gem("graphql-persisted_queries")
+#
+# Cache response fragments: you can mark any field as cached
+# https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
+# gem("graphql-fragment_cache")
+#
+# Need to cache and instrument your GraphQL code in Ruby? Look no further!
+# https://github.com/chatterbugapp/cacheql
+# gem("cacheql")
+#
+
 group :test, :development do
   # Use byebug as debugging gem
   gem "byebug"
+
+  # GraphiQL for GraphQL development
+  # Makes an IDE available to test graphql queries at '/graphiql/'
+  # Until current changes are released, need to use this Github version:
+  gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
 end
 
 group :test do
@@ -162,4 +257,7 @@ group :development do
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   gem "rails_db", "~> 2.3.0"
+
+  # Additional generators for input types, search objects, and mutations
+  # gem "graphql-rails-generators"
 end

@@ -345,7 +345,6 @@ class ImageController < ApplicationController
     return flash_object_errors(@image) unless @image.save
 
     if !@image.process_image(@observation.gps_hidden)
-      logger.error("Unable to upload image")
       name = @image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))
