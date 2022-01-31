@@ -7,7 +7,7 @@ class GraphqlController < ApplicationController
   # plus the graphql query, variables, and operationName.
   #
   # JWT is a popular way to do auth, but i'm experimenting for now with Rails
-  # built-in token generation. There are examples in the wild and i think 
+  # built-in token generation. There are examples in the wild and i think
   # it should be fine for us.
   #
   # (Below deactivates csrf for development, I don't believe necessary)

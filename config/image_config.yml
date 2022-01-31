@@ -3,7 +3,7 @@ development:
   image_sources:
     :local:
       :test: file://%{root}/public/images
-      :read: http://localhost:3000/images
+      :read: "/images"
     :cdmr:
       :test: :transferred_flag
       :read: http://images.mushroomobserver.org
