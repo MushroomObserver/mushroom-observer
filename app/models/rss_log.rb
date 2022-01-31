@@ -13,45 +13,47 @@
 #  associations for the different types of owners.  The resulting performance
 #  hit was significant.
 #
-#  Possible owners are currently:
+#  List of models which log activity are presently:
 #
+#  * Article
+#  * GlossaryTerm
 #  * Location
 #  * Name
 #  * Observation
 #  * Project
 #  * SpeciesList
-#  * GlossaryTerm
-#  * Article
 #
 #  == Adding RssLog to Model
 #
-#  I think this is relatively easy.  Try following these steps:
+#  This might be out of date, but start with these steps:
 #
-#  1) Add columns to rss_logs and new model tables via migration:
+#  1) Database: Add columns to rss_logs and new model tables via migration.
 #
 #       class AddRssLogToModel < ActiveRecord::Migration
-#         def self.up
+#         def self.change
 #           add_column(:rss_logs, :model_id, :integer)
 #           add_column(:models, :rss_log_id, :integer)
 #         end
-#         def self.down
-#           remove_column(:rss_logs, :model_id)
-#           remove_column(:models, :rss_log_id)
-#         end
 #       end
 #
-#  2) Inform model of the new association: (automatically inherits +log+
-#     method from AbstractModel)
+#  2) New model: Create association, tell it which actions (if any) to
+#     automatically log, provide standard title methods.  (Note that
+#     AbstractModel will provide the +log+ method. The optional exclamation
+#     points tell it to pop the object to the top of the Activity Log.)
 #
 #       belongs_to :rss_log
+#       self.autolog_events = [:created!, :updated!, :destroyed!]
+#       def text_name
+#       def format_name
+#       def unique_text_name
+#       def unique_format_name
 #
-#  3) Inform RssLog of the new association:
+#  3) RssLog: Create association, add type to RssLog.all_types.
 #
-#       (just search for "location" in this file)
+#       belongs_to :model
+#       self.all_types # add "model"
 #
-#  4) Add partial view for +list_rss_logs+:
-#
-#       (just clone, e.g., app/views/observer/_location.rhtml)
+#  4) View: Modify MatrixBoxPresenter if who/what/when/where are nonstandard.
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
@@ -64,14 +66,6 @@
 #           :by_rss_log, # Models with RSS logs, in RSS order.
 #         ]
 #       }
-#
-#  Above is somewhat dated. Also:
-#  Inform model which events to log:
-#        self.autolog_events = [:created!, :updated!]
-#  Inform model how to display its name when logging created and destroyed
-#         def unique_format_name
-#         def format_name
-#
 #
 #  == Usage
 #
@@ -112,22 +106,23 @@
 #
 #  *NOTE*: Somewhere in 2008/2009 we changed the syntax of the logs so we could
 #  translate them.  We made the deliberate decision _not_ to convert all the
-#  pre-existing logs.  Thus you will see various syntaxes prior to this
-#  switchover.  These are processed specially in +parse_log+.
+#  pre-existing logs... But apparently at some later point we decided to convert
+#  the old logs after all.  So, everything is now more or less correct.
+#  Although, note that many orphaned logs point to nonexistent targets
+#  (that is, target_id was never cleared), and still others (rare cases)
+#  never had the target title added to the top of the log (and therefore the
+#  log will claim it's not an orphan even though it is).  This latter is
+#  definitely a bug or residue of unclean shutdown or something, but it's not
+#  clear how to fix it.  Just be aware and write resilient code!
 #
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
 #  created_at::         Date/time log or object was created.
-#                       See AbstractModel#init_rss_log
 #  updated_at::         Date/time it was last updated.
 #  notes::              Log of changes.
-#  location::           Owning Location (or nil).
-#  name::               Owning Name (or nil).
-#  observation::        Owning Observation (or nil).
-#  project::            Owning Project (or nil).
-#  species_list::       Owning SpeciesList (or nil).
-#  glossary_term::      Owning GlossaryTerm (or nil).
+#  name, name_id::      Owning Name (or nil).
+#  etc.::               (Pair of methods for each type of model.)
 #
 #  == Class methods
 #
@@ -136,8 +131,9 @@
 #  == Instance methods
 #
 #  add_with_date::      Same, but adds timestamp.
-#  orphan::             About to delete object: add notes, clear association.
+#  orphan::             About to delete object: add object title and notes.
 #  orphan_title::       Get old title from top line of orphaned log.
+#  orphan?::            Has rss_log been orphaned? (i.e., target destroyed?)
 #  target::             Return owner object: Observation, Name, etc.
 #  text_name::          Return title string of associated object.
 #  format_name::        Return formatted title string of associated object.
@@ -152,13 +148,13 @@
 #  None.
 #
 class RssLog < AbstractModel
+  belongs_to :article
+  belongs_to :glossary_term
   belongs_to :location
   belongs_to :name
   belongs_to :observation
   belongs_to :project
   belongs_to :species_list
-  belongs_to :glossary_term
-  belongs_to :article
 
   # Override the default show_controller
   def self.show_controller
@@ -173,24 +169,20 @@ class RssLog < AbstractModel
 
   # Returns the associated object, or nil if it's an orphan.
   def target
-    location ||
-      name ||
-      observation ||
-      project ||
-      species_list ||
-      glossary_term ||
-      article
+    RssLog.all_types.each do |type|
+      obj = send(type.to_sym)
+      return obj if obj
+    end
+    nil
   end
 
   # Returns the associated object's id, or nil if it's an orphan.
   def target_id
-    location_id ||
-      name_id ||
-      observation_id ||
-      project_id ||
-      species_list_id ||
-      glossary_term_id ||
-      article_id
+    RssLog.all_types.each do |type|
+      obj_id = send("#{type}_id".to_sym)
+      return obj_id if obj_id
+    end
+    nil
   end
 
   # Return the type of object of the target, e.g., :observation
@@ -217,8 +209,14 @@ class RssLog < AbstractModel
       _tag, args, _time = parse_log.first
       args[:this] || :rss_log_of_deleted_item.l
     else
-      RssLog.unescape(name)
+      unescape(name)
     end
+  end
+
+  # Has target been destroyed (orphaning this log)?  Top line of log should be
+  # the old object's name after it is destroyed.
+  def orphan?
+    !target_type || !notes.match?(/\A\d{14}/)
   end
 
   # Returns plain text title of the associated object.
@@ -266,31 +264,9 @@ class RssLog < AbstractModel
   end
 
   # Returns URL of <tt>show_#{object}</tt> action for the associated object.
-  # That is, the RssLog for an Observation would return
-  # <tt>"/observer/show_observation/#{id}"</tt>, and so on.  If the RssLog is
-  # an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt>
-  # URL.
+  # The time thing might have something to do with RSS log requirements?
   def url
-    if location_id
-      format("/location/show_location/%d?time=%d", location_id,
-             updated_at.tv_sec)
-    elsif name_id
-      format("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
-    elsif observation_id
-      format("/observer/show_observation/%d?time=%d", observation_id,
-             updated_at.tv_sec)
-    elsif project_id
-      format("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
-    elsif species_list_id
-      format("/observer/show_species_list/%d?time=%d", species_list_id,
-             updated_at.tv_sec)
-    elsif glossary_term_id
-      format("/glossary_terms/%d?time=%d", glossary_term_id, updated_at.tv_sec)
-    elsif article_id
-      format("/articles/%d?time=%d", article_id, updated_at.tv_sec)
-    else
-      format("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
-    end
+    "#{(target || self).show_url}?time=#{updated_at.tv_sec}"
   end
 
   # Add entry to top of notes and save.  Pass in a localization key and a hash
@@ -311,24 +287,16 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, args = {})
-    entry = RssLog.encode(tag,
-                          relevant_args(args),
-                          args[:time] || Time.zone.now)
+    entry = encode(tag, relevant_args(args), args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     self.notes = "#{entry}\n#{notes}"
-    # self.updated_at = args[:time] if args[:touch]
     save_without_our_callbacks unless args.key?(:save) && !args[:save]
     RssLog.record_timestamps = true
   end
 
   def relevant_args(args)
-    result = {
-      user: (User.current ? User.current.login : :UNKNOWN.l)
-    }.update(args)
-    result.delete(:touch)
-    result.delete(:time)
-    result.delete(:save)
-    result
+    { user: (User.current ? User.current.login : :UNKNOWN.l) }.
+      update(args).except(:save, :time, :touch)
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
@@ -340,7 +308,7 @@ class RssLog < AbstractModel
   def orphan(title, key, args = {})
     args = args.merge(save: false)
     add_with_date(key, args)
-    self.notes = "#{RssLog.escape(title)}\n#{notes}"
+    self.notes = "#{escape(title)}\n#{notes}"
     save_without_our_callbacks
   end
 
@@ -352,23 +320,29 @@ class RssLog < AbstractModel
   #   end
   #
   def parse_log(cutoff_time = nil)
-    first = true
     results = []
     notes.to_s.split("\n").each do |line|
-      if first && !line.match(/^\d{14}/)
-        tag  = :log_orphan
-        args = { title: self.class.unescape(line) }
-        time = updated_at
+      if results.empty? && !line.match(/^\d{14}/)
+        tag, args, time = decode_orphan_title(line)
       elsif line.present?
-        tag, args, time = self.class.decode(line)
+        tag, args, time = decode(line)
+      else
+        next
       end
       break if cutoff_time && time < cutoff_time
 
       results << [tag, args, time]
-      first = false
     end
     results
   end
+
+  private
+
+  def decode_orphan_title(line)
+    [:log_orphan, { title: unescape(line) }, updated_at]
+  end
+
+  public
 
   # Figure out a message for most recent update.
   def detail
@@ -387,73 +361,10 @@ class RssLog < AbstractModel
     ""
   end
 
-  # Has target been destroyed (orphaning this log)?
-  def orphan?
-    !target_type || !notes.match?(/\A\d{14}/)
-  end
-
-  ##############################################################################
-
-  # Encode a line of the log.  Pass in a triplet:
-  # tag:: Symbol
-  # args:: Hash
-  # time:: TimeWithZone
-  def self.encode(tag, args, time)
-    time = time.utc.strftime("%Y%m%d%H%M%S")
-    tag = tag.to_s
-    raise("Invalid rss log tag: #{tag}") if tag.blank?
-
-    args = args.keys.sort_by(&:to_s).map do |key|
-      [key.to_s, escape(args[key])]
-    end.flatten
-    [time, tag, *args].map do |x|
-      # Make *absolutely* sure no logs are ever created with fields missing,
-      # since this can royally f--- up the parser and crash things.
-      x.blank? ? "." : x.gsub(/\s+/, "_")
-    end.join(" ")
-  end
-
-  # Decode a line from the log.  Returns a triplet:
-  # tag:: Symbol
-  # args:: Hash
-  # time:: TimeWithZone
-  def self.decode(line)
-    time, tag, *args = line.split
-    odd = false
-    args.map! do |x|
-      odd = !odd
-      odd ? x.to_sym : unescape(x)
-    end
-    args << "" if odd
-    begin
-      time = Time.parse(time).in_time_zone
-    rescue StandardError => e
-      # Caught this error in the log, not sure how/why.
-      if Rails.env.production?
-        time = Time.zone.now # (but don't crash in production)
-      else
-        raise("rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}")
-      end
-    end
-    [tag.to_s.to_sym, Hash[*args], time]
-  end
-
-  # Protect special characters (whitespace) in string for log encoder/decoder.
-  def self.escape(str)
-    str.to_s.gsub(/[%\s]/) { |m| "%%%02X" % m.ord }
-  end
-
-  # Reverse protection of special characters in string for log encoder/decoder.
-  def self.unescape(str)
-    str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
-  end
-
-  #############################################################################
-
   private
 
   def target_combined?(tag)
-    !target_id || tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+    tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
   end
 
   def target_recently_created?(time)
@@ -464,8 +375,67 @@ class RssLog < AbstractModel
     if [:observation, :species_list].include?(target_type)
       :rss_created_at.t(type: target_type) # user would be redundant
     else
+      # Creation should be first action logged.
       tag, args = log.last
       tag.t(args)
     end
+  end
+
+  ##############################################################################
+
+  # Encode a line of the log.  Pass in a triplet:
+  # tag:: Symbol
+  # args:: Hash
+  # time:: TimeWithZone
+  def encode(tag, args, time)
+    time = time.utc.strftime("%Y%m%d%H%M%S")
+    tag = tag.to_s
+    raise("Invalid rss log tag: #{tag}") if tag.blank?
+
+    args = args.keys.sort_by(&:to_s).map do |key|
+      [key.to_s, escape(args[key])]
+    end.flatten
+    [time, tag, *args].map { |x| remove_blanks(x) }.join(" ")
+  end
+
+  # Make *absolutely* sure no logs are ever created with fields missing,
+  # since this can royally f--- up the parser and crash things.
+  def remove_blanks(str)
+    str.blank? ? "." : str.to_s.gsub(/\s+/, "_")
+  end
+
+  # Decode a line from the log.  Returns a triplet:
+  # tag:: Symbol
+  # args:: Hash
+  # time:: TimeWithZone
+  def decode(line)
+    time, tag, *args = line.split
+    [tag.to_s.to_sym, decode_args(args), decode_time(time)]
+  end
+
+  def decode_args(args)
+    odd = false
+    args.map! do |x|
+      odd = !odd
+      odd ? x.to_sym : unescape(x)
+    end
+    args << "" if odd
+    Hash[*args]
+  end
+
+  def decode_time(str)
+    Time.parse(str).in_time_zone
+  rescue StandardError
+    Time.zone.now
+  end
+
+  # Protect special characters (whitespace) in string for log encoder/decoder.
+  def escape(str)
+    str.to_s.gsub(/[%\s]/) { |m| "%%%02X" % m.ord }
+  end
+
+  # Reverse protection of special characters in string for log encoder/decoder.
+  def unescape(str)
+    str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
   end
 end

@@ -209,8 +209,11 @@ require("mimemagic")
 #  ==== Callbacks and Logging
 #  update_thumbnails::  Change thumbnails before destroy.
 #  track_copyright_changes:: Log changes in copyright info.
-#  log_update::         Log update in associated Observation's.
-#  log_destroy::        Log destroy in associated Observation's.
+#  log_update::         Log update in associated observations, etc.
+#  log_destroy::        Log destroy in associated observations, etc.
+#  log_create_for::     Log adding new image to associated observtion, etc.
+#  log_reuse_for::      Log adding existing image to associated observtion, etc.
+#  log_remove_from::    Log removing image from associated observtion, etc.
 #
 ################################################################################
 #
@@ -281,6 +284,11 @@ class Image < AbstractModel
     else
       title + " (#{id || "?"})"
     end
+  end
+
+  # How this image is refered to in the rss logs.
+  def log_name
+    "#{:Image.t} ##{id || was || "?"}"
   end
 
   ##############################################################################
@@ -673,7 +681,7 @@ class Image < AbstractModel
   # be called after the image has been validated and the record saved.  (We
   # need to have an ID at this point.)  Adds any errors to the :image field
   # and returns false.
-  def process_image(strip = false)
+  def process_image(strip: false)
     result = true
     if new_record?
       errors.add(:image, "Called process_image before saving image record.")
@@ -810,7 +818,7 @@ class Image < AbstractModel
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
   # integers.  Returns value of new vote.
-  def change_vote(user, value = nil, anon = false)
+  def change_vote(user, value, anon: false)
     user_id = user.is_a?(User) ? user.id : user.to_i
     save_changes = !changed?
 
@@ -898,14 +906,33 @@ class Image < AbstractModel
     end
   end
 
-  # Log update in associated Observation's.
+  # Log update in associated observations, glossary terms, etc.
   def log_update
-    observations.each { |obs| obs.log_update_image(self) }
+    [glossary_terms + observations].each do |object|
+      object.log(:log_image_updated, name: log_name, touch: false)
+    end
   end
 
-  # Log destruction in associated Observation's.
+  # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
-    observations.each { |obs| obs.log_destroy_image(self) }
+    [glossary_terms + observations].each do |object|
+      object.log(:log_image_destroyed, name: log_name, touch: true)
+    end
+  end
+
+  # Log adding new image to an associated observation, glossary term, etc.
+  def log_create_for(object)
+    object.log(:log_image_created, name: log_name, touch: true)
+  end
+
+  # Log adding existing image to an associated observation, glossary term, etc.
+  def log_reuse_for(object)
+    object.log(:log_image_reused, name: log_name, touch: true)
+  end
+
+  # Log removing an image from an associated observation, glossary term, etc.
+  def log_remove_from(object)
+    object.log(:log_image_removed, name: log_name, touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.
