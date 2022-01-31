@@ -194,6 +194,13 @@ class RssLog < AbstractModel
     nil
   end
 
+  # Clear association with target.
+  def clear_target_id
+    RssLog.all_types.each do |type|
+      send("#{type}_id=", nil)
+    end
+  end
+
   # Handy for prev/next handler.  Any object that responds to rss_log has an
   # attached RssLog.  In this case, it *is* the RssLog itself, meaning it is
   # an orphan log for a deleted object.
@@ -309,6 +316,7 @@ class RssLog < AbstractModel
     args = args.merge(save: false)
     add_with_date(key, args)
     self.notes = "#{escape(title)}\n#{notes}"
+    clear_target_id
     save_without_our_callbacks
   end
 
