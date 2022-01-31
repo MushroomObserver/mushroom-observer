@@ -389,7 +389,7 @@ class RssLog < AbstractModel
 
   # Has target been destroyed (orphaning this log)?
   def orphan?
-    !target_type || notes !~ /^\d{14}/
+    !target_type || !notes.match?(/\A\d{14}/)
   end
 
   ##############################################################################
