@@ -688,6 +688,8 @@ class AbstractModel < ApplicationRecord
   # Callback that logs destruction.
   def autolog_destroyed
     autolog_event(:destroyed, orphan: true)
+    rss_log.send("#{type_tag}_id=", nil)
+    rss_log.save
   end
 
   # Do we log this event? and how?
@@ -721,10 +723,9 @@ class AbstractModel < ApplicationRecord
     rss_log
   end
 
+  # Point object to its new RssLog and save the object unless we are sure
+  # it will be saved later.
   def attach_rss_log_first_step(rss_log)
-
-    # Point object to its new rss_log and save the object unless we are sure
-    # it will be saved later.
     will_save_later = new_record? || changed?
     self.rss_log_id = rss_log.id
     self.rss_log    = rss_log
