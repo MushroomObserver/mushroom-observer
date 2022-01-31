@@ -687,19 +687,20 @@ class AbstractModel < ApplicationRecord
 
   # Callback that logs destruction.
   def autolog_destroyed
-    autolog_event(:destroyed, :orphan)
+    autolog_event(:destroyed, orphan: true)
   end
 
   # Do we log this event? and how?
-  def autolog_event(event, orphan = nil)
+  def autolog_event(event, orphan: nil)
     return unless RunLevel.is_normal?
 
-    touch = if autolog_events.include?(event)
-              false
-            elsif autolog_events.include?("#{event}!".to_sym)
-              true
-            end
-    return if touch.nil?
+    if autolog_events.include?(event)
+      touch = false
+    elsif autolog_events.include?("#{event}!".to_sym)
+      touch = true
+    else
+      return
+    end
 
     type = type_tag
     msg = "log_#{type}_#{event}".to_sym
@@ -714,20 +715,20 @@ class AbstractModel < ApplicationRecord
 
     rss_log = RssLog.new
     rss_log.created_at = created_at unless new_record?
-    attach_rss_log_first_step(rss_log) unless orphan
+    rss_log.send("#{type_tag}_id=", id) if id && !orphan
     rss_log.save
+    attach_rss_log_first_step(rss_log) unless orphan
     rss_log
   end
 
   def attach_rss_log_first_step(rss_log)
-    rss_log.send("#{type_tag}_id=", id) if id
 
     # Point object to its new rss_log and save the object unless we are sure
     # it will be saved later.
-    need_to_save_target = !new_record? && !changed?
+    will_save_later = new_record? || changed?
     self.rss_log_id = rss_log.id
     self.rss_log    = rss_log
-    save if need_to_save_target
+    save unless will_save_later
   end
 
   # Fill in reverse-lookup id in RssLog after creating new record.
