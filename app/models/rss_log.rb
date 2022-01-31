@@ -374,7 +374,7 @@ class RssLog < AbstractModel
   def detail
     log = parse_log
     latest_tag, latest_args, latest_time = log.first
-    if target_simply_destroyed?
+    if orphan?
       :rss_destroyed.t(type: :object)
     elsif target_combined?(latest_tag)
       :rss_destroyed.t(type: target_type)
@@ -385,6 +385,11 @@ class RssLog < AbstractModel
     end
   rescue StandardError
     ""
+  end
+
+  # Has target been destroyed (orphaning this log)?
+  def orphan?
+    !target_type || notes !~ /^\d{14}/
   end
 
   ##############################################################################
@@ -446,10 +451,6 @@ class RssLog < AbstractModel
   #############################################################################
 
   private
-
-  def target_simply_destroyed?
-    !target_type
-  end
 
   def target_combined?(tag)
     !target_id || tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
