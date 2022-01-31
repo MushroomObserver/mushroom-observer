@@ -662,6 +662,7 @@ class AbstractModel < ApplicationRecord
     touch unless new_record? || # rubocop:disable Rails/SkipsModelValidations
                  args[:touch] == false
     rss_log.add_with_date(tag, args)
+    rss_log
   end
 
   # Add message to RssLog if you're about to destroy this object, creating new
@@ -673,6 +674,7 @@ class AbstractModel < ApplicationRecord
   def orphan_log(*args)
     rss_log = init_rss_log(orphan: true)
     rss_log.orphan(format_name, *args)
+    rss_log
   end
 
   # Callback that logs creation.
@@ -687,7 +689,8 @@ class AbstractModel < ApplicationRecord
 
   # Callback that logs destruction.
   def autolog_destroyed
-    autolog_event(:destroyed, orphan: true)
+    return unless rss_log = autolog_event(:destroyed, orphan: true)
+
     rss_log.send("#{type_tag}_id=", nil)
     rss_log.save
   end
