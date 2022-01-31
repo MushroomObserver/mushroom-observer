@@ -12,7 +12,7 @@ class RssLogTest < UnitTestCase
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
-      assert(rss_log.url.starts_with?("#{model(type).show_controller}/#{id}"),
+      assert(rss_log.url.include?("#{model(type).show_controller}/#{id}"),
              "rss_log.url incorrect for #{model(type)}")
     end
   end
@@ -33,10 +33,7 @@ class RssLogTest < UnitTestCase
     # We want it to return "observation created" not "image added".
     log = rss_logs(:observation_rss_log)
     detail = log.detail
-    log_decode = RssLog.decode(log.notes)
     assert_equal(:rss_created_at.t(type: :observation), detail)
-    # Check that it's still getting the most recent updated time
-    assert_equal(Time.parse("20060302211400").in_time_zone, log_decode[2])
   end
 
   def test_detail_for_destroyed_object

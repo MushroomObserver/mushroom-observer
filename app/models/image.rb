@@ -908,14 +908,14 @@ class Image < AbstractModel
 
   # Log update in associated observations, glossary terms, etc.
   def log_update
-    [glossary_terms + observations].each do |object|
+    (glossary_terms + observations).each do |object|
       object.log(:log_image_updated, name: log_name, touch: false)
     end
   end
 
   # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
-    [glossary_terms + observations].each do |object|
+    (glossary_terms + observations).each do |object|
       object.log(:log_image_destroyed, name: log_name, touch: true)
     end
   end
