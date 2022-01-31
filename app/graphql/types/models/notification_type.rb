@@ -9,6 +9,7 @@ module Types::Models
     field :note_template, String, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :require_specimen, Boolean, null: false
+    
     # belongs to
     field :user, Types::Models::UserType, null: false
   end

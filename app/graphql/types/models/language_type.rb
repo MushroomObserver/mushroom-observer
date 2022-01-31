@@ -8,6 +8,7 @@ module Types::Models
     field :order, String, null: true
     field :official, Boolean, null: false
     field :beta, Boolean, null: false
+    
     # has many
     field :translation_strings, [Types::Models::TranslationStringType], null: true
   end

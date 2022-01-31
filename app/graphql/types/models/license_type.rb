@@ -8,9 +8,11 @@ module Types::Models
     field :deprecated, Boolean, null: false
     field :form_name, String, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+
     # has many
     field :images, [Types::Models::ImageType], null: true
-    field :location_descriptions, [Types::Models::LocationDescriptionType], null: true
+    field :location_descriptions, [Types::Models::LocationDescriptionType],
+          null: true
     field :name_descriptions, [Types::Models::NameDescriptionType], null: true
     field :users, [Types::Models::UserType], null: true
   end

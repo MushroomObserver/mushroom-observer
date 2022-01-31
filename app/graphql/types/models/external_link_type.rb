@@ -9,6 +9,7 @@ module Types::Models
     field :observation_id, Integer, null: true
     field :external_site_id, Integer, null: true
     field :url, String, null: true
+    
     # belongs to
     field :external_site, Types::Models::ExternalSiteType, null: true
     field :observation, Types::Models::ObservationType, null: true

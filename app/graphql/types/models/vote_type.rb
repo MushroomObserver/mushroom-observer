@@ -10,6 +10,7 @@ module Types::Models
     field :observation_id, Integer, null: true
     field :favorite, Boolean, null: true
     field :value, Float, null: true
+    
     # belongs to
     field :user, Types::Models::UserType, null: true
     field :naming, Types::Models::NamingType, null: true

@@ -9,6 +9,7 @@ module Types::Models
     field :text, String, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :user_id, Integer, null: true
+    
     # belongs to
     field :language, Types::Models::LanguageType, null: false
     field :user, Types::Models::UserType, null: true

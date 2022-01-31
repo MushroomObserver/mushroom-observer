@@ -10,9 +10,11 @@ module Types::Models
     field :user_id, Integer, null: false
     field :initial_det, String, null: false
     field :accession_number, String, null: false
+
     # belongs to
     field :herbarium, Types::Models::HerbariumType, null: false
     field :user, Types::Models::UserType, null: false
+    
     # has and belongs to many
     field :observations, [Types::Models::ObservationType], null: true
   end

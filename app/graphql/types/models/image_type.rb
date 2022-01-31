@@ -7,7 +7,8 @@ module Types::Models
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :content_type, String, null: true
     field :user_id, Integer, null: true
-    field :when, GraphQL::Types::ISO8601Date, null: true, resolver_method: :when_observed
+    field :when, GraphQL::Types::ISO8601Date, null: true,
+                                              resolver_method: :when_observed
     field :notes, String, null: true
     field :copyright_holder, String, null: true
     field :license_id, Integer, null: false
@@ -20,16 +21,19 @@ module Types::Models
     field :original_name, String, null: true
     field :transferred, Boolean, null: false
     field :gps_stripped, Boolean, null: false
+
     # belongs to
     field :license, Types::Models::LicenseType, null: false
     field :user, Types::Models::UserType, null: true
     field :reviewer, Types::Models::UserType, null: true
+
     # has many
     field :thumb_clients, [Types::Models::ObservationType], null: true
     field :image_votes, [Types::Models::VoteType], null: true
     field :subjects, [Types::Models::UserType], null: true
     field :best_glossary_terms, [Types::Models::GlossaryTermType], null: true
     field :copyright_changes, [Types::Models::CopyrightChangeType], null: true
+
     # has and belongs to many
     field :observations, [Types::Models::ObservationType], null: true
     field :projects, [Types::Models::ProjectType], null: true

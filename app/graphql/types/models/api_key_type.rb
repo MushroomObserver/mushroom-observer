@@ -10,6 +10,7 @@ module Types::Models
     field :key, String, null: false
     field :notes, String, null: true
     field :verified, GraphQL::Types::ISO8601DateTime, null: true
+
     # belongs to
     field :user, Types::Models::UserType, null: false
   end

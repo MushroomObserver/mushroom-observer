@@ -10,6 +10,7 @@ module Types::Models
     field :year, Integer, null: true
     field :name, String, null: true
     field :license_id, Integer, null: true
+    
     # belongs to
     field :user, Types::Models::UserType, null: false
     field :license, Types::Models::LicenseType, null: true

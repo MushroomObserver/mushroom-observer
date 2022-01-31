@@ -12,11 +12,14 @@ module Types::Models
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :code, String, null: false
     field :personal_user_id, Integer, null: true
+
     # belongs to
     field :location, Types::Models::LocationType, null: true
     field :personal_user, Types::Models::UserType, null: true
+
     # has many
     field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
+    
     # has and belongs to many
     field :curators, [Types::Models::UserType], null: true
   end

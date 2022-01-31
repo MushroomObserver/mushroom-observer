@@ -11,6 +11,7 @@ module Types::Models
     field :peer_reviewed, Boolean, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+    
     # belongs to
     field :user, Types::Models::UserType, null: true
   end

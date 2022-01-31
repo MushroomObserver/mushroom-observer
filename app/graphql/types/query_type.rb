@@ -44,17 +44,17 @@ module Types
     # field :namings, resolver: Resolvers::Namings
     # field :notification, resolver: Queries::Notification
     # field :notifications, resolver: Resolvers::Notifications
-    # field :observation, resolver: Queries::Observation
-    # field :observations, Types::Models::ObservationType.connection_type,
-    #       null: false, resolver: Resolvers::Observations
+    field :observation, resolver: Queries::Observation
+    field :observations, Types::Models::ObservationType.connection_type,
+          null: false, resolver: Resolvers::Observations
     # field :observation_view, resolver: Queries::ObservationView
     # field :observation_views, resolver: Resolvers::ObservationViews
     # field :project, resolver: Queries::Project
     # field :projects, resolver: Resolvers::Projects
     # field :publication, resolver: Queries::Publication
     # field :publications, resolver: Resolvers::Publications
-    # field :rss_log, resolver: Queries::RssLog
-    # field :rss_logs, resolver: Resolvers::RssLogs
+    field :rss_log, resolver: Queries::RssLog
+    field :rss_logs, resolver: Resolvers::RssLogs
     # field :sequence, resolver: Queries::Sequence
     # field :sequences, resolver: Resolvers::Sequences
     # field :species_list, resolver: Queries::SpeciesList
@@ -64,8 +64,8 @@ module Types
     # field :user_group, resolver: Queries::UserGroup
     # field :user_groups, resolver: Resolvers::UserGroups
     field :user, resolver: Queries::User
-    # field :users, Types::Models::UserType.connection_type, null: false,
-    #                                                        resolver: Queries::Users
+    field :users, Types::Models::UserType.connection_type, null: false,
+                                                           resolver: Queries::Users
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes
 

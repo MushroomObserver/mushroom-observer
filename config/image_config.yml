@@ -3,7 +3,7 @@ development:
   image_sources:
     :local:
       :test: file://%{root}/public/images
-      :read: "/images"
+      :read: http://localhost:3000/images
     :cdmr:
       :test: :transferred_flag
       :read: http://images.mushroomobserver.org
@@ -34,10 +34,9 @@ test:
     :remote2:
       :write: file://%{root}/public/test_server2
       :sizes:
-      - :thumbnail
-      - :small
-      - :medium
+        - :thumbnail
+        - :small
+        - :medium
   keep_these_image_sizes_local:
-  - :thumbnail
-  - :small
-
+    - :thumbnail
+    - :small

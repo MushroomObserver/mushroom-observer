@@ -12,6 +12,7 @@ module Types::Models
     field :reviewed, Boolean, null: false
     field :user_id, Integer, null: true
     field :recurring, Boolean, null: true
+    
     # belongs to
     field :user, Types::Models::UserType, null: true
   end

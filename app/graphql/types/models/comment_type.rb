@@ -10,6 +10,7 @@ module Types::Models
     field :target_type, String, null: true
     field :target_id, Integer, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+    
     # belongs to
     field :user, Types::Models::UserType, null: true
     field :target, Types::Unions::InterestTarget, null: false

@@ -11,10 +11,12 @@ module Types::Models
     field :rss_log_id, Integer, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+
     # belongs to
     field :thumb_image, Types::Models::ImageType, null: true
     field :rss_log, Types::Models::RssLogType, null: true
     field :user, Types::Models::UserType, null: true
+    
     # has and belongs to many
     field :images, [Types::Models::ImageType], null: true
 

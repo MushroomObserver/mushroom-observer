@@ -22,10 +22,12 @@ module Types::Models
     field :name, String, null: true
     field :scientific_name, String, null: true
     field :locked, Boolean, null: false
+    
     # belongs to
     field :description, Types::Models::LocationDescriptionType, null: true
     field :rss_log, Types::Models::RssLogType, null: true
     field :user, Types::Models::UserType, null: true
+    
     # has many
     field :descriptions, [Types::Models::LocationDescriptionType], null: true
     field :comments, [Types::Models::CommentType], null: true

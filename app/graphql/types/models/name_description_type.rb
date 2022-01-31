@@ -30,14 +30,17 @@ module Types::Models
     field :refs, String, null: true
     field :classification, String, null: true
     field :project_id, Integer, null: true
+
     # belongs to
     field :license, Types::Models::LicenseType, null: true
     field :name, Types::Models::NameType, null: true
     field :project, Types::Models::ProjectType, null: true
     field :reviewer, Types::Models::UserType, null: true
+
     # has many
     field :comments, [Types::Models::CommentType], null: true
     field :interests, [Types::Models::UserType], null: true
+    
     # has and belongs to many
     field :admin_groups, [Types::Models::UserGroupType], null: true
     field :writer_groups, [Types::Models::UserGroupType], null: true

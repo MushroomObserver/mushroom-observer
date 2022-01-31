@@ -10,10 +10,12 @@ module Types::Models
     field :user_id, Integer, null: true
     field :vote_cache, Float, null: true
     field :reasons, String, null: true
+
     # belongs to
     field :name, Types::Models::NameType, null: true
     field :observation, Types::Models::ObservationType, null: true
     field :user, Types::Models::UserType, null: true
+    
     # has many
     field :votes, [Types::Models::VoteType], null: true
   end

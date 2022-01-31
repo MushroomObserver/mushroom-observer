@@ -23,14 +23,17 @@ module Types::Models
     field :refs, String, null: true
     field :ok_for_export, Boolean, null: false
     field :project_id, Integer, null: true
+    
     # belongs to
     field :license, Types::Models::LicenseType, null: true
     field :location, Types::Models::LocationType, null: true
     field :project, Types::Models::ProjectType, null: true
     field :user, Types::Models::UserType, null: true
+
     # has many
     field :comments, [Types::Models::CommentType], null: true
     field :interests, [Types::Models::UserType], null: true
+
     # has and belongs to many
     field :admin_groups, [Types::Models::UserGroupType], null: true
     field :writer_groups, [Types::Models::UserGroupType], null: true

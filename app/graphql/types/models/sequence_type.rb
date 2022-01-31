@@ -12,6 +12,7 @@ module Types::Models
     field :notes, String, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
+    
     # belongs to
     field :observation, Types::Models::ObservationType, null: true
     field :user, Types::Models::UserType, null: true

@@ -8,8 +8,10 @@ module Types::Models
     field :user_id, Integer, null: true
     field :name, String, null: true
     field :number, String, null: true
+
     # belongs to
     field :user, Types::Models::UserType, null: true
+    
     # has and belongs to many
     field :observations, [Types::Models::ObservationType], null: true
   end

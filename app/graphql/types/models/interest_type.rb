@@ -8,6 +8,7 @@ module Types::Models
     field :user_id, Integer, null: true
     field :state, Boolean, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
+    
     # belongs to
     field :target, Types::Unions::InterestTarget, null: true
     field :user, Types::Models::UserType, null: true
