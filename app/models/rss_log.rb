@@ -355,14 +355,12 @@ class RssLog < AbstractModel
   # Figure out a message for most recent update.
   def detail
     log = parse_log
-    latest_tag, latest_args, latest_time = log.first
     if orphan?
-      :rss_destroyed.t(type: :object)
-    elsif target_combined?(latest_tag)
-      :rss_destroyed.t(type: target_type)
-    elsif target_recently_created?(latest_time)
+      penultimate_message(log)
+    elsif target_recently_created?(log)
       creation_message(log)
     else
+      latest_message(log)
       latest_tag.t(latest_args)
     end
   rescue StandardError
@@ -371,12 +369,19 @@ class RssLog < AbstractModel
 
   private
 
-  def target_combined?(tag)
-    tag.to_s.match?(/^log_#{target_type}_(merged|destroyed)/)
+  def target_recently_created?(log)
+    _latest_tag, _latest_args, latest_time = log.first
+    !latest_time || latest_time < created_at + 1.minute
   end
 
-  def target_recently_created?(time)
-    !time || time < created_at + 1.minute
+  def latest_message(log)
+    tag, args = log.first
+    tag.t(args)
+  end
+
+  def penultimate_message(log)
+    tag, args = log[1]
+    tag.present? ? tag.t(args) : :rss_destroyed.t(type: target_type)
   end
 
   def creation_message(log)
