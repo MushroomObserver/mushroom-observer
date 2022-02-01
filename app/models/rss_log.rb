@@ -439,7 +439,7 @@ class RssLog < AbstractModel
 
   # Protect special characters (whitespace) in string for log encoder/decoder.
   def escape(str)
-    str.to_s.gsub(/[%\s]/) { |m| "%%%02X" % m.ord }
+    str.to_s.gsub(/[%\s]/) { |m| format("%%%<code>02X", code: m.ord) }
   end
 
   # Reverse protection of special characters in string for log encoder/decoder.
