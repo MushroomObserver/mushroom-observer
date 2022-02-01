@@ -650,7 +650,7 @@ class ObserverController
           if !image.save
             bad_images.push(image)
             flash_object_errors(image)
-          elsif !image.process_image(observation.gps_hidden)
+          elsif !image.process_image(strip: observation.gps_hidden)
             name_str = name ? "'#{name}'" : "##{image.id}"
             flash_notice(:runtime_no_upload_image.t(name: name_str))
             bad_images.push(image)
@@ -717,7 +717,7 @@ class ObserverController
     images.each do |image|
       unless observation.image_ids.include?(image.id)
         observation.add_image(image)
-        observation.log_create_image(image)
+        image.log_create_for(observation)
       end
     end
   end
