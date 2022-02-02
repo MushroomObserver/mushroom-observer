@@ -57,7 +57,10 @@ module Types::Models
     field :email_locations_admin, Boolean, null: true
     field :email_names_admin, Boolean, null: true
 
-    # TODO: uncomment each association as the models are added
+    # TODO: uncomment each association as the models are added, OR...
+    #
+    # This post has examples that may help DRYing up association loading
+    # https://www.keypup.io/blog/graphql-the-rails-way-part-1-exposing-your-resources-for-querying
 
     # belongs to
     # field :image, Types::Models::ImageType, null: true
@@ -72,7 +75,7 @@ module Types::Models
     # field :images, [Types::Models::ImageType], null: true
     # field :interests, [Types::Models::InterestType], null: true
     # field :locations, [Types::Models::LocationType], null: true
-    # field :location_descriptions, [Types::Models::LocationDescriptionType], 
+    # field :location_descriptions, [Types::Models::LocationDescriptionType],
     #                               null: true
     # field :names, [Types::Models::NameType], null: true
     # field :name_descriptions, [Types::Models::NameDescriptionType], null: true
@@ -87,7 +90,7 @@ module Types::Models
     # field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
     # field :votes, [Types::Models::VoteType], null: true
     # field :reviewed_images, [Types::Models::ImageType], null: true
-    # field :reviewed_name_descriptions, [Types::Models::NameDescriptionType], 
+    # field :reviewed_name_descriptions, [Types::Models::NameDescriptionType],
     #                                    null: true
     # # field :to_emails, [Types::Models::QueuedEmailType], null: true
 
@@ -95,9 +98,9 @@ module Types::Models
     # field :user_groups, [Types::Models::UserGroupType], null: true
     # field :authored_names, [Types::Models::NameDescriptionType], null: true
     # field :edited_names, [Types::Models::NameDescriptionType], null: true
-    # field :authored_locations, [Types::Models::LocationDescriptionType], 
+    # field :authored_locations, [Types::Models::LocationDescriptionType],
     #                            null: true
-    # field :edited_locations, [Types::Models::LocationDescriptionType], 
+    # field :edited_locations, [Types::Models::LocationDescriptionType],
     #                          null: true
     # field :curated_herbaria, [Types::Models::HerbariumType], null: true
 

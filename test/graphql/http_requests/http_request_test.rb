@@ -6,7 +6,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   end
 
   # https://graphql-ruby.org/testing/integration_tests.html
-  def check_current_user
+  def test_check_current_user
     query_string = "{ current_user { username } }"
     post(graphql_path, params: { query: query_string })
     json_response = JSON.parse(@response.body)
