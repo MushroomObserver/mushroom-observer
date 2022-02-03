@@ -69,18 +69,20 @@ class CommentController < ApplicationController
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
   def show_comments_by_user
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Comment, :by_user, user: user)
-      show_selected_comments(query)
-    end
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Comment, :by_user, user: user)
+    show_selected_comments(query)
   end
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
   def show_comments_for_user
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Comment, :for_user, user: user)
-      show_selected_comments(query)
-    end
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Comment, :for_user, user: user)
+    show_selected_comments(query)
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -113,8 +115,7 @@ class CommentController < ApplicationController
       show_selected_comments(query)
     end
   end
-
-  # Show selected list of comments.
+# Show selected list of comments.
   def show_selected_comments(query, args = {})
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
@@ -160,10 +161,10 @@ class CommentController < ApplicationController
   def show_comment
     store_location
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id].to_s)
-      @target = @comment.target
-      allowed_to_see!(@target)
-    end
+    return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
+
+    @target = @comment.target
+    allowed_to_see!(@target)
   end
 
   # Go to next comment: redirects to show_comment.
@@ -226,29 +227,29 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def edit_comment
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id].to_s)
-      @target = @comment.target
-      if !allowed_to_see!(@target)
-        # redirected already
-      elsif !check_permission!(@comment)
+    return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
+
+    @target = @comment.target
+    if !allowed_to_see!(@target)
+      # redirected already
+    elsif !check_permission!(@comment)
+      redirect_with_query(controller: @target.show_controller,
+                          action: @target.show_action, id: @target.id)
+    elsif request.method == "POST"
+      @comment.attributes = whitelisted_comment_params if params[:comment]
+      if !@comment.changed?
+        flash_notice(:runtime_no_changes.t)
+        done = true
+      elsif !@comment.save
+        flash_object_errors(@comment)
+      else
+        @comment.log_update
+        flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
+        done = true
+      end
+      if done
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
-      elsif request.method == "POST"
-        @comment.attributes = whitelisted_comment_params if params[:comment]
-        if !@comment.changed?
-          flash_notice(:runtime_no_changes.t)
-          done = true
-        elsif !@comment.save
-          flash_object_errors(@comment)
-        else
-          @comment.log_update
-          flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
-          done = true
-        end
-        if done
-          redirect_with_query(controller: @target.show_controller,
-                              action: @target.show_action, id: @target.id)
-        end
       end
     end
   end
@@ -261,19 +262,19 @@ class CommentController < ApplicationController
   def destroy_comment
     pass_query_params
     id = params[:id].to_s
-    if @comment = find_or_goto_index(Comment, id)
-      @target = @comment.target
-      if !check_permission!(@comment)
-        # all cases redirect to object show page
-      elsif !@comment.destroy
-        flash_error(:runtime_form_comments_destroy_failed.t(id: id))
-      else
-        @comment.log_destroy
-        flash_notice(:runtime_form_comments_destroy_success.t(id: id))
-      end
-      redirect_with_query(controller: @target.show_controller,
-                          action: @target.show_action, id: @target.id)
+    return unless (@comment = find_or_goto_index(Comment, id))
+
+    @target = @comment.target
+    if !check_permission!(@comment)
+      # all cases redirect to object show page
+    elsif !@comment.destroy
+      flash_error(:runtime_form_comments_destroy_failed.t(id: id))
+    else
+      @comment.log_destroy
+      flash_notice(:runtime_form_comments_destroy_success.t(id: id))
     end
+    redirect_with_query(controller: @target.show_controller,
+                          action: @target.show_action, id: @target.id)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to
