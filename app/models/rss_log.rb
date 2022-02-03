@@ -361,17 +361,17 @@ class RssLog < AbstractModel
       creation_message(log)
     else
       latest_message(log)
-      latest_tag.t(latest_args)
     end
-  rescue StandardError
-    ""
+  rescue StandardError => e
+    Rails.env.production? ? raise(e) : ""
   end
 
   private
 
   def target_recently_created?(log)
     _latest_tag, _latest_args, latest_time = log.first
-    !latest_time || latest_time < created_at + 1.minute
+    first_time = created_at || log.last[2]
+    latest_time && first_time && latest_time < first_time + 1.minute
   end
 
   def latest_message(log)
