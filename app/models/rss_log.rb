@@ -363,8 +363,7 @@ class RssLog < AbstractModel
       latest_message(log)
     end
   rescue StandardError => e
-    raise e unless Rails.env.production?
-    ""
+    Rails.env.production? ? raise(e) : ""
   end
 
   private
