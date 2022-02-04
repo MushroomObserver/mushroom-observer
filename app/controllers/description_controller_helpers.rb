@@ -100,7 +100,7 @@ module DescriptionControllerHelpers
         end
       else
         flash_error(:runtime_invalid.t(type: '"target"',
-                                        value: target))
+                                       value: target))
       end
     end
   end
@@ -328,7 +328,7 @@ module DescriptionControllerHelpers
                     !update_writein(@description, name, reader, writer, admin)
 
         @data << { name: name, reader: reader, writer: writer,
-                    admin: admin }
+                   admin: admin }
         flash_error(:runtime_description_user_not_found.t(name: name))
         done = false
       end

@@ -275,7 +275,7 @@ class CommentController < ApplicationController
       flash_notice(:runtime_form_comments_destroy_success.t(id: id))
     end
     redirect_with_query(controller: @target.show_controller,
-                          action: @target.show_action, id: @target.id)
+                        action: @target.show_action, id: @target.id)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to
