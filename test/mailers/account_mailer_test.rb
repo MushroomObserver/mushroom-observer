@@ -41,7 +41,7 @@ class AccountMailerTest < UnitTestCase
     email = remove_extraneous_email_headers(email)
     fix_mac_vs_pc!(email)
     assert_string_equal_file(email, *html_files)
-    end
+  end
 
   # At the moment at least Redcloth produces slightly different output on
   # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a

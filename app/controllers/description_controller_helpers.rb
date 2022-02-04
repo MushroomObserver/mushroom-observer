@@ -407,7 +407,7 @@ module DescriptionControllerHelpers
   def merge_description_notes(src, dest)
     src_notes  = src.all_notes
     dest_notes = dest.all_notes
-    src_notes.keys.each do |f|
+    src_notes.each_key do |f|
       if dest_notes[f].blank?
         dest_notes[f] = src_notes[f]
       elsif src_notes[f].present?
