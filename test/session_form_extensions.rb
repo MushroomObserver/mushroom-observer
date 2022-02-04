@@ -431,13 +431,11 @@ module SessionExtensions
       field.node["checked"] = "checked" if field.type == :checkbox
 
       # Uncheck all the other radio-boxes in this group.
-      if field.type == :radio
-        field.value = true
-        inputs.each do |field2|
-          if (field2 != field) && (field2.name == field.name)
-            field2.value = false
-          end
-        end
+      return unless field.type == :radio
+
+      field.value = true
+      inputs.each do |field2|
+        field2.value = false if (field2 != field) && (field2.name == field.name)
       end
     end
 
