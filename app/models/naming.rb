@@ -179,37 +179,37 @@ class Naming < AbstractModel
     end
 
     # Send email to people interested in this observation.
-    if obs = observation
-      owner  = obs.user
-      sender = user
-      recipients = []
+    return unless (obs = observation)
 
-      # Send notification to owner if they want.
-      recipients.push(owner) if owner&.email_observations_naming
+    owner  = obs.user
+    sender = user
+    recipients = []
 
-      # Send to people who have registered interest in this observation.
-      # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in obs.interests
-        if interest.state
-          recipients.push(interest.user)
-        else
-          recipients.delete(interest.user)
-        end
+    # Send notification to owner if they want.
+    recipients.push(owner) if owner&.email_observations_naming
+
+    # Send to people who have registered interest in this observation.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    for interest in obs.interests
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
       end
+    end
 
-      # Also send to people who registered positive interest in this name.
-      # (Don't want *disinterest* in name overriding
-      # interest in the observation, say.)
-      for taxon in taxa
-        for interest in taxon.interests
-          recipients.push(interest.user) if interest.state
-        end
+    # Also send to people who registered positive interest in this name.
+    # (Don't want *disinterest* in name overriding
+    # interest in the observation, say.)
+    for taxon in taxa
+      for interest in taxon.interests
+        recipients.push(interest.user) if interest.state
       end
+    end
 
-      # Send to everyone (except the person who created the naming!)
-      for recipient in recipients.uniq - [sender]
-        QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
-      end
+    # Send to everyone (except the person who created the naming!)
+    for recipient in recipients.uniq - [sender]
+      QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
     end
   end
 
