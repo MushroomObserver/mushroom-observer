@@ -302,27 +302,27 @@ module DescriptionControllerHelpers
       # Look up write-ins and adjust their permissions.
       @data = [nil]
       done = true
-      for n in params[:writein_name].keys.sort
+      params[:writein_name].keys.sort.each do |n|
         name   = begin
-                    params[:writein_name][n].to_s
-                  rescue StandardError
-                    ""
-                  end
+                   params[:writein_name][n].to_s
+                 rescue StandardError
+                   ""
+                 end
         reader = begin
-                    params[:writein_reader][n] == "1"
-                  rescue StandardError
-                    false
-                  end
+                   params[:writein_reader][n] == "1"
+                 rescue StandardError
+                   false
+                 end
         writer = begin
-                    params[:writein_writer][n] == "1"
-                  rescue StandardError
-                    false
-                  end
+                   params[:writein_writer][n] == "1"
+                 rescue StandardError
+                   false
+                 end
         admin  = begin
-                    params[:writein_admin][n] == "1"
-                  rescue StandardError
-                    false
-                  end
+                   params[:writein_admin][n] == "1"
+                 rescue StandardError
+                   false
+                 end
 
         next unless name.present? &&
                     !update_writein(@description, name, reader, writer, admin)
@@ -407,7 +407,7 @@ module DescriptionControllerHelpers
   def merge_description_notes(src, dest)
     src_notes  = src.all_notes
     dest_notes = dest.all_notes
-    for f in src_notes.keys
+    src_notes.keys.each do |f|
       if dest_notes[f].blank?
         dest_notes[f] = src_notes[f]
       elsif src_notes[f].present?
@@ -632,7 +632,7 @@ module DescriptionControllerHelpers
   # Update the permissions of a given type for the list of pre-filled-in
   # groups.
   def update_groups(desc, type, groups)
-    for id, val in groups
+    groups.each do |id, val|
       if group = UserGroup.safe_find(id)
         update_group(desc, type, group, (val == "1"))
       else
@@ -655,11 +655,11 @@ module DescriptionControllerHelpers
   # Throw up some flash notices to reassure user that we did in fact make the
   # changes they wanted us to make.
   def flash_description_changes(old_groups, new_groups, type)
-    for group in new_groups - old_groups
+    new_groups - old_groups.each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_added_#{type}".t(name: name))
     end
-    for group in old_groups - new_groups
+    old_groups - new_groups.each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_removed_#{type}".t(name: name))
     end
@@ -688,7 +688,7 @@ module DescriptionControllerHelpers
       result = true
 
       # Copy over all non-blank descriptive fields.
-      for f, val in src_notes
+      src_notes.each do |f, val|
         dest.send("#{f}=", val) if val.present?
       end
 
