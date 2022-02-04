@@ -338,8 +338,8 @@ module DescriptionControllerHelpers
       new_writers = @description.writer_groups.sort_by(&:id)
       new_admins  = @description.admin_groups.sort_by(&:id)
       if (old_readers != new_readers) ||
-          (old_writers != new_writers) ||
-          (old_admins != new_admins)
+         (old_writers != new_writers) ||
+         (old_admins != new_admins)
 
         # Give feedback to assure user that their changes were made.
         flash_description_changes(old_readers, new_readers, :reader)
