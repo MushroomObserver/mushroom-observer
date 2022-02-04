@@ -655,11 +655,11 @@ module DescriptionControllerHelpers
   # Throw up some flash notices to reassure user that we did in fact make the
   # changes they wanted us to make.
   def flash_description_changes(old_groups, new_groups, type)
-    new_groups - old_groups.each do |group|
+    (new_groups - old_groups).each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_added_#{type}".t(name: name))
     end
-    old_groups - new_groups.each do |group|
+    (old_groups - new_groups).each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_removed_#{type}".t(name: name))
     end
