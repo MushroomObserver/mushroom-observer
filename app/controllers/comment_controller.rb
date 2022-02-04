@@ -115,7 +115,7 @@ class CommentController < ApplicationController
       show_selected_comments(query)
     end
   end
-# Show selected list of comments.
+  # Show selected list of comments.
   def show_selected_comments(query, args = {})
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
