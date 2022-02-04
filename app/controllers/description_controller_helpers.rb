@@ -258,9 +258,9 @@ module DescriptionControllerHelpers
       draft.reader_groups << UserGroup.all_users
       draft.save
       parent.log(:log_published_description,
-                  user: @user.login,
-                  name: draft.unique_partial_format_name,
-                  touch: true)
+                 user: @user.login,
+                 name: draft.unique_partial_format_name,
+                 touch: true)
       parent.description = draft
       parent.save
       redirect_with_query(action: parent.show_action, id: parent.id)
