@@ -34,7 +34,7 @@ module Mutations::User
 
       # I believe i'm abandoning this, just keeping it for tests.
       # Session auth would be possible if the Svelte app were hosted
-      # on the same server... but we need something more versatile.
+      # on the same domain... but we need something more versatile.
       context[:session][:token] = token
 
       # This is what the resolver returns:
