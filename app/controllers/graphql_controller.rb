@@ -7,7 +7,7 @@ class GraphqlController < ApplicationController
   # plus the graphql query, variables, and operationName.
   #
   # JWT is a popular way to do auth, but i'm experimenting for now with Rails
-  # built-in token generation. There are examples in the wild and i think 
+  # built-in token generation. There are examples in the wild and i think
   # it should be fine for us.
   #
   # (Below deactivates csrf for development, I don't believe necessary)
@@ -24,23 +24,17 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      session: session,
-      # Query context goes here, for example:
-      # "current_user" is a default method. MO uses "session_user" - Nimmo
       current_user: current_user,
       # Below maybe methods from application_rb available to graphql? Not yet
       autologin: autologin,
       in_admin_mode: in_admin_mode
-      # unshown_notifications?: unshown_notifications?,
-      # set_locale: set_locale
-      # all_locales: all_locales,
-      # set_timezone: set_timezone,
-      # sorted_locales_from_request_header: sorted_locales_from_request_header,
-      # valid_locale_from_request_header: valid_locale_from_request_header
     }
     result = MushroomObserverSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+
+    # This is for my sanity, to be removed prior to merge - Nimmo
     puts("context")
     pp(context)
+
     render(json: result)
   rescue StandardError => e
     raise(e) unless Rails.env.development?
@@ -51,7 +45,7 @@ class GraphqlController < ApplicationController
   private
 
   # https://www.howtographql.com/graphql-ruby/4-authentication/
-  # gets current user from token stored in the session
+  # Decrypt the current user from token stored in the header (not the session)
   def current_user
     # if we want to change the sign-in strategy, this is the place to do it
 
@@ -71,7 +65,7 @@ class GraphqlController < ApplicationController
     headers = request.headers
     if headers["authorization"].present?
       return headers["authorization"].split(" ").last
-    else
+      # else
       # Don't error if there's no token, we're just checking
       # errors.add(:token, "Missing token")
       # raise(ArgumentError.new("Missing token"))
