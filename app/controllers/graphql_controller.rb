@@ -24,6 +24,7 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
+      session: session,
       current_user: current_user,
       # Below maybe methods from application_rb available to graphql? Not yet
       autologin: autologin,
