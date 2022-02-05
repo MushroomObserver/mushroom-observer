@@ -1214,7 +1214,7 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Image server is back online!<br/>\nWe're looking for feedback on how to improve Mushroom Observer, \"more information here\":/observer/interview.<br/>\nPlease remember to <a href=\"https://mushroomobserver.org/support/donate\">donate</a> to support Mushroom Observer.  We are entirely volunteer run, but we still need to pay for our servers.  Thanks!"
+  app_banner_box: "**Please do not re-click a link while waiting for a page to load.** (It's slower and degrades site speed for all users.)\nTo get images for machine learning, see \"+MO Images for Machine Learning+\":/articles/20"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
