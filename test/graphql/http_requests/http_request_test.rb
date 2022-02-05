@@ -18,7 +18,8 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     assert_nil(json_response["context"]["current_user"], "Unauthenticated requests have no current_user")
 
-    # This time, add some authentication to the HTTP request
+    # This time, add some authentication to the HTTP request. However,
+    # this isn't how we're doing auth presently on MO's graphql_controller.
     # No idea what the next line does in other test environments,
     # but it don't do noffin in ours
     user = create(:user)
