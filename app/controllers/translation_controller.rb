@@ -74,15 +74,11 @@ class TranslationController < ApplicationController
   end
 
   def validate_language_and_user(locale, lang)
-    if !lang
-      raise(:edit_translations_bad_locale.t(locale: locale))
-    elsif !@user
-      raise(:edit_translations_login_required.t)
-    elsif !@user.is_successful_contributor?
-      raise(:unsuccessful_contributor_warning.t)
-    elsif lang.official && !reviewer?
-      raise(:edit_translations_reviewer_required.t)
-    end
+    raise(:edit_translations_bad_locale.t(locale: locale)) unless lang
+    raise(:edit_translations_login_required.t) unless @user
+    raise(:unsuccessful_contributor_warning.t) \
+      unless @user.is_successful_contributor?
+    raise(:edit_translations_reviewer_required.t) if lang.official && !reviewer?
   end
 
   def get_record_maps(lang, tags)

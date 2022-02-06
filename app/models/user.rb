@@ -958,12 +958,12 @@ class User < AbstractModel
   end
 
   def check_password # :nodoc:
-    if password.present?
-      if password_confirmation.to_s.blank?
-        errors.add(:password, :validate_user_password_confirmation_missing.t)
-      elsif password != password_confirmation
-        errors.add(:password, :validate_user_password_no_match.t)
-      end
+    return if password.blank?
+
+    if password_confirmation.to_s.blank?
+      errors.add(:password, :validate_user_password_confirmation_missing.t)
+    elsif password != password_confirmation
+      errors.add(:password, :validate_user_password_no_match.t)
     end
   end
 

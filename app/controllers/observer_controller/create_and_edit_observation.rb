@@ -512,10 +512,10 @@ class ObserverController
       @collectors_name   = params[:collection_number][:name]
       @collectors_number = params[:collection_number][:number]
     end
-    if params[:herbarium_record]
-      @herbarium_name = params[:herbarium_record][:herbarium_name]
-      @herbarium_id   = params[:herbarium_record][:herbarium_id]
-    end
+    return unless params[:herbarium_record]
+
+    @herbarium_name = params[:herbarium_record][:herbarium_name]
+    @herbarium_id   = params[:herbarium_record][:herbarium_id]
   end
 
   def init_project_vars
@@ -775,12 +775,12 @@ class ObserverController
   private
 
   def update_naming(reason)
-    if @name
-      @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_log(@naming)
-      @observation.reload
-      @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
-    end
+    return unless @name
+
+    @naming.create_reasons(reason, params[:was_js_on] == "yes")
+    save_with_log(@naming)
+    @observation.reload
+    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def whitelisted_observation_args

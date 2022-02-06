@@ -12,4 +12,12 @@ class NotificationTest < UnitTestCase
     notification = notifications(:bad_flavor_notification)
     assert_equal("Unrecognized notification flavor", notification.summary)
   end
+
+  def test_no_user
+    notification = notifications(:coprinus_comatus_notification)
+    notification.user = nil
+
+    assert_not(notification.save)
+    assert(notification.errors[:user].any?)
+  end
 end
