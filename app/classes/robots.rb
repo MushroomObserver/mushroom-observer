@@ -2,7 +2,13 @@
 
 class Robots
   class << self
-    def allowed?(args)
+    # Is the robot authorized to be on the site?
+    def authorized?(user_agent)
+      # Googlebot not followed by a hyphen excludes Googlebot-Image, etc.
+      /Googlebot(?!-)|bingbot/.match?(user_agent)
+    end
+
+    def action_allowed?(args)
       populate_allowed_robot_actions unless defined?(@@allowed_robot_actions)
       return true  if args[:controller].start_with?("api")
       return false if args[:ua].downcase.include?("yandex")
