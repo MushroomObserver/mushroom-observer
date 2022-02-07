@@ -178,14 +178,13 @@ class ApplicationController < ActionController::Base
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true unless browser.bot?
-    if Robots.authorized?(browser.ua)
-      return true if Robots.action_allowed?(
-        controller: params[:controller],
-        action: params[:action],
-        ua: browser.ua,
-        ip: request.remote_ip
-      )
-    end
+    return true if Robots.authorized?(browser.ua) &&
+                   Robots.action_allowed?(
+                     controller: params[:controller],
+                     action: params[:action],
+                     ua: browser.ua,
+                     ip: request.remote_ip
+                   )
 
     render(plain: "Robots are not allowed on this page.",
            status: :forbidden,
