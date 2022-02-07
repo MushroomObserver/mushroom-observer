@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Permissions for user_agents
 class Robots
   class << self
     # Is the robot authorized to be on the site?
@@ -9,15 +10,15 @@ class Robots
     end
 
     def action_allowed?(args)
-      populate_allowed_robot_actions unless defined?(@@allowed_robot_actions)
-      return true  if args[:controller].start_with?("api")
+      populate_allowed_robot_actions unless defined?(@allowed_robot_actions)
+      return true if args[:controller].start_with?("api")
 
-      @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
+      @allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end
 
     def populate_allowed_robot_actions
       file = MO.robots_dot_text_file
-      @@allowed_robot_actions = parse_robots_dot_text(file)
+      @allowed_robot_actions = parse_robots_dot_text(file)
     end
 
     def parse_robots_dot_text(file)
