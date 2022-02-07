@@ -11,7 +11,6 @@ class Robots
     def action_allowed?(args)
       populate_allowed_robot_actions unless defined?(@@allowed_robot_actions)
       return true  if args[:controller].start_with?("api")
-      return false if args[:ua].downcase.include?("yandex")
 
       @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end

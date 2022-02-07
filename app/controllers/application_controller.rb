@@ -181,9 +181,7 @@ class ApplicationController < ActionController::Base
     return true if Robots.authorized?(browser.ua) &&
                    Robots.action_allowed?(
                      controller: params[:controller],
-                     action: params[:action],
-                     ua: browser.ua,
-                     ip: request.remote_ip
+                     action: params[:action]
                    )
 
     render(plain: "Robots are not allowed on this page.",
