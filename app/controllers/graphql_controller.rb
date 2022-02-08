@@ -24,17 +24,22 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      session: session,
-      current_user: current_user,
+      # session: session,
+      current_user: current_user
       # Below maybe methods from application_rb available to graphql? Not yet
-      autologin: autologin,
-      in_admin_mode: in_admin_mode
+      # autologin: autologin,
+      # in_admin_mode: in_admin_mode
     }
-    result = MushroomObserverSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+    result = MushroomObserverSchema.execute(
+      query,
+      variables: variables,
+      context: context,
+      operation_name: operation_name
+    )
 
     # This is for my sanity, to be removed prior to merge - Nimmo
-    puts("context")
-    pp(context)
+    # puts("context")
+    # pp(context)
 
     render(json: result)
   rescue StandardError => e
@@ -94,7 +99,8 @@ class GraphqlController < ApplicationController
     when Hash
       variables_param
     when ActionController::Parameters
-      variables_param.to_unsafe_hash # GraphQL-Ruby will validate name and type of incoming variables.
+      # GraphQL-Ruby will validate name and type of incoming variables
+      variables_param.to_unsafe_hash
     when nil
       {}
     else

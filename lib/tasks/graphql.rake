@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Note: Make dumps of schema for different environments - public/private!
+# Use: rake graphql:dump_schema
+# Note that it's possible to make dumps of schema for different environments,
+# for example public/private
 
 namespace :graphql do
   desc "Write a dump of the entire GraphQL Schema"
