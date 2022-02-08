@@ -11,6 +11,8 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
     # OK, this query works - auth not currently required for any user field
     # TBD what a non-authorized query would be
     query_string = "{ user( login: \"rolf\" ){ id name email bonuses } }"
+
+    # https://stackoverflow.com/questions/39096779/set-custom-user-agent-on-rails-testing
     # page.driver.header("User-Agent", "Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405")
     post(graphql_path,
          params: { query: query_string },
