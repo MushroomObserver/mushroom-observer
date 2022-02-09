@@ -106,7 +106,7 @@ class ApplicationController < ActionController::Base
   around_action :catch_errors_and_log_request_stats
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
-  before_action :kick_out_anonymous_users
+  before_action :redirect_anonymous_users
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
@@ -190,6 +190,45 @@ class ApplicationController < ActionController::Base
            layout: false)
     false
   end
+
+  # Redirect anonymous users to login unless they are looking at allowed pages
+  def redirect_anonymous_users
+    return true if browser.bot? || # bots are handled elsewhere
+      anonymous_user_allowed?
+    # session_user || \ # logged in
+
+    redirect_to(account_login_path)
+    false
+  end
+
+  private ##########
+
+  def anonymous_user_allowed?
+    # entire_controller_ok_for_anonymous_user? ||
+      action_ok_for_anonymous_user?
+  end
+
+=begin
+  def entire_controller_ok_for_anonymous_user?
+    params[:controller].start_with?("api") ||
+    # login, signup, email_new_password, verify, etc.
+    params[:controller] == "account"
+    params[:controller] == "articles"
+  end
+=end
+
+  def action_ok_for_anonymous_user?
+=begin
+    %w[
+    observer/intro
+    observer/how_to_use
+    observer/ask_webmaster_question
+    ].include?("#{params[:controller]}/#{params[:action]}")
+=end
+end
+
+  public ##########
+
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
