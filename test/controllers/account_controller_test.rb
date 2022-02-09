@@ -123,6 +123,18 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referrer)
   end
 
+  def test_anon_user_allowed_actions
+    # Be certain that anonymous user can reach these actions
+    %i[login signup verify send_verify welcome email_new_password].
+      each do |action|
+        get(action)
+        assert(
+          :success,
+          "Anonymous user should be able to get to #{action.to_s}"
+        )
+      end
+  end
+
   def test_block_known_evil_signups
     params = {
       login: "newbob",
