@@ -106,6 +106,7 @@ class ApplicationController < ActionController::Base
   around_action :catch_errors_and_log_request_stats
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
+  before_action :kick_out_anonymous_users
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
