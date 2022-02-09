@@ -83,6 +83,11 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
+  def assert_title(title)
+    assert_select("head title", { text: /#{title}/, count: 1 },
+                  "Incorrect page or page title displayed")
+  end
+
   ##############################################################################
 
   # ----------------------------
@@ -3928,6 +3933,27 @@ class ObserverControllerTest < FunctionalTestCase
       account_login_path,
       "Anonymous user should be unable to view Observation"
     )
+  end
+
+  def test_anon_user_ask_webmaster_question
+    get(:ask_webmaster_question)
+
+    assert_response(:success)
+    assert_title(:ask_webmaster_title.l)
+  end
+
+  def test_anon_user_how_to_use
+    get(:how_to_use)
+
+    assert_response(:success)
+    assert_title(:how_title.l)
+  end
+
+  def test_anon_user_intro
+    get(:intro)
+
+    assert_response(:success)
+    assert_title(:intro_title.l)
   end
 
   def test_external_sites_user_can_add_links_to

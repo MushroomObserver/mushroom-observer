@@ -204,7 +204,7 @@ class ApplicationController < ActionController::Base
 
   def anonymous_user_allowed?
     entire_controller_ok_for_anonymous_user?
-    # action_ok_for_anonymous_user?
+    action_ok_for_anonymous_user?
   end
 
   def entire_controller_ok_for_anonymous_user?
@@ -215,15 +215,12 @@ class ApplicationController < ActionController::Base
   end
 
   def action_ok_for_anonymous_user?
-=begin
-    %w[
-    observer/intro
-    observer/how_to_use
-    observer/ask_webmaster_question
-    observer/privacy
-    ].include?("#{params[:controller]}/#{params[:action]}")
-=end
-  end
+    [observer_intro_path,
+     observer_how_to_use_path,
+     observer_ask_webmaster_question_path].
+    include?("/#{params[:controller]}/#{params[:action]}")
+# policy_privacy_path
+end
 
   public ##########
 
