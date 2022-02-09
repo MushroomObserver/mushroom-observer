@@ -7,9 +7,17 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
   # from an example on...
   # https://graphql-ruby.org/testing/integration_tests.html
-  def test_check_current_user
-    # OK, this query works - auth not currently required for any user field
-    # TBD what a non-authorized query would be
+  def test_check_user_field_authorization
+    # What we need to test here is whether or not the controller shows fields
+    # requiring authorization.
+
+    # We're not testing the context object's :current_user, which is
+    # internal to the controller.
+
+    # TODO: https://graphql-ruby.org/authorization/overview.html
+    # Add authorization control to some fields in graphql/types/models/User.rb
+    # that only the user should get, and put one of those in this query string
+    # This query works OK - auth not currently required for any user field
     query_string = "{ user( login: \"rolf\" ){ id name email bonuses } }"
 
     # # https://stackoverflow.com/questions/39096779/set-custom-user-agent-on-rails-testing
