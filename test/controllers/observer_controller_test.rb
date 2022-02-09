@@ -3919,6 +3919,13 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(403, @response.status)
   end
 
+  def test_anon_user_semi_open_action
+    obs = observations(:minimal_unknown_obs)
+    # only logged-in users and authorized robots can do this
+    get(:show_observation, params: { id: obs.id })
+    assert_equal(403, @response.status)
+  end
+
   def test_external_sites_user_can_add_links_to
     # not logged in
     do_external_sites_test([], nil, nil)
