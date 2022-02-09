@@ -41,6 +41,9 @@ class GraphqlController < ApplicationController
     # puts("context")
     # pp(context)
 
+    # puts("json: result")
+    # pp(render(json: result))
+
     render(json: result)
   rescue StandardError => e
     raise(e) unless Rails.env.development?

@@ -3,7 +3,7 @@
 # app/graphql/queries/user.rb
 module Queries
   class User < Queries::BaseQuery
-    description "get user by id"
+    description "get user by argument"
     type Types::Models::UserType, null: false
     argument :id, Integer, required: false
     argument :login, String, required: false
