@@ -19,10 +19,9 @@ module Queries
     def resolve(args)
       return {} unless args
 
-      # puts(args)
       if args.key?(:id)
         ::User.find(args[:id])
-      elsif args.key?(:login) # unreliable!
+      elsif args.key?(:login)
         ::User.find_by(login: args[:login])
       elsif args.key?(:email)
         ::User.find_by(email: args[:email].sub(/ <.*>$/, ""))
