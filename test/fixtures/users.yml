@@ -143,3 +143,6 @@ californian:
   <<: *DEFAULTS
   content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
 
+unverified:
+  <<: *DEFAULTS
+  verified: nil

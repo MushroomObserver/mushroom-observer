@@ -6,6 +6,6 @@ module Types
     # field :user_delete, mutation: Mutations::User::Delete
     # field :user_update, mutation: Mutations::User::Update
     # field :user_create, mutation: Mutations::User::Create
-    field :user_login, mutation: Mutations::User::Login
+    # field :user_login, mutation: Mutations::User::Login
   end
 end
