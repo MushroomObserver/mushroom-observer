@@ -209,18 +209,18 @@ class ApplicationController < ActionController::Base
 
   def entire_controller_ok_for_anonymous_user?
     params[:controller].start_with?("api") ||
-    # login, signup, email_new_password, verify, etc.
-    params[:controller] == "account"
-    # params[:controller] == "articles"
+    # Filter will not block anonymous user from any action in these controllers
+    # (Controller or other filters are responsible for other access controls.)
+      %w[account policy].include?(params[:controller])
   end
 
   def action_ok_for_anonymous_user?
+    # Anonymous user can access these controller/action combinations
     [observer_intro_path,
      observer_how_to_use_path,
      observer_ask_webmaster_question_path].
-    include?("/#{params[:controller]}/#{params[:action]}")
-# policy_privacy_path
-end
+      include?("/#{params[:controller]}/#{params[:action]}")
+  end
 
   public ##########
 

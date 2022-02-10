@@ -2,9 +2,10 @@
 
 require("test_helper")
 
-class PolicyControllerTest < IntegrationTestCase
-  test "should get privacy" do
-    get policy_privacy_url
-    assert_response :success
+class PolicyControllerTest < FunctionalTestCase
+  def test_privacy
+    get(:privacy)
+    assert_response(:success)
+    assert_head_title(:privacy_title.l)
   end
 end
