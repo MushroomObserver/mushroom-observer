@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 # To dump this use: rails graphql:dump_schema
 
@@ -17,8 +17,7 @@ class MushroomObserverSchema < GraphQL::Schema
 
   # Union and Interface Resolution
   def self.resolve_type(_abstract_type, _obj, _ctx)
-    # TODO: Implement this function
-    # to return the correct object type for `obj`
+    # NOTE: Implement this function to return the correct object type for `obj`
     raise(GraphQL::RequiredImplementationMissingError)
   end
 

@@ -12,19 +12,25 @@ module Mutations
     def check_logged_in!
       return if context[:current_user]
 
-      raise(GraphQL::ExecutionError.new("You need to login to perform this action"))
+      raise(GraphQL::ExecutionError.new(
+              "You need to login to perform this action"
+            ))
     end
 
     def check_admin!
       return if context[:in_admin_mode?]
 
-      raise(GraphQL::ExecutionError.new("You need to be an admin to perform this action"))
+      raise(GraphQL::ExecutionError.new(
+              "You need to be an admin to perform this action"
+            ))
     end
 
     def check_reviewer!
       return if context[:reviewer?]
 
-      raise(GraphQL::ExecutionError.new("You need to be a reviewer to perform this action"))
+      raise(GraphQL::ExecutionError.new(
+              "You need to be a reviewer to perform this action"
+            ))
     end
   end
 end

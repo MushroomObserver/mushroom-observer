@@ -2,7 +2,7 @@
 
 module Types::Models
   class UserType < Types::BaseObject
-    # TODO: Rails: maybe migrate certain fields to non-nullable in the db
+    # NOTE: Rails: maybe migrate certain fields to non-nullable in the db
     field :id, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
@@ -57,7 +57,7 @@ module Types::Models
     field :email_locations_admin, Boolean, null: true
     field :email_names_admin, Boolean, null: true
 
-    # TODO: uncomment each association as the models are added, OR...
+    # NOTE: uncomment each association as the models are added, OR...
     #
     # This post has examples that may help DRYing up association loading
     # https://www.keypup.io/blog/graphql-the-rails-way-part-1-exposing-your-resources-for-querying
@@ -112,7 +112,7 @@ module Types::Models
     # field :img_src_huge, String, null: true
     # field :img_src_full, String, null: true
 
-    # TODO: make a helper for img_src_xxxx, used in several models
+    # NOTE: make a helper for img_src_xxxx, used in several models
     # urls are inconsistent, helper should prepend domain if missing
     # def img_src_thumb
     #   Image.url(:thumbnail, object.image_id)
