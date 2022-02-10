@@ -145,6 +145,9 @@
 #  authenticate::       Verify login + password.
 #  auth_code::          Code used to verify autologin cookie and POSTs in API.
 #  change_password::    Change password (on an existing record).
+#  create_graphql_token:: Generate a native Rails encrypted token for user.id
+#  get_from_token::     Find a User by decrypting token
+#  crypt::              Uses Rails.application.credentials.secret_key_base
 #
 #  ==== Interests
 #  interest_in::        Return state of User's interest in a given object.
@@ -510,6 +513,24 @@ class User < AbstractModel
     self.last_login = now
     self.last_activity = now
     save
+  end
+
+  # Create a Rails native token (used for authentication in GraphQL API)
+  def create_graphql_token
+    User.crypt.encrypt_and_sign(id.to_s)
+  end
+
+  # param is an http_auth_header
+  def self.get_from_token(auth_header)
+    user_id = User.crypt.decrypt_and_verify(auth_header).to_i
+
+    safe_find(user_id)
+  end
+
+  def self.crypt
+    ActiveSupport::MessageEncryptor.new(
+      Rails.application.credentials.secret_key_base.byteslice(0..31)
+    )
   end
 
   ##############################################################################

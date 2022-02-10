@@ -327,4 +327,10 @@ class UserTest < UnitTestCase
     assert(u.invalid?,
            "Notes template with duplication headings should be invalid")
   end
+
+  def test_create_retrieve_graphql_token
+    token = rolf.create_graphql_token
+    user = User.get_from_token(token)
+    assert_equal(rolf.id, user.id, "Token for user created and decrypted")
+  end
 end

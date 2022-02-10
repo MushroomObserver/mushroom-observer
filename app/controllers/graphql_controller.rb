@@ -56,15 +56,7 @@ class GraphqlController < ApplicationController
   # https://www.howtographql.com/graphql-ruby/4-authentication/
   # Decrypt the current user from token stored in the header (not the session)
   def current_user
-    # if we want to change the sign-in strategy, this is the place to do it
-
-    crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-    # token = crypt.decrypt_and_verify(session[:token])
-
-    token = crypt.decrypt_and_verify(http_auth_header)
-    user_id = token.gsub("user-id:", "").to_i
-
-    User.safe_find(user_id)
+    ::User.get_from_token(http_auth_header)
   rescue ActiveSupport::MessageVerifier::InvalidSignature
     nil
   end

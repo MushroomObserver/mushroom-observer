@@ -28,13 +28,9 @@ module Mutations::User
       }
       user.update(args)
 
-      # https://www.howtographql.com/graphql-ruby/4-authentication/
-      crypt = ActiveSupport::MessageEncryptor.new(
-        Rails.application.credentials.secret_key_base.byteslice(0..31)
-      )
-      token = crypt.encrypt_and_sign("user-id:#{user.id}")
+      token = user.create_graphql_token
 
-      # I believe i'm abandoning this, just keeping it for tests.
+      # I believe i'm abandoning :session, just keeping it for tests.
       # Session auth would be possible if the Svelte app were hosted
       # on the same domain... but we need something more versatile.
       # context[:session][:token] = token
@@ -47,5 +43,7 @@ module Mutations::User
     rescue ActiveRecord::RecordNotFound
       raise(GraphQL::ExecutionError.new("user not found"))
     end
+
+    # https://www.howtographql.com/graphql-ruby/4-authentication/
   end
 end

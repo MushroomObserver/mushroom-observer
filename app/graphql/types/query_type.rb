@@ -65,6 +65,7 @@ module Types
     # field :user_groups, resolver: Resolvers::UserGroups
     field :user, resolver: Queries::User
     # field :users, Types::Models::UserType.connection_type, null: false,
+    field :visitor, resolver: Queries::Visitor
     #                                                        resolver: Queries::Users
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes

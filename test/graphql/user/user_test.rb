@@ -9,6 +9,12 @@ class Mutations::UserTest < IntegrationTestCase
   #   }
   # end
 
+  # TODO: https://graphql-ruby.org/authorization/overview.html
+  # Add authorization control to some fields in graphql/types/models/User.rb
+  # that only the user should get, and put one of those in this query string
+  # This query works OK - auth not currently required for any user field
+  # query_string = "{ user( login: \"rolf\" ){ id name email password } }"
+
   # def test_find_user_by_id
   #   query_string = <<-GRAPHQL
   #     query($id: Int){
