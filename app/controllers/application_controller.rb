@@ -195,7 +195,7 @@ class ApplicationController < ActionController::Base
   def redirect_anonymous_users
     return true if browser.bot? # recognized bots are handled elsewhere
     return true if anonymous_user_allowed?
-    # session_user || \ # logged in
+    # return true unless user_anonymous?
 
     return redirect_to(account_login_path)
   end

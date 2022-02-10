@@ -13,7 +13,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_title(:glossary_term_index_title.l)
+    assert_head_title(:glossary_term_index_title.l)
 
     GlossaryTerm.find_each do |term|
       assert_select(
@@ -32,7 +32,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show, params: { id: term.id })
 
     assert_response(:success)
-    assert_title(:show_glossary_term_title.l(name: term.name))
+    assert_head_title(:show_glossary_term_title.l(name: term.name))
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{term.send(attr)}/,
@@ -60,7 +60,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_response(:success)
-    assert_title(:create_glossary_term_title.l)
+    assert_head_title(:create_glossary_term_title.l)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
@@ -83,7 +83,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:edit, params: { id: term.id })
 
     assert_response(:success)
-    assert_title(:edit_glossary_term_title.l(name: term.name))
+    assert_head_title(:edit_glossary_term_title.l(name: term.name))
 
     assert_select(
       "form [name='glossary_term[name]']", { count: 1 },
@@ -306,7 +306,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show_past, params: { id: term.id, version: version.version })
 
     assert_response(:success)
-    assert_title(:show_past_glossary_term_title.l(num: version.version,
+    assert_head_title(:show_past_glossary_term_title.l(num: version.version,
                                                   name: term.name))
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
@@ -318,11 +318,6 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ---------- helpers ---------------------------------------------------------
-
-  def assert_title(title)
-    assert_select("head title", { text: /#{title}/, count: 1 },
-                  "Incorrect page or page title displayed")
-  end
 
   def create_term_params
     {
