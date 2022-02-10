@@ -203,7 +203,7 @@ class ApplicationController < ActionController::Base
   private ##########
 
   def anonymous_user_allowed?
-    entire_controller_ok_for_anonymous_user?
+    entire_controller_ok_for_anonymous_user? ||
     action_ok_for_anonymous_user?
   end
 
