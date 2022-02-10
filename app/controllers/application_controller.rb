@@ -211,7 +211,12 @@ class ApplicationController < ActionController::Base
     params[:controller].start_with?("api") ||
     # Filter will not block anonymous user from any action in these controllers
     # (Controller or other filters are responsible for other access controls.)
-      %w[account articles policy publications].include?(params[:controller])
+      %w[account
+         ajax
+         articles
+         policy
+         publications].
+        include?(params[:controller])
   end
 
   def action_ok_for_anonymous_user?
