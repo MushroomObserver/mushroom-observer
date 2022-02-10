@@ -1,22 +1,11 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
-  # Note 22/01/29 - Nimmo
-  # This controller is short but important, and I haven't figured it out yet.
-  # It parses the incoming request: headers, context (including authentication)
+  # Note 22/02/10 - Nimmo
+  # This controller is short but important.
+  # It parses the incoming request: headers for context (authentication)
   # plus the graphql query, variables, and operationName.
   #
-  # JWT is a popular way to do auth, but i'm experimenting for now with Rails
-  # built-in token generation. There are examples in the wild and i think
-  # it should be fine for us.
-  #
-  # (Below deactivates csrf for development, I don't believe necessary)
-  # If accessing from outside this domain, nullify the session
-  # This allows for outside API access while preventing CSRF attacks,
-  # but you'll have to authenticate your user separately
-  # protect_from_forgery with: :null_session
-  # skip_before_action(:verify_authenticity_token)
-  # skip_before_action(:fix_bad_domains)
   disable_filters
 
   def execute
@@ -24,7 +13,6 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      # session: session,
       current_user: current_user
       # Below maybe methods from application_rb available to graphql? Not yet
       # autologin: autologin,
@@ -36,13 +24,6 @@ class GraphqlController < ApplicationController
       context: context,
       operation_name: operation_name
     )
-
-    # This is for my sanity, to be removed prior to merge - Nimmo
-    # puts("context")
-    # pp(context)
-
-    # puts("json: result")
-    # pp(render(json: result))
 
     render(json: result)
   rescue StandardError => e
@@ -76,8 +57,6 @@ class GraphqlController < ApplicationController
   end
 
   def in_admin_mode
-    # crypt = ActiveSupport::MessageEncryptor.new(Rails.application.credentials.secret_key_base.byteslice(0..31))
-    # token = crypt.decrypt_and_verify(session[:token])
     # in_admin_mode = token.gsub("in_admin_mode:", "").to_boolean
     false
   end
@@ -103,9 +82,9 @@ class GraphqlController < ApplicationController
     end
   end
 
-  def handle_error_in_development(e)
-    logger.error(e.message)
-    logger.error(e.backtrace.join("\n"))
+  def handle_error_in_development(err)
+    logger.error(err.message)
+    logger.error(err.backtrace.join("\n"))
 
     render(json: { errors: [{ message: e.message, backtrace: e.backtrace }],
                    data: {} },
