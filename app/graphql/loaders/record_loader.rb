@@ -3,6 +3,7 @@
 # from gem graphql-batch
 class RecordLoader < GraphQL::Batch::Loader
   def initialize(model)
+    super()
     @model = model
   end
 
