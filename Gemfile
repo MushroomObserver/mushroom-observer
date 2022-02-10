@@ -152,7 +152,7 @@ gem("graphql")
 #
 # Authorization gem
 # Action Policy is an authorization library for your GraphQL Ruby application
-gem("action_policy-graphql")
+# gem("action_policy-graphql")
 #
 # Pagination & Connection gems
 #
