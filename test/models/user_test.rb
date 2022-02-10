@@ -335,8 +335,9 @@ class UserTest < UnitTestCase
   end
 
   def test_unverified_graphql_token
-    token = unverified.create_graphql_token
-    user = User.get_from_token(token)
-    assert_nil(user.id, "Token for unverified user not created")
+    assert_raises("User not verified") do
+      token = users(:unverified).create_graphql_token
+    end
+    assert_raises("User not verified") { User.get_from_token(token) }
   end
 end
