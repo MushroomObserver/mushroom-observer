@@ -30,10 +30,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
                "Unauthenticated requests have no current_user")
 
     # This time, add some authentication to the HTTP request.
-    rolf = User.find_by(login: "rolf")
-
-    # maybe this should be a method of user class!
-    # from graphql/mutations/user/login.rb
+    rolf = users(:rolf)
     token = rolf.create_graphql_token
 
     post(graphql_path,
