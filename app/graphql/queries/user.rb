@@ -10,12 +10,6 @@ module Queries
     argument :email, String, required: false
     argument :name, String, required: false
 
-    # def resolve(id:)
-    #   ::User.find(id)
-    # use this for associations:
-    # RecordLoader.for(User).load(id)
-    # end
-
     def resolve(args)
       return {} unless args
 
@@ -29,5 +23,11 @@ module Queries
         ::User.find_by(name: args[:name])
       end
     end
+
+    # def resolve(id:)
+    #   ::User.find(id)
+    #   use this for associations:
+    #   RecordLoader.for(User).load(id)
+    # end
   end
 end

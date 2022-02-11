@@ -15,10 +15,10 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   end
 
   # Whether or not the controller correctly figures out :current_user
-  # from an example on...
+  # Note this also tests the Visitor query
   # https://graphql-ruby.org/testing/integration_tests.html
-  def test_check_user_field_authorization
-    query_string = "{ visitor{ login } }"
+  def test_check_visitor_authentication
+    query_string = "{ visitor { login } }"
 
     post(graphql_path,
          params: { query: query_string },
