@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# To dump this use: rails graphql:dump_schema
+# NOTE: use `rails graphql:dump_schema`` to get a dump of the current schema
 
 class MushroomObserverSchema < GraphQL::Schema
   query(Types::QueryType)
