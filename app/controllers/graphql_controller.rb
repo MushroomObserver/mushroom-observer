@@ -14,8 +14,6 @@ class GraphqlController < ApplicationController
     operation_name = params[:operationName]
     context = {
       current_user: current_user
-      # Below maybe methods from application_rb available to graphql? Not yet
-      # autologin: autologin,
       # in_admin_mode: in_admin_mode
     }
     result = MushroomObserverSchema.execute(
@@ -56,10 +54,14 @@ class GraphqlController < ApplicationController
     nil
   end
 
-  def in_admin_mode
-    # in_admin_mode = token.gsub("in_admin_mode:", "").to_boolean
-    false
-  end
+  # def in_admin_mode
+  #   ::User.token_in_admin_mode?(http_auth_header)
+  # end
+
+  # def autologin
+  #   token_hash = ::User.decrypt_token_hash(http_auth_header)
+  #   token_hash[:autologin].to_boolean
+  # end
 
   # Handle variables in form data, JSON body, or a blank value
   def prepare_variables(variables_param)

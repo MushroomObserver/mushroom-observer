@@ -519,17 +519,43 @@ class User < AbstractModel
   def create_graphql_token
     raise("User not verified") unless verified
 
-    User.crypt.encrypt_and_sign(id.to_s)
+    token_hash = { user_id: id, in_admin_mode: false }
+    User.encrypted_token(token_hash)
+  end
+
+  def create_admin_token
+    raise("User not an admin") unless admin
+
+    token_hash = { user_id: id, in_admin_mode: true }
+    User.encrypted_token(token_hash)
+  end
+
+  def self.encrypted_token(token_hash)
+    token_string = JSON.generate(token_hash)
+    User.crypt.encrypt_and_sign(token_string)
   end
 
   # param is an http_auth_header
   def self.get_from_token(auth_header)
-    user_id = User.crypt.decrypt_and_verify(auth_header).to_i
-    user = safe_find(user_id)
+    token_hash = User.decrypt_token_hash(auth_header)
+    user = safe_find(token_hash["user_id"])
+    raise("User not found") unless user
 
     raise("User not verified") unless user.verified
 
     user
+  end
+
+  def self.decrypt_token_hash(auth_header)
+    token = User.crypt.decrypt_and_verify(auth_header)
+    JSON.parse(token)
+  end
+
+  def self.token_in_admin_mode?(auth_header)
+    token_hash = User.decrypt_token_hash(auth_header)
+    raise("Token missing key") unless token_hash.has_key?("in_admin_mode")
+
+    token_hash["in_admin_mode"].to_boolean
   end
 
   def self.crypt
