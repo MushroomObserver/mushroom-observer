@@ -531,8 +531,8 @@ class User < AbstractModel
   end
 
   def self.encrypted_token(token_hash)
-    token_string = JSON.generate(token_hash)
-    User.crypt.encrypt_and_sign(token_string)
+    token_json = JSON.generate(token_hash)
+    User.crypt.encrypt_and_sign(token_json)
   end
 
   # param is an http_auth_header
@@ -546,16 +546,16 @@ class User < AbstractModel
     user
   end
 
-  def self.decrypt_token_hash(auth_header)
-    token = User.crypt.decrypt_and_verify(auth_header)
-    JSON.parse(token)
-  end
-
   def self.token_in_admin_mode?(auth_header)
     token_hash = User.decrypt_token_hash(auth_header)
     raise("Token missing key") unless token_hash.has_key?("in_admin_mode")
 
     token_hash["in_admin_mode"].to_boolean
+  end
+
+  def self.decrypt_token_hash(auth_header)
+    token = User.crypt.decrypt_and_verify(auth_header)
+    JSON.parse(token)
   end
 
   def self.crypt
