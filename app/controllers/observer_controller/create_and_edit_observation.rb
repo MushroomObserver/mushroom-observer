@@ -512,10 +512,10 @@ class ObserverController
       @collectors_name   = params[:collection_number][:name]
       @collectors_number = params[:collection_number][:number]
     end
-    if params[:herbarium_record]
-      @herbarium_name = params[:herbarium_record][:herbarium_name]
-      @herbarium_id   = params[:herbarium_record][:herbarium_id]
-    end
+    return unless params[:herbarium_record]
+
+    @herbarium_name = params[:herbarium_record][:herbarium_name]
+    @herbarium_id   = params[:herbarium_record][:herbarium_id]
   end
 
   def init_project_vars
@@ -650,7 +650,7 @@ class ObserverController
           if !image.save
             bad_images.push(image)
             flash_object_errors(image)
-          elsif !image.process_image(observation.gps_hidden)
+          elsif !image.process_image(strip: observation.gps_hidden)
             name_str = name ? "'#{name}'" : "##{image.id}"
             flash_notice(:runtime_no_upload_image.t(name: name_str))
             bad_images.push(image)
@@ -717,7 +717,7 @@ class ObserverController
     images.each do |image|
       unless observation.image_ids.include?(image.id)
         observation.add_image(image)
-        observation.log_create_image(image)
+        image.log_create_for(observation)
       end
     end
   end
@@ -775,12 +775,12 @@ class ObserverController
   private
 
   def update_naming(reason)
-    if @name
-      @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_log(@naming)
-      @observation.reload
-      @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
-    end
+    return unless @name
+
+    @naming.create_reasons(reason, params[:was_js_on] == "yes")
+    save_with_log(@naming)
+    @observation.reload
+    @observation.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end
 
   def whitelisted_observation_args

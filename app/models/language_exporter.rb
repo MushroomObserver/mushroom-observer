@@ -226,23 +226,23 @@ module LanguageExporter
     # verbose("  adding :#{tag}")
     # verbose("    was #{old_val.inspect}")
     # verbose("    now #{new_val.inspect}")
-    unless safe_mode
-      translation_strings.create(
-        tag: tag,
-        text: new_val
-      )
-    end
+    return if safe_mode
+
+    translation_strings.create(
+      tag: tag,
+      text: new_val
+    )
   end
 
   def update_string(str, new_val, _old_val)
     # verbose("  updating :#{str.tag}")
     # verbose("    was #{old_val.inspect}")
     # verbose("    now #{new_val.inspect}")
-    unless safe_mode
-      str.update(
-        text: new_val
-      )
-    end
+    return if safe_mode
+
+    str.update(
+      text: new_val
+    )
   end
 
   # ----------------------------

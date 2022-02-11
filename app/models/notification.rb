@@ -110,8 +110,8 @@ class Notification < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !user && !User.current
-      errors.add(:user, :validate_notification_user_missing.t)
-    end
+    return unless !user && !User.current
+
+    errors.add(:user, :validate_notification_user_missing.t)
   end
 end

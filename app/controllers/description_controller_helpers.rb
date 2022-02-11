@@ -75,32 +75,32 @@ module DescriptionControllerHelpers
   # old description afterword.
   def merge_descriptions
     pass_query_params
-    if src = find_description(params[:id].to_s)
-      @description = src
+    return unless (src = find_description(params[:id].to_s))
 
-      # Doesn't have permission to see source.
-      if !in_admin_mode? && !src.is_reader?(@user)
-        flash_error(:runtime_description_private.t)
-        redirect_with_query(action: src.parent.show_action, id: src.parent_id)
+    @description = src
 
-      # POST method
-      elsif request.method == "POST"
-        delete_after = (params[:delete] == "1")
-        target = params[:target].to_s
-        if target =~ /^parent_(\d+)$/
-          target_id = Regexp.last_match(1)
-          if dest = find_or_goto_index(src.parent.class, target_id)
-            do_move_description(src, dest, delete_after)
-          end
-        elsif target =~ /^desc_(\d+)$/
-          target_id = Regexp.last_match(1)
-          if dest = find_description(target_id)
-            do_merge_description(src, dest, delete_after)
-          end
-        else
-          flash_error(:runtime_invalid.t(type: '"target"',
-                                         value: target))
+    # Doesn't have permission to see source.
+    if !in_admin_mode? && !src.is_reader?(@user)
+      flash_error(:runtime_description_private.t)
+      redirect_with_query(action: src.parent.show_action, id: src.parent_id)
+
+    # POST method
+    elsif request.method == "POST"
+      delete_after = (params[:delete] == "1")
+      target = params[:target].to_s
+      if target =~ /^parent_(\d+)$/
+        target_id = Regexp.last_match(1)
+        if dest = find_or_goto_index(src.parent.class, target_id)
+          do_move_description(src, dest, delete_after)
         end
+      elsif target =~ /^desc_(\d+)$/
+        target_id = Regexp.last_match(1)
+        if dest = find_description(target_id)
+          do_merge_description(src, dest, delete_after)
+        end
+      else
+        flash_error(:runtime_invalid.t(type: '"target"',
+                                       value: target))
       end
     end
   end
@@ -228,162 +228,161 @@ module DescriptionControllerHelpers
   # conflict bring up the edit_description form to let the user do the merge.
   def publish_description
     pass_query_params
-    if draft = find_description(params[:id].to_s)
-      parent = draft.parent
-      old = parent.description
+    return unless (draft = find_description(params[:id].to_s))
 
-      # Must be admin on the draft in order for this to work.  (Must be able
-      # to delete the draft after publishing it.)
-      if !in_admin_mode? && !draft.is_admin?(@user)
-        flash_error(:runtime_edit_description_denied.t)
-        redirect_with_query(action: parent.show_action, id: parent.id)
+    parent = draft.parent
+    old = parent.description
 
-      # Can't merge it into itself!
-      elsif old == draft
-        flash_error(:runtime_description_already_default.t)
-        redirect_with_query(action: draft.show_action, id: draft.id)
+    # Must be admin on the draft in order for this to work.  (Must be able
+    # to delete the draft after publishing it.)
+    if !in_admin_mode? && !draft.is_admin?(@user)
+      flash_error(:runtime_edit_description_denied.t)
+      redirect_with_query(action: parent.show_action, id: parent.id)
 
-      # I've temporarily decided to always just turn it into a public desc.
-      # User can then merge by hand if public desc already exists.
-      else
-        draft.source_type = :public
-        draft.source_name = ""
-        draft.project     = nil
-        draft.admin_groups.clear
-        draft.admin_groups << UserGroup.reviewers
-        draft.writer_groups.clear
-        draft.writer_groups << UserGroup.all_users
-        draft.reader_groups.clear
-        draft.reader_groups << UserGroup.all_users
-        draft.save
-        parent.log(:log_published_description,
-                   user: @user.login,
-                   name: draft.unique_partial_format_name,
-                   touch: true)
-        parent.description = draft
-        parent.save
-        redirect_with_query(action: parent.show_action, id: parent.id)
-      end
+    # Can't merge it into itself!
+    elsif old == draft
+      flash_error(:runtime_description_already_default.t)
+      redirect_with_query(action: draft.show_action, id: draft.id)
+
+    # I've temporarily decided to always just turn it into a public desc.
+    # User can then merge by hand if public desc already exists.
+    else
+      draft.source_type = :public
+      draft.source_name = ""
+      draft.project     = nil
+      draft.admin_groups.clear
+      draft.admin_groups << UserGroup.reviewers
+      draft.writer_groups.clear
+      draft.writer_groups << UserGroup.all_users
+      draft.reader_groups.clear
+      draft.reader_groups << UserGroup.all_users
+      draft.save
+      parent.log(:log_published_description,
+                 user: @user.login,
+                 name: draft.unique_partial_format_name,
+                 touch: true)
+      parent.description = draft
+      parent.save
+      redirect_with_query(action: parent.show_action, id: parent.id)
     end
   end
 
   # Adjust permissions on a description.
   def adjust_permissions
     pass_query_params
-    if @description = find_description(params[:id].to_s)
-      done = false
+    return unless (@description = find_description(params[:id].to_s))
 
-      # Doesn't have permission.
-      if !in_admin_mode? && !@description.is_admin?(@user)
-        flash_error(:runtime_description_adjust_permissions_denied.t)
-        done = true
+    done = false
+    # Doesn't have permission.
+    if !in_admin_mode? && !@description.is_admin?(@user)
+      flash_error(:runtime_description_adjust_permissions_denied.t)
+      done = true
 
-      # These types have fixed permissions.
-      elsif [:public, :foreign].include?(@description.source_type) &&
-            !in_admin_mode?
-        flash_error(:runtime_description_permissions_fixed.t)
-        done = true
+    # These types have fixed permissions.
+    elsif [:public, :foreign].include?(@description.source_type) &&
+          !in_admin_mode?
+      flash_error(:runtime_description_permissions_fixed.t)
+      done = true
 
-      # GET method.
-      elsif request.method != "POST"
-        @data = nil
+    # GET method.
+    elsif request.method != "POST"
+      @data = nil
 
-      # POST method.
-      else
-        old_readers = @description.reader_groups.sort_by(&:id)
-        old_writers = @description.writer_groups.sort_by(&:id)
-        old_admins  = @description.admin_groups.sort_by(&:id)
+    # POST method.
+    else
+      old_readers = @description.reader_groups.sort_by(&:id)
+      old_writers = @description.writer_groups.sort_by(&:id)
+      old_admins  = @description.admin_groups.sort_by(&:id)
 
-        # Update permissions on list of users and groups at the top.
-        update_groups(@description, :readers, params[:group_reader])
-        update_groups(@description, :writers, params[:group_writer])
-        update_groups(@description, :admins,  params[:group_admin])
+      # Update permissions on list of users and groups at the top.
+      update_groups(@description, :readers, params[:group_reader])
+      update_groups(@description, :writers, params[:group_writer])
+      update_groups(@description, :admins,  params[:group_admin])
 
-        # Look up write-ins and adjust their permissions.
-        @data = [nil]
-        done = true
-        for n in params[:writein_name].keys.sort
-          name   = begin
-                     params[:writein_name][n].to_s
-                   rescue StandardError
-                     ""
-                   end
-          reader = begin
-                     params[:writein_reader][n] == "1"
-                   rescue StandardError
-                     false
-                   end
-          writer = begin
-                     params[:writein_writer][n] == "1"
-                   rescue StandardError
-                     false
-                   end
-          admin  = begin
-                     params[:writein_admin][n] == "1"
-                   rescue StandardError
-                     false
-                   end
+      # Look up write-ins and adjust their permissions.
+      @data = [nil]
+      done = true
+      params[:writein_name].keys.sort.each do |n|
+        name   = begin
+                   params[:writein_name][n].to_s
+                 rescue StandardError
+                   ""
+                 end
+        reader = begin
+                   params[:writein_reader][n] == "1"
+                 rescue StandardError
+                   false
+                 end
+        writer = begin
+                   params[:writein_writer][n] == "1"
+                 rescue StandardError
+                   false
+                 end
+        admin  = begin
+                   params[:writein_admin][n] == "1"
+                 rescue StandardError
+                   false
+                 end
 
-          next unless name.present? &&
-                      !update_writein(@description, name, reader, writer, admin)
+        next unless name.present? &&
+                    !update_writein(@description, name, reader, writer, admin)
 
-          @data << { name: name, reader: reader, writer: writer,
-                     admin: admin }
-          flash_error(:runtime_description_user_not_found.t(name: name))
-          done = false
-        end
-
-        # Were any changes made?
-        new_readers = @description.reader_groups.sort_by(&:id)
-        new_writers = @description.writer_groups.sort_by(&:id)
-        new_admins  = @description.admin_groups.sort_by(&:id)
-        if (old_readers != new_readers) ||
-           (old_writers != new_writers) ||
-           (old_admins != new_admins)
-
-          # Give feedback to assure user that their changes were made.
-          flash_description_changes(old_readers, new_readers, :reader)
-          flash_description_changes(old_writers, new_writers, :writer)
-          flash_description_changes(old_admins,  new_admins,  :admin)
-
-          # Keep the "public" flag updated.
-          public = @description.reader_groups.include?(UserGroup.all_users)
-          if @description.public != public
-            @description.public = public
-            @description.save
-          end
-
-          @description.parent.log(:log_changed_permissions,
-                                  user: @user.login, touch: false,
-                                  name: @description.unique_partial_format_name)
-        else
-          flash_notice(:runtime_description_adjust_permissions_no_changes.t)
-        end
+        @data << { name: name, reader: reader, writer: writer,
+                   admin: admin }
+        flash_error(:runtime_description_user_not_found.t(name: name))
+        done = false
       end
 
-      if done
-        redirect_with_query(action: @description.show_action,
-                            id: @description.id)
+      # Were any changes made?
+      new_readers = @description.reader_groups.sort_by(&:id)
+      new_writers = @description.writer_groups.sort_by(&:id)
+      new_admins  = @description.admin_groups.sort_by(&:id)
+      if (old_readers != new_readers) ||
+         (old_writers != new_writers) ||
+         (old_admins != new_admins)
 
-      # Gather list of all the groups, authors, editors and owner.
-      # If the user wants more they can write them in.
+        # Give feedback to assure user that their changes were made.
+        flash_description_changes(old_readers, new_readers, :reader)
+        flash_description_changes(old_writers, new_writers, :writer)
+        flash_description_changes(old_admins,  new_admins,  :admin)
+
+        # Keep the "public" flag updated.
+        public = @description.reader_groups.include?(UserGroup.all_users)
+        if @description.public != public
+          @description.public = public
+          @description.save
+        end
+
+        @description.parent.log(:log_changed_permissions,
+                                user: @user.login, touch: false,
+                                name: @description.unique_partial_format_name)
       else
-        @groups = (
-          [UserGroup.all_users] +
-          @description.admin_groups.sort_by(&:name) +
-          @description.writer_groups.sort_by(&:name) +
-          @description.reader_groups.sort_by(&:name) +
-          [UserGroup.reviewers]
-        ) + (
-          [@description.user] +
-          @description.authors.sort_by(&:login) +
-          @description.editors.sort_by(&:login) +
-          [@user]
-        ).map { |user| UserGroup.one_user(user) }
-        @groups.uniq!
-        @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
-                  @groups.select { |g| g.name.match(/^user \d+$/) }
+        flash_notice(:runtime_description_adjust_permissions_no_changes.t)
       end
+    end
+
+    if done
+      redirect_with_query(action: @description.show_action,
+                          id: @description.id)
+
+    # Gather list of all the groups, authors, editors and owner.
+    # If the user wants more they can write them in.
+    else
+      @groups = (
+        [UserGroup.all_users] +
+        @description.admin_groups.sort_by(&:name) +
+        @description.writer_groups.sort_by(&:name) +
+        @description.reader_groups.sort_by(&:name) +
+        [UserGroup.reviewers]
+      ) + (
+        [@description.user] +
+        @description.authors.sort_by(&:login) +
+        @description.editors.sort_by(&:login) +
+        [@user]
+      ).map { |user| UserGroup.one_user(user) }
+      @groups.uniq!
+      @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
+                @groups.select { |g| g.name.match(/^user \d+$/) }
     end
   end
 
@@ -408,7 +407,7 @@ module DescriptionControllerHelpers
   def merge_description_notes(src, dest)
     src_notes  = src.all_notes
     dest_notes = dest.all_notes
-    for f in src_notes.keys
+    src_notes.each_key do |f|
       if dest_notes[f].blank?
         dest_notes[f] = src_notes[f]
       elsif src_notes[f].present?
@@ -633,7 +632,7 @@ module DescriptionControllerHelpers
   # Update the permissions of a given type for the list of pre-filled-in
   # groups.
   def update_groups(desc, type, groups)
-    for id, val in groups
+    groups.each do |id, val|
       if group = UserGroup.safe_find(id)
         update_group(desc, type, group, (val == "1"))
       else
@@ -656,11 +655,11 @@ module DescriptionControllerHelpers
   # Throw up some flash notices to reassure user that we did in fact make the
   # changes they wanted us to make.
   def flash_description_changes(old_groups, new_groups, type)
-    for group in new_groups - old_groups
+    (new_groups - old_groups).each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_added_#{type}".t(name: name))
     end
-    for group in old_groups - new_groups
+    (old_groups - new_groups).each do |group|
       name = group_name(group)
       flash_notice(:"runtime_description_removed_#{type}".t(name: name))
     end
@@ -689,7 +688,7 @@ module DescriptionControllerHelpers
       result = true
 
       # Copy over all non-blank descriptive fields.
-      for f, val in src_notes
+      src_notes.each do |f, val|
         dest.send("#{f}=", val) if val.present?
       end
 
