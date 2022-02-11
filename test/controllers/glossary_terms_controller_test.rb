@@ -10,6 +10,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   # ***** index *****
   def test_index
+    login
     get(:index)
 
     assert_response(:success)
@@ -29,6 +30,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     prior_version_path = show_past_glossary_term_path(
       term.id, version: term.version - 1
     )
+    login
     get(:show, params: { id: term.id })
 
     assert_response(:success)
@@ -303,6 +305,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_show_past
     term = glossary_terms(:square_glossary_term)
     version = term.versions.first # oldest version
+    login
     get(:show_past, params: { id: term.id, version: version.version })
 
     assert_response(:success)
