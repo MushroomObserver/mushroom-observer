@@ -4,22 +4,26 @@ require("test_helper")
 
 class CommentControllerTest < FunctionalTestCase
   def test_list_comments
+    login
     get_with_dump(:list_comments)
     assert_template("list_comments")
   end
 
   def test_show_comment
+    login
     get_with_dump(:show_comment,
                   id: comments(:minimal_unknown_obs_comment_1).id)
     assert_template("show_comment")
   end
 
   def test_show_comments_for_user
+    login
     get_with_dump(:show_comments_for_user, id: rolf.id)
     assert_template("list_comments")
   end
 
   def test_show_comments_by_user
+    login
     get_with_dump(:show_comments_by_user, id: rolf.id)
     assert_redirected_to(action: "show_comment",
                          id: comments(:minimal_unknown_obs_comment_1).id,
