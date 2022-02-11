@@ -12,9 +12,11 @@ module Mutations
     def check_logged_in!
       return if context[:current_user]
 
-      raise(GraphQL::ExecutionError.new(
-              "You need to login to perform this action"
-            ))
+      raise(
+        GraphQL::ExecutionError.new(
+          "You need to login to perform this action"
+        )
+      )
     end
 
     def check_admin!
