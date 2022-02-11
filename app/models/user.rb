@@ -547,7 +547,7 @@ class User < AbstractModel
 
   def self.token_in_admin_mode?(auth_header)
     token_hash = User.decrypt_token_hash(auth_header)
-    raise("Token missing key") unless token_hash.has_key?("in_admin_mode")
+    raise("Token missing key") unless token_hash.key?("in_admin_mode")
 
     token_hash["in_admin_mode"]
   end
