@@ -18,6 +18,35 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
     "{ visitor { login }, inAdminMode }"
   end
 
+  def invalid_query_string
+    "{ nonsense }"
+  end
+
+  def invalid_query_variable
+    "{ user( nonsense: 31 ) }"
+  end
+
+  def test_invalid_query_string
+    post(graphql_path,
+         params: { query: invalid_query_string },
+         headers: { "User-Agent" => "iPadApp" })
+
+    json_response = JSON.parse(@response.body)
+    assert_equal("Field 'nonsense' doesn't exist on type 'Query'",
+                 json_response["errors"][0]["message"], "Field does not exist")
+  end
+
+  def test_invalid_query_variable
+    post(graphql_path,
+         params: { query: invalid_query_variable },
+         headers: { "User-Agent" => "iPadApp" })
+
+    json_response = JSON.parse(@response.body)
+    assert_equal("selectionMismatch",
+                 json_response["errors"][0]["extensions"]["code"],
+                 "Variable 'nonsense' does not exist for field 'user'")
+  end
+
   # Whether or not the controller correctly figures out :current_user
   # Note this also tests the Visitor query
   # https://graphql-ruby.org/testing/integration_tests.html
