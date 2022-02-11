@@ -34,6 +34,11 @@ class UserTest < UnitTestCase
     assert_not(u.save)
     assert(u.errors[:password].any?)
 
+    u.password = "unconfirmed_password"
+    u.password_confirmation = ""
+    assert_not(u.save)
+    assert(u.errors[:password].any?)
+
     # This is allowed now to let API create users without a password chosen yet.
     u.password = u.password_confirmation = "bobs_secure_password"
     assert(u.save)

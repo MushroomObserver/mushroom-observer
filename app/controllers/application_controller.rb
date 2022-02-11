@@ -178,12 +178,11 @@ class ApplicationController < ActionController::Base
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true unless browser.bot?
-    return true if Robots.allowed?(
-      controller: params[:controller],
-      action: params[:action],
-      ua: browser.ua,
-      ip: request.remote_ip
-    )
+    return true if Robots.authorized?(browser.ua) &&
+                   Robots.action_allowed?(
+                     controller: params[:controller],
+                     action: params[:action]
+                   )
 
     render(plain: "Robots are not allowed on this page.",
            status: :forbidden,
@@ -262,7 +261,7 @@ class ApplicationController < ActionController::Base
 
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by_locale(I18n.locale)
+    @language = Language.find_by(locale: I18n.locale)
     if @user && @language &&
        (!@language.official || reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -570,7 +569,7 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    lang = Language.find_by_locale(specified_locale) || Language.official
+    lang = Language.find_by(locale: specified_locale) || Language.official
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
@@ -665,7 +664,7 @@ class ApplicationController < ActionController::Base
   # Extract locales and weights, creating map from locale to weight.
   def map_locales_to_weights(locales)
     locales.split(",").each_with_object({}) do |term, loc_wts|
-      next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+      next unless "#{term};q=1" =~ /^(.+?);q=([^;]+)/
 
       loc_wts[Regexp.last_match(1)] = (begin
                                          Regexp.last_match(2).to_f

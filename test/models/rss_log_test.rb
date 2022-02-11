@@ -12,27 +12,53 @@ class RssLogTest < UnitTestCase
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
-      assert(rss_log.url.starts_with?("#{model(type).show_controller}/#{id}"),
+      assert(rss_log.url.include?("#{model(type).show_controller}/#{id}"),
              "rss_log.url incorrect for #{model(type)}")
     end
   end
 
   def test_orphan_title
     log = rss_logs(:location_rss_log)
-    assert_equal(log.notes, log.orphan_title)
-
-    # replace normal top line of log with yyyymmddhhmmss
-    log.notes = Time.zone.now.strftime("%Y%m%d%I%M%S")
+    # If log doesn't look orphaned, it should return generic "deleted item".
     assert_equal(:rss_log_of_deleted_item.l, log.orphan_title)
+
+    # When it is orphaned, it should put the target title in the first line
+    # of the log, and that's what orphan_title should return.
+    log.update(notes: "Target Title\n#{log.notes}")
+    assert_equal("Target Title", log.orphan_title)
   end
 
-  def test_details
+  def test_detail_for_complexly_created_observation
+    # Observation is created then an image is immediately uploaded.
+    # We want it to return "observation created" not "image added".
     log = rss_logs(:observation_rss_log)
     detail = log.detail
-    log_decode = RssLog.decode(log.notes)
     assert_equal(:rss_created_at.t(type: :observation), detail)
-    # Check that it's still getting the most recent updated time
-    assert_equal(Time.parse("20060302211400").in_time_zone, log_decode[2])
+  end
+
+  def test_detail_for_destroyed_object
+    User.current = users(:dick)
+    obs = observations(:detailed_unknown_obs)
+    log = obs.rss_log
+    assert_not_nil(log)
+    assert_false(log.orphan?)
+    obs.destroy!
+    log.reload
+    assert_true(log.orphan?)
+    assert_equal(:log_observation_destroyed.t(user: "dick"), log.detail)
+  end
+
+  def test_detail_for_merged_location
+    User.current = users(:mary)
+    loc1 = locations(:albion)
+    loc2 = locations(:mitrula_marsh)
+    log = loc1.rss_log
+    assert_false(log.orphan?)
+    loc2.merge(loc1)
+    log.reload
+    assert_true(log.orphan?)
+    assert_equal(:log_location_merged.t(that: loc2.display_name, user: "mary"),
+                 log.detail)
   end
 
   # ---------- helpers ---------------------------------------------------------
