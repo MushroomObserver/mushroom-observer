@@ -235,17 +235,17 @@ class ProjectController < ApplicationController
   # Outputs: none
   def destroy_project
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if !check_permission!(@project)
-        redirect_with_query(action: "show_project", id: @project.id)
-      elsif !@project.destroy
-        flash_error(:destroy_project_failed.t)
-        redirect_with_query(action: "show_project", id: @project.id)
-      else
-        @project.log_destroy
-        flash_notice(:destroy_project_success.t)
-        redirect_with_query(action: :index_project)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    if !check_permission!(@project)
+      redirect_with_query(action: "show_project", id: @project.id)
+    elsif !@project.destroy
+      flash_error(:destroy_project_failed.t)
+      redirect_with_query(action: "show_project", id: @project.id)
+    else
+      @project.log_destroy
+      flash_notice(:destroy_project_success.t)
+      redirect_with_query(action: :index_project)
     end
   end
 
@@ -265,18 +265,17 @@ class ProjectController < ApplicationController
   def admin_request
     sender = @user
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if request.method == "POST"
-        subject = params[:email][:subject]
-        content = params[:email][:content]
-        for receiver in @project.admin_group.users
-          AdminEmail.build(sender, receiver, @project,
-                           subject, content).deliver_now
-        end
-        flash_notice(:admin_request_success.t(title: @project.title))
-        redirect_with_query(action: :show_project, id: @project.id)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return unless request.method == "POST"
+
+    subject = params[:email][:subject]
+    content = params[:email][:content]
+    for receiver in @project.admin_group.users
+      AdminEmail.build(sender, receiver, @project,
+                       subject, content).deliver_now
     end
+    flash_notice(:admin_request_success.t(title: @project.title))
+    redirect_with_query(action: :show_project, id: @project.id)
   end
 
   # View that lists all users with links to add each as a member.

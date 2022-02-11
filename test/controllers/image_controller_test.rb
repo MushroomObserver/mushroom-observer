@@ -464,9 +464,8 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.reload.rss_log)
     assert(obs.rss_log.notes.include?("log_image_updated"))
     assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
-    image_num = RssLog.escape("Image ##{image.id}")
     assert(
-      obs.rss_log.notes.include?("name #{image_num}")
+      obs.rss_log.notes.include?("name Image%20##{image.id}")
     )
     assert_equal(new_name, image.reload.original_name)
   end
@@ -748,10 +747,10 @@ class ImageControllerTest < FunctionalTestCase
   def test_bulk_image_vote_anonymity_thingy
     img1 = images(:in_situ_image)
     img2 = images(:commercial_inquiry_image)
-    img1.change_vote(mary, 1, false)
-    img2.change_vote(mary, 2, true)
-    img1.change_vote(rolf, 3, true)
-    img2.change_vote(rolf, 4, false)
+    img1.change_vote(mary, 1, anon: false)
+    img2.change_vote(mary, 2, anon: true)
+    img1.change_vote(rolf, 3, anon: true)
+    img2.change_vote(rolf, 4, anon: false)
 
     assert_not(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)

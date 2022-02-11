@@ -3901,11 +3901,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
   end
 
-  def test_robot_permissions
-    @request.user_agent = "Googlebot"
-    get(:intro)
+  def test_whitelisted_robot_permissions
+    @request.user_agent =
+      "Mozilla/5.0 (compatible; Googlebot/2.1; " \
+      "+http://www.google.com/bot.html)"
+    get(:intro) # authorized robots and anonymous users are allowed here
     assert_equal(200, @response.status)
     get(:textile)
+    assert_equal(403, @response.status)
+  end
+
+  def test_unauthorized_robot_permissions
+    @request.user_agent =
+      "Mozilla/5.0 (compatible; Baiduspider/2.0; "\
+      "+http://www.baidu.com/search/spider.html)"
+    get(:intro) # only authorized robots and anonymous users are allowed here
     assert_equal(403, @response.status)
   end
 

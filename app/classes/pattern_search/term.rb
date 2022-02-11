@@ -74,7 +74,8 @@ module PatternSearch
     def parse_list_of_names
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           ::Name.safe_find(val) ||
             raise(BadNameError.new(var: var, val: val))
         else
@@ -87,7 +88,8 @@ module PatternSearch
     def parse_list_of_herbaria
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
@@ -101,7 +103,8 @@ module PatternSearch
     def parse_list_of_locations
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
@@ -115,7 +118,8 @@ module PatternSearch
     def parse_list_of_projects
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
@@ -128,7 +132,8 @@ module PatternSearch
     def parse_list_of_species_lists
       make_sure_values_not_empty!
       vals.map do |val|
-        if /^\d+$/.match?(val)
+        # cop gives false positive
+        if /^\d+$/.match?(val) # rubocop:disable Style/GuardClause
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else

@@ -158,8 +158,10 @@ class Name < AbstractModel
 
     log ||= :log_name_updated
     args = { touch: altered? }.merge(args)
+    return false unless save
+
     log(log, args)
-    save
+    true
   end
 
   # A common mistake is capitalizing the species epithet. If the second word

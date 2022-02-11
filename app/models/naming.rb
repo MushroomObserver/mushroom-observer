@@ -157,59 +157,59 @@ class Naming < AbstractModel
 
   # Send email notifications after creating or changing the Name.
   def create_emails
-    if @name_changed
-      @name_changed = false
+    return unless @name_changed
 
-      # Send email to people interested in this name.
-      @initial_name_id = name_id
-      taxa = name.approved_name.all_parents
-      taxa.push(name)
-      taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
-      done_user = {}
-      flavor = Notification.flavors[:name]
-      taxa.each do |taxon|
-        Notification.where(flavor: flavor, obj_id: taxon.id).find_each do |n|
-          next unless (n.user != user) && !done_user[n.user_id] &&
-                      (!n.require_specimen || observation.specimen)
+    @name_changed = false
 
-          QueuedEmail::NameTracking.create_email(n, self)
-          done_user[n.user_id] = true
-        end
+    # Send email to people interested in this name.
+    @initial_name_id = name_id
+    taxa = name.approved_name.all_parents
+    taxa.push(name)
+    taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
+    done_user = {}
+    flavor = Notification.flavors[:name]
+    taxa.each do |taxon|
+      Notification.where(flavor: flavor, obj_id: taxon.id).find_each do |n|
+        next unless (n.user != user) && !done_user[n.user_id] &&
+                    (!n.require_specimen || observation.specimen)
+
+        QueuedEmail::NameTracking.create_email(n, self)
+        done_user[n.user_id] = true
       end
+    end
 
-      # Send email to people interested in this observation.
-      if obs = observation
-        owner  = obs.user
-        sender = user
-        recipients = []
+    # Send email to people interested in this observation.
+    return unless (obs = observation)
 
-        # Send notification to owner if they want.
-        recipients.push(owner) if owner&.email_observations_naming
+    owner  = obs.user
+    sender = user
+    recipients = []
 
-        # Send to people who have registered interest in this observation.
-        # Also remove everyone who has explicitly said they are NOT interested.
-        for interest in obs.interests
-          if interest.state
-            recipients.push(interest.user)
-          else
-            recipients.delete(interest.user)
-          end
-        end
+    # Send notification to owner if they want.
+    recipients.push(owner) if owner&.email_observations_naming
 
-        # Also send to people who registered positive interest in this name.
-        # (Don't want *disinterest* in name overriding
-        # interest in the observation, say.)
-        for taxon in taxa
-          for interest in taxon.interests
-            recipients.push(interest.user) if interest.state
-          end
-        end
-
-        # Send to everyone (except the person who created the naming!)
-        for recipient in recipients.uniq - [sender]
-          QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
-        end
+    # Send to people who have registered interest in this observation.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    for interest in obs.interests
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
       end
+    end
+
+    # Also send to people who registered positive interest in this name.
+    # (Don't want *disinterest* in name overriding
+    # interest in the observation, say.)
+    for taxon in taxa
+      for interest in taxon.interests
+        recipients.push(interest.user) if interest.state
+      end
+    end
+
+    # Send to everyone (except the person who created the naming!)
+    for recipient in recipients.uniq - [sender]
+      QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
     end
   end
 
@@ -309,10 +309,10 @@ class Naming < AbstractModel
   end
 
   def clean_votes(new_name, user)
-    if new_name != name
-      votes.each do |vote|
-        vote.destroy if vote.user_id != user.id
-      end
+    return unless new_name != name
+
+    votes.each do |vote|
+      vote.destroy if vote.user_id != user.id
     end
   end
 

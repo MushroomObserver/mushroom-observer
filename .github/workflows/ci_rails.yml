@@ -67,6 +67,8 @@ jobs:
 
     # And finally we can run the test suite
     - name: Run tests
+      env:
+        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: bundle exec rails test
 
     # https://github.com/marketplace/actions/coveralls-github-action

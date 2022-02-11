@@ -207,7 +207,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Location.safe_find(loc_id))
-    assert_equal(:location, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_name_rss_log_life_cycle
@@ -254,7 +254,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_name_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Name.safe_find(name_id))
-    assert_equal(:name, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_observation_rss_log_life_cycle
@@ -301,7 +301,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_observation_destroyed, rss_log)
     # assert_in_delta(time, rss_log.updated_at, 1.second)
     assert_nil(Observation.safe_find(obs_id))
-    assert_equal(:observation, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_project_rss_log_life_cycle
@@ -353,7 +353,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_project_destroyed, rss_log)
     assert(proj.rss_log.updated_at > time)
     assert_nil(Project.safe_find(proj_id))
-    assert_equal(:project, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_species_list_rss_log_life_cycle
@@ -394,7 +394,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_species_list_destroyed, rss_log)
     assert_nil(SpeciesList.safe_find(spl_id))
-    assert_equal(:species_list, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   # -------------------------------------------------------------------

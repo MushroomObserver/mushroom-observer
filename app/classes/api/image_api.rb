@@ -96,14 +96,14 @@ class API
 
     def after_create(img)
       strip = @observations.any?(&:gps_hidden)
-      img.process_image(strip) || raise(ImageUploadFailed.new(img))
+      img.process_image(strip: strip) || raise(ImageUploadFailed.new(img))
       @observations.each do |obs|
         obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
-        obs.log_create_image(img)
+        img.log_create_for(obs)
       end
       return unless @vote
 
-      img.change_vote(@user, @vote, (@user.votes_anonymous == :yes))
+      img.change_vote(@user, @vote, anon: @user.votes_anonymous == :yes)
     end
 
     ############################################################################
