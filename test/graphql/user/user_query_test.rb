@@ -102,8 +102,8 @@ module Queries
       user_result = result["data"]["user"]
 
       # Make sure the query worked
-      assert_equal(user.email, user_result["email"])
       assert_equal(user.name, user_result["name"])
+      assert_equal(user.email, user_result["email"])
     end
 
     # Note: https://graphql-ruby.org/authorization/overview.html

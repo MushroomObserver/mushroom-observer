@@ -2,7 +2,7 @@
 
 # This file defines all possible graphql queries (and their resolvers)
 require("graphql/batch")
-require("loaders/record_loader")
+# require("loaders/record_loader")
 
 module Types
   class QueryType < Types::BaseObject
