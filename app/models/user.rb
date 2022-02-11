@@ -517,11 +517,9 @@ class User < AbstractModel
 
   # Create a Rails native token (used for authentication in GraphQL API)
   def create_graphql_token
-    if verified
-      User.crypt.encrypt_and_sign(id.to_s)
-    else
-      raise("User not verified")
-    end
+    raise("User not verified") unless verified
+
+    User.crypt.encrypt_and_sign(id.to_s)
   end
 
   # param is an http_auth_header
@@ -529,11 +527,9 @@ class User < AbstractModel
     user_id = User.crypt.decrypt_and_verify(auth_header).to_i
     user = safe_find(user_id)
 
-    if user.verified
-      user
-    else
-      raise("User not verified")
-    end
+    raise("User not verified") unless user.verified
+
+    user
   end
 
   def self.crypt
