@@ -195,7 +195,7 @@ class ApplicationController < ActionController::Base
   def redirect_anonymous_users
     return true if browser.bot? # recognized bots are handled elsewhere
     return true if anonymous_user_allowed?
-    # return true unless user_anonymous?
+    return true if verified_user_logged_in?
 
     return redirect_to(account_login_path)
   end
@@ -225,6 +225,10 @@ class ApplicationController < ActionController::Base
      observer_how_to_use_path,
      observer_ask_webmaster_question_path].
       include?("/#{params[:controller]}/#{params[:action]}")
+  end
+
+  def verified_user_logged_in?
+    session_user&.verified?
   end
 
   public ##########
