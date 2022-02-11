@@ -3,7 +3,7 @@
 module Queries
   class Visitor < Queries::BaseQuery
     description "get the current logged in visitor"
-    type Types::Models::UserType, null: false
+    type Types::Models::UserType, null: true
 
     # A very basic query for the :current_user, if exists
     def resolve

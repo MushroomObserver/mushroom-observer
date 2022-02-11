@@ -13,8 +13,8 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      current_user: current_user
-      # in_admin_mode: in_admin_mode
+      current_user: current_user,
+      in_admin_mode?: in_admin_mode?
     }
     result = MushroomObserverSchema.execute(
       query,
@@ -54,9 +54,11 @@ class GraphqlController < ApplicationController
     nil
   end
 
-  # def in_admin_mode
-  #   ::User.token_in_admin_mode?(http_auth_header)
-  # end
+  def in_admin_mode?
+    ::User.token_in_admin_mode?(http_auth_header)
+  rescue ActiveSupport::MessageVerifier::InvalidSignature
+    nil
+  end
 
   # def autologin
   #   token_hash = ::User.decrypt_token_hash(http_auth_header)

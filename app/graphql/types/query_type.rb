@@ -66,9 +66,11 @@ module Types
     field :user, resolver: Queries::User
     # field :users, Types::Models::UserType.connection_type, null: false,
     #       resolver: Queries::Users
-    field :visitor, resolver: Queries::Visitor
     # field :vote, resolver: Queries::Vote
     # field :votes, resolver: Resolvers::Votes
+
+    field :visitor, resolver: Queries::Visitor
+    field :in_admin_mode, resolver: Queries::Admin
 
     # def herbaria(**_args)
     #   Herbarium.order("created_at DESC")

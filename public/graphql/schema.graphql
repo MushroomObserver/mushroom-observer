@@ -8,6 +8,11 @@ type Mutation {
 
 type Query {
   """
+  Is the current logged in visitor in admin mode?
+  """
+  inAdminMode: Boolean!
+
+  """
   get user by argument
   """
   user(email: String, id: Int, login: String, name: String): User!
@@ -15,7 +20,7 @@ type Query {
   """
   get the current logged in visitor
   """
-  visitor: User!
+  visitor: User
 }
 
 type User {

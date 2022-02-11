@@ -524,9 +524,8 @@ class User < AbstractModel
   end
 
   def create_admin_token
-    raise("User not an admin") unless admin
-
-    token_hash = { user_id: id, in_admin_mode: true }
+    # if they're not an admin, just return false and keep the token
+    token_hash = { user_id: id, in_admin_mode: admin }
     User.encrypted_token(token_hash)
   end
 
@@ -550,7 +549,7 @@ class User < AbstractModel
     token_hash = User.decrypt_token_hash(auth_header)
     raise("Token missing key") unless token_hash.has_key?("in_admin_mode")
 
-    token_hash["in_admin_mode"].to_boolean
+    token_hash["in_admin_mode"]
   end
 
   def self.decrypt_token_hash(auth_header)
