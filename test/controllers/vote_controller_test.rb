@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# tests of Herbarium controller
+# tests of Votes (Confidence levels) of Proposed Names
 class VoteControllerTest < FunctionalTestCase
   # ----------------------------
   #  Test voting.
@@ -141,6 +141,7 @@ class VoteControllerTest < FunctionalTestCase
   end
 
   def test_show_votes
+    login
     # First just make sure the page displays.
     get_with_dump(:show_votes, id: namings(:coprinus_comatus_naming).id)
     assert_template(:show_votes, partial: "_show_votes")
