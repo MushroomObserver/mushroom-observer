@@ -221,10 +221,14 @@ class ApplicationController < ActionController::Base
 
   def action_ok_for_anonymous_user?
     # Anonymous user can access these controller/action combinations
-    [observer_intro_path,
-     observer_how_to_use_path,
-     observer_ask_webmaster_question_path].
-      include?("/#{params[:controller]}/#{params[:action]}")
+    [
+      observer_ask_webmaster_question_path,
+      observer_how_to_use_path,
+      observer_intro_path,
+      observer_turn_javascript_nil_path,
+      observer_turn_javascript_off_path,
+      observer_turn_javascript_on_path
+    ].include?("/#{params[:controller]}/#{params[:action]}")
   end
 
   def verified_user_logged_in?
