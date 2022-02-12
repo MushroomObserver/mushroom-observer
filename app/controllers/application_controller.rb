@@ -215,7 +215,8 @@ class ApplicationController < ActionController::Base
          ajax
          articles
          policy
-         publications].
+         publications
+         support].
         include?(params[:controller])
   end
 
