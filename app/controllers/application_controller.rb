@@ -197,6 +197,7 @@ class ApplicationController < ActionController::Base
     return true if anonymous_user_allowed?
     return true if verified_user_logged_in?
 
+    store_location
     return redirect_to(account_login_path)
   end
 

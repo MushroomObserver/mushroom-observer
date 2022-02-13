@@ -118,14 +118,13 @@ class AmateurTest < IntegrationTestCase
     message2 = "This may be _Xylaria polymorpha_, no?"
 
     # Start by showing the observation...
+    login("katrina")
     get("/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
 
     click(label: "Add Comment")
-    assert_template("account/login")
-    login("katrina")
     assert_template("comment/add_comment")
 
     # (Make sure the form is for the correct object!)
