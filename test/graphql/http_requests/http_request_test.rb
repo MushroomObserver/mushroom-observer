@@ -91,6 +91,24 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
                  "User not an admin")
   end
 
+  # Refuse a token to unverified user
+  def test_check_unverified_user_token
+    user = users(:unverified)
+    token = Token.new(user_id: user.id,
+                      in_admin_mode: user.admin).encrypt_to_header
+
+    post(graphql_path,
+         params: { query: query_string },
+         headers: headers_with_auth(token))
+
+    json_response = JSON.parse(@response.body)
+
+    assert_nil(json_response["data"]["visitor"],
+               "Unverified user is not allowed as current_user")
+    assert_equal(false, json_response["data"]["admin"],
+                 "User not an admin")
+  end
+
   # Whether or not the controller correctly figures out :in_admin_mode
   def test_check_non_admin_token
     # This time, add some authentication to the HTTP request.

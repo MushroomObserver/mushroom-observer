@@ -42,7 +42,8 @@ class GraphqlController < ApplicationController
 
     user = User.safe_find(token["user_id"])
     raise("User not found") unless user
-    raise("User not verified") unless user.verified
+    # Should we raise an error here? Silently giving no current_user:
+    return unless user.verified
 
     user
   end
