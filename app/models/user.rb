@@ -145,9 +145,6 @@
 #  authenticate::       Verify login + password.
 #  auth_code::          Code used to verify autologin cookie and POSTs in API.
 #  change_password::    Change password (on an existing record).
-#  create_graphql_token:: Generate a native Rails encrypted token for user.id
-#  get_from_token::     Find a User by decrypting token
-#  crypt::              Uses Rails.application.credentials.secret_key_base
 #
 #  ==== Interests
 #  interest_in::        Return state of User's interest in a given object.
