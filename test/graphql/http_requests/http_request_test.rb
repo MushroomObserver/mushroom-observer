@@ -67,13 +67,12 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   end
 
   def test_valid_query_variables
-    # puts(valid_variables)
     post(graphql_path,
          params: { query: query_with_variables, variables: valid_variables },
          headers: @headers)
 
     json_response = JSON.parse(@response.body)
-    assert_equal("rolf", json_response["data"]["user"]["login"],
+    assert_equal(users(:rolf).id, json_response["data"]["user"]["id"],
                  "Variable correctly parsed for query")
   end
 
