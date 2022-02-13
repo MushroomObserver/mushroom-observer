@@ -332,17 +332,4 @@ class UserTest < UnitTestCase
     assert(u.invalid?,
            "Notes template with duplication headings should be invalid")
   end
-
-  def test_graphql_token
-    token = rolf.create_graphql_token
-    user = User.get_from_token(token)
-    assert_equal(rolf.id, user.id, "Token for user created and decrypted")
-  end
-
-  def test_unverified_graphql_token
-    assert_raises("User not verified") do
-      token = users(:unverified).create_graphql_token
-      User.get_from_token(token)
-    end
-  end
 end
