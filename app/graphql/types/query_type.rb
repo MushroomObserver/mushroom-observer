@@ -70,7 +70,7 @@ module Types
     # field :votes, resolver: Resolvers::Votes
 
     field :visitor, resolver: Queries::Visitor
-    field :in_admin_mode, resolver: Queries::Admin
+    field :admin, resolver: Queries::Admin
 
     # def herbaria(**_args)
     #   Herbarium.order("created_at DESC")

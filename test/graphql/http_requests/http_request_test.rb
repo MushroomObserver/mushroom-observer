@@ -3,9 +3,14 @@
 require("test_helper")
 
 class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
-  # Need a user agent to get by MO's robot detector here. But neither
-  # setting request.header nor Capybara.page.driver.header works here
+  # Tests the GraphQL Controller and the most basic queries that reflect
+  # controller's `context` hash back to the JSON response, Visitor and Admin
+  # https://graphql-ruby.org/testing/integration_tests.html
+
+  # Setup: We need to set a user agent to get by MO's robot detector here.
+  # Neither setting request.header nor Capybara.page.driver.header works?
   # https://stackoverflow.com/questions/39096779/set-custom-user-agent-on-rails-testing
+
   # def setup
   #   Capybara.page.driver.header("User-Agent", "iPadApp")
   # end
@@ -15,15 +20,23 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   end
 
   def query_string
-    "{ visitor { login }, inAdminMode }"
+    "{ visitor { login }, admin }"
   end
 
   def invalid_query_string
     "{ nonsense }"
   end
 
-  def invalid_query_variable
-    "{ user( nonsense: 31 ) }"
+  def query_with_variable
+    "query findRolf($login: String!){ user( login: $login ){ login, id } }"
+  end
+
+  def invalid_variables
+    { "login" => "0" }
+  end
+
+  def valid_variables
+    { "login" => users(:rolf).login }
   end
 
   def test_invalid_query_string
@@ -38,18 +51,26 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
   def test_invalid_query_variable
     post(graphql_path,
-         params: { query: invalid_query_variable },
+         params: { query: query_with_variable, variables: invalid_variables },
          headers: { "User-Agent" => "iPadApp" })
 
     json_response = JSON.parse(@response.body)
-    assert_equal("selectionMismatch",
-                 json_response["errors"][0]["extensions"]["code"],
-                 "Variable 'nonsense' does not exist for field 'user'")
+    assert_nil(json_response["data"], "Wrong variables")
+  end
+
+  def test_valid_query_variable
+    # puts(valid_variables)
+    post(graphql_path,
+         params: { query: query_with_variable, variables: valid_variables },
+         headers: { "User-Agent" => "iPadApp" })
+
+    json_response = JSON.parse(@response.body)
+    assert_equal("rolf", json_response["data"]["user"]["login"],
+                 "Variable correctly parsed for query")
   end
 
   # Whether or not the controller correctly figures out :current_user
-  # Note this also tests the Visitor query
-  # https://graphql-ruby.org/testing/integration_tests.html
+  # Note this also tests the Visitor and Admin queries
   def test_check_no_token
     post(graphql_path,
          params: { query: query_string },
@@ -59,12 +80,17 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     assert_nil(json_response["data"]["visitor"],
                "Unauthenticated requests have no current_user")
+    assert_equal(false, json_response["data"]["admin"],
+                 "User not an admin")
   end
 
-  def test_check_graphql_token
+  # Whether or not the controller correctly figures out :in_admin_mode
+  def test_check_non_admin_token
     # This time, add some authentication to the HTTP request.
+    # Rolf is not an admin.
     rolf = users(:rolf)
-    token = rolf.create_graphql_token
+    token = Token.new(user_id: rolf.id,
+                      in_admin_mode: rolf.admin).encrypt_to_header
 
     post(graphql_path,
          params: { query: query_string },
@@ -75,28 +101,14 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     assert_equal(rolf.login, json_response["data"]["visitor"]["login"],
                  "Authenticated requests load the current_user")
-  end
-
-  def test_check_non_admin_token
-    # Rolf is not an admin
-    rolf = users(:rolf)
-    token = rolf.create_admin_token
-
-    post(graphql_path,
-         params: { query: query_string },
-         headers: { "User-Agent" => "iPadApp",
-                    "Authorization" => "Bearer #{token}" })
-
-    json_response = JSON.parse(@response.body)
-
-    assert_equal(false, json_response["data"]["inAdminMode"],
+    assert_equal(false, json_response["data"]["admin"],
                  "User not an admin")
   end
 
   def test_check_admin_token
-    # Rolf is not an admin
     bill = users(:admin)
-    token = bill.create_admin_token
+    token = Token.new(user_id: bill.id,
+                      in_admin_mode: bill.admin).encrypt_to_header
 
     post(graphql_path,
          params: { query: query_string },
@@ -105,7 +117,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     json_response = JSON.parse(@response.body)
 
-    assert_equal(true, json_response["data"]["inAdminMode"],
+    assert_equal(true, json_response["data"]["admin"],
                  "Admin user is now in admin mode")
   end
 end

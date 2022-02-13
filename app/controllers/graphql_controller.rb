@@ -3,9 +3,10 @@
 class GraphqlController < ApplicationController
   # Note 22/02/10 - Nimmo
   # This controller is short but important.
-  # It parses the incoming request: headers for context (authentication)
-  # plus the graphql query, variables, and operationName.
-  #
+  # Parses an incoming request header to build a Context hash (authentication)
+  # and forwards that to the graphql Query, w/ Variables and Operation Name.
+  # Possible operation names: Query, Mutation, Union etc
+
   disable_filters
 
   def execute
@@ -34,8 +35,26 @@ class GraphqlController < ApplicationController
 
   # https://www.howtographql.com/graphql-ruby/4-authentication/
   # Decrypt the current user from token stored in the header (not the session)
+  # Note: There may not be a token!
   def current_user
-    ::User.get_from_token(http_auth_header)
+    return unless token.is_a?(Hash)
+    raise("Token missing user_id") unless token.key?("user_id")
+
+    user = User.safe_find(token["user_id"])
+    raise("User not found") unless user
+    raise("User not verified") unless user.verified
+
+    user
+  end
+
+  def in_admin_mode?
+    return false unless token.is_a?(Hash)
+
+    token["in_admin_mode"]
+  end
+
+  def token
+    ::Token.decrypt_from_header(http_auth_header).hash
   rescue ActiveSupport::MessageVerifier::InvalidSignature
     nil
   end
@@ -51,12 +70,6 @@ class GraphqlController < ApplicationController
       # raise(ArgumentError.new("Missing token"))
     end
 
-    nil
-  end
-
-  def in_admin_mode?
-    ::User.token_in_admin_mode?(http_auth_header)
-  rescue ActiveSupport::MessageVerifier::InvalidSignature
     nil
   end
 

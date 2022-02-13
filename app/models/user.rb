@@ -515,54 +515,6 @@ class User < AbstractModel
     save
   end
 
-  # Create a Rails native token (used for authentication in GraphQL API)
-  def create_graphql_token
-    raise("User not verified") unless verified
-
-    token_hash = { user_id: id, in_admin_mode: false }
-    User.encrypted_token(token_hash)
-  end
-
-  def create_admin_token
-    # if they're not an admin, just return false and keep the token
-    token_hash = { user_id: id, in_admin_mode: admin }
-    User.encrypted_token(token_hash)
-  end
-
-  def self.encrypted_token(token_hash)
-    token_json = JSON.generate(token_hash)
-    User.crypt.encrypt_and_sign(token_json)
-  end
-
-  # param is an http_auth_header
-  def self.get_from_token(auth_header)
-    token_hash = User.decrypt_token_hash(auth_header)
-    user = safe_find(token_hash["user_id"])
-    raise("User not found") unless user
-
-    raise("User not verified") unless user.verified
-
-    user
-  end
-
-  def self.token_in_admin_mode?(auth_header)
-    token_hash = User.decrypt_token_hash(auth_header)
-    raise("Token missing key") unless token_hash.key?("in_admin_mode")
-
-    token_hash["in_admin_mode"]
-  end
-
-  def self.decrypt_token_hash(auth_header)
-    token = User.crypt.decrypt_and_verify(auth_header)
-    JSON.parse(token)
-  end
-
-  def self.crypt
-    ActiveSupport::MessageEncryptor.new(
-      Rails.application.credentials.secret_key_base.byteslice(0..31)
-    )
-  end
-
   ##############################################################################
   #
   #  :section: Groups
