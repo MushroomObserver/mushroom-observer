@@ -22,11 +22,5 @@ module Queries
         ::User.find_by(name: args[:name])
       end
     end
-
-    # def resolve(id:)
-    #   ::User.find(id)
-    #   use this for associations:
-    #   RecordLoader.for(User).load(id)
-    # end
   end
 end
