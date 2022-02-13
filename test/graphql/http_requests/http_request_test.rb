@@ -11,9 +11,17 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   # Neither setting request.header nor Capybara.page.driver.header works?
   # https://stackoverflow.com/questions/39096779/set-custom-user-agent-on-rails-testing
 
-  # def setup
-  #   Capybara.page.driver.header("User-Agent", "iPadApp")
-  # end
+  def setup
+    @headers = { "User-Agent" => "iPadApp" }
+  end
+
+  def headers_with_auth(token)
+    return @headers unless token
+
+    headers = @headers
+    headers["Authorization"] = "Bearer #{token}"
+    headers
+  end
 
   def graphql_path
     "/graphql"
@@ -27,7 +35,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
     "{ nonsense }"
   end
 
-  def query_with_variable
+  def query_with_variables
     "query findRolf($login: String!){ user( login: $login ){ login, id } }"
   end
 
@@ -42,39 +50,39 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
   def test_invalid_query_string
     post(graphql_path,
          params: { query: invalid_query_string },
-         headers: { "User-Agent" => "iPadApp" })
+         headers: @headers)
 
     json_response = JSON.parse(@response.body)
     assert_equal("Field 'nonsense' doesn't exist on type 'Query'",
                  json_response["errors"][0]["message"], "Field does not exist")
   end
 
-  def test_invalid_query_variable
+  def test_invalid_query_variables
     post(graphql_path,
-         params: { query: query_with_variable, variables: invalid_variables },
-         headers: { "User-Agent" => "iPadApp" })
+         params: { query: query_with_variables, variables: invalid_variables },
+         headers: @headers)
 
     json_response = JSON.parse(@response.body)
     assert_nil(json_response["data"], "Wrong variables")
   end
 
-  def test_valid_query_variable
+  def test_valid_query_variables
     # puts(valid_variables)
     post(graphql_path,
-         params: { query: query_with_variable, variables: valid_variables },
-         headers: { "User-Agent" => "iPadApp" })
+         params: { query: query_with_variables, variables: valid_variables },
+         headers: @headers)
 
     json_response = JSON.parse(@response.body)
     assert_equal("rolf", json_response["data"]["user"]["login"],
                  "Variable correctly parsed for query")
   end
 
-  # Whether or not the controller correctly figures out :current_user
+  # Whether or not the controller correctly figures out no :current_user
   # Note this also tests the Visitor and Admin queries
   def test_check_no_token
     post(graphql_path,
          params: { query: query_string },
-         headers: { "User-Agent" => "iPadApp" })
+         headers: @headers)
 
     json_response = JSON.parse(@response.body)
 
@@ -94,8 +102,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     post(graphql_path,
          params: { query: query_string },
-         headers: { "User-Agent" => "iPadApp",
-                    "Authorization" => "Bearer #{token}" })
+         headers: headers_with_auth(token))
 
     json_response = JSON.parse(@response.body)
 
@@ -112,8 +119,7 @@ class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
 
     post(graphql_path,
          params: { query: query_string },
-         headers: { "User-Agent" => "iPadApp",
-                    "Authorization" => "Bearer #{token}" })
+         headers: headers_with_auth(token))
 
     json_response = JSON.parse(@response.body)
 

@@ -10,7 +10,7 @@ type Query {
   """
   Is the current logged in visitor in admin mode?
   """
-  inAdminMode: Boolean!
+  admin: Boolean!
 
   """
   get user by argument
