@@ -32,6 +32,7 @@ class StudentTest < IntegrationTestCase
     rolf_session.check_admin(url, gen_desc, project)
     katrina_session.check_another_student(url)
     dick_session.check_another_user(url)
+    lurker_session.login
     lurker_session.check_another_user(url)
   end
 
