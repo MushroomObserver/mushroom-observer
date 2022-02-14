@@ -6,6 +6,7 @@ require("test_helper")
 class ShowNameHelperTest < IntegrationTestCase
   # Prove that all these links appear under "Observations of"
   def test_links_to_observations_of
+    login
     # on ShowObservation page
     get("/name/show_name/#{names(:chlorophyllum_rachodes).id}")
     assert_match(:obss_of_this_name.l, response.body)
