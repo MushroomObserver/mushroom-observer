@@ -21,7 +21,7 @@ class Token
   end
 
   def self.crypt
-    @crypt ||= ActiveSupport::MessageEncryptor.new(
+    @@crypt ||= ActiveSupport::MessageEncryptor.new(
       Rails.application.credentials.secret_key_base.byteslice(0..31)
     )
   end
