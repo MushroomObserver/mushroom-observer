@@ -2,6 +2,8 @@
 
 module Types::Models
   class UserType < Types::BaseObject
+    implements Types::ImageUrls
+
     # NOTE: Rails: maybe migrate certain fields to non-nullable in the db
     field :id, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: true
@@ -103,39 +105,5 @@ module Types::Models
     # field :edited_locations, [Types::Models::LocationDescriptionType],
     #                          null: true
     # field :curated_herbaria, [Types::Models::HerbariumType], null: true
-
-    # custom fields
-    # field :img_src_thumb, String, null: true
-    # field :img_src_sm, String, null: true
-    # field :img_src_med, String, null: true
-    # field :img_src_lg, String, null: true
-    # field :img_src_huge, String, null: true
-    # field :img_src_full, String, null: true
-
-    # NOTE: make a helper for img_src_xxxx, used in several models
-    # urls are inconsistent, helper should prepend domain if missing
-    # def img_src_thumb
-    #   Image.url(:thumbnail, object.image_id)
-    # end
-
-    # def img_src_sm
-    #   Image.url(:small, object.image_id)
-    # end
-
-    # def img_src_med
-    #   Image.url(:medium, object.image_id)
-    # end
-
-    # def img_src_lg
-    #   Image.url(:large, object.image_id)
-    # end
-
-    # def img_src_huge
-    #   Image.url(:huge, object.image_id)
-    # end
-
-    # def img_src_full
-    #   Image.url(:full_size, object.image_id)
-    # end
   end
 end
