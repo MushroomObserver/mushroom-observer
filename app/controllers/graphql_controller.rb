@@ -40,22 +40,22 @@ class GraphqlController < ApplicationController
     return unless token.is_a?(Hash)
     raise("Token missing user_id") unless token.key?("user_id")
 
-    user = User.safe_find(token["user_id"])
-    raise("User not found") unless user
+    @current_user ||= User.safe_find(token["user_id"])
+    raise("User not found") unless @current_user
     # Should we raise an error here? Silently giving no current_user:
-    return unless user.verified
+    return unless @current_user.verified
 
-    user
+    @current_user
   end
 
   def in_admin_mode?
     return false unless token.is_a?(Hash)
 
-    token["in_admin_mode"]
+    @in_admin_mode ||= token["in_admin_mode"]
   end
 
   def token
-    ::Token.decrypt_from_header(http_auth_header).hash
+    @token ||= ::Token.decrypt_from_header(http_auth_header).hash
   rescue ActiveSupport::MessageVerifier::InvalidSignature
     nil
   end
