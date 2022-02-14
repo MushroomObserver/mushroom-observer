@@ -1,0 +1,80 @@
+"""
+An ISO 8601-encoded datetime
+"""
+scalar ISO8601DateTime
+
+type Mutation {
+}
+
+type Query {
+  """
+  Is the current logged in visitor in admin mode?
+  """
+  admin: Boolean!
+
+  """
+  get user by argument
+  """
+  user(email: String, id: Int, login: String, name: String): User!
+
+  """
+  get the current logged in visitor
+  """
+  visitor: User
+}
+
+type User {
+  admin: Boolean
+  alert: String
+  authCode: String
+  bonuses: String
+  contentFilter: String
+  contribution: Int
+  createdAt: ISO8601DateTime
+  defaultRssType: String
+  email: String!
+  emailCommentsAll: Boolean!
+  emailCommentsOwner: Boolean!
+  emailCommentsResponse: Boolean!
+  emailGeneralCommercial: Boolean!
+  emailGeneralFeature: Boolean!
+  emailGeneralQuestion: Boolean!
+  emailHtml: Boolean!
+  emailLocationsAdmin: Boolean
+  emailLocationsAll: Boolean!
+  emailLocationsAuthor: Boolean!
+  emailLocationsEditor: Boolean!
+  emailNamesAdmin: Boolean
+  emailNamesAll: Boolean!
+  emailNamesAuthor: Boolean!
+  emailNamesEditor: Boolean!
+  emailNamesReviewer: Boolean!
+  emailObservationsAll: Boolean!
+  emailObservationsConsensus: Boolean!
+  emailObservationsNaming: Boolean!
+  hideAuthors: Int!
+  id: Int!
+  imageId: Int
+  imageSize: Int
+  keepFilenames: Int!
+  lastActivity: ISO8601DateTime
+  lastLogin: ISO8601DateTime
+  layoutCount: Int
+  licenseId: Int!
+  locale: String
+  locationFormat: Int
+  locationId: Int
+  login: String!
+  mailingAddress: String
+  name: String
+  notes: String
+  notesTemplate: String
+  password: String!
+  theme: String
+  thumbnailMaps: Boolean!
+  thumbnailSize: Int
+  updatedAt: ISO8601DateTime
+  verified: ISO8601DateTime
+  viewOwnerId: Boolean!
+  votesAnonymous: Int
+}
