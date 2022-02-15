@@ -188,7 +188,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_herbarium_record_search
-    login)
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Coprinus comatus")
