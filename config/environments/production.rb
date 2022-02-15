@@ -133,6 +133,9 @@ MushroomObserver::Application.configure do
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
+
+  # Rails 5.2 credentials - add the master.key in production
+  # config.require_master_key = true
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
