@@ -156,7 +156,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_single_herbarium_search
-    login(users(:zero_user))
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "New York")
@@ -172,7 +172,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_multiple_herbarium_search
-    login(users(:zero_user))
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Personal")
@@ -188,7 +188,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_herbarium_record_search
-    login(users(:zero_user))
+    login)
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Coprinus comatus")
