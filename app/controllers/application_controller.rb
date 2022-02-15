@@ -194,7 +194,6 @@ class ApplicationController < ActionController::Base
   # Redirect anonymous users to login unless they are looking at allowed pages
   def redirect_anonymous_users
     return true if browser.bot? # recognized bots are handled elsewhere
-    return true if anonymous_user_allowed?
     return true if verified_user_logged_in?
 
     store_location
@@ -202,33 +201,6 @@ class ApplicationController < ActionController::Base
   end
 
   private ##########
-
-  def anonymous_user_allowed?
-    entire_controller_ok_for_anonymous_user? ||
-    action_ok_for_anonymous_user?
-  end
-
-  def entire_controller_ok_for_anonymous_user?
-      # (Controller or other filters are responsible for other access controls.)
-      %w[account
-         articles
-         policy
-         publications
-         support].
-        include?(params[:controller])
-  end
-
-  def action_ok_for_anonymous_user?
-    # Anonymous user can access these controller/action combinations
-    [
-      observer_ask_webmaster_question_path,
-      observer_how_to_use_path,
-      observer_intro_path,
-      observer_turn_javascript_nil_path,
-      observer_turn_javascript_off_path,
-      observer_turn_javascript_on_path
-    ].include?("/#{params[:controller]}/#{params[:action]}")
-  end
 
   def verified_user_logged_in?
     session_user&.verified?
