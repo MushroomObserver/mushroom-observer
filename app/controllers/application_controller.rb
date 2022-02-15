@@ -124,7 +124,7 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_before_action(:create_view_instance_variable)
+    skip_before_action(:redirect_anonymous_users)
     skip_before_action(:verify_authenticity_token)
     skip_before_action(:fix_bad_domains)
     skip_before_action(:autologin)
@@ -209,13 +209,9 @@ class ApplicationController < ActionController::Base
   end
 
   def entire_controller_ok_for_anonymous_user?
-    params[:controller].start_with?("api") ||
-    # Filter will not block anonymous user from any action in these controllers
-    # (Controller or other filters are responsible for other access controls.)
+      # (Controller or other filters are responsible for other access controls.)
       %w[account
-         ajax
          articles
-         graphql
          policy
          publications
          support].
