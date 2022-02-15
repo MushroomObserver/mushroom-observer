@@ -104,7 +104,7 @@ class ObserverController < ApplicationController
     :show_user
   ]
 
-  skip_before_action :redirect_anonymous_users, only:[
+  skip_before_action :redirect_anonymous_users, only: [
     :ask_webmaster_question,
     :how_to_use,
     :intro,
