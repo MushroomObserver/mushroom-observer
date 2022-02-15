@@ -125,6 +125,7 @@ class ApplicationController < ActionController::Base
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
     skip_before_action(:redirect_anonymous_users)
+    skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
     skip_before_action(:fix_bad_domains)
     skip_before_action(:autologin)
