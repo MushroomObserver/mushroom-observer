@@ -215,6 +215,7 @@ class ApplicationController < ActionController::Base
       %w[account
          ajax
          articles
+         graphql
          policy
          publications
          support].
