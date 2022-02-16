@@ -121,12 +121,12 @@ class CuratorTest < IntegrationTestCase
     get(herbaria_path(flavor: :all))
 
     herbarium_show_path_matcher = %r{#{herbaria_path}/\d+(?!\d|/edit)}
-   
+
     herbaria_show_links = assert_select("a:match('href', ?)",
                                         herbarium_show_path_matcher)
     assert_equal(
-        Herbarium.count, herbaria_show_links.size, 
-        "Index should have show links to all herbaria"
+      Herbarium.count, herbaria_show_links.size,
+      "Index should have show links to all herbaria"
     )
 
     first_herbarium_path = herbaria_show_links.first.attributes["href"].value.

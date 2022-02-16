@@ -14,7 +14,7 @@ class CapybarLurkerTest < IntegrationTestCase
     reset_session!
     visit(root_path)
     login
-    
+
     # Click on first observation in feed results
     first(:xpath, rss_observation_created_xpath).click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")

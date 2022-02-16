@@ -80,7 +80,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     # which is part of this Species List.
     species_list = species_lists(:unknown_species_list)
 
-    login(user)    
+    login(user)
 
     # Edit the Observation, unchecking the Project.
     visit("/observer/edit_observation/#{observation.id}")

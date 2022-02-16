@@ -310,7 +310,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_head_title(:show_past_glossary_term_title.l(num: version.version,
-                                                  name: term.name))
+                                                       name: term.name))
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{version.send(attr)}/,

@@ -342,7 +342,7 @@ class AmateurTest < IntegrationTestCase
       get("/#{obs.id}")
       assert_template( # redirected login after storing location in session
         "account/login"
-      ) 
+      )
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")

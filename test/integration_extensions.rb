@@ -11,7 +11,7 @@
 #
 module IntegrationExtensions
   # Login the given user in the current session.
-  def login(login = users(:zero_user).login, password = "testpassword", 
+  def login(login = users(:zero_user).login, password = "testpassword",
             remember_me = true)
     login = login.login if login.is_a?(User)
     get("/account/login")
