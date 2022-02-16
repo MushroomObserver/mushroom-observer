@@ -61,7 +61,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     project = projects(:obs_collected_and_displayed_project)
 
     # Log in user
-    login(dick)
+    login(user)
 
     # Edit the Observation, unchecking the Project.
     visit("/observer/edit_observation/#{observation.id}")
