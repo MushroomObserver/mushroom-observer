@@ -13,7 +13,7 @@ module Types::Models
     field :verified, GraphQL::Types::ISO8601DateTime, null: true
     field :login, String, null: false
     field :name, String, null: true
-    field :email, String, null: false
+    field :email, String, null: true, require_owner: true
     field :password, String, null: false
     field :admin, Boolean, null: true
     field :alert, String, null: true

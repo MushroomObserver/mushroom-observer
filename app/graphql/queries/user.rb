@@ -6,8 +6,8 @@ module Queries
     type Types::Models::UserType, null: false
     argument :id, Integer, required: false
     argument :login, String, required: false
-    argument :email, String, required: false
     argument :name, String, required: false
+    # argument :email, String, required: false
 
     def resolve(args)
       return {} unless args
@@ -16,10 +16,10 @@ module Queries
         ::User.find(args[:id])
       elsif args.key?(:login)
         ::User.find_by(login: args[:login])
-      elsif args.key?(:email)
-        ::User.find_by(email: args[:email].sub(/ <.*>$/, ""))
       elsif args.key?(:name)
         ::User.find_by(name: args[:name])
+        # elsif args.key?(:email)
+        #   ::User.find_by(email: args[:email].sub(/ <.*>$/, ""))
       end
     end
   end
