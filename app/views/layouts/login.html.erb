@@ -94,11 +94,8 @@
   <div class="row row-offcanvas row-offcanvas-left">
     <!--NAVIGATION-->
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print">
-      <a id="logo-link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
-        <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
-      </a>
       <div id="navigation">
-        <%= render(partial: "/shared/nav_left") %>
+        <%= render(partial: "/shared/nav_left_login") %>
       </div>
     </div>
     <!--/NAVIGATION-->
@@ -112,18 +109,13 @@
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
           </p>
-          <p class="pull-right">
-            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
-              <span class="glyphicon glyphicon-search"></span>
-            </button>
-          </p>
         </div>
       </div>
       <!--/HAMBURGER_BUTTONS-->
 
       <div class="max-width-text">
         <p class="align-center">
-          <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+          <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
         </p>
         <p class="sub-caption">
           Mushroom Observer (MO)<%# translation unnecessary %>
