@@ -47,6 +47,13 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_select(".results tr", numbers.count)
   end
 
+  def test_collection_number_search_by_number
+    number = collection_numbers(:minimal_unknown_coll_num).number
+    login
+    get(:collection_number_search, pattern: number)
+    assert_redirected_to(%r{/show_collection_number})
+  end
+
   def test_collection_number_search_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
@@ -70,6 +77,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   end
 
   def test_show_collection_number
+    login
     get(:show_collection_number)
     get(:show_collection_number, id: "bogus")
 
