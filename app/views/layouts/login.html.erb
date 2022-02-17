@@ -122,8 +122,13 @@
       <!--/HAMBURGER_BUTTONS-->
 
       <div class="max-width-text">
-        <p class="sub-caption">Mushroom Observer (MO)</p>
-        <p><%= :login_layout_description.t %></p>
+        <p class="align-center">
+          <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+        </p>
+        <p class="sub-caption">
+          Mushroom Observer (MO)<%# translation unnecessary %>
+        </p>
+        <%= :login_layout_description.tp %>
       </div>
 
       <% if flash_notices? %>
@@ -160,8 +165,6 @@
     </div>
   </div>
 </div>
-
-
 
 <%
   # The divs below are used by jquery to make helpers to determine current
