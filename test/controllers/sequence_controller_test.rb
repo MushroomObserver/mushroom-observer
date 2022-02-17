@@ -5,7 +5,8 @@ require("test_helper")
 # Controller tests for nucleotide sequences
 class SequenceControllerTest < FunctionalTestCase
   def test_list_sequences
-    get_with_dump(:list_sequences)
+    login
+    get(:list_sequences)
     assert(:success)
   end
 
@@ -19,6 +20,7 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_observation_index
+    login
     obs = observations(:locally_sequenced_obs)
     get(:observation_index, id: obs.id)
     assert(:success)
