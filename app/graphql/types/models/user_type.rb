@@ -10,54 +10,56 @@ module Types::Models
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: true
     field :last_login, GraphQL::Types::ISO8601DateTime, null: true
     field :last_activity, GraphQL::Types::ISO8601DateTime, null: true
-    field :verified, GraphQL::Types::ISO8601DateTime, null: true
+    field :verified, GraphQL::Types::ISO8601DateTime, null: true,
+                                                      require_owner: true
     field :login, String, null: false
     field :name, String, null: true
     field :email, String, null: true, require_owner: true
-    field :password, String, null: false
-    field :admin, Boolean, null: true
+    field :password, String, null: true, require_owner: true
+    field :admin, Boolean, null: true, require_owner: true
     field :alert, String, null: true
-    field :auth_code, String, null: true
-    field :mailing_address, String, null: true
+    field :auth_code, String, null: true, require_admin: true
+    field :mailing_address, String, null: true, require_owner: true
     field :notes, String, null: true
-    field :notes_template, String, null: true
-    field :theme, String, null: true
-    field :thumbnail_size, Integer, null: true
-    field :image_size, Integer, null: true
-    field :default_rss_type, String, null: true
-    field :location_format, Integer, null: true
-    field :hide_authors, Integer, null: false
-    field :thumbnail_maps, Boolean, null: false
-    field :keep_filenames, Integer, null: false
-    field :layout_count, Integer, null: true
-    field :view_owner_id, Boolean, null: false
-    field :content_filter, String, null: true
+    field :notes_template, String, null: true, require_owner: true
+    field :theme, String, null: true, require_owner: true
+    field :thumbnail_size, Integer, null: true, require_owner: true
+    field :image_size, Integer, null: true, require_owner: true
+    field :default_rss_type, String, null: true, require_owner: true
+    field :location_format, Integer, null: true, require_owner: true
+    field :hide_authors, Integer, null: true, require_owner: true
+    field :thumbnail_maps, Boolean, null: true, require_owner: true
+    field :keep_filenames, Integer, null: true, require_owner: true
+    field :layout_count, Integer, null: true, require_owner: true
+    field :view_owner_id, Boolean, null: true, require_owner: true
+    field :content_filter, String, null: true, require_owner: true
     field :license_id, Integer, null: false
-    field :image_id, Integer, null: true
-    field :location_id, Integer, null: true
+    field :image_id, Integer, null: true, require_owner: true
+    field :location_id, Integer, null: true, require_owner: true
     field :locale, String, null: true
-    field :votes_anonymous, Integer, null: true
+    field :votes_anonymous, Integer, null: true, require_owner: true
     field :bonuses, String, null: true
     field :contribution, Integer, null: true
-    field :email_comments_owner, Boolean, null: false
-    field :email_comments_response, Boolean, null: false
-    field :email_comments_all, Boolean, null: false
-    field :email_observations_consensus, Boolean, null: false
-    field :email_observations_naming, Boolean, null: false
-    field :email_observations_all, Boolean, null: false
-    field :email_names_author, Boolean, null: false
-    field :email_names_editor, Boolean, null: false
-    field :email_names_reviewer, Boolean, null: false
-    field :email_names_all, Boolean, null: false
-    field :email_locations_author, Boolean, null: false
-    field :email_locations_editor, Boolean, null: false
-    field :email_locations_all, Boolean, null: false
-    field :email_general_feature, Boolean, null: false
-    field :email_general_commercial, Boolean, null: false
-    field :email_general_question, Boolean, null: false
-    field :email_html, Boolean, null: false
-    field :email_locations_admin, Boolean, null: true
-    field :email_names_admin, Boolean, null: true
+    field :email_comments_owner, Boolean, null: true, require_owner: true
+    field :email_comments_response, Boolean, null: true, require_owner: true
+    field :email_comments_all, Boolean, null: true, require_owner: true
+    field :email_observations_consensus, Boolean, null: true,
+                                                  require_owner: true
+    field :email_observations_naming, Boolean, null: true, require_owner: true
+    field :email_observations_all, Boolean, null: true, require_owner: true
+    field :email_names_author, Boolean, null: true, require_owner: true
+    field :email_names_editor, Boolean, null: true, require_owner: true
+    field :email_names_reviewer, Boolean, null: true, require_owner: true
+    field :email_names_all, Boolean, null: true, require_owner: true
+    field :email_locations_author, Boolean, null: true, require_owner: true
+    field :email_locations_editor, Boolean, null: true, require_owner: true
+    field :email_locations_all, Boolean, null: true, require_owner: true
+    field :email_general_feature, Boolean, null: true, require_owner: true
+    field :email_general_commercial, Boolean, null: true, require_owner: true
+    field :email_general_question, Boolean, null: true, require_owner: true
+    field :email_html, Boolean, null: true, require_owner: true
+    field :email_locations_admin, Boolean, null: true, require_owner: true
+    field :email_names_admin, Boolean, null: true, require_owner: true
 
     # NOTE: uncomment each association as the models are added, OR...
     #
