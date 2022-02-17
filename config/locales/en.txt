@@ -1697,6 +1697,12 @@
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/observer/ask_webmaster_question.
   email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
   email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's  not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
+  login_layout_description: A website to record observations about mushrooms, help people identify unfamiliar mushrooms, and expand the community around the scientific exploration of mushrooms (mycology)
+  login_create_account_caption: Create a free account
+  login_explain_login_requirement: To prevent automated programs from consuming too much of our resources, we limit website use to logged-in users.
+  login_data_without_login_caption: Get MO Data Without Logging In
+  login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
+  login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API.md#csv-files.
 
   # account/logout
   logout_title: Logout
