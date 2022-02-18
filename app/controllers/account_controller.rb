@@ -43,7 +43,12 @@
 #
 ################################################################################
 class AccountController < ApplicationController
-  layout "login"
+  layout "login", only: [
+    :login,
+    :reverify,
+    :signup,
+    :verify
+  ]
 
   before_action :login_required, except: [
     :email_new_password,
