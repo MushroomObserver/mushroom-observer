@@ -149,10 +149,10 @@
       <div id="content" class="row">
         <% unless @user&.verified? %>
           <div class="max-width-text">
-            <p class="align-center">
+            <p class="align-center hidden-sm hidden-md hidden-lg">
               <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
             </p>
-            <p class="sub-caption">Mushroom Observer (MO)</p>
+            <p class="sub-caption align-center">Mushroom Observer (MO)</p>
             <p><%= :login_layout_description.t %></p>
           </div>
         <% end %>
