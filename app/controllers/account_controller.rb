@@ -43,8 +43,6 @@
 #
 ################################################################################
 class AccountController < ApplicationController
-  layout "login"
-
   before_action :login_required, except: [
     :email_new_password,
     :login,
