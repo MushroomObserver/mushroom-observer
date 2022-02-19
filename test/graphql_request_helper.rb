@@ -27,9 +27,9 @@ module GraphQLRequestHelper
   end
 
   # Graphql request with the `query` and `variables` defaults.
-  def do_graphql_request(user: nil, qry: nil, var: nil)
-    token = Token.new(user_id: user&.id,
-                      in_admin_mode: user&.admin).encrypt_to_header
+  def do_graphql_request(user: nil, qry: nil, var: nil, token: nil)
+    token ||= Token.new(user_id: user&.id,
+                        in_admin_mode: user&.admin).encrypt_to_header
 
     post(graphql_path,
          params: {
