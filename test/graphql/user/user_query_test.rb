@@ -1,42 +1,17 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("graphql_queries")
 
 module Queries
   class UserQueryTest < IntegrationTestCase
-    def no_context
-      {
-        current_user: nil,
-        in_admin_mode?: false
-      }
-    end
-
-    def rolf_in_context
-      {
-        current_user: users(:rolf),
-        in_admin_mode?: false
-      }
-    end
-
-    def user_query_string
-      <<-GRAPHQL
-        query($id: Int, $login: String, $name: String){
-          user(id: $id, login: $login, name: $name) {
-            id
-            name
-            login
-            email
-            emailNamesEditor
-          }
-        }
-      GRAPHQL
-    end
+    include GraphQLQueries
 
     def test_find_user
       user = rolf
 
       result = MushroomObserverSchema.execute(
-        user_query_string,
+        user_query,
         variables: { id: user.id },
         context: no_context
       )
@@ -47,7 +22,7 @@ module Queries
       assert_equal(user.login, user_result["login"])
 
       result = MushroomObserverSchema.execute(
-        user_query_string,
+        user_query,
         variables: { login: user.login },
         context: no_context
       )
@@ -58,7 +33,7 @@ module Queries
       assert_equal(user.name, user_result["name"])
 
       result = MushroomObserverSchema.execute(
-        user_query_string,
+        user_query,
         variables: { name: user.name },
         context: no_context
       )
@@ -72,7 +47,7 @@ module Queries
     def test_email_visibility
       user = rolf
       result = MushroomObserverSchema.execute(
-        user_query_string,
+        user_query,
         variables: { login: user.login },
         context: rolf_in_context
       )
@@ -86,7 +61,7 @@ module Queries
 
       # Rolf queries for Mary Newbie by login
       result = MushroomObserverSchema.execute(
-        user_query_string,
+        user_query,
         variables: { login: users(:mary).login },
         context: rolf_in_context
       )
@@ -97,6 +72,20 @@ module Queries
       # Make sure Rolf cannot read Mary's email address
       assert_nil(user_result["email"])
       assert_nil(user_result["emailNamesEditor"])
+    end
+
+    def no_context
+      {
+        current_user: nil,
+        in_admin_mode?: false
+      }
+    end
+
+    def rolf_in_context
+      {
+        current_user: users(:rolf),
+        in_admin_mode?: false
+      }
     end
   end
 end

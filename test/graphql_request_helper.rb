@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+require("graphql_queries")
+
 module GraphQLRequestHelper
+  include GraphQLQueries
   # Must set this to get thru robot filter
   def setup
     @headers = { "User-Agent" => "iPadApp" }
@@ -42,36 +45,5 @@ module GraphQLRequestHelper
   # Give variables an empty default
   def variables
     {}
-  end
-
-  def visitor_query
-    <<-GRAPHQL
-    query visitor { 
-      visitor { 
-        login 
-      }, 
-      admin
-    }
-    GRAPHQL
-  end
-
-  def nonsense_query
-    <<-GRAPHQL
-    query nonsense { nonsense } 
-    GRAPHQL
-  end
-
-  def user_query
-    <<-GRAPHQL
-      query($id: Int, $login: String, $name: String){
-        user(id: $id, login: $login, name: $name) {
-          id
-          name
-          login
-          email
-          emailNamesEditor
-        }
-      }
-    GRAPHQL
   end
 end
