@@ -291,7 +291,7 @@ module LanguageExporter
   end
 
   def escape_string(val)
-    '"' + val.gsub(/(["\\])/, '\\\\\\1') + '"'
+    %("#{val.gsub(/(["\\])/, '\\\\\\1')}")
   end
 
   # ----------------------------
