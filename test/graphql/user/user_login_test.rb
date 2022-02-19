@@ -6,14 +6,14 @@ require("graphql_request_helper")
 class Mutations::UserLoginTest < ActionDispatch::IntegrationTest
   include GraphQLRequestHelper
 
-  def test_invalid_login_input
+  def test_invalid_login
     do_graphql_request(qry: user_login, var: wrong_password)
 
     assert_nil(json.dig("data", "userLogin", "user"), "Invalid login")
     assert_nil(json["data"]["userLogin"]["token"], "Invalid login")
   end
 
-  def test_valid_login_input
+  def test_valid_login
     do_graphql_request(qry: user_login, var: valid_password)
 
     assert_equal(users(:rolf).id,
