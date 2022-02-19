@@ -40,10 +40,10 @@ class GraphqlController < ApplicationController
     return unless token.is_a?(Hash)
     raise("Token missing user_id") unless token.key?("user_id")
 
+    # puts(token.inspect)
     @current_user ||= User.safe_find(token["user_id"])
-    raise("User not found") unless @current_user
-    # Should we raise an error here? Silently giving no current_user:
-    return unless @current_user.verified
+    # Should we raise an error if unverified? Silently giving no current_user:
+    return nil unless @current_user&.verified
 
     @current_user
   end

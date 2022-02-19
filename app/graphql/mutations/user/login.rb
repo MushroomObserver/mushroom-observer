@@ -11,11 +11,7 @@ module Mutations::User
     field :user, Types::Models::UserType, null: true
 
     def resolve(input: nil)
-      puts("input.inspect")
-      puts(input.inspect)
       user = User.authenticate(**input)
-      puts("user.inspect")
-      puts(user.inspect)
 
       return {} unless user
 

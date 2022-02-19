@@ -10,6 +10,8 @@ module Queries
     # argument :email, String, required: false
 
     def resolve(args)
+      puts("args")
+      puts(args.inspect)
       return {} unless args
 
       if args.key?(:id)
