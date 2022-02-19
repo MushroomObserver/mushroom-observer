@@ -33,4 +33,18 @@ module GraphQLQueries
       }
     GRAPHQL
   end
+
+  def user_login
+    <<-GRAPHQL
+    mutation userLogin($input: UserLoginInput!){
+      userLogin( input: $input ){
+        user {
+          id,
+          login
+        },
+        token
+      }
+    }
+    GRAPHQL
+  end
 end
