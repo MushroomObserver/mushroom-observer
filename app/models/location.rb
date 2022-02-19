@@ -149,8 +149,8 @@ class Location < AbstractModel
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
+    (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
   \s*$/x.freeze
 
@@ -311,7 +311,7 @@ class Location < AbstractModel
   def self.clean_name(str, leave_stars = false)
     str = str.to_ascii
     if leave_stars
-      str.gsub!(/[^\w\*]+/, " ")
+      str.gsub!(/[^\w*]+/, " ")
       str.gsub!(/ +\*/, "*")
       str.gsub!(/\* +/, "*")
     else

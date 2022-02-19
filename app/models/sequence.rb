@@ -57,7 +57,11 @@ class Sequence < AbstractModel
   DESCRIPTION          = /\A>.*$/.freeze
 
   # nucleotide codes from http://www.bioinformatics.org/sms2/iupac.html
+  # RuboCop 0.89.0 Style/RedundantRegexpEscape cop gives false positive.
+  # (In Ruby a hyphen (-) in a character class is a metacharacter.)
+  # rubocop:disable Style/RedundantRegexpEscape
   VALID_CODES          = /ACGTURYSWKMBDHVN.\-/i.freeze
+  # rubocop:enable Style/RedundantRegexpEscape
 
   # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
   VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i.freeze
