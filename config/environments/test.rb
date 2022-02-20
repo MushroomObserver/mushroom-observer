@@ -91,6 +91,17 @@ MushroomObserver::Application.configure do
   # config.action_dispatch.show_exceptions = false
 
   config.active_support.test_order = :random
+
+  # ----------------------------
+  #  Bullet configuration.
+  # ----------------------------
+
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.raise = true               # Show message by raising errors.
+    Bullet.stacktrace_includes = [ ]
+    Bullet.stacktrace_excludes = [ ]
+  end
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
