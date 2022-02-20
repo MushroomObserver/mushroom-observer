@@ -136,7 +136,8 @@ class ImageController < ApplicationController
     args = {
       action: "list_images",
       matrix: true,
-      include: [:user, { observations: :name }]
+      include: [:user, { observations: :name }, :subjects, :best_glossary_terms,
+                :glossary_terms, :image_votes]
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -158,16 +159,14 @@ class ImageController < ApplicationController
     @links << coerced_query_link(query, Observation)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") ||
-       (query.params[:by] == "reverse_user")
+    case query.params[:by]
+    when "user", "reverse_user"
       args[:letters] = "users.login"
     # Paginate by letter if sorting by copyright holder.
-    elsif (query.params[:by] == "copyright_holder") ||
-          (query.params[:by] == "reverse_copyright_holder")
+    when "copyright_holder", "reverse_copyright_holder"
       args[:letters] = "images.copyright_holder"
     # Paginate by letter if sorting by name.
-    elsif (query.params[:by] == "name") ||
-          (query.params[:by] == "reverse_name")
+    when "name", "reverse_name"
       args[:letters] = "names.sort_name"
     end
 
@@ -226,7 +225,7 @@ class ImageController < ApplicationController
       cur = @image.users_vote
       if cur != val
         anon = @user.votes_anonymous == :yes
-        @image.change_vote(@user, val, anon)
+        @image.change_vote(@user, val, anon: anon)
       end
 
       # Advance to next image automatically if "next" parameter set.
@@ -344,15 +343,14 @@ class ImageController < ApplicationController
     @image.original_name = "" if @user.keep_filenames == :toss
     return flash_object_errors(@image) unless @image.save
 
-    if !@image.process_image(@observation.gps_hidden)
-      logger.error("Unable to upload image")
+    if !@image.process_image(strip: @observation.gps_hidden)
       name = @image.original_name
       name = "???" if name.empty?
       flash_error(:runtime_image_invalid_image.t(name: name))
       flash_object_errors(@image)
     else
       @observation.add_image(@image)
-      @observation.log_create_image(@image)
+      @image.log_create_for(@observation)
       name = @image.original_name
       name = "##{@image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
@@ -532,7 +530,7 @@ class ImageController < ApplicationController
       flash_error(:runtime_image_remove_missing.t(id: @image.id))
     else
       @observation.remove_image(@image)
-      @observation.log_remove_image(@image)
+      @image.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
     redirect_with_query(controller: "observer",
@@ -568,7 +566,7 @@ class ImageController < ApplicationController
     if image &&
        @object.add_image(image) &&
        @object.save
-      @object.log_reuse_image(image)
+      image.log_reuse_for(@object)
       redirect_with_query(glossary_term_path(@object.id))
     else
       flash_error(:runtime_no_save.t(:glossary_term)) if image
@@ -617,7 +615,7 @@ class ImageController < ApplicationController
       elsif @mode == :observation
         # Add image to observation.
         @observation.add_image(image)
-        @observation.log_reuse_image(image)
+        image.log_reuse_for(@observation)
         if @observation.gps_hidden
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
@@ -678,7 +676,7 @@ class ImageController < ApplicationController
           next unless (image = Image.safe_find(image_id))
 
           @object.remove_image(image)
-          @object.log_remove_image(image)
+          image.log_remove_from(@object)
           flash_notice(:runtime_image_remove_success.t(id: image_id))
         end
         redirect_with_query(controller: target_class.show_controller,
@@ -701,13 +699,14 @@ class ImageController < ApplicationController
     return unless image
 
     if check_permission!(image)
-      if params[:op] == "rotate_left"
+      case params[:op]
+      when "rotate_left"
         image.transform(:rotate_left)
         flash_notice(:image_show_transform_note.t)
-      elsif params[:op] == "rotate_right"
+      when "rotate_right"
         image.transform(:rotate_right)
         flash_notice(:image_show_transform_note.t)
-      elsif params[:op] == "mirror"
+      when "mirror"
         image.transform(:mirror)
         flash_notice(:image_show_transform_note.t)
       else

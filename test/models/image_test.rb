@@ -18,20 +18,20 @@ class ImageTest < UnitTestCase
     assert_nil(img.users_vote(rolf))
     assert_false(img.image_votes.first.anonymous)
 
-    img.change_vote(rolf, 4, :anon)
+    img.change_vote(rolf, 4, anon: true)
     assert_equal(2, img.num_votes)
     assert_equal(3, img.vote_cache)
     assert_equal(2, img.users_vote(mary))
     assert_equal(4, img.users_vote(rolf))
 
-    img.change_vote(mary)
+    img.change_vote(mary, nil)
     assert_equal(1, img.num_votes)
     assert_equal(4, img.vote_cache)
     assert_equal(4, img.users_vote(rolf))
     assert_nil(img.users_vote(mary))
     assert_true(img.image_votes.first.anonymous)
 
-    img.change_vote(rolf)
+    img.change_vote(rolf, nil)
     assert_nil(img.users_vote(mary))
     assert_nil(img.users_vote(rolf))
   end

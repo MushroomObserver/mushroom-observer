@@ -19,9 +19,9 @@ class Name < AbstractModel
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       if parents.last.nil?
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
-      elsif save_parents
-        parents.each { |n| n.save if n&.new_record? }
       end
+
+      parents.each { |n| n.save if n&.new_record? } if save_parents
     end
     self.attributes = parse.params
   end

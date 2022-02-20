@@ -311,7 +311,6 @@ ACTIONS = {
     index_observation: {},
     index_rss_log: {},
     index_user: {},
-    interview: {},
     intro: {},
     letter_to_community: {},
     list_observations: {},
@@ -590,6 +589,16 @@ end
 # -----------------------------------------------------
 
 MushroomObserver::Application.routes.draw do
+  if Rails.env.development?
+    mount(GraphiQL::Rails::Engine, at: "/graphiql",
+                                   graphql_path: "/graphql#execute")
+  end
+
+  if Rails.env.development? || Rails.env.test?
+    # GraphQL development additions
+    post("/graphql", to: "graphql#execute")
+  end
+
   get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

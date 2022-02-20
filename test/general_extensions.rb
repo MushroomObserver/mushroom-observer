@@ -421,10 +421,10 @@ module GeneralExtensions
       print(" = #{txt}")
     end
     print("\n")
-    if exp.has_elements?
-      exp.elements.each do |child|
-        dump_xml(child, indent + "  ")
-      end
+    return unless exp.has_elements?
+
+    exp.elements.each do |child|
+      dump_xml(child, indent + "  ")
     end
   end
 

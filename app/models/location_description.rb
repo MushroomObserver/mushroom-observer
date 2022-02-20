@@ -131,46 +131,46 @@ class LocationDescription < Description
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-    if saved_version_changes?
-      sender = User.current
-      recipients = []
+    return unless saved_version_changes?
 
-      # Tell admins of the change.
-      for user in admins
-        recipients.push(user) if user.email_locations_admin
-      end
+    sender = User.current
+    recipients = []
 
-      # Tell authors of the change.
-      for user in authors
-        recipients.push(user) if user.email_locations_author
-      end
+    # Tell admins of the change.
+    for user in admins
+      recipients.push(user) if user.email_locations_admin
+    end
 
-      # Tell editors of the change.
-      for user in editors
-        recipients.push(user) if user.email_locations_editor
-      end
+    # Tell authors of the change.
+    for user in authors
+      recipients.push(user) if user.email_locations_author
+    end
 
-      # Tell masochists who want to know about all location changes.
-      for user in User.where(email_locations_all: true)
-        recipients.push(user)
-      end
+    # Tell editors of the change.
+    for user in editors
+      recipients.push(user) if user.email_locations_editor
+    end
 
-      # Send to people who have registered interest.
-      # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in location.interests
-        if interest.state
-          recipients.push(interest.user)
-        else
-          recipients.delete(interest.user)
-        end
-      end
+    # Tell masochists who want to know about all location changes.
+    for user in User.where(email_locations_all: true)
+      recipients.push(user)
+    end
 
-      # Send notification to all except the person who triggered the change.
-      for recipient in recipients.uniq - [sender]
-        QueuedEmail::LocationChange.create_email(
-          sender, recipient, location, self
-        )
+    # Send to people who have registered interest.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    for interest in location.interests
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
       end
+    end
+
+    # Send notification to all except the person who triggered the change.
+    for recipient in recipients.uniq - [sender]
+      QueuedEmail::LocationChange.create_email(
+        sender, recipient, location, self
+      )
     end
   end
 end

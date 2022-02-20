@@ -115,10 +115,10 @@ class Observation
     end
 
     def update_naming_cache(naming, value)
-      if naming.vote_cache != value
-        naming.vote_cache = value
-        naming.save
-      end
+      return unless naming.vote_cache != value
+
+      naming.vote_cache = value
+      naming.save
     end
 
     def find_taxon_votes

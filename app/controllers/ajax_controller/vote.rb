@@ -9,9 +9,10 @@ class AjaxController
   # value:: Value of vote.
   def vote
     @user = session_user!
-    if @type == "naming"
+    case @type
+    when "naming"
       cast_naming_vote(@id, @value)
-    elsif @type == "image"
+    when "image"
       cast_image_vote(@id, @value)
     end
   end
@@ -40,7 +41,7 @@ class AjaxController
 
     value = value == "0" ? nil : Image.validate_vote(value)
     anon = (@user.votes_anonymous == :yes)
-    image.change_vote(@user, value, anon)
+    image.change_vote(@user, value, anon: anon)
     render(partial: "image/image_vote_links", locals: { image: image })
   end
 end

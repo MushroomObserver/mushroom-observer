@@ -872,6 +872,29 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(10, rolf.reload.contribution)
   end
 
+  def test_create_name_icn_already_used
+    old_name = names(:coprinus_comatus)
+    assert_true(old_name.icn_id.present?)
+    name_count = Name.count
+    rss_log_count = RssLog.count
+    params = {
+      name: {
+        icn_id: old_name.icn_id.to_s,
+        text_name: "Something else",
+        author: "(Thank You) Why Not",
+        rank: :Species,
+        citation: "I'll pass"
+      }
+    }
+    login("mary")
+    post(:create_name, params: params)
+    assert_response(:success)
+    assert_equal(name_count, Name.count,
+                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+    assert_equal(rss_log_count, RssLog.count,
+                 "Shouldn't have created an RSS log! #{RssLog.last.inspect}.")
+  end
+
   def test_create_name_matching_multiple_names
     desired_name = names(:coprinellus_micaceus_no_author)
     text_name = desired_name.text_name

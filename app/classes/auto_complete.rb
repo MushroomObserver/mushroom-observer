@@ -38,10 +38,10 @@ class AutoComplete
   private
 
   def truncate_matches
-    if matches.length > limit
-      matches.slice!(limit..-1)
-      matches.push("...")
-    end
+    return unless matches.length > limit
+
+    matches.slice!(limit..-1)
+    matches.push("...")
   end
 
   def clean_matches

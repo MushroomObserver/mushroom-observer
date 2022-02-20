@@ -29,13 +29,13 @@ module ThumbnailHelper
   end
 
   def show_best_image(obs)
-    if obs&.thumb_image
-      thumbnail(obs.thumb_image,
-                link: obs.show_link_args,
-                size: :thumbnail,
-                votes: true,
-                responsive: false) + image_copyright(obs.thumb_image)
-    end
+    return unless obs&.thumb_image
+
+    thumbnail(obs.thumb_image,
+              link: obs.show_link_args,
+              size: :thumbnail,
+              votes: true,
+              responsive: false) + image_copyright(obs.thumb_image)
   end
 
   # Grab the copyright_text for an Image.

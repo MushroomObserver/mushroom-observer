@@ -432,7 +432,6 @@ class AccountController < ApplicationController
         if !image.save
           flash_object_errors(image)
         elsif !image.process_image
-          logger.error("Unable to upload image")
           name = image.original_name
           name = "???" if name.empty?
           flash_error(:runtime_profile_invalid_image.t(name: name))

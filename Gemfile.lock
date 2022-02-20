@@ -5,6 +5,15 @@ GIT
     cure_acts_as_versioned (0.6.3)
       activerecord (>= 3.0.9)
 
+GIT
+  remote: https://github.com/rmosolgo/graphiql-rails.git
+  revision: 6b34eb17bf13262eef6edf9a069cfc69b5db9708
+  ref: 6b34eb1
+  specs:
+    graphiql-rails (1.8.0)
+      railties
+      sprockets-rails
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -109,6 +118,13 @@ GEM
     ffi (1.15.5)
     globalid (1.0.0)
       activesupport (>= 5.0)
+    graphql (1.13.10)
+    graphql-batch (0.5.0)
+      graphql (>= 1.10, < 2)
+      promise.rb (~> 0.7.2)
+    graphql-connections (1.1.0)
+      activerecord (>= 5)
+      graphql (~> 1.10)
     hashdiff (1.0.1)
     i18n (1.10.0)
       concurrent-ruby (~> 1.0)
@@ -166,9 +182,12 @@ GEM
     parallel (1.21.0)
     parser (3.1.0.0)
       ast (~> 2.4.1)
+    promise.rb (0.7.4)
     public_suffix (4.0.6)
     racc (1.6.0)
     rack (2.2.3)
+    rack-cors (1.1.1)
+      rack (>= 2.0.0)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rails (5.2.6.2)
@@ -227,6 +246,8 @@ GEM
       unicode-display_width (>= 1.4.0, < 2.0)
     rubocop-ast (0.8.0)
       parser (>= 2.7.1.5)
+    rubocop-graphql (0.13.0)
+      rubocop (>= 0.87, < 2)
     rubocop-performance (1.8.1)
       rubocop (>= 0.87.0)
       rubocop-ast (>= 0.4.0)
@@ -309,6 +330,10 @@ DEPENDENCIES
   coffee-rails
   cure_acts_as_versioned!
   date (>= 3.2.1)
+  graphiql-rails!
+  graphql
+  graphql-batch
+  graphql-connections
   i18n
   jbuilder
   jquery-rails
@@ -321,11 +346,13 @@ DEPENDENCIES
   mocha
   mry
   mysql2
+  rack-cors
   rails (~> 5.2.2)
   rails-controller-testing
   rails_db (~> 2.3.0)
   rtf
   rubocop (= 0.89)
+  rubocop-graphql
   rubocop-performance
   rubocop-rails
   rubyzip
