@@ -103,11 +103,6 @@ function copy_file_to_server {
     path=${image_server_data[$server,path]}
     scp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
-  "s3")
-    cmd=$app_root/script/s3cp.rb
-    wait_for $cmd
-    $cmd $image_root/$file $server $file || die "Failed to transfer $file to $path."
-    ;;
   *)
     url=${image_server_data[$server,url]}
     die "Don't know how to transfer $file to $url."
@@ -140,5 +135,5 @@ function read_server_directory {
     url=${image_server_data[$server,url]}
     die "Don't know how to get listing of $url/$subdir on $server server."
   esac
-} 
+}
 
