@@ -127,10 +127,6 @@ function read_server_directory {
     ssh $host find -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
       die "Failed to list $host:$path/$subdir on $server server."
     ;;
-  "s3")
-    # Listing an S3 bucket takes forever, rely on cached listing instead.
-    grep ^$subdir $image_root/$server.files | sed 's/[^\/]*\///' | $app_root/script/s3uniq.rb
-    ;;
   *)
     url=${image_server_data[$server,url]}
     die "Don't know how to get listing of $url/$subdir on $server server."
