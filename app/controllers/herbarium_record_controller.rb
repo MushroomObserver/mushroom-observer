@@ -143,7 +143,8 @@ class HerbariumRecordController < ApplicationController
     args = {
       action: :list_herbarium_records,
       letters: "herbarium_records.initial_det",
-      num_per_page: 100
+      num_per_page: 100,
+      include: [ { herbarium: :curators }, { observations: :name }, :user ]
     }.merge(args)
 
     @links ||= []

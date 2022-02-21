@@ -574,7 +574,6 @@ class SpeciesListController < ApplicationController
       projects += @list.projects
       projects.uniq!
     end
-    projects
   end
 
   def manage_object_states
@@ -994,7 +993,7 @@ class SpeciesListController < ApplicationController
 
   def init_name_vars_for_edit(spl)
     init_name_vars_for_create
-    @deprecated_names = spl.names.select(&:deprecated)
+    @deprecated_names = spl.names.where(deprecated: true)
     @place_name = spl.place_name
   end
 
@@ -1094,7 +1093,8 @@ class SpeciesListController < ApplicationController
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title)
+    @projects = User.current.projects_member(order: :title,
+                                             include: {user_group: :users})
     @project_checks = {}
   end
 
@@ -1130,7 +1130,8 @@ class SpeciesListController < ApplicationController
     return unless checks
 
     any_changes = false
-    User.current.projects_member.each do |project|
+    Project.where(id: User.current.projects_member.map(&:id)).
+            includes(:species_lists).each do |project|
       before = spl.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next if before == after

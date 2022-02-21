@@ -188,7 +188,7 @@ class HerbariaController < ApplicationController
     { # default args
       letters: "herbaria.name",
       num_per_page: 100,
-      include: [:herbarium_records, :personal_user]
+      include: [:curators, :herbarium_records, :personal_user]
     }.merge(args,
             template: "/herbaria/index.html.erb", # render with this template
             # Add some alternate sorting criteria.
