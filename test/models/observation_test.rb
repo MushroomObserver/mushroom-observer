@@ -1029,4 +1029,12 @@ class ObservationTest < UnitTestCase
     assert_operator(obs.old_last_viewed_by(dick), :>=, time - 2.seconds)
     assert_operator(obs.old_last_viewed_by(dick), :<=, time + 2.seconds)
   end
+
+  def test_destroy_orphans_log
+    obs = observations(:detailed_unknown_obs)
+    log = obs.rss_log
+    assert_not_nil(log)
+    obs.destroy!
+    assert_nil(log.reload.target_id)
+  end
 end

@@ -119,8 +119,9 @@ class Location < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
-  # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  # Automatically log standard events.  Merge will already log the destruction
+  # as a merge and orphan the log.
+  self.autolog_events = [:created!, :updated!, :destroyed]
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
@@ -699,6 +700,7 @@ class Location < AbstractModel
     # Log the action.
     old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
+    old_loc.rss_log = nil
 
     # Destroy past versions.
     editors = []

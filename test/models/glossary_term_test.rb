@@ -131,6 +131,14 @@ class GlossaryTermTest < UnitTestCase
     assert(term.invalid?, "GlossaryTerm must have description or image")
   end
 
+  def test_destroy_orphans_log
+    term = glossary_terms(:conic_glossary_term)
+    log = term.rss_log
+    assert_not_nil(log)
+    term.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
   # Remove an image from images
   # Remove nil
   # Remove an image that is not associated with this glossary_term
