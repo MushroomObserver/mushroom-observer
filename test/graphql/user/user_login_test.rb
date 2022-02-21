@@ -20,13 +20,14 @@ class Mutations::UserLoginTest < ActionDispatch::IntegrationTest
                  json.dig("data", "userLogin", "user", "id"),
                  "Variable correctly parsed for query")
 
+    # now check visitor query, that generated token assigns a current_user
     do_graphql_request(user: users(:rolf), qry: visitor_query)
 
     assert_equal(users(:rolf).login,
                  json.dig("data", "visitor", "login"),
                  "Authenticated requests load the current_user")
 
-    # Use the token we just got, rather than generating new. (doublecheck)
+    # now pass token from response, rather than generating new. (doublecheck)
     do_graphql_request(user: users(:rolf),
                        qry: user_query,
                        var: { login: users(:rolf).login },
