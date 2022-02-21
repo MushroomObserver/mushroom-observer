@@ -3302,6 +3302,7 @@ class NameTest < UnitTestCase
     name2.merge(name1)
     assert_nil(log1.reload.target_id)
     assert_not_nil(log2.reload.target_id)
-    assert_match(/Name merged/, log1.detail)
+    assert_equal(:log_orphan, log1.parse_log[0][0])
+    assert_equal(:log_name_merged, log1.parse_log[1][0])
   end
 end

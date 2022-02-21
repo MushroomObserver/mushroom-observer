@@ -56,8 +56,8 @@ class Project < AbstractModel
 
   before_destroy :orphan_drafts
 
-  # Automatically (but silently) log destruction.
-  self.autolog_events = [:destroyed]
+  # Project handles all of its own logging.
+  self.autolog_events = []
 
   # Various debugging things require all models respond to +text_name+.  Just
   # returns +title+.

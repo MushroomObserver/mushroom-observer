@@ -101,6 +101,7 @@ class ProjectTest < UnitTestCase
     log = proj.rss_log
     assert_not_nil(log)
     proj.destroy!
+    proj.log_destroy
     assert_nil(log.reload.target_id)
   end
 end

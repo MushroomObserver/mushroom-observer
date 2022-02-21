@@ -222,7 +222,7 @@ class AbstractModel < ApplicationRecord
   before_destroy :do_log_destroy
   def do_log_destroy
     SiteData.update_contribution(:del, self)
-    autolog_destroyed if has_rss_log?
+    autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end
 
