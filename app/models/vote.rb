@@ -214,7 +214,7 @@ class Vote < AbstractModel
   def user_weight
     contrib = user ? user.contribution : 0
     contrib = contrib < 1 ? 0 : Math.log(contrib) / LOG10
-    contrib += 1 if observation && user == observation.user
+    contrib += 1 if observation && user_id == observation.user_id
     contrib
   end
 

@@ -23,7 +23,9 @@
         </tr>
       </thead>
       <tbody>
-        <% observation.namings.sort_by(&:created_at).each do |naming| %>
+        <% observation.namings.includes(:name, :user,
+                                        votes: [:observation, :user]).
+                       sort_by(&:created_at).each do |naming| %>
           <tr>
             <% Textile.register_name(naming.name) %>
             <td>

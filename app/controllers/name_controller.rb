@@ -396,7 +396,12 @@ class NameController < ApplicationController
     # Determine which queries actually have results and instantiate the ones
     # we'll use.
     @best_description = @name.best_brief_description
-    @first_four       = @obs_with_images_query.results(limit: 4)
+    @first_four       = @obs_with_images_query.results(
+                          limit: 4,
+                          include: {
+                            thumb_image: [:image_votes, :license, :user]
+                          }
+                        )
     @first_child      = @children_query.results(limit: 1).first
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
@@ -1092,7 +1097,8 @@ class NameController < ApplicationController
 
     @query = create_query(:Observation, :all, names: @name.id)
     apply_content_filters(@query)
-    @observations = @query.results.select { |o| o.lat || o.location }
+    @observations = @query.results(include: :location).
+                           select { |o| o.lat || o.location }
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications

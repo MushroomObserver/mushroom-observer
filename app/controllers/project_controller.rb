@@ -82,7 +82,8 @@ class ProjectController < ApplicationController
     args = {
       action: :list_projects,
       letters: "projects.title",
-      num_per_page: 50
+      num_per_page: 50,
+      include: :user
     }.merge(args)
 
     @links ||= []

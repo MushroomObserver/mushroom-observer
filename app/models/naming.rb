@@ -287,7 +287,7 @@ class Naming < AbstractModel
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
-    votes.each { |v| return v if v.user_id == user.id }
+    votes.includes(:user).each { |v| return v if v.user_id == user.id }
     nil
   end
 
@@ -532,6 +532,6 @@ class Naming < AbstractModel
       errors.add(:observation, :validate_naming_observation_missing.t)
     end
     errors.add(:name, :validate_naming_name_missing.t) unless name
-    errors.add(:user, :validate_naming_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_naming_user_missing.t) if !user_id && !User.current
   end
 end

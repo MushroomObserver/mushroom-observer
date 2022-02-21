@@ -2,7 +2,6 @@
 
 class MatrixBoxPresenter
   attr_accessor \
-    :target,    # store rss_log.target to avoid having to load it again 
     :thumbnail, # thumbnail image tag
     :detail,    # string with extra details
     :when,      # when object or target was created
@@ -12,7 +11,6 @@ class MatrixBoxPresenter
     :time       # when object or target was last modified
 
   def initialize(object, view)
-    self.target = object
     case object
     when Image
       image_to_presenter(object, view)

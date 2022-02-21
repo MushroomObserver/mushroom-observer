@@ -101,6 +101,7 @@ MushroomObserver::Application.configure do
     Bullet.raise = true               # Show message by raising errors.
     Bullet.stacktrace_includes = [ ]
     Bullet.stacktrace_excludes = [ ]
+    Bullet.unused_eager_loading_enable = false
   end
 end
 
