@@ -75,20 +75,6 @@ MushroomObserver::Application.configure do
 
   # Enable web console for MushroomObserver VM
   config.web_console.whitelisted_ips = "10.0.2.2"
-
-  # ----------------------------
-  #  Bullet configuration.
-  # ----------------------------
-
-  config.after_initialize do
-    Bullet.enable = true
-    Bullet.bullet_logger = true          # Log to log/bullet.log
-    Bullet.alert = true                  # Popup alert in browser.
-    Bullet.add_footer = true             # Add footer to page in browser.
-    Bullet.skip_html_injection = false   # Required for alert and add_footer.
-    Bullet.stacktrace_includes = [ ]
-    Bullet.stacktrace_excludes = [ ]
-  end
 end
 
 file = File.expand_path("../consts-site.rb", __dir__)
