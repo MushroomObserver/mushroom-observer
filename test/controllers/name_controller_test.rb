@@ -2891,12 +2891,13 @@ class NameControllerTest < FunctionalTestCase
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
 
-    expect = "log_name_merged" \
-    # change spaces to %20 because display_name in the log is URI escaped
-    " that #{survivor.display_name.gsub(" ", "%20")}" \
-    " this #{destroyed_display_name.gsub(" ", "%20")}".
-      tr("*", "\*") # escape regex metacharacters
-    assert_match(expect, RssLog.last.notes, "Merger was logged incorrectly")
+    log = RssLog.last.parse_log
+    assert_equal(:log_orphan, log[0][0])
+    assert_equal({ title: destroyed_display_name }, log[0][1])
+    assert_equal(:log_name_merged, log[1][0])
+    assert_equal({ this: destroyed_display_name,
+                   that: survivor.display_name,
+                   user: "rolf" }, log[1][1])
   end
 
   def test_update_name_reverse_merge_add_identifier

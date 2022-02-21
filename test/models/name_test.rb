@@ -3283,4 +3283,26 @@ class NameTest < UnitTestCase
     assert_equal(names(:lepiota).classification,
                  l_rhacodes.reload.classification)
   end
+
+  def test_destroy_orphans_log
+    loc = locations(:mitrula_marsh)
+    log = loc.rss_log
+    assert_not_nil(log)
+    loc.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  def test_merge_orphans_log
+    name1 = names(:coprinus)
+    name2 = names(:fungi)
+    log1 = name1.rss_log
+    log2 = name2.rss_log
+    assert_not_nil(log1)
+    assert_not_nil(log2)
+    name2.merge(name1)
+    assert_nil(log1.reload.target_id)
+    assert_not_nil(log2.reload.target_id)
+    assert_equal(:log_orphan, log1.parse_log[0][0])
+    assert_equal(:log_name_merged, log1.parse_log[1][0])
+  end
 end

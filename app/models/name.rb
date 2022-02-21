@@ -387,8 +387,10 @@ class Name < AbstractModel
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
-  # (Destruction is already logged as a merge.)
-  self.autolog_events = []
+  # (Create should not be logged at all.  Update is already logged with more
+  # sphistication than the autologger allows.  Merge will already log the
+  # destruction as a merge and orphan the log.
+  self.autolog_events = [:destroyed]
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|

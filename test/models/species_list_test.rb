@@ -127,4 +127,12 @@ class SpeciesListTest < UnitTestCase
     assert_users_equal(mary, v.user)
     assert_equal(Vote.next_best_vote, v.value)
   end
+
+  def test_destroy_orphans_log
+    spl = species_lists(:first_species_list)
+    log = spl.rss_log
+    assert_not_nil(log)
+    spl.destroy!
+    assert_nil(log.reload.target_id)
+  end
 end

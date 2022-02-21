@@ -14,8 +14,8 @@ class LurkerTest < IntegrationTestCase
     assert_template("observer/show_observation")
 
     # Click on prev/next
-    click(label: "« Prev", in: :title)
     click(label: "Next »", in: :title)
+    click(label: "« Prev", in: :title)
 
     # Click on the first image.
     click(label: :image, href: /show_image/)

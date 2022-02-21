@@ -42,7 +42,7 @@ class GlossaryTerm < AbstractModel
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
   # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  self.autolog_events = [:created!, :updated!, :destroyed!]
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
