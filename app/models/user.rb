@@ -593,12 +593,12 @@ class User < AbstractModel
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
-  def all_editable_species_lists
+  def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
       results = species_lists
       if projects_member.any?
         project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.find_by_sql(%(
+        results += SpeciesList.includes(include).find_by_sql(%(
           SELECT species_lists.* FROM species_lists, projects_species_lists
           WHERE species_lists.user_id != #{id}
             AND projects_species_lists.project_id IN (#{project_ids})

@@ -134,6 +134,15 @@ class ApplicationController < ActionController::Base
     before_action { User.current = nil }
   end
 
+  # Disables Bullet tester for one action. Use this in your controller:
+  #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
+  def skip_bullet
+    Bullet.n_plus_one_query_enable = false
+    yield
+  ensure
+    Bullet.n_plus_one_query_enable = true
+  end
+
   ## @view can be used by classes to access view specific features like render
   def create_view_instance_variable
     @view = view_context

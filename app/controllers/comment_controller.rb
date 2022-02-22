@@ -59,13 +59,6 @@ class CommentController < ApplicationController
     :comment_search
   ]
 
-  def skip_bullet
-    Bullet.n_plus_one_query_enable = false
-    yield
-  ensure
-    Bullet.n_plus_one_query_enable = true
-  end
-
   ##############################################################################
   #
   #  :section: Searches and Indexes

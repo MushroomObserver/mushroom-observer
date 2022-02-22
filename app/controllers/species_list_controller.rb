@@ -68,6 +68,13 @@ class SpeciesListController < ApplicationController
     :create_species_list, :name_lister
   ]
 
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
+    # Bullet wants us to eager load synonyms for @deprecated_names in
+    # edit_species_list, and I thought it would be possible, but I can't
+    # get it to work.  Seems to minor to waste any more time on.
+    :edit_species_list
+  ]
+
   ##############################################################################
   #
   #  :section: Index
@@ -574,6 +581,7 @@ class SpeciesListController < ApplicationController
       projects += @list.projects
       projects.uniq!
     end
+    projects
   end
 
   def manage_object_states

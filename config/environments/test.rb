@@ -102,6 +102,8 @@ MushroomObserver::Application.configure do
     Bullet.stacktrace_includes = [ ]
     Bullet.stacktrace_excludes = [ ]
     Bullet.unused_eager_loading_enable = false
+    # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
+    #                     association: :comments)
   end
 end
 
