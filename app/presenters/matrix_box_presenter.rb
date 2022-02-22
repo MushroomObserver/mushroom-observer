@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Gather details for items in matrix-style ndex pages.
 class MatrixBoxPresenter
   attr_accessor \
     :thumbnail, # thumbnail image tag
@@ -51,7 +52,7 @@ class MatrixBoxPresenter
                        link: { controller: target.show_controller,
                                action: target.show_action, id: target.id })
       end
-    return unless temp = rss_log.detail
+    return unless (temp = rss_log.detail)
 
     # To avoid calling rss_log.detail twice
     self.detail = temp
@@ -103,9 +104,13 @@ class MatrixBoxPresenter
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user, view)
     name = user.unique_text_name
+    # rubocop:disable Rails/OutputSafety
+    # The results of .t and web_date are guaranteed to be safe, and both
+    # user.contribution and observations.count are just numbers.
     self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
                    #{:Observations.t}: #{user.observations.count}".html_safe
+    # rubocop:enable Rails/OutputSafety
     self.what  = view.link_with_query(name, action: :show_user, id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
