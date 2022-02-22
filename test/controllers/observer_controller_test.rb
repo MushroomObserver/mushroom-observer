@@ -268,6 +268,17 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_user)
   end
 
+  # Make sure we display the thumbnail of observations without an rss_log.
+  def test_observations_by_known_user
+    obs = observations(:coprinus_comatus_obs)
+    assert_nil(obs.rss_log_id)
+    assert_not_nil(obs.thumb_image_id)
+    url = Image.url(:small, obs.thumb_image_id)
+    get(:observations_by_user, params: { id: rolf.id })
+    assert_template(:list_observations)
+    assert_match(url, @response.body)
+  end
+
   def test_altering_types_shown_by_rss_log_index
     # Show none.
     post(:index_rss_log)
