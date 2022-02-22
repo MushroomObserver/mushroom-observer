@@ -164,12 +164,12 @@ class Naming < AbstractModel
     @initial_name_id = name_id
     taxa = name.approved_name.all_parents
     taxa.push(name)
-    taxa.push(Name.where(text_name: "Lichen")) if name.is_lichen?
+    taxa |= Name.where(text_name: "Lichen").to_a if name.is_lichen?
     done_user = {}
     flavor = Notification.flavors[:name]
     taxa.each do |taxon|
-      Notification.where(flavor: flavor, obj_id: taxon.id).
-        includes(:user).find_each do |n|
+      Notification.where(flavor: flavor, obj_id: taxon.id).includes(:user).
+        find_each do |n|
         next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
 
