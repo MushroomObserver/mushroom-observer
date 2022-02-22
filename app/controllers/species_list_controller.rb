@@ -1144,23 +1144,30 @@ class SpeciesListController < ApplicationController
       after = checks["id_#{project.id}"] == "1"
       next if before == after
 
-      if after
-        project.add_species_list(spl)
-        flash_notice(:attached_to_project.t(object: :species_list,
-                                            project: project.title))
-      else
-        project.remove_species_list(spl)
-        flash_notice(:removed_from_project.t(object: :species_list,
-                                             project: project.title))
-      end
+      change_project_species_lists(
+        project: project, spl: spl, change: (after ? :add : :remove)
+      )
       any_changes = true
     end
+
     flash_notice(:species_list_show_manage_observations_too.t) if any_changes
   end
 
   ##############################################################################
 
   private
+
+  def change_project_species_lists(project:, spl:, change: :add)
+    if change == :add
+      project.add_species_list(spl)
+      flash_notice(:attached_to_project.t(object: :species_list,
+                                          project: project.title))
+    else
+      project.remove_species_list(spl)
+      flash_notice(:removed_from_project.t(object: :species_list,
+                                           project: project.title))
+    end
+  end
 
   def whitelisted_species_list_args
     ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]
