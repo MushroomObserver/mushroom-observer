@@ -3054,7 +3054,7 @@ class ObserverControllerTest < FunctionalTestCase
          })
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
-    reasons = naming.get_reasons.select(&:used?).map(&:num).sort
+    reasons = naming.reasons_array.select(&:used?).map(&:num).sort
     assert_equal([2, 3, 4], reasons)
 
     # If javascript IS enabled, then checkbox IS required.
@@ -3073,7 +3073,7 @@ class ObserverControllerTest < FunctionalTestCase
          })
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
-    reasons = naming.get_reasons.select(&:used?).map(&:num).sort
+    reasons = naming.reasons_array.select(&:used?).map(&:num).sort
     assert_equal([3, 4], reasons)
   end
 

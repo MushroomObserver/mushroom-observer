@@ -11,9 +11,9 @@
 #
 #  Observation#change_vote::         Change a User's Vote for a given Naming.
 #  Observation#calc_consensus::  Decide which Name is winner for an Observation.
-#  Observation#is_owners_favorite?:: Is a given Naming the Observation owner's
+#  Observation#owners_favorite?::    Is a given Naming the Observation owner's
 #                                    favorite?
-#  Observation#is_users_favorite?::  Is a given Naming the given User's
+#  Observation#users_favorite?::     Is a given Naming the given User's
 #                                    favorite?
 #  Observation#refresh_vote_cache::  Refresh vote cache for all Observation's.
 #
@@ -21,7 +21,7 @@
 #  Naming#user_voted?::         Has a given User voted for this Naming?
 #  Naming#users_vote::          Get a given User's Vote for this Naming.
 #  Naming#vote_percent::        Convert score for this Naming into a percentage.
-#  Naming#is_users_favorite?::  Is this Naming the given User's favorite?
+#  Naming#users_favorite?::     Is this Naming the given User's favorite?
 #  Naming#calc_vote_table::     Gather Vote info for this Naming.
 #
 #  == Attributes

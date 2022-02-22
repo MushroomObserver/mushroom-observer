@@ -71,13 +71,13 @@
               <% end %>
             </td>
             <td>
-              <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
+              <%= image_tag("eye3.png") if observation.owners_favorite?(naming) %>
               <%= image_tag("eyes3.png") if naming == consensus %>
             </td>
           </tr>
           <tr>
             <td colspan="5">
-              <% naming.get_reasons.each do |reason| %>
+              <% naming.reasons_array.each do |reason| %>
                 <% if reason.used? %>
                   <div>
                     <span>
@@ -196,10 +196,10 @@
                     <% end %>
                   </div>
                   <div class="col-xs-6">
-                    <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
+                    <%= image_tag("eye3.png") if observation.owners_favorite?(naming) %>
                     <%= image_tag("eyes3.png") if naming == consensus %>
                   </div>
-                  <% naming.get_reasons.select(&:used?).each do |reason| %>
+                  <% naming.reasons_array.select(&:used?).each do |reason| %>
                     <div class="col-xs-12">
                       <span>
                         <%= reason.notes.blank? ? reason.label.t : (reason.label.l + ": " + reason.notes.to_s.html_safe).tl %>

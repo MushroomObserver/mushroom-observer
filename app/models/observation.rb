@@ -105,9 +105,9 @@
 #  owners_vote::            Owner's Vote on a given Naming.
 #  users_vote::             A given User's Vote on a given Naming
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
-#  is_owners_favorite?::    Is a given Naming one of the owner's favorite(s)
+#  owners_favorite?::       Is a given Naming one of the owner's favorite(s)
 #                           for this Observation?
-#  is_users_favorite?::     Is a given Naming one of the given user's
+#  users_favorite?::        Is a given Naming one of the given user's
 #                           favorites for this Observation?
 #  owner_preference         owners's unique prefered Name (if any) for this Obs
 #  change_vote::            Change a given User's Vote for a given Naming.
@@ -712,15 +712,15 @@ class Observation < AbstractModel
   # votes from the owner of this observation.
   # Note: multiple namings can return true for a given observation.
   # This is used to display eyes next to Proposed Name on Observation page
-  def is_owners_favorite?(naming)
-    lookup_naming(naming).is_users_favorite?(user)
+  def owners_favorite?(naming)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # Returns true if a given Naming has received one of the highest positive
   # votes from the given user (among namings for this observation).
   # Note: multiple namings can return true for a given user and observation.
-  def is_users_favorite?(naming, user)
-    lookup_naming(naming).is_users_favorite?(user)
+  def users_favorite?(naming, user)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # All of observation.user's votes on all Namings for this Observation
