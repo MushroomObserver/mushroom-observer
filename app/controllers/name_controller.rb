@@ -397,11 +397,11 @@ class NameController < ApplicationController
     # we'll use.
     @best_description = @name.best_brief_description
     @first_four       = @obs_with_images_query.results(
-                          limit: 4,
-                          include: {
-                            thumb_image: [:image_votes, :license, :user]
-                          }
-                        )
+      limit: 4,
+      include: {
+        thumb_image: [:image_votes, :license, :user]
+      }
+    )
     @first_child      = @children_query.results(limit: 1).first
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
@@ -443,9 +443,10 @@ class NameController < ApplicationController
       subversion = params[:version]
       if subversion.present? &&
          (version.version != subversion.to_i)
-        version = NameDescription::Version.
-                  find_by_version_and_name_description_id(params[:version],
-                                                          @old_parent_id)
+        version = NameDescription::Version.find_by(
+          version: params[:version],
+          name_description_id: @old_parent_id
+        )
       end
       @description.clone_versioned_model(version, @description)
     end
@@ -1098,7 +1099,7 @@ class NameController < ApplicationController
     @query = create_query(:Observation, :all, names: @name.id)
     apply_content_filters(@query)
     @observations = @query.results(include: :location).
-                           select { |o| o.lat || o.location }
+                    select { |o| o.lat || o.location }
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications

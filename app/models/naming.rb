@@ -164,7 +164,7 @@ class Naming < AbstractModel
     @initial_name_id = name_id
     taxa = name.approved_name.all_parents
     taxa.push(name)
-    taxa |= Name.where(text_name: "Lichen").to_a if name.is_lichen?
+    taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
     done_user = {}
     flavor = Notification.flavors[:name]
     taxa.each do |taxon|
