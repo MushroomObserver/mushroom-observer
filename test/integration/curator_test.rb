@@ -116,22 +116,28 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_index_sort_links
+    user = users(:zero_user)
+    login(user)
     get(herbaria_path(flavor: :all))
 
-    herbaria_links = assert_select("a:match('href', ?)",
-                                   %r{#{herbaria_path}/\d+})
-    assert_equal(Herbarium.count, herbaria_links.size,
-                 "Index should display links to all herbaria")
+    herbarium_show_path_matcher = %r{#{herbaria_path}/\d+(?!\d|/edit)}
 
-    first_herbarium_path = herbaria_links.first.attributes["href"].value.
+    herbaria_show_links = assert_select("a:match('href', ?)",
+                                        herbarium_show_path_matcher)
+    assert_equal(
+      Herbarium.count, herbaria_show_links.size,
+      "Index should have show links to all herbaria"
+    )
+
+    first_herbarium_path = herbaria_show_links.first.attributes["href"].value.
                            sub(/\?.*/, "") # strip query string
 
     click(label: :sort_by_reverse.l)
-    reverse_herbaria_links = assert_select("a:match('href', ?)",
-                                           %r{#{herbaria_path}/\d+})
+    reverse_herbaria_show_links = assert_select("a:match('href', ?)",
+                                                herbarium_show_path_matcher)
     assert_equal(
       first_herbarium_path,
-      reverse_herbaria_links.last.attributes["href"].value.sub(/\?.*/, ""),
+      reverse_herbaria_show_links.last.attributes["href"].value.sub(/\?.*/, ""),
       "Reverse ordered last herbarium should be the normal first herbarium"
     )
   end
@@ -150,6 +156,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_single_herbarium_search
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "New York")
@@ -165,6 +172,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_multiple_herbarium_search
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Personal")
@@ -180,6 +188,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_herbarium_record_search
+    login
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Coprinus comatus")

@@ -2316,7 +2316,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_by_rss_log
-    assert_query([names(:fungi).id], :Name, :by_rss_log)
+    assert_query(Name.joins(:rss_log).order("rss_logs.updated_at"),
+                 :Name, :by_rss_log)
   end
 
   def test_name_in_set

@@ -15,6 +15,7 @@ conic_glossary_term:
   description: Cute little cone head. # This should be a symbol
   thumb_image: conic_image # The image for the index
   images: conic_image # all thumb_images should also be in images
+  rss_log: glossary_term_rss_log
 
 convex_glossary_term:
   <<: *DEFAULTS

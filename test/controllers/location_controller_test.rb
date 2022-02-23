@@ -97,6 +97,7 @@ class LocationControllerTest < FunctionalTestCase
     location = locations(:albion)
     updated_at = location.updated_at
     log_updated_at = location.rss_log.updated_at
+    login
     get_with_dump(:show_location, id: location.id)
     assert_action_partials("show_location",
                            %w[_location _show_comments
@@ -115,6 +116,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_show_past_location
     location = locations(:albion)
+    login
     get_with_dump(:show_past_location, id: location.id,
                                        version: location.version - 1)
     assert_template("show_past_location", partial: "_location")
@@ -127,6 +129,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_list_locations
+    login
     get_with_dump(:list_locations)
     assert_template("list_locations")
   end
@@ -134,6 +137,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_location_pattern_search_id
     loc = locations(:salt_point)
 
+    login
     get(:location_search, params: { pattern: loc.id.to_s })
     assert_redirected_to("#{location_show_location_path}/#{loc.id}")
   end
@@ -141,12 +145,14 @@ class LocationControllerTest < FunctionalTestCase
   def test_location_advanced_search
     query = Query.lookup_and_save(:Location, :advanced_search,
                                   location: "California")
+    login
     get(:advanced_search, @controller.query_params(query))
     assert_template(:list_locations)
   end
 
   def test_location_bounding_box
     delta = 0.001
+    login
     get(:list_locations, north: 0, south: 0, east: 0, west: 0)
     query = Query.find(QueryRecord.last.id)
     assert_equal(0 + delta, query.params[:north])
@@ -163,16 +169,19 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_list_countries
+    login
     get_with_dump(:list_countries)
     assert_template("list_countries")
   end
 
   def test_list_by_country
+    login
     get_with_dump(:list_by_country, country: "USA")
     assert_template("list_locations")
   end
 
   def test_list_by_country_with_quote
+    login
     get_with_dump(:list_by_country, country: "Cote d'Ivoire")
     assert_template("list_locations")
   end
@@ -218,11 +227,13 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_locations_by_user
+    login
     get_with_dump(:locations_by_user, id: rolf.id)
     assert_template("list_locations")
   end
 
   def test_locations_by_editor
+    login
     get_with_dump(:locations_by_editor, id: rolf.id)
     assert_template("list_locations")
   end
@@ -240,6 +251,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_location_descriptions_by_author
     desc = location_descriptions(:albion_desc)
+    login
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
       %r{/location/show_location_description/#{desc.id}}
@@ -247,6 +259,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_location_descriptions_by_editor
+    login
     get_with_dump(:location_descriptions_by_editor, id: rolf.id)
     assert_template("list_location_descriptions")
   end
@@ -254,6 +267,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_show_location_description
     # happy path
     desc = location_descriptions(:albion_desc)
+    login
     get_with_dump(:show_location_description, id: desc.id)
     assert_action_partials("show_location_description",
                            %w[_show_description _location_description])
@@ -820,6 +834,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_map_locations
+    login
     # test_map_locations - map everything
     get_with_dump(:map_locations)
     assert_template("map_locations")

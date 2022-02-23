@@ -54,13 +54,13 @@ class AccountController < ApplicationController
     :verify,
     :welcome
   ]
-
   before_action :disable_link_prefetching, except: [
     :login,
     :signup,
     :prefs,
     :profile
   ]
+  skip_before_action :redirect_anonymous_users
 
   ##############################################################################
   #

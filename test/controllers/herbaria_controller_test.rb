@@ -109,6 +109,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
     query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
+    login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
@@ -119,6 +120,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_all
+    login
     get(:index, params: { flavor: :all })
 
     assert_response(:success)
@@ -185,8 +187,9 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_index_all_merge_source_links_presence_no_login
+  def test_index_all_no_login
     get(:index, params: { flavor: :all })
+    assert_redirected_to(account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
@@ -235,11 +238,13 @@ class HerbariaControllerTest < FunctionalTestCase
     source = field_museum
     get(:index, params: { flavor: :all, merge: source.id })
 
+    assert_redirected_to(account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("form[action *= 'herbaria_merges_path']", count: 0)
   end
 
   def test_index_nonpersonal
+    login
     get(:index, params: { flavor: :nonpersonal })
 
     assert_select("#title-caption", text: :query_title_nonpersonal.l)
@@ -261,6 +266,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_pattern_text
     pattern = "Personal Herbarium"
+    login
     get(:index, params: { pattern: pattern })
 
     assert_select("#title-caption").text.start_with?(
@@ -283,6 +289,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_pattern_integer
+    login
     get(:index, params: { pattern: nybg.id })
 
     assert_redirected_to(
@@ -292,6 +299,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_reverse_records
+    login
     get(:index, params: { by: "reverse_records" })
 
     assert_response(:success)

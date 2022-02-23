@@ -16,23 +16,27 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_index
+    login
     get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_template(:list_herbarium_records)
   end
 
   def test_herbarium_with_no_herbarium_records_index
+    login
     get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:list_herbarium_records)
     assert_flash_text(/No matching fungarium records found/)
   end
 
   def test_observation_index
+    login
     get_with_dump(:observation_index,
                   id: observations(:coprinus_comatus_obs).id)
     assert_template(:list_herbarium_records)
   end
 
   def test_observation_with_no_herbarium_records_index
+    login
     get_with_dump(:observation_index,
                   id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:list_herbarium_records)
@@ -42,6 +46,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_herbarium_record_search
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
+    login
     get(:herbarium_record_search, pattern: pattern)
     assert_response(:success)
     assert_template("list_herbarium_records")
@@ -50,6 +55,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_record_search_with_one_herbarium_record_index
+    login
     get_with_dump(:herbarium_record_search,
                   pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
@@ -57,6 +63,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   end
 
   def test_index_herbarium_record
+    login
     get(:index_herbarium_record)
     assert_response(:success)
     assert_template("list_herbarium_records")
@@ -67,6 +74,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
+    login
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
     assert_template(:show_herbarium_record, partial: "_rss_log")
   end
@@ -74,6 +82,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_show_herbarium_record_with_notes
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
+    login
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
     assert_template(:show_herbarium_record, partial: "_rss_log")
   end
@@ -85,6 +94,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     number2 = query.results[1]
     q = query.record.id.alphabetize
 
+    login
     get(:next_herbarium_record, id: number1.id, q: q)
     assert_redirected_to(action: :show_herbarium_record, id: number2.id, q: q)
 
