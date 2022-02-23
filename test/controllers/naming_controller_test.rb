@@ -225,7 +225,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(2, nam1.votes.length)
 
     # Check new reasons.
-    nrs = nam1.get_reasons
+    nrs = nam1.reasons_array
     assert_equal(3, nrs.count(&:used?))
     assert_equal(1, nrs[0].num)
     assert_equal(2, nrs[1].num)
@@ -278,7 +278,7 @@ class NamingControllerTest < FunctionalTestCase
 
     # Make sure old naming is unchanged.
     assert_equal(names(:coprinus_comatus).id, nam1.reload.name_id)
-    assert_equal(1, nam1.get_reasons.count(&:used?))
+    assert_equal(1, nam1.reasons_array.count(&:used?))
     assert_equal(3, nam1.vote_sum)
     assert_equal(2, nam1.votes.length)
 
@@ -286,7 +286,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:conocybe_filaris).id, naming.name_id)
     assert_equal(rolf, naming.user)
-    nrs = naming.get_reasons.select(&:used?)
+    nrs = naming.reasons_array.select(&:used?)
     assert_equal(1, nrs.length)
     assert_equal(1, nrs.first.num)
     assert_equal("Isn't it obvious?", nrs.first.notes)
@@ -363,7 +363,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:agaricus).id, naming.name_id)
     assert_equal(rolf, naming.user)
-    assert_equal(3, naming.get_reasons.count(&:used?))
+    assert_equal(3, naming.reasons_array.count(&:used?))
     assert_equal(1, naming.votes.length)
 
     # Make sure vote was created correctly.
@@ -372,7 +372,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(3, vote.value)
 
     # Make sure reasons were created correctly.
-    nr1, nr2, nr3, nr4 = naming.get_reasons
+    nr1, nr2, nr3, nr4 = naming.reasons_array
     assert_equal(1, nr1.num)
     assert_equal(2, nr2.num)
     assert_equal(3, nr3.num)

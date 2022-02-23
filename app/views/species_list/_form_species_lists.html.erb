@@ -130,7 +130,7 @@
         <p>
           <% for project in @projects %>
             <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
-                          disabled: @species_list.user != @user && !project.is_member?(@user)) %>
+                          disabled: @species_list.user_id != @user.id && !project.is_member?(@user)) %>
             <%= label_tag("project_id_#{project.id}", link_to_object(project)) %>
             <br/>
           <% end %>

@@ -190,43 +190,7 @@ class SpeciesList < AbstractModel
 
   # Get list of Names, sorted by sort_name, for this list's Observation's.
   def names
-    # Takes 0.07 seconds on Sebastopol Observations.
-    # (Methods that call this don't need the description, review status, etc.)
-    Name.find_by_sql(%(
-      SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
-             n.author, n.display_name, n.display_name, n.synonym_id,
-             n.correct_spelling_id, n.citation
-      FROM names n, observations o, observations_species_lists os
-      WHERE n.id = o.name_id
-        AND os.observation_id = o.id
-        AND os.species_list_id = #{id}
-      ORDER BY n.sort_name ASC
-    ))
-
-    # Takes 0.10 seconds on Sebastopol Observations.
-    # Name.find_by_sql %(
-    #   SELECT DISTINCT n.*
-    #   FROM names n, observations o, observations_species_lists os
-    #   WHERE n.id = o.name_id
-    #     AND os.observation_id = o.id
-    #     AND os.species_list_id = #{id}
-    #   ORDER BY n.sort_name ASC
-    # )
-
-    # Takes 0.25 seconds on Sebastopol Observations.
-    # ids = observations.map(&:name_id).uniq
-    # Name.find(:all, :conditions => ['id IN (?)', ids], :
-    #           order => 'sort_name ASC')
-
-    # Takes 0.71 seconds on Sebastopol Observations.
-    # self.observations.map {|o| o.name_id}.
-    #   uniq.map {|id| Name.find(id)}.sort_by(&:sort_name)
-
-    # Takes 1.00 seconds on Sebastopol Observations.
-    # Name.all(:conditions =>
-    #            ['observations_species_lists.species_list_id = ?', id],
-    #          :include => {:observations => :species_lists},
-    #          :order => 'names.sort_name ASC')
+    Name.where(id: observations.map(&:name_id).uniq).order("sort_name ASC")
   end
 
   # Tests to see if the species list includes an Observation with the given

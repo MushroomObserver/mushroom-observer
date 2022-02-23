@@ -540,9 +540,9 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is a member of.
-  def projects_member(order: :created_at)
+  def projects_member(order: :created_at, include: nil)
     @projects_member ||= Project.where(user_group: user_groups.ids).
-                         order(order).to_a
+                         includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
@@ -593,12 +593,12 @@ class User < AbstractModel
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
-  def all_editable_species_lists
+  def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
       results = species_lists
       if projects_member.any?
         project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.find_by_sql(%(
+        results += SpeciesList.includes(include).find_by_sql(%(
           SELECT species_lists.* FROM species_lists, projects_species_lists
           WHERE species_lists.user_id != #{id}
             AND projects_species_lists.project_id IN (#{project_ids})

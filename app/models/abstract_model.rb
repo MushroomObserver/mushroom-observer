@@ -751,7 +751,7 @@ class AbstractModel < ApplicationRecord
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user == user))
+    !respond_to?("user") || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)

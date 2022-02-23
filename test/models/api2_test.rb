@@ -228,7 +228,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_last_reasons_correct(naming)
-    naming.get_reasons.each do |reason|
+    naming.reasons_array.each do |reason|
       expect = @reasons[reason.num]
       if expect.nil?
         assert_false(reason.used?)

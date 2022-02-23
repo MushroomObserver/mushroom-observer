@@ -48,6 +48,17 @@ class CommentController < ApplicationController
     :show_comment
   ]
 
+  # Bullet doesn't seem to be able to figure out that we cannot eager load
+  # through polymorphic relations, so I'm just disabling it for these actions.
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
+    :index_comment,
+    :list_comments,
+    :show_comments_by_user,
+    :show_comments_for_user,
+    :show_comments_for_target,
+    :comment_search
+  ]
+
   ##############################################################################
   #
   #  :section: Searches and Indexes

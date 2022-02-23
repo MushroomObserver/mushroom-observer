@@ -68,6 +68,13 @@ class SpeciesListController < ApplicationController
     :create_species_list, :name_lister
   ]
 
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
+    # Bullet wants us to eager load synonyms for @deprecated_names in
+    # edit_species_list, and I thought it would be possible, but I can't
+    # get it to work.  Seems to minor to waste any more time on.
+    :edit_species_list
+  ]
+
   ##############################################################################
   #
   #  :section: Index
@@ -236,7 +243,7 @@ class SpeciesListController < ApplicationController
 
   def render_name_list_as_txt(names)
     charset = "UTF-8"
-    str = "\xEF\xBB\xBF" + names.map(&:real_search_name).join("\r\n")
+    str = "\xEF\xBB\xBF#{names.map(&:real_search_name).join("\r\n")}"
     send_data(str, type: "text/plain",
                    charset: charset,
                    disposition: "attachment",
@@ -272,7 +279,7 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author if author.present?
+      doc << " #{author}" if author.present?
       doc.line_break
     end
     send_data(doc.to_rtf, type: "text/rtf",
@@ -301,9 +308,9 @@ class SpeciesListController < ApplicationController
       name, author = str.split("|")
       name.tr!("ë", "e")
       if author
-        Name.find_by_text_name_and_author(name, author)
+        Name.find_by(text_name: name, author: author)
       else
-        Name.find_by_text_name(name)
+        Name.find_by(text_name: name)
       end
     end
     @names.reject!(&:nil?)
@@ -453,7 +460,7 @@ class SpeciesListController < ApplicationController
     if /^\d+$/.match?(str)
       SpeciesList.safe_find(str)
     else
-      SpeciesList.find_by_title(str)
+      SpeciesList.find_by(title: str)
     end
   end
 
@@ -994,7 +1001,7 @@ class SpeciesListController < ApplicationController
 
   def init_name_vars_for_edit(spl)
     init_name_vars_for_create
-    @deprecated_names = spl.names.select(&:deprecated)
+    @deprecated_names = spl.names.where(deprecated: true)
     @place_name = spl.place_name
   end
 
@@ -1094,7 +1101,8 @@ class SpeciesListController < ApplicationController
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title)
+    @projects = User.current.projects_member(order: :title,
+                                             include: { user_group: :users })
     @project_checks = {}
   end
 
@@ -1130,28 +1138,36 @@ class SpeciesListController < ApplicationController
     return unless checks
 
     any_changes = false
-    User.current.projects_member.each do |project|
+    Project.where(id: User.current.projects_member.map(&:id)).
+      includes(:species_lists).each do |project|
       before = spl.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next if before == after
 
-      if after
-        project.add_species_list(spl)
-        flash_notice(:attached_to_project.t(object: :species_list,
-                                            project: project.title))
-      else
-        project.remove_species_list(spl)
-        flash_notice(:removed_from_project.t(object: :species_list,
-                                             project: project.title))
-      end
+      change_project_species_lists(
+        project: project, spl: spl, change: (after ? :add : :remove)
+      )
       any_changes = true
     end
+
     flash_notice(:species_list_show_manage_observations_too.t) if any_changes
   end
 
   ##############################################################################
 
   private
+
+  def change_project_species_lists(project:, spl:, change: :add)
+    if change == :add
+      project.add_species_list(spl)
+      flash_notice(:attached_to_project.t(object: :species_list,
+                                          project: project.title))
+    else
+      project.remove_species_list(spl)
+      flash_notice(:removed_from_project.t(object: :species_list,
+                                           project: project.title))
+    end
+  end
 
   def whitelisted_species_list_args
     ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]

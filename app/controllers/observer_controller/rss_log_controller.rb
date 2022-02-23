@@ -39,16 +39,21 @@ class ObserverController
     store_query_in_session(query)
     query_params_set(query)
 
+    includes = {
+      article: :user,
+      glossary_term: :user,
+      location: :user,
+      name: :user,
+      observation: [:location, :name, :user,
+                    @user ? { thumb_image: :image_votes } : :thumb_image],
+      project: :user,
+      species_list: [:location, :user]
+    }
+
     args = {
       action: "list_rss_logs",
       matrix: true,
-      include: {
-        location: :user,
-        name: :user,
-        observation: [:location, :name, { thumb_image: :image_votes }, :user],
-        project: :user,
-        species_list: [:location, :user]
-      }
+      include: includes
     }.merge(args)
 
     @types = query.params[:type].to_s.split.sort

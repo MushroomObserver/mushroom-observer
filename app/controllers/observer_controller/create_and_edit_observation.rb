@@ -576,7 +576,7 @@ class ObserverController
   def update_projects(obs, checks)
     return unless checks
 
-    User.current.projects_member.each do |project|
+    User.current.projects_member(include: :observations).each do |project|
       before = obs.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next unless before != after

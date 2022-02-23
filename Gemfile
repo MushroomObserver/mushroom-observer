@@ -250,6 +250,9 @@ group :test do
   # Stub and set expectations on HTTP requests in test mode
   # Allow selective disabling of internet
   gem "webmock"
+
+  # Check for N+1 queries and unused eager loading.
+  gem "bullet"
 end
 
 group :development do

@@ -136,6 +136,15 @@ class ApplicationController < ActionController::Base
     before_action { User.current = nil }
   end
 
+  # Disables Bullet tester for one action. Use this in your controller:
+  #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
+  def skip_bullet
+    Bullet.n_plus_one_query_enable = false
+    yield
+  ensure
+    Bullet.n_plus_one_query_enable = true
+  end
+
   ## @view can be used by classes to access view specific features like render
   def create_view_instance_variable
     @view = view_context
@@ -1855,7 +1864,7 @@ class ApplicationController < ActionController::Base
 
   # Bad place for this, but need proper refactor to have a good place.
   def gather_users_votes(obs, user)
-    obs.namings.each_with_object({}) do |naming, votes|
+    obs.namings.includes(:votes).each_with_object({}) do |naming, votes|
       votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
