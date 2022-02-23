@@ -38,7 +38,7 @@ class LocalizationFilesTest < UnitTestCase
       data.each do |tag, str|
         next unless str.is_a?(String)
 
-        str.gsub(/[\[\=]:(\w+)/) do
+        str.gsub(/[\[=]:(\w+)/) do
           unless tags.key?(Regexp.last_match(1).downcase)
             errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
           end
@@ -135,7 +135,7 @@ class LocalizationFilesTest < UnitTestCase
       Dir.glob("#{path}/*").each do |file|
         if /\.(rb|rhtml|rxml|erb)$/.match?(file)
           yield(file)
-        elsif File.directory?(file) && file.match(%r{\/\w+$})
+        elsif File.directory?(file) && file.match(%r{/\w+$})
           source_files(file, &block)
         end
       end

@@ -291,7 +291,7 @@ module LanguageExporter
   end
 
   def escape_string(val)
-    '"' + val.gsub(/([\"\\])/, '\\\\\\1') + '"'
+    %("#{val.gsub(/(["\\])/, '\\\\\\1')}")
   end
 
   # ----------------------------
@@ -432,7 +432,7 @@ module LanguageExporter
     elsif str.start_with?('"')
       pass = false unless /^"([^"\\]|\\.)*"$/.match?(str)
     elsif /:(\s|$)| #/.match?(str) ||
-          (/^[^\w\(]/.match?(str) && str[0].is_ascii_character?)
+          (/^[^\w(]/.match?(str) && str[0].is_ascii_character?)
       pass = false
     end
     pass

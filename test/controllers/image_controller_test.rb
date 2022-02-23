@@ -26,7 +26,7 @@ class ImageControllerTest < FunctionalTestCase
     get_with_dump(:next_image, id: images(:turned_over_image).id)
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|\?]})
+    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|?]})
   end
 
   def test_next_image_ss
@@ -129,7 +129,7 @@ class ImageControllerTest < FunctionalTestCase
     login
     get_with_dump(:prev_image, id: images(:in_situ_image).id) # oldest image
     # so "prev" is the 2nd oldest
-    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|\?]})
+    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|?]})
   end
 
   def test_prev_image_ss

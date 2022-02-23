@@ -200,7 +200,7 @@ class TextileTest < UnitTestCase
   def test_textile_div_safe
     str = "Xyz"
     assert_match(
-      %r{<div class=\"textile\">.*#{str}.*</div>},
+      %r{<div class="textile">.*#{str}.*</div>},
       Textile.textile_div_safe { Textile.textilize(str) },
       %("#{str}" should be within a <div class="textile>")
     )
