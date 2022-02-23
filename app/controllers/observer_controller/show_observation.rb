@@ -70,10 +70,12 @@ class ObserverController
   def external_sites_user_can_add_links_to(obs)
     return [] unless @user
 
+    obs_sites = obs.external_links.includes(external_site: :project).
+                map(&:external_site)
     if @user == obs.user || in_admin_mode?
-      ExternalSite.all - obs.external_links.map(&:external_site)
+      ExternalSite.all - obs_sites
     else
-      @user.external_sites - obs.external_links.map(&:external_site)
+      @user.external_sites - obs_sites
     end
   end
 
