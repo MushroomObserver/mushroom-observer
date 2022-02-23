@@ -70,6 +70,7 @@ class ProjectControllerTest < FunctionalTestCase
   end
 
   def test_show_project
+    login("zero") # NOt the owner of eol_project
     p_id = projects(:eol_project).id
     get_with_dump(:show_project, id: p_id)
     assert_template("show_project")
@@ -91,6 +92,7 @@ class ProjectControllerTest < FunctionalTestCase
   end
 
   def test_list_projects
+    login
     get_with_dump(:list_projects)
     assert_template("list_projects")
   end

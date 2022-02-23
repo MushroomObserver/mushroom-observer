@@ -5,11 +5,13 @@ require("test_helper")
 # Controller tests for nucleotide sequences
 class SequenceControllerTest < FunctionalTestCase
   def test_list_sequences
-    get_with_dump(:list_sequences)
+    login
+    get(:list_sequences)
     assert(:success)
   end
 
   def test_sequence_search
+    login
     get(:sequence_search, pattern: Sequence.last.id)
     assert_redirected_to(Sequence.last.show_link_args)
 
@@ -18,6 +20,7 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_observation_index
+    login
     obs = observations(:locally_sequenced_obs)
     get(:observation_index, id: obs.id)
     assert(:success)
@@ -28,6 +31,7 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_index_sequence
+    login
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     results = query.results
@@ -45,6 +49,7 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_show_sequence
+    login
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
     get_with_dump(:show_sequence, id: sequence.id)

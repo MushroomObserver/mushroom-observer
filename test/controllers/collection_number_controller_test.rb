@@ -4,6 +4,7 @@ require("test_helper")
 
 class CollectionNumberControllerTest < FunctionalTestCase
   def test_collection_index
+    login
     get_with_dump(:list_collection_numbers)
     assert_template(:list_collection_numbers)
   end
@@ -11,6 +12,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   def test_observation_index_with_one_collection_number
     obs = observations(:minimal_unknown_obs)
     assert_equal(1, obs.collection_numbers.count)
+    login
     get_with_dump(:observation_index, id: obs.id)
     assert_template(:list_collection_numbers)
     assert_no_flash
@@ -19,6 +21,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   def test_observation_index_with_multiple_collection_numbers
     obs = observations(:detailed_unknown_obs)
     assert_operator(obs.collection_numbers.count, :>, 1)
+    login
     get_with_dump(:observation_index, id: obs.id)
     assert_template(:list_collection_numbers)
     assert_no_flash
@@ -27,6 +30,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   def test_observation_index_with_no_collection_numbers
     obs = observations(:strobilurus_diminutivus_obs)
     assert_empty(obs.collection_numbers)
+    login
     get_with_dump(:observation_index, id: obs.id)
     assert_template(:list_collection_numbers)
     assert_flash_text(/no matching collection numbers found/i)
@@ -35,6 +39,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   def test_collection_number_search
     numbers = CollectionNumber.where("name like '%singer%'")
     assert_operator(numbers.count, :>, 1)
+    login
     get(:collection_number_search, pattern: "Singer")
     assert_response(:success)
     assert_template("list_collection_numbers")
@@ -42,9 +47,17 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_select(".results tr", numbers.count)
   end
 
+  def test_collection_number_search_by_number
+    number = collection_numbers(:minimal_unknown_coll_num).number
+    login
+    get(:collection_number_search, pattern: number)
+    assert_redirected_to(%r{/show_collection_number})
+  end
+
   def test_collection_number_search_with_one_collection_number_index
     numbers = CollectionNumber.where("name like '%neighbor%'")
     assert_equal(1, numbers.count)
+    login
     get_with_dump(:collection_number_search, pattern: "neighbor")
     query_record = QueryRecord.last
     assert_redirected_to(action: :show_collection_number,
@@ -55,6 +68,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   def test_index_collection_number
     query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
     assert_operator(query.num_results, :>, 1)
+    login
     get(:index_collection_number, q: query.record.id.alphabetize)
     assert_response(:success)
     assert_template("list_collection_numbers")
@@ -63,6 +77,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
   end
 
   def test_show_collection_number
+    login
     get(:show_collection_number)
     get(:show_collection_number, id: "bogus")
 
@@ -77,6 +92,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     number2 = query.results[1]
     q = query.record.id.alphabetize
 
+    login
     get(:next_collection_number, id: number1.id, q: q)
     assert_redirected_to(action: :show_collection_number, id: number2.id, q: q)
 

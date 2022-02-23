@@ -14,6 +14,11 @@ class QuerySupplementalTest < IntegrationTestCase
     obs = observations(:boletus_edulis_obs)
 
     visit("/")
+    if page.has_title?(:login_please_login.l)
+      fill_in("user_login", with: users(:zero_user).login)
+      fill_in("user_password", with: "testpassword")
+      click_button("Login")
+    end
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")
