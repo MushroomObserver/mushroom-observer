@@ -27,18 +27,21 @@ class RedirectsTest < IntegrationTestCase
   # Article to Articles------ --------------------------------------------------
 
   def test_controller_article
+    login
     get("/article")
     assert_equal(articles_path,
                  @response.request.fullpath)
   end
 
   def test_list_article
+    login
     get("/article/list_article")
     assert_equal(articles_path,
                  @response.request.fullpath)
   end
 
   def test_index_article
+    login
     get("/article/index_article/")
     assert_equal(articles_path,
                  @response.request.fullpath)
@@ -46,6 +49,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_show_article
     get("/article/show_article/#{Article.first.id}")
+    login
     assert_equal(article_path(Article.first.id),
                  @response.request.fullpath)
   end
@@ -105,17 +109,20 @@ class RedirectsTest < IntegrationTestCase
 
   def test_controller_glossary
     get("/glossary")
+    login
     assert_equal(glossary_terms_path,
                  @response.request.fullpath)
   end
 
   def test_list_glossary_term
     get("/glossary/list_glossary_term")
+    login
     assert_equal(glossary_terms_path,
                  @response.request.fullpath)
   end
 
   def test_index_glossary
+    login
     get("/glossary/index_glossary_term")
     assert_equal(glossary_terms_path,
                  @response.request.fullpath)
@@ -123,6 +130,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_show_glossary_term
     term = glossary_terms(:conic_glossary_term)
+    login
     get("/glossary/show_glossary_term/#{term.id}")
     assert_equal(glossary_term_path(term.id),
                  @response.request.fullpath)
@@ -160,6 +168,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_show_past_glossary_term
     term = glossary_terms(:conic_glossary_term)
+    login
     get("/glossary/show_past_glossary_term/#{term.id}?version=1")
     assert_equal(show_past_glossary_term_path(term.id, version: 1),
                  @response.request.fullpath)
@@ -251,24 +260,28 @@ class RedirectsTest < IntegrationTestCase
   end
 
   def test_herbarium_search
+    login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/herbarium_search", herbaria_path
     )
   end
 
   def test_herbarium
+    login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium", herbaria_path(flavor: :nonpersonal)
     )
   end
 
   def test_index_herbarium
+    login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/index", herbaria_path
     )
   end
 
   def test_list_herbaria
+    login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/list_herbaria", herbaria_path(flavor: :all)
     )
@@ -297,6 +310,7 @@ class RedirectsTest < IntegrationTestCase
 
   def test_show_herbarium_get
     nybg = herbaria(:nybg_herbarium)
+    login
     assert_old_url_redirects_to_new_path(
       :get, "/herbarium/show_herbarium/#{nybg.id}", herbarium_path(nybg)
     )

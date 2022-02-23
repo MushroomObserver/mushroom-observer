@@ -460,4 +460,26 @@ class LocationTest < UnitTestCase
     loc.force_valid_lat_longs!
     assert_equal([8, 6, -170, 170], [loc.north, loc.south, loc.east, loc.west])
   end
+
+  def test_destroy_orphans_log
+    loc = locations(:mitrula_marsh)
+    log = loc.rss_log
+    assert_not_nil(log)
+    loc.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  def test_merge_orphans_log
+    loc1 = locations(:mitrula_marsh)
+    loc2 = locations(:albion)
+    log1 = loc1.rss_log
+    log2 = loc2.rss_log
+    assert_not_nil(log1)
+    assert_not_nil(log2)
+    loc2.merge(loc1)
+    assert_nil(log1.reload.target_id)
+    assert_not_nil(log2.reload.target_id)
+    assert_equal(:log_orphan, log1.parse_log[0][0])
+    assert_equal(:log_location_merged, log1.parse_log[1][0])
+  end
 end

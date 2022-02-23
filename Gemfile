@@ -83,9 +83,6 @@ gem("cure_acts_as_versioned",
 # https://www.pivotaltracker.com/story/show/90595194
 gem("simple_enum")
 
-# Amazon S3 SDK, for access to images on dreamhost S3
-gem("aws-sdk-s3")
-
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails

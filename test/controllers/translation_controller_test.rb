@@ -117,13 +117,11 @@ class TranslationControllerTest < FunctionalTestCase
 
   def test_authorization_no_login_en
     get(:edit_translations, locale: "en")
-    assert_flash_error
     assert_response(:redirect)
   end
 
   def test_authorization_no_login_el
     get(:edit_translations, locale: "el")
-    assert_flash_error
     assert_response(:redirect)
   end
 

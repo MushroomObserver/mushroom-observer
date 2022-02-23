@@ -5,6 +5,7 @@ require("test_helper")
 # Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < IntegrationTestCase
   def test_poke_around
+    login
     # Start at index.
     get("/")
     assert_template("observer/list_rss_logs")
@@ -14,8 +15,8 @@ class LurkerTest < IntegrationTestCase
     assert_template("observer/show_observation")
 
     # Click on prev/next
-    click(label: "« Prev", in: :title)
     click(label: "Next »", in: :title)
+    click(label: "« Prev", in: :title)
 
     # Click on the first image.
     click(label: :image, href: /show_image/)
@@ -91,6 +92,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_search
+    login
     get("/")
 
     # Search for a name.  (Only one.)
@@ -140,6 +142,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_search_next
+    login
     get("/")
 
     # Search for a name.  (More than one.)
@@ -154,6 +157,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_obs_at_location
+    login
     # Start at distribution map for Fungi.
     get("/name/map/#{names(:fungi).id}")
 

@@ -25,6 +25,7 @@ class ArticlesController < ApplicationController
     :index,
     :show
   ]
+  skip_before_action :redirect_anonymous_users
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
