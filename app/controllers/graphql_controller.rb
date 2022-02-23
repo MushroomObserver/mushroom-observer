@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
+# The controller that deals with all incoming GraphQL requests.
+# Decrypts token from request header to build `context` hash for authentication.
+# Reads `variables` and `operation_name` from the request body (possible query
+# operation names: Query, Mutation, Union, etc...) and executes the `query`
 class GraphqlController < ApplicationController
-  # Note 22/02/10 - Nimmo
-  # This controller is short but important.
-  # Parses an incoming request header to build a Context hash (authentication)
-  # and forwards that to the graphql Query, w/ Variables and Operation Name.
-  # Possible operation names: Query, Mutation, Union etc
-
   disable_filters
 
   def execute
@@ -40,10 +38,10 @@ class GraphqlController < ApplicationController
     return unless token.is_a?(Hash)
     raise("Token missing user_id") unless token.key?("user_id")
 
+    # puts(token.inspect)
     @current_user ||= User.safe_find(token["user_id"])
-    raise("User not found") unless @current_user
-    # Should we raise an error here? Silently giving no current_user:
-    return unless @current_user.verified
+    # Should we raise an error if unverified? Silently giving no current_user:
+    return nil unless @current_user&.verified
 
     @current_user
   end
