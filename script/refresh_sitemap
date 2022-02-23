@@ -115,6 +115,9 @@ ROBOTS_HEADER = <<~"TXT"
   User-agent: AdsBot-Google
   User-agent: AdsBot-Google-Mobile
   User-agent: AdsBot-Google-Mobile-Apps
+  # This bot must be named explicity, else it follows GoogleBot rules
+  # https://developers.facebook.com/docs/sharing/bot/
+  User-agent: FacebookBot
   User-agent: Facebot # Unofficial Facebook bots (subset of facebookexternalhit)
   User-agent: * # Block everything else not whitelisted below
   Disallow: /
@@ -138,8 +141,8 @@ ROBOTS_HEADER = <<~"TXT"
   Disallow: /name/show_name
 
 TXT
-# The rest of #write_robots_file mjust follow immeediately
-# abd aookues to the group of whitelisted user agents immediatelyu above.
+# The rest of #write_robots_file must follow immediately
+# after the rules for whitelisted crawlers/user agents.
 ROBOTS_FOOTER = <<"TXT"
 TXT
 
