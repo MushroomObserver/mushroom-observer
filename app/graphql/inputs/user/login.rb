@@ -10,7 +10,8 @@ module Inputs
 
       argument :login, String, required: true
       argument :password, String, required: true
-      argument :remember_me, Boolean, required: false
+      argument :remember_me, Boolean, required: false, default_value: false,
+                                      replace_null_with_default: true
     end
   end
 end
