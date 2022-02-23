@@ -24,14 +24,13 @@ module Mutations
         user.update({ last_login: Time.zone.now })
 
         token = ::Token.new(user_id: user.id,
-                            in_admin_mode: false,
-                            remember_me: input.remember_me,
-                            created: Time.zone.now).encrypt_to_header
+                            in_admin_mode: false).encrypt_to_header
 
         # This is what the resolver returns:
         {
           user: user, # For easier debugging
-          token: token # Contains user_id
+          token: token, # Contains user_id
+          remember_me: input.remember_me # Pass this back to response
         }
       rescue ActiveRecord::RecordNotFound
         raise(GraphQL::ExecutionError.new("User not found"))
