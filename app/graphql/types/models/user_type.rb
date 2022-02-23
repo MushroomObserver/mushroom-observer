@@ -82,7 +82,8 @@ module Types
       # field :location_descriptions, [Types::Models::LocationDescriptionType],
       #                               null: true
       # field :names, [Types::Models::NameType], null: true
-      # field :name_descriptions, [Types::Models::NameDescriptionType], null: true
+      # field :name_descriptions, [Types::Models::NameDescriptionType],
+      #                           null: true
       # field :namings, [Types::Models::NamingType], null: true
       # field :notifications, [Types::Models::NotificationType], null: true
       # field :observations, [Types::Models::ObservationType], null: true
@@ -91,7 +92,8 @@ module Types
       # # field :queued_emails, [Types::QueuedEmailType], null: true
       # field :sequences, [Types::Models::SequenceType], null: true
       # field :species_lists, [Types::Models::SpeciesListType], null: true
-      # field :herbarium_records, [Types::Models::HerbariumRecordType], null: true
+      # field :herbarium_records, [Types::Models::HerbariumRecordType],
+      #                           null: true
       # field :votes, [Types::Models::VoteType], null: true
       # field :reviewed_images, [Types::Models::ImageType], null: true
       # field :reviewed_name_descriptions, [Types::Models::NameDescriptionType],
