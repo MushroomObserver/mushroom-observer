@@ -16,6 +16,7 @@ class Mutations::UserLoginTest < ActionDispatch::IntegrationTest
   def test_valid_login
     do_graphql_request(qry: user_login, var: valid_password)
 
+    # Valid pw with nil remember_me is ok, but defaults to false
     assert_equal(users(:rolf).id,
                  json.dig("data", "userLogin", "user", "id"),
                  "Variable correctly parsed for query")
