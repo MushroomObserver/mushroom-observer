@@ -19,6 +19,8 @@ class Mutations::UserLoginTest < ActionDispatch::IntegrationTest
     assert_equal(users(:rolf).id,
                  json.dig("data", "userLogin", "user", "id"),
                  "Variable correctly parsed for query")
+    assert_equal(false, json.dig("data", "userLogin", "rememberMe"),
+                 "remember_me arg correctly defaults to false")
 
     # now check visitor query, that generated token assigns a current_user
     do_graphql_request(user: users(:rolf), qry: visitor_query)

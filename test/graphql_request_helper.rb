@@ -8,7 +8,9 @@ module GraphQLRequestHelper
 
   # Must set this to get thru robot filter
   def setup
-    @headers = { "User-Agent" => "iPadApp" }
+    @headers = {}
+    @headers["User-Agent"] = "iPadApp"
+    @headers["Content-type"] = "application/json"
   end
 
   # Add a token if we have one
@@ -34,11 +36,13 @@ module GraphQLRequestHelper
     token ||= Token.new(user_id: user&.id,
                         in_admin_mode: user&.admin).encrypt_to_header
 
+    params = {
+      query: qry || query,
+      variables: var || variables
+    }
+
     post(graphql_path,
-         params: {
-           query: qry || query,
-           variables: var || variables
-         },
+         params: params.to_json,
          headers: headers_with_auth(token))
   end
 

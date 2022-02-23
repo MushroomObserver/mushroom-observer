@@ -42,7 +42,8 @@ module GraphQLQueries
           id,
           login
         },
-        token
+        token,
+        rememberMe
       }
     }
     GRAPHQL

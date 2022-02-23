@@ -11,6 +11,7 @@ module Mutations
 
       field :token, String, null: true
       field :user, Types::Models::UserType, null: true
+      field :remember_me, Boolean, null: true
 
       def resolve(input: nil)
         user = ::User.authenticate(login: input.login,
@@ -26,11 +27,14 @@ module Mutations
         token = ::Token.new(user_id: user.id,
                             in_admin_mode: false).encrypt_to_header
 
-        # This is what the resolver returns:
+        # This is what the resolver returns, must match "payload" fields above:
+        # user, for easier debugging;
+        # token, contains user_id and in_admin_mode?
+        # rememberMe, passed straight from input to response
         {
-          user: user, # For easier debugging
-          token: token, # Contains user_id
-          remember_me: input.remember_me # Pass this back to response
+          user: user,
+          token: token,
+          remember_me: input.remember_me
         }
       rescue ActiveRecord::RecordNotFound
         raise(GraphQL::ExecutionError.new("User not found"))
