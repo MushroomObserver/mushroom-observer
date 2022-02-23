@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Query for a single user by id, login or full name
 module Queries
   class User < Queries::BaseQuery
     description "get user by argument"

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# This controller deals with incoming GraphQL requests.
-# It parses the request header to build a `context` hash for authentication,
-# parses the `variables` and `operation_name` from the request body (possible
-# operation names: Query, Mutation, Union...) and executes the `query`
+# The controller that deals with all incoming GraphQL requests.
+# Decrypts token from request header to build `context` hash for authentication.
+# Reads `variables` and `operation_name` from the request body (possible query
+# operation names: Query, Mutation, Union, etc...) and executes the `query`
 class GraphqlController < ApplicationController
   disable_filters
 
