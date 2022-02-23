@@ -3,7 +3,6 @@
 module Types
   class BaseField < GraphQL::Schema::Field
     argument_class(Types::BaseArgument)
-    # attr_accessor :require_admin, :require_owner
 
     # Pass `field ..., require_admin: true` to reject non-admin users from field
     def initialize(*args, require_admin: false, require_owner: false,
@@ -18,8 +17,6 @@ module Types
     end
 
     def owner_or_admin(obj, ctx)
-      # puts("ctx[:current_user]")
-      # puts(ctx[:current_user])
       if ctx[:current_user].nil?
         false
       else
@@ -28,20 +25,16 @@ module Types
       end
     end
 
-    # need access to obj here to determine owner_id
-    # def visible?(ctx)
-    #   # if `only_show_admin:` given, require the current user to be admin
-    #   super && (@only_show_admin ? ctx[:current_user]&.admin? : true)
-    #   super && (@only_show_owner ? owner_or_admin(obj, ctx) : true)
-    # end
-
     # Field #authorized? methods are called before resolving a field
     # Note this effectively blocks resolution of a query field, eg user.email
-    # But we need to enable unauthorized search for user by email in login
     def authorized?(obj, args, ctx)
-      # if `require_admin:` was given, require current user to be an admin
-      super && (@require_admin ? ctx[:current_user]&.admin? : true)
-      super && (@require_owner ? owner_or_admin(obj, ctx) : true)
+      return false unless super
+      # if `require_admin: true`, require current user to be an admin
+      return false if @require_admin && !ctx[:current_user]&.admin?
+      # if `require_owner: true`, require current user to be obj owner or admin
+      return false if @require_owner && !owner_or_admin(obj, ctx)
+
+      true
     end
   end
 end
