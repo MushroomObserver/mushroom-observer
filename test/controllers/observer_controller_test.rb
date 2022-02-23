@@ -278,6 +278,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
     url = Image.url(:small, obs.thumb_image_id)
+    test_show_owner_id_noone_logged_in
+    login
     get(:observations_by_user, params: { id: rolf.id })
     assert_template(:list_observations)
     assert_match(url, @response.body)
