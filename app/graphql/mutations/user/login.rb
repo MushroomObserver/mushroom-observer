@@ -13,7 +13,8 @@ module Mutations
       field :user, Types::Models::UserType, null: true
 
       def resolve(input: nil)
-        user = ::User.authenticate(login: input.login, password: input.password)
+        user = ::User.authenticate(login: input.login,
+                                   password: input.password)
 
         return {} unless user
 
