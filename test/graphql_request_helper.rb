@@ -2,8 +2,10 @@
 
 require("graphql_queries")
 
+# Helper module for testing full HTTP requests (as opposed to Schema.execute)
 module GraphQLRequestHelper
   include GraphQLQueries
+
   # Must set this to get thru robot filter
   def setup
     @headers = { "User-Agent" => "iPadApp" }
@@ -11,8 +13,6 @@ module GraphQLRequestHelper
 
   # Add a token if we have one
   def headers_with_auth(token)
-    # puts("@headers.inspect")
-    # puts(@headers.inspect)
     return @headers unless token
 
     headers = @headers

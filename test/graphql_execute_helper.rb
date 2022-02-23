@@ -2,6 +2,7 @@
 
 require("graphql_queries")
 
+# Helper module for testing Schema.execute (as opposed to HTTP requests)
 module GraphQLExecuteHelper
   include GraphQLQueries
 

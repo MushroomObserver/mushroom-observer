@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Mutation to authenticate and login a user, generating a token
+# Authenticate and login a user, generating a token
 module Mutations
   module User
     class Login < Mutations::BaseMutation
@@ -20,12 +20,7 @@ module Mutations
         raise(GraphQL::ExecutionError.new("User not verified")) unless
           user.verified
 
-        now = Time.zone.now
-        args = {
-          last_login: now,
-          updated_at: now
-        }
-        user.update(args)
+        user.update({ last_login: Time.zone.now })
 
         token = ::Token.new(user_id: user.id,
                             in_admin_mode: false).encrypt_to_header
@@ -36,7 +31,7 @@ module Mutations
           token: token # Contains user_id
         }
       rescue ActiveRecord::RecordNotFound
-        raise(GraphQL::ExecutionError.new("user not found"))
+        raise(GraphQL::ExecutionError.new("User not found"))
       end
 
       # https://www.howtographql.com/graphql-ruby/4-authentication/
