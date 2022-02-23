@@ -12,8 +12,8 @@ class GlossaryTermsController < ApplicationController
     # See https://www.pivotaltracker.com/story/show/167657202
     # Glossary should be query-able
     # See https://www.pivotaltracker.com/story/show/167809123
-    @glossary_terms = GlossaryTerm.includes(thumb_image: :image_votes).
-                      order(:name)
+    includes = @user ? { thumb_image: :image_votes } : :thumb_image
+    @glossary_terms = GlossaryTerm.includes(includes).order(:name)
   end
 
   def show

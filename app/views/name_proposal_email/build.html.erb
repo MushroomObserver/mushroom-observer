@@ -7,7 +7,7 @@
   fields += "*#{:Name.l}:* #{@naming.format_name}\n"
   fields += "*#{:Time.l}:* #{@naming.created_at.email_time}\n"
   fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
-  for reason in @naming.get_reasons
+  for reason in @naming.reasons_array
     if reason.used?
       if reason.notes.blank?
         fields += "*#{reason.label.l}*\n"
