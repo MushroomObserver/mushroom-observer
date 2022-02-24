@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # helper to integrate bullet gem with minitest
 # from https://github.com/flyerhzm/bullet/issues/442
 # Include this helper in any test file where you want to use the gem
