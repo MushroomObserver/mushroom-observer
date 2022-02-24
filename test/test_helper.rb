@@ -52,6 +52,8 @@ require("rails/test_help")
 require("mocha/minitest")
 
 %w[
+  bullet_helper
+
   general_extensions
   flash_extensions
   controller_extensions
