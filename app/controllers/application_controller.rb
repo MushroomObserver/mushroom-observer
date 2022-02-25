@@ -106,11 +106,11 @@ class ApplicationController < ActionController::Base
   around_action :catch_errors_and_log_request_stats
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
-  before_action :redirect_anonymous_users
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
   before_action :autologin
+  before_action :redirect_anonymous_users
   before_action :set_locale
   before_action :set_timezone
   before_action :refresh_translations
@@ -200,23 +200,6 @@ class ApplicationController < ActionController::Base
            layout: false)
     false
   end
-
-  # Redirect anonymous users to login unless they are looking at allowed pages
-  def redirect_anonymous_users
-    return true if browser.bot? # recognized bots are handled elsewhere
-    return true if verified_user_logged_in?
-
-    store_location
-    redirect_to(account_login_path)
-  end
-
-  private ##########
-
-  def verified_user_logged_in?
-    session_user&.verified?
-  end
-
-  public ##########
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
@@ -460,6 +443,16 @@ class ApplicationController < ActionController::Base
   end
 
   public ##########
+
+  # Filter that redirect anonymous users to login
+  # unless they're looking at allowed pages
+  def redirect_anonymous_users
+    return true if browser.bot? # recognized bots are handled elsewhere
+    return true if @user
+
+    store_location
+    redirect_to(account_login_path)
+  end
 
   # ----------------------------
   #  "Public" methods.
