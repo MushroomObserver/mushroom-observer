@@ -147,7 +147,7 @@ class SequenceController < ApplicationController
 
   def show_selected_sequences(query, args = {})
     args = { action: :list_sequences,
-             include: [:observation, { observation: :name }, :user],
+             include: [{ observation: :name }, :user],
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
     @links ||= []
