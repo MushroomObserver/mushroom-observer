@@ -7,7 +7,7 @@
   <%= link_to(:app_privacy_policy.t, policy_privacy_path,
               { class: "list-group-item" }) %>
   <%= link_to(:app_donate.t, support_donate_path,
-              { class: "list-group-item indent" }) %>
+              { class: "list-group-item" }) %>
 
   <% if in_admin_mode? %>
     <div class="list-group-item disabled bold"><%= :app_admin.t %>: </div>
