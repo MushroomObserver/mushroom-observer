@@ -491,10 +491,19 @@ class User < AbstractModel
   #   user = User.authenticate(login: 'Fred Flintstone', password: 'password')
   #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
+  # find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
+  #           password != '' ",
+  #         login, login, login, sha1(password))
+  #
   def self.authenticate(login: nil, password: nil)
-    find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
-              password != '' ",
-            login, login, login, sha1(password))
+    users = User.arel_table
+
+    User.find_by(
+      users[:login].eq(login).
+      or(users[:name].eq(login)).
+      or(users[:email].eq(login)).
+      and(users[:password].eq(sha1(password)))
+    )
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -540,8 +549,17 @@ class User < AbstractModel
   #     AND user_groups_users.user_id = #{id}
   # ))
   def projects_admin
-    @projects_admin ||= Project.joins(:admin_group_users).
-                        where(users: { id: id })
+    projects = Project.arel_table
+    # For join tables with no model, need to create an Arel::Table object
+    # so we can use Arel methods on it, eg access columns
+    user_groups_users = Arel::Table.new("user_groups_users")
+
+    # Note: `project` is an Arel method specifying what to `SELECT`
+    arel = projects.project(Arel.star).join(user_groups_users).
+           on(projects[:admin_group_id].eq(user_groups_users[:user_group_id]).
+                 and(user_groups_users[:user_id].eq(id)))
+
+    @projects_admin_arel ||= Project.joins(*arel.join_sources)
   end
 
   # Return an Array of Project's that this User is a member of.
@@ -571,7 +589,17 @@ class User < AbstractModel
         SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
         ORDER BY created_at DESC LIMIT 1
       ))
-      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+      puts("herbarium_id SQL")
+      puts(herbarium_id)
+
+      hr = HerbariumRecord.arel_table
+      arel = hr.project(hr[:herbarium_id]).
+             where(hr[:user_id].eq(id)).
+             order(hr[:created_at].desc).take(1)
+      herbarium_id = Herbarium.connection.select_value(arel.to_sql)
+      puts("herbarium_id Arel")
+      puts(herbarium_id)
+      # herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
 
@@ -1024,6 +1052,14 @@ class User < AbstractModel
     users = User.arel_table
     open_bracket = Arel::Nodes.build_quoted(" <")
     close_bracket = Arel::Nodes.build_quoted(">")
-    user_name = Arel::Nodes::NamedFunction.new("CONCAT", [invoices[:invoiceDate]])
+    user_name = Arel::Nodes::NamedFunction.new(
+      "CONCAT", [open_bracket, users[:name], close_bracket]
+    )
+    user_name_if = Arel::Nodes::NamedFunction.new(
+      "IF"
+    )
+    whole_handle = Arel::Nodes::NamedFunction.new(
+      "CONCAT", [users[:login], user_name_if]
+    )
   end
 end
