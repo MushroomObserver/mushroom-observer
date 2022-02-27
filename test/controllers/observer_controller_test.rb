@@ -1472,6 +1472,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_ask_foreign_user_gives_english_success_message
+    I18n.locale = :fr
     rolf.update(locale: "fr")
     assert_equal("fr", rolf.reload.locale)
     assert_equal("en", mary.locale)
