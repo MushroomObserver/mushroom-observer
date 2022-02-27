@@ -548,6 +548,7 @@ class User < AbstractModel
   #   WHERE projects.admin_group_id = user_groups_users.user_group_id
   #     AND user_groups_users.user_id = #{id}
   # ))
+  # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
     projects = Project.arel_table
     # For join tables with no model, need to create an Arel::Table object
@@ -582,31 +583,33 @@ class User < AbstractModel
 
   # Return the name of this user's "favorite" herbarium
   # (meaning the one they have used the most).
+  # herbarium_id = Herbarium.connection.select_value(%(
+  #   SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
+  #   ORDER BY created_at DESC LIMIT 1
+  # ))
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      herbarium_id = Herbarium.connection.select_value(%(
-        SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
-        ORDER BY created_at DESC LIMIT 1
-      ))
-      puts("herbarium_id SQL")
-      puts(herbarium_id)
-
       hr = HerbariumRecord.arel_table
       arel = hr.project(hr[:herbarium_id]).
              where(hr[:user_id].eq(id)).
              order(hr[:created_at].desc).take(1)
       herbarium_id = Herbarium.connection.select_value(arel.to_sql)
-      puts("herbarium_id Arel")
-      puts(herbarium_id)
-      # herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
 
+  # Herbarium.connection.select_value(%(
+  #   SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
+  # )) || :user_personal_herbarium.l(name: unique_text_name)
   def personal_herbarium_name
-    Herbarium.connection.select_value(%(
-      SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
-    )) || :user_personal_herbarium.l(name: unique_text_name)
+    h = Herbarium.arel_table
+    arel = h.project(h[:name]).where(h[:personal_user_id].eq(id)).take(1)
+    herbarium_name = Herbarium.connection.select_value(arel.to_sql)
+    herbarium_name || :user_personal_herbarium.l(name: unique_text_name)
+
+    # personal_herbarium&.name ||
+    #   :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
