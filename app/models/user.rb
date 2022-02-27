@@ -199,6 +199,9 @@
 #
 class User < AbstractModel
   require "digest/sha1"
+  require "arel-helpers"
+
+  include ArelHelpers::JoinAssociation
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -531,12 +534,23 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
+  # @projects_admin ||= Project.find_by_sql(%(
+  #   SELECT projects.* FROM projects, user_groups_users
+  #   WHERE projects.admin_group_id = user_groups_users.user_group_id
+  #     AND user_groups_users.user_id = #{id}
+  # ))
   def projects_admin
-    @projects_admin ||= Project.find_by_sql(%(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.admin_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    ))
+    projects = Project.arel_table
+    # for join tables with no model, need to create an Arel::Table object
+    # so we can use Arel methods on it, eg access columns
+    user_groups_users = Arel::Table.new("user_groups_users")
+
+    # Note: `project` is an Arel method specifying what to `SELECT`
+    arel = projects.project(Arel.star).join(user_groups_users).
+           on(projects[:admin_group_id].eq(user_groups_users[:user_group_id]).
+                 and(user_groups_users[:user_id].eq(id)))
+
+    @projects_admin ||= Project.find_by_sql(arel.to_sql)
   end
 
   # Return an Array of Project's that this User is a member of.
@@ -742,15 +756,7 @@ class User < AbstractModel
 
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
-      result = connection.select_values(%(
-        SELECT CONCAT(users.login,
-                      IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-        FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-                    last_login, NULL) DESC,
-                 contribution DESC
-        LIMIT 1000
-      )).uniq.sort
+      result = primer_values_alt
 
       File.open(MO.user_primer_cache_file, "w:utf-8").
         write(result.join("\n") + "\n")
@@ -1007,5 +1013,26 @@ class User < AbstractModel
   # :nodoc
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
+  end
+
+  # Get list of users sorted first by when they last logged in (if recent),
+  # then by cotribution.
+  def primer_values
+    connection.select_values(%(
+      SELECT CONCAT(users.login,
+                    IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+      FROM users
+      ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
+                  last_login, NULL) DESC,
+                contribution DESC
+      LIMIT 1000
+    )).uniq.sort
+  end
+
+  def primer_values_alt
+    users = User.arel_table
+    open_bracket = Arel::Nodes.build_quoted(" <")
+    close_bracket = Arel::Nodes.build_quoted(">")
+    user_name = Arel::Nodes::NamedFunction.new("CONCAT", [invoices[:invoiceDate]])
   end
 end
