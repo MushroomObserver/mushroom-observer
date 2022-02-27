@@ -560,7 +560,7 @@ class User < AbstractModel
            on(projects[:admin_group_id].eq(user_groups_users[:user_group_id]).
                  and(user_groups_users[:user_id].eq(id)))
 
-    @projects_admin_arel ||= Project.joins(*arel.join_sources)
+    @projects_admin ||= Project.joins(*arel.join_sources)
   end
 
   # Return an Array of Project's that this User is a member of.
