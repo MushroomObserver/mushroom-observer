@@ -540,17 +540,8 @@ class User < AbstractModel
   #     AND user_groups_users.user_id = #{id}
   # ))
   def projects_admin
-    projects = Project.arel_table
-    # for join tables with no model, need to create an Arel::Table object
-    # so we can use Arel methods on it, eg access columns
-    user_groups_users = Arel::Table.new("user_groups_users")
-
-    # Note: `project` is an Arel method specifying what to `SELECT`
-    arel = projects.project(Arel.star).join(user_groups_users).
-           on(projects[:admin_group_id].eq(user_groups_users[:user_group_id]).
-                 and(user_groups_users[:user_id].eq(id)))
-
-    @projects_admin ||= Project.find_by_sql(arel.to_sql)
+    @projects_admin ||= Project.joins(:admin_group_users).
+                        where(users: { id: id })
   end
 
   # Return an Array of Project's that this User is a member of.
