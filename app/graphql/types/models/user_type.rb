@@ -109,6 +109,11 @@ module Types
       # field :edited_locations, [Types::Models::LocationDescriptionType],
       #                          null: true
       # field :curated_herbaria, [Types::Models::HerbariumType], null: true
+
+      # class methods
+      # field :projects_admin, [Types::Models::ProjectType], null: true,
+      #                                                      require_owner: true
+      # delegate :projects_admin, to: :object
     end
   end
 end
