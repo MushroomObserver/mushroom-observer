@@ -139,6 +139,7 @@
                 when 2; "alert-danger"
               end
               content_tag(:div, flash_get_notices,
+                          id: "flash-notices",
                           class: "alert push-down #{klass}")
             %>
           </div>

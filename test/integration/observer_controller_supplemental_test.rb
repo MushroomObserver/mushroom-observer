@@ -4,6 +4,16 @@ require("test_helper")
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
+
+  def login(user = users(:zero_user))
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+  end
+
+  # ------------------------------------------------------------
+
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
@@ -90,10 +100,30 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     assert_not_includes(species_list.observations, observation)
   end
 
-  def login(user = users(:zero_user))
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+  def test_locales_when_sending_email_question
+    sender = users(:rolf)
+    receiver = users(:mary)
+    sender.update(locale: "fr")
+    assert_equal("fr", sender.locale)
+    assert_equal("en", receiver.locale)
+
+    # I have no clue how to ensure translations are set any particular way.
+    # This stub causes every single translation to be simply:
+    #   "locale:mo.tag"
+    # Makes it very easy to test which language is being used!
+    # But note that the standard login helper won't work because it is
+    # expecting the English translations to work correctly.
+    I18n.stub(:t, lambda {|*args| "#{I18n.locale}:#{args.first}"}) do
+      visit("/account/login")
+      fill_in("en:mo.login_user:", with: sender.login)
+      fill_in("en:mo.login_password:", with: "testpassword")
+      click_button("en:mo.login_login")
+      visit("/observer/ask_user_question/#{receiver.id}")
+      fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
+      fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
+      click_button("fr:mo.SEND")
+      notices = page.find_by_id("flash-notices")
+      notices.assert_text("fr:mo.runtime_ask_user_question_success")
+    end
   end
 end

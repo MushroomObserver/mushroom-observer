@@ -1471,30 +1471,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_ask_user_question_success.t)
   end
 
-  def test_ask_foreign_user_gives_english_success_message
-    I18n.locale = :fr
-    rolf.update(locale: "fr")
-    assert_equal("fr", rolf.reload.locale)
-    assert_equal("en", mary.locale)
-    login("rolf")
-    str = "Question posée avec succès."
-    TranslationString.create!(
-      language_id: languages(:french).id,
-      tag: "runtime_ask_user_question_success",
-      text: str
-    )
-    params = {
-      id: mary.id,
-      email: {
-        subject: "Bonjour!",
-        content: "Ça va?"
-      }
-    }
-    post(:ask_user_question, params)
-    assert_flash_text(str)
-    assert_equal(:fr, I18n.locale)
-  end
-
   def test_email_merge_request
     name1 = Name.all.sample
     name2 = Name.all.sample
