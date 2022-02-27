@@ -777,8 +777,42 @@ class User < AbstractModel
        File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
 
       # Get list of users sorted first by when they last logged in (if recent),
-      # then by cotribution.
-      result = primer_values_alt
+      # then by contribution.
+      # connection.select_values(%(
+      #   SELECT CONCAT(users.login,
+      #                 IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+      #   FROM users
+      #   ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
+      #               last_login, NULL) DESC,
+      #             contribution DESC
+      #   LIMIT 1000
+      # )).uniq.sort
+
+      orders = Arel::Nodes::NamedFuction.new(
+        "IF",
+        [User.arel_table[:last_login].
+           gt(Arel.sql("CURRENT_TIMESTAMP - INTERVAL 1 MONTH")),
+         User.arel_table[:last_login],
+         Arel.sql("NULL")]
+      )
+
+      plucks = Arel::Nodes::NamedFuction.new(
+        "CONCAT",
+        [User.arel_table[:name],
+         Arel::Nodes::NamedFuction.new(
+           "IF",
+           [User.arel_table[:name].eq(""),
+            Arel.sql("''"),
+            Arel::Nodes::NamedFuction.new(
+              "CONCAT",
+              [Arel.sql("' <'"),
+               User.arel_table[:name],
+               Arel.sql("'>'")]
+            )]
+         )]
+      )
+
+      result = User.order(orders).limit(1000).pluck(plucks).uniq.sort
 
       File.open(MO.user_primer_cache_file, "w:utf-8").
         write(result.join("\n") + "\n")
@@ -1035,34 +1069,5 @@ class User < AbstractModel
   # :nodoc
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
-  end
-
-  # Get list of users sorted first by when they last logged in (if recent),
-  # then by cotribution.
-  def primer_values
-    connection.select_values(%(
-      SELECT CONCAT(users.login,
-                    IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-      FROM users
-      ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-                  last_login, NULL) DESC,
-                contribution DESC
-      LIMIT 1000
-    )).uniq.sort
-  end
-
-  def primer_values_alt
-    users = User.arel_table
-    open_bracket = Arel::Nodes.build_quoted(" <")
-    close_bracket = Arel::Nodes.build_quoted(">")
-    user_name = Arel::Nodes::NamedFunction.new(
-      "CONCAT", [open_bracket, users[:name], close_bracket]
-    )
-    user_name_if = Arel::Nodes::NamedFunction.new(
-      "IF"
-    )
-    whole_handle = Arel::Nodes::NamedFunction.new(
-      "CONCAT", [users[:login], user_name_if]
-    )
   end
 end
