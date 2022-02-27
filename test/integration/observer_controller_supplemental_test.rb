@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
+# This cop doesn't understand that find_by_id is not being called on an
+# ActiveRecord instance, and therefore is not a rails dynamic finder.
+# rubocop:disable Rails/DynamicFindBy
+
 require("test_helper")
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
-
   def login(user = users(:zero_user))
     visit("/account/login")
     fill_in("User name or Email address:", with: user.login)
@@ -113,7 +116,11 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     # Makes it very easy to test which language is being used!
     # But note that the standard login helper won't work because it is
     # expecting the English translations to work correctly.
-    I18n.stub(:t, lambda {|*args| "#{I18n.locale}:#{args.first}"}) do
+    translator = lambda do |*args|
+      "#{I18n.locale}:#{args.first}"
+    end
+
+    I18n.stub(:t, translator) do
       visit("/account/login")
       fill_in("en:mo.login_user:", with: sender.login)
       fill_in("en:mo.login_password:", with: "testpassword")
@@ -127,3 +134,5 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     end
   end
 end
+
+# rubocop:enable Rails/DynamicFindBy
