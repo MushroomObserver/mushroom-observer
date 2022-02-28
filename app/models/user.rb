@@ -663,7 +663,7 @@ class User < AbstractModel
           )
         )
         join = sl.create_join(psl, constraints, Arel::Nodes::InnerJoin)
-        results = SpeciesList.joins(join).uniq.sort
+        results = SpeciesList.includes(include).joins(join).uniq.sort
         # puts("component method")
         # puts(results.pluck(:id).inspect)
       else
