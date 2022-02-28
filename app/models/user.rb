@@ -603,13 +603,8 @@ class User < AbstractModel
   #   SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
   # )) || :user_personal_herbarium.l(name: unique_text_name)
   def personal_herbarium_name
-    h = Herbarium.arel_table
-    arel = h.project(h[:name]).where(h[:personal_user_id].eq(id)).take(1)
-    herbarium_name = Herbarium.connection.select_value(arel.to_sql)
-    herbarium_name || :user_personal_herbarium.l(name: unique_text_name)
-
-    # personal_herbarium&.name ||
-    #   :user_personal_herbarium.l(name: unique_text_name)
+    personal_herbarium&.name ||
+      :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
@@ -631,15 +626,48 @@ class User < AbstractModel
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
-      results = species_lists
       if projects_member.any?
-        project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.includes(include).find_by_sql(%(
-          SELECT species_lists.* FROM species_lists, projects_species_lists
-          WHERE species_lists.user_id != #{id}
-            AND projects_species_lists.project_id IN (#{project_ids})
-            AND projects_species_lists.species_list_id = species_lists.id
-        ))
+        # project_ids = projects_member.map(&:id).join(",")
+        # results = species_lists
+        # results += SpeciesList.includes(include).find_by_sql(%(
+        #   SELECT species_lists.* FROM species_lists, projects_species_lists
+        #   WHERE species_lists.user_id != #{id}
+        #     AND projects_species_lists.project_id IN (#{project_ids})
+        #     AND projects_species_lists.species_list_id = species_lists.id
+        #   ))
+        # puts("original SQL")
+        # puts(results.uniq.sort.pluck(:id).inspect)
+
+        # Revised SQL: user species_lists are in WHERE, avoiding extra load
+        # project_ids = projects_member.map(&:id).join(",")
+        # results = SpeciesList.includes(include).find_by_sql(%(
+        #   SELECT species_lists.* FROM species_lists, projects_species_lists
+        #   WHERE (species_lists.user_id = #{id} )
+        #   OR (species_lists.user_id != #{id}
+        #     AND projects_species_lists.project_id IN (#{project_ids})
+        #     AND projects_species_lists.species_list_id = species_lists.id)
+        #   ))
+        # puts("revised SQL")
+        # puts(results.uniq.sort.pluck(:id).inspect)
+
+        project_ids = projects_member.map(&:id)
+        sl = SpeciesList.arel_table
+        psl = Arel::Table.new("projects_species_lists")
+        constraints = sl.create_on(
+          sl[:user_id].eq(id).or(
+            sl[:user_id].not_eq(id).and(
+              psl[:project_id].in(project_ids).and(
+                psl[:species_list_id].eq(sl[:id])
+              )
+            )
+          )
+        )
+        join = sl.create_join(psl, constraints, Arel::Nodes::InnerJoin)
+        results = SpeciesList.joins(join).uniq.sort
+        # puts("component method")
+        # puts(results.pluck(:id).inspect)
+      else
+        results = species_lists
       end
       results
     end
@@ -662,13 +690,21 @@ class User < AbstractModel
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      state = Interest.connection.select_value(%(
-        SELECT state FROM interests
-        WHERE user_id = #{id}
-          AND target_type = '#{object.class.name}'
-          AND target_id = #{object.id}
-        LIMIT 1
-      )).to_s
+      i = Interest.arel_table
+      arel = i.project(i[:state]).
+             where(i[:user_id].eq(id).
+                   and(i[:target_type].eq(object.class.name)).
+                   and(i[:target_id].eq(object.id))).
+             take(1)
+      # puts(arel.to_sql)
+      # state = Interest.connection.select_value(%(
+      #   SELECT state FROM interests
+      #   WHERE user_id = #{id}
+      #     AND target_type = '#{object.class.name}'
+      #     AND target_id = #{object.id}
+      #   LIMIT 1
+      # )).to_s
+      state = Interest.connection.select_value(arel.to_sql).to_s
       case state
       when "1"
         :watching
@@ -788,12 +824,13 @@ class User < AbstractModel
       #   LIMIT 1000
       # )).uniq.sort
 
+      # https://stackoverflow.com/a/71282345/3357635
       orders = Arel::Nodes::NamedFuction.new(
         "IF",
         [User.arel_table[:last_login].
-           gt(Arel.sql("CURRENT_TIMESTAMP - INTERVAL 1 MONTH")),
+           gt(Time.zone.now - 1.month),
          User.arel_table[:last_login],
-         Arel.sql("NULL")]
+         nil]
       )
 
       plucks = Arel::Nodes::NamedFuction.new(
