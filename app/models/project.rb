@@ -49,8 +49,6 @@ class Project < AbstractModel
 
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
-  has_many :admin_group_users, through: :admin_group,
-                               source: :users
 
   has_and_belongs_to_many :images
   has_and_belongs_to_many :observations
