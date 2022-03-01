@@ -655,17 +655,13 @@ class User < AbstractModel
         sl = SpeciesList.arel_table
         psl = Arel::Table.new(:projects_species_lists)
         constraints = sl.create_on(
-          sl[:user_id].eq(id).or(
-            sl[:user_id].not_eq(id).and(
-              psl[:project_id].in(project_ids).and(
-                psl[:species_list_id].eq(sl[:id])
-              )
-            )
-          )
+          sl[:id].eq(psl[:species_list_id])
         )
-        join = sl.create_join(psl, constraints, Arel::Nodes::InnerJoin)
-        results = SpeciesList.includes(include).joins(join).uniq.sort
-        # puts("component method")
+        join = sl.create_join(psl, constraints, Arel::Nodes::OuterJoin)
+        results = SpeciesList.includes(include).joins(join).where(
+          sl[:user_id].eq(id).or(psl[:project_id].in(project_ids))
+        ).uniq.sort
+        # puts("component method short")
         # puts(results.pluck(:id).inspect)
       else
         results = species_lists
