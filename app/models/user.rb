@@ -553,7 +553,7 @@ class User < AbstractModel
     projects = Project.arel_table
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
-    user_groups_users = Arel::Table.new("user_groups_users")
+    user_groups_users = Arel::Table.new(:user_groups_users)
 
     # Note: `project` is an Arel method specifying what to `SELECT`
     arel = projects.project(Arel.star).join(user_groups_users).
@@ -652,7 +652,7 @@ class User < AbstractModel
 
         project_ids = projects_member.map(&:id)
         sl = SpeciesList.arel_table
-        psl = Arel::Table.new("projects_species_lists")
+        psl = Arel::Table.new(:projects_species_lists)
         constraints = sl.create_on(
           sl[:user_id].eq(id).or(
             sl[:user_id].not_eq(id).and(
@@ -704,6 +704,7 @@ class User < AbstractModel
       #     AND target_id = #{object.id}
       #   LIMIT 1
       # )).to_s
+      # Question for Jason: Why convert to string here?
       state = Interest.connection.select_value(arel.to_sql).to_s
       case state
       when "1"
@@ -865,7 +866,14 @@ class User < AbstractModel
   # 2) Image votes.
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
-    # Blank out any references in public records.
+    blank_out_public_references(id)
+    delete_one_user_group_references(id)
+    delete_observations_attachments(id)
+    delete_own_records(id)
+  end
+
+  # Blank out any references in public records.
+  private_class_method def self.blank_out_public_references(id)
     [
       [:location_descriptions,          :user_id],
       [:location_descriptions_versions, :user_id],
@@ -885,12 +893,20 @@ class User < AbstractModel
       [:translation_strings_versions,   :user_id],
       [:votes,                          :user_id]
     ].each do |table, col|
-      User.connection.update(%(
-        UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      update_manager = Arel::UpdateManager.new.
+                       table(table).
+                       set([[table[col], 0]]).
+                       where(table[col].eq(id))
+      User.connection.update(update_manager.to_sql)
+      # User.connection.update(%(
+      #   UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
+      # ))
     end
+  end
 
-    # Delete references to their one-user group.
+  # Delete references to their one-user group.
+  private_class_method def self.delete_one_user_group_references(id)
     group = UserGroup.one_user(id)
     if group
       group_id = group.id
@@ -903,18 +919,30 @@ class User < AbstractModel
         [:name_descriptions_writers,     :user_group_id],
         [:user_groups,                   :id]
       ].each do |table, col|
-        User.connection.delete(%(
-          DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        ))
+        table = Arel::Table.new(table)
+        delete_manager = Arel::DeleteManager.new.
+                         from(table).
+                         where(table[col].eq(group_id))
+        User.connection.delete(delete_manager.to_sql)
+        # puts(delete_manager.to_sql)
+        # User.connection.delete(%(
+        #   DELETE FROM #{table} WHERE `#{col}` = #{group_id}
+        # ))
       end
     end
+  end
 
-    # Delete their observations' attachments.
-    ids = User.connection.select_values(%(
-      SELECT id FROM observations WHERE user_id = #{id}
-    )).map(&:to_s)
+  # Delete their observations' attachments.
+  private_class_method def self.delete_observations_attachments(id)
+    obs = Observation.arel_table
+    obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
+    ids = User.connection.select_values(obs_select_manager.to_sql).map
+    # ids = User.connection.select_values(%(
+    #   SELECT id FROM observations WHERE user_id = #{id}
+    # )).map(&:to_s)
+    # puts(ids.inspect)
     if ids.any?
-      ids = ids.join(",")
+      # ids = ids.join(",")
       [
         [:collection_numbers_observations, :observation_id],
         [:comments,                        :target_id, :target_type],
@@ -926,21 +954,36 @@ class User < AbstractModel
         [:sequences,                       :observation_id],
         [:votes,                           :observation_id]
       ].each do |table, id_col, type_col|
+        table = Arel::Table.new(table)
         if type_col
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          ))
+          delete_manager = Arel::DeleteManager.new.
+                           from(table).
+                           where(table[id_col].in(ids).and(
+                                   table[type_col].eq("Observation")
+                                 ))
+          User.connection.delete(delete_manager.to_sql)
+          # puts(delete_manager.to_sql)
+          # User.connection.delete(%(
+          #   DELETE FROM #{table}
+          #   WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
+          # ))
         else
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids})
-          ))
+          delete_manager = Arel::DeleteManager.new.
+                           from(table).
+                           where(table[id_col].in(ids))
+          User.connection.delete(delete_manager.to_sql)
+          # puts(delete_manager.to_sql)
+          # User.connection.delete(%(
+          #   DELETE FROM #{table}
+          #   WHERE `#{id_col}` IN (#{ids})
+          # ))
         end
       end
     end
+  end
 
-    # Delete records they own, culminating in the user record itself.
+  # Delete records they own, culminating in the user record itself.
+  private_class_method def self.delete_own_records(id)
     [
       [:api_keys,                       :user_id],
       [:articles,                       :user_id],
@@ -971,9 +1014,15 @@ class User < AbstractModel
       [:user_groups_users,              :user_id],
       [:users,                          :id]
     ].each do |table, col|
-      User.connection.delete(%(
-        DELETE FROM #{table} WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(id))
+      User.connection.delete(delete_manager.to_sql)
+      # puts(delete_manager.to_sql)
+      # User.connection.delete(%(
+      #   DELETE FROM #{table} WHERE `#{col}` = #{id}
+      # ))
     end
   end
 
