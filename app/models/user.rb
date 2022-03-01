@@ -827,34 +827,32 @@ class User < AbstractModel
       # )).uniq.sort
 
       # https://stackoverflow.com/a/71282345/3357635
-      orders = Arel::Nodes::NamedFuction.new(
+      users = User.arel_table
+
+      orders = Arel::Nodes::NamedFunction.new(
         "IF",
-        [User.arel_table[:last_login].
-           gt(Time.zone.now - 1.month),
-         User.arel_table[:last_login],
-         nil]
+        [users[:last_login].gt(Time.zone.now - 1.month),
+         users[:last_login],
+         Arel.sql("NULL")]
       )
 
-      plucks = Arel::Nodes::NamedFuction.new(
+      plucks = Arel::Nodes::NamedFunction.new(
         "CONCAT",
-        [User.arel_table[:name],
-         Arel::Nodes::NamedFuction.new(
+        [users[:name],
+         Arel::Nodes::NamedFunction.new(
            "IF",
-           [User.arel_table[:name].eq(""),
+           [users[:name].eq(""),
             Arel.sql("''"),
-            Arel::Nodes::NamedFuction.new(
+            Arel::Nodes::NamedFunction.new(
               "CONCAT",
               [Arel.sql("' <'"),
-               User.arel_table[:name],
+               users[:name],
                Arel.sql("'>'")]
             )]
          )]
       )
-      u = User.arel_table
-      select_manager = u.project(plucks).order(orders).take(1000)
-      puts(select_manager.to_sql)
-      # result = User.connection.select(select_manager.to_sql)
-      # result = User.order(orders).limit(1000).pluck(plucks).uniq.sort
+      result = User.order(orders.desc, users[:contribution].desc).limit(1000).
+               pluck(plucks).uniq.sort
 
       File.open(MO.user_primer_cache_file, "w:utf-8").
         write(result.join("\n") + "\n")
