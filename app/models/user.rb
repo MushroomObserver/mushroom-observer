@@ -912,27 +912,27 @@ class User < AbstractModel
   # Delete references to their one-user group.
   private_class_method def self.delete_one_user_group_references(id)
     group = UserGroup.one_user(id)
-    if group
-      group_id = group.id
-      [
-        [:location_descriptions_admins,  :user_group_id],
-        [:location_descriptions_readers, :user_group_id],
-        [:location_descriptions_writers, :user_group_id],
-        [:name_descriptions_admins,      :user_group_id],
-        [:name_descriptions_readers,     :user_group_id],
-        [:name_descriptions_writers,     :user_group_id],
-        [:user_groups,                   :id]
-      ].each do |table, col|
-        table = Arel::Table.new(table)
-        delete_manager = Arel::DeleteManager.new.
-                         from(table).
-                         where(table[col].eq(group_id))
-        User.connection.delete(delete_manager.to_sql)
-        # puts(delete_manager.to_sql)
-        # User.connection.delete(%(
-        #   DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        # ))
-      end
+    return unless group
+
+    group_id = group.id
+    [
+      [:location_descriptions_admins,  :user_group_id],
+      [:location_descriptions_readers, :user_group_id],
+      [:location_descriptions_writers, :user_group_id],
+      [:name_descriptions_admins,      :user_group_id],
+      [:name_descriptions_readers,     :user_group_id],
+      [:name_descriptions_writers,     :user_group_id],
+      [:user_groups,                   :id]
+    ].each do |table, col|
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(group_id))
+      User.connection.delete(delete_manager.to_sql)
+      # puts(delete_manager.to_sql)
+      # User.connection.delete(%(
+      #   DELETE FROM #{table} WHERE `#{col}` = #{group_id}
+      # ))
     end
   end
 
@@ -945,44 +945,43 @@ class User < AbstractModel
     #   SELECT id FROM observations WHERE user_id = #{id}
     # )).map(&:to_s)
     # puts(ids.inspect)
-    if ids.any?
-      # ids = ids.join(",")
-      [
-        [:collection_numbers_observations, :observation_id],
-        [:comments,                        :target_id, :target_type],
-        [:herbarium_records_observations,  :observation_id],
-        [:images_observations,             :observation_id],
-        [:interests,                       :target_id, :target_type],
-        [:namings,                         :observation_id],
-        [:rss_logs,                        :observation_id],
-        [:sequences,                       :observation_id],
-        [:votes,                           :observation_id]
-      ].each do |table, id_col, type_col|
-        table = Arel::Table.new(table)
-        if type_col
-          delete_manager = Arel::DeleteManager.new.
-                           from(table).
-                           where(table[id_col].in(ids).and(
-                                   table[type_col].eq("Observation")
-                                 ))
-          User.connection.delete(delete_manager.to_sql)
-          # puts(delete_manager.to_sql)
-          # User.connection.delete(%(
-          #   DELETE FROM #{table}
-          #   WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          # ))
-        else
-          delete_manager = Arel::DeleteManager.new.
-                           from(table).
-                           where(table[id_col].in(ids))
-          User.connection.delete(delete_manager.to_sql)
-          # puts(delete_manager.to_sql)
-          # User.connection.delete(%(
-          #   DELETE FROM #{table}
-          #   WHERE `#{id_col}` IN (#{ids})
-          # ))
-        end
+    return unless ids.any?
+
+    # ids = ids.join(",")
+    [
+      [:collection_numbers_observations, :observation_id],
+      [:comments,                        :target_id, :target_type],
+      [:herbarium_records_observations,  :observation_id],
+      [:images_observations,             :observation_id],
+      [:interests,                       :target_id, :target_type],
+      [:namings,                         :observation_id],
+      [:rss_logs,                        :observation_id],
+      [:sequences,                       :observation_id],
+      [:votes,                           :observation_id]
+    ].each do |table, id_col, type_col|
+      table = Arel::Table.new(table)
+      if type_col
+        delete_manager = Arel::DeleteManager.new.
+                         from(table).
+                         where(table[id_col].in(ids).and(
+                                 table[type_col].eq("Observation")
+                               ))
+        # puts(delete_manager.to_sql)
+        # User.connection.delete(%(
+        #   DELETE FROM #{table}
+        #   WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
+        # ))
+      else
+        delete_manager = Arel::DeleteManager.new.
+                         from(table).
+                         where(table[id_col].in(ids))
+        # puts(delete_manager.to_sql)
+        # User.connection.delete(%(
+        #   DELETE FROM #{table}
+        #   WHERE `#{id_col}` IN (#{ids})
+        # ))
       end
+      User.connection.delete(delete_manager.to_sql)
     end
   end
 
