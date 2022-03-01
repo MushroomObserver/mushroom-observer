@@ -202,6 +202,7 @@ class User < AbstractModel
   require "arel-helpers"
 
   include ArelHelpers::JoinAssociation
+  include Arel::Nodes
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
