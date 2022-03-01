@@ -567,6 +567,14 @@ class User < AbstractModel
   def projects_member(order: :created_at, include: nil)
     @projects_member ||= Project.where(user_group: user_groups.ids).
                          includes(include).order(order).to_a
+    # puts(projects_member.pluck(:id))
+
+    # ug_u = Arel::Table.new(:user_groups_users)
+    # selects = ug_u.project(ug_u[:user_group_id]).where(ug_u[:user_id].eq(id))
+    # ug_ids = User.connection.select_values(selects)
+    # @projects_member ||= Project.where(user_group: ug_ids).
+    #                   includes(include).order(order).to_a
+    # puts(projects_member.pluck(:id))
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
@@ -644,25 +652,51 @@ class User < AbstractModel
         # results = SpeciesList.includes(include).find_by_sql(%(
         #   SELECT species_lists.* FROM species_lists, projects_species_lists
         #   WHERE (species_lists.user_id = #{id} )
-        #   OR (species_lists.user_id != #{id}
-        #     AND projects_species_lists.project_id IN (#{project_ids})
+        #   OR (projects_species_lists.project_id IN (#{project_ids})
         #     AND projects_species_lists.species_list_id = species_lists.id)
         #   ))
         # puts("revised SQL")
         # puts(results.uniq.sort.pluck(:id).inspect)
 
+        # New SQL: rewritten by Jason 2/2022
+        # project_ids = projects_member.map(&:id).join(",")
+        # results = SpeciesList.includes(include).find_by_sql(%(
+        #   SELECT *
+        #   FROM species_lists
+        #   WHERE user_id = #{id}
+        #   OR id IN (
+        #     SELECT DISTINCT(species_list_id)
+        #     FROM projects_species_lists
+        #     WHERE project_id IN (#{project_ids})
+        #   );
+        # ))
+        # puts("new SQL")
+        # puts(results.uniq.sort.pluck(:id).inspect)
+
         project_ids = projects_member.map(&:id)
         sl = SpeciesList.arel_table
         psl = Arel::Table.new(:projects_species_lists)
-        constraints = sl.create_on(
-          sl[:id].eq(psl[:species_list_id])
-        )
-        join = sl.create_join(psl, constraints, Arel::Nodes::OuterJoin)
-        results = SpeciesList.includes(include).joins(join).where(
-          sl[:user_id].eq(id).or(psl[:project_id].in(project_ids))
-        ).uniq.sort
+
+        # Arel with left outer join version
+        # constraints = sl.create_on(
+        #   sl[:id].eq(psl[:species_list_id])
+        # )
+        # join = sl.create_join(psl, constraints, Arel::Nodes::OuterJoin)
+        # results = SpeciesList.includes(include).joins(join).where(
+        #   sl[:user_id].eq(id).or(psl[:project_id].in(project_ids))
+        # ).uniq.sort
         # puts("component method short")
         # puts(results.pluck(:id).inspect)
+
+        # Arel with nested select version
+        inner_select = psl.project(psl[:species_list_id]).
+                       where(psl[:project_id].in(project_ids)).uniq
+        sl_ids_array = Arel::Nodes::Grouping.new(inner_select)
+        outer_select = sl.project(Arel.star).where(sl[:user_id].eq(id).
+                       or(sl[:id].in(sl_ids_array))).uniq
+        results = SpeciesList.find_by_sql(outer_select.to_sql)
+        # puts("nested method short")
+        # puts(results.inspect)
       else
         results = species_lists
       end
