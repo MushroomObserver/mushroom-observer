@@ -202,7 +202,6 @@ class User < AbstractModel
   require "arel-helpers"
 
   include ArelHelpers::JoinAssociation
-  include Arel::Nodes
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -603,8 +602,9 @@ class User < AbstractModel
   # Herbarium.connection.select_value(%(
   #   SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
   # )) || :user_personal_herbarium.l(name: unique_text_name)
+  # Can't call personal_herbarium&.name here because instance var may be stale
   def personal_herbarium_name
-    personal_herbarium&.name ||
+    Herbarium.find_by(personal_user_id: id)&.name ||
       :user_personal_herbarium.l(name: unique_text_name)
   end
 
@@ -850,8 +850,11 @@ class User < AbstractModel
             )]
          )]
       )
-
-      result = User.order(orders).limit(1000).pluck(plucks).uniq.sort
+      u = User.arel_table
+      select_manager = u.project(plucks).order(orders).take(1000)
+      puts(select_manager.to_sql)
+      # result = User.connection.select(select_manager.to_sql)
+      # result = User.order(orders).limit(1000).pluck(plucks).uniq.sort
 
       File.open(MO.user_primer_cache_file, "w:utf-8").
         write(result.join("\n") + "\n")
