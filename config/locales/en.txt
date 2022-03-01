@@ -2428,6 +2428,7 @@
 
   # herbarium fields
   herbarium_curator: Curator
+  herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
   user_personal_herbarium: "[name]: Personal Fungarium"
