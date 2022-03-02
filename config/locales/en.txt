@@ -1514,7 +1514,7 @@
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
-  form_naming_name_help: "The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**"
+  form_naming_name_help: The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
   form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
@@ -1543,8 +1543,8 @@
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n Include administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\n Examples: \n&nbsp;&nbsp; [loc1] \n&nbsp;&nbsp; [loc2]"
-  form_observations_locate_on_map_help: "Use the Locate on Map Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
+  form_observations_locate_on_map_help: Use the Locate on Map Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
@@ -2481,7 +2481,7 @@
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
   create_herbarium_record_title: Add Fungarium Record
-  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419 \n&nbsp;&nbsp;BRY-L-0025845 \n&nbsp;&nbsp;MO 174623 \n&nbsp;&nbsp;Joe Smith 17-013"
+  create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
   create_herbarium_record_already_used: This fungarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct fungarium record.
@@ -2547,11 +2547,11 @@
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
-  donate_snail_mail: Donors who wish to donate by check should make the check payable to "Mushroom Observer, Inc." and mail it to our registered corporate address:\nMushroom Observer, Inc. \n68 Bay Rd. \nNorth Falmouth, MA 02556-2404
+  donate_snail_mail: "Donors who wish to donate by check should make the check payable to \"Mushroom Observer, Inc.\" and mail it to our registered corporate address:\nMushroom Observer, Inc.\n68 Bay Rd.\nNorth Falmouth, MA 02556-2404"
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
-  donate_explanation: "A donation can be made in any amount. There are two ways: via PayPal or by check. We encourage you to send a check for donations of $200 or more. \n\nPayPal donations can be made with most credit cards (no PayPal account needed) or via a PayPal account by clicking on the \"Confirm\" button below. \n\nFor donations by check see below. \n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors. If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
+  donate_explanation: "A donation can be made in any amount. There are two ways: via PayPal or by check. We encourage you to send a check for donations of $200 or more.\n\nPayPal donations can be made with most credit cards (no PayPal account needed) or via a PayPal account by clicking on the \"Confirm\" button below.\n\nFor donations by check see below.\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors. If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
   donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are eligible to be deducted for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
@@ -2623,7 +2623,7 @@
   advanced_search_observer_help: Who observed the mushroom
   advanced_search_result_type: Result Type
   # Image search UI temporarily disabled for performance. 2021-09-12 JDC
-  # advanced_search_result_type_help: Do you want [:observations], [:images], [:locations] or [:names]/[:descriptions]?
+  # advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
   advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
 
   advanced_search_filters: Search Filters
@@ -2910,7 +2910,7 @@
   sandbox_look_like: This is what it will look like
   sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "??italics??        trademark(tm) \n**boldface**       copyright(c) \n+underline+        registered(r) \n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote \n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":http://google.com or !http://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
@@ -3264,7 +3264,7 @@
   email_location_change: "User made nontrivial change to a location:\n\nuser : [user]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nshow location : [show_url]\nedit location : [edit_url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nshow url : [show_url]\nedit url : [edit_url]"
   email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nshow this : [show_this_url]\nedit this : [edit_this_url]\nshow that : [show_that_url]\nedit that : [edit_that_url]\nnotes : [notes]"
-  email_name_change_request: "User wants to change Name having dependents: \n\nuser : [user] \nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
+  email_name_change_request: "User wants to change Name having dependents:\n\nuser : [user]\nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
@@ -3511,8 +3511,8 @@
   validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
-  validate_user_selection: "You selected"
-  validate_today: "today is"
+  validate_user_selection: You selected
+  validate_today: today is
 
   # One-time-use error messages.
   validate_image_content_type_images_only: You can only upload [:images].
