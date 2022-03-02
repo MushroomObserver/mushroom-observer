@@ -1925,7 +1925,13 @@
   rss_hide: "Hide:"
   rss_all: Everything
   rss_all_help: Show all object types.
-  rss_one: "[TYPES]"
+  rss_one_observation: "[:OBSERVATIONS]"
+  rss_one_name: "[:NAMES]"
+  rss_one_location: "[:LOCATIONS]"
+  rss_one_species_list: "[:SPECIES_LISTS]"
+  rss_one_project: "[:PROJECTS]"
+  rss_one_glossary_term: "[:GLOSSARY]"
+  rss_one_article: "[:NEWS]"
   rss_one_help: Show only [types].
   rss_make_default: Make This My Default
   rss_this_is_default: This Is Your Default
@@ -2422,6 +2428,7 @@
 
   # herbarium fields
   herbarium_curator: Curator
+  herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
   user_personal_herbarium: "[name]: Personal Fungarium"

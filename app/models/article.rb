@@ -19,7 +19,6 @@
 #  display_name::       name boldfaced
 #  format_name          name
 #  text_name            name without formatting
-#  rss_log_tab_label    label displayed in the RssLog tabset
 #  unique_format_name   name + id
 #  unique_text_name     name + id without formatting
 #
@@ -58,11 +57,6 @@ class Article < AbstractModel
   # used by RSS feed
   def unique_text_name
     text_name + " (#{id || "?"})"
-  end
-
-  # The label which is displayed for this model's tab in the RssLog tabset
-  def self.rss_log_tab_label
-    "News"
   end
 
   # wrapper around class method of same name
