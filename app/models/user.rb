@@ -201,6 +201,7 @@ class User < AbstractModel
   require "digest/sha1"
   require "arel-helpers"
 
+  include ArelHelpers::ArelTable
   include ArelHelpers::JoinAssociation
 
   # enum definitions for use by simple_enum gem
@@ -496,13 +497,11 @@ class User < AbstractModel
   #         login, login, login, sha1(password))
   #
   def self.authenticate(login: nil, password: nil)
-    users = User.arel_table
-
     User.find_by(
-      users[:login].eq(login).
-      or(users[:name].eq(login)).
-      or(users[:email].eq(login)).
-      and(users[:password].eq(sha1(password)))
+      User[:login].eq(login).
+      or(User[:name].eq(login)).
+      or(User[:email].eq(login)).
+      and(User[:password].eq(sha1(password)))
     )
   end
 
