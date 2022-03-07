@@ -614,7 +614,7 @@ class User < AbstractModel
     @all_editable_species_lists ||= begin
       if projects_member.any?
         SpeciesList.includes(include).find_by_sql(
-          species_lists_by_user_or_project.to_sql
+          arel_select_species_lists_by_user_or_project.to_sql
         )
       else
         species_lists.includes(include)
@@ -622,13 +622,13 @@ class User < AbstractModel
     end
   end
 
-  def species_lists_by_user_or_project
+  def arel_select_species_lists_by_user_or_project
     sl = SpeciesList.arel_table
     sl.project(Arel.star).where(sl[:user_id].eq(id).
-      or(sl[:id].in(projects_member_species_lists))).uniq
+      or(sl[:id].in(arel_select_species_list_ids_in_users_projects))).uniq
   end
 
-  def projects_member_species_lists
+  def arel_select_species_list_ids_in_users_projects
     project_ids = projects_member.map(&:id)
     psl = Arel::Table.new(:projects_species_lists)
     psl.project(psl[:species_list_id]).
