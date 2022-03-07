@@ -507,9 +507,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    # rubocop:disable Rails/SkipsModelValidations
     update_attribute("password", self.class.sha1(pass)) if pass.present?
-    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Mark a User account as "verified".
@@ -613,22 +611,22 @@ class User < AbstractModel
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
       if projects_member.any?
-        sql = all_editable_species_lists_outer_select.to_sql
-        SpeciesList.includes(include).find_by_sql(sql)
+        SpeciesList.includes(include).find_by_sql(
+          species_lists_by_user_or_project.to_sql
+        )
       else
         species_lists.includes(include)
       end
     end
   end
 
-  def all_editable_species_lists_outer_select
-    inner_select = all_editable_species_lists_inner_select
+  def species_lists_by_user_or_project
     sl = SpeciesList.arel_table
     sl.project(Arel.star).where(sl[:user_id].eq(id).
-      or(sl[:id].in(inner_select))).uniq
+      or(sl[:id].in(projects_member_species_lists))).uniq
   end
 
-  def all_editable_species_lists_inner_select
+  def projects_member_species_lists
     project_ids = projects_member.map(&:id)
     psl = Arel::Table.new(:projects_species_lists)
     psl.project(psl[:species_list_id]).
