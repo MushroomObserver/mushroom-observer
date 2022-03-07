@@ -507,7 +507,9 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
+    # rubocop:disable Rails/SkipsModelValidations
     update_attribute("password", self.class.sha1(pass)) if pass.present?
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Mark a User account as "verified".
