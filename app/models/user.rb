@@ -540,31 +540,22 @@ class User < AbstractModel
   # Return an Array of Project's that this User is an admin for.
   # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
-    projects = Project.arel_table
+    prj = Project.arel_table
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
-    user_groups_users = Arel::Table.new(:user_groups_users)
+    ugu = Arel::Table.new(:user_groups_users)
 
-    # Note: `project` is an Arel method specifying what to `SELECT`
-    arel = projects.project(Arel.star).join(user_groups_users).
-           on(projects[:admin_group_id].eq(user_groups_users[:user_group_id]).
-                 and(user_groups_users[:user_id].eq(id)))
+    select_manager = prj.project(Arel.star).join(ugu).
+                     on(prj[:admin_group_id].eq(ugu[:user_group_id]).
+                        and(ugu[:user_id].eq(id)))
 
-    @projects_admin ||= Project.joins(*arel.join_sources)
+    @projects_admin ||= Project.joins(*select_manager.join_sources)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
     @projects_member ||= Project.where(user_group: user_groups.ids).
                          includes(include).order(order).to_a
-    # puts(projects_member.pluck(:id))
-
-    # ug_u = Arel::Table.new(:user_groups_users)
-    # selects = ug_u.project(ug_u[:user_group_id]).where(ug_u[:user_id].eq(id))
-    # ug_ids = User.connection.select_values(selects)
-    # @projects_member ||= Project.where(user_group: ug_ids).
-    #                   includes(include).order(order).to_a
-    # puts(projects_member.pluck(:id))
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
