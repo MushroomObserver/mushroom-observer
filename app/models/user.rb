@@ -199,6 +199,10 @@
 #
 class User < AbstractModel
   require "digest/sha1"
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -489,9 +493,12 @@ class User < AbstractModel
   #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
   def self.authenticate(login: nil, password: nil)
-    find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
-              password != '' ",
-            login, login, login, sha1(password))
+    User.find_by(
+      User[:login].eq(login).
+      or(User[:name].eq(login)).
+      or(User[:email].eq(login)).
+      and(User[:password].eq(sha1(password)))
+    )
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -531,12 +538,18 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
+  # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
-    @projects_admin ||= Project.find_by_sql(%(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.admin_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    ))
+    prj = Project.arel_table
+    # For join tables with no model, need to create an Arel::Table object
+    # so we can use Arel methods on it, eg access columns
+    ugu = Arel::Table.new(:user_groups_users)
+
+    select_manager = prj.project(Arel.star).join(ugu).
+                     on(prj[:admin_group_id].eq(ugu[:user_group_id]).
+                        and(ugu[:user_id].eq(id)))
+
+    @projects_admin ||= Project.joins(*select_manager.join_sources)
   end
 
   # Return an Array of Project's that this User is a member of.
@@ -562,18 +575,20 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      herbarium_id = Herbarium.connection.select_value(%(
-        SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
-        ORDER BY created_at DESC LIMIT 1
-      ))
+      hr = HerbariumRecord.arel_table
+      select_manager = hr.project(hr[:herbarium_id]).
+                       where(hr[:user_id].eq(id)).
+                       order(hr[:created_at].desc).take(1)
+      herbarium_id = Herbarium.connection.select_value(select_manager.to_sql)
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
 
+  # Offers a default fallback for personal herbarium name
+  # Can't call personal_herbarium&.name here because instance var may be stale
   def personal_herbarium_name
-    Herbarium.connection.select_value(%(
-      SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
-    )) || :user_personal_herbarium.l(name: unique_text_name)
+    Herbarium.find_by(personal_user_id: id)&.name ||
+      :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
@@ -595,15 +610,18 @@ class User < AbstractModel
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
-      results = species_lists
       if projects_member.any?
-        project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.includes(include).find_by_sql(%(
-          SELECT species_lists.* FROM species_lists, projects_species_lists
-          WHERE species_lists.user_id != #{id}
-            AND projects_species_lists.project_id IN (#{project_ids})
-            AND projects_species_lists.species_list_id = species_lists.id
-        ))
+        project_ids = projects_member.map(&:id)
+        sl = SpeciesList.arel_table
+        psl = Arel::Table.new(:projects_species_lists)
+
+        inner_select = psl.project(psl[:species_list_id]).
+                       where(psl[:project_id].in(project_ids)).uniq
+        outer_select = sl.project(Arel.star).where(sl[:user_id].eq(id).
+                       or(sl[:id].in(inner_select))).uniq
+        results = SpeciesList.find_by_sql(outer_select.to_sql)
+      else
+        results = species_lists
       end
       results
     end
@@ -626,13 +644,13 @@ class User < AbstractModel
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      state = Interest.connection.select_value(%(
-        SELECT state FROM interests
-        WHERE user_id = #{id}
-          AND target_type = '#{object.class.name}'
-          AND target_id = #{object.id}
-        LIMIT 1
-      )).to_s
+      i = Interest.arel_table
+      select_manager = i.project(i[:state]).
+                       where(i[:user_id].eq(id).
+                        and(i[:target_type].eq(object.class.name)).
+                        and(i[:target_id].eq(object.id))).
+                       take(1)
+      state = Interest.connection.select_value(select_manager.to_sql).to_s
       case state
       when "1"
         :watching
@@ -740,17 +758,34 @@ class User < AbstractModel
     if !File.exist?(MO.user_primer_cache_file) ||
        File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
 
-      # Get list of users sorted first by when they last logged in (if recent),
-      # then by cotribution.
-      result = connection.select_values(%(
-        SELECT CONCAT(users.login,
-                      IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-        FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-                    last_login, NULL) DESC,
-                 contribution DESC
-        LIMIT 1000
-      )).uniq.sort
+      # How to order - https://stackoverflow.com/a/71282345/3357635
+      users = User.arel_table
+
+      orders = Arel::Nodes::NamedFunction.new(
+        "IF",
+        [users[:last_login].gt(Time.zone.now - 1.month),
+         users[:last_login],
+         Arel.sql("NULL")]
+      )
+
+      # What to return
+      plucks = Arel::Nodes::NamedFunction.new(
+        "CONCAT",
+        [users[:name],
+         Arel::Nodes::NamedFunction.new(
+           "IF",
+           [users[:name].eq(""),
+            Arel.sql("''"),
+            Arel::Nodes::NamedFunction.new(
+              "CONCAT",
+              [Arel.sql("' <'"),
+               users[:name],
+               Arel.sql("'>'")]
+            )]
+         )]
+      )
+      result = User.order(orders.desc, users[:contribution].desc).limit(1000).
+               pluck(plucks).uniq.sort
 
       File.open(MO.user_primer_cache_file, "w:utf-8").
         write(result.join("\n") + "\n")
@@ -766,7 +801,14 @@ class User < AbstractModel
   # 2) Image votes.
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
-    # Blank out any references in public records.
+    blank_out_public_references(id)
+    delete_one_user_group_references(id)
+    delete_observations_attachments(id)
+    delete_own_records(id)
+  end
+
+  # Blank out any references in public records.
+  private_class_method def self.blank_out_public_references(id)
     [
       [:location_descriptions,          :user_id],
       [:location_descriptions_versions, :user_id],
@@ -786,62 +828,74 @@ class User < AbstractModel
       [:translation_strings_versions,   :user_id],
       [:votes,                          :user_id]
     ].each do |table, col|
-      User.connection.update(%(
-        UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      update_manager = Arel::UpdateManager.new.
+                       table(table).
+                       set([[table[col], 0]]).
+                       where(table[col].eq(id))
+      User.connection.update(update_manager.to_sql)
     end
+  end
 
-    # Delete references to their one-user group.
+  # Delete references to their one-user group.
+  private_class_method def self.delete_one_user_group_references(id)
     group = UserGroup.one_user(id)
-    if group
-      group_id = group.id
-      [
-        [:location_descriptions_admins,  :user_group_id],
-        [:location_descriptions_readers, :user_group_id],
-        [:location_descriptions_writers, :user_group_id],
-        [:name_descriptions_admins,      :user_group_id],
-        [:name_descriptions_readers,     :user_group_id],
-        [:name_descriptions_writers,     :user_group_id],
-        [:user_groups,                   :id]
-      ].each do |table, col|
-        User.connection.delete(%(
-          DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        ))
-      end
-    end
+    return unless group
 
-    # Delete their observations' attachments.
-    ids = User.connection.select_values(%(
-      SELECT id FROM observations WHERE user_id = #{id}
-    )).map(&:to_s)
-    if ids.any?
-      ids = ids.join(",")
-      [
-        [:collection_numbers_observations, :observation_id],
-        [:comments,                        :target_id, :target_type],
-        [:herbarium_records_observations,  :observation_id],
-        [:images_observations,             :observation_id],
-        [:interests,                       :target_id, :target_type],
-        [:namings,                         :observation_id],
-        [:rss_logs,                        :observation_id],
-        [:sequences,                       :observation_id],
-        [:votes,                           :observation_id]
-      ].each do |table, id_col, type_col|
-        if type_col
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          ))
-        else
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids})
-          ))
-        end
-      end
+    group_id = group.id
+    [
+      [:location_descriptions_admins,  :user_group_id],
+      [:location_descriptions_readers, :user_group_id],
+      [:location_descriptions_writers, :user_group_id],
+      [:name_descriptions_admins,      :user_group_id],
+      [:name_descriptions_readers,     :user_group_id],
+      [:name_descriptions_writers,     :user_group_id],
+      [:user_groups,                   :id]
+    ].each do |table, col|
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(group_id))
+      User.connection.delete(delete_manager.to_sql)
     end
+  end
 
-    # Delete records they own, culminating in the user record itself.
+  # Delete their observations' attachments.
+  private_class_method def self.delete_observations_attachments(id)
+    obs = Observation.arel_table
+    obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
+    ids = User.connection.select_values(obs_select_manager.to_sql).map
+    return unless ids.any?
+
+    [
+      [:collection_numbers_observations, :observation_id],
+      [:comments,                        :target_id, :target_type],
+      [:herbarium_records_observations,  :observation_id],
+      [:images_observations,             :observation_id],
+      [:interests,                       :target_id, :target_type],
+      [:namings,                         :observation_id],
+      [:rss_logs,                        :observation_id],
+      [:sequences,                       :observation_id],
+      [:votes,                           :observation_id]
+    ].each do |table, id_col, type_col|
+      table = Arel::Table.new(table)
+      if type_col
+        delete_manager = Arel::DeleteManager.new.
+                         from(table).
+                         where(table[id_col].in(ids).and(
+                                 table[type_col].eq("Observation")
+                               ))
+      else
+        delete_manager = Arel::DeleteManager.new.
+                         from(table).
+                         where(table[id_col].in(ids))
+      end
+      User.connection.delete(delete_manager.to_sql)
+    end
+  end
+
+  # Delete records they own, culminating in the user record itself.
+  private_class_method def self.delete_own_records(id)
     [
       [:api_keys,                       :user_id],
       [:articles,                       :user_id],
@@ -872,9 +926,11 @@ class User < AbstractModel
       [:user_groups_users,              :user_id],
       [:users,                          :id]
     ].each do |table, col|
-      User.connection.delete(%(
-        DELETE FROM #{table} WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(id))
+      User.connection.delete(delete_manager.to_sql)
     end
   end
 

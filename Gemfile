@@ -17,6 +17,12 @@ gem("mysql2")
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
 
+# Add Arel helpers for more concise query syntax in Arel
+# https://github.com/camertron/arel-helpers
+# https://github.com/Faveod/arel-extensions
+gem("arel_extensions")
+gem("arel-helpers")
+
 # Use bootstrap style generator
 gem("bootstrap-sass")
 
