@@ -788,11 +788,12 @@ class User < AbstractModel
   private_class_method def self.primer_data
     # How to order - https://stackoverflow.com/a/71282345/3357635
     users = User.arel_table
-    User.order(last_login_if_recent_arel.desc, users[:contribution].desc).
-      limit(1000).pluck(login_plus_name_arel).uniq.sort
+    User.order(arel_function_last_login_if_recent.desc,
+               users[:contribution].desc).
+      limit(1000).pluck(arel_function_login_plus_name).uniq.sort
   end
 
-  private_class_method def self.last_login_if_recent_arel
+  private_class_method def self.arel_function_last_login_if_recent
     users = User.arel_table
     Arel::Nodes::NamedFunction.new(
       "IF",
@@ -802,7 +803,7 @@ class User < AbstractModel
     )
   end
 
-  private_class_method def self.login_plus_name_arel
+  private_class_method def self.arel_function_login_plus_name
     users = User.arel_table
     Arel::Nodes::NamedFunction.new(
       "CONCAT",
