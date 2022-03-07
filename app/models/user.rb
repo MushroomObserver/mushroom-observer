@@ -492,10 +492,6 @@ class User < AbstractModel
   #   user = User.authenticate(login: 'Fred Flintstone', password: 'password')
   #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
-  # find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
-  #           password != '' ",
-  #         login, login, login, sha1(password))
-  #
   def self.authenticate(login: nil, password: nil)
     User.find_by(
       User[:login].eq(login).
@@ -542,11 +538,6 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
-  # @projects_admin ||= Project.find_by_sql(%(
-  #   SELECT projects.* FROM projects, user_groups_users
-  #   WHERE projects.admin_group_id = user_groups_users.user_group_id
-  #     AND user_groups_users.user_id = #{id}
-  # ))
   # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
     projects = Project.arel_table
@@ -590,25 +581,19 @@ class User < AbstractModel
 
   # Return the name of this user's "favorite" herbarium
   # (meaning the one they have used the most).
-  # herbarium_id = Herbarium.connection.select_value(%(
-  #   SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
-  #   ORDER BY created_at DESC LIMIT 1
-  # ))
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
       hr = HerbariumRecord.arel_table
-      arel = hr.project(hr[:herbarium_id]).
-             where(hr[:user_id].eq(id)).
-             order(hr[:created_at].desc).take(1)
-      herbarium_id = Herbarium.connection.select_value(arel.to_sql)
+      select_manager = hr.project(hr[:herbarium_id]).
+                       where(hr[:user_id].eq(id)).
+                       order(hr[:created_at].desc).take(1)
+      herbarium_id = Herbarium.connection.select_value(select_manager.to_sql)
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
 
-  # Herbarium.connection.select_value(%(
-  #   SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
-  # )) || :user_personal_herbarium.l(name: unique_text_name)
+  # Offers a default fallback for personal herbarium name
   # Can't call personal_herbarium&.name here because instance var may be stale
   def personal_herbarium_name
     Herbarium.find_by(personal_user_id: id)&.name ||
@@ -635,67 +620,15 @@ class User < AbstractModel
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
       if projects_member.any?
-        # project_ids = projects_member.map(&:id).join(",")
-        # results = species_lists
-        # results += SpeciesList.includes(include).find_by_sql(%(
-        #   SELECT species_lists.* FROM species_lists, projects_species_lists
-        #   WHERE species_lists.user_id != #{id}
-        #     AND projects_species_lists.project_id IN (#{project_ids})
-        #     AND projects_species_lists.species_list_id = species_lists.id
-        #   ))
-        # puts("original SQL")
-        # puts(results.uniq.sort.pluck(:id).inspect)
-
-        # Revised SQL: user species_lists are in WHERE, avoiding extra load
-        # project_ids = projects_member.map(&:id).join(",")
-        # results = SpeciesList.includes(include).find_by_sql(%(
-        #   SELECT species_lists.* FROM species_lists, projects_species_lists
-        #   WHERE (species_lists.user_id = #{id} )
-        #   OR (projects_species_lists.project_id IN (#{project_ids})
-        #     AND projects_species_lists.species_list_id = species_lists.id)
-        #   ))
-        # puts("revised SQL")
-        # puts(results.uniq.sort.pluck(:id).inspect)
-
-        # New SQL: rewritten by Jason 2/2022
-        # project_ids = projects_member.map(&:id).join(",")
-        # results = SpeciesList.includes(include).find_by_sql(%(
-        #   SELECT *
-        #   FROM species_lists
-        #   WHERE user_id = #{id}
-        #   OR id IN (
-        #     SELECT DISTINCT(species_list_id)
-        #     FROM projects_species_lists
-        #     WHERE project_id IN (#{project_ids})
-        #   );
-        # ))
-        # puts("new SQL")
-        # puts(results.uniq.sort.pluck(:id).inspect)
-
         project_ids = projects_member.map(&:id)
         sl = SpeciesList.arel_table
         psl = Arel::Table.new(:projects_species_lists)
 
-        # Arel with left outer join version
-        # constraints = sl.create_on(
-        #   sl[:id].eq(psl[:species_list_id])
-        # )
-        # join = sl.create_join(psl, constraints, Arel::Nodes::OuterJoin)
-        # results = SpeciesList.includes(include).joins(join).where(
-        #   sl[:user_id].eq(id).or(psl[:project_id].in(project_ids))
-        # ).uniq.sort
-        # puts("component method short")
-        # puts(results.pluck(:id).inspect)
-
-        # Arel with nested select version
         inner_select = psl.project(psl[:species_list_id]).
                        where(psl[:project_id].in(project_ids)).uniq
-        sl_ids_array = Arel::Nodes::Grouping.new(inner_select)
         outer_select = sl.project(Arel.star).where(sl[:user_id].eq(id).
-                       or(sl[:id].in(sl_ids_array))).uniq
+                       or(sl[:id].in(inner_select))).uniq
         results = SpeciesList.find_by_sql(outer_select.to_sql)
-        # puts("nested method short")
-        # puts(results.inspect)
       else
         results = species_lists
       end
@@ -721,21 +654,12 @@ class User < AbstractModel
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
       i = Interest.arel_table
-      arel = i.project(i[:state]).
-             where(i[:user_id].eq(id).
-                   and(i[:target_type].eq(object.class.name)).
-                   and(i[:target_id].eq(object.id))).
-             take(1)
-      # puts(arel.to_sql)
-      # state = Interest.connection.select_value(%(
-      #   SELECT state FROM interests
-      #   WHERE user_id = #{id}
-      #     AND target_type = '#{object.class.name}'
-      #     AND target_id = #{object.id}
-      #   LIMIT 1
-      # )).to_s
-      # Question for Jason: Why convert to string here?
-      state = Interest.connection.select_value(arel.to_sql).to_s
+      select_manager = i.project(i[:state]).
+                       where(i[:user_id].eq(id).
+                        and(i[:target_type].eq(object.class.name)).
+                        and(i[:target_id].eq(object.id))).
+                       take(1)
+      state = Interest.connection.select_value(select_manager.to_sql).to_s
       case state
       when "1"
         :watching
@@ -843,19 +767,7 @@ class User < AbstractModel
     if !File.exist?(MO.user_primer_cache_file) ||
        File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
 
-      # Get list of users sorted first by when they last logged in (if recent),
-      # then by contribution.
-      # connection.select_values(%(
-      #   SELECT CONCAT(users.login,
-      #                 IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-      #   FROM users
-      #   ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-      #               last_login, NULL) DESC,
-      #             contribution DESC
-      #   LIMIT 1000
-      # )).uniq.sort
-
-      # https://stackoverflow.com/a/71282345/3357635
+      # How to order - https://stackoverflow.com/a/71282345/3357635
       users = User.arel_table
 
       orders = Arel::Nodes::NamedFunction.new(
@@ -865,6 +777,7 @@ class User < AbstractModel
          Arel.sql("NULL")]
       )
 
+      # What to return
       plucks = Arel::Nodes::NamedFunction.new(
         "CONCAT",
         [users[:name],
@@ -930,9 +843,6 @@ class User < AbstractModel
                        set([[table[col], 0]]).
                        where(table[col].eq(id))
       User.connection.update(update_manager.to_sql)
-      # User.connection.update(%(
-      #   UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      # ))
     end
   end
 
@@ -956,10 +866,6 @@ class User < AbstractModel
                        from(table).
                        where(table[col].eq(group_id))
       User.connection.delete(delete_manager.to_sql)
-      # puts(delete_manager.to_sql)
-      # User.connection.delete(%(
-      #   DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-      # ))
     end
   end
 
@@ -968,13 +874,8 @@ class User < AbstractModel
     obs = Observation.arel_table
     obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
     ids = User.connection.select_values(obs_select_manager.to_sql).map
-    # ids = User.connection.select_values(%(
-    #   SELECT id FROM observations WHERE user_id = #{id}
-    # )).map(&:to_s)
-    # puts(ids.inspect)
     return unless ids.any?
 
-    # ids = ids.join(",")
     [
       [:collection_numbers_observations, :observation_id],
       [:comments,                        :target_id, :target_type],
@@ -993,20 +894,10 @@ class User < AbstractModel
                          where(table[id_col].in(ids).and(
                                  table[type_col].eq("Observation")
                                ))
-        # puts(delete_manager.to_sql)
-        # User.connection.delete(%(
-        #   DELETE FROM #{table}
-        #   WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-        # ))
       else
         delete_manager = Arel::DeleteManager.new.
                          from(table).
                          where(table[id_col].in(ids))
-        # puts(delete_manager.to_sql)
-        # User.connection.delete(%(
-        #   DELETE FROM #{table}
-        #   WHERE `#{id_col}` IN (#{ids})
-        # ))
       end
       User.connection.delete(delete_manager.to_sql)
     end
@@ -1049,10 +940,6 @@ class User < AbstractModel
                        from(table).
                        where(table[col].eq(id))
       User.connection.delete(delete_manager.to_sql)
-      # puts(delete_manager.to_sql)
-      # User.connection.delete(%(
-      #   DELETE FROM #{table} WHERE `#{col}` = #{id}
-      # ))
     end
   end
 
