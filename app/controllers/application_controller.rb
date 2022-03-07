@@ -203,7 +203,7 @@ class ApplicationController < ActionController::Base
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    return true if @user&.is_successful_contributor?
+    return true if @user&.successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
     redirect_back_or_default(controller: :observer, action: :index)

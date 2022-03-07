@@ -344,7 +344,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_unsuccessful_create_location_description
     loc = locations(:albion)
     user = login(users(:spammer).name)
-    assert_false(user.is_successful_contributor?)
+    assert_false(user.successful_contributor?)
     get_with_dump(:create_location_description, id: loc.id)
     assert_response(:redirect)
   end

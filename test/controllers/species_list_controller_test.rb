@@ -364,7 +364,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_unsuccessful_create_location_description
     user = login("spamspamspam")
-    assert_false(user.is_successful_contributor?)
+    assert_false(user.successful_contributor?)
     get(:create_species_list)
     assert_response(:redirect)
   end
@@ -1217,7 +1217,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     # This will have to be very rudimentary, since the vast majority of the
     # complexity is in Javascript.  Sigh.
     user = login("rolf")
-    assert(user.is_successful_contributor?)
+    assert(user.successful_contributor?)
     get(:name_lister)
 
     params = {
