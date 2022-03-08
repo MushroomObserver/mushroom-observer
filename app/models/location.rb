@@ -126,11 +126,17 @@ class Location < AbstractModel
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
+    l_v = Arel::Table.new(:names_versions)
+    count_versions = l_v.project(Arel.star.count).
+                     where(l_v[:name_id].eq(ver.name_id).
+                           and(l_v[:user_id]).eq(ver.user_id))
     if (ver.version != 1) &&
-       Location.connection.select_value(%(
-         SELECT COUNT(*) FROM locations_versions
-         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Location.connection.select_value(count_versions.to_sql).to_s == "0"
+      # if (ver.version != 1) &&
+      #    Location.connection.select_value(%(
+      #      SELECT COUNT(*) FROM locations_versions
+      #      WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
+      #    )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -467,18 +473,31 @@ class Location < AbstractModel
   def self.location_exists(name)
     return false unless name
 
+    loc = Location.arel_table
+    obs = Observation.arel_table
+    spl = SpeciesList.arel_table
+
     @@location_cache ||= (
-      Location.connection.select_values(%(
-        SELECT name FROM locations
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `observations`
-        WHERE `where` is not NULL
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `species_lists`
-        WHERE `where` is not NULL
-      ))
+      Location.connection.select_values(
+        loc.project(loc[:name]).to_sql
+      ) +
+      Location.connection.select_values(
+        obs.project(obs[:where]).where(obs[:where].not_eq(nil)).to_sql
+      ) +
+      Location.connection.select_values(
+        loc.project(spl[:where]).where(spl[:where].not_eq(nil)).to_sql
+      )
+      # Location.connection.select_values(%(
+      #   SELECT name FROM locations
+      # )) +
+      # Location.connection.select_values(%(
+      #   SELECT `where` FROM `observations`
+      #   WHERE `where` is not NULL
+      # )) +
+      # Location.connection.select_values(%(
+      #   SELECT `where` FROM `species_lists`
+      #   WHERE `where` is not NULL
+      # ))
     ).uniq
     @@location_cache.member?(name)
   end

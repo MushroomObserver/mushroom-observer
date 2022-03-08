@@ -161,11 +161,29 @@ class Project < AbstractModel
           AND io.observation_id = op.observation_id
           AND op.project_id = #{id}
       )).map(&:to_i)
-      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
+      puts(leave_these_img_ids)
+
+      img_ids = imgs.map(&:id)
+      io = Arel::Table.new(:images_observations)
+      op = Arel::Table.new(:observations_projects)
+
+      select_manager = io.project(io[:image_id]).join(op).on(
+        io[:image_id].in(img_ids).and(
+          io[:observation_id].not_eq(obs.id).and(
+            io[:observation_id].eq(op[:observation_id])
+          ).and(op[:project_id].eq(id))
+        )
+      )
+      puts(select_manager.to_sql)
+      leave_these_img_ids = Image.connection.select_values(
+        select_manager.to_sql
+      ).map(&:to_i)
+      puts(leave_these_img_ids)
+      # imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
     end
-    observations.delete(obs)
-    imgs.each { |img| images.delete(img) }
-    update_attribute(:updated_at, Time.zone.now)
+    # observations.delete(obs)
+    # imgs.each { |img| images.delete(img) }
+    # update_attribute(:updated_at, Time.zone.now)
   end
 
   # Add species_list to this project if not already done so.  Saves it.

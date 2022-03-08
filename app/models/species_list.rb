@@ -83,6 +83,10 @@
 ################################################################################
 #
 class SpeciesList < AbstractModel
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -120,10 +124,16 @@ class SpeciesList < AbstractModel
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
-    SpeciesList.connection.delete(%(
-      DELETE FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+    # SpeciesList.connection.delete(%(
+    #   DELETE FROM observations_species_lists
+    #   WHERE species_list_id = #{id}
+    # ))
+    osl = Arel::Table.new(:observations_species_lists)
+    delete_manager = Arel::DeleteManager.new.
+                     from(osl).
+                     where(osl[:species_list_id].eq(id))
+    # puts(delete_manager.to_sql)
+    SpeciesList.connection.delete(delete_manager.to_sql)
   end
 
   ##############################################################################
@@ -203,11 +213,18 @@ class SpeciesList < AbstractModel
   def self.define_a_location(location, old_name)
     old_name = connection.quote(old_name)
     new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE species_lists
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    # connection.update(%(
+    #   UPDATE species_lists
+    #   SET `where` = #{new_name}, location_id = #{location.id}
+    #   WHERE `where` = #{old_name}
+    # ))
+    update_manager = Arel::UpdateManager.new.
+                     table(SpeciesList.arel_table).
+                     set([[SpeciesList[:where], new_name],
+                          [SpeciesList[:location_id], location.id]]).
+                     where(SpeciesList[:where].eq(old_name))
+    # puts(update_manager.to_sql)
+    connection.update(update_manager.to_sql)
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
