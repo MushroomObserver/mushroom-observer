@@ -76,7 +76,7 @@ function copy_file_from_server {
   ssh)
     wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    rsync $path/$file $image_root/$file || die "Failed to get $file from $path."
+    rsync -a $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   http*)
     url=${image_server_data[$server,url]}
@@ -101,7 +101,7 @@ function copy_file_to_server {
   "ssh")
     wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    rsync $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    rsync -a $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
   *)
     url=${image_server_data[$server,url]}
