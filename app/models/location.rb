@@ -490,7 +490,7 @@ class Location < AbstractModel
         obs.project(obs[:where]).where(obs[:where].not_eq(nil)).to_sql
       ) +
       Location.connection.select_values(
-        loc.project(spl[:where]).where(spl[:where].not_eq(nil)).to_sql
+        spl.project(spl[:where]).where(spl[:where].not_eq(nil)).to_sql
       )
       # Location.connection.select_values(%(
       #   SELECT name FROM locations
