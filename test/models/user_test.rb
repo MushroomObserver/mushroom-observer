@@ -299,12 +299,12 @@ class UserTest < UnitTestCase
     end
   end
 
-  def test_is_successful_contributor?
-    assert(rolf.is_successful_contributor?)
+  def test_successful_contributor?
+    assert(rolf.successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?
-    assert_false(users(:spammer).is_successful_contributor?)
+    assert_false(users(:spammer).successful_contributor?)
   end
 
   def test_notes_template_validation
