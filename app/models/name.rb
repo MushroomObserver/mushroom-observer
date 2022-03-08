@@ -395,10 +395,7 @@ class Name < AbstractModel
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
-    n_v = Arel::Table.new(:names_versions)
-    count_versions = n_v.project(Arel.star.count).
-                     where(n_v[:name_id].eq(ver.name_id).
-                           and(n_v[:user_id]).eq(ver.user_id))
+    count_versions = arel_select_count_name_versions(ver)
     if (ver.version != 1) &&
        Name.connection.select_value(count_versions.to_sql).to_s == "0"
       #  Name.connection.select_value(%(
@@ -407,6 +404,13 @@ class Name < AbstractModel
       #  )).to_s == "0"
       SiteData.update_contribution(:add, :names_versions)
     end
+  end
+
+  def arel_select_count_name_versions(ver)
+    n_v = Arel::Table.new(:names_versions)
+    count_versions = n_v.project(Arel.star.count).
+                     where(n_v[:name_id].eq(ver.name_id).
+                           and(n_v[:user_id]).eq(ver.user_id))
   end
 
   scope :with_rank,

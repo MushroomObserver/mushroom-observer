@@ -128,12 +128,16 @@ class SpeciesList < AbstractModel
     #   DELETE FROM observations_species_lists
     #   WHERE species_list_id = #{id}
     # ))
-    osl = Arel::Table.new(:observations_species_lists)
-    delete_manager = Arel::DeleteManager.new.
-                     from(osl).
-                     where(osl[:species_list_id].eq(id))
+    delete_manager = arel_delete_observations_species_lists(id)
     # puts(delete_manager.to_sql)
     SpeciesList.connection.delete(delete_manager.to_sql)
+  end
+
+  def arel_delete_observations_species_lists(id)
+    osl = Arel::Table.new(:observations_species_lists)
+    Arel::DeleteManager.new.
+      from(osl).
+      where(osl[:species_list_id].eq(id))
   end
 
   ##############################################################################
@@ -211,20 +215,24 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
     # connection.update(%(
     #   UPDATE species_lists
     #   SET `where` = #{new_name}, location_id = #{location.id}
     #   WHERE `where` = #{old_name}
     # ))
-    update_manager = Arel::UpdateManager.new.
-                     table(SpeciesList.arel_table).
-                     set([[SpeciesList[:where], new_name],
-                          [SpeciesList[:location_id], location.id]]).
-                     where(SpeciesList[:where].eq(old_name))
+    update_manager = arel_update_defined_location(location, old_name)
     # puts(update_manager.to_sql)
     connection.update(update_manager.to_sql)
+  end
+
+  def arel_update_defined_location(location, old_name)
+    old_name = connection.quote(old_name)
+    new_name = connection.quote(location.name)
+    Arel::UpdateManager.new.
+      table(SpeciesList.arel_table).
+      set([[SpeciesList[:where], new_name],
+           [SpeciesList[:location_id], location.id]]).
+      where(SpeciesList[:where].eq(old_name))
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.

@@ -972,26 +972,76 @@ class Image < AbstractModel
     # This is orders of magnitude faster than doing via active-record.
     old_name = Image.connection.quote(old_name)
     new_name = Image.connection.quote(new_name)
-    data = Image.connection.select_rows(%(
-      SELECT id, YEAR(`when`), license_id FROM images
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    select_manager = arel_select_copyright_holder(old_name, user)
+    # puts(select_manager.to_sql)
+    data = Image.connection.select_rows(select_manager.to_sql)
+    # data = Image.connection.select_rows(%(
+    #   SELECT id, YEAR(`when`), license_id FROM images
+    #   WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    # ))
     return unless data.any?
 
     # brakeman generates what appears to be a false positive SQL injection
     # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{data.map do |id, year, lic|
-            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
-          end.join(",\n")}
-    ))
-    Image.connection.update(%(
-      UPDATE images SET copyright_holder = #{new_name}
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    insert_manager = arel_insert_copyright_changes(old_name, user)
+    puts(insert_manager.to_sql)
+    # Image.connection.insert(%(
+    #   INSERT INTO copyright_changes
+    #     (user_id, updated_at, target_type, target_id, year, name, license_id)
+    #   VALUES
+    #     #{data.map do |id, year, lic|
+    #         "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
+    #       end.join(",\n")}
+    # ))
+    update_manager = arel_update_copyright(old_name, new_name, user)
+    Image.connection.update(update_manager.to_sql)
+    # Image.connection.update(%(
+    #   UPDATE images SET copyright_holder = #{new_name}
+    #   WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    # ))
+  end
+
+  def arel_select_copyright_holder(old_name, user)
+    i = Image.arel_table
+    i.project([i[:id], i[:when].year, i[:license_id]]).
+      where(i[:user_id].eq(user.id).
+            and(i[:copyright_holder].eq(old_name)))
+  end
+
+  def arel_insert_copyright_changes(old_name, user)
+    cc = CopyrightChange.arel_table
+    now = Time.zone.now
+    values_list = data.map do |id, _year, lic|
+      [
+        [user.id, cc[:user_id]],
+        [now, cc[:updated_at]],
+        ["Image", cc[:target_type]],
+        [id, cc[:target_id]],
+        [now.year, cc[:year]],
+        [old_name, cc[:name]],
+        [lic, cc[:license_id]]
+      ]
+    end
+    Arel::InsertManager.new.tap do |manager|
+      manager.into(cc)
+      manager.columns << cc[:user_id]
+      manager.columns << cc[:updated_at]
+      manager.columns << cc[:target_type]
+      manager.columns << cc[:target_id]
+      manager.columns << cc[:year]
+      manager.columns << cc[:name]
+      manager.columns << cc[:license_id]
+      manager.values = manager.create_values_list(values_list)
+    end
+  end
+
+  def arel_update_copyright(old_name, new_name, user)
+    i = Image.arel_table
+    Arel::UpdateManager.new.
+      table(i).
+      set([[i[:copyright_holder], new_name]]).
+      where(i[:user_id].eq(user.id).
+          and(i[:copyright_holder].eq(old_name)))
   end
 
   def year

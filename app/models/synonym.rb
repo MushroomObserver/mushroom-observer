@@ -48,9 +48,7 @@ class Synonym < AbstractModel
     #   ORDER BY synonym_id ASC
     # ))
     # puts(references.join(",").to_s)
-    reference_select = Name.select(:synonym_id).distinct.
-                       where(Name[:synonym_id].not_eq(nil)).
-                       order(Name[:synonym_id].asc)
+    reference_select = arel_select_referenced_synonyms
     # puts(ref_selects.to_sql)
     references = Name.connection.select_values(reference_select.to_sql)
     # puts(references.join(",").to_s)
@@ -72,9 +70,7 @@ class Synonym < AbstractModel
       #   DELETE FROM synonyms
       #   WHERE id IN (#{unused.map(&:to_s).join(",")})
       # ))
-      delete_manager = Arel::DeleteManager.new.
-                       from(Synonym.arel_table).
-                       where(Synonym[:id].in(unused))
+      delete_manager = arel_delete_unused_synonyms(unused)
       # puts(delete_manager.to_sql)
       Name.connection.delete(delete_manager.to_sql)
 
@@ -86,15 +82,31 @@ class Synonym < AbstractModel
       #   #{missing.map { |id| "(#{id})" }.join(",")}
       # ))
 
-      insert_manager = Arel::InsertManager.new.tap do |manager|
-        manager.into(Synonym.arel_table)
-        manager.columns << Synonym[:id]
-        manager.values = manager.create_values(missing, Synonym[:id])
-      end
+      insert_manager = arel_insert_missing_synonyms(missing)
       # puts(insert_manager.to_sql)
       Name.connection.execute(insert_manager.to_sql)
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs
+  end
+
+  def arel_select_referenced_synonyms
+    Name.select(:synonym_id).distinct.
+      where(Name[:synonym_id].not_eq(nil)).
+      order(Name[:synonym_id].asc)
+  end
+
+  def arel_delete_unused_synonyms(unused)
+    Arel::DeleteManager.new.
+      from(Synonym.arel_table).
+      where(Synonym[:id].in(unused))
+  end
+
+  def arel_insert_missing_synonyms(missing)
+    Arel::InsertManager.new.tap do |manager|
+      manager.into(Synonym.arel_table)
+      manager.columns << Synonym[:id]
+      manager.values = manager.create_values(missing, Synonym[:id])
+    end
   end
 end

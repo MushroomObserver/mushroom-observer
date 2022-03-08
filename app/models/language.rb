@@ -58,15 +58,11 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    ts = TranslationString.arel_table
-    id_select_manager = ts.project(ts[:user_id]).
-                        where(ts[:language_id].eq(id).
-                              and(ts[:user_id].not_eq(0))).
-                        group(ts[:user_id]).order(ts[:id].count.desc).take(num)
+    id_select_manager = arel_select_top_contributors_ids(num)
     # puts(id_select_manager.to_sql)
-    # Note: We just want an array of the ids. Switching to select_values here.
+    # Note: We just want the array of ids here. Switching to select_values:
     user_ids = self.class.connection.select_values(id_select_manager.to_sql)
-    puts(user_ids.inspect)
+    # puts(user_ids.inspect)
     # user_ids = self.class.connection.select_rows(%(
     #   SELECT user_id
     #   FROM translation_strings
@@ -76,10 +72,7 @@ class Language < AbstractModel
     #   LIMIT #{num}
     # ))
     if user_ids.any?
-      u = User.arel_table
-      # Note: ORDER BY does not seem necessary here. Array maintains the order.
-      user_select_manager = u.project([u[:id], u[:login]]).
-                            where(u[:id].in(user_ids))
+      user_select_manager = arel_select_top_contributors_in_order(user_ids)
       # puts(user_select_manager.to_sql)
       #   user_ids = self.class.connection.select_rows(%(
       #     SELECT id, login
@@ -88,21 +81,40 @@ class Language < AbstractModel
       #     ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
       #   ))
       user_ids = self.class.connection.select_rows(user_select_manager.to_sql)
-      puts(user_ids.inspect)
+      # puts(user_ids.inspect)
     end
-    # user_ids
+    user_ids
   end
+
+  private
+
+  def arel_select_top_contributors_ids(num)
+    ts = TranslationString.arel_table
+    ts.project(ts[:user_id]).
+      where(ts[:language_id].eq(id).and(ts[:user_id].not_eq(0))).
+      group(ts[:user_id]).order(ts[:id].count.desc).take(num)
+  end
+
+  def arel_select_top_contributors_in_order(user_ids)
+    # Note: ORDER BY does not seem necessary here. Array maintains the order.
+    u = User.arel_table
+    u.project([u[:id], u[:login]]).where(u[:id].in(user_ids))
+  end
+
+  public
 
   # Count the number of lines the user has translated.  Include edits, as well.
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values(%(
+    values = Language.connection.select_values(%(
       SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
       FROM translation_strings_versions
       WHERE user_id = #{user.id}
       GROUP BY translation_string_id
     ))
+    # puts(values.inspect)
+    for text in values
       lines += score_lines(text)
     end
     lines
@@ -110,7 +122,7 @@ class Language < AbstractModel
 
   def calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values(%(
+    values = Language.connection.select_values(%(
       SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
       FROM translation_strings t, translation_strings_versions v
       WHERE t.language_id = #{id}
@@ -118,6 +130,8 @@ class Language < AbstractModel
         AND v.user_id = #{user.id}
       GROUP BY t.id
     ))
+    # puts(values.inspect)
+    for text in values
       lines += Language.score_lines(text)
     end
     lines
@@ -141,14 +155,7 @@ class Language < AbstractModel
 
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
-    cutoff = @@last_update
-    @@last_update = Time.zone.now
-    update_cutoff = Language.connection.quote(cutoff)
-    langs = Language.arel_table
-    ts = TranslationString.arel_table
-    select_manager = ts.project([ts[:locale], ts[:tag], ts[:text]]).
-                     join(langs).on(ts[:language_id].eq(langs[:id]).
-                                    and(ts[:updated_at].gteq(update_cutoff)))
+    select_manager = arel_select_recent_translations
     strings = Language.connection.select_rows(select_manager.to_sql)
 
     for locale, tag, text in strings
@@ -160,5 +167,17 @@ class Language < AbstractModel
       # ))
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
+  end
+
+  private_class_method def self.arel_select_recent_translations
+    cutoff = @@last_update
+    @@last_update = Time.zone.now
+    update_cutoff = Language.connection.quote(cutoff)
+    langs = Language.arel_table
+    ts = TranslationString.arel_table
+
+    ts.project([ts[:locale], ts[:tag], ts[:text]]).
+      join(langs).on(ts[:language_id].eq(langs[:id]).
+                   and(ts[:updated_at].gteq(update_cutoff)))
   end
 end

@@ -150,40 +150,47 @@ class Project < AbstractModel
     return unless observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    puts("imgs")
+    puts(imgs)
     if imgs.any?
-      img_ids = imgs.map(&:id).map(&:to_s).join(",")
+      # img_ids = imgs.map(&:id).map(&:to_s).join(",")
       # Leave images which are attached to other observations
       # still attached to this project.
-      leave_these_img_ids = Image.connection.select_values(%(
-        SELECT io.image_id FROM images_observations io, observations_projects op
-        WHERE io.image_id IN (#{img_ids})
-          AND io.observation_id != #{obs.id}
-          AND io.observation_id = op.observation_id
-          AND op.project_id = #{id}
-      )).map(&:to_i)
-      puts(leave_these_img_ids)
+      # leave_these_img_ids = Image.connection.select_values(%(
+      #   SELECT io.image_id FROM images_observations io, observations_projects op
+      #   WHERE io.image_id IN (#{img_ids})
+      #     AND io.observation_id != #{obs.id}
+      #     AND io.observation_id = op.observation_id
+      #     AND op.project_id = #{id}
+      # )).map(&:to_i)
+      # puts(leave_these_img_ids)
 
-      img_ids = imgs.map(&:id)
-      io = Arel::Table.new(:images_observations)
-      op = Arel::Table.new(:observations_projects)
-
-      select_manager = io.project(io[:image_id]).join(op).on(
-        io[:image_id].in(img_ids).and(
-          io[:observation_id].not_eq(obs.id).and(
-            io[:observation_id].eq(op[:observation_id])
-          ).and(op[:project_id].eq(id))
-        )
-      )
-      puts(select_manager.to_sql)
+      select_ids = arel_select_leave_these_img_ids(obs, imgs)
+      # puts(select_manager.to_sql)
       leave_these_img_ids = Image.connection.select_values(
-        select_manager.to_sql
+        select_ids.to_sql
       ).map(&:to_i)
-      puts(leave_these_img_ids)
-      # imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
+      # puts(leave_these_img_ids)
+      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
+      # puts(imgs.inspect)
     end
-    # observations.delete(obs)
-    # imgs.each { |img| images.delete(img) }
-    # update_attribute(:updated_at, Time.zone.now)
+    observations.delete(obs)
+    imgs.each { |img| images.delete(img) }
+    update_attribute(:updated_at, Time.zone.now)
+  end
+
+  def arel_select_leave_these_img_ids(obs, imgs)
+    io = Arel::Table.new(:images_observations)
+    op = Arel::Table.new(:observations_projects)
+    img_ids = imgs.map(&:id)
+
+    io.project(io[:image_id]).join(op).on(
+      io[:image_id].in(img_ids).and(
+        io[:observation_id].not_eq(obs.id).and(
+          io[:observation_id].eq(op[:observation_id])
+        ).and(op[:project_id].eq(id))
+      )
+    )
   end
 
   # Add species_list to this project if not already done so.  Saves it.

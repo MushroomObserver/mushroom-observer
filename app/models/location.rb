@@ -126,10 +126,8 @@ class Location < AbstractModel
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
-    l_v = Arel::Table.new(:names_versions)
-    count_versions = l_v.project(Arel.star.count).
-                     where(l_v[:name_id].eq(ver.name_id).
-                           and(l_v[:user_id]).eq(ver.user_id))
+    count_versions = arel_select_count_location_versions(ver)
+
     if (ver.version != 1) &&
        Location.connection.select_value(count_versions.to_sql).to_s == "0"
       # if (ver.version != 1) &&
@@ -139,6 +137,13 @@ class Location < AbstractModel
       #    )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
+  end
+
+  def arel_select_count_location_versions(ver)
+    l_v = Arel::Table.new(:locations_versions)
+    count_versions = l_v.project(Arel.star.count).
+                     where(l_v[:location_id].eq(ver.location_id).
+                           and(l_v[:user_id]).eq(ver.user_id))
   end
 
   # Let attached observations update their cache if these fields changed.
