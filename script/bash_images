@@ -74,9 +74,9 @@ function copy_file_from_server {
     cp $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   ssh)
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    scp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    rsync $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   http*)
     url=${image_server_data[$server,url]}
@@ -99,9 +99,9 @@ function copy_file_to_server {
     cp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
   "ssh")
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     path=${image_server_data[$server,path]}
-    scp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    rsync $image_root/$file $path/$file || die "Failed to transfer $file to $path."
     ;;
   *)
     url=${image_server_data[$server,url]}
@@ -121,7 +121,7 @@ function read_server_directory {
       die "Failed to list $path/$subdir on $server server."
     ;;
   "ssh")
-    wait_for "(scp|ssh)"
+    wait_for "(ssh|rsync)"
     host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
     path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
     ssh $host find -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
