@@ -395,7 +395,7 @@ class Name < AbstractModel
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
-    count_versions = arel_select_count_name_versions(ver)
+    count_versions = Name.arel_select_count_name_versions(ver)
     if (ver.version != 1) &&
        Name.connection.select_value(count_versions.to_sql).to_s == "0"
       #  Name.connection.select_value(%(
@@ -406,7 +406,7 @@ class Name < AbstractModel
     end
   end
 
-  private_class_method def self.arel_select_count_name_versions(ver)
+  def self.arel_select_count_name_versions(ver)
     n_v = Arel::Table.new(:names_versions)
     n_v.project(Arel.star.count).
       where(n_v[:name_id].eq(ver.name_id).

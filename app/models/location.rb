@@ -126,7 +126,7 @@ class Location < AbstractModel
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
-    count_versions = arel_select_count_location_versions(ver)
+    count_versions = Location.arel_select_count_location_versions(ver)
 
     if (ver.version != 1) &&
        Location.connection.select_value(count_versions.to_sql).to_s == "0"
@@ -139,7 +139,7 @@ class Location < AbstractModel
     end
   end
 
-  private_class_method def self.arel_select_count_location_versions(ver)
+  def self.arel_select_count_location_versions(ver)
     l_v = Arel::Table.new(:locations_versions)
     l_v.project(Arel.star.count).
       where(l_v[:location_id].eq(ver.location_id).
