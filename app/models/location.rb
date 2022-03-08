@@ -139,7 +139,7 @@ class Location < AbstractModel
     end
   end
 
-  def arel_select_count_location_versions(ver)
+  private_class_method def self.arel_select_count_location_versions(ver)
     l_v = Arel::Table.new(:locations_versions)
     l_v.project(Arel.star.count).
       where(l_v[:location_id].eq(ver.location_id).

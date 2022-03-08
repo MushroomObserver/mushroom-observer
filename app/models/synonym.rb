@@ -90,19 +90,19 @@ class Synonym < AbstractModel
     msgs
   end
 
-  def arel_select_referenced_synonyms
+  private_class_method def self.arel_select_referenced_synonyms
     Name.select(:synonym_id).distinct.
       where(Name[:synonym_id].not_eq(nil)).
       order(Name[:synonym_id].asc)
   end
 
-  def arel_delete_unused_synonyms(unused)
+  private_class_method def self.arel_delete_unused_synonyms(unused)
     Arel::DeleteManager.new.
       from(Synonym.arel_table).
       where(Synonym[:id].in(unused))
   end
 
-  def arel_insert_missing_synonyms(missing)
+  private_class_method def self.arel_insert_missing_synonyms(missing)
     Arel::InsertManager.new.tap do |manager|
       manager.into(Synonym.arel_table)
       manager.columns << Synonym[:id]
