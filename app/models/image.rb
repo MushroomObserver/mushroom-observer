@@ -983,8 +983,8 @@ class Image < AbstractModel
 
     # brakeman generates what appears to be a false positive SQL injection
     # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    insert_manager = arel_insert_copyright_changes(old_name, user)
-    puts(insert_manager.to_sql)
+    insert_manager = arel_insert_copyright_changes(data, old_name, user)
+    # puts(insert_manager.to_sql)
     # Image.connection.insert(%(
     #   INSERT INTO copyright_changes
     #     (user_id, updated_at, target_type, target_id, year, name, license_id)
@@ -1008,20 +1008,10 @@ class Image < AbstractModel
             and(i[:copyright_holder].eq(old_name)))
   end
 
-  def arel_insert_copyright_changes(old_name, user)
+  def arel_insert_copyright_changes(data, old_name, user)
     cc = CopyrightChange.arel_table
     now = Time.zone.now
-    values_list = data.map do |id, _year, lic|
-      [
-        [user.id, cc[:user_id]],
-        [now, cc[:updated_at]],
-        ["Image", cc[:target_type]],
-        [id, cc[:target_id]],
-        [now.year, cc[:year]],
-        [old_name, cc[:name]],
-        [lic, cc[:license_id]]
-      ]
-    end
+    values_list = arel_values_list_copyright_changes(data, old_name, user)
     Arel::InsertManager.new.tap do |manager|
       manager.into(cc)
       manager.columns << cc[:user_id]
@@ -1032,6 +1022,20 @@ class Image < AbstractModel
       manager.columns << cc[:name]
       manager.columns << cc[:license_id]
       manager.values = manager.create_values_list(values_list)
+    end
+  end
+
+  def arel_values_list_copyright_changes(data, old_name, user)
+    data.map do |id, year, lic|
+      [
+        [user.id, cc[:user_id]],
+        [now, cc[:updated_at]],
+        ["Image", cc[:target_type]],
+        [id, cc[:target_id]],
+        [year, cc[:year]],
+        [old_name, cc[:name]],
+        [lic, cc[:license_id]]
+      ]
     end
   end
 

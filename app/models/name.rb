@@ -408,9 +408,9 @@ class Name < AbstractModel
 
   def arel_select_count_name_versions(ver)
     n_v = Arel::Table.new(:names_versions)
-    count_versions = n_v.project(Arel.star.count).
-                     where(n_v[:name_id].eq(ver.name_id).
-                           and(n_v[:user_id]).eq(ver.user_id))
+    n_v.project(Arel.star.count).
+      where(n_v[:name_id].eq(ver.name_id).
+      and(n_v[:user_id]).eq(ver.user_id))
   end
 
   scope :with_rank,
