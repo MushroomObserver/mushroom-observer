@@ -173,11 +173,11 @@ class Language < AbstractModel
     cutoff = @@last_update
     @@last_update = Time.zone.now
     update_cutoff = Language.connection.quote(cutoff)
-    langs = Language.arel_table
+    lang = Language.arel_table
     ts = TranslationString.arel_table
 
-    ts.project([ts[:locale], ts[:tag], ts[:text]]).
-      join(langs).on(ts[:language_id].eq(langs[:id]).
+    ts.project([lang[:locale], ts[:tag], ts[:text]]).
+      join(lang).on(ts[:language_id].eq(lang[:id]).
                    and(ts[:updated_at].gteq(update_cutoff)))
   end
 end

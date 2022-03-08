@@ -150,8 +150,6 @@ class Project < AbstractModel
     return unless observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
-    puts("imgs")
-    puts(imgs)
     if imgs.any?
       # img_ids = imgs.map(&:id).map(&:to_s).join(",")
       # Leave images which are attached to other observations

@@ -985,6 +985,7 @@ class Image < AbstractModel
     # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
     insert_manager = arel_insert_copyright_changes(data, old_name, user)
     # puts(insert_manager.to_sql)
+    Image.connection.insert(insert_manager.to_sql)
     # Image.connection.insert(%(
     #   INSERT INTO copyright_changes
     #     (user_id, updated_at, target_type, target_id, year, name, license_id)
@@ -994,6 +995,7 @@ class Image < AbstractModel
     #       end.join(",\n")}
     # ))
     update_manager = arel_update_copyright(old_name, new_name, user)
+    # puts(update_manager.to_sql)
     Image.connection.update(update_manager.to_sql)
     # Image.connection.update(%(
     #   UPDATE images SET copyright_holder = #{new_name}
@@ -1010,7 +1012,6 @@ class Image < AbstractModel
 
   def arel_insert_copyright_changes(data, old_name, user)
     cc = CopyrightChange.arel_table
-    now = Time.zone.now
     values_list = arel_values_list_copyright_changes(data, old_name, user)
     Arel::InsertManager.new.tap do |manager|
       manager.into(cc)
@@ -1029,7 +1030,7 @@ class Image < AbstractModel
     data.map do |id, year, lic|
       [
         [user.id, cc[:user_id]],
-        [now, cc[:updated_at]],
+        [Time.zone.now, cc[:updated_at]],
         ["Image", cc[:target_type]],
         [id, cc[:target_id]],
         [year, cc[:year]],

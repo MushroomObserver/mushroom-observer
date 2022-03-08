@@ -28,7 +28,7 @@ class QueryRecord < ApplicationRecord
     @@last_cleanup = Time.zone.now
   end
 
-  def arel_delete_cleanup(table_name)
+  private_class_method def self.arel_delete_cleanup(table_name)
     table = Arel::Table.new(table_name)
     Arel::DeleteManager.new.
       from(table).
