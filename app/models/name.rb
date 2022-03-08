@@ -410,7 +410,7 @@ class Name < AbstractModel
     n_v = Arel::Table.new(:names_versions)
     n_v.project(Arel.star.count).
       where(n_v[:name_id].eq(ver.name_id).
-      and(n_v[:user_id].eq(ver.user_id))
+      and(n_v[:user_id].eq(ver.user_id)))
   end
 
   scope :with_rank,
