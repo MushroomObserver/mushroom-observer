@@ -255,25 +255,33 @@ class Observation < AbstractModel
     #   FROM observations o, #{type}s x
     #   WHERE o.#{type}_id = x.id
     #     AND o.#{local} != x.#{foreign}
-    obs.project(Arel.star).join(tbl).
+    obs.join(tbl).
       on(obs["#{type}_id".to_sym].eq(tbl[:id]).
-         and(obs[local.to_sym].not_eq(tbl[foreign.to_sym])))
+         and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
+      project(Arel.star)
   end
 
   private_class_method def self.arel_update_broken_caches(
-    type, foreign, local, broken_caches
+    type, foreign, local, _broken_caches
   )
     tbl = type.camelize.constantize.arel_table
     obs = Observation.arel_table
+    join_source = Arel::Nodes::JoinSource.new(
+      obs,
+      [obs.create_join(tbl)]
+    )
 
+    # NOTE: this doesn't work, Arel does not generate the table name for
+    # the SET column
     #   UPDATE observations o, #{type}s x
     #   SET o.#{local} = x.#{foreign}
     #   WHERE o.#{type}_id = x.id
     #     AND o.#{local} != x.#{foreign}
     Arel::UpdateManager.new.
-      table(obs).
-      set([[obs[local.to_sym], tbl[foreign.to_sym]]]).
-      where(obs[:id].in(broken_caches))
+      table(join_source).
+      where(obs[:id].eq(tbl[:id]). # in(broken_caches).
+            and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
+      set([[obs[local.to_sym], tbl[foreign.to_sym]]])
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -333,12 +341,16 @@ class Observation < AbstractModel
   private_class_method def self.arel_update_misspellings(miss_ids)
     obs = Observation.arel_table
     names = Name.arel_table
+    join_source = Arel::Nodes::JoinSource.new(
+      obs,
+      [obs.create_join(names)]
+    )
 
     #   UPDATE observations o, names n
     #   SET o.name_id = n.correct_spelling_id
     #   WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
     Arel::UpdateManager.new.
-      table(obs).
+      table(join_source).
       set([[obs[:name_id], names[:correct_spelling_id]]]).
       where(obs[:id].in(miss_ids))
   end
