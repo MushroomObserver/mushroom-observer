@@ -226,7 +226,7 @@ class Observation < AbstractModel
   # errors, and reports which ids were broken.
   # NOTE: New consolidation 2022/03, selects the broken rows only once
   def self.refresh_cached_column(type, foreign, local = foreign)
-    tbl = Arel::Table.new(type.pluralize.to_sym)
+    tbl = type.camelize.constantize.arel_table
     obs = Observation.arel_table
 
     # Check how many entries are broken in a mirrored column.  It will be good
@@ -324,13 +324,15 @@ class Observation < AbstractModel
     end
   end
 
-  private_class_method def self.arel_select_misspellings
+  private_class_method def self.arel_select_misspellings(obs, names)
     obs.project([obs[:id], names[:text_name]]).join(names).
       on(obs[:name_id].eq(names[:id]).
            and(names[:correct_spelling_id].not_eq(nil)))
   end
 
-  private_class_method def self.arel_update_misspellings(misspellings)
+  private_class_method def self.arel_update_misspellings(
+    obs, names, misspellings
+  )
     Arel::UpdateManager.new.
       table(obs).
       set([[obs[:name_id], names[:correct_spelling_id]]]).

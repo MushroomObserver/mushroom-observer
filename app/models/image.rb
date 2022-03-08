@@ -1003,14 +1003,16 @@ class Image < AbstractModel
     # ))
   end
 
-  def arel_select_copyright_holder(old_name, user)
+  private_class_method def self.arel_select_copyright_holder(old_name, user)
     i = Image.arel_table
     i.project([i[:id], i[:when].year, i[:license_id]]).
       where(i[:user_id].eq(user.id).
             and(i[:copyright_holder].eq(old_name)))
   end
 
-  def arel_insert_copyright_changes(data, old_name, user)
+  private_class_method def self.arel_insert_copyright_changes(
+    data, old_name, user
+  )
     cc = CopyrightChange.arel_table
     values_list = arel_values_list_copyright_changes(data, old_name, user)
     Arel::InsertManager.new.tap do |manager|
@@ -1026,7 +1028,9 @@ class Image < AbstractModel
     end
   end
 
-  def arel_values_list_copyright_changes(data, old_name, user)
+  private_class_method def self.arel_values_list_copyright_changes(
+    data, old_name, user
+  )
     data.map do |id, year, lic|
       [
         [user.id, cc[:user_id]],
@@ -1040,7 +1044,7 @@ class Image < AbstractModel
     end
   end
 
-  def arel_update_copyright(old_name, new_name, user)
+  private_class_method def self.arel_update_copyright(old_name, new_name, user)
     i = Image.arel_table
     Arel::UpdateManager.new.
       table(i).

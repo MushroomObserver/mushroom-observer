@@ -49,7 +49,7 @@ class Synonym < AbstractModel
     # ))
     # puts(references.join(",").to_s)
     reference_select = arel_select_referenced_synonyms
-    # puts(ref_selects.to_sql)
+    # puts(reference_select.to_sql)
     references = Name.connection.select_values(reference_select.to_sql)
     # puts(references.join(",").to_s)
 
@@ -57,7 +57,7 @@ class Synonym < AbstractModel
     #   SELECT id FROM synonyms ORDER BY id ASC
     # ))
     record_select = Synonym.select(:id).order(Synonym[:id].asc)
-    # puts(rec_selects.to_sql)
+    # puts(record_select.to_sql)
     records = Name.connection.select_values(record_select.to_sql)
     # puts(records.join(",").to_s)
     unused  = records - references
