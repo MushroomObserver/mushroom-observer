@@ -314,7 +314,9 @@ class Observation < AbstractModel
     # )).map do |id, search_name|
     #   "Observation ##{id} was misspelled: #{search_name.inspect}"
     # end
-    update_manager = arel_update_misspellings(misspellings)
+    miss_ids = misspellings.map { |id, _search_name| id }
+    # puts(miss_ids.inspect)
+    update_manager = arel_update_misspellings(miss_ids)
     # puts(update_manager.to_sql)
     Observation.connection.update(update_manager.to_sql)
     # Observation.connection.execute(%(
@@ -330,18 +332,21 @@ class Observation < AbstractModel
   end
 
   private_class_method def self.arel_select_misspellings
-    Observation.arel_table.
-      project([Observation[:id], Name[:text_name]]).
-      join(Name.arel_table).
-      on(Observation[:name_id].eq(Name[:id]).
-         and(Name[:correct_spelling_id].not_eq(nil)))
+    obs = Observation.arel_table
+    names = Name.arel_table
+    obs.join(names).
+      on(obs[:name_id].eq(names[:id]).
+         and(names[:correct_spelling_id].not_eq(nil))).
+      project(obs[:id], names[:text_name])
   end
 
-  private_class_method def self.arel_update_misspellings(misspellings)
+  private_class_method def self.arel_update_misspellings(miss_ids)
+    obs = Observation.arel_table
+    names = Name.arel_table
     Arel::UpdateManager.new.
-      table(Observation.arel_table).
-      set([[Observation[:name_id], Name[:correct_spelling_id]]]).
-      where(Observation[:id].in(misspellings))
+      table(obs).
+      set([[obs[:name_id], names[:correct_spelling_id]]]).
+      where(obs[:id].in(miss_ids))
   end
 
   def update_view_stats

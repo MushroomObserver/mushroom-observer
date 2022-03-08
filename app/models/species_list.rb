@@ -225,7 +225,9 @@ class SpeciesList < AbstractModel
     connection.update(update_manager.to_sql)
   end
 
-  def arel_update_defined_location(location, old_name)
+  private_class_method def self.arel_update_defined_location(
+    location, old_name
+  )
     old_name = connection.quote(old_name)
     new_name = connection.quote(location.name)
     Arel::UpdateManager.new.
