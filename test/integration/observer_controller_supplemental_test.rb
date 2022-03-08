@@ -121,6 +121,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     end
 
     I18n.stub(:t, translator) do
+      Capybara.reset_sessions!
       visit("/account/login")
       fill_in("en:mo.login_user:", with: sender.login)
       fill_in("en:mo.login_password:", with: "testpassword")
