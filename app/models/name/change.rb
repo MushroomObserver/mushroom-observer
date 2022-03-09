@@ -90,9 +90,21 @@ class Name < AbstractModel
   # Super quick and low-level update to make sure no observation names are
   # misspellings.
   def change_misspelled_consensus_names
-    Observation.connection.execute(%(
-      UPDATE observations SET name_id = #{correct_spelling_id}
-      WHERE name_id = #{id}
-    ))
+    update_manager = arel_update_misspelled_consensus_names
+
+    Observation.connection.update(update_manager.to_sql)
+  end
+
+  private
+
+  def arel_update_misspelled_consensus_names
+    obs = Observation.arel_table
+
+    #   UPDATE observations SET name_id = #{correct_spelling_id}
+    #   WHERE name_id = #{id}
+    Arel::UpdateManager.new.
+      table(obs).
+      where(obs[:name_id].eq(id)).
+      set([[obs[:name_id], correct_spelling_id]])
   end
 end
