@@ -54,9 +54,9 @@ class Name < AbstractModel
       update_manager = arel_update_add_lifeform(
         type, concat_str, search_str
       )
-      puts(all_children.map(&:id).inspect)
-      puts(update_manager.to_sql)
-      # Name.connection.update(update_manager.to_sql)
+      # puts(all_children.map(&:id).inspect)
+      # puts(update_manager.to_sql)
+      Name.connection.update(update_manager.to_sql)
     end
   end
 
@@ -69,8 +69,8 @@ class Name < AbstractModel
       update_manager = arel_update_remove_lifeform(
         type, replace_str, search_str
       )
-      puts(update_manager.to_sql)
-      # Name.connection.update(update_manager.to_sql)
+      # puts(update_manager.to_sql)
+      Name.connection.update(update_manager.to_sql)
     end
   end
 
