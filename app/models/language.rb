@@ -73,13 +73,6 @@ class Language < AbstractModel
     # ))
     if user_ids.any?
       user_select_manager = arel_select_top_contributors_in_order(user_ids)
-      # puts(user_select_manager.to_sql)
-      #   user_ids = self.class.connection.select_rows(%(
-      #     SELECT id, login
-      #     FROM users
-      #     WHERE id IN (#{user_ids.join(",")})
-      #     ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
-      #   ))
       user_ids = self.class.connection.select_rows(user_select_manager.to_sql)
       # puts(user_ids.inspect)
     end
@@ -95,6 +88,10 @@ class Language < AbstractModel
       group(ts[:user_id]).order(ts[:id].count.desc).take(num)
   end
 
+  # SELECT id, login
+  # FROM users
+  # WHERE id IN (#{user_ids.join(",")})
+  # ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
   def arel_select_top_contributors_in_order(user_ids)
     # Note: ORDER BY does not seem necessary here. Array maintains the order.
     u = User.arel_table

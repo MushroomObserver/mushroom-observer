@@ -45,8 +45,10 @@ class Name < AbstractModel
 
     def accepted_generic_classification_strings
       Name.where(rank: Name.ranks[:Genus], deprecated: false).
-        where("author NOT LIKE 'sensu lato%'").
-        where("LENGTH(classification) > 2").
+        # where("author NOT LIKE 'sensu lato%'").
+        # where("LENGTH(classification) > 2").
+        where(Name[:author].does_not_match("sensu lato%")).
+        where(Name[:classification].length > 2).
         pluck(:text_name, :classification).
         each_with_object({}) do |vals, classifications|
           text_name, classification = vals

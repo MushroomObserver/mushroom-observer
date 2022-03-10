@@ -215,21 +215,20 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    # connection.update(%(
-    #   UPDATE species_lists
-    #   SET `where` = #{new_name}, location_id = #{location.id}
-    #   WHERE `where` = #{old_name}
-    # ))
     update_manager = arel_update_defined_location(location, old_name)
     # puts(update_manager.to_sql)
-    connection.update(update_manager.to_sql)
+    SpeciesList.connection.update(update_manager.to_sql)
   end
 
+  #   UPDATE species_lists
+  #   SET `where` = #{new_name}, location_id = #{location.id}
+  #   WHERE `where` = #{old_name}
+  # Note: Need to use connection.quote_string here!
   private_class_method def self.arel_update_defined_location(
     location, old_name
   )
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
+    old_name = SpeciesList.connection.quote_string(old_name)
+    new_name = SpeciesList.connection.quote_string(location.name)
     Arel::UpdateManager.new.
       table(SpeciesList.arel_table).
       set([[SpeciesList[:where], new_name],

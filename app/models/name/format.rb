@@ -97,7 +97,7 @@ class Name < AbstractModel
   # boldface for deprecated names.
   def self.make_sure_names_are_bolded_correctly
     select_manager = arel_select_accepted_and_deprecated
-    puts(select_manager.to_sql)
+    # puts(select_manager.to_sql)
     Name.connection.select_values(select_manager.to_sql).map do |id|
       name = Name.find(id)
       name.change_deprecated(name.deprecated)

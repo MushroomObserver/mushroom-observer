@@ -507,9 +507,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    # rubocop:disable Rails/SkipsModelValidations
     update_attribute("password", self.class.sha1(pass)) if pass.present?
-    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Mark a User account as "verified".
@@ -811,12 +809,12 @@ class User < AbstractModel
        Arel::Nodes::NamedFunction.new(
          "IF",
          [users[:name].eq(""),
-          Arel.sql("''"),
+          Arel::Nodes.build_quoted(""),
           Arel::Nodes::NamedFunction.new(
             "CONCAT",
-            [Arel.sql("' <'"),
+            [Arel::Nodes.build_quoted(" <"),
              users[:name],
-             Arel.sql("'>'")]
+             Arel::Nodes.build_quoted(">")]
           )]
        )]
     )

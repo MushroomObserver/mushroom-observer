@@ -47,8 +47,8 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    concat_str = Name.connection.quote("#{lifeform} ")
-    search_str = Name.connection.quote("% #{lifeform} %")
+    concat_str = Name.connection.quote_string("#{lifeform} ")
+    search_str = Name.connection.quote_string("% #{lifeform} %")
 
     for type in %w[name observation] do
       update_manager = arel_update_add_lifeform(
@@ -62,8 +62,8 @@ class Name < AbstractModel
 
   # Remove lifeform (one word only) from all children.
   def propagate_remove_lifeform(lifeform)
-    replace_str = Name.connection.quote(" #{lifeform} ")
-    search_str  = Name.connection.quote("% #{lifeform} %")
+    replace_str = Name.connection.quote_string(" #{lifeform} ")
+    search_str  = Name.connection.quote_string("% #{lifeform} %")
 
     for type in %w[name observation] do
       update_manager = arel_update_remove_lifeform(
@@ -81,6 +81,7 @@ class Name < AbstractModel
     id_column = type == "name" ? :id : :name_id
     concat_sql = arel_function_concat_lifeform(table, concat_str)
     # puts(concat_sql)
+
     # UPDATE names SET lifeform = CONCAT(lifeform, #{concat_str})
     # WHERE id IN (#{all_children.map(&:id).join(",")})
     #   AND lifeform NOT LIKE #{search_str}
@@ -88,7 +89,6 @@ class Name < AbstractModel
     # UPDATE observations SET lifeform = CONCAT(lifeform, #{concat_str})
     # WHERE name_id IN (#{all_children.map(&:id).join(",")})
     #   AND lifeform NOT LIKE #{search_str}
-
     Arel::UpdateManager.new.
       table(table).
       where(table[id_column.to_sym].in(all_children.map(&:id)).
@@ -117,7 +117,6 @@ class Name < AbstractModel
     # UPDATE observations SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
     # WHERE name_id IN (#{all_children.map(&:id).join(",")})
     #   AND lifeform LIKE #{search_str}
-
     Arel::UpdateManager.new.
       table(table).
       where(table[id_column.to_sym].in(all_children.map(&:id)).
@@ -130,8 +129,8 @@ class Name < AbstractModel
       Arel::Nodes::NamedFunction.new(
         "REPLACE",
         [table[:lifeform],
-         Arel.sql(replace_str),
-         Arel.sql(" ")]
+         Arel::Nodes.build_quoted(replace_str),
+         Arel::Nodes.build_quoted(" ")]
       ).to_sql
     )
   end

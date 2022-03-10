@@ -78,6 +78,10 @@
 #
 class Location < AbstractModel
   require "acts_as_versioned"
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -143,7 +147,7 @@ class Location < AbstractModel
     l_v = Arel::Table.new(:locations_versions)
     l_v.project(Arel.star.count).
       where(l_v[:location_id].eq(ver.location_id).
-      and(l_v[:user_id].eq(ver.user_id)))
+            and(l_v[:user_id].eq(ver.user_id)))
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -256,7 +260,8 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
+      # location = Location.find_by("name LIKE ?", name)
+      location = Location.find_by(Location[:name].matches(name))
       return location if location
     end
     raise("There is no \"unknown\" location!")

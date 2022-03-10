@@ -276,6 +276,10 @@
 class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   require_dependency "name/change"
   require_dependency "name/create"
@@ -427,21 +431,24 @@ class Name < AbstractModel
   # Used by show_name.
   def self.count_observations(names)
     ids = names.map(&:id)
-    obs = Observation.arel_table
-    names = Name.arel_table
-    select_manager = obs.project([Arel.star.count, names[:id]]).join(names).
-                     where(obs[:name_id].eq(names[:id]).
-                        and(names[:id].in(ids))).group(names[:id])
+    select_manager = arel_select_count_observations
 
     counts_and_ids = Name.connection.select_rows(select_manager.to_sql)
-    # counts_and_ids = Name.connection.select_rows(%(
-    #     SELECT count(*) c, names.id i FROM observations, names
-    #     WHERE observations.name_id = names.id
-    #     AND names.id IN (#{ids.join(", ")}) group by names.id
-    # ))
     result = {}
     counts_and_ids.each { |row| result[row[1]] = row[0] }
     result
+  end
+
+  # SELECT count(*) c, names.id i FROM observations, names
+  # WHERE observations.name_id = names.id
+  # AND names.id IN (#{ids.join(", ")}) group by names.id
+  private_class_method def self.arel_select_count_observations
+    obs = Observation.arel_table
+    names = Name.arel_table
+
+    obs.project([Arel.star.count, names[:id]]).join(names).
+      where(obs[:name_id].eq(names[:id]).
+      and(names[:id].in(ids))).group(names[:id])
   end
 
   ##############################################################################
