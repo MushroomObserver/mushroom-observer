@@ -44,12 +44,13 @@ class Name < AbstractModel
     end
 
     def accepted_generic_classification_strings
-      Name.where(rank: Name.ranks[:Genus], deprecated: false).
-        # where("author NOT LIKE 'sensu lato%'").
-        # where("LENGTH(classification) > 2").
-        where(Name[:author].does_not_match("sensu lato%")).
-        where(Name[:classification].length > 2).
-        pluck(:text_name, :classification).
+      # Name.where(rank: Name.ranks[:Genus], deprecated: false).
+      #   where("author NOT LIKE 'sensu lato%'").
+      #   where("LENGTH(classification) > 2").
+      #   pluck(:text_name, :classification).
+      select_manager = arel_select_accepted_generic_classification_strings
+      # puts(select_manager.to_sql)
+      Name.connection.select_rows(select_manager.to_sql).
         each_with_object({}) do |vals, classifications|
           text_name, classification = vals
           if classifications[text_name].present?
@@ -59,6 +60,17 @@ class Name < AbstractModel
           end
         end
     end
+
+    def arel_select_accepted_generic_classification_strings
+      names = Name.arel_table
+      names.where(names[:rank].eq(Name.ranks[:Genus]).
+        and(names[:deprecated].eq(Arel.sql("FALSE"))).
+        and(names[:author].does_not_match("sensu lato%")).
+        and(names[:classification].length > 2)).
+        project(names[:text_name], names[:classification])
+    end
+
+    public
 
     def hash_of_names_with_observations
       Hash[

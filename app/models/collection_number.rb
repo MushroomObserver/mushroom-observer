@@ -145,11 +145,12 @@ class CollectionNumber < AbstractModel
     new_format_name = Observation.connection.quote_string(format_name)
     old_format_name = Observation.connection.quote_string(old_format_name)
     join_sources = arel_join_source_corresponding_tables(old_format_name)
+    hr = Arel::Table.new(:herbarium_records)
 
     # puts(join_sources.to_sql)
     Arel::UpdateManager.new.
       table(join_sources).
-      set([[HerbariumRecord[:accession_number], new_format_name]])
+      set([[hr[:accession_number], new_format_name]])
   end
 
   def arel_join_source_corresponding_tables(old_format_name)

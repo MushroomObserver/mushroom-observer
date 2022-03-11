@@ -231,15 +231,16 @@ class Observation < AbstractModel
   # NOTE: New consolidation 2022/03, selects the broken rows only once
   def self.refresh_cached_column(type, foreign, local = foreign)
     select_manager = arel_select_broken_caches(type, foreign, local)
-    # puts(select_manager.to_sql)
+    puts(select_manager.to_sql)
     broken_caches = Observation.connection.select_values(select_manager.to_sql)
-    # puts(broken_caches.inspect)
+    puts(broken_caches.inspect)
 
-    update_manager = arel_update_broken_caches(
-      type, foreign, local, broken_caches
-    )
+    # update_manager = arel_update_broken_caches(
+    #   type, foreign, local, broken_caches
+    # )
     # puts(update_manager.to_sql)
-    Observation.connection.update(update_manager.to_sql)
+    # Observation.connection.update(update_manager.to_sql)
+    update_broken_caches(type, foreign, local, broken_caches)
 
     # Report what we fixed
     broken_caches.map do |id|
@@ -258,30 +259,35 @@ class Observation < AbstractModel
     obs.join(tbl).
       on(obs["#{type}_id".to_sym].eq(tbl[:id]).
          and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
-      project(Arel.star)
+      project(obs[:id])
   end
 
-  private_class_method def self.arel_update_broken_caches(
-    type, foreign, local, _broken_caches
+  private_class_method def self.update_broken_caches(
+    type, foreign, local, broken_caches
   )
     tbl = type.camelize.constantize.arel_table
     obs = Observation.arel_table
-    join_source = Arel::Nodes::JoinSource.new(
-      obs,
-      [obs.create_join(tbl)]
-    )
+    # join_source = Arel::Nodes::JoinSource.new(
+    #   obs,
+    #   [obs.create_join(tbl)]
+    # )
 
-    # NOTE: this doesn't work, Arel does not generate the table name for
-    # the SET column
     #   UPDATE observations o, #{type}s x
     #   SET o.#{local} = x.#{foreign}
     #   WHERE o.#{type}_id = x.id
     #     AND o.#{local} != x.#{foreign}
-    Arel::UpdateManager.new.
-      table(join_source).
-      where(obs[:id].eq(tbl[:id]). # in(broken_caches).
-            and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
-      set([[obs[local.to_sym], tbl[foreign.to_sym]]])
+    Observation.joins(obs.join(tbl).join_sources).
+      where(obs[:id].in(broken_caches)).
+      update_all("observations.#{local} = #{type.pluralize}.#{foreign}")
+
+    # FIXME: Arel UpdateManager on joined tables does not work
+    # Arel does not generate qualified table name for the SET column
+    # https://github.com/rails/rails/issues/44401
+    # Arel::UpdateManager.new.
+    #   table(join_source).
+    #   where(obs[:id].eq(tbl[:id]). # in(broken_caches).
+    #         and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
+    #   set([[obs[local.to_sym], tbl[foreign.to_sym]]])
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -314,11 +320,12 @@ class Observation < AbstractModel
     misspellings = Observation.connection.select_rows(select_manager.to_sql)
     # puts(misspellings.inspect)
 
-    miss_ids = misspellings.map { |id, _search_name| id }
+    misspellings_ids = misspellings.map { |id, _search_name| id }
     # puts(miss_ids.inspect)
-    update_manager = arel_update_misspellings(miss_ids)
+    # update_manager = arel_update_misspellings(misspellings_ids)
     # puts(update_manager.to_sql)
-    Observation.connection.update(update_manager.to_sql)
+    # Observation.connection.update(update_manager.to_sql)
+    update_all_misspellings(misspellings_ids)
 
     # Report what we fixed
     misspellings.map do |id, search_name|
@@ -338,21 +345,29 @@ class Observation < AbstractModel
       project(obs[:id], names[:text_name])
   end
 
-  private_class_method def self.arel_update_misspellings(miss_ids)
+  private_class_method def self.update_all_misspellings(misspellings_ids)
     obs = Observation.arel_table
     names = Name.arel_table
-    join_source = Arel::Nodes::JoinSource.new(
-      obs,
-      [obs.create_join(names)]
-    )
+    # join_source = Arel::Nodes::JoinSource.new(
+    #   obs,
+    #   [obs.create_join(names)]
+    # )
 
-    #   UPDATE observations o, names n
-    #   SET o.name_id = n.correct_spelling_id
-    #   WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    Arel::UpdateManager.new.
-      table(join_source).
-      set([[obs[:name_id], names[:correct_spelling_id]]]).
-      where(obs[:id].in(miss_ids))
+    # UPDATE observations o, names n
+    # SET o.name_id = n.correct_spelling_id
+    # WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
+    Observation.joins(obs.join(names).join_sources).
+      where(obs[:name_id].in(misspellings_ids).
+            and(names[:correct_spelling_id].not_eq(nil))).
+      update_all("observations.name_id = names.correct_spelling_id")
+
+    # FIXME: Arel UpdateManager on joined tables does not work
+    # Arel does not generate qualified table name for the SET column
+    # https://github.com/rails/rails/issues/44401
+    # Arel::UpdateManager.new.
+    #   table(join_source).
+    #   set([[obs[:name_id], names[:correct_spelling_id]]]).
+    #   where(obs[:id].in(miss_ids))
   end
 
   def update_view_stats
