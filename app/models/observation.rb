@@ -295,9 +295,9 @@ class Observation < AbstractModel
   private_class_method def self.arel_update_cache(type, field, id, val)
     obs = Observation.arel_table
 
-    #   UPDATE observations
-    #   SET `#{field}` = #{Observation.connection.quote(val)}
-    #   WHERE #{type}_id = #{id}
+    # UPDATE observations
+    # SET `#{field}` = #{Observation.connection.quote(val)}
+    # WHERE #{type}_id = #{id}
     Arel::UpdateManager.new.
       table(obs).
       set([[obs[field.to_sym], val]]).

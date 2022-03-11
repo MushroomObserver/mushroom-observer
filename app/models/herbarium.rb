@@ -168,17 +168,29 @@ class Herbarium < AbstractModel
   def self.primer
     result = ""
     if User.current
-      result = connection.select_values(%(
-        SELECT DISTINCT h.name AS x
-        FROM herbarium_records s, herbaria h, herbaria_curators c
-        WHERE s.herbarium_id = h.id
-        AND h.id = c.herbarium_id
-        AND c.user_id = #{user_id}
-        ORDER BY s.updated_at DESC
-        LIMIT 100
-      )).sort
+      select_manager = arel_select_herbarium_primer
+      # puts(select_manager.to_sql)
+      result = connection.select_values(select_manager).sort
     end
     result
+  end
+
+  # SELECT DISTINCT h.name AS x
+  # FROM herbarium_records s, herbaria h, herbaria_curators c
+  # WHERE s.herbarium_id = h.id
+  # AND h.id = c.herbarium_id
+  # AND c.user_id = #{user_id}
+  # ORDER BY s.updated_at DESC
+  # LIMIT 100
+  private_class_method def self.arel_select_herbarium_primer
+    s = HerbariumRecord.arel_table
+    h = Herbarium.arel_table
+    c = Arel::Table.new(:herbaria_curators)
+    # user_id = 252
+
+    h.join(s).on(s[:herbarium_id].eq(h[:id])).join(c).on(
+      h[:id].eq(c[:herbarium_id]).and(c[:user_id].eq(user_id))
+    ).project(h[:name]).distinct.order(s[:updated_at]).take(100)
   end
 
   def self.find_by_code_with_wildcards(str)
