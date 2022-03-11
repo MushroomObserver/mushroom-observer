@@ -231,9 +231,9 @@ class Observation < AbstractModel
   # NOTE: New consolidation 2022/03, selects the broken rows only once
   def self.refresh_cached_column(type, foreign, local = foreign)
     select_manager = arel_select_broken_caches(type, foreign, local)
-    puts(select_manager.to_sql)
+    # puts(select_manager.to_sql)
     broken_caches = Observation.connection.select_values(select_manager.to_sql)
-    puts(broken_caches.inspect)
+    # puts(broken_caches.inspect)
 
     # update_manager = arel_update_broken_caches(
     #   type, foreign, local, broken_caches
