@@ -78,9 +78,10 @@ class Name < AbstractModel
         # conditions = ["text_name like ? AND correct_spelling_id IS NULL",
         #               "#{synonym.text_name} #{child_pat}"]
         # result += Name.where(conditions).select do |name|
-        synonym_pat = synonym.text_name + " " + child_pat
-        result += Name.where(Name[:text_name].matches(synonym_pat).
-                    and(Name[:correct_spelling_id].eq(nil))).select do |name|
+        result += Name.where(
+          Name[:text_name].matches("#{synonym.text_name} #{child_pat}").
+          and(Name[:correct_spelling_id].eq(nil))
+        ).select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)
         end
