@@ -326,9 +326,7 @@ class Observation < AbstractModel
     obs = Observation.arel_table
     names = Name.arel_table
 
-    Observation.joins(obs.join(names).
-      on(obs[:name_id].eq(names[:id]).
-          and(names[:correct_spelling_id].not_eq(nil))).join_sources).
+    Observation.joins(:name).where(names[:correct_spelling_id].not_eq(nil)).
       update_all("`observations`.`name_id` = `names`.`correct_spelling_id`")
   end
 

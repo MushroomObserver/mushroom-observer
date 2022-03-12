@@ -108,7 +108,7 @@ class CollectionNumber < AbstractModel
 
   # DELETE FROM collection_numbers WHERE id = #{id}
   def destroy_without_callbacks
-    collection_number.delete
+    delete
   end
 
   # Mirror changes to collection number in herbarium records.  Do this
