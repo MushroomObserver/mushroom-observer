@@ -229,6 +229,8 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
     tbl = type.camelize.constantize.arel_table
     obs = Observation.arel_table
     broken_caches = Observation.joins(type.to_sym).
@@ -241,6 +243,7 @@ class Observation < AbstractModel
     broken_caches.update_all(
       "`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`"
     )
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -268,6 +271,8 @@ class Observation < AbstractModel
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
     obs = Observation.arel_table
     names = Name.arel_table
 
@@ -279,6 +284,7 @@ class Observation < AbstractModel
     misspellings.update_all(
       "`observations`.`name_id` = `names`.`correct_spelling_id`"
     )
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   def update_view_stats

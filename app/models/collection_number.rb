@@ -122,6 +122,8 @@ class CollectionNumber < AbstractModel
   #   AND hro.herbarium_record_id = hr.id
   #   AND hr.accession_number = #{old_format_name}
   def change_corresponding_herbarium_records(old_format_name)
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
     cno = Arel::Table.new(:collection_numbers_observations)
     hro = Arel::Table.new(:herbarium_records_observations)
     hr = Arel::Table.new(:herbarium_records)
@@ -134,5 +136,6 @@ class CollectionNumber < AbstractModel
       and(cno[:collection_number_id].eq(id)).
       and(cno[:observation_id].eq(hro[:observation_id]))
     ).update_all(accession_number: new_format_name)
+    # rubocop:enable Rails/SkipsModelValidations
   end
 end
