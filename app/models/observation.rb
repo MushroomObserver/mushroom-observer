@@ -270,7 +270,7 @@ class Observation < AbstractModel
       on(obs["#{type}_id".to_sym].eq(tbl[:id]).
          and(obs[local.to_s.to_sym].
              not_eq(tbl[foreign.to_s.to_sym]))).join_sources).
-      update_all("observations.#{local} = #{type.pluralize}.#{foreign}")
+      update_all("`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`")
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -329,7 +329,7 @@ class Observation < AbstractModel
     Observation.joins(obs.join(names).
       on(obs[:name_id].eq(names[:id]).
           and(names[:correct_spelling_id].not_eq(nil))).join_sources).
-      update_all("observations.name_id = names.correct_spelling_id")
+      update_all("`observations`.`name_id` = `names`.`correct_spelling_id`")
   end
 
   def update_view_stats
