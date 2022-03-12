@@ -52,13 +52,13 @@ class Name < AbstractModel
       # puts(select_manager.to_sql)
       Name.connection.select_rows(select_manager.to_sql).
         each_with_object({}) do |vals, classifications|
-          text_name, classification = vals
-          if classifications[text_name].present?
-            warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-          else
-            classifications[text_name] = classification
-          end
+        text_name, classification = vals
+        if classifications[text_name].present?
+          warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+        else
+          classifications[text_name] = classification
         end
+      end
     end
 
     def arel_select_accepted_generic_classification_strings
