@@ -229,48 +229,18 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
-    msgs = report_broken_caches(type, foreign, local)
-    refresh_cached_column_fix_errors(type, foreign, local)
-    msgs
-  end
-
-  # Check how many entries are broken in a mirrored column.  It will be good to
-  # keep track of this at first to make sure we've caught all the ways in which
-  # the mirror can get inadvertently broken.
-  def self.report_broken_caches(type, foreign, local)
-    select_manager = arel_select_broken_caches(type, foreign, local)
-    Observation.connection.select_values(select_manager.to_sql).map do |id|
+    tbl = type.camelize.constantize.arel_table
+    obs = Observation.arel_table
+    broken_caches = Observation.joins(type.to_sym).
+                    where(obs[local.to_s.to_sym].
+                          not_eq(tbl[foreign.to_s.to_sym]))
+    broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
-  end
-
-  # SELECT o.id
-  # FROM observations o, #{type}s x
-  # WHERE o.#{type}_id = x.id
-  #   AND o.#{local} != x.#{foreign}
-  private_class_method def self.arel_select_broken_caches(type, foreign, local)
-    tbl = type.camelize.constantize.arel_table
-    obs = Observation.arel_table
-    obs.join(tbl).
-      on(obs["#{type}_id".to_sym].eq(tbl[:id]).
-         and(obs[local.to_sym].not_eq(tbl[foreign.to_sym]))).
-      project(Arel.star)
-  end
-
-  # Refresh the mirror of a foreign table's column in the observations table.
-  # UPDATE observations o, #{type}s x
-  # SET o.#{local} = x.#{foreign}
-  # WHERE o.#{type}_id = x.id
-  #   AND o.#{local} != x.#{foreign}
-  # NOTE: Arel::UpdateManager doesn't work on joins
-  def self.refresh_cached_column_fix_errors(type, foreign, local)
-    tbl = type.camelize.constantize.arel_table
-    obs = Observation.arel_table
-    Observation.joins(obs.join(tbl).
-      on(obs["#{type}_id".to_sym].eq(tbl[:id]).
-         and(obs[local.to_s.to_sym].
-             not_eq(tbl[foreign.to_s.to_sym]))).join_sources).
-      update_all("`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`")
+    # Refresh the mirror of a foreign table's column in the observations table.
+    broken_caches.update_all(
+      "`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`"
+    )
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -298,36 +268,17 @@ class Observation < AbstractModel
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
-    msgs = Observation.connection.
-           select_rows(arel_select_misspellings).map do |id, search_name|
+    obs = Observation.arel_table
+    names = Name.arel_table
+
+    misspellings = Observation.joins(:name).
+                   where(names[:correct_spelling_id].not_eq(nil))
+    misspellings.pluck(obs[:id], names[:text_name]).map do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
-    update_all_misspellings
-    msgs
-  end
-
-  # SELECT o.id, n.text_name FROM observations o, names n
-  # WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-  private_class_method def self.arel_select_misspellings
-    obs = Observation.arel_table
-    names = Name.arel_table
-
-    obs.join(names).
-      on(obs[:name_id].eq(names[:id]).
-         and(names[:correct_spelling_id].not_eq(nil))).
-      project(obs[:id], names[:text_name])
-  end
-
-  # UPDATE observations o, names n
-  # SET o.name_id = n.correct_spelling_id
-  # WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-  # NOTE: Arel::UpdateManager doesn't work on joins
-  private_class_method def self.update_all_misspellings
-    obs = Observation.arel_table
-    names = Name.arel_table
-
-    Observation.joins(:name).where(names[:correct_spelling_id].not_eq(nil)).
-      update_all("`observations`.`name_id` = `names`.`correct_spelling_id`")
+    misspellings.update_all(
+      "`observations`.`name_id` = `names`.`correct_spelling_id`"
+    )
   end
 
   def update_view_stats
