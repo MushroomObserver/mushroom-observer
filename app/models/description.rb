@@ -424,7 +424,7 @@ class Description < AbstractModel
   def arel_select_group_user_ids(table)
     table = Arel::Table.new(table.to_sym)
     ugu = Arel::Table.new(:user_groups_users)
-    table.join(ugu).on(table["#{type_tag}_id".to_sym].eq(id).
+    table.join(ugu).on(table[:"#{type_tag}_id"].eq(id).
           and(table[:user_group_id].eq(ugu[:user_group_id]))).distinct.
       project(ugu[:user_id]).order(ugu[:user_id].asc)
   end
