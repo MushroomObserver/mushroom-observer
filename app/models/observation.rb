@@ -241,12 +241,12 @@ class Observation < AbstractModel
     end
     # Refresh the mirror of a foreign table's column in the observations table.
     # Guard for SQL injection
-    if Observation.column_names.include?(local) &&
-       tbl.column_names.include?(foreign)
-      broken_caches.update_all(
-        "`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`"
-      )
-    end
+    # if Observation.column_names.include?(local) &&
+    #    tbl.column_names.include?(foreign)
+    broken_caches.update_all(
+      "`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`"
+    )
+    # end
     # rubocop:enable Rails/SkipsModelValidations
   end
 
