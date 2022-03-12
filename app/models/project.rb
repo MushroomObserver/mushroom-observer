@@ -151,18 +151,8 @@ class Project < AbstractModel
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     if imgs.any?
-      # img_ids = imgs.map(&:id).map(&:to_s).join(",")
       # Leave images which are attached to other observations
       # still attached to this project.
-      # leave_these_img_ids = Image.connection.select_values(%(
-      #   SELECT io.image_id FROM images_observations io, observations_projects op
-      #   WHERE io.image_id IN (#{img_ids})
-      #     AND io.observation_id != #{obs.id}
-      #     AND io.observation_id = op.observation_id
-      #     AND op.project_id = #{id}
-      # )).map(&:to_i)
-      # puts(leave_these_img_ids)
-
       select_ids = arel_select_leave_these_img_ids(obs, imgs)
       # puts(select_manager.to_sql)
       leave_these_img_ids = Image.connection.select_values(
@@ -177,6 +167,11 @@ class Project < AbstractModel
     update_attribute(:updated_at, Time.zone.now)
   end
 
+  # SELECT io.image_id FROM images_observations io, observations_projects op
+  # WHERE io.image_id IN (#{img_ids})
+  #   AND io.observation_id != #{obs.id}
+  #   AND io.observation_id = op.observation_id
+  #   AND op.project_id = #{id}
   def arel_select_leave_these_img_ids(obs, imgs)
     io = Arel::Table.new(:images_observations)
     op = Arel::Table.new(:observations_projects)

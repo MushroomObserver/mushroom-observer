@@ -42,20 +42,12 @@ class Synonym < AbstractModel
   # the site working...
   def self.make_sure_all_referenced_synonyms_exist
     msgs = []
-    # references = Name.connection.select_values(%(
-    #   SELECT DISTINCT synonym_id FROM names
-    #   WHERE synonym_id IS NOT NULL
-    #   ORDER BY synonym_id ASC
-    # ))
-    # puts(references.join(",").to_s)
     reference_select = arel_select_referenced_synonyms
     # puts(reference_select.to_sql)
     references = Name.connection.select_values(reference_select.to_sql)
     # puts(references.join(",").to_s)
 
-    # records = Name.connection.select_values(%(
-    #   SELECT id FROM synonyms ORDER BY id ASC
-    # ))
+    # SELECT id FROM synonyms ORDER BY id ASC
     record_select = Synonym.select(:id).order(Synonym[:id].asc)
     # puts(record_select.to_sql)
     records = Name.connection.select_values(record_select.to_sql)
@@ -66,10 +58,6 @@ class Synonym < AbstractModel
     # puts(missing.join(",").to_s)
 
     if unused.any?
-      # Name.connection.execute(%(
-      #   DELETE FROM synonyms
-      #   WHERE id IN (#{unused.map(&:to_s).join(",")})
-      # ))
       delete_manager = arel_delete_unused_synonyms(unused)
       # puts(delete_manager.to_sql)
       Name.connection.delete(delete_manager.to_sql)
@@ -77,11 +65,6 @@ class Synonym < AbstractModel
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
     if missing.any?
-      # Name.connection.execute(%(
-      #   INSERT INTO synonyms (id) VALUES
-      #   #{missing.map { |id| "(#{id})" }.join(",")}
-      # ))
-
       insert_manager = arel_insert_missing_synonyms(missing)
       # puts(insert_manager.to_sql)
       Name.connection.execute(insert_manager.to_sql)
@@ -90,6 +73,9 @@ class Synonym < AbstractModel
     msgs
   end
 
+  # SELECT DISTINCT synonym_id FROM names
+  # WHERE synonym_id IS NOT NULL
+  # ORDER BY synonym_id ASC
   private_class_method def self.arel_select_referenced_synonyms
     names = Name.arel_table
 
@@ -98,6 +84,8 @@ class Synonym < AbstractModel
       order(names[:synonym_id].asc)
   end
 
+  # DELETE FROM synonyms
+  # WHERE id IN (#{unused.map(&:to_s).join(",")})
   private_class_method def self.arel_delete_unused_synonyms(unused)
     syn = Synonym.arel_table
 
@@ -106,6 +94,8 @@ class Synonym < AbstractModel
       where(syn[:id].in(unused))
   end
 
+  # INSERT INTO synonyms (id) VALUES
+  # #{missing.map { |id| "(#{id})" }.join(",")}
   private_class_method def self.arel_insert_missing_synonyms(missing)
     syn = Synonym.arel_table
 

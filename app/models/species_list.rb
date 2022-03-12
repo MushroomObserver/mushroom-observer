@@ -220,10 +220,10 @@ class SpeciesList < AbstractModel
     SpeciesList.connection.update(update_manager.to_sql)
   end
 
-  #   UPDATE species_lists
-  #   SET `where` = #{new_name}, location_id = #{location.id}
-  #   WHERE `where` = #{old_name}
-  # Note: Need to use connection.quote_string here!
+  # UPDATE species_lists
+  # SET `where` = #{new_name}, location_id = #{location.id}
+  # WHERE `where` = #{old_name}
+  # Note: Need to use connection.quote_string here
   private_class_method def self.arel_update_defined_location(
     location, old_name
   )

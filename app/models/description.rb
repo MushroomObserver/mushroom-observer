@@ -434,7 +434,7 @@ class Description < AbstractModel
   # ORDER BY user_group_id ASC
   def arel_select_group_ids(table)
     table = Arel::Table.new(table.to_sym)
-    table.where(table["#{type_tag}_id".to_sym].eq(id)).distinct.
+    table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
       project(table[:user_group_id]).order(table[:user_group_id].asc)
   end
 

@@ -44,12 +44,7 @@ class Name < AbstractModel
     end
 
     def accepted_generic_classification_strings
-      # Name.where(rank: Name.ranks[:Genus], deprecated: false).
-      #   where("author NOT LIKE 'sensu lato%'").
-      #   where("LENGTH(classification) > 2").
-      #   pluck(:text_name, :classification).
       select_manager = arel_select_accepted_generic_classification_strings
-      # puts(select_manager.to_sql)
       Name.connection.select_rows(select_manager.to_sql).
         each_with_object({}) do |vals, classifications|
         text_name, classification = vals
@@ -61,6 +56,10 @@ class Name < AbstractModel
       end
     end
 
+    # Name.where(rank: Name.ranks[:Genus], deprecated: false).
+    #   where("author NOT LIKE 'sensu lato%'").
+    #   where("LENGTH(classification) > 2").
+    #   pluck(:text_name, :classification).
     def arel_select_accepted_generic_classification_strings
       names = Name.arel_table
       names.where(names[:rank].eq(Name.ranks[:Genus]).
