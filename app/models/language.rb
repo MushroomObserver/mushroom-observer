@@ -27,6 +27,9 @@
 ################################################################################
 
 class Language < AbstractModel
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
   include LanguageExporter
   class << self
     include LanguageTracking
@@ -151,6 +154,8 @@ class Language < AbstractModel
       group(t[:id]).select(self.class.arel_function_group_concat_strings(v))
   end
 
+  public
+
   def self.arel_function_group_concat_strings(v)
     Arel::Nodes::NamedFunction.new(
       "GROUP_CONCAT",
@@ -161,8 +166,6 @@ class Language < AbstractModel
       )]
     )
   end
-
-  public
 
   def self.score_lines(text)
     hash = {}
