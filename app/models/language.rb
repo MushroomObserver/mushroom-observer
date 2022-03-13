@@ -60,17 +60,8 @@ class Language < AbstractModel
   def top_contributors(num = 10)
     id_select_manager = arel_select_top_contributors_ids(num)
     # puts(id_select_manager.to_sql)
-    # Note: We just want the array of ids here. Switching to select_values:
     user_ids = self.class.connection.select_values(id_select_manager.to_sql)
     # puts(user_ids.inspect)
-    # user_ids = self.class.connection.select_rows(%(
-    #   SELECT user_id
-    #   FROM translation_strings
-    #   WHERE language_id = #{id} AND user_id != 0
-    #   GROUP BY user_id
-    #   ORDER BY COUNT(id) DESC
-    #   LIMIT #{num}
-    # ))
     if user_ids.any?
       user_select_manager = arel_select_top_contributors_in_order(user_ids)
       user_ids = self.class.connection.select_rows(user_select_manager.to_sql)
@@ -81,19 +72,25 @@ class Language < AbstractModel
 
   private
 
+  # SELECT user_id
+  # FROM translation_strings
+  # WHERE language_id = #{id} AND user_id != 0
+  # GROUP BY user_id
+  # ORDER BY COUNT(id) DESC
+  # LIMIT #{num}
   def arel_select_top_contributors_ids(num)
-    ts = TranslationString.arel_table
-    ts.project(ts[:user_id]).
-      where(ts[:language_id].eq(id).and(ts[:user_id].not_eq(0))).
-      group(ts[:user_id]).order(ts[:id].count.desc).take(num)
+    t = TranslationString.arel_table
+    t.project(t[:user_id]).
+      where(t[:language_id].eq(id).and(t[:user_id].not_eq(0))).
+      group(t[:user_id]).order(t[:id].count.desc).take(num)
   end
 
   # SELECT id, login
   # FROM users
   # WHERE id IN (#{user_ids.join(",")})
   # ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
+  # Note: ORDER BY unnecessary? `project` by id seems to maintain the order.
   def arel_select_top_contributors_in_order(user_ids)
-    # Note: ORDER BY does not seem necessary here. Array maintains the order.
     u = User.arel_table
     u.project([u[:id], u[:login]]).where(u[:id].in(user_ids))
   end
@@ -104,35 +101,68 @@ class Language < AbstractModel
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    values = Language.connection.select_values(%(
-      SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
-      FROM translation_strings_versions
-      WHERE user_id = #{user.id}
-      GROUP BY translation_string_id
-    ))
-    # puts(values.inspect)
+    select_manager = arel_select_translation_strings_versions(user)
+    # puts(select_manager.to_sql)
+    values = Language.connection.select_values(select_manager.to_sql)
+    # # puts(values.inspect)
     for text in values
       lines += score_lines(text)
     end
     lines
   end
 
+  # SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
+  # FROM translation_strings_versions
+  # WHERE user_id = #{user.id}
+  # GROUP BY translation_string_id
+  private_class_method def self.arel_select_translation_strings_versions(user)
+    v = Arel::Table.new(:translation_strings_versions)
+    v.where(v[:user_id].eq(user.id)).
+      group(v[:translation_string_id]).
+      project(arel_function_group_concat_strings(v))
+  end
+
   def calculate_users_contribution(user)
     lines = 0
-    values = Language.connection.select_values(%(
-      SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
-      FROM translation_strings t, translation_strings_versions v
-      WHERE t.language_id = #{id}
-        AND v.translation_string_id = t.id
-        AND v.user_id = #{user.id}
-      GROUP BY t.id
-    ))
+    select_manager = arel_select_translation_strings(user)
+    # puts(select_manager.to_sql)
+    values = Language.connection.select_values(select_manager.to_sql)
     # puts(values.inspect)
     for text in values
       lines += Language.score_lines(text)
     end
     lines
   end
+
+  private
+
+  # SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
+  # FROM translation_strings t, translation_strings_versions v
+  # WHERE t.language_id = #{id}
+  #   AND v.translation_string_id = t.id
+  #   AND v.user_id = #{user.id}
+  # GROUP BY t.id
+  def arel_select_translation_strings(user)
+    t = Arel::Table.new(:translation_strings)
+    v = Arel::Table.new(:translation_strings_versions)
+    TranslationString.joins(t.join(v).on(t[:language_id].eq(id).
+                            and(v[:translation_string_id].eq(t[:id])).
+                            and(v[:user_id].eq(user.id))).join_sources).
+      group(t[:id]).select(self.class.arel_function_group_concat_strings(v))
+  end
+
+  def self.arel_function_group_concat_strings(v)
+    Arel::Nodes::NamedFunction.new(
+      "GROUP_CONCAT",
+      [Arel::Nodes::NamedFunction.new(
+        "CONCAT",
+        [v[:text],
+         Arel::Nodes.build_quoted("\n")]
+      )]
+    )
+  end
+
+  public
 
   def self.score_lines(text)
     hash = {}
@@ -156,16 +186,14 @@ class Language < AbstractModel
     strings = Language.connection.select_rows(select_manager.to_sql)
 
     for locale, tag, text in strings
-      # for locale, tag, text in Language.connection.select_rows(%(
-      #   SELECT locale, tag, text
-      #   FROM translation_strings t, languages l
-      #   WHERE t.language_id = l.id
-      #     AND t.updated_at >= #{Language.connection.quote(cutoff)}
-      # ))
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
 
+  # SELECT locale, tag, text
+  # FROM translation_strings t, languages l
+  # WHERE t.language_id = l.id
+  #   AND t.updated_at >= #{Language.connection.quote(cutoff)}
   private_class_method def self.arel_select_recent_translations
     cutoff = @@last_update
     @@last_update = Time.zone.now
@@ -175,6 +203,6 @@ class Language < AbstractModel
 
     ts.project([lang[:locale], ts[:tag], ts[:text]]).
       join(lang).on(ts[:language_id].eq(lang[:id]).
-                   and(ts[:updated_at].gteq(update_cutoff)))
+                    and(ts[:updated_at].gteq(update_cutoff)))
   end
 end
