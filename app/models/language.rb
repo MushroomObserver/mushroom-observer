@@ -156,12 +156,12 @@ class Language < AbstractModel
 
   public
 
-  def self.arel_function_group_concat_strings(v)
+  def self.arel_function_group_concat_strings(table)
     Arel::Nodes::NamedFunction.new(
       "GROUP_CONCAT",
       [Arel::Nodes::NamedFunction.new(
         "CONCAT",
-        [v[:text],
+        [table[:text],
          Arel::Nodes.build_quoted("\n")]
       )]
     )
