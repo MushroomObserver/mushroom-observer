@@ -10,6 +10,7 @@ class Donation < ApplicationRecord
     Donation.connection.select_all(select_manager.to_sql).to_a
   end
 
+  # rubocop:disable Metrics/AbcSize
   # "SELECT who, SUM(amount) total, MAX(created_at) most_recent
   # FROM donations WHERE anonymous = 0 and reviewed = 1
   # GROUP BY who, email ORDER BY total DESC, most_recent DESC"
@@ -20,6 +21,7 @@ class Donation < ApplicationRecord
       group(d[:who], d[:email]).
       order(d[:amount].sum.desc, d[:created_at].maximum.desc)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def other_amount
     ""

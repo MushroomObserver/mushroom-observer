@@ -175,6 +175,7 @@ class Herbarium < AbstractModel
     result
   end
 
+  # rubocop:disable Metrics/AbcSize
   # SELECT DISTINCT h.name AS x
   # FROM herbarium_records s, herbaria h, herbaria_curators c
   # WHERE s.herbarium_id = h.id
@@ -186,12 +187,13 @@ class Herbarium < AbstractModel
     s = HerbariumRecord.arel_table
     h = Herbarium.arel_table
     c = Arel::Table.new(:herbaria_curators)
-    # user_id = 252
+    # user_id = 252 # for testing
 
     h.join(s).on(s[:herbarium_id].eq(h[:id])).join(c).on(
       h[:id].eq(c[:herbarium_id]).and(c[:user_id].eq(user_id))
     ).project(h[:name]).distinct.order(s[:updated_at]).take(100)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def self.find_by_code_with_wildcards(str)
     find_using_wildcards("code", str)
