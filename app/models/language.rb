@@ -156,6 +156,10 @@ class Language < AbstractModel
 
   public
 
+  # JASON QUESTION - Is there a way to rewrite these without the group_concat?
+  # I was thinking maybe just select the :text, and append the newlines in Ruby
+  # via map. But this gives a different score, because of the grouping.
+  # The command in PostgresQL is "STRING_AGG"
   def self.arel_function_group_concat_strings(table)
     Arel::Nodes::NamedFunction.new(
       "GROUP_CONCAT",
