@@ -33,11 +33,11 @@ MushroomObserver::Application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.image_precedence = {
-    default: [:cdmr, :local]
+    default: [:mycolab, :local]
     # For use when testing live server in parallel with production server.
-    # :default   => [:cdmr, :local, :mo]
+    # :default   => [:mycolab, :local, :mo]
   }
-  config.image_fallback_source = :cdmr
+  config.image_fallback_source = :mycolab
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
