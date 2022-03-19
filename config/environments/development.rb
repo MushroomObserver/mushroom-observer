@@ -25,8 +25,8 @@ MushroomObserver::Application.configure do
     domain: "localhost"
   }
 
-  config.image_precedence = { default: [:local, :cdmr] }
-  config.image_fallback_source = :cdmr
+  config.image_precedence = { default: [:local, :mycolab] }
+  config.image_fallback_source = :mycolab
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
