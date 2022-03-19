@@ -71,7 +71,7 @@
   <div class="col-xs-12 max-width-text obs-notes">
     <%= if observation.notes?
       Textile.clear_textile_cache
-      Textile.register_name(*observation.namings.includes(:name).map(&:name))
+      Textile.register_name(*observation.namings.map(&:name))
       Textile.register_name(observation.name)
       content_tag(
         :div, observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
