@@ -20,7 +20,9 @@ class AjaxController
   private
 
   def cast_naming_vote(id, value_str)
-    @naming = Naming.find(id)
+    @naming = Naming.includes(
+      observation: { namings: :votes }
+    ).find_by(id: id)
     value = Vote.validate_value(value_str)
     raise("Bad value.") unless value
 
