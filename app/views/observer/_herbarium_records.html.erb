@@ -1,6 +1,5 @@
 <%
-  records = observation.herbarium_records.
-                        includes({herbarium: :curators}, :user)
+  records = observation.herbarium_records
   can_add = in_admin_mode? || observation.can_edit? ||
             @user && @user.curated_herbaria.any?
 
