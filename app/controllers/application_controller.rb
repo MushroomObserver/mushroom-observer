@@ -1658,6 +1658,7 @@ class ApplicationController < ActionController::Base
                                             type: model.type_tag))
     redirect_with_query(controller: model.show_controller,
                         action: model.index_action)
+    nil
   end
 
   private ##########
