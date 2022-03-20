@@ -203,12 +203,10 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def add_comment
     pass_query_params
-    @target = Comment.find_object(params[:type], params[:id].to_s)
-    if !@target
-      redirect_back_or_default("/")
-    elsif !allowed_to_see!(@target)
-      # redirected already
-    elsif request.method == "GET"
+    return unless (@target = load_target(params[:type], params[:id]))
+    return unless allowed_to_see!(@target)
+
+    if request.method == "GET"
       @comment = Comment.new
       @comment.target = @target
     else
@@ -241,28 +239,25 @@ class CommentController < ApplicationController
     pass_query_params
     return unless (@comment = find_or_goto_index(Comment, params[:id].to_s))
 
-    @target = @comment.target
-    if !allowed_to_see!(@target)
-      # redirected already
-    elsif !check_permission!(@comment)
+    @target = load_target(@comment.target_type, @comment.target_id)
+    return unless allowed_to_see!(@target)
+    return unless check_permission_or_redirect!(@comment, @target)
+    return unless request.method == "POST"
+
+    @comment.attributes = whitelisted_comment_params if params[:comment]
+    if !@comment.changed?
+      flash_notice(:runtime_no_changes.t)
+      done = true
+    elsif !@comment.save
+      flash_object_errors(@comment)
+    else
+      @comment.log_update
+      flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
+      done = true
+    end
+    if done
       redirect_with_query(controller: @target.show_controller,
                           action: @target.show_action, id: @target.id)
-    elsif request.method == "POST"
-      @comment.attributes = whitelisted_comment_params if params[:comment]
-      if !@comment.changed?
-        flash_notice(:runtime_no_changes.t)
-        done = true
-      elsif !@comment.save
-        flash_object_errors(@comment)
-      else
-        @comment.log_update
-        flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
-        done = true
-      end
-      if done
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
-      end
     end
   end
 
@@ -310,5 +305,24 @@ class CommentController < ApplicationController
 
   def whitelisted_comment_params
     params[:comment].permit([:summary, :comment])
+  end
+
+  def load_target(type, id)
+    case type
+    when "Observation"
+      load_for_show_observation_or_goto_index(id)
+    else
+      target = Comment.find_object(type, id.to_s)
+      redirect_back_or_default("/") unless target
+      target
+    end
+  end
+
+  def check_permission_or_redirect!(comment, target)
+    return true if check_permission!(comment)
+
+    redirect_with_query(controller: target.show_controller,
+                        action: target.show_action, id: target.id)
+    return false
   end
 end

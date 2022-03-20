@@ -1865,6 +1865,19 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def load_for_show_observation_or_goto_index(id)
+    Observation.includes(
+      :collection_numbers,
+      { comments: :user },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { namings: :name },
+      :projects,
+      :sequences
+    ).find_by(id: id) ||
+    flash_error_and_goto_index(Observation, id)
+  end
+
   ##############################################################################
 
   private

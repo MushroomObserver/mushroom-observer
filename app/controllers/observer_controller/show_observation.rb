@@ -37,7 +37,7 @@ class ObserverController
     @observation = Observation.includes(
       :collection_numbers,
       { comments: :user },
-      { external_links: :external_site },
+      { external_links: { external_site: :project } },
       { herbarium_records: [{ herbarium: :curators }, :user] },
       { images: [:image_votes, :license, :projects, :user] },
       :location,

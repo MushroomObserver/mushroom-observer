@@ -13,7 +13,8 @@ class NamingController < ApplicationController
     pass_query_params
     @params = NamingParams.new
     naming = @params.naming = Naming.from_params(params)
-    @params.observation = naming.observation
+    @params.observation =
+      load_for_show_observation_or_goto_index(naming.observation_id)
     return default_redirect(naming.observation) unless check_permission!(naming)
 
     # TODO: Can this get moved into NamingParams#naming=
@@ -24,7 +25,8 @@ class NamingController < ApplicationController
   def create
     pass_query_params
     @params = NamingParams.new(params[:name])
-    @params.observation = find_or_goto_index(Observation, params[:id].to_s)
+    @params.observation =
+      load_for_show_observation_or_goto_index(params[:id])
     fill_in_reference_for_suggestions(@params) if params[:name].present?
     return unless @params.observation
 
