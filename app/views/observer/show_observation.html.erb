@@ -12,7 +12,7 @@
 %>
 
 <div class="row">
-  <div class="col-sm-8 pull-left-sm">
+  <div class="col-md-8 pull-left-sm">
     <div class="list-group">
       <div class="list-group-item">
         <%= render(partial: "show_observation",
@@ -20,7 +20,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-4 pull-right-sm">
+  <div class="col-md-4 pull-right-sm">
     <div class="list-group">
       <div class="list-group-item name-section small">
         <%= render(partial: "show_name_info",
@@ -41,7 +41,7 @@
     <% end %>
     <%= render(partial: "show_images", locals: { observation: @observation }) %>
   </div>
-  <div class="col-sm-8 pull-left-sm">
+  <div class="col-md-8 pull-left-sm">
     <div id="naming_partial">
       <%= render(partial: "naming/show", locals: { observation: @observation }) %>
     </div>
