@@ -1875,7 +1875,7 @@ class ApplicationController < ActionController::Base
       :projects,
       :sequences
     ).find_by(id: id) ||
-    flash_error_and_goto_index(Observation, id)
+      flash_error_and_goto_index(Observation, id)
   end
 
   ##############################################################################

@@ -28,7 +28,6 @@
 #  allowed_to_see!::
 #
 ################################################################################
-
 class CommentController < ApplicationController
   before_action :login_required, except: [
     :comment_search,
@@ -108,7 +107,7 @@ class CommentController < ApplicationController
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(action: :list_comments)
-    elsif target = find_or_goto_index(model, params[:id].to_s)
+    elsif (target = find_or_goto_index(model, params[:id].to_s))
       query = create_query(:Comment, :for_target, target: target.id,
                                                   type: target.class.name)
       show_selected_comments(query)
@@ -206,21 +205,17 @@ class CommentController < ApplicationController
     return unless (@target = load_target(params[:type], params[:id]))
     return unless allowed_to_see!(@target)
 
-    if request.method == "GET"
-      @comment = Comment.new
-      @comment.target = @target
+    @comment = Comment.new(target: @target)
+    return unless request.method == "POST"
+
+    @comment.attributes = whitelisted_comment_params if params[:comment]
+    if !@comment.save
+      flash_object_errors(@comment)
     else
-      @comment = Comment.new
-      @comment.attributes = whitelisted_comment_params if params[:comment]
-      @comment.target = @target
-      if !@comment.save
-        flash_object_errors(@comment)
-      else
-        @comment.log_create
-        flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
-      end
+      @comment.log_create
+      flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
+      redirect_with_query(controller: @target.show_controller,
+                          action: @target.show_action, id: @target.id)
     end
   end
 
@@ -255,10 +250,10 @@ class CommentController < ApplicationController
       flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
       done = true
     end
-    if done
-      redirect_with_query(controller: @target.show_controller,
-                          action: @target.show_action, id: @target.id)
-    end
+    return unless done
+
+    redirect_with_query(controller: @target.show_controller,
+                        action: @target.show_action, id: @target.id)
   end
 
   # Callback to destroy a comment.
@@ -323,6 +318,6 @@ class CommentController < ApplicationController
 
     redirect_with_query(controller: target.show_controller,
                         action: target.show_action, id: target.id)
-    return false
+    false
   end
 end
