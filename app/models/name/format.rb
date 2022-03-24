@@ -96,12 +96,15 @@ class Name < AbstractModel
   # Make sure display names are in boldface for accepted names, and not in
   # boldface for deprecated names.
   def self.make_sure_names_are_bolded_correctly
-    (Name.where(deprecated: true, Name[:display_name].matches("%*%")).to_a + 
-      Name.where(deprecated: false, Name[:display_name].does_not_match("%*%")).to_a).each do |name|
-        name.change_deprecated(name.deprecated)
-        name.save
-        "The name #{name.search_name.inspect} " \
-        "should #{name.deprecated && "not "} have been in boldface."
+    needs_fixing = Name.where(deprecated: true).
+                   where(Name[:display_name].matches("%*%")).
+                   or(Name.where(deprecated: false).
+                      where(Name[:display_name].does_not_match("%*%")))
+    needs_fixing.to_a.each do |name|
+      name.change_deprecated(name.deprecated)
+      name.save
+      "The name #{name.search_name.inspect} " \
+      "should #{name.deprecated && "not "} have been in boldface."
     end
   end
 
