@@ -293,8 +293,7 @@ class Naming < AbstractModel
 
   # Is this Naming the given User's favorite Naming for this Observation?
   def users_favorite?(user)
-    votes.find_each { |v| return true if (v.user_id == user.id) && v.favorite }
-    false
+    votes.any? { |v| v.user_id == user.id && v.favorite }
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
@@ -375,10 +374,7 @@ class Naming < AbstractModel
     val = tot_sum.to_f / (tot_wgt + 1.0)
 
     # Update vote_cache if it's wrong.
-    if vote_cache != val
-      self.vote_cache = val
-      save
-    end
+    update!(vote_cache: val) if (vote_cache - val).abs > 1e-4
 
     table
   end

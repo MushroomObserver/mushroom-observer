@@ -1379,12 +1379,30 @@ table.table-namings {
     }
     th, td {
         padding: 5px;
+        word-wrap: break-word;
+        -webkit-hyphens: auto; /* iOS 4.2+ */
+        -moz-hyphens: auto; /* Firefox 5+ */
+        -ms-hyphens: auto; /* IE 10+ */
+        hyphens: auto;
     }
     th:first-child {
         padding-left: 0;
     }
     td:first-child {
         padding-left: 1em;
+        max-width: 175px;
+    }
+    td:nth-child(2) {
+        max-width: 100px;
+    }
+    td:nth-child(3) {
+        max-width: 75px;
+    }
+    td:nth-child(4) {
+        max-width: 125px;
+    }
+    td:nth-child(5) {
+        max-width: 65px;
     }
     td:last-child {
         padding-right: 1em;
