@@ -180,8 +180,7 @@ class Name < AbstractModel
 
     # Return corrected name if that name exists, else keep original name.
     # if Name.where("search_name = ? OR text_name = ?", str2, str2).present?
-    if Name.where(Name[:search_name].eq(str2).
-                  or(Name[:text_name].eq(str2))).present?
+    if Name.where(search_name: str2).or(Name.where(text_name: str2)).present?
       str2
     else
       str

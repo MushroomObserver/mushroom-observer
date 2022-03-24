@@ -535,18 +535,18 @@ class Name < AbstractModel
     # subtaxa = Name.where("deprecated IS FALSE AND " \
     #                      "text_name LIKE ?",
     #                      "#{text_name} %").to_a
-    subtaxa = Name.where(Name[:deprecated].eq(Arel.sql("FALSE")).
-                         and(Name[:text_name].matches("#{text_name} %"))).to_a
+    subtaxa = Name.where(deprecated: false).
+              where(Name[:text_name].matches("#{text_name} %")).to_a
     # synonyms = Name.where("deprecated IS TRUE AND " \
     #                       "synonym_id IN (?) AND " \
     #                       "classification != ?",
     #                       subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
     #                       classification)
-    synonyms = Name.where(Name[:deprecated].eq(Arel.sql("TRUE")).
-                          and(Name[:synonym_id].in(
-                                subtaxa.map(&:synonym_id).reject(&:nil?).uniq
-                              )).
-                          and(Name[:classification].not_eq(classification)))
+    uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
+    # Beware of AR where.not gotcha - will not match a null classification below
+    synonyms = Name.where(deprecated: true).
+               where(synonym_id: uniq_subtaxa).
+               where(Name[:classification].not_eq(classification))
     (subtaxa + synonyms).map(&:id).uniq
   end
 
