@@ -107,6 +107,7 @@ module Api2InlineHelper
                notes: image.notes.to_s.tpl_nodiv,
                quality: image.vote_cache,
                owner: json_user(image.user),
+               copyright_holder: image.copyright_holder,
                original_url: image.original_url)
   end
 
@@ -116,6 +117,7 @@ module Api2InlineHelper
     xml_html_string(xml, :notes, image.notes.to_s.tpl_nodiv)
     xml_confidence_level(xml, :quality, image.vote_cache)
     xml_detailed_object(xml, :owner, image.user)
+    xml_string(xml, :copyright_holder, image.copyright_holder)
     xml_url(xml, :original_url, image.original_url)
   end
 
