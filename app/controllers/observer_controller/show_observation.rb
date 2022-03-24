@@ -30,7 +30,7 @@ class ObserverController
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
     @new_sites     = external_sites_user_can_add_links_to(@observation)
-    @votes         = gather_users_votes(@observation, @user) if @user
+    @votes         = @user ? gather_users_votes(@observation, @user) : []
   end
 
   def load_observation_for_show_observation_page
