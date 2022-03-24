@@ -893,6 +893,20 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(rolf, name.user)
   end
 
+  def test_create_name_blank
+    login("rolf")
+    params = {
+      name: {
+        text_name: "",
+        author: "",
+        rank: :Species,
+        citation: ""
+      }
+    }
+    # Just make sure it doesn't crash!
+    post(:create_name, params: params)
+  end
+
   def test_create_name_existing
     name = names(:conocybe_filaris)
     text_name = name.text_name
