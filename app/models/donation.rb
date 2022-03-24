@@ -2,26 +2,25 @@
 
 # Donations to Mushroom Observer, Inc.
 class Donation < ApplicationRecord
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+
   belongs_to :user
 
-  def self.donor_list
-    select_manager = arel_select_donor_list
-    # puts(select_manager.to_sql)
-    Donation.connection.select_all(select_manager.to_sql).to_a
-  end
-
-  # rubocop:disable Metrics/AbcSize
   # "SELECT who, SUM(amount) total, MAX(created_at) most_recent
   # FROM donations WHERE anonymous = 0 and reviewed = 1
   # GROUP BY who, email ORDER BY total DESC, most_recent DESC"
-  private_class_method def self.arel_select_donor_list
+  def self.donor_list
     d = Donation.arel_table
-    d.where(d[:anonymous].eq(0).and(d[:reviewed].eq(1))).
-      project(d[:who], d[:amount].sum, d[:created_at].maximum).
-      group(d[:who], d[:email]).
-      order(d[:amount].sum.desc, d[:created_at].maximum.desc)
+    values = Donation.where(anonymous: 0, reviewed: 1).group(:who, :email).
+             order(d[:amount].sum.desc, d[:created_at].maximum.desc).
+             pluck(:who, d[:amount].sum, d[:created_at].maximum)
+
+    values.map do |who, total, most_recent|
+      { "who" => who, "total" => total, "most_recent" => most_recent }
+    end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def other_amount
     ""

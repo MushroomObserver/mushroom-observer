@@ -61,44 +61,12 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    id_select_manager = arel_select_top_contributors_ids(num)
-    # puts(id_select_manager.to_sql)
-    user_ids = self.class.connection.select_values(id_select_manager.to_sql)
-    # puts(user_ids.inspect)
-    if user_ids.any?
-      user_select_manager = arel_select_top_contributors_in_order(user_ids)
-      user_ids = self.class.connection.select_rows(user_select_manager.to_sql)
-      # puts(user_ids.inspect)
-    end
-    user_ids
+    ts = Arel::Table.new(:translation_strings)
+    u = Arel::Table.new(:users)
+    TranslationString.where(language: self).where.not(user_id: 0).
+      group(:user_id).order(ts[:id].count).limit(num).
+      joins(:user).pluck(u[:id], u[:login])
   end
-
-  private
-
-  # SELECT user_id
-  # FROM translation_strings
-  # WHERE language_id = #{id} AND user_id != 0
-  # GROUP BY user_id
-  # ORDER BY COUNT(id) DESC
-  # LIMIT #{num}
-  def arel_select_top_contributors_ids(num)
-    t = TranslationString.arel_table
-    t.project(t[:user_id]).
-      where(t[:language_id].eq(id).and(t[:user_id].not_eq(0))).
-      group(t[:user_id]).order(t[:id].count.desc).take(num)
-  end
-
-  # SELECT id, login
-  # FROM users
-  # WHERE id IN (#{user_ids.join(",")})
-  # ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
-  # Note: ORDER BY unnecessary? `project` by id seems to maintain the order.
-  def arel_select_top_contributors_in_order(user_ids)
-    u = User.arel_table
-    u.project([u[:id], u[:login]]).where(u[:id].in(user_ids))
-  end
-
-  public
 
   # Count the number of lines the user has translated.  Include edits, as well.
   # It counts paragraphs, actually, and weights them according to length.
@@ -137,8 +105,35 @@ class Language < AbstractModel
     lines
   end
 
+  # def calculate_users_contribution(user)
+  #   v = Arel::Table.new(:translation_strings_versions)
+  #   hash = {}
+  #   strings = TranslationString.joins(:versions).
+  #             where(language_id: id,
+  #                   translation_strings_versions: { user_id: user.id }).
+  #             group(:id).pluck(:id, v[:text])
+  #   strings.each do |id, text|
+  #     text.split("\n").each do |str|
+  #       (hash[id] ||= {}) && (hash[id][str] = true) if str.present?
+  #     end
+  #     puts(hash)
+  #   end
+  #   score_lines(hash)
+  # end
+
+  # def score_lines(hash)
+  #   score = 0
+  #   hash.each_value do |hash2|
+  #     hash2.each_key do |key|
+  #       score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
+  #     end
+  #   end
+  #   score
+  # end
+
   private
 
+  # rubocop:disable Metrics/AbcSize
   # SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
   # FROM translation_strings t, translation_strings_versions v
   # WHERE t.language_id = #{id}
@@ -153,8 +148,6 @@ class Language < AbstractModel
                             and(v[:user_id].eq(user.id))).join_sources).
       group(t[:id]).select(self.class.arel_function_group_concat_strings(v))
   end
-
-  public
 
   # JASON QUESTION - Is there a way to rewrite these without the group_concat?
   # I was thinking maybe just select the :text, and append the newlines in Ruby
@@ -188,28 +181,22 @@ class Language < AbstractModel
   @@last_update = 1.minute.ago
 
   # Update I18n backend with any recent changes in translations.
-  def self.update_recent_translations
-    select_manager = arel_select_recent_translations
-    strings = Language.connection.select_rows(select_manager.to_sql)
-
-    for locale, tag, text in strings
-      TranslationString.translations(locale.to_sym)[tag.to_sym] = text
-    end
-  end
-
   # SELECT locale, tag, text
   # FROM translation_strings t, languages l
   # WHERE t.language_id = l.id
   #   AND t.updated_at >= #{Language.connection.quote(cutoff)}
-  private_class_method def self.arel_select_recent_translations
+  def self.update_recent_translations
     cutoff = @@last_update
     @@last_update = Time.zone.now
     update_cutoff = Language.connection.quote(cutoff)
     lang = Language.arel_table
     ts = TranslationString.arel_table
 
-    ts.project([lang[:locale], ts[:tag], ts[:text]]).
-      join(lang).on(ts[:language_id].eq(lang[:id]).
-                    and(ts[:updated_at].gteq(update_cutoff)))
+    strings = TranslationString.joins(:language).
+              where(ts[:updated_at].gteq(update_cutoff)).
+              pluck(lang[:locale], :tag, :text)
+    for locale, tag, text in strings
+      TranslationString.translations(locale.to_sym)[tag.to_sym] = text
+    end
   end
 end

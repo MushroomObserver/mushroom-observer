@@ -113,9 +113,6 @@ class LanguageTest < UnitTestCase
   def test_user_contribution
     # These are smaller than they should be because the test fixtures doesn't
     # include versions corresponding to the current translation strings.
-    assert_equal(0, Language.calculate_users_contribution(rolf))
-    assert_equal(1, Language.calculate_users_contribution(mary))
-    assert_equal(1, Language.calculate_users_contribution(dick))
     assert_equal(0, languages(:english).calculate_users_contribution(mary))
     assert_equal(1, languages(:greek).calculate_users_contribution(mary))
     assert_equal(0, languages(:english).calculate_users_contribution(dick))

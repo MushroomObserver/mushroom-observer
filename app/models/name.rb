@@ -399,22 +399,15 @@ class Name < AbstractModel
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
-    count_versions = Name.arel_select_count_name_versions(ver)
     if (ver.version != 1) &&
-       Name.connection.select_value(count_versions.to_sql).to_s == "0"
+       Name::Version.where(name_id: ver.name_id,
+                           user_id: ver.user_id).none?
       #  Name.connection.select_value(%(
       #    SELECT COUNT(*) FROM names_versions
       #    WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
       #  )).to_s == "0"
       SiteData.update_contribution(:add, :names_versions)
     end
-  end
-
-  def self.arel_select_count_name_versions(ver)
-    n_v = Arel::Table.new(:names_versions)
-    n_v.project(Arel.star.count).
-      where(n_v[:name_id].eq(ver.name_id).
-      and(n_v[:user_id].eq(ver.user_id)))
   end
 
   scope :with_rank,
@@ -429,26 +422,12 @@ class Name < AbstractModel
   end
 
   # Used by show_name.
-  def self.count_observations(names)
-    ids = names.map(&:id)
-    select_manager = arel_select_count_observations
-
-    counts_and_ids = Name.connection.select_rows(select_manager.to_sql)
-    result = {}
-    counts_and_ids.each { |row| result[row[1]] = row[0] }
-    result
-  end
-
   # SELECT count(*) c, names.id i FROM observations, names
   # WHERE observations.name_id = names.id
   # AND names.id IN (#{ids.join(", ")}) group by names.id
-  private_class_method def self.arel_select_count_observations
-    obs = Observation.arel_table
-    names = Name.arel_table
-
-    obs.project([Arel.star.count, names[:id]]).join(names).
-      where(obs[:name_id].eq(names[:id]).
-      and(names[:id].in(ids))).group(names[:id])
+  def self.count_observations(names)
+    Hash[*Observation.group(:name_id).where(name: names).
+         pluck(:name_id, Arel.star.count).to_a.flatten]
   end
 
   ##############################################################################

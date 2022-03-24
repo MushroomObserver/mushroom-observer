@@ -96,32 +96,13 @@ class Name < AbstractModel
   # Make sure display names are in boldface for accepted names, and not in
   # boldface for deprecated names.
   def self.make_sure_names_are_bolded_correctly
-    select_manager = arel_select_accepted_and_deprecated
-    # puts(select_manager.to_sql)
-    Name.connection.select_values(select_manager.to_sql).map do |id|
-      name = Name.find(id)
-      name.change_deprecated(name.deprecated)
-      name.save
-      "The name #{name.search_name.inspect} " \
-      "should #{name.deprecated && "not "} have been in boldface."
+    (Name.where(deprecated: true, Name[:display_name].matches("%*%")).to_a + 
+      Name.where(deprecated: false, Name[:display_name].does_not_match("%*%")).to_a).each do |name|
+        name.change_deprecated(name.deprecated)
+        name.save
+        "The name #{name.search_name.inspect} " \
+        "should #{name.deprecated && "not "} have been in boldface."
     end
-  end
-
-  # SELECT id FROM names
-  # WHERE IF(deprecated, display_name LIKE "%*%", display_name NOT LIKE "%*%")
-  private_class_method def self.arel_select_accepted_and_deprecated
-    names = Name.arel_table
-    names.where(arel_if_bolded_or_not).project(names[:id])
-  end
-
-  private_class_method def self.arel_if_bolded_or_not
-    names = Name.arel_table
-    Arel::Nodes::NamedFunction.new(
-      "IF",
-      [names[:deprecated].eq(true),
-       names[:display_name].matches("%*%"),
-       names[:display_name].does_not_match("%*%")]
-    )
   end
 
   ##### Names treated specially ################################################

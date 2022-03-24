@@ -21,10 +21,6 @@
 #  mailing_address::  Postal address for sending specimens to (optional).
 #  description::      Random notes (optional).
 #
-#  == Class methods
-#
-#  Herbarium.primer::       List of names to prime autocompleter.
-#
 #  == Instance methods
 #
 #  herbarium_records::      HerbariumRecord(s) belonging to this Herbarium.
@@ -160,40 +156,6 @@ class Herbarium < AbstractModel
     dest.curators          += src.curators - dest.curators
     dest.herbarium_records += src.herbarium_records - dest.herbarium_records
   end
-
-  # Look at the most recent HerbariumRecord's the current User has created.
-  # Return a list of the last 100 herbarium names used in those
-  # HerbariumRecords that this user is a curator for.  This list is used to
-  # prime Herbarium auto-completers.
-  def self.primer
-    result = ""
-    if User.current
-      select_manager = arel_select_herbarium_primer
-      # puts(select_manager.to_sql)
-      result = connection.select_values(select_manager).sort
-    end
-    result
-  end
-
-  # rubocop:disable Metrics/AbcSize
-  # SELECT DISTINCT h.name AS x
-  # FROM herbarium_records s, herbaria h, herbaria_curators c
-  # WHERE s.herbarium_id = h.id
-  # AND h.id = c.herbarium_id
-  # AND c.user_id = #{user_id}
-  # ORDER BY s.updated_at DESC
-  # LIMIT 100
-  private_class_method def self.arel_select_herbarium_primer
-    s = HerbariumRecord.arel_table
-    h = Herbarium.arel_table
-    c = Arel::Table.new(:herbaria_curators)
-    # user_id = 252 # for testing
-
-    h.join(s).on(s[:herbarium_id].eq(h[:id])).join(c).on(
-      h[:id].eq(c[:herbarium_id]).and(c[:user_id].eq(user_id))
-    ).project(h[:name]).distinct.order(s[:updated_at]).take(100)
-  end
-  # rubocop:enable Metrics/AbcSize
 
   def self.find_by_code_with_wildcards(str)
     find_using_wildcards("code", str)

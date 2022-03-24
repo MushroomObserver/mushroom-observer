@@ -580,18 +580,7 @@ class Description < AbstractModel
   end
 
   def user_made_a_change?(user)
-    select_manager = arel_select_user_made_a_change(user)
-    self.class.connection.select_value(select_manager.to_sql)
-  end
-
-  # SELECT id FROM #{versioned_table_name}
-  # WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
-  # LIMIT 1
-  def arel_select_user_made_a_change(user)
-    vtn = Arel::Table.new(versioned_table_name.to_sym)
-    vtn.where(vtn["#{type_tag}_id".to_sym].eq(id).
-              and(vtn[:user_id].eq(user.id))).
-      project(vtn[:id]).take(1)
+    versions.where(user_id: user.id).any?
   end
 
   # By default make first user to add any text an author.

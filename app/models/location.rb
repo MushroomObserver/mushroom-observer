@@ -130,10 +130,10 @@ class Location < AbstractModel
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
-    count_versions = Location.arel_select_count_location_versions(ver)
-
     if (ver.version != 1) &&
-       Location.connection.select_value(count_versions.to_sql).to_s == "0"
+       Location::Version.where(location_id: ver.location_id,
+                               user_id: ver.user_id).none?
+      #  Location.connection.select_value(count_versions.to_sql).to_s == "0"
       # if (ver.version != 1) &&
       #    Location.connection.select_value(%(
       #      SELECT COUNT(*) FROM locations_versions
@@ -143,12 +143,12 @@ class Location < AbstractModel
     end
   end
 
-  def self.arel_select_count_location_versions(ver)
-    l_v = Arel::Table.new(:locations_versions)
-    l_v.project(Arel.star.count).
-      where(l_v[:location_id].eq(ver.location_id).
-            and(l_v[:user_id].eq(ver.user_id)))
-  end
+  # def self.arel_select_count_location_versions(ver)
+  #   l_v = Arel::Table.new(:locations_versions)
+  #   l_v.project(Arel.star.count).
+  #     where(l_v[:location_id].eq(ver.location_id).
+  #           and(l_v[:user_id].eq(ver.user_id)))
+  # end
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
@@ -487,27 +487,21 @@ class Location < AbstractModel
     obs = Observation.arel_table
     spl = SpeciesList.arel_table
 
+    # Location.connection.select_values(%(
+    #   SELECT name FROM locations
+    # )) +
+    # Location.connection.select_values(%(
+    #   SELECT `where` FROM `observations`
+    #   WHERE `where` is not NULL
+    # )) +
+    # Location.connection.select_values(%(
+    #   SELECT `where` FROM `species_lists`
+    #   WHERE `where` is not NULL
+    # ))
     @@location_cache ||= (
-      Location.connection.select_values(
-        loc.project(loc[:name]).to_sql
-      ) +
-      Location.connection.select_values(
-        obs.project(obs[:where]).where(obs[:where].not_eq(nil)).to_sql
-      ) +
-      Location.connection.select_values(
-        spl.project(spl[:where]).where(spl[:where].not_eq(nil)).to_sql
-      )
-      # Location.connection.select_values(%(
-      #   SELECT name FROM locations
-      # )) +
-      # Location.connection.select_values(%(
-      #   SELECT `where` FROM `observations`
-      #   WHERE `where` is not NULL
-      # )) +
-      # Location.connection.select_values(%(
-      #   SELECT `where` FROM `species_lists`
-      #   WHERE `where` is not NULL
-      # ))
+      Location.pluck(:name) +
+        Observation.where.not(where: nil).pluck(:where) +
+        SpeciesList.where.not(where: nil).pluck(:where)
     ).uniq
     @@location_cache.member?(name)
   end

@@ -220,6 +220,10 @@ require("mimemagic")
 class Image < AbstractModel
   require "fileutils"
   require "net/http"
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
@@ -972,10 +976,8 @@ class Image < AbstractModel
     # This is orders of magnitude faster than doing via active-record.
     old_name = Image.connection.quote(old_name)
     new_name = Image.connection.quote(new_name)
-
-    select_manager = arel_select_copyright_holder(old_name, user)
-    # puts(select_manager.to_sql)
-    data = Image.connection.select_rows(select_manager.to_sql)
+    data = Image.where(user: user, copyright_holder: old_name).
+           pluck(:id, Image[:when].year, :license_id)
     return unless data.any?
 
     # brakeman generates what appears to be a false positive SQL injection
@@ -989,15 +991,7 @@ class Image < AbstractModel
     Image.connection.update(update_manager.to_sql)
   end
 
-  # SELECT id, YEAR(`when`), license_id FROM images
-  # WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-  private_class_method def self.arel_select_copyright_holder(old_name, user)
-    i = Image.arel_table
-    i.project([i[:id], i[:when].year, i[:license_id]]).
-      where(i[:user_id].eq(user.id).
-            and(i[:copyright_holder].eq(old_name)))
-  end
-
+  # rubocop:disable Metrics/AbcSize
   # INSERT INTO copyright_changes
   #   (user_id, updated_at, target_type, target_id, year, name, license_id)
   # VALUES
@@ -1048,6 +1042,7 @@ class Image < AbstractModel
       where(i[:user_id].eq(user.id).
           and(i[:copyright_holder].eq(old_name)))
   end
+  # rubocop:enable Metrics/AbcSize
 
   def year
     self.when.year
