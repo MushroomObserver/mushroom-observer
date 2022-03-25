@@ -4246,14 +4246,12 @@ class ObserverControllerTest < FunctionalTestCase
     vote1 = naming1.votes.find_by(user: rolf)
     vote2 = naming2.votes.find_by(user: rolf)
     login("rolf")
-    get(:show_observation, id: obs.id)
+    get(:show_observation, params: { id: obs.id })
     assert_response(:success)
     assert_template(:show_observation)
-    puts vote1.value.inspect
-    puts vote2.value.inspect
-    assert_select("select#vote_#{naming1.id}_value>" +
+    assert_select("select#vote_#{naming1.id}_value>" \
                   "option[selected=selected][value='#{vote1.value}']")
-    assert_select("select#vote_#{naming2.id}_value>" +
+    assert_select("select#vote_#{naming2.id}_value>" \
                   "option[selected=selected][value='#{vote2.value}']")
   end
 end

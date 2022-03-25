@@ -28,7 +28,7 @@ class Api2ControllerTest < FunctionalTestCase
 
   def post_and_send(action, type, params)
     @request.env["CONTENT_TYPE"] = type
-    post(action, params)
+    post(action, params: params)
   end
 
   def file_checksum(filename)
@@ -46,7 +46,7 @@ class Api2ControllerTest < FunctionalTestCase
   def test_robot_permissions
     @request.user_agent = "Googlebot"
     obs = Observation.first
-    get(:observations, id: obs.id)
+    get(:observations, params: { id: obs.id })
     assert_equal(200, @response.status)
   end
 
@@ -109,7 +109,7 @@ class Api2ControllerTest < FunctionalTestCase
   def do_basic_get_request_for_model(model)
     [:none, :low, :high].each do |detail|
       [:xml, :json].each do |format|
-        get(model.table_name.to_sym, detail: detail, format: format)
+        get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)
       end
@@ -117,16 +117,15 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def test_num_of_pages
-    get(:observations, detail: :high, format: :json)
+    get(:observations, params: { detail: :high, format: :json })
     json = JSON.parse(response.body)
     assert_equal((Observation.count / 100.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
 
   def test_post_minimal_observation
-    post(:observations,
-         api_key: api_keys(:rolfs_api_key).key,
-         location: "Unknown")
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Unknown" }
+    post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -149,8 +148,7 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_observation
-    post(
-      :observations,
+    params = {
       api_key: api_keys(:rolfs_api_key).key,
       date: "2012-06-26",
       location: "Burbank, California, USA",
@@ -166,7 +164,8 @@ class Api2ControllerTest < FunctionalTestCase
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
       species_lists: "Another Species List"
-    )
+    }
+    post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -221,8 +220,11 @@ class Api2ControllerTest < FunctionalTestCase
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
     File.stub(:rename, false) do
-      post(:images, api_key: api_keys(:rolfs_api_key).key,
-                    upload: Rack::Test::UploadedFile.new(file, "image/jpeg"))
+      params = {
+        api_key: api_keys(:rolfs_api_key).key,
+        upload: Rack::Test::UploadedFile.new(file, "image/jpeg")
+      }
+      post(:images, params: params)
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
@@ -262,14 +264,16 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_post_user
     rolfs_key = api_keys(:rolfs_api_key)
-    post(:users,
-         api_key: rolfs_key.key,
-         login: "miles",
-         email: "miles@davis.com",
-         password: "sivadselim",
-         create_key: "New API2 Key",
-         detail: :high,
-         format: :xml)
+    params = {
+      api_key: rolfs_key.key,
+      login: "miles",
+      email: "miles@davis.com",
+      password: "sivadselim",
+      create_key: "New API2 Key",
+      detail: :high,
+      format: :xml
+    }
+    post(:users, params: params)
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
@@ -301,9 +305,11 @@ class Api2ControllerTest < FunctionalTestCase
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
-    post(:api_keys,
-         api_key: rolfs_key.key,
-         app: "Mushroom Mapper")
+    params = {
+      api_key: rolfs_key.key,
+      app: "Mushroom Mapper"
+    }
+    post(:api_keys, params: params)
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -311,10 +317,12 @@ class Api2ControllerTest < FunctionalTestCase
     assert_not_nil(api_key.verified)
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
-    post(:api_keys,
-         api_key: rolfs_key.key,
-         app: "Mushroom Mapper",
-         for_user: mary.id)
+    params = {
+      api_key: rolfs_key.key,
+      app: "Mushroom Mapper",
+      for_user: mary.id
+    }
+    post(:api_keys, params: params)
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -328,8 +336,7 @@ class Api2ControllerTest < FunctionalTestCase
   # Prove user can add Sequence to someone else's Observation
   def test_post_sequence
     obs = observations(:coprinus_comatus_obs)
-    post(
-      :sequences,
+    params = {
       observation: obs.id,
       api_key: api_keys(:marys_api_key).key,
       locus: "ITS",
@@ -337,7 +344,8 @@ class Api2ControllerTest < FunctionalTestCase
       archive: "GenBank",
       accession: "KT1234",
       notes: "sequence notes"
-    )
+    }
+    post(:sequences, params: params)
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
@@ -352,23 +360,24 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_get_observation_with_gps_hidden
     obs = observations(:unknown_with_lat_long)
-    get(:observations, id: obs.id, detail: :high, format: :json)
+    get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_match(/34.1622|118.3521/, @response.body)
-    get(:observations, id: obs.id, detail: :high, format: :xml)
+    get(:observations, params: { id: obs.id, detail: :high, format: :xml })
     assert_match(/34.1622|118.3521/, @response.body)
 
     obs.update(gps_hidden: true)
-    get(:observations, id: obs.id, detail: :high, format: :json)
+    get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_no_match(/34.1622|118.3521/, @response.body)
-    get(:observations, id: obs.id, detail: :high, format: :xml)
+    get(:observations, params: { id: obs.id, detail: :high, format: :xml })
     assert_no_match(/34.1622|118.3521/, @response.body)
   end
 
   def test_get_empty_results
-    get(:observations, date: "2100-01-01", format: :json, detail: :none)
-    get(:observations, date: "2100-01-01", format: :json, detail: :high)
-    get(:observations, date: "2100-01-01", format: :xml, detail: :none)
-    get(:observations, date: "2100-01-01", format: :xml, detail: :high)
+    params = { date: "2100-01-01" }
+    get(:observations, params: params.merge(format: :json, detail: :none))
+    get(:observations, params: params.merge(format: :json, detail: :high))
+    get(:observations, params: params.merge(format: :xml, detail: :none))
+    get(:observations, params: params.merge(format: :xml, detail: :high))
   end
 
   def test_routing
@@ -387,36 +396,41 @@ class Api2ControllerTest < FunctionalTestCase
     marys_vote = obs.votes.find_by(user: mary)
     assert_users_equal(rolf, obs.user)
 
-    params = {
-      detail: :high,
-      id:     obs.id
-    }
+    params = { detail: :high, id: obs.id }
 
     params[:format] = :json
-    get(:observations, params.merge(api_key: rolfs_key.key))
+    get(:observations, params: params.merge(api_key: rolfs_key.key))
     json = JSON.parse(response.body)
     votes = json["results"][0]["votes"]
-    assert_equal("rolf",
-      votes.select {|v| v["id"] == rolfs_vote.id}[0]["owner"]["login_name"])
-    assert_equal("mary",
-      votes.select {|v| v["id"] == marys_vote.id}[0]["owner"]["login_name"])
+    assert_equal(
+      "rolf",
+      votes.select { |v| v["id"] == rolfs_vote.id }[0]["owner"]["login_name"]
+    )
+    assert_equal(
+      "mary",
+      votes.select { |v| v["id"] == marys_vote.id }[0]["owner"]["login_name"]
+    )
 
-    get(:observations, params.merge(api_key: marys_key.key))
+    get(:observations, params: params.merge(api_key: marys_key.key))
     json = JSON.parse(response.body)
     votes = json["results"][0]["votes"]
-    assert_equal(:anonymous.l,
-      votes.select {|v| v["id"] == rolfs_vote.id}[0]["owner"])
-    assert_equal("mary",
-      votes.select {|v| v["id"] == marys_vote.id}[0]["owner"]["login_name"])
+    assert_equal(
+      :anonymous.l,
+      votes.select { |v| v["id"] == rolfs_vote.id }[0]["owner"]
+    )
+    assert_equal(
+      "mary",
+      votes.select { |v| v["id"] == marys_vote.id }[0]["owner"]["login_name"]
+    )
 
     params[:format] = :xml
-    get(:observations, params.merge(api_key: rolfs_key.key))
+    get(:observations, params: params.merge(api_key: rolfs_key.key))
     doc = REXML::Document.new(response.body)
     votes = doc.root.elements["results/result/votes"]
     check_anonymity(votes, rolfs_vote, false)
     check_anonymity(votes, marys_vote, false)
 
-    get(:observations, params.merge(api_key: marys_key.key))
+    get(:observations, params: params.merge(api_key: marys_key.key))
     doc = REXML::Document.new(response.body)
     votes = doc.root.elements["results/result/votes"]
     check_anonymity(votes, rolfs_vote, true)
