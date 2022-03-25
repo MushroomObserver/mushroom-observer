@@ -250,22 +250,23 @@ class Observation < AbstractModel
   # Used by Name and Location to update the observation cache when a cached
   # field value is changed.
   def self.update_cache(type, field, id, val)
-    update_manager = arel_update_cache(type, field, id, val)
+    # update_manager = arel_update_cache(type, field, id, val)
     # puts(update_manager.to_sql)
-    Observation.connection.update(update_manager.to_sql)
+    # Observation.connection.update(update_manager.to_sql)
+    Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
 
   # UPDATE observations
   # SET `#{field}` = #{Observation.connection.quote(val)}
   # WHERE #{type}_id = #{id}
-  private_class_method def self.arel_update_cache(type, field, id, val)
-    obs = Observation.arel_table
+  # private_class_method def self.arel_update_cache(type, field, id, val)
+  #   obs = Observation.arel_table
 
-    Arel::UpdateManager.new.
-      table(obs).
-      set([[obs[field.to_sym], val]]).
-      where(obs["#{type}_id".to_sym].eq(id))
-  end
+  #   Arel::UpdateManager.new.
+  #     table(obs).
+  #     set([[obs[field.to_sym], val]]).
+  #     where(obs["#{type}_id".to_sym].eq(id))
+  # end
 
   # Check for any observations whose consensus is a misspelled name.  This can
   # mess up the mirrors because misspelled names are "invisible", so their
