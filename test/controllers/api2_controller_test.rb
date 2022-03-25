@@ -389,10 +389,10 @@ class Api2ControllerTest < FunctionalTestCase
 
     params = {
       detail: :high,
-      format: :json,
       id:     obs.id
     }
 
+    params[:format] = :json
     get(:observations, params.merge(api_key: rolfs_key.key))
     json = JSON.parse(response.body)
     votes = json["results"][0]["votes"]
@@ -408,5 +408,28 @@ class Api2ControllerTest < FunctionalTestCase
       votes.select {|v| v["id"] == rolfs_vote.id}[0]["owner"])
     assert_equal("mary",
       votes.select {|v| v["id"] == marys_vote.id}[0]["owner"]["login_name"])
+
+    params[:format] = :xml
+    get(:observations, params.merge(api_key: rolfs_key.key))
+    doc = REXML::Document.new(response.body)
+    votes = doc.root.elements["results/result/votes"]
+    check_anonymity(votes, rolfs_vote, false)
+    check_anonymity(votes, marys_vote, false)
+
+    get(:observations, params.merge(api_key: marys_key.key))
+    doc = REXML::Document.new(response.body)
+    votes = doc.root.elements["results/result/votes"]
+    check_anonymity(votes, rolfs_vote, true)
+    check_anonymity(votes, marys_vote, false)
+  end
+
+  def check_anonymity(elements, vote, anonymous)
+    elements.each do |elem|
+      next unless elem.is_a?(REXML::Element)
+      next unless elem.attributes["id"] == vote.id.to_s
+
+      assert_equal(anonymous ? "string" : "user",
+                   elem.elements["owner"].attributes["type"])
+    end
   end
 end
