@@ -32,7 +32,7 @@
         <td>&nbsp;</td>
         <td align="center"><%= num %></td>
         <td align="left"><small><%=
-          votes = table[str][:votes].select(&:anonymous?) \
+          votes = table[str][:votes].reject(&:anonymous?) \
                                     .sort_by {|v| v.id.to_s.reverse}
                                     # pseudorandom but deterministic order
           if votes.length > 0

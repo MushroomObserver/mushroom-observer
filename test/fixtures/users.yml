@@ -16,6 +16,7 @@ DEFAULTS: &DEFAULTS
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   verified:       <%= Time.now.strftime("%F %T")%>
   user_groups:    all_users, $LABEL_only
+  votes_anonymous: <%= User.votes_anonymous[:no] %>
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures

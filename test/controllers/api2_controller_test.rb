@@ -377,4 +377,36 @@ class Api2ControllerTest < FunctionalTestCase
     assert_routing({ path: "/api2/comments", method: :patch },
                    { controller: "api2", action: "comments" })
   end
+
+  def test_vote_anonymity
+    obs = observations(:coprinus_comatus_obs)
+    rolf.update!(votes_anonymous: :yes)
+    rolfs_key = api_keys(:rolfs_api_key)
+    marys_key = api_keys(:marys_api_key)
+    rolfs_vote = obs.votes.find_by(user: rolf)
+    marys_vote = obs.votes.find_by(user: mary)
+    assert_users_equal(rolf, obs.user)
+
+    params = {
+      detail: :high,
+      format: :json,
+      id:     obs.id
+    }
+
+    get(:observations, params.merge(api_key: rolfs_key.key))
+    json = JSON.parse(response.body)
+    votes = json["results"][0]["votes"]
+    assert_equal("rolf",
+      votes.select {|v| v["id"] == rolfs_vote.id}[0]["owner"]["login_name"])
+    assert_equal("mary",
+      votes.select {|v| v["id"] == marys_vote.id}[0]["owner"]["login_name"])
+
+    get(:observations, params.merge(api_key: marys_key.key))
+    json = JSON.parse(response.body)
+    votes = json["results"][0]["votes"]
+    assert_equal(:anonymous.l,
+      votes.select {|v| v["id"] == rolfs_vote.id}[0]["owner"])
+    assert_equal("mary",
+      votes.select {|v| v["id"] == marys_vote.id}[0]["owner"]["login_name"])
+  end
 end
