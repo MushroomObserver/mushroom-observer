@@ -11,9 +11,9 @@
     percent = naming.vote_percent.round.to_s.html_safe + "%"
     any_votes = naming.votes && naming.votes.length > 0
     can_vote = check_permission(naming)
-    vote = @votes[naming.id]
+    @vote = @votes[naming.id]
     menu = Vote.confidence_menu
-    if !can_vote || !vote || vote.value == 0
+    if !can_vote || !@vote || @vote.value == 0
       menu = [Vote.no_opinion] + menu
     end
     row = {
