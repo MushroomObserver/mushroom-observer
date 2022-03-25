@@ -154,7 +154,7 @@ class Project < AbstractModel
       # Leave images which are attached to other observations
       # still attached to this project.
       select_ids = arel_select_leave_these_img_ids(obs, imgs)
-      # puts(select_manager.to_sql)
+      # puts(select_ids.to_sql)
       leave_these_img_ids = Image.connection.select_values(
         select_ids.to_sql
       ).map(&:to_i)
@@ -177,13 +177,13 @@ class Project < AbstractModel
     op = Arel::Table.new(:observations_projects)
     img_ids = imgs.map(&:id)
 
-    io.project(io[:image_id]).join(op).on(
+    io.join(op).on(
       io[:image_id].in(img_ids).and(
         io[:observation_id].not_eq(obs.id).and(
           io[:observation_id].eq(op[:observation_id])
         ).and(op[:project_id].eq(id))
       )
-    )
+    ).project(io[:image_id])
   end
 
   # Add species_list to this project if not already done so.  Saves it.
