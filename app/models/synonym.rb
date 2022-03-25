@@ -42,15 +42,19 @@ class Synonym < AbstractModel
   # the site working...
   def self.make_sure_all_referenced_synonyms_exist
     msgs = []
-    reference_select = arel_select_referenced_synonyms
-    # puts(reference_select.to_sql)
-    references = Name.connection.select_values(reference_select.to_sql)
+    # reference_select = arel_select_referenced_synonyms
+    # # puts(reference_select.to_sql)
+    # references = Name.connection.select_values(reference_select.to_sql)
+    names = Name.arel_table
+    references = Name.where(names[:synonym_id].not_eq(nil)).distinct.
+                 order(synonym_id: :asc).pluck(:synonym_id)
     # puts(references.join(",").to_s)
 
     # SELECT id FROM synonyms ORDER BY id ASC
-    record_select = Synonym.select(:id).order(Synonym[:id].asc)
+    # record_select = Synonym.select(:id).order(Synonym[:id].asc)
     # puts(record_select.to_sql)
-    records = Name.connection.select_values(record_select.to_sql)
+    # records = Name.connection.select_values(record_select.to_sql)
+    records = Synonym.all.order(id: :asc).pluck(:id)
     # puts(records.join(",").to_s)
     unused  = records - references
     missing = references - records
@@ -76,13 +80,13 @@ class Synonym < AbstractModel
   # SELECT DISTINCT synonym_id FROM names
   # WHERE synonym_id IS NOT NULL
   # ORDER BY synonym_id ASC
-  private_class_method def self.arel_select_referenced_synonyms
-    names = Name.arel_table
+  # private_class_method def self.arel_select_referenced_synonyms
+  #   names = Name.arel_table
 
-    Name.select(:synonym_id).distinct.
-      where(names[:synonym_id].not_eq(nil)).
-      order(names[:synonym_id].asc)
-  end
+  #   Name.select(:synonym_id).distinct.
+  #     where(names[:synonym_id].not_eq(nil)).
+  #     order(names[:synonym_id].asc)
+  # end
 
   # DELETE FROM synonyms
   # WHERE id IN (#{unused.map(&:to_s).join(",")})
