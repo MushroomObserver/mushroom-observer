@@ -4238,4 +4238,20 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(0.321, data[1].max)
     assert_objs_equal(obs, data[1].image_obs)
   end
+
+  def test_show_observation_votes
+    obs = observations(:coprinus_comatus_obs)
+    naming1 = obs.namings.first
+    naming2 = obs.namings.last
+    vote1 = naming1.votes.find_by(user: rolf)
+    vote2 = naming2.votes.find_by(user: rolf)
+    login("rolf")
+    get(:show_observation, params: { id: obs.id })
+    assert_response(:success)
+    assert_template(:show_observation)
+    assert_select("select#vote_#{naming1.id}_value>" \
+                  "option[selected=selected][value='#{vote1.value}']")
+    assert_select("select#vote_#{naming2.id}_value>" \
+                  "option[selected=selected][value='#{vote2.value}']")
+  end
 end

@@ -210,11 +210,11 @@ module Api2InlineHelper
   end
 
   def json_vote(vote)
-    anonymous = vote.user == User.current || !vote.anonymous?
+    show_vote = vote.user == User.current || !vote.anonymous?
     strip_hash(id: vote.id,
                confidence: vote.value,
                naming_id: vote.naming_id,
-               owner: anonymous ? json_user(vote.user) : :anonymous.l)
+               owner: show_vote ? json_user(vote.user) : :anonymous.l)
   end
 
   def xml_vote(xml, vote)
