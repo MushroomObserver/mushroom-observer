@@ -19,10 +19,6 @@ production:
       :test: :transferred_flag
       :read: https://mushroomobserver.org/images
       :write: ssh://mo@204.93.192.148:/data/images/mo
-    :cdmr:
-      :test: :transferred_flag
-      :read: https://mushroomobserver.org/images
-      :write: ssh://mo@50.31.154.67:/images/mo
   keep_these_image_sizes_local: []
 
 test:
