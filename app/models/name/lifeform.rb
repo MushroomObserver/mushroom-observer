@@ -47,17 +47,26 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    concat_str = Name.connection.quote_string("#{lifeform} ")
-    search_str = Name.connection.quote_string("% #{lifeform} %")
+    # concat_str = Name.connection.quote_string("#{lifeform} ")
+    # search_str = Name.connection.quote_string("% #{lifeform} %")
 
-    for type in %w[name observation] do
-      update_manager = arel_update_add_lifeform(
-        type, concat_str, search_str
-      )
-      # puts(all_children.map(&:id).inspect)
-      # puts(update_manager.to_sql)
-      Name.connection.update(update_manager.to_sql)
-    end
+    # for type in %w[name observation] do
+    #   update_manager = arel_update_add_lifeform(
+    #     type, concat_str, search_str
+    #   )
+    #   # puts(all_children.map(&:id).inspect)
+    #   # puts(update_manager.to_sql)
+    #   Name.connection.update(update_manager.to_sql)
+    # end
+    name_ids = all_children.map(&:id)
+
+    Name.where(id: name_ids).
+      where(Name[:lifeform].does_not_match("% #{lifeform} %")).
+      update_all(lifeform: Name[:lifeform] + "#{lifeform} ")
+
+    Observation.where(name_id: name_ids).
+      where(Observation[:lifeform].does_not_match("% #{lifeform} %")).
+      update_all(lifeform: Observation[:lifeform] + "#{lifeform} ")
   end
 
   # Remove lifeform (one word only) from all children.
@@ -76,34 +85,34 @@ class Name < AbstractModel
 
   private
 
-  def arel_update_add_lifeform(type, concat_str, search_str)
-    table = type.camelize.constantize.arel_table
-    id_column = type == "name" ? :id : :name_id
-    concat_sql = arel_function_concat_lifeform(table, concat_str)
-    # puts(concat_sql)
+  # def arel_update_add_lifeform(type, concat_str, search_str)
+  #   table = type.camelize.constantize.arel_table
+  #   id_column = type == "name" ? :id : :name_id
+  #   concat_sql = arel_function_concat_lifeform(table, concat_str)
+  #   # puts(concat_sql)
 
-    # UPDATE names SET lifeform = CONCAT(lifeform, #{concat_str})
-    # WHERE id IN (#{all_children.map(&:id).join(",")})
-    #   AND lifeform NOT LIKE #{search_str}
+  #   # UPDATE names SET lifeform = CONCAT(lifeform, #{concat_str})
+  #   # WHERE id IN (#{all_children.map(&:id).join(",")})
+  #   #   AND lifeform NOT LIKE #{search_str}
 
-    # UPDATE observations SET lifeform = CONCAT(lifeform, #{concat_str})
-    # WHERE name_id IN (#{all_children.map(&:id).join(",")})
-    #   AND lifeform NOT LIKE #{search_str}
-    Arel::UpdateManager.new.
-      table(table).
-      where(table[id_column.to_sym].in(all_children.map(&:id)).
-            and(table[:lifeform].does_not_match(search_str))).
-      set([[table[:lifeform], concat_sql]])
-  end
+  #   # UPDATE observations SET lifeform = CONCAT(lifeform, #{concat_str})
+  #   # WHERE name_id IN (#{all_children.map(&:id).join(",")})
+  #   #   AND lifeform NOT LIKE #{search_str}
+  #   Arel::UpdateManager.new.
+  #     table(table).
+  #     where(table[id_column.to_sym].in(all_children.map(&:id)).
+  #           and(table[:lifeform].does_not_match(search_str))).
+  #     set([[table[:lifeform], concat_sql]])
+  # end
 
-  def arel_function_concat_lifeform(table, concat_str)
-    Arel::Nodes::SqlLiteral.new((table[:lifeform] + concat_str).to_sql)
-    # Arel::Nodes::SqlLiteral.new(
-    #   Arel::Nodes::NamedFunction.new(
-    #     "CONCAT", [table[:lifeform], Arel.sql(concat_str)]
-    #   ).to_sql
-    # )
-  end
+  # def arel_function_concat_lifeform(table, concat_str)
+  #   Arel::Nodes::SqlLiteral.new((table[:lifeform] + concat_str).to_sql)
+  #   # Arel::Nodes::SqlLiteral.new(
+  #   #   Arel::Nodes::NamedFunction.new(
+  #   #     "CONCAT", [table[:lifeform], Arel.sql(concat_str)]
+  #   #   ).to_sql
+  #   # )
+  # end
 
   def arel_update_remove_lifeform(type, replace_str, search_str)
     table = type.camelize.constantize.arel_table
