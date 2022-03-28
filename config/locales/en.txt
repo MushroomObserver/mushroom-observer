@@ -1808,7 +1808,7 @@
   prefs_location_format_scientific: Scientific (USA, New York)
   prefs_hide_authors: "[:AUTHORITYS]"
   prefs_hide_authors_none: show author for all ranks (default)
-  prefs_hide_authors_above_species: hide author for gunus and higher ranks
+  prefs_hide_authors_above_species: hide author for genus and higher ranks
   prefs_thumbnail_size: Thumbnail size
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
