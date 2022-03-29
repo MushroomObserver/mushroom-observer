@@ -670,14 +670,13 @@ class ApplicationController < ActionController::Base
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
   def sorted_locales_from_request_header
-    result = []
-    if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
+    accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
+    logger.debug("[globalite] HTTP header = #{accepted_locales.inspect}")
+    return [] unless accepted_locales.present?
 
-      locale_weights = map_locales_to_weights(accepted_locales)
-      # Now sort by decreasing weights.
-      result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
-    end
-
+    locale_weights = map_locales_to_weights(accepted_locales)
+    # Sort by decreasing weights.
+    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
