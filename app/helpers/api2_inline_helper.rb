@@ -10,8 +10,6 @@
 #  NOTE: Each partial is in pairs: a JSON version and an XML version.
 #  Please ensure they stay identical.
 #
-################################################################################
-
 module Api2InlineHelper
   def json_api_key(api_key)
     strip_hash(id: api_key.id,
@@ -165,13 +163,36 @@ module Api2InlineHelper
     strip_hash(id: naming.id,
                name: json_name(naming.name),
                owner: json_user(naming.user),
-               confidence: naming.vote_cache)
+               confidence: naming.vote_cache,
+               reasons: json_reasons(naming.reasons_array))
+  end
+
+  def json_reasons(reasons)
+    reasons.select(&:used?).map do |reason|
+      { reason: reason.label.l, notes: reason.notes.to_s.tpl_nodiv }
+    end
   end
 
   def xml_naming(xml, naming)
     xml_detailed_object(xml, :name, naming.name)
     xml_detailed_object(xml, :owner, naming.user)
     xml_confidence_level(xml, :confidence, naming.vote_cache)
+    xml_reasons(xml, naming.reasons_array)
+  end
+
+  def xml_reasons(xml, reasons)
+    xml.reasons do
+      reasons.each do |reason|
+        xml_reason(xml, reason) if reason.used?
+      end
+    end
+  end
+
+  def xml_reason(xml, reason)
+    xml.reason do
+      xml_string(xml, :reason, reason.label.l)
+      xml_string(xml, :notes, reason.notes.to_s.tpl_nodiv)
+    end
   end
 
   def json_project(project)
@@ -188,7 +209,8 @@ module Api2InlineHelper
                locus: sequence.locus.to_s,
                bases: sequence.bases.to_s,
                archive: sequence.archive.to_s,
-               accession: sequence.accession.to_s)
+               accession: sequence.accession.to_s,
+               notes: sequence.notes.to_s.tpl_nodiv)
   end
 
   def xml_sequence(xml, sequence)
@@ -196,6 +218,7 @@ module Api2InlineHelper
     xml_string(xml, :bases, sequence.bases)
     xml_string(xml, :archive, sequence.archive)
     xml_string(xml, :accession, sequence.accession)
+    xml_string(xml, :notes, sequence.notes.to_s.tpl_nodiv)
   end
 
   def json_user(user)
