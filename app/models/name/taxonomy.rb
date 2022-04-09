@@ -507,7 +507,6 @@ class Name < AbstractModel
       if rank != :Genus
 
     # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
       update_all(classification: classification)
@@ -515,7 +514,6 @@ class Name < AbstractModel
       update_all(classification: classification)
     Observation.where(name_id: subtaxa).
       update_all(classification: classification)
-    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Get list of subtaxa whose classification doesn't match (and therefore
@@ -537,14 +535,11 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
       where("name_descriptions.classification != names.classification").
       where("COALESCE(name_descriptions.classification, '') != ''").
       update_all("names.classification = name_descriptions.classification")
-    # rubocop:enable Rails/SkipsModelValidations
     []
   end
 
