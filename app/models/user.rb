@@ -836,6 +836,7 @@ class User < AbstractModel
   # Blank out any references in public records.
   private_class_method def self.blank_out_public_references(id)
     [
+      [:herbaria,                       :personal_user_id],
       [:location_descriptions,          :user_id],
       [:location_descriptions_versions, :user_id],
       [:locations,                      :user_id],
