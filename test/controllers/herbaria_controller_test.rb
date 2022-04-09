@@ -933,4 +933,14 @@ class HerbariaControllerTest < FunctionalTestCase
       "Attempt to destroy non-existent herbarium should redirect to index"
     )
   end
+
+  # This was a bug found in the wild, presumably from a user which was deleted
+  # but the corresponding personal_user_id was not cleared and therefore then
+  # referred to a nonexistent user.  It caused the herbarium index to crash.
+  def test_herbarium_personal_user_id_corrupt
+    # Intentionally "break" the user link for Rolf's personal herbarium.
+    herbaria(:rolf_herbarium).update(personal_user_id: -1)
+    login("mary")
+    get(:index)
+  end
 end
