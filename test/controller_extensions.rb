@@ -326,6 +326,12 @@ module ControllerExtensions
     end
   end
 
+  # assert that the text of the html HEAD title matches the argument.
+  def assert_head_title(title)
+    assert_select("head title", { text: /#{title}/, count: 1 },
+                  "Incorrect page or page title displayed")
+  end
+
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
   def assert_link_in_html(label, url_opts, _msg = nil)

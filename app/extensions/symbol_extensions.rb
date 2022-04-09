@@ -245,7 +245,7 @@ class Symbol
   end
 
   def localize_recursive_expansion(val, args, level) # :nodoc:
-    val.gsub(/ \[ :(\w+?) (?:\( ([^\(\)\[\]]+) \))? \] /x) do
+    val.gsub(/ \[ :(\w+?) (?:\( ([^()\[\]]+) \))? \] /x) do
       tag = Regexp.last_match(1).to_sym
       args2 = Regexp.last_match(2).to_s
       hash = args.dup

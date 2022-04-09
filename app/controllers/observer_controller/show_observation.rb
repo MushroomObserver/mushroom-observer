@@ -24,14 +24,31 @@ class ObserverController
     store_location
     check_if_user_wants_to_make_their_votes_public
     check_if_user_wants_to_change_thumbnail_size
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
+    return unless load_observation_for_show_observation_page
 
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
     @new_sites     = external_sites_user_can_add_links_to(@observation)
-    @votes         = gather_users_votes(@observation, @user) if @user
+    @votes         = @user ? gather_users_votes(@observation, @user) : []
+  end
+
+  def load_observation_for_show_observation_page
+    @observation = Observation.includes(
+      :collection_numbers,
+      { comments: :user },
+      { external_links: { external_site: :project } },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      :location,
+      :name,
+      { namings: [:name, :user, { votes: [:observation, :user] }] },
+      :projects,
+      :sequences,
+      { species_lists: :projects },
+      :user
+    ).find_by(id: params[:id]) ||
+                   flash_error_and_goto_index(Observation, params[:id])
   end
 
   # Make it really easy for users to elect to go public with their votes.
@@ -70,10 +87,11 @@ class ObserverController
   def external_sites_user_can_add_links_to(obs)
     return [] unless @user
 
+    obs_site_ids = obs.external_links.map(&:external_site_id)
     if @user == obs.user || in_admin_mode?
-      ExternalSite.all - obs.external_links.map(&:external_site)
+      ExternalSite.where.not(id: obs_site_ids)
     else
-      @user.external_sites - obs.external_links.map(&:external_site)
+      @user.external_sites.where.not(id: obs_site_ids)
     end
   end
 

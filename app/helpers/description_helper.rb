@@ -90,7 +90,7 @@ module DescriptionHelper
     type = obj.type_tag
 
     # Filter out empty descriptions (unless it's public or one you own).
-    list = obj.descriptions.select do |desc|
+    list = obj.descriptions.includes(:user).select do |desc|
       desc.notes? || (desc.user == @user) ||
         reviewer? || (desc.source_type == :public)
     end

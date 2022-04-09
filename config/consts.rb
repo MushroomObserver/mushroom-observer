@@ -130,9 +130,9 @@ MushroomObserver::Application.configure do
   # Search order when serving images.
   # Key is size, e.g., :thumbnail, :small, etc.
   # config.image_precedence = {
-  #   :default => [:local, :cdmr]
+  #   :default => [:local, :mycolab]
   # }
-  # config.image_fallback_source = :cdmr
+  # config.image_fallback_source = :mycolab
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
   config.keep_these_image_sizes_local =
@@ -171,17 +171,6 @@ MushroomObserver::Application.configure do
   config.eol_ranks_for_export = [:Form, :Variety, :Subspecies, :Species, :Genus]
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
-
-  # Configuration of S3 image store on dreamhost.  Example:
-  #   config.s3_credentials = {
-  #     cdmr: {
-  #       server:            "https://objects.dreamhost.com",
-  #       bucket:            "mo-images",
-  #       access_key_id:     "xxxxxxxxxxxxxxxxxxxx",
-  #       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  #     }
-  #   }
-  config.s3_credentials = {}
 
   # Default number of items for an RSS page
   config.default_layout_count = 18

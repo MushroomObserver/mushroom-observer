@@ -576,7 +576,7 @@ class ObserverController
   def update_projects(obs, checks)
     return unless checks
 
-    User.current.projects_member.each do |project|
+    User.current.projects_member(include: :observations).each do |project|
       before = obs.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next unless before != after
@@ -747,26 +747,6 @@ class ObserverController
     @observation.images.each do |img|
       error = img.strip_gps!
       flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
-    end
-  end
-
-  ##############################################################################
-  #
-  #  Methods relating to User#notes_template
-  #
-  ##############################################################################
-
-  def use_notes_template?
-    @user.notes_template? && @observation.notes.blank?
-  end
-
-  # String combining the note parts defined in the User's notes_template
-  # with their filled-in values, ignoring parts with blank values
-  def combined_notes_parts
-    @user.notes_template_parts.each_with_object("") do |part, notes|
-      key   = Observation.notes_part_id(part).to_sym
-      value = params[key]
-      notes << "#{part}: #{value}\n" if value.present?
     end
   end
 

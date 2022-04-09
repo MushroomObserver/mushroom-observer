@@ -247,7 +247,7 @@ class NameController
   end
 
   def parsed_text_name
-    if params[:name][:text_name].blank? && @name
+    if params[:name][:text_name].blank? && @name&.text_name.present?
       @name.real_text_name
     else
       params[:name][:text_name]

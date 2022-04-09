@@ -7,7 +7,7 @@
   <%= link_to(:app_privacy_policy.t, policy_privacy_path,
               { class: "list-group-item" }) %>
   <%= link_to(:app_donate.t, support_donate_path,
-              { class: "list-group-item indent" }) %>
+              { class: "list-group-item" }) %>
 
   <% if in_admin_mode? %>
     <div class="list-group-item disabled bold"><%= :app_admin.t %>: </div>
@@ -143,12 +143,15 @@
         <%= content_tag(:span, "#{:app_languages.t}:") %>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown"
            role="button" aria-expanded="false">
-          <%= I18n.locale.upcase %>
+          <%= image_tag("/flags/flag-#{I18n.locale.downcase}.png",
+                      width: "27px", height: "18px") %>
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-          <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-            <li><%= link_to(h(lang.name),
+          <% Language.where.not(beta: true).order(:order).each do |lang| %>
+            <li><%= link_to(image_tag("/flags/flag-#{lang.locale}.png",
+                                    width: "27px", height: "18px") +
+                            "&nbsp;".html_safe + h(lang.name),
                     reload_with_args(user_locale: lang.locale)) %></li>
           <% end %>
         </ul>

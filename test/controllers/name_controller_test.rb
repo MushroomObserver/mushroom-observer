@@ -205,42 +205,50 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_index_name
+    login
     get_with_dump(:index_name)
     assert_template(:list_names)
   end
 
   def test_name_index
+    login
     get_with_dump(:list_names)
     assert_template(:list_names)
   end
 
   def test_name_description_index
+    login
     get_with_dump(:list_name_descriptions)
     assert_template(:list_name_descriptions)
   end
 
   def test_index_description_index
+    login
     get_with_dump(:index_name_description)
     assert_template(:list_name_descriptions)
   end
 
   def test_observation_index
+    login
     get_with_dump(:observation_index)
     assert_template(:list_names)
   end
 
   def test_observation_index_by_letter
+    login
     get_with_dump(:observation_index, letter: "A")
     assert_template(:list_names)
   end
 
   def test_authored_names
+    login
     get_with_dump(:authored_names)
     assert_template(:list_names)
   end
 
   def test_show_name
     assert_equal(0, QueryRecord.count)
+    login
     get_with_dump(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Creates three for children and all four observations sections,
@@ -265,6 +273,7 @@ class NameControllerTest < FunctionalTestCase
   def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)
+    login
     get(:show_name, params: { id: name.id })
     assert_select(
       "body a[href='#{index_fungorum_record_url(name.icn_id)}']", true,
@@ -283,6 +292,7 @@ class NameControllerTest < FunctionalTestCase
   def test_show_name_genus_with_icn_id
     # Name's icn_id is filled in
     name = names(:tubaria)
+    login
     get(:show_name, params: { id: name.id })
     assert_select(
       "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
@@ -294,6 +304,7 @@ class NameControllerTest < FunctionalTestCase
     # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
     label = :ICN_ID.l.to_s
+    login
     get(:show_name, params: { id: name.id })
 
     assert_select(
@@ -321,6 +332,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_show_name_searchable_in_registry
     name = names(:boletus_edulis_group)
+    login
     get(:show_name, params: { id: name.id })
 
     # Name isn't registrable; it shouldn't have an icn_id label or record link
@@ -348,17 +360,20 @@ class NameControllerTest < FunctionalTestCase
   def test_show_name_icn_id_unregistrable
     # Name is not registrable (cannot have an icn number)
     name = names(:eukarya)
+    login
     get(:show_name, params: { id: name.id })
     assert(/#{:ICN_ID.l}/ !~ @response.body,
            "Page should not have ICN identifier label")
   end
 
   def test_show_name_with_eol_link
+    login
     get(:show_name, params: { id: names(:abortiporus_biennis_for_eol).id })
     assert_template(:show_name, partial: "_name")
   end
 
   def test_name_external_links_exist
+    login
     get(:show_name, params: { id: names(:coprinus_comatus).id })
 
     assert_select("a[href *= 'images.google.com']")
@@ -367,6 +382,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_show_name_locked
     name = Name.where(locked: true).first
+    login
     get_with_dump(:show_name, id: name.id)
     assert_select("a[href*=approve_name]", count: 0)
     assert_select("a[href*=deprecate_name]", count: 0)
@@ -401,11 +417,13 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_show_past_name
+    login
     get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
     assert_template(:show_past_name, partial: "_name")
   end
 
   def test_show_past_name_with_misspelling
+    login
     get_with_dump(:show_past_name, id: names(:petigera).id)
     assert_template(:show_past_name, partial: "_name")
   end
@@ -415,6 +433,7 @@ class NameControllerTest < FunctionalTestCase
     id = description.id
     object = NameDescription.find(id)
     params = @controller.find_query_and_next_object(object, :next, id)
+    login
     get(:next_name_description, params: { id: description.id })
     q = @controller.query_params(QueryRecord.last)
     assert_redirected_to(action: :show_name_description,
@@ -427,6 +446,7 @@ class NameControllerTest < FunctionalTestCase
     id = description.id
     object = NameDescription.find(id)
     params = @controller.find_query_and_next_object(object, :prev, id)
+    login
     get(:prev_name_description, params: { id: description.id })
     q = @controller.query_params(QueryRecord.last)
     assert_redirected_to(action: :show_name_description,
@@ -439,6 +459,7 @@ class NameControllerTest < FunctionalTestCase
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]
+    login
     get(:next_name, params: { id: name12.id })
     q = @controller.query_params(QueryRecord.last)
     assert_redirected_to(action: :show_name, id: name13.id, params: q)
@@ -459,6 +480,7 @@ class NameControllerTest < FunctionalTestCase
     name3 = query.results[-2]
     name4 = query.results[-1]
 
+    login
     get(:next_name, params: q.merge(id: name1.id))
     assert_redirected_to(name2.show_link_args.merge(q))
     get(:next_name, params: q.merge(id: name3.id))
@@ -477,26 +499,31 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_names_by_user
+    login
     get_with_dump(:names_by_user, id: rolf.id)
     assert_template(:list_names)
   end
 
   def test_names_by_editor
+    login
     get_with_dump(:names_by_editor, id: rolf.id)
     assert_template(:list_names)
   end
 
   def test_needed_descriptions
+    login
     get_with_dump(:needed_descriptions)
     assert_template(:list_names)
   end
 
   def test_name_descriptions_by_author
+    login
     get_with_dump(:name_descriptions_by_author, id: rolf.id)
     assert_template(:list_name_descriptions)
   end
 
   def test_name_descriptions_by_editor
+    login
     get_with_dump(:name_descriptions_by_editor, id: rolf.id)
     assert_redirected_to(action: :show_name_description,
                          id: name_descriptions(:coprinus_comatus_desc).id,
@@ -505,16 +532,19 @@ class NameControllerTest < FunctionalTestCase
 
   def test_name_search
     id = names(:agaricus).id
+    login
     get_with_dump(:name_search, pattern: id)
     assert_redirected_to(action: :show_name, id: id)
   end
 
   def test_name_search_help
+    login
     get_with_dump(:name_search, pattern: "help:me")
     assert_match(/unexpected term/i, @response.body)
   end
 
   def test_name_search_with_spelling_correction
+    login
     get_with_dump(:name_search, pattern: "agaricis campestrus")
     assert_template(:list_names)
     assert_select("div.alert-warning", 1)
@@ -536,6 +566,7 @@ class NameControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+    login
     get(:advanced_search, params: @controller.query_params(query))
     assert_template(:list_names)
   end
@@ -548,6 +579,7 @@ class NameControllerTest < FunctionalTestCase
                                   location: "Eastern Oklahoma")
     params = @controller.query_params(query)
     query.record.delete
+    login
     get(:advanced_search, params: params)
     assert_redirected_to(controller: "observer",
                          action: "advanced_search_form")
@@ -572,6 +604,7 @@ class NameControllerTest < FunctionalTestCase
   def test_show_name_description
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
+    login
     get_with_dump(:show_name_description, params)
     assert_template(:show_name_description, partial: "_show_description")
   end
@@ -634,10 +667,12 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_eol
+    login
     get("eol")
   end
 
   def test_eol_preview
+    login
     get_with_dump("eol_preview")
   end
 
@@ -657,6 +692,7 @@ class NameControllerTest < FunctionalTestCase
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
     query_params = pagination_query_params
+    login
     get(:test_index, params: { num_per_page: 10 }.merge(query_params))
     # print @response.body
     assert_template(:list_names)
@@ -680,6 +716,7 @@ class NameControllerTest < FunctionalTestCase
   def test_pagination_page2
     # Now go to the second page.
     query_params = pagination_query_params
+    login
     get(:test_index, params: { num_per_page: 10, page: 2 }.merge(query_params))
     assert_template(:list_names)
     name_links = css_select(".table a")
@@ -702,6 +739,7 @@ class NameControllerTest < FunctionalTestCase
     # Now try a letter.
     query_params = pagination_query_params
     l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
+    login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
     assert_template(:list_names)
@@ -726,6 +764,7 @@ class NameControllerTest < FunctionalTestCase
     l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
+    login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
     assert_template(:list_names)
@@ -749,6 +788,7 @@ class NameControllerTest < FunctionalTestCase
     l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
     last_name = l_names.pop
     # Check second page.
+    login
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2 }.merge(query_params))
     assert_template(:list_names)
@@ -765,6 +805,7 @@ class NameControllerTest < FunctionalTestCase
   def test_pagination_with_anchors
     query_params = pagination_query_params
     # Some cleverness is required to get pagination links to include anchors.
+    login
     get(:test_index, params: {
       num_per_page: 10,
       test_anchor: "blah"
@@ -805,18 +846,21 @@ class NameControllerTest < FunctionalTestCase
 
   # name with Observations that have Locations
   def test_map
+    login
     get_with_dump(:map, id: names(:agaricus_campestris).id)
     assert_template(:map)
   end
 
   # name with Observations that don't have Locations
   def test_map_no_loc
+    login
     get_with_dump(:map, id: names(:coprinus_comatus).id)
     assert_template(:map)
   end
 
   # name with no Observations
   def test_map_no_obs
+    login
     get_with_dump(:map, id: names(:conocybe_filaris).id)
     assert_template(:map)
   end
@@ -847,6 +891,20 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(icn_id, name.icn_id)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
+  end
+
+  def test_create_name_blank
+    login("rolf")
+    params = {
+      name: {
+        text_name: "",
+        author: "",
+        rank: :Species,
+        citation: ""
+      }
+    }
+    # Just make sure it doesn't crash!
+    post(:create_name, params: params)
   end
 
   def test_create_name_existing
@@ -5038,6 +5096,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_why_danny_cant_edit_lentinus_description
     desc = name_descriptions(:boletus_edulis_desc)
+    login
     get(:show_name_description, params: { id: desc.id })
     assert_no_flash
     assert_template(:show_name_description)

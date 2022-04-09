@@ -1,0 +1,30 @@
+<%
+  @title = :login_please_login.t
+%>
+
+<div class="max-width-text">
+  <%= form_tag(action: :login) do %>
+    <div class="form-group push-down">
+      <%= label_tag(:user_login, :login_user.t + ":") %>
+      <%= text_field(:user, :login, value: @login, data: {autofocus: @login.blank?}, class: "form-control") %>
+    </div>
+
+    <div class="form-group push-down">
+      <%= label_tag(:user_password, :login_password.t + ":") %>
+      <%= password_field(:user, :password, value: "", data: {autofocus: !@login.blank?}, class: "form-control") %>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= check_box(:user, :remember_me, checked: @remember) %>
+      <%= label_tag(:user_remember_me, :login_remember_me.t) %>
+    </div>
+
+    <%= submit_tag(:login_login.l, class: "btn center-block push-down") %>
+
+    <div class="form-group push-down">
+      <%= :login_forgot_password.tp %>
+      <%= :login_no_account.tp %>
+      <%= :login_having_problems.tp %>
+    </div>
+  <% end %>
+</div>

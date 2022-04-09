@@ -36,7 +36,7 @@
 #  vote_percent::           Convert cached Vote score to a percentage.
 #  user_voted?::            Has a given User voted on this Naming?
 #  users_vote::             Get a given User's Vote on this Naming.
-#  is_users_favorite?::     Is this Naming the given User's favorite?
+#  users_favorite?::        Is this Naming the given User's favorite?
 #  change_vote::            Call Observation#change_vote.
 #  editable?::              Can owner change this Naming's Name?
 #  deletable?::             Can owner delete this Naming?
@@ -50,7 +50,6 @@
 #  enforce_default_reasons:: Make sure default reasons are set in if none given.
 #
 ################################################################################
-
 class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
@@ -102,7 +101,7 @@ class Naming < AbstractModel
   # was on the notes are hidden when the box is unchecked thus it is invalid.
   def create_reasons(args, was_js_on)
     args ||= {}
-    get_reasons.each do |reason|
+    reasons_array.each do |reason|
       num = reason.num
       if (x = args[num.to_s])
         check = x[:check]
@@ -165,12 +164,13 @@ class Naming < AbstractModel
     @initial_name_id = name_id
     taxa = name.approved_name.all_parents
     taxa.push(name)
-    taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
+    taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
     done_user = {}
     flavor = Notification.flavors[:name]
     taxa.each do |taxon|
-      Notification.where(flavor: flavor, obj_id: taxon.id).find_each do |n|
-        next unless (n.user != user) && !done_user[n.user_id] &&
+      Notification.where(flavor: flavor, obj_id: taxon.id).includes(:user).
+        find_each do |n|
+        next unless (n.user_id != user.id) && !done_user[n.user_id] &&
                     (!n.require_specimen || observation.specimen)
 
         QueuedEmail::NameTracking.create_email(n, self)
@@ -190,7 +190,7 @@ class Naming < AbstractModel
 
     # Send to people who have registered interest in this observation.
     # Also remove everyone who has explicitly said they are NOT interested.
-    for interest in obs.interests
+    obs.interests.each do |interest|
       if interest.state
         recipients.push(interest.user)
       else
@@ -201,14 +201,14 @@ class Naming < AbstractModel
     # Also send to people who registered positive interest in this name.
     # (Don't want *disinterest* in name overriding
     # interest in the observation, say.)
-    for taxon in taxa
-      for interest in taxon.interests
+    taxa.each do |taxon|
+      taxon.interests.each do |interest|
         recipients.push(interest.user) if interest.state
       end
     end
 
     # Send to everyone (except the person who created the naming!)
-    for recipient in recipients.uniq - [sender]
+    (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::NameProposal.create_email(sender, recipient, obs, self)
     end
   end
@@ -227,7 +227,7 @@ class Naming < AbstractModel
 
   def init_reasons(args = nil)
     result = {}
-    get_reasons.each do |reason|
+    reasons_array.each do |reason|
       num = reason.num
 
       # Use naming's reasons by default.
@@ -269,7 +269,7 @@ class Naming < AbstractModel
   # (Just used by functional tests right now.)
   def vote_sum
     sum = 0.0
-    for v in votes
+    votes.each do |v|
       sum += v.value
     end
     sum
@@ -287,14 +287,13 @@ class Naming < AbstractModel
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
-    votes.each { |v| return v if v.user_id == user.id }
+    votes.includes(:user).find_each { |v| return v if v.user_id == user.id }
     nil
   end
 
   # Is this Naming the given User's favorite Naming for this Observation?
-  def is_users_favorite?(user)
-    votes.each { |v| return true if (v.user_id == user.id) && v.favorite }
-    false
+  def users_favorite?(user)
+    votes.any? { |v| v.user_id == user.id && v.favorite }
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
@@ -351,7 +350,7 @@ class Naming < AbstractModel
   def calc_vote_table
     # Initialize table.
     table = {}
-    for str, val in Vote.opinion_menu
+    Vote.opinion_menu.each do |str, val|
       table[str] = {
         num: 0,
         wgt: 0.0,
@@ -363,7 +362,7 @@ class Naming < AbstractModel
     # Gather votes, doing a weighted sum in the process.
     tot_sum = 0
     tot_wgt = 0
-    for v in votes
+    votes.each do |v|
       str = Vote.confidence(v.value)
       wgt = v.user_weight
       table[str][:num] += 1
@@ -375,10 +374,7 @@ class Naming < AbstractModel
     val = tot_sum.to_f / (tot_wgt + 1.0)
 
     # Update vote_cache if it's wrong.
-    if vote_cache != val
-      self.vote_cache = val
-      save
-    end
+    update!(vote_cache: val) if (vote_cache - val).abs > 1e-4
 
     table
   end
@@ -405,7 +401,7 @@ class Naming < AbstractModel
 
   # Return reasons as Array of Reason instances.  Changes to these instances
   # will make appropriate changes to the Naming.
-  def get_reasons
+  def reasons_array
     self.reasons ||= {}
     ALL_REASONS.map do |num|
       Reason.new(reasons, num)
@@ -414,17 +410,17 @@ class Naming < AbstractModel
 
   # Return reasons as Hash of Reason instances.  Changes to these instances
   # will make appropriate changes to the Naming.
-  def get_reasons_hash
+  def reasons_hash
     result = {}
-    for reason in get_reasons
+    reasons_array.each do |reason|
       result[reason.num] = reason
     end
     result
   end
 
   # Update reasons given Hash of notes values.
-  def set_reasons(hash)
-    for reason in get_reasons
+  def update_reasons(hash)
+    reasons_array.each do |reason|
       if hash.key?(reason.num)
         reason.notes = hash[reason.num].to_s
       else
@@ -437,7 +433,7 @@ class Naming < AbstractModel
   def enforce_default_reasons
     self.reasons ||= {}
     if reasons.keys.empty?
-      for num in DEFAULT_REASONS
+      DEFAULT_REASONS.each do |num|
         reasons[num] = ""
       end
     end
@@ -532,6 +528,7 @@ class Naming < AbstractModel
       errors.add(:observation, :validate_naming_observation_missing.t)
     end
     errors.add(:name, :validate_naming_name_missing.t) unless name
-    errors.add(:user, :validate_naming_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_naming_user_missing.t) if !user_id &&
+                                                          !User.current
   end
 end

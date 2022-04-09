@@ -92,6 +92,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_index_species_list_by_past_bys
+    login
     get(:index_species_list, params: { by: :modified })
     assert_response(:success)
     get(:index_species_list, params: { by: :created })
@@ -99,16 +100,13 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_list_species_lists
+    login
     get(:list_species_lists)
     assert_template(:list_species_lists)
   end
 
   def test_show_species_list
     sl_id = species_lists(:first_species_list).id
-
-    # Show empty list with no one logged in.
-    get(:show_species_list, params: { id: sl_id })
-    assert_template(:show_species_list, partial: "_show_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
@@ -122,6 +120,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_show_species_lists_attached_to_projects
+    login
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)
     spl = species_lists(:first_species_list)
@@ -177,22 +176,26 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_by_title
+    login
     get(:species_lists_by_title)
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_by_user
+    login
     get(:species_lists_by_user, params: { id: rolf.id })
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_for_project
+    login
     get(:species_lists_for_project,
         params: { id: projects(:bolete_project).id })
     assert_template(:list_species_lists)
   end
 
   def test_species_list_search
+    login
     spl = species_lists(:unknown_species_list)
     get(:species_list_search, params: { pattern: spl.id.to_s })
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -202,6 +205,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_list_species_list_by_user
+    login
     query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index_species_list, params: query_params)
@@ -217,6 +221,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_destroy_species_list
+    login
     spl = species_lists(:first_species_list)
     assert(spl)
     id = spl.id
@@ -359,7 +364,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_unsuccessful_create_location_description
     user = login("spamspamspam")
-    assert_false(user.is_successful_contributor?)
+    assert_false(user.successful_contributor?)
     get(:create_species_list)
     assert_response(:redirect)
   end
@@ -1129,6 +1134,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   # ----------------------------
 
   def test_make_report
+    login
     now = Time.zone.now
 
     User.current = rolf
@@ -1176,6 +1182,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_print_labels
+    login
     spl = species_lists(:one_genus_three_species_list)
     query = Query.lookup_and_save(:Observation, :in_species_list,
                                   species_list: spl)
@@ -1186,6 +1193,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_download
+    login
     spl = species_lists(:one_genus_three_species_list)
     query = Query.lookup_and_save(:Observation, :in_species_list,
                                   species_list: spl)
@@ -1209,7 +1217,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     # This will have to be very rudimentary, since the vast majority of the
     # complexity is in Javascript.  Sigh.
     user = login("rolf")
-    assert(user.is_successful_contributor?)
+    assert(user.successful_contributor?)
     get(:name_lister)
 
     params = {

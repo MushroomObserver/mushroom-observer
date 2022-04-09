@@ -199,6 +199,10 @@
 #
 class User < AbstractModel
   require "digest/sha1"
+  require "arel-helpers"
+
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -489,9 +493,12 @@ class User < AbstractModel
   #   user = User.authenticate(login: 'fred99@aol.com', password: 'password')
   #
   def self.authenticate(login: nil, password: nil)
-    find_by("(login = ? OR name = ? OR email = ?) AND password = ? AND
-              password != '' ",
-            login, login, login, sha1(password))
+    User.find_by(
+      User[:login].eq(login).
+      or(User[:name].eq(login)).
+      or(User[:email].eq(login)).
+      and(User[:password].eq(sha1(password)))
+    )
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -500,7 +507,9 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
+    # rubocop:disable Rails/SkipsModelValidations
     update_attribute("password", self.class.sha1(pass)) if pass.present?
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   # Mark a User account as "verified".
@@ -531,18 +540,24 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
+  # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
-    @projects_admin ||= Project.find_by_sql(%(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.admin_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    ))
+    prj = Project.arel_table
+    # For join tables with no model, need to create an Arel::Table object
+    # so we can use Arel methods on it, eg access columns
+    ugu = Arel::Table.new(:user_groups_users)
+
+    select_manager = prj.project(Arel.star).join(ugu).
+                     on(prj[:admin_group_id].eq(ugu[:user_group_id]).
+                        and(ugu[:user_id].eq(id)))
+
+    @projects_admin ||= Project.joins(*select_manager.join_sources)
   end
 
   # Return an Array of Project's that this User is a member of.
-  def projects_member(order: :created_at)
+  def projects_member(order: :created_at, include: nil)
     @projects_member ||= Project.where(user_group: user_groups.ids).
-                         order(order).to_a
+                         includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
@@ -562,18 +577,20 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      herbarium_id = Herbarium.connection.select_value(%(
-        SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
-        ORDER BY created_at DESC LIMIT 1
-      ))
+      hr = HerbariumRecord.arel_table
+      select_manager = hr.project(hr[:herbarium_id]).
+                       where(hr[:user_id].eq(id)).
+                       order(hr[:created_at].desc).take(1)
+      herbarium_id = Herbarium.connection.select_value(select_manager.to_sql)
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
 
+  # Offers a default fallback for personal herbarium name
+  # Can't call personal_herbarium&.name here because instance var may be stale
   def personal_herbarium_name
-    Herbarium.connection.select_value(%(
-      SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
-    )) || :user_personal_herbarium.l(name: unique_text_name)
+    Herbarium.find_by(personal_user_id: id)&.name ||
+      :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
@@ -593,20 +610,29 @@ class User < AbstractModel
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
-  def all_editable_species_lists
+  def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
-      results = species_lists
       if projects_member.any?
-        project_ids = projects_member.map(&:id).join(",")
-        results += SpeciesList.find_by_sql(%(
-          SELECT species_lists.* FROM species_lists, projects_species_lists
-          WHERE species_lists.user_id != #{id}
-            AND projects_species_lists.project_id IN (#{project_ids})
-            AND projects_species_lists.species_list_id = species_lists.id
-        ))
+        SpeciesList.includes(include).find_by_sql(
+          arel_select_species_lists_by_user_or_project.to_sql
+        )
+      else
+        species_lists.includes(include)
       end
-      results
     end
+  end
+
+  def arel_select_species_lists_by_user_or_project
+    sl = SpeciesList.arel_table
+    sl.project(Arel.star).where(sl[:user_id].eq(id).
+      or(sl[:id].in(arel_select_species_list_ids_in_users_projects))).uniq
+  end
+
+  def arel_select_species_list_ids_in_users_projects
+    project_ids = projects_member.map(&:id)
+    psl = Arel::Table.new(:projects_species_lists)
+    psl.project(psl[:species_list_id]).
+      where(psl[:project_id].in(project_ids)).uniq
   end
 
   ##############################################################################
@@ -626,20 +652,23 @@ class User < AbstractModel
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      state = Interest.connection.select_value(%(
-        SELECT state FROM interests
-        WHERE user_id = #{id}
-          AND target_type = '#{object.class.name}'
-          AND target_id = #{object.id}
-        LIMIT 1
-      )).to_s
-      case state
+      sql = interest_in_sql(object)
+      case Interest.connection.select_value(sql).to_s
       when "1"
         :watching
       when "0"
         :ignoring
       end
     end
+  end
+
+  def interest_in_sql(object)
+    i = Interest.arel_table
+    i.project(i[:state]).
+      where(i[:user_id].eq(id).
+        and(i[:target_type].eq(object.class.name)).
+        and(i[:target_id].eq(object.id))).
+      take(1).to_sql
   end
 
   # Has this user expressed positive interest in a given object?
@@ -695,7 +724,7 @@ class User < AbstractModel
     bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
-  def is_successful_contributor?
+  def successful_contributor?
     observations.any?
   end
 
@@ -736,29 +765,61 @@ class User < AbstractModel
   # 1000 (by contribution or created within the last month) login String's
   # (with full name in parens).
   def self.primer
-    result = []
     if !File.exist?(MO.user_primer_cache_file) ||
        File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
-
-      # Get list of users sorted first by when they last logged in (if recent),
-      # then by cotribution.
-      result = connection.select_values(%(
-        SELECT CONCAT(users.login,
-                      IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-        FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
-                    last_login, NULL) DESC,
-                 contribution DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      File.open(MO.user_primer_cache_file, "w:utf-8").
-        write(result.join("\n") + "\n")
+      data = primer_data
+      write_primer_file(data)
+      data
     else
-      result = File.open(MO.user_primer_cache_file, "r:UTF-8").
-               readlines.map(&:chomp)
+      read_primer_file
     end
-    result
+  end
+
+  private_class_method def self.write_primer_file(data)
+    File.open(MO.user_primer_cache_file, "w:utf-8").
+      write("#{data.join("\n")}\n")
+  end
+
+  private_class_method def self.read_primer_file
+    File.open(MO.user_primer_cache_file, "r:UTF-8").
+      readlines.map(&:chomp)
+  end
+
+  private_class_method def self.primer_data
+    # How to order - https://stackoverflow.com/a/71282345/3357635
+    users = User.arel_table
+    User.order(arel_function_last_login_if_recent.desc,
+               users[:contribution].desc).
+      limit(1000).pluck(arel_function_login_plus_name).uniq.sort
+  end
+
+  private_class_method def self.arel_function_last_login_if_recent
+    users = User.arel_table
+    Arel::Nodes::NamedFunction.new(
+      "IF",
+      [users[:last_login].gt(1.month.ago),
+       users[:last_login],
+       Arel.sql("NULL")]
+    )
+  end
+
+  private_class_method def self.arel_function_login_plus_name
+    users = User.arel_table
+    Arel::Nodes::NamedFunction.new(
+      "CONCAT",
+      [users[:login],
+       Arel::Nodes::NamedFunction.new(
+         "IF",
+         [users[:name].eq(""),
+          Arel.sql("''"),
+          Arel::Nodes::NamedFunction.new(
+            "CONCAT",
+            [Arel.sql("' <'"),
+             users[:name],
+             Arel.sql("'>'")]
+          )]
+       )]
+    )
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -766,7 +827,14 @@ class User < AbstractModel
   # 2) Image votes.
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
-    # Blank out any references in public records.
+    blank_out_public_references(id)
+    delete_one_user_group_references(id)
+    delete_observations_attachments(id)
+    delete_own_records(id)
+  end
+
+  # Blank out any references in public records.
+  private_class_method def self.blank_out_public_references(id)
     [
       [:location_descriptions,          :user_id],
       [:location_descriptions_versions, :user_id],
@@ -786,62 +854,75 @@ class User < AbstractModel
       [:translation_strings_versions,   :user_id],
       [:votes,                          :user_id]
     ].each do |table, col|
-      User.connection.update(%(
-        UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      update_manager = Arel::UpdateManager.new.
+                       table(table).
+                       set([[table[col], 0]]).
+                       where(table[col].eq(id))
+      User.connection.update(update_manager.to_sql)
     end
+  end
 
-    # Delete references to their one-user group.
+  # Delete references to their one-user group.
+  private_class_method def self.delete_one_user_group_references(id)
     group = UserGroup.one_user(id)
-    if group
-      group_id = group.id
-      [
-        [:location_descriptions_admins,  :user_group_id],
-        [:location_descriptions_readers, :user_group_id],
-        [:location_descriptions_writers, :user_group_id],
-        [:name_descriptions_admins,      :user_group_id],
-        [:name_descriptions_readers,     :user_group_id],
-        [:name_descriptions_writers,     :user_group_id],
-        [:user_groups,                   :id]
-      ].each do |table, col|
-        User.connection.delete(%(
-          DELETE FROM #{table} WHERE `#{col}` = #{group_id}
-        ))
-      end
-    end
+    return unless group
 
-    # Delete their observations' attachments.
-    ids = User.connection.select_values(%(
-      SELECT id FROM observations WHERE user_id = #{id}
-    )).map(&:to_s)
-    if ids.any?
-      ids = ids.join(",")
-      [
-        [:collection_numbers_observations, :observation_id],
-        [:comments,                        :target_id, :target_type],
-        [:herbarium_records_observations,  :observation_id],
-        [:images_observations,             :observation_id],
-        [:interests,                       :target_id, :target_type],
-        [:namings,                         :observation_id],
-        [:rss_logs,                        :observation_id],
-        [:sequences,                       :observation_id],
-        [:votes,                           :observation_id]
-      ].each do |table, id_col, type_col|
-        if type_col
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
-          ))
-        else
-          User.connection.delete(%(
-            DELETE FROM #{table}
-            WHERE `#{id_col}` IN (#{ids})
-          ))
-        end
-      end
+    group_id = group.id
+    [
+      [:location_descriptions_admins,  :user_group_id],
+      [:location_descriptions_readers, :user_group_id],
+      [:location_descriptions_writers, :user_group_id],
+      [:name_descriptions_admins,      :user_group_id],
+      [:name_descriptions_readers,     :user_group_id],
+      [:name_descriptions_writers,     :user_group_id],
+      [:user_groups,                   :id]
+    ].each do |table, col|
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(group_id))
+      User.connection.delete(delete_manager.to_sql)
     end
+  end
 
-    # Delete records they own, culminating in the user record itself.
+  # Delete their observations' attachments.
+  private_class_method def self.delete_observations_attachments(id)
+    obs = Observation.arel_table
+    obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
+    obs_ids = User.connection.select_values(obs_select_manager.to_sql)
+    return unless obs_ids.any?
+
+    [
+      [:collection_numbers_observations, :observation_id],
+      [:comments,                        :target_id, :target_type],
+      [:herbarium_records_observations,  :observation_id],
+      [:images_observations,             :observation_id],
+      [:interests,                       :target_id, :target_type],
+      [:namings,                         :observation_id],
+      [:rss_logs,                        :observation_id],
+      [:sequences,                       :observation_id],
+      [:votes,                           :observation_id]
+    ].each do |table, id_col, type_col|
+      delete_obs_attachments_from_one_table(
+        obs_ids, table, id_col, type_col
+      )
+    end
+  end
+
+  private_class_method def self.delete_obs_attachments_from_one_table(
+    obs_ids, table, id_col, type_col
+  )
+    table = Arel::Table.new(table)
+    conds = table[id_col].in(obs_ids)
+    conds = conds.and(table[type_col].eq("Observation")) if type_col
+    delete_manager = Arel::DeleteManager.new.from(table).where(conds)
+    User.connection.delete(delete_manager.to_sql)
+  end
+
+  # Delete records they own, culminating in the user record itself.
+  # rubocop:disable Metrics/MethodLength
+  private_class_method def self.delete_own_records(id)
     [
       [:api_keys,                       :user_id],
       [:articles,                       :user_id],
@@ -872,16 +953,19 @@ class User < AbstractModel
       [:user_groups_users,              :user_id],
       [:users,                          :id]
     ].each do |table, col|
-      User.connection.delete(%(
-        DELETE FROM #{table} WHERE `#{col}` = #{id}
-      ))
+      table = Arel::Table.new(table)
+      delete_manager = Arel::DeleteManager.new.
+                       from(table).
+                       where(table[col].eq(id))
+      User.connection.delete(delete_manager.to_sql)
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   # Does user have any unshown naming notifications?
   # (I'm thoroughly confused about what role the observation plays in this
   # complicated set of pages. -JPH)
-  def has_unshown_naming_notifications?(_observation = nil)
+  def unshown_naming_notifications?(_observation = nil)
     result = false
     QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
                       user_id: id).find_each do |q|
@@ -908,19 +992,19 @@ class User < AbstractModel
   ##############################################################################
 
   # Encrypt a password.
-  def self.sha1(pass) # :nodoc:
+  def self.sha1(pass)
     Digest::SHA1.hexdigest("something__#{pass}__")
   end
 
   # Encrypted code used in autologin cookie and API authentication.
-  def self.old_auth_code(password) # :nodoc:
+  def self.old_auth_code(password)
     Digest::SHA1.hexdigest("SdFgJwLeR#{password}WeRtWeRkTj")
   end
 
   # This is a +before_create+ callback that encrypts the password before saving
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
-  def crypt_password # :nodoc:
+  def crypt_password
     self["password"] = self.class.sha1(password) if password.present?
     self["auth_code"] = String.random(40)
   end
@@ -934,30 +1018,47 @@ class User < AbstractModel
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
 
-  def user_requirements # :nodoc:
+  def user_requirements
+    user_login_requirements
+    user_password_requirements
+    user_email_requirements
+    user_other_requirements
+  end
+
+  def user_login_requirements
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
     elsif login.length < 3 || login.size > 40
       errors.add(:login, :validate_user_login_too_long.t)
-    elsif (other = User.find_by_login(login)) && (other.id != id)
+    elsif login_already_taken?
       errors.add(:login, :validate_user_login_taken.t)
     end
+  end
 
-    if password.to_s.present? && (password.length < 5 || password.size > 40)
-      errors.add(:password, :validate_user_password_too_long.t)
-    end
+  def login_already_taken?
+    other = User.find_by(login: login)
+    other && other.id != id
+  end
 
+  def user_password_requirements
+    errors.add(:password, :validate_user_password_too_long.t) \
+      if password.to_s.present? && (password.length < 5 || password.size > 40)
+  end
+
+  def user_email_requirements
     if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
     elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
+  end
 
+  def user_other_requirements
     errors.add(:theme, :validate_user_theme_too_long.t) if theme.to_s.size > 40
     errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
-  def check_password # :nodoc:
+  def check_password
     return if password.blank?
 
     if password_confirmation.to_s.blank?
@@ -967,13 +1068,13 @@ class User < AbstractModel
     end
   end
 
-  def notes_template_forbid_other # :nodoc
+  def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
     end
   end
 
-  def notes_template_forbid_duplicates # :nodoc
+  def notes_template_forbid_duplicates
     return if notes_template.blank?
 
     squished = notes_template.split(",").map(&:squish)
@@ -983,7 +1084,7 @@ class User < AbstractModel
     end
   end
 
-  def notes_template_bad_parts # :nodoc
+  def notes_template_bad_parts
     return [] if notes_template.blank?
 
     notes_template.split(",").each_with_object([]) do |part, a|
@@ -999,12 +1100,10 @@ class User < AbstractModel
   #
   # 'other' plus other words is valid, e.g.,
   # notes_template = "Cap color, Cap size, Cap other"
-  # :nodoc
   def notes_template_reserved_words
     [Observation.other_notes_part.downcase].concat(notes_other_translations)
   end
 
-  # :nodoc
   def notes_other_translations
     %w[andere altro altra autre autres otra otras otro otros outros]
   end

@@ -123,6 +123,46 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referrer)
   end
 
+  def test_anon_user_login
+    get(:login)
+
+    assert_response(:success)
+    assert_head_title(:login_please_login.l)
+  end
+
+  def test_anon_user_signup
+    get(:signup)
+
+    assert_response(:success)
+    assert_head_title(:signup_title.l)
+  end
+
+  def test_anon_user_verify
+    get(:verify)
+
+    assert_redirected_to(observer_index_user_path)
+  end
+
+  def test_anon_user_send_verify
+    get(:send_verify)
+
+    assert_redirected_to(observer_index_user_path)
+  end
+
+  def test_anon_user_welcome
+    get(:welcome)
+
+    assert_response(:success)
+    assert_head_title(:welcome_no_user_title.l)
+  end
+
+  def test_anon_user_email_new_password
+    get(:email_new_password)
+
+    assert_response(:success)
+    assert_head_title(:email_new_password_title.l)
+  end
+
   def test_block_known_evil_signups
     params = {
       login: "newbob",

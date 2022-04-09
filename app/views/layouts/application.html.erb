@@ -139,6 +139,7 @@
                 when 2; "alert-danger"
               end
               content_tag(:div, flash_get_notices,
+                          id: "flash-notices",
                           class: "alert push-down #{klass}")
             %>
           </div>
@@ -147,6 +148,16 @@
       <% flash_clear %>
 
       <div id="content" class="row">
+        <% unless @user&.verified? %>
+          <div class="max-width-text">
+            <p class="align-center hidden-sm hidden-md hidden-lg">
+              <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
+            </p>
+            <p class="sub-caption align-center">Mushroom Observer (MO)</p>
+            <p><%= :login_layout_description.t %></p>
+          </div>
+        <% end %>
+
         <%= render(partial: "/shared/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->

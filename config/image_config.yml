@@ -4,7 +4,7 @@ development:
     :local:
       :test: file://%{root}/public/images
       :read: "/images"
-    :cdmr:
+    :mycolab:
       :test: :transferred_flag
       :read: http://images.mushroomobserver.org
   keep_these_image_sizes_local: []
@@ -15,10 +15,10 @@ production:
     :local:
       :test: file:///var/web/mo/public/images
       :read: https://mushroomobserver.org/local_images
-    :cdmr:
+    :mycolab:
       :test: :transferred_flag
       :read: https://mushroomobserver.org/images
-      :write: ssh://mo@images.mushroomobserver.org:/images/mo
+      :write: ssh://mo@204.93.192.148:/data/images/mo
   keep_these_image_sizes_local: []
 
 test:

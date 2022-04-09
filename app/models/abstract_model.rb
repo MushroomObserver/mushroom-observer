@@ -738,12 +738,6 @@ class AbstractModel < ApplicationRecord
     rss_log.save
   end
 
-  # The label which is displayed for the model's tab in the RssLog tabset
-  # e.g. "Names", "Species Lists"
-  def self.rss_log_tab_label
-    to_s.pluralized_title
-  end
-
   # Add a note to the notes field with paragraph break between different notes.
   def add_note(note)
     self.notes = notes.present? ? "\n\n#{note}" : note
@@ -751,7 +745,7 @@ class AbstractModel < ApplicationRecord
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user == user))
+    !respond_to?("user") || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)

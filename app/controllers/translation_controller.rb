@@ -77,7 +77,7 @@ class TranslationController < ApplicationController
     raise(:edit_translations_bad_locale.t(locale: locale)) unless lang
     raise(:edit_translations_login_required.t) unless @user
     raise(:unsuccessful_contributor_warning.t) \
-      unless @user.is_successful_contributor?
+      unless @user.successful_contributor?
     raise(:edit_translations_reviewer_required.t) if lang.official && !reviewer?
   end
 

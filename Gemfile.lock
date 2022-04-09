@@ -63,25 +63,13 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     ansi (1.5.0)
     arel (9.0.0)
+    arel-helpers (2.14.0)
+      activerecord (>= 3.1.0, < 8)
+    arel_extensions (1.3.4)
+      arel (>= 6.0)
     ast (2.4.2)
     autoprefixer-rails (10.4.2.0)
       execjs (~> 2)
-    aws-eventstream (1.2.0)
-    aws-partitions (1.574.0)
-    aws-sdk-core (3.130.0)
-      aws-eventstream (~> 1, >= 1.0.2)
-      aws-partitions (~> 1, >= 1.525.0)
-      aws-sigv4 (~> 1.1)
-      jmespath (~> 1.0)
-    aws-sdk-kms (1.55.0)
-      aws-sdk-core (~> 3, >= 3.127.0)
-      aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.113.0)
-      aws-sdk-core (~> 3, >= 3.127.0)
-      aws-sdk-kms (~> 1)
-      aws-sigv4 (~> 1.4)
-    aws-sigv4 (1.4.0)
-      aws-eventstream (~> 1, >= 1.0.2)
     bindex (0.8.1)
     blankslate (3.1.3)
     bootstrap-sass (3.4.1)
@@ -90,6 +78,9 @@ GEM
     brakeman (5.2.2)
     browser (5.3.1)
     builder (3.2.4)
+    bullet (7.0.1)
+      activesupport (>= 3.0.0)
+      uniform_notifier (~> 1.11)
     byebug (11.1.3)
     capybara (3.36.0)
       addressable
@@ -131,7 +122,6 @@ GEM
     jbuilder (2.11.5)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    jmespath (1.6.1)
     jquery-rails (4.4.0)
       rails-dom-testing (>= 1, < 3)
       railties (>= 4.2.0)
@@ -297,6 +287,7 @@ GEM
     unicorn (5.4.1)
       kgio (~> 2.6)
       raindrops (~> 0.7)
+    uniform_notifier (1.16.0)
     web-console (3.7.0)
       actionview (>= 5.0)
       activemodel (>= 5.0)
@@ -320,11 +311,14 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  aws-sdk-s3
+  activestorage (>= 5.2.6.3)
+  arel-helpers
+  arel_extensions
   blankslate
   bootstrap-sass
   brakeman
   browser
+  bullet
   byebug
   capybara
   coffee-rails

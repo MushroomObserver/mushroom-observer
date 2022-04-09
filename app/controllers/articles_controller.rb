@@ -25,6 +25,7 @@ class ArticlesController < ApplicationController
     :index,
     :show
   ]
+  skip_before_action :redirect_anonymous_users
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
@@ -127,6 +128,7 @@ class ArticlesController < ApplicationController
       action: :index,
       letters: "articles.title",
       num_per_page: 50,
+      include: :user,
       sorting_links: [["created_at",  :sort_by_created_at.t],
                       ["updated_at",  :sort_by_updated_at.t],
                       ["user",        :sort_by_user.t],

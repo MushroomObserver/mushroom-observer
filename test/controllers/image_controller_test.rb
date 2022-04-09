@@ -4,25 +4,29 @@ require("test_helper")
 
 class ImageControllerTest < FunctionalTestCase
   def test_list_images
+    login
     get_with_dump(:list_images)
     assert_template("list_images", partial: "_image")
   end
 
   def test_images_by_user
+    login
     get_with_dump(:images_by_user, id: rolf.id)
     assert_template("list_images", partial: "_image")
   end
 
   def test_images_for_project
+    login
     get_with_dump(:images_for_project, id: projects(:bolete_project).id)
     assert_template("list_images", partial: "_image")
   end
 
   def test_next_image
+    login
     get_with_dump(:next_image, id: images(:turned_over_image).id)
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
-    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|\?]})
+    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|?]})
   end
 
   def test_next_image_ss
@@ -83,6 +87,7 @@ class ImageControllerTest < FunctionalTestCase
       id: det_unknown.images.last.id,
       params: @controller.query_params(inner) # inner for first obs
     }.flatten
+    login
     get(:next_image, params)
     assert_redirected_to(action: "show_image",
                          id: images(:agaricus_campestris_image).id,
@@ -114,15 +119,17 @@ class ImageControllerTest < FunctionalTestCase
       id: rolfs_favorite_image_id,
       params: @controller.query_params(query)
     }.flatten
+    login
     get(:next_image, params)
     assert_redirected_to(action: "show_image", id: expected_next,
                          params: @controller.query_params(query))
   end
 
   def test_prev_image
+    login
     get_with_dump(:prev_image, id: images(:in_situ_image).id) # oldest image
     # so "prev" is the 2nd oldest
-    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|\?]})
+    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|?]})
   end
 
   def test_prev_image_ss
@@ -174,6 +181,7 @@ class ImageControllerTest < FunctionalTestCase
       id: images(:agaricus_campestris_image).id,
       params: @controller.query_params(inner)
     }.flatten
+    login
     get(:prev_image, params)
     assert_redirected_to(
       action: "show_image",
@@ -184,6 +192,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_show_original
     img_id = images(:in_situ_image).id
+    login
     get_with_dump(:show_original, id: img_id)
     assert_redirected_to(action: "show_image", size: "full_size", id: img_id)
   end
@@ -191,6 +200,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_image
     image = images(:in_situ_image)
     num_views = image.num_views
+    login
     get_with_dump(:show_image, id: image.id)
     assert_template("show_image", partial: "_form_ccbyncsa25")
     image.reload
@@ -236,6 +246,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_image_search
+    login
     get_with_dump(:image_search, pattern: "Notes")
     assert_template("list_images", partial: "_image")
     assert_equal(:query_title_pattern_search.t(types: "Images",
@@ -249,12 +260,14 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_image_search_next
+    login
     get_with_dump(:image_search, pattern: "Notes")
     assert_template("list_images", partial: "_image")
   end
 
   def test_image_search_by_number
     img_id = images(:commercial_inquiry_image).id
+    login
     get_with_dump(:image_search, pattern: img_id)
     assert_redirected_to(action: "show_image", id: img_id)
   end
@@ -265,11 +278,13 @@ class ImageControllerTest < FunctionalTestCase
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
                                   location: "Eastern Oklahoma")
+    login
     get(:advanced_search, @controller.query_params(query))
     assert_template("list_images")
   end
 
   def test_advanced_search_invalid_q_param
+    login
     get(:advanced_search, params: { q: "xxxxx" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
@@ -889,6 +904,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_show_user_profile_image
     assert(rolf.image_id)
+    login
     get(:show_image, id: rolf.image_id)
 
     conic = glossary_terms(:conic_glossary_term)

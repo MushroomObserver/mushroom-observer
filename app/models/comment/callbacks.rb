@@ -93,7 +93,7 @@ class Comment
 
   def users_with_other_comments
     Comment.where(target_type: target_type, target_id: target_id).
-      map(&:user).uniq
+      includes(:user).map(&:user).uniq
   end
 
   USER_LINK_PAT = /

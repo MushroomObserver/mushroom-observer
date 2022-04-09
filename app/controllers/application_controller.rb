@@ -110,6 +110,7 @@ class ApplicationController < ActionController::Base
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
   before_action :autologin
+  before_action :redirect_anonymous_users
   before_action :set_locale
   before_action :set_timezone
   before_action :refresh_translations
@@ -123,6 +124,7 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
+    skip_before_action(:redirect_anonymous_users)
     skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
     skip_before_action(:fix_bad_domains)
@@ -132,6 +134,15 @@ class ApplicationController < ActionController::Base
     skip_before_action(:track_translations)
     before_action(:disable_link_prefetching)
     before_action { User.current = nil }
+  end
+
+  # Disables Bullet tester for one action. Use this in your controller:
+  #   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [ ... ]
+  def skip_bullet
+    Bullet.n_plus_one_query_enable = false
+    yield
+  ensure
+    Bullet.n_plus_one_query_enable = true
   end
 
   ## @view can be used by classes to access view specific features like render
@@ -192,7 +203,7 @@ class ApplicationController < ActionController::Base
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    return true if @user&.is_successful_contributor?
+    return true if @user&.successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
     redirect_back_or_default(controller: :observer, action: :index)
@@ -433,6 +444,16 @@ class ApplicationController < ActionController::Base
 
   public ##########
 
+  # Filter that redirect anonymous users to login
+  # unless they're looking at allowed pages
+  def redirect_anonymous_users
+    return true if browser.bot? # recognized bots are handled elsewhere
+    return true if @user
+
+    store_location
+    redirect_to(account_login_path)
+  end
+
   # ----------------------------
   #  "Public" methods.
   # ----------------------------
@@ -649,14 +670,13 @@ class ApplicationController < ActionController::Base
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
   def sorted_locales_from_request_header
-    result = []
-    if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
+    accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
+    logger.debug("[globalite] HTTP header = #{accepted_locales.inspect}")
+    return [] unless accepted_locales.present?
 
-      locale_weights = map_locales_to_weights(accepted_locales)
-      # Now sort by decreasing weights.
-      result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
-    end
-
+    locale_weights = map_locales_to_weights(accepted_locales)
+    # Sort by decreasing weights.
+    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
@@ -1629,14 +1649,15 @@ class ApplicationController < ActionController::Base
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
-    result = model.safe_find(id)
-    unless result
-      flash_error(:runtime_object_not_found.t(id: id || "0",
-                                              type: model.type_tag))
-      redirect_with_query(controller: model.show_controller,
-                          action: model.index_action)
-    end
-    result
+    model.safe_find(id) || flash_error_and_goto_index(model, id)
+  end
+
+  def flash_error_and_goto_index(model, id)
+    flash_error(:runtime_object_not_found.t(id: id || "0",
+                                            type: model.type_tag))
+    redirect_with_query(controller: model.show_controller,
+                        action: model.index_action)
+    nil
   end
 
   private ##########
@@ -1841,6 +1862,19 @@ class ApplicationController < ActionController::Base
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
+  end
+
+  def load_for_show_observation_or_goto_index(id)
+    Observation.includes(
+      :collection_numbers,
+      { comments: :user },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { namings: :name },
+      :projects,
+      :sequences
+    ).find_by(id: id) ||
+      flash_error_and_goto_index(Observation, id)
   end
 
   ##############################################################################

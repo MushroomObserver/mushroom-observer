@@ -103,5 +103,21 @@ class ObserverController < ApplicationController
     :show_observation,
     :show_user
   ]
+
+  skip_before_action :redirect_anonymous_users, only: [
+    :ask_webmaster_question,
+    :how_to_use,
+    :intro,
+    :turn_javascript_nil,
+    :turn_javascript_off,
+    :turn_javascript_on
+  ]
+
   # rubocop:enable Rails/LexicallyScopedActionFilter
+
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
+    # Bullet wants us to eager load species_list.observations when removing
+    # an observation from a species_list, but I can't figure out how.
+    :edit_observation
+  ]
 end

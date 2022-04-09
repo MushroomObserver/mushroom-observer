@@ -10,12 +10,22 @@ gem("sprockets")
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem("rails", "~> 5.2.2")
 
+# This is here only to ensure a patch for a code injection vulnerability.
+# Please remove next time we update everything.
+gem("activestorage", ">= 5.2.6.3")
+
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
 gem("mysql2")
 
 # Use sqlite3 as the database for Active Record
-# gem "sqlite3"
+# gem("sqlite3")
+
+# Add Arel helpers for more concise query syntax in Arel
+# https://github.com/camertron/arel-helpers
+# https://github.com/Faveod/arel-extensions
+gem("arel_extensions")
+gem("arel-helpers")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
@@ -41,19 +51,19 @@ gem("uglifier")
 
 # Turbolinks makes following links in your web application faster.
 # Read more: https://github.com/rails/turbolinks
-# gem "turbolinks"
+# gem("turbolinks")
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem("jbuilder")
 
 # Use ActiveModel has_secure_password
-# gem "bcrypt", "~> 3.1.7"
+# gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
 gem("unicorn", "5.4.1")
 
 # Use Capistrano for deployment
-# gem "capistrano", group: :development
+# gem("capistrano", group: :development)
 
 # Use i18n for internationalization
 gem("i18n")
@@ -82,9 +92,6 @@ gem("cure_acts_as_versioned",
 # In the future, replace simple_enum with Rails native enums
 # https://www.pivotaltracker.com/story/show/90595194
 gem("simple_enum")
-
-# Amazon S3 SDK, for access to images on dreamhost S3
-gem("aws-sdk-s3")
 
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
@@ -224,44 +231,47 @@ gem("graphql-batch")
 
 group :test, :development do
   # Use byebug as debugging gem
-  gem "byebug"
+  gem("byebug")
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
   # Until current changes are released, need to use this Github version:
-  gem "graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1"
+  gem("graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1")
 end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem "capybara"
+  gem("capybara")
 
   # allows test results to be reported back to test runner IDE's
-  gem "minitest"
-  gem "minitest-reporters"
+  gem("minitest")
+  gem("minitest-reporters")
 
   # Mocking and stubbing in Ruby
-  gem "mocha"
+  gem("mocha")
 
   # restore `assigns` and `assert_template` to tests
-  gem "rails-controller-testing"
+  gem("rails-controller-testing")
 
   # Performance tests for Rails >= 4.0
   # See https://github.com/rails/rails-perftest
-  # gem "rails-perftest", group: :test
+  # gem("rails-perftest", group: :test)
 
   # Stub and set expectations on HTTP requests in test mode
   # Allow selective disabling of internet
-  gem "webmock"
+  gem("webmock")
+
+  # Check for N+1 queries and unused eager loading.
+  gem("bullet")
 end
 
 group :development do
   # Calling `console` creates irb session in the browser (instead of terminal)
-  gem "web-console"
+  gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem "rails_db", "~> 2.3.0"
+  gem("rails_db", "~> 2.3.0")
 
   # Additional generators for input types, search objects, and mutations
-  # gem "graphql-rails-generators"
+  # gem("graphql-rails-generators")
 end

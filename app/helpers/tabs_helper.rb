@@ -50,7 +50,7 @@ module TabsHelper
   end
 
   def notifications_link(obs, user)
-    return unless user&.has_unshown_naming_notifications?(obs)
+    return unless user&.unshown_naming_notifications?(obs)
 
     link_with_query(:show_observation_view_notifications.t,
                     controller: :observation, action: :show_notifications,

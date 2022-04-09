@@ -118,14 +118,13 @@ class AmateurTest < IntegrationTestCase
     message2 = "This may be _Xylaria polymorpha_, no?"
 
     # Start by showing the observation...
+    login("katrina")
     get("/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
 
     click(label: "Add Comment")
-    assert_template("account/login")
-    login("katrina")
     assert_template("comment/add_comment")
 
     # (Make sure the form is for the correct object!)
@@ -263,12 +262,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("observer/show_observation")
-    assert_select("div.thumbnail-map", 1)
-
-    click(label: "Hide thumbnail map.")
-    assert_template("observer/show_observation")
-    assert_select("div.thumbnail-map", 0)
+    assert_template("account/login")
 
     login("dick")
     assert_template("observer/show_observation")
@@ -346,15 +340,19 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
-      click(label: /propose.*name/i)
-      assert_template("account/login")
+      assert_template( # redirected login after storing location in session
+        "account/login"
+      )
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")
         form.change("remember_me", true)
         form.submit("Login")
       end
+      assert_select( # Upon login, redirected to stored location
+        "a[href*='naming/edit'], a[href*='naming/destroy']", false
+      )
+      click(label: /propose.*name/i)
     end
 
     def create_name(obs, text_name)
