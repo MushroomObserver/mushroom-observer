@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2022_01_28_202651) do
 
-  create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "last_used"
     t.integer "num_uses", default: 0
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "collection_numbers", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "collection_numbers", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "user_id"
@@ -39,12 +39,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.string "number"
   end
 
-  create_table "collection_numbers_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "collection_numbers_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "collection_number_id"
     t.integer "observation_id"
   end
 
-  create_table "comments", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "comments", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.integer "user_id"
     t.string "summary", limit: 100
@@ -54,7 +54,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at"
   end
 
-  create_table "copyright_changes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "copyright_changes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "updated_at", null: false
     t.string "target_type", limit: 30, null: false
@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "license_id"
   end
 
-  create_table "donations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "donations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2
     t.string "who", limit: 100
     t.string "email", limit: 100
@@ -76,7 +76,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "recurring", default: false
   end
 
-  create_table "external_links", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "external_links", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "user_id"
@@ -85,12 +85,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.string "url", limit: 100
   end
 
-  create_table "external_sites", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "external_sites", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
   end
 
-  create_table "glossary_terms", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "glossary_terms", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "user_id"
     t.string "name", limit: 1024
@@ -101,12 +101,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at"
   end
 
-  create_table "glossary_terms_images", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "glossary_terms_images", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "image_id"
     t.integer "glossary_term_id"
   end
 
-  create_table "glossary_terms_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "glossary_terms_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "glossary_term_id"
     t.integer "version"
     t.integer "user_id"
@@ -115,7 +115,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "description"
   end
 
-  create_table "herbaria", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "herbaria", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.text "mailing_address"
     t.integer "location_id"
     t.string "email", limit: 80, default: "", null: false
@@ -127,12 +127,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "personal_user_id"
   end
 
-  create_table "herbaria_curators", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "herbaria_curators", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "herbarium_id", default: 0, null: false
   end
 
-  create_table "herbarium_records", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "herbarium_records", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "herbarium_id", null: false
     t.text "notes"
     t.datetime "created_at"
@@ -142,12 +142,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.string "accession_number", limit: 80, null: false
   end
 
-  create_table "herbarium_records_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "herbarium_records_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "observation_id", default: 0, null: false
     t.integer "herbarium_record_id", default: 0, null: false
   end
 
-  create_table "image_votes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "image_votes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "value", null: false
     t.boolean "anonymous", default: false, null: false
     t.integer "user_id"
@@ -156,7 +156,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.index ["user_id"], name: "index_image_votes_on_user_id"
   end
 
-  create_table "images", id: :integer, unsigned: true, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "images", id: :integer, unsigned: true, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "content_type", limit: 100
@@ -176,18 +176,18 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "gps_stripped", default: false, null: false
   end
 
-  create_table "images_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "images_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "image_id", default: 0, null: false
     t.integer "observation_id", default: 0, null: false
     t.index ["observation_id"], name: "index_images_observations_on_observation_id"
   end
 
-  create_table "images_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "images_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
   end
 
-  create_table "interests", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "interests", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "target_type", limit: 30
     t.integer "target_id"
     t.integer "user_id"
@@ -195,7 +195,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at"
   end
 
-  create_table "languages", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "languages", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "locale", limit: 40
     t.string "name", limit: 100
     t.string "order", limit: 100
@@ -203,7 +203,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "beta", null: false
   end
 
-  create_table "licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "licenses", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "display_name", limit: 80
     t.string "url", limit: 200
     t.boolean "deprecated", default: false, null: false
@@ -211,7 +211,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at"
   end
 
-  create_table "location_descriptions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -234,27 +234,27 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "project_id"
   end
 
-  create_table "location_descriptions_admins", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_admins", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "location_descriptions_authors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_authors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id", default: 0, null: false
     t.integer "user_id", default: 0, null: false
   end
 
-  create_table "location_descriptions_editors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_editors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id", default: 0, null: false
     t.integer "user_id", default: 0, null: false
   end
 
-  create_table "location_descriptions_readers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_readers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "location_descriptions_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id"
     t.integer "version"
     t.datetime "updated_at"
@@ -268,12 +268,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "refs"
   end
 
-  create_table "location_descriptions_writers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "location_descriptions_writers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "location_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "locations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "locations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -295,7 +295,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "locked", default: false, null: false
   end
 
-  create_table "locations_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "locations_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "location_id"
     t.integer "version"
     t.datetime "updated_at"
@@ -311,7 +311,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.string "scientific_name", limit: 1024
   end
 
-  create_table "name_descriptions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -341,27 +341,27 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "project_id"
   end
 
-  create_table "name_descriptions_admins", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_admins", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "name_descriptions_authors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_authors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id", default: 0, null: false
     t.integer "user_id", default: 0, null: false
   end
 
-  create_table "name_descriptions_editors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_editors", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id", default: 0, null: false
     t.integer "user_id", default: 0, null: false
   end
 
-  create_table "name_descriptions_readers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_readers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "name_descriptions_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id"
     t.integer "version"
     t.datetime "updated_at"
@@ -379,12 +379,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "classification"
   end
 
-  create_table "name_descriptions_writers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "name_descriptions_writers", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_description_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "names", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "names", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -411,7 +411,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "icn_id"
   end
 
-  create_table "names_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "names_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "name_id"
     t.integer "version"
     t.datetime "updated_at"
@@ -430,13 +430,13 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "icn_id"
   end
 
-  create_table "naming_reasons", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "naming_reasons", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "naming_id"
     t.integer "reason"
     t.text "notes"
   end
 
-  create_table "namings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "namings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "observation_id"
@@ -446,7 +446,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "reasons"
   end
 
-  create_table "notifications", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "notifications", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "flavor"
     t.integer "obj_id"
@@ -455,13 +455,13 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "require_specimen", default: false, null: false
   end
 
-  create_table "observation_views", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "observation_views", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "user_id"
     t.datetime "last_view"
   end
 
-  create_table "observations", id: :integer, unsigned: true, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "observations", id: :integer, unsigned: true, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.date "when"
@@ -486,17 +486,17 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.boolean "gps_hidden", default: false, null: false
   end
 
-  create_table "observations_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "observations_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "observation_id", null: false
     t.integer "project_id", null: false
   end
 
-  create_table "observations_species_lists", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "observations_species_lists", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "observation_id", default: 0, null: false
     t.integer "species_list_id", default: 0, null: false
   end
 
-  create_table "projects", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "projects", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "admin_group_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
@@ -507,12 +507,12 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "rss_log_id"
   end
 
-  create_table "projects_species_lists", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "projects_species_lists", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "species_list_id", null: false
   end
 
-  create_table "publications", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "publications", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id"
     t.text "full"
     t.string "link"
@@ -523,31 +523,31 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at"
   end
 
-  create_table "query_records", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "query_records", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "updated_at"
     t.integer "access_count"
     t.text "description"
     t.integer "outer_id"
   end
 
-  create_table "queued_email_integers", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "queued_email_integers", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "queued_email_id", default: 0, null: false
     t.string "key", limit: 100
     t.integer "value", default: 0, null: false
   end
 
-  create_table "queued_email_notes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "queued_email_notes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "queued_email_id", default: 0, null: false
     t.text "value"
   end
 
-  create_table "queued_email_strings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "queued_email_strings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "queued_email_id", default: 0, null: false
     t.string "key", limit: 100
     t.string "value", limit: 100
   end
 
-  create_table "queued_emails", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "queued_emails", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id"
     t.datetime "queued"
     t.integer "num_attempts"
@@ -555,7 +555,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "to_user_id"
   end
 
-  create_table "rss_logs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "rss_logs", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "species_list_id"
     t.datetime "updated_at"
@@ -580,7 +580,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "species_lists", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "species_lists", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.date "when"
@@ -592,10 +592,10 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "location_id"
   end
 
-  create_table "synonyms", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "synonyms", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
   end
 
-  create_table "translation_strings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "translation_strings", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "language_id", null: false
     t.string "tag", limit: 100
@@ -604,7 +604,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "user_id"
   end
 
-  create_table "translation_strings_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "translation_strings_versions", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "translation_string_id"
     t.text "text"
@@ -612,25 +612,25 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.integer "user_id"
   end
 
-  create_table "triples", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "triples", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "subject", limit: 1024
     t.string "predicate", limit: 1024
     t.string "object", limit: 1024
   end
 
-  create_table "user_groups", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "user_groups", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "name", default: "", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean "meta", default: false
   end
 
-  create_table "user_groups_users", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "user_groups_users", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
   end
 
-  create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "users", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.string "login", limit: 80, default: "", null: false
     t.string "password", limit: 40, default: "", null: false
     t.string "email", limit: 80, default: "", null: false
@@ -685,7 +685,7 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "notes_template"
   end
 
-  create_table "votes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "votes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "naming_id"
