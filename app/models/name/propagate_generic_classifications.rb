@@ -80,15 +80,12 @@ class Name < AbstractModel
     end
 
     def execute_bundled_propagation_fixes(bundles, dry_run)
-      # Deliberately skip validations
-      # rubocop:disable Rails/SkipsModelValidations
       bundles.each_with_object([]) do |bundle, msgs|
         classification, ids = bundle
         msgs << "Setting classifications for #{ids.join(",")}"
         Name.where(id: ids).update_all(classification: classification) \
           unless dry_run
       end
-      # rubocop:enable Rails/SkipsModelValidations
     end
 
     def describe_propagation_fix(name, old_class, new_class)

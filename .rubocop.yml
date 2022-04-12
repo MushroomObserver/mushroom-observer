@@ -353,3 +353,6 @@ Style/StringLiteralsInInterpolation:
 Style/SymbolArray:
   EnforcedStyle: brackets
 
+# We skip validations all the time.  I'm tired of disabling this cop.
+Rails/SkipsModelValidations:
+  Enabled: false
