@@ -3947,17 +3947,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(403, @response.status)
   end
 
-  def test_anon_user_forbidden_action
-    obs = observations(:minimal_unknown_obs)
-    # only logged-in users and authorized robots can do this
-    get(:show_observation, params: { id: obs.id })
-
-    assert_redirected_to(
-      account_login_path,
-      "Anonymous user should be unable to view Observation"
-    )
-  end
-
   def test_anon_user_ask_webmaster_question
     get(:ask_webmaster_question)
 

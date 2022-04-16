@@ -32,18 +32,19 @@
 #  process_image::         (helper for add_image)
 #
 class ImageController < ApplicationController
-  before_action :login_required, except: [
-    :advanced_search,
-    :image_search,
-    :images_by_user,
-    :images_for_project,
-    :index_image,
-    :list_images,
-    :next_image,
-    :prev_image,
-    :show_image,
-    :show_original
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :image_search,
+  #   :images_by_user,
+  #   :images_for_project,
+  #   :index_image,
+  #   :list_images,
+  #   :next_image,
+  #   :prev_image,
+  #   :show_image,
+  #   :show_original
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :add_image,

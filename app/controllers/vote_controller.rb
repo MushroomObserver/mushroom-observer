@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class VoteController < ApplicationController
-  before_action :login_required, except: [:show_votes]
+  before_action :login_required # except: [:show_votes]
 
   # Show breakdown of votes for a given naming.
   # Linked from: show_observation

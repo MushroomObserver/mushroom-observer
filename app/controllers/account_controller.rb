@@ -60,7 +60,6 @@ class AccountController < ApplicationController
     :prefs,
     :profile
   ]
-  skip_before_action :redirect_anonymous_users
 
   ##############################################################################
   #

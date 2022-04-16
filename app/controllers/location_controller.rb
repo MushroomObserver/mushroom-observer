@@ -6,30 +6,31 @@ require("geocoder")
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_action :login_required, except: [
-    :advanced_search,
-    :help,
-    :index_location,
-    :index_location_description,
-    :list_by_country,
-    :list_countries,
-    :list_location_descriptions,
-    :list_locations,
-    :location_descriptions_by_author,
-    :location_descriptions_by_editor,
-    :location_search,
-    :locations_by_editor,
-    :locations_by_user,
-    :map_locations,
-    :next_location,
-    :prev_location,
-    :next_location_description,
-    :prev_location_description,
-    :show_location,
-    :show_location_description,
-    :show_past_location,
-    :show_past_location_description
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :help,
+  #   :index_location,
+  #   :index_location_description,
+  #   :list_by_country,
+  #   :list_countries,
+  #   :list_location_descriptions,
+  #   :list_locations,
+  #   :location_descriptions_by_author,
+  #   :location_descriptions_by_editor,
+  #   :location_search,
+  #   :locations_by_editor,
+  #   :locations_by_user,
+  #   :map_locations,
+  #   :next_location,
+  #   :prev_location,
+  #   :next_location_description,
+  #   :prev_location_description,
+  #   :show_location,
+  #   :show_location_description,
+  #   :show_past_location,
+  #   :show_past_location_description
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_location,

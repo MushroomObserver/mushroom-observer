@@ -40,21 +40,22 @@
 class SpeciesListController < ApplicationController
   # require "rtf"
 
-  before_action :login_required, except: [
-    :download,
-    :index_species_list,
-    :list_species_lists,
-    :make_report,
-    :name_lister,
-    :next_species_list,
-    :prev_species_list,
-    :print_labels,
-    :show_species_list,
-    :species_list_search,
-    :species_lists_by_title,
-    :species_lists_by_user,
-    :species_lists_for_project
-  ]
+  before_action :login_required
+  # except: [
+  #   :download,
+  #   :index_species_list,
+  #   :list_species_lists,
+  #   :make_report,
+  #   :name_lister,
+  #   :next_species_list,
+  #   :prev_species_list,
+  #   :print_labels,
+  #   :show_species_list,
+  #   :species_list_search,
+  #   :species_lists_by_title,
+  #   :species_lists_by_user,
+  #   :species_lists_for_project
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_species_list,
