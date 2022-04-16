@@ -42,7 +42,7 @@ class ObserverController
   def show_obs_light_includes
     [
       { comments: :user },
-      { images: :user },
+      { images: [:license, :user] },
       :location,
       :name,
       { namings: :name },
