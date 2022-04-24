@@ -272,17 +272,27 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_user)
   end
 
-  # Make sure we display the thumbnail of observations without an rss_log.
   def test_observations_by_known_user
+    # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
     assert_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
-    url = Image.url(:small, obs.thumb_image_id)
+    user = rolf
+    assert(
+      user.layout_count >= rolf.observations.size,
+      "User must be able to display all rolf's Observations in a single page"
+    )
+
     test_show_owner_id_noone_logged_in
-    login
+
+    login(user.login)
     get(:observations_by_user, params: { id: rolf.id })
+
     assert_template(:list_observations)
-    assert_match(url, @response.body)
+    assert_match(
+      Image.url(:small, obs.thumb_image_id), @response.body,
+      "Observation thumbnail should display although this is not an rss_log"
+    )
   end
 
   def test_altering_types_shown_by_rss_log_index
