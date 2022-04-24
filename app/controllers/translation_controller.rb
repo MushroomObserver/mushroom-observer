@@ -2,7 +2,7 @@
 
 class TranslationController < ApplicationController
   before_action :login_required
-  
+
   # ----------------------------
   #  :section: Edit Actions
   # ----------------------------

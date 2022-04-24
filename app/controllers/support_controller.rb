@@ -2,7 +2,6 @@
 
 # Controller for community support including donations and summary letters
 class SupportController < ApplicationController
-
   def donate
     store_location
     @donation = Donation.new
