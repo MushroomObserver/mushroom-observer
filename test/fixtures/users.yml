@@ -143,6 +143,7 @@ antilichenologist:
 californian:
   <<: *DEFAULTS
   content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
+  layout_count: 24 # must be >= number of California Observations
 
 unverified:
   <<: *DEFAULTS

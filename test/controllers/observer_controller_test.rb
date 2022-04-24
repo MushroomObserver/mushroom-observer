@@ -823,11 +823,19 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observations_with_region_filter
-    login(users(:californian).name)
+    california_observations = Observation.where(
+      "`where` LIKE '%California, USA'"
+    ).order(:id).to_a
+    user = users(:californian)
+    # Make sure the fixture is still okay
+    assert_equal({ region: "California, USA" }, user.content_filter)
+    assert(user.layout_count >= california_observations.size,
+           "User must be able to display search results in a single page.")
+
+    login(user.name)
     get(:list_observations)
-    expect = Observation.where("`where` LIKE '%California, USA'").to_a
-    results = @controller.instance_variable_get("@objects")
-    assert_obj_list_equal(expect.sort_by(&:id), results.sort_by(&:id))
+    results = @controller.instance_variable_get("@objects").sort_by(&:id)
+    assert_obj_list_equal(california_observations, results)
   end
 
   def test_send_webmaster_question
