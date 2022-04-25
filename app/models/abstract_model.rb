@@ -659,7 +659,7 @@ class AbstractModel < ApplicationRecord
   #
   def log(tag, args = {})
     init_rss_log unless rss_log
-    touch unless new_record? || # rubocop:disable Rails/SkipsModelValidations
+    touch unless new_record? ||
                  args[:touch] == false
     rss_log.add_with_date(tag, args)
   end

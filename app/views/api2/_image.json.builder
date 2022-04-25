@@ -13,7 +13,7 @@ json.original_name(object.original_name.to_s) \
 json.number_of_views(object.num_views) if object.num_views.present?
 json.last_viewed(object.last_view.try(&:utc)) if object.last_view.present?
 json.ok_for_export(object.ok_for_export ? true : false)
-json.license(object.license.display_name.to_s)
+json.license(object.license.try(&:display_name).to_s)
 json.content_type(object.content_type.to_s)
 json.width(object.width) if object.width.present?
 json.height(object.height) if object.height.present?
@@ -25,5 +25,5 @@ else
   json.files((Image.all_sizes + [:original]).map do |size|
     object.send("#{size}_url")
   end)
-  json.observation_idsr(object.observation_ids)
+  json.observation_ids(object.observation_ids)
 end

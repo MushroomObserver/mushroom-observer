@@ -179,10 +179,7 @@ class Name < AbstractModel
            map do |id, text_name, author|
              "Name ##{id} #{text_name} #{author} was a misspelling of itself."
            end
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
     Name.where("correct_spelling_id = id").update_all(correct_spelling_id: nil)
-    # rubocop:enable Rails/SkipsModelValidations
     msgs
   end
 end

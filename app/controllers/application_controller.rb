@@ -670,14 +670,13 @@ class ApplicationController < ActionController::Base
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
   def sorted_locales_from_request_header
-    result = []
-    if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
+    accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
+    logger.debug("[globalite] HTTP header = #{accepted_locales.inspect}")
+    return [] unless accepted_locales.present?
 
-      locale_weights = map_locales_to_weights(accepted_locales)
-      # Now sort by decreasing weights.
-      result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
-    end
-
+    locale_weights = map_locales_to_weights(accepted_locales)
+    # Sort by decreasing weights.
+    result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     logger.debug("[globalite] client accepted locales: #{result.join(", ")}")
     result
   end
@@ -1650,14 +1649,15 @@ class ApplicationController < ActionController::Base
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
-    result = model.safe_find(id)
-    unless result
-      flash_error(:runtime_object_not_found.t(id: id || "0",
-                                              type: model.type_tag))
-      redirect_with_query(controller: model.show_controller,
-                          action: model.index_action)
-    end
-    result
+    model.safe_find(id) || flash_error_and_goto_index(model, id)
+  end
+
+  def flash_error_and_goto_index(model, id)
+    flash_error(:runtime_object_not_found.t(id: id || "0",
+                                            type: model.type_tag))
+    redirect_with_query(controller: model.show_controller,
+                        action: model.index_action)
+    nil
   end
 
   private ##########
@@ -1857,11 +1857,24 @@ class ApplicationController < ActionController::Base
 
   # Bad place for this, but need proper refactor to have a good place.
   def gather_users_votes(obs, user)
-    obs.namings.includes(:votes).each_with_object({}) do |naming, votes|
+    obs.namings.each_with_object({}) do |naming, votes|
       votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
+  end
+
+  def load_for_show_observation_or_goto_index(id)
+    Observation.includes(
+      :collection_numbers,
+      { comments: :user },
+      { herbarium_records: [{ herbarium: :curators }, :user] },
+      { images: [:image_votes, :license, :projects, :user] },
+      { namings: :name },
+      :projects,
+      :sequences
+    ).find_by(id: id) ||
+      flash_error_and_goto_index(Observation, id)
   end
 
   ##############################################################################

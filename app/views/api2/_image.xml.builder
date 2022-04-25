@@ -17,7 +17,7 @@ xml.tag!(
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
-  xml_string(xml, :license, object.license.display_name)
+  xml_string(xml, :license, object.license.try(&:display_name))
   xml_string(xml, :content_type, object.content_type)
   xml_integer(xml, :width, object.width)
   xml_integer(xml, :height, object.height)

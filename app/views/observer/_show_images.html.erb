@@ -27,7 +27,7 @@
     <%
     # This sort puts the thumbnail first.  We can't use thumb_image, because we
     # haven't eager-loaded it; we *have* eager-loaded all the other images.
-    observation.images.includes(:image_votes, :license, :projects, :user).
+    observation.images.
                 sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id}.
                 each do |image| %>
       <div class="list-group-item">

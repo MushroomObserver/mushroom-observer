@@ -32,7 +32,7 @@
               <%= herbarium.herbarium_records.length %>
             </td>
             <td>
-              <%= if herbarium.personal_user_id.present? && !@no_user_column
+              <%= if !@no_user_column && herbarium.personal_user.present?
                     tag.span(user_link(herbarium.personal_user),
                              title: herbarium.personal_user.unique_text_name)
               end %>

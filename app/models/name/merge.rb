@@ -22,8 +22,6 @@ class Name < AbstractModel
   def merge(old_name)
     return if old_name == self
 
-    xargs = {}
-
     # Move all observations over to the new name.
     old_name.observations.each do |obs|
       obs.name = self
@@ -77,14 +75,7 @@ class Name < AbstractModel
     end
 
     # Move over any remaining descriptions.
-    old_name.descriptions.each do |desc|
-      xargs = {
-        id: desc,
-        set_name: self
-      }
-      desc.name_id = id
-      desc.save
-    end
+    NameDescription.where(name_id: old_name.id).update_all(name_id: id)
 
     # Log the action.
     old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,

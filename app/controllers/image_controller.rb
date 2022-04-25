@@ -769,13 +769,8 @@ class ImageController < ApplicationController
       update_licenses_history(images_to_update, row[:old_holder], row[:old_id])
 
       # Update the license info in the images
-      # Disable cop because we want to update all relevant records with
-      # a single SELECT. Otherwise license updating would take too long
-      # for users with many (e.g. thousands) of images
-      # rubocop:disable Rails/SkipsModelValidations
       images_to_update.update_all(license_id: row[:new_id],
                                   copyright_holder: row[:new_holder])
-      # rubocop:enable Rails/SkipsModelValidations
     end
   end
 
