@@ -328,7 +328,9 @@ class AccountController < ApplicationController
 
     update_password
     update_prefs_from_form
-    update_copyright_holder if prefs_changed_successfully
+    return unless prefs_changed_successfully
+
+    update_copyright_holder(@user.legal_name_change)
   end
 
   def update_password
@@ -368,10 +370,10 @@ class AccountController < ApplicationController
       end
   end
 
-  def update_copyright_holder
-    return unless (new_holder = @user.legal_name_change)
+  def update_copyright_holder(legal_name_change = nil)
+    return unless legal_name_change
 
-    Image.update_copyright_holder(*new_holder, @user)
+    Image.update_copyright_holder(*legal_name_change, @user)
   end
 
   def prefs_changed_successfully
@@ -443,6 +445,7 @@ class AccountController < ApplicationController
         end
       end
 
+      # compute legal name change now because @user.save will overwrite it
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
@@ -450,9 +453,7 @@ class AccountController < ApplicationController
       elsif !@user.save
         flash_object_errors(@user)
       else
-        if legal_name_change
-          Image.update_copyright_holder(*legal_name_change, @user)
-        end
+        update_copyright_holder(legal_name_change)
         if need_to_create_location
           flash_notice(:runtime_profile_must_define.t)
           redirect_to(controller: "location", action: "create_location",
