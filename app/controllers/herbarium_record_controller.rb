@@ -2,16 +2,17 @@
 
 # Controls viewing and modifying herbarium records.
 class HerbariumRecordController < ApplicationController
-  before_action :login_required, except: [
-    :index_herbarium_record,
-    :list_herbarium_records,
-    :herbarium_record_search,
-    :herbarium_index,
-    :observation_index,
-    :show_herbarium_record,
-    :next_herbarium_record,
-    :prev_herbarium_record
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_herbarium_record,
+  #   :list_herbarium_records,
+  #   :herbarium_record_search,
+  #   :herbarium_index,
+  #   :observation_index,
+  #   :show_herbarium_record,
+  #   :next_herbarium_record,
+  #   :prev_herbarium_record
+  # ]
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record

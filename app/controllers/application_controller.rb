@@ -110,7 +110,6 @@ class ApplicationController < ActionController::Base
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
   before_action :autologin
-  before_action :redirect_anonymous_users
   before_action :set_locale
   before_action :set_timezone
   before_action :refresh_translations
@@ -124,7 +123,6 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_before_action(:redirect_anonymous_users)
     skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
     skip_before_action(:fix_bad_domains)
@@ -443,16 +441,6 @@ class ApplicationController < ActionController::Base
   end
 
   public ##########
-
-  # Filter that redirect anonymous users to login
-  # unless they're looking at allowed pages
-  def redirect_anonymous_users
-    return true if browser.bot? # recognized bots are handled elsewhere
-    return true if @user
-
-    store_location
-    redirect_to(account_login_path)
-  end
 
   # ----------------------------
   #  "Public" methods.
