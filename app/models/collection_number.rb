@@ -132,9 +132,7 @@ class CollectionNumber < AbstractModel
 
     HerbariumRecord.joins(observations: :collection_numbers).where(
       hr[:accession_number].eq(old_format_name).
-      and(hro[:herbarium_record_id].eq(hr[:id])).
-      and(cno[:collection_number_id].eq(id)).
-      and(cno[:observation_id].eq(hro[:observation_id]))
+      and(cno[:collection_number_id].eq(id))
     ).update_all(accession_number: new_format_name)
     # rubocop:enable Rails/SkipsModelValidations
   end
