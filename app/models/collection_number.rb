@@ -130,9 +130,13 @@ class CollectionNumber < AbstractModel
     new_format_name = Observation.connection.quote_string(format_name)
     old_format_name = Observation.connection.quote_string(old_format_name)
 
+    # HerbariumRecord.joins(observations: :collection_numbers).where(
+    #   hr[:accession_number].eq(old_format_name).
+    #  and(cno[:collection_number_id].eq(id))
+    # ).update_all(accession_number: new_format_name)
+    # The following AR has the same `explain` (but different SQL) from the Arel
     HerbariumRecord.joins(observations: :collection_numbers).where(
-      hr[:accession_number].eq(old_format_name).
-      and(cno[:collection_number_id].eq(id))
+      accession_number: old_format_name, collection_numbers: { id: id }
     ).update_all(accession_number: new_format_name)
     # rubocop:enable Rails/SkipsModelValidations
   end
