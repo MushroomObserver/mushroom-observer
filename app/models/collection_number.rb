@@ -113,31 +113,12 @@ class CollectionNumber < AbstractModel
 
   # Mirror changes to collection number in herbarium records.  Do this
   # low-level to avoid redundant rss logs and other callbacks.
-  # UPDATE collection_numbers_observations cno,
-  #   herbarium_records_observations hro,
-  #   herbarium_records hr
-  # SET hr.accession_number = #{new_format_name}
-  #   WHERE cno.collection_number_id = #{id}
-  #   AND cno.observation_id = hro.observation_id
-  #   AND hro.herbarium_record_id = hr.id
-  #   AND hr.accession_number = #{old_format_name}
   def change_corresponding_herbarium_records(old_format_name)
-    # Deliberately skip validations
-    # rubocop:disable Rails/SkipsModelValidations
-    cno = Arel::Table.new(:collection_numbers_observations)
-    hro = Arel::Table.new(:herbarium_records_observations)
-    hr = Arel::Table.new(:herbarium_records)
     new_format_name = Observation.connection.quote_string(format_name)
     old_format_name = Observation.connection.quote_string(old_format_name)
 
-    # HerbariumRecord.joins(observations: :collection_numbers).where(
-    #   hr[:accession_number].eq(old_format_name).
-    #  and(cno[:collection_number_id].eq(id))
-    # ).update_all(accession_number: new_format_name)
-    # The following AR has the same `explain` (but different SQL) from the Arel
     HerbariumRecord.joins(observations: :collection_numbers).where(
       accession_number: old_format_name, collection_numbers: { id: id }
     ).update_all(accession_number: new_format_name)
-    # rubocop:enable Rails/SkipsModelValidations
   end
 end
