@@ -551,6 +551,10 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
+    n = Arel::Table.new(:names)
+    nd = Arel::Table.new(:name_descriptions)
+    # Deliberately skip validations
+    # rubocop:disable Rails/SkipsModelValidations
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
       # where("name_descriptions.classification != names.classification").
