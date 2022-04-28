@@ -55,7 +55,7 @@ class ScriptTest < UnitTestCase
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
       "2006-03-02 21:14:00 NULL\n"
-    actual = File.read(tempfile).gsub(/ +/, " ")
+    actual = File.read(tempfile).squeeze(" ")
     assert_equal(expect, actual)
   end
 
