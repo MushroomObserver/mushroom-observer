@@ -173,7 +173,7 @@ MushroomObserver::Application.configure do
   config.eol_min_observation_vote = 2.4
 
   # Default number of items for an RSS page
-  config.default_layout_count = 18
+  config.default_layout_count = 12
 
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000

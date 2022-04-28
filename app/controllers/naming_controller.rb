@@ -3,11 +3,7 @@
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
   before_action :login_required
-
-  before_action :disable_link_prefetching, except: [
-    :create,
-    :edit
-  ]
+  before_action :disable_link_prefetching, except: [:create, :edit]
 
   def edit
     pass_query_params

@@ -2,15 +2,16 @@
 
 # Controls viewing and modifying collection numbers.
 class CollectionNumberController < ApplicationController
-  before_action :login_required, except: [
-    :index_collection_number,
-    :list_collection_numbers,
-    :collection_number_search,
-    :observation_index,
-    :show_collection_number,
-    :next_collection_number,
-    :prev_collection_number
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_collection_number,
+  #   :list_collection_numbers,
+  #   :collection_number_search,
+  #   :observation_index,
+  #   :show_collection_number,
+  #   :next_collection_number,
+  #   :prev_collection_number
+  # ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_collection_number

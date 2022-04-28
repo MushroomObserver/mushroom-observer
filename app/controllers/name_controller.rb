@@ -67,33 +67,34 @@ class NameController < ApplicationController
   # No idea how to fix this offense.  If I add another
   #    before_action :login_required, except: :show_name_description
   # in name_controller/show_name_description.rb, it ignores it.
-  before_action :login_required, except: [
-    :advanced_search,
-    :authored_names,
-    :eol,
-    :eol_preview,
-    :index_name,
-    :index_name_description,
-    :map,
-    :list_name_descriptions,
-    :list_names,
-    :name_search,
-    :name_descriptions_by_author,
-    :name_descriptions_by_editor,
-    :names_by_user,
-    :names_by_editor,
-    :needed_descriptions,
-    :next_name,
-    :next_name_description,
-    :observation_index,
-    :prev_name,
-    :prev_name_description,
-    :show_name,
-    :show_name_description,
-    :show_past_name,
-    :show_past_name_description,
-    :test_index
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :authored_names,
+  #   :eol,
+  #   :eol_preview,
+  #   :index_name,
+  #   :index_name_description,
+  #   :map,
+  #   :list_name_descriptions,
+  #   :list_names,
+  #   :name_search,
+  #   :name_descriptions_by_author,
+  #   :name_descriptions_by_editor,
+  #   :names_by_user,
+  #   :names_by_editor,
+  #   :needed_descriptions,
+  #   :next_name,
+  #   :next_name_description,
+  #   :observation_index,
+  #   :prev_name,
+  #   :prev_name_description,
+  #   :show_name,
+  #   :show_name_description,
+  #   :show_past_name,
+  #   :show_past_name_description,
+  #   :test_index
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :approve_name,

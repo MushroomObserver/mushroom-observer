@@ -394,11 +394,6 @@ class User < AbstractModel
     @@location_format = val
   end
 
-  # Did current user opt to view owner_id's?
-  def self.view_owner_id_on?
-    try(:current).try(:view_owner_id)
-  end
-
   # Clear cached data structures when reload.
   def reload
     @projects_admin = nil

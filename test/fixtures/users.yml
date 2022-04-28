@@ -26,6 +26,7 @@ rolf:
   license: ccwiki30
   image: rolf_profile_image
   view_owner_id: true
+  layout_count: 24 # >= # of rolf's Observations
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
@@ -143,6 +144,7 @@ antilichenologist:
 californian:
   <<: *DEFAULTS
   content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
+  layout_count: 24 # >= # of California Observations
 
 unverified:
   <<: *DEFAULTS
