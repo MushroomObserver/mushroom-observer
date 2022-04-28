@@ -44,7 +44,7 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-  # See https://docs.rubocop.org/rubocop/versioning.html#pending-copss
+  # See https://docs.rubocop.org/rubocop/versioning.html#pending-cops
   NewCops: enable
 
   ########################### Excluded files ###################################
