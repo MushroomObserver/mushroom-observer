@@ -227,6 +227,11 @@ Rails/DynamicFindBy:
 Rails/HasAndBelongsToMany:
   Enabled: false
 
+# Can be unsafe depending on eager_load vs pre_load
+# https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
+Rails/WhereExists:
+  Enabled: false
+
 # (0.87) pending cop
 Style/AccessorGrouping:
   Enabled: true
