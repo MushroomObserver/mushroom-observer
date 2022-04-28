@@ -211,6 +211,10 @@ Performance/RegexpMatch:
   # So manually correct to: regexp.match?(something)
   AutoCorrect: false
 
+Performance/StringInclude:
+  # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
+  Enabled: false
+
 # Causes test failures when used with Rubocop auto-correct
 # Could we get autocorrect to work by configuring the Whitelist parameter
 Rails/DynamicFindBy:
