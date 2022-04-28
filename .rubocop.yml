@@ -45,7 +45,7 @@ require:
 
 AllCops:
   # See https://docs.rubocop.org/rubocop/1.27/versioning.html#pending-cops
-  NewCops: enable
+  NewCops: disable
 
   ########################### Excluded files ###################################
   # Completely ignore the following
