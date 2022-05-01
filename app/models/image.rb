@@ -238,8 +238,8 @@ class Image < AbstractModel
 
   has_many :copyright_changes, as: :target, dependent: :destroy
 
-  before_destroy :update_thumbnails
   after_update :track_copyright_changes
+  before_destroy :update_thumbnails
 
   def all_glossary_terms
     best_glossary_terms + glossary_terms
