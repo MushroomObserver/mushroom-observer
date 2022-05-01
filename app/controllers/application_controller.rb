@@ -1219,7 +1219,7 @@ class ApplicationController < ActionController::Base
 
   def invalid_q_param?
     params && params[:q] &&
-      !QueryRecord.where(id: params[:q].dealphabetize).exists?
+      !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
 
   public ##########
