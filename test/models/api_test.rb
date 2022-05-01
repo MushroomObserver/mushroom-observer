@@ -1230,7 +1230,7 @@ class ApiTest < UnitTestCase
     assert_api_results(Image.where(license: pd))
 
     assert_api_pass(params.merge(has_votes: "yes"))
-    assert_api_results(Image.where.not(vote_cache: nil))
+    assert_api_results(Image.where("vote_cache IS NOT NULL"))
     assert_api_pass(params.merge(has_votes: "no"))
     assert_api_results(Image.where("vote_cache IS NULL"))
 
@@ -2207,7 +2207,7 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     no_notes = Observation.no_notes_persisted
-    with     = Observation.where.not(notes: no_notes)
+    with     = Observation.where("notes != ?", no_notes)
     without  = Observation.where("notes = ?", no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
@@ -2972,7 +2972,7 @@ class ApiTest < UnitTestCase
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
     no_notes = Observation.no_notes_persisted
-    with     = Observation.where.not(notes: no_notes)
+    with     = Observation.where("notes != ?", no_notes)
     without  = Observation.where("notes = ?", no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
