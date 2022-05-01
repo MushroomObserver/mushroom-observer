@@ -21,7 +21,7 @@ class Name < AbstractModel
   # This excludes "lichen" but includes "mushroom" (so that truly lichenized
   # basidiolichens with mushroom fruiting bodies are included).
   def not_lichen?
-    !lifeform.include?(" lichen ")
+    lifeform.exclude?(" lichen ")
   end
 
   validate :validate_lifeform

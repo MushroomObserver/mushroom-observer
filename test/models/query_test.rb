@@ -548,7 +548,8 @@ class QueryTest < UnitTestCase
   def paginate_assertions(number, num_per_page, expected_nths)
     from_nth = (number - 1) * num_per_page
     to_nth = from_nth + num_per_page - 1
-    name_ids = @names.map { |n| n[:id] }
+    name_ids = @names.pluck(:id)
+
     assert_equal(
       expected_nths,
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
@@ -727,7 +728,7 @@ class QueryTest < UnitTestCase
 
     # calculate some other details
     inners_query_ids = inners_details.map { |n| n[:inner].record.id }.sort
-    inners_obs_ids = inners_details.map { |n| n[:obs] }.sort
+    inners_obs_ids = inners_details.pluck(:obs).sort
 
     assert(inner1.outer?)
     # it's been tweaked but still same id

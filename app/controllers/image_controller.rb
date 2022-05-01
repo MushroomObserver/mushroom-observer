@@ -527,7 +527,7 @@ class ImageController < ApplicationController
 
     if !check_permission!(@observation)
       flash_error(:runtime_image_remove_denied.t(id: @image.id))
-    elsif !@observation.images.include?(@image)
+    elsif @observation.images.exclude?(@image)
       flash_error(:runtime_image_remove_missing.t(id: @image.id))
     else
       @observation.remove_image(@image)

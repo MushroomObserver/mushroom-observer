@@ -605,7 +605,7 @@ class SpeciesListController < ApplicationController
     @any_changes = false
     @projects.each do |proj|
       if @project_states[proj.id]
-        if !@user.projects_member.include?(proj)
+        if @user.projects_member.exclude?(proj)
           flash_error(:species_list_projects_no_add_to_project.
                          t(proj: proj.title))
         else

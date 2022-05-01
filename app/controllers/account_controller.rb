@@ -876,7 +876,7 @@ class AccountController < ApplicationController
     /(Vemslons|Uplilla)$/ =~ @new_user.login ||
       /(\.xyz|namnerbca.com)$/ =~ @new_user.email ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
-      /blizkoyan2017/ =~ @new_user.email.remove(".")
+      @new_user.email.remove(".").include?("blizkoyan2017")
   end
 
   def make_sure_theme_is_valid!

@@ -98,7 +98,7 @@ class ObserverController
       redirect_back_or_default("/")
     elsif !model_class ||
           !model_class.respond_to?(:column_names) ||
-          !model_class.column_names.include?("ok_for_export")
+          model_class.column_names.exclude?("ok_for_export")
       flash_error(:runtime_invalid.t(type: '"type"', value: type))
       redirect_back_or_default("/")
     elsif !value.match(/^[01]$/)
