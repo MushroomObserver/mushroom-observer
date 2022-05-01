@@ -77,7 +77,7 @@ class ScriptTest < UnitTestCase
     # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert File.read(dest_file).match(/<results number="1">/)
+    assert File.read(dest_file).include?('<results number="1">')
     # system("cp #{dest_file} x.xml")
   end
 

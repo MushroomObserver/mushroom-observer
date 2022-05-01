@@ -116,7 +116,7 @@ class Name < AbstractModel
       unpublished? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
-      /"/ =~ text_name && rank >= :Class ||
+      text_name.include?('"') && rank >= :Class ||
       # Use kingdom: Protozoa as a rough proxy for slime molds
       # Slime molds, which are Protozoa, are in fungal nomenclature registries.
       # But most Protozoa are not slime molds and there's no efficient way
