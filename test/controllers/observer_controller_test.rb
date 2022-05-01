@@ -2003,7 +2003,7 @@ class ObserverControllerTest < FunctionalTestCase
     herbarium_record = obs.herbarium_records.first
     herbarium = herbarium_record.herbarium
     assert(herbarium.curator?(katrina))
-    assert(herbarium.name.match(/Katrina/))
+    assert(herbarium.name.include?("Katrina"))
   end
 
   def test_create_simple_observation_with_approved_unique_name
