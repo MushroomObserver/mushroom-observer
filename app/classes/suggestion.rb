@@ -37,7 +37,7 @@ class Suggestion
   end
 
   def sum
-    @sum ||= @probs.inject(0.0) { |sum, val| sum + val }
+    @sum ||= @probs.sum(0.0)
   end
 
   def confident?

@@ -113,7 +113,7 @@ module Query
         val2 = scalar_validate(arg, val, arg_type)
         if (arg_type == :string) && set.include?(val2.to_sym)
           val2 = val2.to_sym
-        elsif !set.include?(val2)
+        elsif set.exclude?(val2)
           raise("Value for :#{arg} should be one of the following: "\
                 "#{set.inspect}.")
         end

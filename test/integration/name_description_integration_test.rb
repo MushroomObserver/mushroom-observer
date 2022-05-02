@@ -173,7 +173,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def edit_description_requires_login?
-      abilities[:edit].to_s.match(/login/)
+      abilities[:edit].to_s.include?("login")
     end
 
     def destroy_description_link_there?

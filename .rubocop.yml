@@ -44,8 +44,8 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-  # See https://docs.rubocop.org/rubocop/1.27/versioning.html#pending-cops
-  NewCops: disable
+  # See https://docs.rubocop.org/rubocop/versioning.html#pending-cops
+  NewCops: enable
 
   ########################### Excluded files ###################################
   # Completely ignore the following
@@ -211,6 +211,10 @@ Performance/RegexpMatch:
   # So manually correct to: regexp.match?(something)
   AutoCorrect: false
 
+Performance/StringInclude:
+  # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
+  Enabled: false
+
 # Causes test failures when used with Rubocop auto-correct
 # Could we get autocorrect to work by configuring the Whitelist parameter
 Rails/DynamicFindBy:
@@ -221,6 +225,11 @@ Rails/DynamicFindBy:
 # http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
 # It's not worth the effort
 Rails/HasAndBelongsToMany:
+  Enabled: false
+
+# Can be unsafe depending on eager_load vs pre_load
+# https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
+Rails/WhereExists:
   Enabled: false
 
 # (0.87) pending cop

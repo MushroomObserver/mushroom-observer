@@ -571,7 +571,7 @@ class Description < AbstractModel
   def chg_permission(groups, arg, mode)
     arg = UserGroup.one_user(arg) if arg.is_a?(User)
     if (mode == :add) &&
-       !groups.include?(arg)
+       groups.exclude?(arg)
       groups.push(arg)
     elsif (mode == :remove) &&
           groups.include?(arg)

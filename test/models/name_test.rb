@@ -3269,8 +3269,8 @@ class NameTest < UnitTestCase
                     "Boletaceae => Agaricaceae") &&
         msgs.include?("Filling in classification for Lepiota rhacodes") &&
         msgs.include?("Stripping classification from Agaricus campestris") &&
-        !msgs.include?("Filling in classification for Lepiota rachodes") &&
-        !msgs.include?("Stripping classification from Agaricus campestras"),
+        msgs.exclude?("Filling in classification for Lepiota rachodes") &&
+        msgs.exclude?("Stripping classification from Agaricus campestras"),
       "Messages wrong.  Got this:\n#{msgs.inspect}\n"
     )
 
