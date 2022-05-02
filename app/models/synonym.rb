@@ -45,9 +45,8 @@ class Synonym < AbstractModel
     # reference_select = arel_select_referenced_synonyms
     # # puts(reference_select.to_sql)
     # references = Name.connection.select_values(reference_select.to_sql)
-    names = Name.arel_table
-    references = Name.where(names[:synonym_id].not_eq(nil)).distinct.
-                 order(synonym_id: :asc).pluck(:synonym_id)
+    references = Name.select(:synonym_id).where.not(synonym: nil).distinct.
+                 order(:synonym_id).pluck(:synonym_id)
     # puts(references.join(",").to_s)
 
     # SELECT id FROM synonyms ORDER BY id ASC
@@ -62,9 +61,7 @@ class Synonym < AbstractModel
     # puts(missing.join(",").to_s)
 
     if unused.any?
-      delete_manager = arel_delete_unused_synonyms(unused)
-      # puts(delete_manager.to_sql)
-      Name.connection.delete(delete_manager.to_sql)
+      Synonym.where(id: unused).delete_all
 
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
@@ -87,16 +84,6 @@ class Synonym < AbstractModel
   #     where(names[:synonym_id].not_eq(nil)).
   #     order(names[:synonym_id].asc)
   # end
-
-  # DELETE FROM synonyms
-  # WHERE id IN (#{unused.map(&:to_s).join(",")})
-  private_class_method def self.arel_delete_unused_synonyms(unused)
-    syn = Synonym.arel_table
-
-    Arel::DeleteManager.new.
-      from(syn).
-      where(syn[:id].in(unused))
-  end
 
   # INSERT INTO synonyms (id) VALUES
   # #{missing.map { |id| "(#{id})" }.join(",")}
