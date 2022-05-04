@@ -46,19 +46,19 @@ class Synonym < AbstractModel
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
     if missing.any?
-      insert_manager = arel_insert_missing_synonyms(missing)
+      insert_manager = arel_insert_all(missing)
       Name.connection.execute(insert_manager.to_sql)
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs
   end
 
-  private_class_method def self.arel_insert_missing_synonyms(missing)
-    syn = Synonym.arel_table
+  private_class_method def self.arel_insert_all(ids)
+    table = Synonym.arel_table
     Arel::InsertManager.new.tap do |manager|
-      manager.into(syn)
-      manager.columns << syn[:id]
-      manager.values = manager.create_values(missing, syn[:id])
+      manager.into(table)
+      manager.columns << table[:id]
+      manager.values = manager.create_values(ids, table[:id])
     end
   end
 end
