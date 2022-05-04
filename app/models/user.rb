@@ -804,12 +804,12 @@ class User < AbstractModel
        Arel::Nodes::NamedFunction.new(
          "IF",
          [users[:name].eq(""),
-          Arel.sql("''"),
+          Arel::Nodes.build_quoted(""),
           Arel::Nodes::NamedFunction.new(
             "CONCAT",
-            [Arel.sql("' <'"),
+            [Arel::Nodes.build_quoted(" <"),
              users[:name],
-             Arel.sql("'>'")]
+             Arel::Nodes.build_quoted(">")]
           )]
        )]
     )
