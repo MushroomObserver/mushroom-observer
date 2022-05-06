@@ -714,7 +714,7 @@ class AccountController < ApplicationController
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
-      @stats = IpStats.read_stats(:do_activity)
+      @stats = IpStats.read_stats(do_activity: true)
     else
       redirect_back_or_default("/observer/how_to_help")
     end
