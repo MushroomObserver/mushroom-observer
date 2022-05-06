@@ -143,7 +143,6 @@ GEM
     kgio (2.11.4)
     libv8-node (16.10.0.0)
     libv8-node (16.10.0.0-x86_64-linux)
-    libv8-node (16.10.0.0-x86_64-linux-musl)
     loofah (2.17.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -369,4 +368,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.3.6
+   2.3.13
