@@ -83,6 +83,9 @@
 ################################################################################
 #
 class SpeciesList < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -120,10 +123,25 @@ class SpeciesList < AbstractModel
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
-    SpeciesList.connection.delete(%(
-      DELETE FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+
+    # Nimmo Note: afaik, we cannot yet use AR delete_all here because the
+    # observations_species_lists table is not backed by a model
+    # (i.e., it's has_and_belongs_to_many vs. has_many_through)
+    # Conversion to HMT is possible but not super-simple.
+    # SpeciesList.connection.delete(%(
+    #   DELETE FROM observations_species_lists
+    #   WHERE species_list_id = #{id}
+    # ))
+    delete_manager = arel_delete_observations_species_lists(id)
+    # puts(delete_manager.to_sql)
+    SpeciesList.connection.delete(delete_manager.to_sql)
+  end
+
+  def arel_delete_observations_species_lists(id)
+    osl = Arel::Table.new(:observations_species_lists)
+    Arel::DeleteManager.new.
+      from(osl).
+      where(osl[:species_list_id].eq(id))
   end
 
   ##############################################################################
@@ -201,13 +219,30 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE species_lists
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    update_manager = arel_update_defined_location(location, old_name)
+    # puts(update_manager.to_sql)
+    SpeciesList.connection.update(update_manager.to_sql)
+  end
+
+  # Nimmo Note: This can be done in AR with update_all, something like:
+  #   SpeciesList.where(where: old_name).update_all(
+  #     where: new_name, location_id: location.id)
+  # but I'm not sure that is preferable because it skips validations?
+  # Does Arel skip too? Original SQL:
+  # UPDATE species_lists
+  # SET `where` = #{new_name}, location_id = #{location.id}
+  # WHERE `where` = #{old_name}
+  private_class_method def self.arel_update_defined_location(
+    location, old_name
+  )
+    # Note: Need to use connection.quote_string with Arel here
+    old_name = SpeciesList.connection.quote_string(old_name)
+    new_name = SpeciesList.connection.quote_string(location.name)
+    Arel::UpdateManager.new.
+      table(SpeciesList.arel_table).
+      where(SpeciesList[:where].eq(old_name)).
+      set([[SpeciesList[:where], new_name],
+           [SpeciesList[:location_id], location.id]])
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
