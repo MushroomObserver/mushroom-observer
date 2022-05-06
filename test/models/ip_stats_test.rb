@@ -131,7 +131,7 @@ class IpStatsTest < UnitTestCase
     IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
                       controller: "observer", action: "create_observation")
 
-    stats = IpStats.read_stats(:do_activity)
+    stats = IpStats.read_stats(do_activity: true)
     assert_equal([ip1, ip2], stats.keys.sort)
     assert_nil(stats[ip1][:user])
     assert_equal(rolf.id, stats[ip2][:user])
