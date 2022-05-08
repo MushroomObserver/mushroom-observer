@@ -218,31 +218,14 @@ class SpeciesList < AbstractModel
   end
 
   # After defining a location, update any lists using old "where" name.
-  def self.define_a_location(location, old_name)
-    update_manager = arel_update_defined_location(location, old_name)
-    # puts(update_manager.to_sql)
-    SpeciesList.connection.update(update_manager.to_sql)
-  end
-
-  # Nimmo Note: This can be done in AR with update_all, something like:
-  #   SpeciesList.where(where: old_name).update_all(
-  #     where: new_name, location_id: location.id)
-  # but I'm not sure that is preferable because it skips validations?
-  # Does Arel skip too? Original SQL:
+  # Original SQL:
   # UPDATE species_lists
   # SET `where` = #{new_name}, location_id = #{location.id}
   # WHERE `where` = #{old_name}
-  private_class_method def self.arel_update_defined_location(
-    location, old_name
-  )
-    # Note: Need to use connection.quote_string with Arel here
-    old_name = SpeciesList.connection.quote_string(old_name)
-    new_name = SpeciesList.connection.quote_string(location.name)
-    Arel::UpdateManager.new.
-      table(SpeciesList.arel_table).
-      where(SpeciesList[:where].eq(old_name)).
-      set([[SpeciesList[:where], new_name],
-           [SpeciesList[:location_id], location.id]])
+  def self.define_a_location(location, old_name)
+    SpeciesList.where(where: old_name).update_all(
+      where: new_name, location_id: location.id
+    )
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
