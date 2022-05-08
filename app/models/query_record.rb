@@ -3,6 +3,8 @@
 #  = Query Record Model
 #
 #  Query Records store the parameters of recent user queries for quicker access.
+#  Queries can be nested (inner/outer); if query_record is for an inner query,
+#  the `outer_id` is also stored.
 #  Used by MO's Query::Modules::ActiveRecord
 #
 #  == Attributes
@@ -11,7 +13,7 @@
 #  updated_at::     Date/time it was last updated.
 #  access_count::   Number of times the query record was accessed.
 #  description::    Serialized parameters of the query.
-#  outer_id::       ?.
+#  outer_id::       `id` of outer query, when inner query of a nested query.
 #
 #  == Class methods
 #
