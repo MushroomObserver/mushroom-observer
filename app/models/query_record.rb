@@ -27,8 +27,6 @@ class QueryRecord < ApplicationRecord
     @@last_cleanup = Time.zone.now
   end
 
-  # Nimmo Note: Not sure how we'd do this in AR.
-  # Arel enables passing the table_name as a variable.
   # Original SQL:
   # DELETE FROM #{table_name}
   # WHERE
@@ -36,6 +34,9 @@ class QueryRecord < ApplicationRecord
   #   access_count > 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
 
   # Jason proposal, 5/5/22: Disregard access_count, just use INTERVAL 1 DAY
+  # Nimmo Note: Conditional is now simplified, but I'm not sure how to do this
+  # in AR. Arel enables passing table_name as a variable, as in SQL
+
   private_class_method def self.arel_delete_cleanup(table_name)
     table = Arel::Table.new(table_name)
     Arel::DeleteManager.new.
