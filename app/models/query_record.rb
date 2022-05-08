@@ -31,12 +31,13 @@ class QueryRecord < ApplicationRecord
   end
 
   # Nimmo Note: Original SQL.
-  # DELETE FROM #{table_name}  <-- `query_records`
+  # DELETE FROM #{table_name}  <-- this was always `query_records`, var unneeded
   # WHERE
   #   access_count = 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR
   #   access_count > 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
+  # Jason proposed removing the access_count check 5/2022 and using < 1 DAY
 
-  # Only keep unused states around for an hour, and used states for a day.
+  # Only keep states around for a day.
   # This goes through the whole lot and destroys old ones.
   def self.cleanup
     return unless !defined?(@@last_cleanup) ||
