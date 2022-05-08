@@ -2,11 +2,26 @@
 
 #  = Query Record Model
 #
-#  Query Records save recent queries to the db for quicker access.
+#  Query Records store the parameters of recent user queries for quicker access.
 #  Used by MO's Query::Modules::ActiveRecord
+#
+#  == Attributes
+#
+#  id::             Locally unique numerical id.
+#  updated_at::     Date/time it was last updated.
+#  access_count::   Number of times the query record was accessed.
+#  description::    Serialized parameters of the query.
+#  outer_id::       ?.
+#
+#  == Class methods
+#
+#  QueryRecord.cleanup::     Removes all qr's older than one day.
 
 # access query records saved in the db
 class QueryRecord < ApplicationRecord
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   attr_accessor :query
 
   def query # rubocop:disable Lint/DuplicateMethods
@@ -26,13 +41,8 @@ class QueryRecord < ApplicationRecord
                   (@@last_cleanup < 5.minutes.ago) ||
                   ::Rails.env.test?
 
-    qr = QueryRecord.arel_table
-
     QueryRecord.where(
-      qr[:access_count].eq(0).
-        and(qr[:updated_at].lt(Time.zone.now - 6.hours)).
-      or(qr[:access_count].gt(0).
-        and(qr[:updated_at].lt(Time.zone.now - 1.day)))
+      QueryRecord[:updated_at] < (Time.zone.now - 1.day)
     ).delete_all
 
     @@last_cleanup = Time.zone.now
