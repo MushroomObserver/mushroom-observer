@@ -225,7 +225,9 @@ class SpeciesList < AbstractModel
   def self.define_a_location(location, old_name)
     # Note: Need to use connection.quote_string here
     old_name = SpeciesList.connection.quote_string(old_name)
-    new_name = SpeciesList.connection.quote_string(location.name)    SpeciesList.where(where: old_name).update_all(
+    new_name = SpeciesList.connection.quote_string(location.name)
+
+    SpeciesList.where(where: old_name).update_all(
       where: new_name, location_id: location.id
     )
   end
