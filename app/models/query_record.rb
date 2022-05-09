@@ -3,8 +3,9 @@
 #  = Query Record Model
 #
 #  Query Records store the parameters of recent user queries for quicker access.
-#  Queries can be nested (inner/outer); if query_record is for an inner query,
-#  the `outer_id` is also stored.
+#  For nested queries, the inner and outer queries are stored as separate
+#  query_records. Inner queries store an `outer_id` of the outer query.
+#
 #  Used by MO's Query::Modules::ActiveRecord
 #
 #  == Attributes
@@ -17,7 +18,7 @@
 #
 #  == Class methods
 #
-#  QueryRecord.cleanup::     Removes all qr's older than one day.
+#  QueryRecord.cleanup::     Removes all query_records older than one day.
 
 # access query records saved in the db
 class QueryRecord < ApplicationRecord
