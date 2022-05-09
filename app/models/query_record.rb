@@ -45,7 +45,7 @@ class QueryRecord < ApplicationRecord
                   ::Rails.env.test?
 
     QueryRecord.where(
-      QueryRecord[:updated_at] < (Time.zone.now - 1.day)
+      QueryRecord[:updated_at] < 1.day.ago
     ).delete_all
 
     @@last_cleanup = Time.zone.now
