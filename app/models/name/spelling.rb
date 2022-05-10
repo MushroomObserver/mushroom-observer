@@ -158,8 +158,8 @@ class Name < AbstractModel
 
     # Nimmo note: this is kinda nice with a scope and AR + Arel
     Name.with_correct_spelling.
-      where(Name[:text_name].length.between(min_len..max_len).
-      and(Name[:text_name].matches_any(patterns))).limit(10).to_a
+      where(Name[:text_name].length.between(min_len..max_len)).
+      where(Name[:text_name].matches_any(patterns)).limit(10).to_a
   end
 
   # String words together replacing the one at +index+ with +sub+.
