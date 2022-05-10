@@ -176,6 +176,7 @@ class Project < AbstractModel
   #   AND io.observation_id != #{obs.id}
   #   AND io.observation_id = op.observation_id
   #   AND op.project_id = #{id}
+  # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
     io = Arel::Table.new(:images_observations)
     op = Arel::Table.new(:observations_projects)
@@ -189,6 +190,7 @@ class Project < AbstractModel
       )
     ).project(io[:image_id])
   end
+  # rubocop:enable Metrics/AbcSize
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)
