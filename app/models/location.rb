@@ -78,6 +78,9 @@
 #
 class Location < AbstractModel
   require "acts_as_versioned"
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -127,10 +130,8 @@ class Location < AbstractModel
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
-       Location.connection.select_value(%(
-         SELECT COUNT(*) FROM locations_versions
-         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Location::Version.where(location_id: ver.location_id,
+                               user_id: ver.user_id).none?
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -245,7 +246,7 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
+      location = Location.find_by(Location[:name].matches(name))
       return location if location
     end
     raise("There is no \"unknown\" location!")
@@ -468,17 +469,9 @@ class Location < AbstractModel
     return false unless name
 
     @@location_cache ||= (
-      Location.connection.select_values(%(
-        SELECT name FROM locations
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `observations`
-        WHERE `where` is not NULL
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `species_lists`
-        WHERE `where` is not NULL
-      ))
+      Location.pluck(:name) +
+        Observation.where.not(where: nil).pluck(:where) +
+        SpeciesList.where.not(where: nil).pluck(:where)
     ).uniq
     @@location_cache.member?(name)
   end
