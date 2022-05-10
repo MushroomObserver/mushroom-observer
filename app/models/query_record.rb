@@ -10,7 +10,7 @@
 #
 #  == Attributes
 #
-#  id::             Locally unique numerical id.
+#  id::             Unique numerical id.
 #  updated_at::     Date/time it was last updated.
 #  access_count::   Number of times the query record was accessed.
 #  description::    Serialized parameters of the query.
