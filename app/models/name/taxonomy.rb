@@ -524,15 +524,7 @@ class Name < AbstractModel
   # names below genus with the same generic epithet.  Then add all those
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
-    # subtaxa = Name.where("deprecated IS FALSE AND " \
-    #                      "text_name LIKE ?",
-    #                      "#{text_name} %").to_a
     subtaxa = Name.with_name_like(text_name).where(deprecated: false).to_a
-    # synonyms = Name.where("deprecated IS TRUE AND " \
-    #                       "synonym_id IN (?) AND " \
-    #                       "classification != ?",
-    #                       subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
-    #                       classification)
     uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
     # Beware of AR where.not gotcha - will not match a null classification below
     synonyms = Name.where(deprecated: true).
@@ -544,16 +536,11 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    n = Arel::Table.new(:names)
     nd = Arel::Table.new(:name_descriptions)
-    # Deliberately skip validations
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
-      # where("name_descriptions.classification != names.classification").
-      where(nd[:classification].not_eq(n[:classification])).
-      # where("COALESCE(name_descriptions.classification, '') != ''").
+      where(nd[:classification].not_eq(Name[:classification])).
       where(nd[:classification].coalesce("").not_eq("")).
-      # update_all("names.classification = name_descriptions.classification")
       update_all("names.classification = name_descriptions.classification")
     []
   end
@@ -579,7 +566,6 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      # Name.where("text_name LIKE ?", "#{text_name} %").
       Name.with_name_like(text_name).with_correct_spelling.any?
     else
       Name.with_classification_like(rank, text_name).with_correct_spelling.any?
@@ -599,7 +585,6 @@ class Name < AbstractModel
   end
 
   def genus_or_species_is_ancestor?
-    # Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
     Name.joins(:namings).with_name_like(text_name).with_rank_below(rank).any?
   end
 end

@@ -75,12 +75,10 @@ class Name < AbstractModel
       # synonym = <Lepiota>
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
-        # conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-        #               "#{synonym.text_name} #{child_pat}"]
-        # result += Name.where(conditions).select do |name|
-        result += Name.where(Name[:text_name].
-                             matches("#{synonym.text_name} #{child_pat}")).
-                  where(correct_spelling_id: nil).select do |name|
+        result += Name.with_correct_spelling.
+                  where(Name[:text_name].
+                        matches("#{synonym.text_name} #{child_pat}")).
+                  select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)
         end
@@ -150,13 +148,6 @@ class Name < AbstractModel
     end
 
     # Create SQL query out of these patterns.
-    # conds = patterns.map do |pat|
-    #   "text_name LIKE #{Name.connection.quote(pat)}"
-    # end.join(" OR ")
-    # all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
-    #             "AND (#{conds}) AND correct_spelling_id IS NULL"
-
-    # Nimmo note: this is kinda nice with a scope and AR + Arel
     Name.with_correct_spelling.
       where(Name[:text_name].length.between(min_len..max_len)).
       where(Name[:text_name].matches_any(patterns)).limit(10).to_a
