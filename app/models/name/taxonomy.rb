@@ -6,10 +6,12 @@ class Name < AbstractModel
         # NoMethodError: undefined method `ranks'
         #   test/fixtures/names.yml:28:in `get_binding'
         ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+          # where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
   scope :with_rank_below,
-        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+        # ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def self.all_ranks
     [:Form, :Variety, :Subspecies, :Species,
@@ -116,7 +118,7 @@ class Name < AbstractModel
       unpublished? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
-      text_name.include?('"') && rank >= :Class ||
+      /"/ =~ text_name && rank >= :Class ||
       # Use kingdom: Protozoa as a rough proxy for slime molds
       # Slime molds, which are Protozoa, are in fungal nomenclature registries.
       # But most Protozoa are not slime molds and there's no efficient way
@@ -311,19 +313,26 @@ class Name < AbstractModel
   #
   def children(all: false)
     if at_or_below_genus?
-      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-      sql_args = "#{text_name} %"
+      # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
+      # sql_args = "#{text_name} %"
+      sql_conditions = Name[:correct_spelling_id].eq(nil).
+                       and(Name[:text_name].matches("#{text_name} %"))
     else
-      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-      sql_args = "%#{rank}: _#{text_name}_%"
+      # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
+      # sql_args = "%#{rank}: _#{text_name}_%"
+      sql_conditions = Name[:correct_spelling_id].eq(nil).
+                       and(Name[:classification].
+                           matches("%#{rank}: _#{text_name}_%"))
     end
 
-    return Name.where(sql_conditions, sql_args).to_a if all
+    # return Name.where(sql_conditions, sql_args).to_a if all
+    return Name.where(sql_conditions).to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
+      # matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
+      matches = Name.with_rank(rank2).where(sql_conditions)
       return matches.to_a if matches.any?
     end
     []
@@ -521,24 +530,37 @@ class Name < AbstractModel
   # names below genus with the same generic epithet.  Then add all those
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
-    subtaxa = Name.where("deprecated IS FALSE AND " \
-                         "text_name LIKE ?",
-                         "#{text_name} %").to_a
-    synonyms = Name.where("deprecated IS TRUE AND " \
-                          "synonym_id IN (?) AND " \
-                          "classification != ?",
-                          subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
-                          classification)
+    # subtaxa = Name.where("deprecated IS FALSE AND " \
+    #                      "text_name LIKE ?",
+    #                      "#{text_name} %").to_a
+    subtaxa = Name.where(deprecated: false).
+              where(Name[:text_name].matches("#{text_name} %")).to_a
+    # synonyms = Name.where("deprecated IS TRUE AND " \
+    #                       "synonym_id IN (?) AND " \
+    #                       "classification != ?",
+    #                       subtaxa.map(&:synonym_id).reject(&:nil?).uniq,
+    #                       classification)
+    uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
+    # Beware of AR where.not gotcha - will not match a null classification below
+    synonyms = Name.where(deprecated: true).
+               where(synonym_id: uniq_subtaxa).
+               where(Name[:classification].not_eq(classification))
     (subtaxa + synonyms).map(&:id).uniq
   end
 
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
+    n = Arel::Table.new(:names)
+    nd = Arel::Table.new(:name_descriptions)
+    # Deliberately skip validations
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
-      where("name_descriptions.classification != names.classification").
-      where("COALESCE(name_descriptions.classification, '') != ''").
+      # where("name_descriptions.classification != names.classification").
+      where(nd[:classification].not_eq(n[:classification])).
+      # where("COALESCE(name_descriptions.classification, '') != ''").
+      where(nd[:classification].coalesce("").not_eq("")).
+      # update_all("names.classification = name_descriptions.classification")
       update_all("names.classification = name_descriptions.classification")
     []
   end
@@ -564,7 +586,8 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.where("text_name LIKE ?", "#{text_name} %").
+      # Name.where("text_name LIKE ?", "#{text_name} %").
+      Name.where(Name[:text_name].matches("#{text_name} %")).
         with_correct_spelling.any?
     else
       Name.with_classification_like(rank, text_name).with_correct_spelling.any?
@@ -584,7 +607,8 @@ class Name < AbstractModel
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
+    # Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
+    Name.joins(:namings).where(Name[:text_name].matches("#{text_name} %")).
       with_rank_below(rank).any?
   end
 end
