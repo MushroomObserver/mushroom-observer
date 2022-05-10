@@ -140,7 +140,7 @@ class Project < AbstractModel
   def add_observation(obs)
     return if observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    imgs = obs.images.where(user_id: obs.user_id)
     observations.push(obs)
     imgs.each { |img| images.push(img) }
   end
@@ -153,7 +153,7 @@ class Project < AbstractModel
   def remove_observation(obs)
     return unless observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    imgs = obs.images.where(user_id: obs.user_id)
     if imgs.any?
       # Leave images which are attached to other observations
       # still attached to this project.
