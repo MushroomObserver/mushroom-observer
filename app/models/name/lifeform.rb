@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   ALL_LIFEFORMS = %w[
     basidiolichen
     lichen
@@ -55,12 +58,12 @@ class Name < AbstractModel
     n = Name.arel_table
     Name.where(id: name_ids).
       where(n[:lifeform].does_not_match(search_str)).
-      update_all(lifeform: n[:lifeform] + concat_str)
+      update_all("lifeform = #{(n[:lifeform] + concat_str).to_sql}")
 
     o = Observation.arel_table
     Observation.where(name_id: name_ids).
       where(o[:lifeform].does_not_match(search_str)).
-      update_all(lifeform: o[:lifeform] + concat_str)
+      update_all("lifeform = #{(o[:lifeform] + concat_str).to_sql}")
   end
 
   # Remove lifeform (one word only) from all children.
