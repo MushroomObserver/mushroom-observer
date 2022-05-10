@@ -156,9 +156,9 @@ class Name < AbstractModel
     # all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
     #             "AND (#{conds}) AND correct_spelling_id IS NULL"
 
-    # Nimmo note: this is stunningly easy with AR + Arel
-    where(Name[:text_name].length.between(min_len..max_len).
-      and(Name[:correct_spelling_id].eq(nil)).
+    # Nimmo note: this is kinda nice with a scope and AR + Arel
+    Name.with_correct_spelling.
+      where(Name[:text_name].length.between(min_len..max_len).
       and(Name[:text_name].matches_any(patterns))).limit(10).to_a
   end
 

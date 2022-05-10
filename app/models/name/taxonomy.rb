@@ -9,6 +9,8 @@ class Name < AbstractModel
           # where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
+  scope :with_name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
   scope :with_rank_below,
         # ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
@@ -312,31 +314,39 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all: false)
-    if at_or_below_genus?
-      # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-      # sql_args = "#{text_name} %"
-      sql_conditions = Name[:correct_spelling_id].eq(nil).
-                       and(Name[:text_name].matches("#{text_name} %"))
-    else
-      # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-      # sql_args = "%#{rank}: _#{text_name}_%"
-      sql_conditions = Name[:correct_spelling_id].eq(nil).
-                       and(Name[:classification].
-                           matches("%#{rank}: _#{text_name}_%"))
-    end
-
     # return Name.where(sql_conditions, sql_args).to_a if all
-    return Name.where(sql_conditions).to_a if all
+    return Name.where(children_sql_conditions).to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
       # matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
-      matches = Name.with_rank(rank2).where(sql_conditions)
+      matches = Name.with_rank(rank2).where(children_sql_conditions)
       return matches.to_a if matches.any?
     end
     []
   end
+
+  ################
+
+  private
+
+  # Nimmo note: could these be scopes? Used elsewhere.
+  def children_sql_conditions
+    if at_or_below_genus?
+      # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
+      # sql_args = "#{text_name} %"
+      Name.with_correct_spelling.with_name_like(text_name)
+    else
+      # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
+      # sql_args = "%#{rank}: _#{text_name}_%"
+      Name.with_correct_spelling.with_classification_like(rank, text_name)
+    end
+  end
+
+  public
+
+  # ----------------------------------------------------------------------------
 
   # Parse the given +classification+ String, validate it, and reformat it so
   # that it is standardized.  Return the reformatted String.  Throws a
@@ -533,8 +543,7 @@ class Name < AbstractModel
     # subtaxa = Name.where("deprecated IS FALSE AND " \
     #                      "text_name LIKE ?",
     #                      "#{text_name} %").to_a
-    subtaxa = Name.where(deprecated: false).
-              where(Name[:text_name].matches("#{text_name} %")).to_a
+    subtaxa = Name.with_name_like(text_name).where(deprecated: false).to_a
     # synonyms = Name.where("deprecated IS TRUE AND " \
     #                       "synonym_id IN (?) AND " \
     #                       "classification != ?",
@@ -587,8 +596,7 @@ class Name < AbstractModel
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
       # Name.where("text_name LIKE ?", "#{text_name} %").
-      Name.where(Name[:text_name].matches("#{text_name} %")).
-        with_correct_spelling.any?
+      Name.with_name_like(text_name).with_correct_spelling.any?
     else
       Name.with_classification_like(rank, text_name).with_correct_spelling.any?
     end
@@ -608,7 +616,6 @@ class Name < AbstractModel
 
   def genus_or_species_is_ancestor?
     # Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
-    Name.joins(:namings).where(Name[:text_name].matches("#{text_name} %")).
-      with_rank_below(rank).any?
+    Name.joins(:namings).with_name_like(text_name).with_rank_below(rank).any?
   end
 end
