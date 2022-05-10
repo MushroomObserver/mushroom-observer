@@ -50,14 +50,17 @@ class Name < AbstractModel
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
     name_ids = all_children.map(&:id)
+    return unless name_ids.any?
 
+    n = Name.arel_table
     Name.where(id: name_ids).
-      where(Name[:lifeform].does_not_match(search_str)).
-      update_all(lifeform: Name[:lifeform] + concat_str)
+      where(n[:lifeform].does_not_match(search_str)).
+      update_all(lifeform: n[:lifeform] + concat_str)
 
+    o = Observation.arel_table
     Observation.where(name_id: name_ids).
-      where(Observation[:lifeform].does_not_match(search_str)).
-      update_all(lifeform: Observation[:lifeform] + concat_str)
+      where(o[:lifeform].does_not_match(search_str)).
+      update_all(lifeform: o[:lifeform] + concat_str)
   end
 
   # Remove lifeform (one word only) from all children.
@@ -65,13 +68,16 @@ class Name < AbstractModel
     replace_str = " #{lifeform} "
     search_str  = "% #{lifeform} %"
     name_ids = all_children.map(&:id)
+    return unless name_ids.any?
 
+    n = Name.arel_table
     Name.where(id: name_ids).
-      where(Name[:lifeform].matches(search_str)).
-      update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
+      where(n[:lifeform].matches(search_str)).
+      update_all(lifeform: n[:lifeform].replace(replace_str, " "))
 
+    o = Observation.arel_table
     Observation.where(name_id: name_ids).
-      where(Observation[:lifeform].matches(search_str)).
-      update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
+      where(o[:lifeform].matches(search_str)).
+      update_all(lifeform: o[:lifeform].replace(replace_str, " "))
   end
 end
