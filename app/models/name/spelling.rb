@@ -75,9 +75,12 @@ class Name < AbstractModel
       # synonym = <Lepiota>
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
-        conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-                      "#{synonym.text_name} #{child_pat}"]
-        result += Name.where(conditions).select do |name|
+        # conditions = ["text_name like ? AND correct_spelling_id IS NULL",
+        #               "#{synonym.text_name} #{child_pat}"]
+        # result += Name.where(conditions).select do |name|
+        result += Name.where(Name[:text_name].
+                             matches("#{synonym.text_name} #{child_pat}")).
+                  where(correct_spelling_id: nil).select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)
         end
@@ -116,6 +119,7 @@ class Name < AbstractModel
     results
   end
 
+  # Nimmo note: This looks rewritable, but i couldn't figure it out.
   # Look up name replacing n letters at a time with a star.
   # This method should be private.
   # See https://www.pivotaltracker.com/story/show/176098819
@@ -172,11 +176,11 @@ class Name < AbstractModel
   # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
   def self.fix_self_referential_misspellings
     msgs = Name.select(:id, :text_name, :author).
-           where("correct_spelling_id = id").
+           where(correct_spelling_id: id).
            map do |id, text_name, author|
              "Name ##{id} #{text_name} #{author} was a misspelling of itself."
            end
-    Name.where("correct_spelling_id = id").update_all(correct_spelling_id: nil)
+    Name.where(correct_spelling_id: id).update_all(correct_spelling_id: nil)
     msgs
   end
 end
