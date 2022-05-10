@@ -119,7 +119,6 @@ class Name < AbstractModel
     results
   end
 
-  # Nimmo note: This looks rewritable, but i couldn't figure it out.
   # Look up name replacing n letters at a time with a star.
   # This method should be private.
   # See https://www.pivotaltracker.com/story/show/176098819
@@ -151,13 +150,16 @@ class Name < AbstractModel
     end
 
     # Create SQL query out of these patterns.
-    conds = patterns.map do |pat|
-      "text_name LIKE #{Name.connection.quote(pat)}"
-    end.join(" OR ")
+    # conds = patterns.map do |pat|
+    #   "text_name LIKE #{Name.connection.quote(pat)}"
+    # end.join(" OR ")
     # all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
     #             "AND (#{conds}) AND correct_spelling_id IS NULL"
-    all_conds = Name[:text_name].length.between(min_len..max_len).and(conds).and(Name[:correct_spelling_id].not_eq(nil))
-    where(all_conds).limit(10).to_a
+
+    # Nimmo note: this is stunningly easy with AR + Arel
+    where(Name[:text_name].length.between(min_len..max_len).
+      and(Name[:correct_spelling_id].not_eq(nil)).
+      and(Name[:text_name].matches_any(patterns))).limit(10).to_a
   end
 
   # String words together replacing the one at +index+ with +sub+.
