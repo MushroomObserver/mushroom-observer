@@ -49,6 +49,8 @@ class Name < AbstractModel
   end
 
   # Add lifeform (one word only) to all children.
+  # Nimmo note: We shouldn't have to use the string syntax in update_all
+  # but i couldn't get arel-extensions syntax to work
   def propagate_add_lifeform(lifeform)
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
