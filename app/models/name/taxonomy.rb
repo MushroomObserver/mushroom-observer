@@ -314,25 +314,19 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all: false)
-    # return Name.where(sql_conditions, sql_args).to_a if all
-    scope_conditions =
+    scoped_children =
       if at_or_below_genus?
-        # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-        # sql_args = "#{text_name} %"
         Name.with_correct_spelling.with_name_like(text_name)
       else
-        # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-        # sql_args = "%#{rank}: _#{text_name}_%"
         Name.with_correct_spelling.with_classification_like(rank, text_name)
       end
 
-    return scope_conditions.to_a if all
+    return scoped_children.to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      # matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
-      matches = scope_conditions.with_rank(rank2)
+      matches = scoped_children.with_rank(rank2)
       return matches.to_a if matches.any?
     end
     []
