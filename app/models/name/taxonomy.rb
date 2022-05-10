@@ -315,38 +315,28 @@ class Name < AbstractModel
   #
   def children(all: false)
     # return Name.where(sql_conditions, sql_args).to_a if all
-    return Name.where(children_sql_conditions).to_a if all
+    scope_conditions =
+      if at_or_below_genus?
+        # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
+        # sql_args = "#{text_name} %"
+        Name.with_correct_spelling.with_name_like(text_name)
+      else
+        # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
+        # sql_args = "%#{rank}: _#{text_name}_%"
+        Name.with_correct_spelling.with_classification_like(rank, text_name)
+      end
+
+    return scope_conditions.to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
       # matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
-      matches = Name.with_rank(rank2).where(children_sql_conditions)
+      matches = scope_conditions.with_rank(rank2)
       return matches.to_a if matches.any?
     end
     []
   end
-
-  ################
-
-  private
-
-  # Nimmo note: could these be scopes? Used elsewhere.
-  def children_sql_conditions
-    if at_or_below_genus?
-      # sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-      # sql_args = "#{text_name} %"
-      Name.with_correct_spelling.with_name_like(text_name)
-    else
-      # sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-      # sql_args = "%#{rank}: _#{text_name}_%"
-      Name.with_correct_spelling.with_classification_like(rank, text_name)
-    end
-  end
-
-  public
-
-  # ----------------------------------------------------------------------------
 
   # Parse the given +classification+ String, validate it, and reformat it so
   # that it is standardized.  Return the reformatted String.  Throws a
