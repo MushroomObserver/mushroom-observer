@@ -176,19 +176,16 @@ class Language < AbstractModel
 
   # Be generous to ensure that we don't accidentally miss anything that is
   # changed while the Rails app is booting.
-  @last_update = 1.minute.ago
+  @@last_update = 1.minute.ago
 
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
-    cutoff = @last_update
-    @last_update = Time.zone.now
-    update_cutoff = Language.connection.quote(cutoff)
-    lang = Language.arel_table
-    ts = TranslationString.arel_table
-
+    cutoff = @@last_update
+    @@last_update = Time.zone.now
     strings = TranslationString.joins(:language).
-              where(ts[:updated_at].gteq(update_cutoff)).
-              pluck(lang[:locale], :tag, :text)
+              where(TranslationString[:updated_at].gteq(cutoff)).
+              pluck(Language[:locale], :tag, :text)
+
     for locale, tag, text in strings
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
