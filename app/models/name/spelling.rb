@@ -126,8 +126,8 @@ class Name < AbstractModel
     patterns = []
 
     # Restrict search to names close in length.
-    min_len = Name.connection.quote((name.length - 2).to_s)
-    max_len = Name.connection.quote((name.length + 2).to_s)
+    min_len = name.length - 2
+    max_len = name.length + 2
 
     # Create a bunch of SQL "like" patterns.
     name = name.gsub(/ \w+\. /, " % ")
