@@ -149,13 +149,11 @@ class Language < AbstractModel
   end
   # rubocop:enable Metrics/AbcSize
 
-  public
-
   # NIMMO QUESTION - Is there a way to rewrite these without the group_concat?
   # I was thinking maybe just select the :text, and append the newlines in Ruby
   # via map. But this gives a different score, because of the grouping.
   # The command in PostgresQL is "STRING_AGG"
-  private_class_method def self.arel_function_group_concat_strings(table)
+  def self.arel_function_group_concat_strings(table)
     Arel::Nodes::NamedFunction.new(
       "GROUP_CONCAT",
       [Arel::Nodes::NamedFunction.new(
@@ -166,7 +164,7 @@ class Language < AbstractModel
     )
   end
 
-  private_class_method def self.score_lines(text)
+  def self.score_lines(text)
     hash = {}
     for str in text.split("\n")
       hash[str] = true if str.present?
