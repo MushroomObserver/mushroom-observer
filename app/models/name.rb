@@ -401,10 +401,6 @@ class Name < AbstractModel
     if (ver.version != 1) &&
        Name::Version.where(name_id: ver.name_id,
                            user_id: ver.user_id).none?
-      #  Name.connection.select_value(%(
-      #    SELECT COUNT(*) FROM names_versions
-      #    WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
-      #  )).to_s == "0"
       SiteData.update_contribution(:add, :names_versions)
     end
   end
@@ -421,9 +417,6 @@ class Name < AbstractModel
   end
 
   # Used by show_name.
-  # SELECT count(*) c, names.id i FROM observations, names
-  # WHERE observations.name_id = names.id
-  # AND names.id IN (#{ids.join(", ")}) group by names.id
   def self.count_observations(names)
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
