@@ -47,8 +47,8 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    concat_str = Name.connection.quote_string("#{lifeform} ")
-    search_str = Name.connection.quote_string("% #{lifeform} %")
+    concat_str = "#{lifeform} "
+    search_str = "% #{lifeform} %"
 
     for type in %w[name observation] do
       update_manager = arel_update_add_lifeform(
@@ -72,8 +72,8 @@ class Name < AbstractModel
 
   # Remove lifeform (one word only) from all children.
   def propagate_remove_lifeform(lifeform)
-    replace_str = Name.connection.quote_string(" #{lifeform} ")
-    search_str  = Name.connection.quote_string("% #{lifeform} %")
+    replace_str = " #{lifeform} "
+    search_str  = "% #{lifeform} %"
 
     for type in %w[name observation] do
       update_manager = arel_update_remove_lifeform(
