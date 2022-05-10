@@ -49,6 +49,7 @@ class Name < AbstractModel
   def propagate_add_lifeform(lifeform)
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
+    name_ids = all_children.map(&:id)
 
     Name.where(id: name_ids).
       where(Name[:lifeform].does_not_match(search_str)).
@@ -63,6 +64,7 @@ class Name < AbstractModel
   def propagate_remove_lifeform(lifeform)
     replace_str = " #{lifeform} "
     search_str  = "% #{lifeform} %"
+    name_ids = all_children.map(&:id)
 
     Name.where(id: name_ids).
       where(Name[:lifeform].matches(search_str)).
