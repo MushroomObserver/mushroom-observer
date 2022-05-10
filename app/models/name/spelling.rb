@@ -158,7 +158,7 @@ class Name < AbstractModel
 
     # Nimmo note: this is stunningly easy with AR + Arel
     where(Name[:text_name].length.between(min_len..max_len).
-      and(Name[:correct_spelling_id].not_eq(nil)).
+      and(Name[:correct_spelling_id].eq(nil)).
       and(Name[:text_name].matches_any(patterns))).limit(10).to_a
   end
 
@@ -179,11 +179,11 @@ class Name < AbstractModel
   # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
   def self.fix_self_referential_misspellings
     msgs = Name.select(:id, :text_name, :author).
-           where(correct_spelling_id: id).
+           where(correct_spelling_id: :id).
            map do |id, text_name, author|
              "Name ##{id} #{text_name} #{author} was a misspelling of itself."
            end
-    Name.where(correct_spelling_id: id).update_all(correct_spelling_id: nil)
+    Name.where(correct_spelling_id: :id).update_all(correct_spelling_id: nil)
     msgs
   end
 end
