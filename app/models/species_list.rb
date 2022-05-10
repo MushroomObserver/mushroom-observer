@@ -191,7 +191,7 @@ class SpeciesList < AbstractModel
     title
   end
 
-  # Return formatted title with id appended to make in unique.
+  # Return formatted title with id appended to make unique.
   def unique_format_name
     title = self.title
     if title.blank?
@@ -208,7 +208,7 @@ class SpeciesList < AbstractModel
 
   # Get list of Names, sorted by sort_name, for this list's Observation's.
   def names
-    Name.where(id: observations.map(&:name_id).uniq).order("sort_name ASC")
+    Name.where(id: observations.map(&:name_id).uniq).order(sort_name: :asc)
   end
 
   # Tests to see if the species list includes an Observation with the given
@@ -218,15 +218,7 @@ class SpeciesList < AbstractModel
   end
 
   # After defining a location, update any lists using old "where" name.
-  # Original SQL:
-  # UPDATE species_lists
-  # SET `where` = #{new_name}, location_id = #{location.id}
-  # WHERE `where` = #{old_name}
   def self.define_a_location(location, old_name)
-    # Note: Need to use connection.quote_string here
-    # old_name = SpeciesList.connection.quote_string(old_name)
-    # new_name = SpeciesList.connection.quote_string(location.name)
-
     SpeciesList.where(where: old_name).update_all(
       where: location.name, location_id: location.id
     )
