@@ -130,8 +130,6 @@ class Language < AbstractModel
   #   score
   # end
 
-  private
-
   # rubocop:disable Metrics/AbcSize
   # SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
   # FROM translation_strings t, translation_strings_versions v
