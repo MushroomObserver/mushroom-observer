@@ -790,44 +790,23 @@ class User < AbstractModel
   end
 
   # NIMMO NOTE: this method is not covered by tests?
+  # How to order - https://stackoverflow.com/a/71282345/3357635
   def self.primer_data
-    # How to order - https://stackoverflow.com/a/71282345/3357635
-    User.order(arel_function_last_login_if_recent.desc,
-               User[:contribution].desc).
-      limit(10).pluck(User[:login] + arel_function_login_plus_name).uniq.sort
+    users = User.select(:login, :name).order(
+      arel_last_login_if_recent.desc, User[:contribution].desc
+    ).limit(1000).pluck(:login, :name)
+
+    logins = users.map do |login, name|
+      name.empty? ? login : "#{login} <#{name}>"
+    end.sort
   end
 
-  private_class_method def self.arel_function_last_login_if_recent
-    # Arel::Nodes::NamedFunction.new(
-    #   "IF",
-    #   [User[:last_login].gt(1.month.ago),
-    #    User[:last_login],
-    #    Arel.sql("NULL")]
-    # )
+  private_class_method def self.arel_last_login_if_recent
     User[:last_login].when(
       User[:last_login] > 1.month.ago
     ).then(
       User[:last_login]
     ).else(nil)
-  end
-
-  private_class_method def self.arel_function_login_plus_name
-    # Arel::Nodes::NamedFunction.new(
-    #   "CONCAT",
-    #   [User[:login],
-    #    Arel::Nodes::NamedFunction.new(
-    #      "IF",
-    #      [User[:name].eq(""),
-    #       Arel::Nodes.build_quoted(""),
-    #       Arel::Nodes::NamedFunction.new(
-    #         "CONCAT",
-    #         [Arel::Nodes.build_quoted(" <"),
-    #          User[:name],
-    #          Arel::Nodes.build_quoted(">")]
-    #       )]
-    #    )]
-    # )
-    User[:name].when("").then("").else(" <#{User[:name]}>")
   end
 
   # Erase all references to a given user (by id).  Missing:
