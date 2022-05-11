@@ -796,7 +796,7 @@ class User < AbstractModel
       arel_last_login_if_recent.desc, User[:contribution].desc
     ).limit(1000).pluck(:login, :name)
 
-    logins = users.map do |login, name|
+    users.map do |login, name|
       name.empty? ? login : "#{login} <#{name}>"
     end.sort
   end
