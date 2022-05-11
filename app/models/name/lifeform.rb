@@ -51,21 +51,21 @@ class Name < AbstractModel
   # Add lifeform (one word only) to all children.
   # Nimmo note: We shouldn't have to use the string syntax in update_all
   # but i couldn't get arel-extensions syntax to work
+  # Are we sure all parts are covered in tests?
   def propagate_add_lifeform(lifeform)
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    n = Name.arel_table
     Name.where(id: name_ids).
-      where(n[:lifeform].does_not_match(search_str)).
-      update_all("lifeform = #{(n[:lifeform] + concat_str).to_sql}")
+      where(Name[:lifeform].does_not_match(search_str)).
+      update_all(lifeform: Name[:lifeform] + concat_str)
 
-    o = Observation.arel_table
+    # Weirdly this block requires a string in update all!
     Observation.where(name_id: name_ids).
-      where(o[:lifeform].does_not_match(search_str)).
-      update_all("lifeform = #{(o[:lifeform] + concat_str).to_sql}")
+      where(Observation[:lifeform].does_not_match(search_str)).
+      update_all("lifeform = #{(Observation[:lifeform] + concat_str).to_sql}")
   end
 
   # Remove lifeform (one word only) from all children.
@@ -75,14 +75,12 @@ class Name < AbstractModel
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    n = Name.arel_table
     Name.where(id: name_ids).
-      where(n[:lifeform].matches(search_str)).
-      update_all(lifeform: n[:lifeform].replace(replace_str, " "))
+      where(Name[:lifeform].matches(search_str)).
+      update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
 
-    o = Observation.arel_table
     Observation.where(name_id: name_ids).
-      where(o[:lifeform].matches(search_str)).
-      update_all(lifeform: o[:lifeform].replace(replace_str, " "))
+      where(Observation[:lifeform].matches(search_str)).
+      update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
   end
 end
