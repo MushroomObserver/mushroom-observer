@@ -538,7 +538,7 @@ class User < AbstractModel
     # so we can use Arel methods on it, eg access columns
     ugu = Arel::Table.new(:user_groups_users)
 
-    select_manager = Project.project(Arel.star).join(ugu).
+    select_manager = Project.arel_table.project(Arel.star).join(ugu).
                      on(Project[:admin_group_id].eq(ugu[:user_group_id]).
                         and(ugu[:user_id].eq(id)))
 
