@@ -154,28 +154,22 @@ class Project < AbstractModel
     return unless observations.include?(obs)
 
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
+
+    # Leave images which are attached to other observations
+    # still attached to this project.
     if imgs.any?
-      # Leave images which are attached to other observations
-      # still attached to this project.
-      select_ids = arel_select_leave_these_img_ids(obs, imgs)
-      # puts(select_ids.to_sql)
       leave_these_img_ids = Image.connection.select_values(
-        select_ids.to_sql
+        arel_select_leave_these_img_ids(obs, imgs).to_sql
       ).map(&:to_i)
-      # puts(leave_these_img_ids)
+
       imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
-      # puts(imgs.inspect)
     end
+
     observations.delete(obs)
     imgs.each { |img| images.delete(img) }
     update_attribute(:updated_at, Time.zone.now)
   end
 
-  # SELECT io.image_id FROM images_observations io, observations_projects op
-  # WHERE io.image_id IN (#{img_ids})
-  #   AND io.observation_id != #{obs.id}
-  #   AND io.observation_id = op.observation_id
-  #   AND op.project_id = #{id}
   # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
     io = Arel::Table.new(:images_observations)
