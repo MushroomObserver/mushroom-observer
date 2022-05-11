@@ -230,9 +230,8 @@ class Observation < AbstractModel
   def self.refresh_cached_column(type, foreign, local = foreign)
     # Deliberately skip validations
     tbl = type.camelize.constantize.arel_table
-    obs = Observation.arel_table
     broken_caches = Observation.joins(type.to_sym).
-                    where(obs[local.to_s.to_sym].
+                    where(Observation[local.to_s.to_sym].
                           not_eq(tbl[foreign.to_s.to_sym]))
     broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
@@ -241,43 +240,26 @@ class Observation < AbstractModel
     # Nimmo note:
     # Rubocop says possible SQL injection - can we rewrite or sanitize params?
     broken_caches.update_all(
-      "`observations`.`#{local}` = `#{type.pluralize}`.`#{foreign}`"
+      "observations.#{local} = #{type.pluralize}.#{foreign}"
     )
   end
 
   # Used by Name and Location to update the observation cache when a cached
   # field value is changed.
   def self.update_cache(type, field, id, val)
-    # update_manager = arel_update_cache(type, field, id, val)
-    # puts(update_manager.to_sql)
-    # Observation.connection.update(update_manager.to_sql)
     Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
-
-  # UPDATE observations
-  # SET `#{field}` = #{Observation.connection.quote(val)}
-  # WHERE #{type}_id = #{id}
-  # private_class_method def self.arel_update_cache(type, field, id, val)
-  #   obs = Observation.arel_table
-
-  #   Arel::UpdateManager.new.
-  #     table(obs).
-  #     set([[obs[field.to_sym], val]]).
-  #     where(obs["#{type}_id".to_sym].eq(id))
-  # end
 
   # Check for any observations whose consensus is a misspelled name.  This can
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
-    # Deliberately skip validations
-    obs = Observation.arel_table
-    names = Name.arel_table
-
     misspellings = Observation.joins(:name).
-                   where(names[:correct_spelling_id].not_eq(nil))
-    misspellings.pluck(obs[:id], names[:text_name]).map do |id, search_name|
+                   where(Name[:correct_spelling_id].not_eq(nil))
+
+    misspellings.pluck(Observation[:id], Name[:text_name]).map do
+      |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
     misspellings.update_all(
