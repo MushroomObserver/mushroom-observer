@@ -93,7 +93,7 @@ class Comment < AbstractModel
   require "arel-helpers"
   include ArelHelpers::ArelTable
 
-v  require_dependency "comment/callbacks"
+  require_dependency "comment/callbacks"
 
   belongs_to :target, polymorphic: true
   belongs_to :user
