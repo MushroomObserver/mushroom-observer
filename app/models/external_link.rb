@@ -24,6 +24,9 @@
 #  url::           Actual URL, complete with transport ("http://"), etc.
 #
 class ExternalLink < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :observation
   belongs_to :external_site
   belongs_to :user

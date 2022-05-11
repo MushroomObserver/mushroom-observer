@@ -11,6 +11,9 @@
 #                  may edit external_links to this site for any observation.
 #
 class ExternalSite < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :project
   has_many   :external_links
   has_many   :observations, through: :external_links

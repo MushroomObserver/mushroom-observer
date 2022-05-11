@@ -34,6 +34,9 @@
 #  unique_format_name  name for unorphaned objects
 #
 class Sequence < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :observation
   belongs_to :user
 

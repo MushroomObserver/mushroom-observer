@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class ApiKey < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
   before_create :provide_defaults
 

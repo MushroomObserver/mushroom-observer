@@ -41,6 +41,9 @@
 ################################################################################
 #
 class Project < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :admin_group, class_name: "UserGroup",
                            foreign_key: "admin_group_id"
   belongs_to :rss_log

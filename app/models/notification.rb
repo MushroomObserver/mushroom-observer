@@ -30,6 +30,9 @@
 #  None.
 #
 class Notification < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
 
   # enum definitions for use by simple_enum gem

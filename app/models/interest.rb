@@ -50,6 +50,9 @@
 ################################################################################
 #
 class Interest < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :target, polymorphic: true
   belongs_to :user
 

@@ -2,6 +2,9 @@
 
 # Donations to Mushroom Observer, Inc.
 class Donation < ApplicationRecord
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
 
   def self.donor_list

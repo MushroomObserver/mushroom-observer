@@ -51,6 +51,9 @@
 #
 ################################################################################
 class Naming < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :observation
   belongs_to :name
   belongs_to :user

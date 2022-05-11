@@ -3,6 +3,8 @@
 # Glossary of mycological terms, with illustrations
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
 
   belongs_to(:thumb_image,
              class_name: "Image",

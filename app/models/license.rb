@@ -40,6 +40,9 @@
 ################################################################################
 
 class License < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   has_many :images
   has_many :location_descriptions
   has_many :name_descriptions

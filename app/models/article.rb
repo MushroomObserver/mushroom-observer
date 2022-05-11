@@ -23,6 +23,9 @@
 #  unique_text_name     name + id without formatting
 #
 class Article < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
   belongs_to :rss_log
 

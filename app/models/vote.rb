@@ -63,6 +63,9 @@
 ################################################################################
 
 class Vote < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
   belongs_to :naming
   belongs_to :observation

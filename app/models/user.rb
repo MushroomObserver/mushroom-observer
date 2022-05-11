@@ -200,7 +200,6 @@
 class User < AbstractModel
   require "digest/sha1"
   require "arel-helpers"
-
   include ArelHelpers::ArelTable
   include ArelHelpers::JoinAssociation
 
