@@ -534,13 +534,12 @@ class User < AbstractModel
   # Return an Array of Project's that this User is an admin for.
   # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
-    prj = Project.arel_table
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
     ugu = Arel::Table.new(:user_groups_users)
 
-    select_manager = prj.project(Arel.star).join(ugu).
-                     on(prj[:admin_group_id].eq(ugu[:user_group_id]).
+    select_manager = Project.project(Arel.star).join(ugu).
+                     on(Project[:admin_group_id].eq(ugu[:user_group_id]).
                         and(ugu[:user_id].eq(id)))
 
     @projects_admin ||= Project.joins(*select_manager.join_sources)
@@ -569,11 +568,8 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      hr = HerbariumRecord.arel_table
-      select_manager = hr.project(hr[:herbarium_id]).
-                       where(hr[:user_id].eq(id)).
-                       order(hr[:created_at].desc).take(1)
-      herbarium_id = Herbarium.connection.select_value(select_manager.to_sql)
+      herbarium_id = HerbariumRecord.where(user_id: id).
+                     order(created_at: :desc).take(1).pluck(:herbarium_id).first
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
@@ -641,27 +637,43 @@ class User < AbstractModel
   #   when :ignoring; ...
   #   end
   #
+  # NIMMO NOTE: These methods were not previously covered by tests?
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      sql = interest_in_sql(object)
-      case Interest.connection.select_value(sql).to_s
-      when "1"
+      i = Interest.where(
+        user_id: id, target_type: object.class.name, target_id: object.id
+      ).limit(1).pluck(:state).first
+      case i
+      when true
         :watching
-      when "0"
+      when false
         :ignoring
       end
     end
   end
 
-  def interest_in_sql(object)
-    i = Interest.arel_table
-    i.project(i[:state]).
-      where(i[:user_id].eq(id).
-        and(i[:target_type].eq(object.class.name)).
-        and(i[:target_id].eq(object.id))).
-      take(1).to_sql
-  end
+  # def interest_in(object)
+  #   @interests ||= {}
+  #   @interests["#{object.class.name} #{object.id}"] ||= begin
+  #     sql = interest_in_sql(object)
+  #     case Interest.connection.select_value(sql).to_s
+  #     when "1"
+  #       :watching
+  #     when "0"
+  #       :ignoring
+  #     end
+  #   end
+  # end
+  #
+  # def interest_in_sql(object)
+  #   i = Interest.arel_table
+  #   i.project(i[:state]).
+  #     where(i[:user_id].eq(id).
+  #       and(i[:target_type].eq(object.class.name)).
+  #       and(i[:target_id].eq(object.id))).
+  #     take(1).to_sql
+  # end
 
   # Has this user expressed positive interest in a given object?
   #
@@ -777,41 +789,45 @@ class User < AbstractModel
       readlines.map(&:chomp)
   end
 
-  private_class_method def self.primer_data
+  # NIMMO NOTE: this method is not covered by tests?
+  def self.primer_data
     # How to order - https://stackoverflow.com/a/71282345/3357635
-    users = User.arel_table
     User.order(arel_function_last_login_if_recent.desc,
-               users[:contribution].desc).
-      limit(1000).pluck(arel_function_login_plus_name).uniq.sort
+               User[:contribution].desc).
+      limit(10).pluck(User[:login] + arel_function_login_plus_name).uniq.sort
   end
 
   private_class_method def self.arel_function_last_login_if_recent
-    users = User.arel_table
-    Arel::Nodes::NamedFunction.new(
-      "IF",
-      [users[:last_login].gt(1.month.ago),
-       users[:last_login],
-       Arel.sql("NULL")]
-    )
+    # Arel::Nodes::NamedFunction.new(
+    #   "IF",
+    #   [User[:last_login].gt(1.month.ago),
+    #    User[:last_login],
+    #    Arel.sql("NULL")]
+    # )
+    User[:last_login].when(
+      User[:last_login] > 1.month.ago
+    ).then(
+      User[:last_login]
+    ).else(nil)
   end
 
   private_class_method def self.arel_function_login_plus_name
-    users = User.arel_table
-    Arel::Nodes::NamedFunction.new(
-      "CONCAT",
-      [users[:login],
-       Arel::Nodes::NamedFunction.new(
-         "IF",
-         [users[:name].eq(""),
-          Arel::Nodes.build_quoted(""),
-          Arel::Nodes::NamedFunction.new(
-            "CONCAT",
-            [Arel::Nodes.build_quoted(" <"),
-             users[:name],
-             Arel::Nodes.build_quoted(">")]
-          )]
-       )]
-    )
+    # Arel::Nodes::NamedFunction.new(
+    #   "CONCAT",
+    #   [User[:login],
+    #    Arel::Nodes::NamedFunction.new(
+    #      "IF",
+    #      [User[:name].eq(""),
+    #       Arel::Nodes.build_quoted(""),
+    #       Arel::Nodes::NamedFunction.new(
+    #         "CONCAT",
+    #         [Arel::Nodes.build_quoted(" <"),
+    #          User[:name],
+    #          Arel::Nodes.build_quoted(">")]
+    #       )]
+    #    )]
+    # )
+    User[:name].when("").then("").else(" <#{User[:name]}>")
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -881,9 +897,10 @@ class User < AbstractModel
 
   # Delete their observations' attachments.
   private_class_method def self.delete_observations_attachments(id)
-    obs = Observation.arel_table
-    obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
-    obs_ids = User.connection.select_values(obs_select_manager.to_sql)
+    # obs = Observation.arel_table
+    # obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
+    # obs_ids = User.connection.select_values(obs_select_manager.to_sql)
+    obs_ids = Observation.where(user_id: id).pluck(:id)
     return unless obs_ids.any?
 
     [
