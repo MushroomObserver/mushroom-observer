@@ -240,7 +240,9 @@ class Observation < AbstractModel
     # Nimmo note:
     # Rubocop says possible SQL injection - can we rewrite or sanitize params?
     broken_caches.update_all(
-      "observations.#{local} = #{type.pluralize}.#{foreign}"
+      sanitize_sql_for_assignment(
+        "observations.#{local} = #{type.pluralize}.#{foreign}"
+      )
     )
   end
 
