@@ -2,14 +2,20 @@
 
 # Donations to Mushroom Observer, Inc.
 class Donation < ApplicationRecord
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :user
 
   def self.donor_list
-    connection.select_all(
-      "SELECT who, SUM(amount) total, MAX(created_at) most_recent
-      FROM donations WHERE anonymous = 0 and reviewed = 1
-      GROUP BY who, email ORDER BY total DESC, most_recent DESC"
-    ).to_a
+    values = Donation.where(anonymous: 0, reviewed: 1).group(:who, :email).
+             order(Donation[:amount].sum.desc,
+                   Donation[:created_at].maximum.desc).
+             pluck(:who, Donation[:amount].sum, Donation[:created_at].maximum)
+
+    values.map do |who, total, most_recent|
+      { "who" => who, "total" => total, "most_recent" => most_recent }
+    end
   end
 
   def other_amount

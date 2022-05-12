@@ -21,10 +21,6 @@
 #  mailing_address::  Postal address for sending specimens to (optional).
 #  description::      Random notes (optional).
 #
-#  == Class methods
-#
-#  Herbarium.primer::       List of names to prime autocompleter.
-#
 #  == Instance methods
 #
 #  herbarium_records::      HerbariumRecord(s) belonging to this Herbarium.
@@ -46,6 +42,9 @@
 #
 ################################################################################
 class Herbarium < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
   has_and_belongs_to_many :curators, class_name: "User",
@@ -159,26 +158,6 @@ class Herbarium < AbstractModel
     dest = self
     dest.curators          += src.curators - dest.curators
     dest.herbarium_records += src.herbarium_records - dest.herbarium_records
-  end
-
-  # Look at the most recent HerbariumRecord's the current User has created.
-  # Return a list of the last 100 herbarium names used in those
-  # HerbariumRecords that this user is a curator for.  This list is used to
-  # prime Herbarium auto-completers.
-  def self.primer
-    result = ""
-    if User.current
-      result = connection.select_values(%(
-        SELECT DISTINCT h.name AS x
-        FROM herbarium_records s, herbaria h, herbaria_curators c
-        WHERE s.herbarium_id = h.id
-        AND h.id = c.herbarium_id
-        AND c.user_id = #{user_id}
-        ORDER BY s.updated_at DESC
-        LIMIT 100
-      )).sort
-    end
-    result
   end
 
   def self.find_by_code_with_wildcards(str)
