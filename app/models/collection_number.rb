@@ -104,7 +104,6 @@ class CollectionNumber < AbstractModel
     end
   end
 
-  # DELETE FROM collection_numbers WHERE id = #{id}
   def destroy_without_callbacks
     delete
   end
@@ -112,11 +111,8 @@ class CollectionNumber < AbstractModel
   # Mirror changes to collection number in herbarium records.  Do this
   # low-level to avoid redundant rss logs and other callbacks.
   def change_corresponding_herbarium_records(old_format_name)
-    new_format_name = Observation.connection.quote_string(format_name)
-    old_format_name = Observation.connection.quote_string(old_format_name)
-
     HerbariumRecord.joins(observations: :collection_numbers).where(
       accession_number: old_format_name, collection_numbers: { id: id }
-    ).update_all(accession_number: new_format_name)
+    ).update_all(accession_number: format_name)
   end
 end
