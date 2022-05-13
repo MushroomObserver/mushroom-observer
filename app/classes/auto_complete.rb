@@ -138,9 +138,9 @@ class AutoCompleteLocation < AutoCompleteByWord
       # WHERE (`observations`.`where` LIKE '#{letter}') OR
       #       (`observations`.`where` LIKE '% #{letter}%')
       #
-      Observation.select(:where).where(Observation[:where].matches(letter).
-        or(Observation[:where].matches("% #{letter}%"))).distinct.
-      pluck(:where) +
+      Observation.select(:where).distinct.
+      where(Observation[:where].matches(letter).
+        or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
       #
       # SELECT DISTINCT `name` FROM locations
       # WHERE `name` LIKE '#{letter}%' OR
@@ -150,8 +150,9 @@ class AutoCompleteLocation < AutoCompleteByWord
       # WHERE (`locations`.`name` LIKE '#{letter}') OR
       #       (`locations`.`name` LIKE '% #{letter}%')
       #
-      Location.select(:name).where(Location[:name].matches(letter).
-        or(Location[:name].matches("% #{letter}%"))).distinct.pluck(:name)
+      Location.select(:name).distinct.
+      where(Location[:name].matches(letter).
+        or(Location[:name].matches("% #{letter}%"))).pluck(:name)
 
     matches.map! { |m| Location.reverse_name(m) } if reverse
     matches.sort.uniq
