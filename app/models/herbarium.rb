@@ -46,6 +46,9 @@
 #
 ################################################################################
 class Herbarium < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
   has_and_belongs_to_many :curators, class_name: "User",

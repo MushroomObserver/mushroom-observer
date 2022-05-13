@@ -138,6 +138,9 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+
   belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
   belongs_to :name # (used to cache consensus name)
   belongs_to :location

@@ -120,22 +120,16 @@ class AutoCompleteLocation < AutoCompleteByWord
     self.reverse = (params[:format] == "scientific")
   end
 
-  # Nimmo note: `rough_matches` should be a scope for these models
+  # Nimmo note: `rough_matches` could be a scope for these models...
   # Then it's just Observation.rough_matches(letter).pluck(:where)
+  # (but you have to remember which column to pluck).
+  # This could be useful for graphQL, or not.
   def rough_matches(letter)
-    # matches = Observation.connection.select_values(%(
-    #   SELECT DISTINCT `where` FROM observations
-    #   WHERE `where` LIKE '#{letter}%' OR
-    #         `where` LIKE '% #{letter}%'
-    # )) + Location.connection.select_values(%(
-    #   SELECT DISTINCT `name` FROM locations
-    #   WHERE `name` LIKE '#{letter}%' OR
-    #         `name` LIKE '% #{letter}%'
-    # ))
-    matches = Observation.where(Observation[:where].matches(letter).
-      or(Observation[:where].matches("% #{letter}%"))).distinct.pluck(:where) +
-              Location.where(Location[:name].matches(letter).
-                or(Location[:name].matches("% #{letter}%"))).distinct.pluck(:name)
+    matches =
+      Observation.select(:where).where(Observation[:where].matches(letter).
+        or(Observation[:where].matches("% #{letter}%"))).distinct.pluck(:where) +
+      Location.select(:name).where(Location[:name].matches(letter).
+        or(Location[:name].matches("% #{letter}%"))).distinct.pluck(:name)
 
     matches.map! { |m| Location.reverse_name(m) } if reverse
     matches.sort.uniq
@@ -144,71 +138,59 @@ end
 
 class AutoCompleteName < AutoCompleteByString
   def rough_matches(letter)
-    # Name.connection.select_values(%(
-    #   SELECT DISTINCT text_name FROM names
-    #   WHERE text_name LIKE '#{letter}%'
-    #   AND correct_spelling_id IS NULL
-    # )).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
     # (this sort puts genera and higher on top, everything else
     # on bottom, and sorts alphabetically within each group)
-    Name.with_correct_spelling.
-      where(Name[:text_name].matches("#{letter}%")).distinct.
+    Name.with_correct_spelling.select(:text_name).distinct.
+      where(Name[:text_name].matches("#{letter}%")).
       pluck(:text_name).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
   end
 end
 
 class AutoCompleteProject < AutoCompleteByWord
   def rough_matches(letter)
-    # Project.connection.select_values(%(
-    #   SELECT DISTINCT title FROM projects
-    #   WHERE title LIKE '#{letter}%'
-    #      OR title LIKE '% #{letter}%'
-    #   ORDER BY title ASC
-    # ))
-    Project.where(Project[:title].matches("#{letter}%").
-      or(Project[:title].matches("% #{letter}%"))).distinct.
+    Project.select(:title).distinct.
+      where(Project[:title].matches("#{letter}%").
+        or(Project[:title].matches("% #{letter}%"))).
       order(title: :asc).pluck(:title)
   end
 end
 
 class AutoCompleteSpeciesList < AutoCompleteByWord
   def rough_matches(letter)
-    # SpeciesList.connection.select_values(%(
-    #   SELECT DISTINCT title FROM species_lists
-    #   WHERE title LIKE '#{letter}%'
-    #      OR title LIKE '% #{letter}%'
-    #   ORDER BY title ASC
-    # ))
-    SpeciesList.where(SpeciesList[:title].matches("#{letter}%").
-      or(SpeciesList[:title].matches("% #{letter}%"))).distinct.
+    SpeciesList.select(:title).distinct.
+      where(SpeciesList[:title].matches("#{letter}%").
+        or(SpeciesList[:title].matches("% #{letter}%"))).
       order(title: :asc).pluck(:title)
   end
 end
 
 class AutoCompleteUser < AutoCompleteByString
   def rough_matches(letter)
-    User.connection.select_values(%(
-      SELECT DISTINCT CONCAT(
-        users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">"))
-      )
-      FROM users
-      WHERE login LIKE '#{letter}%'
-         OR name LIKE '#{letter}%'
-         OR name LIKE '% #{letter}%'
-      ORDER BY login ASC
-    ))
+    users = User.select(:login, :name).distinct.
+            where(User[:login].matches("#{letter}%").
+              or(User[:name].matches("#{letter}%")).
+              or(User[:name].matches("% #{letter}%"))).
+            order(login: :asc).pluck(:login, :name)
+
+    users.map do |login, name|
+      name.empty? ? login : "#{login} <#{name}>"
+    end.sort
   end
 end
 
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
-    Herbarium.connection.select_values(%(
-      SELECT IF(code = '', name, CONCAT(code, ' - ', name))
-      FROM herbaria
-      WHERE name LIKE '#{letter}%'
-         OR name LIKE '% #{letter}%'
-         OR code LIKE '#{letter}%'
-      ORDER BY IF(code = '', '~', code) ASC, name ASC
-    ))
+    herbaria =
+      Herbarium.select(:code, :name).distinct.
+      where(Herbarium[:name].matches("#{letter}%").
+        or(Herbarium[:name].matches("% #{letter}%")).
+        or(Herbarium[:code].matches("#{letter}%"))).
+      order(Herbarium[:code].
+        when(nil).then(name: :asc).else(code: :asc, name: :asc)).
+      pluck(:code, :name)
+
+    herbaria.map do |code, name|
+      code.empty? ? name : "#{code} - #{name}"
+    end.sort
   end
 end
