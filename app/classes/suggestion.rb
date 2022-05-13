@@ -104,6 +104,6 @@ class Suggestion
     # Note: Ruby 2.7 will allow endless ranges like (vote_cache: 2..)
     Observation.joins(o_i_inner_join.join_sources).
       where(name_id: @name.synonym_ids, vote_cache: 2..Float::INFINITY).
-      order((Observation[:vote_cache] + Image[:vote_cache]).desc).limit(1).first
+      order((Observation[:vote_cache] + Image[:vote_cache]).desc).take
   end
 end
