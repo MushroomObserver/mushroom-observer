@@ -124,10 +124,32 @@ class AutoCompleteLocation < AutoCompleteByWord
   # Then it's just Observation.rough_matches(letter).pluck(:where)
   # (but you have to remember which column to pluck).
   # This could be useful for graphQL, or not.
+  #
+  # TODO: In /AjaxControllerTest#test_auto_complete_location/
+  # this fails to pick up fixture "My 'secret spot', Oregon, USA" ???
+  # I believe the SQL is identical, can't find the mistake here.
   def rough_matches(letter)
     matches =
+      # SELECT DISTINCT `where` FROM observations
+      # WHERE `where` LIKE '#{letter}%' OR
+      #       `where` LIKE '% #{letter}%'
+      #
+      # SELECT DISTINCT `observations`.`where` FROM `observations`
+      # WHERE (`observations`.`where` LIKE '#{letter}') OR
+      #       (`observations`.`where` LIKE '% #{letter}%')
+      #
       Observation.select(:where).where(Observation[:where].matches(letter).
-        or(Observation[:where].matches("% #{letter}%"))).distinct.pluck(:where) +
+        or(Observation[:where].matches("% #{letter}%"))).distinct.
+      pluck(:where) +
+      #
+      # SELECT DISTINCT `name` FROM locations
+      # WHERE `name` LIKE '#{letter}%' OR
+      #       `name` LIKE '% #{letter}%'
+      #
+      # SELECT DISTINCT `locations`.`name` FROM `locations`
+      # WHERE (`locations`.`name` LIKE '#{letter}') OR
+      #       (`locations`.`name` LIKE '% #{letter}%')
+      #
       Location.select(:name).where(Location[:name].matches(letter).
         or(Location[:name].matches("% #{letter}%"))).distinct.pluck(:name)
 
