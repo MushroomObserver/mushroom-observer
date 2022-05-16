@@ -78,8 +78,6 @@
 #
 class Location < AbstractModel
   require "acts_as_versioned"
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log

@@ -43,9 +43,6 @@
 #                     Herbarium.  Called after create.
 #
 class HerbariumRecord < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :herbarium
   belongs_to :user
   has_and_belongs_to_many :observations
