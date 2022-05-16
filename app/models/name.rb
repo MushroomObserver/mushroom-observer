@@ -276,9 +276,6 @@
 class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-  include ArelHelpers::JoinAssociation
 
   require_dependency "name/change"
   require_dependency "name/create"
