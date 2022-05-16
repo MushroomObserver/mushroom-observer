@@ -96,6 +96,10 @@ class CacheTest < UnitTestCase
       assert_true(obs.lifeform.include?(" lichen "))
       assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
+    Name.where("text_name LIKE 'Agaricus %'").each do |name|
+      assert_true(name.lifeform.include?(" lichen "))
+      assert_operator(name.updated_at, :<, 1.minute.ago)
+    end
     name.propagate_remove_lifeform("lichen")
     Observation.where("text_name LIKE 'Agaricus %'").each do |obs|
       assert_false(obs.lifeform.include?(" lichen "))
