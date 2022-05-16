@@ -112,12 +112,14 @@ class AutoCompleteByWord < AutoComplete
   end
 end
 
-# Nimmo note: Desirable for `rough_matches` to be a scope for these models?
+# Nimmo note: Is it desirable to make `rough_matches` a scope for these models?
+# Doing that, plus a method to pluck the values, would solve the ABC violation.
 # Any caching advantage in that? Then below, it'd be something like:
-#   Observation.rough_matches(letter).pluck(:where)
-# Or would this scatter the code? Have to remember which column to pluck.
+#   Observation.rough_matches(letter).pluck_matches
+# Or would this scatter the code?
 # Thinking the scope could be useful for graphQL, or it could use this class.
 #
+# rubocop:disable Metrics/AbcSize
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -197,4 +199,5 @@ class AutoCompleteHerbarium < AutoCompleteByWord
       code.empty? ? name : "#{code} - #{name}"
     end.sort
   end
+  # rubocop:enable Metrics/AbcSize
 end
