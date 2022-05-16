@@ -199,9 +199,6 @@
 #
 class User < AbstractModel
   require "digest/sha1"
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-  include ArelHelpers::JoinAssociation
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value

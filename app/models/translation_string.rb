@@ -22,8 +22,6 @@
 
 class TranslationString < AbstractModel
   require "acts_as_versioned"
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
 
   belongs_to :language
   belongs_to :user

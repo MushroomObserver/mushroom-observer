@@ -32,9 +32,6 @@
 ################################################################################
 
 class Publication < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :user
 
   validate :check_requirements

@@ -148,9 +148,6 @@
 #  None.
 #
 class RssLog < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :article
   belongs_to :glossary_term
   belongs_to :location

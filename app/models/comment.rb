@@ -90,9 +90,6 @@
 #    comment.target_changed?
 #
 class Comment < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   require_dependency "comment/callbacks"
 
   belongs_to :target, polymorphic: true

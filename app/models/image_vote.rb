@@ -26,9 +26,6 @@
 ################################################################################
 
 class ImageVote < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :user
   belongs_to :image
 end

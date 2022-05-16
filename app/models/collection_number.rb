@@ -51,9 +51,6 @@
 #  None.
 #
 class CollectionNumber < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   has_and_belongs_to_many :observations
   belongs_to :user
 

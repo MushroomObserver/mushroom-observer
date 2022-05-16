@@ -27,8 +27,6 @@
 ################################################################################
 
 class Language < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
   include LanguageExporter
   class << self
     include LanguageTracking
