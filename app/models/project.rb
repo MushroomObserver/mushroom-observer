@@ -145,31 +145,28 @@ class Project < AbstractModel
     imgs.each { |img| images.push(img) }
   end
 
-  # Nimmo note: I remember this one was a lot of work to get right.
-  # IIRC, the Arel was definitely more efficient than the AR for this join.
-  # But it's been so long, i honestly don't remember. Viva la small PR!
-
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
     return unless observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
-
-    # Leave images which are attached to other observations
-    # still attached to this project.
-    if imgs.any?
-      leave_these_img_ids = Image.connection.select_values(
-        arel_select_leave_these_img_ids(obs, imgs).to_sql
-      ).map(&:to_i)
-
-      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
-    end
-
+    imgs_to_delete(obs).each { |img| images.delete(img) }
     observations.delete(obs)
-    imgs.each { |img| images.delete(img) }
     update_attribute(:updated_at, Time.zone.now)
   end
 
+  def imgs_to_delete(obs)
+    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    return imgs if imgs.none?
+
+    # Do not delete images which are attached to other observations
+    # still attached to this project.
+    leave_these_img_ids = Image.connection.select_values(
+      arel_select_leave_these_img_ids(obs, imgs).to_sql
+    ).map(&:to_i)
+    imgs.reject { |img| leave_these_img_ids.include?(img.id) }
+  end
+
+  # Note: Arel is definitely more efficient than AR for this join.
   # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
     io = Arel::Table.new(:images_observations)
