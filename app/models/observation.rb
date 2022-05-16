@@ -234,8 +234,6 @@ class Observation < AbstractModel
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
     # Refresh the mirror of a foreign table's column in the observations table.
-    # Nimmo note:
-    # Rubocop says possible SQL injection - can we rewrite or sanitize params?
     broken_caches.update_all(
       sanitize_sql_for_assignment(
         "observations.#{local} = #{type.pluralize}.#{foreign}"
