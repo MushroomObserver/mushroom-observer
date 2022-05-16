@@ -67,6 +67,9 @@
 
 class AbstractModel < ApplicationRecord
   self.abstract_class = true
+  require "arel-helpers"
+  include ArelHelpers::ArelTable
+  include ArelHelpers::JoinAssociation
 
   def self.acts_like_model?
     true
