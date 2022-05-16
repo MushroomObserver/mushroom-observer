@@ -25,9 +25,6 @@
 ################################################################################
 
 class CopyrightChange < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :user
   belongs_to :target, polymorphic: true
   belongs_to :license

@@ -220,8 +220,6 @@ require("mimemagic")
 class Image < AbstractModel
   require "fileutils"
   require "net/http"
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
 
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
