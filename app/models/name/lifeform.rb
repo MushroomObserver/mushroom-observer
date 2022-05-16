@@ -49,20 +49,28 @@ class Name < AbstractModel
   end
 
   # Add lifeform (one word only) to all children.
-  # Nimmo note: We shouldn't have to use the string syntax in update_all
-  # but i couldn't get arel-extensions syntax to work
-  # Are we sure all parts are covered in tests?
+  # Nimmo note: Are we sure the Name.update_all below is covered in tests?
+  # I'm trying to remove the use of the update_all string interpolation syntax.
+  # More notes below. Note that propagate_remove_lifeform does not need it.
+  #
   def propagate_add_lifeform(lifeform)
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
+    # These pass tests but i'm not sure they're tested:
+    # update_all(lifeform: Name[:lifeform] + concat_str)
+    # update_all(lifeform: Name[:lifeform].concat(concat_str))
+    # So i'm using string interpolation as seems to be necessary below
     Name.where(id: name_ids).
       where(Name[:lifeform].does_not_match(search_str)).
-      update_all(lifeform: Name[:lifeform] + concat_str)
+      update_all("lifeform = #{(Name[:lifeform] + concat_str).to_sql}")
 
-    # Weirdly this block requires a string in update all!
+    # Likewise, I believe the following two should work but don't:
+    # update_all(lifeform: Observation[:lifeform] + concat_str)
+    # update_all(lifeform: Observation[:lifeform].concat(concat_str))
+    # Weirdly this block seems to require a string interpolation in update_all.
     Observation.where(name_id: name_ids).
       where(Observation[:lifeform].does_not_match(search_str)).
       update_all("lifeform = #{(Observation[:lifeform] + concat_str).to_sql}")
