@@ -112,6 +112,12 @@ class AutoCompleteByWord < AutoComplete
   end
 end
 
+# Nimmo note: Desirable for `rough_matches` to be a scope for these models?
+# Any caching advantage in that? Then below, it'd be something like:
+#   Observation.rough_matches(letter).pluck(:where)
+# Or would this scatter the code? Have to remember which column to pluck.
+# Thinking the scope could be useful for graphQL, or it could use this class.
+#
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -120,38 +126,13 @@ class AutoCompleteLocation < AutoCompleteByWord
     self.reverse = (params[:format] == "scientific")
   end
 
-  # Nimmo note: `rough_matches` could be a scope for these models...
-  # Then it's just Observation.rough_matches(letter).pluck(:where)
-  # (but you have to remember which column to pluck).
-  # This could be useful for graphQL, or not.
-  #
-  # TODO: In /AjaxControllerTest#test_auto_complete_location/
-  # this fails to pick up fixture "My 'secret spot', Oregon, USA" ???
-  # I believe the SQL is identical, can't find the mistake here.
   def rough_matches(letter)
     matches =
-      # SELECT DISTINCT `where` FROM observations
-      # WHERE `where` LIKE '#{letter}%' OR
-      #       `where` LIKE '% #{letter}%'
-      #
-      # SELECT DISTINCT `observations`.`where` FROM `observations`
-      # WHERE (`observations`.`where` LIKE '#{letter}') OR
-      #       (`observations`.`where` LIKE '% #{letter}%')
-      #
       Observation.select(:where).distinct.
-      where(Observation[:where].matches(letter).
+      where(Observation[:where].matches("#{letter}%").
         or(Observation[:where].matches("% #{letter}%"))).pluck(:where) +
-      #
-      # SELECT DISTINCT `name` FROM locations
-      # WHERE `name` LIKE '#{letter}%' OR
-      #       `name` LIKE '% #{letter}%'
-      #
-      # SELECT DISTINCT `locations`.`name` FROM `locations`
-      # WHERE (`locations`.`name` LIKE '#{letter}') OR
-      #       (`locations`.`name` LIKE '% #{letter}%')
-      #
       Location.select(:name).distinct.
-      where(Location[:name].matches(letter).
+      where(Location[:name].matches("#{letter}%").
         or(Location[:name].matches("% #{letter}%"))).pluck(:name)
 
     matches.map! { |m| Location.reverse_name(m) } if reverse
