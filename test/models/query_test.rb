@@ -3163,8 +3163,8 @@ class QueryTest < UnitTestCase
     )
     assert_query(expect, :Observation, :all, region: "California, USA")
 
-    expect = Location.where(Location[:name].matches("%, USA").or(
-      Location[:name].matches("%, Canada")))
+    expect = Location.where(Location[:name].matches("%, USA").
+              or(Location[:name].matches("%, Canada")))
     assert(expect.include?(locations(:albion))) # usa
     assert(expect.include?(locations(:elgin_co))) # canada
     assert_query(expect, :Location, :all, region: "North America")
