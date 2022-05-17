@@ -25,9 +25,6 @@
 #  None.
 #
 class Synonym < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   has_many :names
 
   # Nightly cronjob to ensure that no synonym records accidentally got deleted.
