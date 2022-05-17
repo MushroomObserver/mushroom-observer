@@ -59,7 +59,7 @@ class HerbariumTest < UnitTestCase
     # Do it this way to make absolutely sure no duplicate records are being
     # created in the glue table.  This can and has happened with other tables.
     hc = Arel::Table.new(:herbaria_curators)
-    curator_ids = User.connection.select_values(hc.project(:user_id).
+    curator_ids = Herbarium.connection.select_values(hc.project(:user_id).
                   where(hc[:herbarium_id].eq(ny.id)))
     assert_equal(curators.map(&:id).sort, curator_ids.sort)
     assert_obj_list_equal(herbarium_records, result.herbarium_records)
