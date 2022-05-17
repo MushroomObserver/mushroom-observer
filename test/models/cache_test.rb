@@ -81,7 +81,9 @@ class CacheTest < UnitTestCase
     new_classification = names(:peltigera).classification
     name.update(classification: new_classification)
     name.propagate_classification
-    Observation.where("text_name LIKE 'Agaricus%'").each do |obs|
+    Observation.where(
+      Observation[:text_name].matches("Agaricus%")
+    ).each do |obs|
       assert_equal(new_classification, obs.classification)
       assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
@@ -92,20 +94,28 @@ class CacheTest < UnitTestCase
   def test_propagate_lifeform
     name = names(:agaricus)
     name.propagate_add_lifeform("lichen")
-    Observation.where("text_name LIKE 'Agaricus %'").each do |obs|
+    Observation.where(
+      Observation[:text_name].matches("Agaricus %")
+    ).each do |obs|
       assert_true(obs.lifeform.include?(" lichen "))
       assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
-    Name.where("text_name LIKE 'Agaricus %'").each do |nam|
+    Name.where(
+      Name[:text_name].matches("Agaricus %")
+    ).each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))
       assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
     name.propagate_remove_lifeform("lichen")
-    Observation.where("text_name LIKE 'Agaricus %'").each do |obs|
+    Observation.where(
+      Observation[:text_name].matches("Agaricus %")
+    ).each do |obs|
       assert_false(obs.lifeform.include?(" lichen "))
       assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
-    Name.where("text_name LIKE 'Agaricus %'").each do |nam|
+    Name.where(
+      Name[:text_name].matches("Agaricus %")
+    ).each do |nam|
       assert_false(nam.lifeform.include?(" lichen "))
       assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
