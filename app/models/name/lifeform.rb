@@ -49,17 +49,15 @@ class Name < AbstractModel
   end
 
   # Add lifeform (one word only) to all children.
-  # Nimmo note:
-  # I'm trying to remove the use of update_all string interpolation syntax.
-  # More notes below. Note that propagate_remove_lifeform does not need it.
-  #
   def propagate_add_lifeform(lifeform)
     concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    # I believe the following two should work but don't:
+    # Using string interpolation because Rails 5 does not parse a concat node?
+    # https://github.com/Faveod/arel-extensions/issues/76
+    # The following syntax should work in Rails 6:
     # update_all(lifeform: Name[:lifeform] + concat_str)
     # update_all(lifeform: Name[:lifeform].concat(concat_str))
     Name.where(id: name_ids).
