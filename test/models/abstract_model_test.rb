@@ -458,4 +458,15 @@ class AbstractModelTest < UnitTestCase
     obj = model.first
     assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
   end
+
+  # -------------------------------------------------------------------------
+  #  Checks that arel-helpers are included (from the gem) in ApplicationRecord.
+  #  In the test below, the brackets in User[:login] referring to table column
+  #  will throw  NoMethodError: undefined method `[]' for #<Class>
+  #  if arel-helpers not included. Error could be mystifying at first.
+  # -------------------------------------------------------------------------
+  def test_arel_helpers_included
+    arel_find_user = User.find_by(User[:login].eq(rolf.login))
+    assert_equal(arel_find_user.login, rolf.login)
+  end
 end
