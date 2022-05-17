@@ -443,7 +443,7 @@ class QueryTest < UnitTestCase
     @fungi = names(:fungi)
     @agaricus = names(:agaricus)
     num = Name.count
-    num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
+    num_agaricus = Name.where(Name[:text_name].matches("Agaricus%")).count
 
     assert_equal(num, query.select_count)
     assert_equal(num, query.select_count(limit: 10)) # limits no. of counts!!
@@ -767,10 +767,10 @@ class QueryTest < UnitTestCase
 
     # Get 1st result, which is 1st image of 1st imaged observation
     obs = obs_with_imgs_ids.first
-    imgs = Observation.find(obs).images.order("id ASC").map(&:id)
+    imgs = Observation.find(obs).images.order(id: :asc).map(&:id)
     img = imgs.first
     qr = QueryRecord.where(
-      ["description REGEXP ?", "observation=##{obs}"]
+      QueryRecord[:description].matches_regexp("observation=##{obs}")
     ).first
     q = Query.deserialize(qr.description)
     q_first_query = q.first
@@ -862,7 +862,7 @@ class QueryTest < UnitTestCase
     # else get the next obs, if there is one
     elsif (obs = obs_with_imgs_ids[obs_with_imgs_ids.index(obs) + inc])
       # get its list of image ids
-      imgs = Observation.find(obs).images.order("id ASC").map(&:id)
+      imgs = Observation.find(obs).images.order(id: :asc).map(&:id)
       # get first or last image in the list
       # depending on whether were going forward or back through results
       img = inc.positive? ? imgs.first : imgs.last
@@ -1337,16 +1337,16 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :Article, :pattern_search, pattern: "no article has this")
     # title
-    assert_query(Article.where("title LIKE '%premier_article%'
-                               OR body LIKE '%premier_article%'"),
+    assert_query(Article.where(Article[:title].matches("%premier_article%").
+                               or(Article[:body].matches("%premier_article%"))),
                  :Article, :pattern_search, pattern: "premier_article")
     # body
-    expect = Article.where("title LIKE ? AND title LIKE ? AND title LIKE ?",
-                           "%Body%", "%of%", "%Article%").
-             or(
-               Article.where("body LIKE ? AND body LIKE ? AND body LIKE ?",
-                             "%Body%", "%of%", "%Article%")
-             )
+    expect = Article.where(Article[:title].matches("%Body%")).
+             where(Article[:title].matches("%of%")).
+             where(Article[:title].matches("%Article%")).
+             or(Article.where(Article[:body].matches("%Body%")).
+                        where(Article[:body].matches("%of%")).
+                        where(Article[:body].matches("%Article%")))
     assert_query(expect,
                  :Article, :pattern_search, pattern: "Body of Article")
     assert_query(Article.all,
@@ -1367,12 +1367,14 @@ class QueryTest < UnitTestCase
 
   def test_collection_number_pattern_search
     expect = CollectionNumber.
-             where("name like '%Singer%' or number like '%Singer%'").
+             where(CollectionNumber[:name].matches("%Singer%").
+                   or(CollectionNumber[:number].matches("%Singer%"))).
              sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :pattern_search, pattern: "Singer")
 
     expect = CollectionNumber.
-             where("name like '%123a%' or number like '%123a%'").
+             where(CollectionNumber[:name].matches("%123a%").
+                   or(CollectionNumber[:number].matches("%123a%"))).
              sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :pattern_search, pattern: "123a")
   end
@@ -1447,7 +1449,7 @@ class QueryTest < UnitTestCase
              group(:id).
              # Wrap known safe argument in Arel
              # to prevent "Dangerous query method" Deprecation Warning
-             order(Arel.sql("COUNT(herbarium_records.id) DESC"))
+             order(HerbariumRecord[:id].count.desc)
     assert_query(expect, :Herbarium, :all, by: :records)
   end
 
@@ -1599,7 +1601,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:detailed_unknown_obs).created_at
     expect =
       Image.joins(:observations).
-      where("observations.created_at >= ?", created_at).uniq
+      where(Observation[:created_at].gteq(created_at)).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, created_at: created_at)
 
@@ -1607,14 +1609,14 @@ class QueryTest < UnitTestCase
     updated_at = observations(:detailed_unknown_obs).updated_at
     expect =
       Image.joins(:observations).
-      where("observations.updated_at >= ?", updated_at).uniq
+      where(Observation[:updated_at].gteq(updated_at)).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, updated_at: updated_at)
 
     # date
     date = observations(:detailed_unknown_obs).when
     expect = Image.joins(:observations).
-             where("observations.when >= ?", date).uniq
+             where(Observation[:when].gteq(date)).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, date: date)
 
@@ -1623,9 +1625,9 @@ class QueryTest < UnitTestCase
     # comments_has
     expect =
       Image.joins(observations: :comments).
-      where("comments.summary LIKE ?", "%give%").
+      where(Comment[:summary].matches("%give%")).
       or(Image.joins(observations: :comments).
-         where("comments.comment LIKE ?", "%give%")).uniq
+         where(Comment[:comment].matches("%give%"))).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, comments_has: "give")
 
@@ -1636,7 +1638,7 @@ class QueryTest < UnitTestCase
     obs.save
     expect =
       Image.joins(:observations).
-      where("observations.notes LIKE ?", "%:substrate:%").uniq
+      where(Observation[:notes].matches("%:substrate:%")).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect,
                  :Image, :with_observations, has_notes_fields: "substrate")
@@ -1911,7 +1913,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    assert_query(Location.where("name REGEXP 'California'"),
+    assert_query(Location.where(Location[:name].matches_regexp("California")),
                  :Location, :regexp_search, regexp: ".alifornia")
   end
 
@@ -1969,7 +1971,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     assert_query(
       Location.joins(:observations).
-               where("observations.created_at >= ?", created_at).uniq,
+               where(Observation[:created_at].gteq(created_at)).uniq,
       :Location, :with_observations, created_at: created_at
     )
 
@@ -1977,13 +1979,13 @@ class QueryTest < UnitTestCase
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Location.joins(:observations).
-               where("observations.updated_at >= ?", updated_at).uniq,
+               where(Observation[:updated_at].gteq(updated_at)).uniq,
       :Location, :with_observations, updated_at: updated_at
     )
     # date
     date = observations(:california_obs).when
     assert_query(
-      Location.joins(:observations).where("observations.when >= ?", date).uniq,
+      Location.joins(:observations).where(Observation[:when].gteq(date)).uniq,
       :Location, :with_observations, date: date
     )
 
@@ -1991,7 +1993,7 @@ class QueryTest < UnitTestCase
 
     # include_subtaxa
     parent = names(:agaricus)
-    children = Name.where("text_name REGEXP ?", "#{parent.text_name} ")
+    children = Name.where(Name[:text_name].matches_regexp(parent.text_name))
     assert_query(
       Location.joins(:observations).
                where(observations: { name: [parent] + children }).uniq,
@@ -2013,10 +2015,10 @@ class QueryTest < UnitTestCase
     )
     assert_query(
       Location.joins(observations: :comments).
-               where("comments.summary LIKE ?", "%cool%").
+               where(Comment[:summary].matches("%cool%")).
                or(
                  Location.joins(observations: :comments).
-                          where("comments.comment LIKE ?", "%cool%")
+                          where(Comment[:comment].matches("%cool%"))
                ).uniq,
       :Location, :with_observations, comments_has: "cool"
     )
@@ -2024,8 +2026,7 @@ class QueryTest < UnitTestCase
     # has_notes_fields
     assert_query(
       Location.joins(:observations).
-               where("observations.notes LIKE ?", "%:substrate:%").
-               uniq,
+               where(Observation[:notes].matches("%:substrate:%")).uniq,
       :Location, :with_observations, has_notes_fields: "substrate"
     )
 
@@ -2047,7 +2048,7 @@ class QueryTest < UnitTestCase
     # notes_has
     assert_query(
       Location.joins(:observations).
-               where("observations.notes LIKE ?", "%somewhere%").uniq,
+               where(Observation[:notes].matches("%somewhere%")).uniq,
       :Location, :with_observations, notes_has: "somewhere"
     )
 
@@ -2336,7 +2337,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name
-    expect = Name.where("text_name LIKE 'agaricus %'").order("text_name").to_a
+    expect = Name.where(Name[:text_name].matches("agaricus %")).
+             order(:text_name).to_a
     expect.reject!(&:is_misspelling?)
     assert_query(expect, :Name, :all,
                  names: [names(:agaricus).id], include_subtaxa: true,
@@ -2435,7 +2437,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     assert_query(
       Name.joins(:observations).
-           where("observations.created_at >= ?", created_at).uniq,
+           where(Observation[:created_at].gteq(created_at)).uniq,
       :Name, :with_observations, created_at: created_at
     )
 
@@ -2443,14 +2445,14 @@ class QueryTest < UnitTestCase
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Name.joins(:observations).
-           where("observations.updated_at >= ?", updated_at).uniq,
+           where(Observation[:updated_at].gteq(updated_at)).uniq,
       :Name, :with_observations, updated_at: updated_at
     )
 
     # date
     date = observations(:california_obs).when
     assert_query(
-      Name.joins(:observations).where("observations.when >= ?", date).uniq,
+      Name.joins(:observations).where(Observation[:when].gteq(date)).uniq,
       :Name, :with_observations, date: date
     )
 
@@ -2459,7 +2461,7 @@ class QueryTest < UnitTestCase
     # has_notes_fields
     assert_query(
       Name.joins(:observations).
-           where("observations.notes LIKE ?", "%:substrate:%").uniq,
+           where(Observation[:notes].matches("%:substrate:%")).uniq,
       :Name, :with_observations, has_notes_fields: "substrate"
     )
 
@@ -2673,8 +2675,9 @@ class QueryTest < UnitTestCase
 
   def test_observation_at_location
     expect = Observation.where(location_id: locations(:burbank).id).
-             includes(:name).
-             order("names.text_name, names.author, observations.id DESC").to_a
+             joins(:name).order(
+               [Name[:text_name], Name[:author], Observation[:id].desc]
+             ).to_a
     assert_query(expect, :Observation, :at_location,
                  location: locations(:burbank))
   end
@@ -2746,7 +2749,7 @@ class QueryTest < UnitTestCase
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_all_name_proposals, exclude_consensus
-    names = Name.where("text_name like 'Agaricus camp%'").to_a
+    names = Name.where(Name[:text_name].matches("Agaricus camp%")).to_a
     agaricus_ssp = names.clone
     name = names.pop
     names.each { |n| name.merge_synonyms(n) }
@@ -2867,15 +2870,16 @@ class QueryTest < UnitTestCase
                  :Observation, :pattern_search, pattern: "pipi valley")
     # location
     expect = Observation.where(location_id: locations(:burbank)).
-             includes(:name).
-             order("names.text_name, names.author,observations.id DESC").to_a
+             joins(:name).order(
+               [Name[:text_name], Name[:author], Observation[:id].desc]
+             ).to_a
     assert_query(expect,
                  :Observation, :pattern_search, pattern: "burbank", by: :name)
 
     # name
     expect = Observation.
-             where("names.text_name LIKE 'agaricus%'").includes(:name).
-             order("names.text_name, names.author, observations.id DESC")
+             where(Name[:text_name].matches("agaricus%")).joins(:name).
+             order([Name[:text_name], Name[:author], Observation[:id].desc])
     assert_query(expect.map(&:id),
                  :Observation, :pattern_search, pattern: "agaricus", by: :name)
   end
@@ -2899,12 +2903,12 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :Project, :pattern_search, pattern: "no project has this")
     # title
-    assert_query(Project.where("summary LIKE '%bolete%'
-                               OR title LIKE '%bolete%'"),
+    assert_query(Project.where(Project[:summary].matches("%bolete%").
+                               or(Project[:title].matches("%bolete%"))),
                  :Project, :pattern_search, pattern: "bolete")
     # summary
-    assert_query(Project.where("summary LIKE '%two lists%'
-                               OR title LIKE '%two lists%'"),
+    assert_query(Project.where(Project[:summary].matches("%two lists%").
+                               or(Project[:title].matches("%two lists%"))),
                  :Project, :pattern_search, pattern: "two lists")
     assert_query(Project.all,
                  :Project, :pattern_search, pattern: "")
@@ -2922,9 +2926,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_all
-    expect = Sequence.all.order("created_at").to_a
+    expect = Sequence.all.order(:created_at).to_a
     assert_query(expect, :Sequence, :all)
-    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")),
                  :Sequence, :all, locus_has: "ITS")
     assert_query([sequences(:alternate_archive)],
                  :Sequence, :all, archive: "UNITE")
@@ -2979,7 +2983,7 @@ class QueryTest < UnitTestCase
 
   def test_sequence_pattern_search
     assert_query([], :Sequence, :pattern_search, pattern: "nonexistent")
-    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")),
                  :Sequence, :pattern_search, pattern: "ITS")
     assert_query([sequences(:alternate_archive)],
                  :Sequence, :pattern_search, pattern: "UNITE")
@@ -2988,7 +2992,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_all
-    expect = SpeciesList.all.order("title").to_a
+    expect = SpeciesList.all.order(:title).to_a
     assert_query(expect, :SpeciesList, :all)
   end
 
@@ -3068,18 +3072,22 @@ class QueryTest < UnitTestCase
   def test_herbarium_record_pattern_search
     assert_query([], :HerbariumRecord, :pattern_search,
                  pattern: "no herbarium record has this")
-    assert_query(HerbariumRecord.where("initial_det LIKE '%Agaricus%'"),
+    assert_query(HerbariumRecord.where(
+                   HerbariumRecord[:initial_det].matches("%Agaricus%")
+                 ),
                  :HerbariumRecord, :pattern_search, pattern: "Agaricus")
-    assert_query(HerbariumRecord.where("notes LIKE '%rare%'"),
+    assert_query(HerbariumRecord.where(
+                   HerbariumRecord[:notes].matches("%rare%")
+                 ),
                  :HerbariumRecord, :pattern_search, pattern: "rare")
     assert_query(HerbariumRecord.all,
                  :HerbariumRecord, :pattern_search, pattern: "")
   end
 
   def test_user_all
-    expect = User.all.order("name").to_a
+    expect = User.all.order(:name).to_a
     assert_query(expect, :User, :all)
-    expect = User.all.order("login").to_a
+    expect = User.all.order(:login).to_a
     assert_query(expect, :User, :all, by: :login)
   end
 
@@ -3129,33 +3137,40 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Observation, :all, has_specimen: "no")
 
     ##### lichen filters #####
-    expect_obs = Observation.where("lifeform LIKE '%lichen%'").to_a
-    expect_names = Name.where("lifeform LIKE '%lichen%'").
+    expect_obs = Observation.where(
+      Observation[:lifeform].matches("%lichen%")
+    ).to_a
+    expect_names = Name.where(Name[:lifeform].matches("%lichen%")).
                    reject(&:correct_spelling_id).to_a
     assert_query(expect_obs, :Observation, :all, lichen: "yes")
     assert_query(expect_names, :Name, :all, lichen: "yes")
 
-    expect_obs = Observation.where("lifeform NOT LIKE '% lichen %'").to_a
-    expect_names = Name.where("lifeform NOT LIKE '% lichen %'").
+    expect_obs = Observation.where(
+      Observation[:lifeform].does_not_match("% lichen %")
+    ).to_a
+    expect_names = Name.where(Name[:lifeform].does_not_match("% lichen %")).
                    reject(&:correct_spelling_id).to_a
     assert_query(expect_obs, :Observation, :all, lichen: "no")
     assert_query(expect_names, :Name, :all, lichen: "no")
 
     ##### region filter #####
-    expect = Location.where("name LIKE '%California%'")
+    expect = Location.where(Location[:name].matches("%California%"))
     assert_query(expect, :Location, :all, region: "California, USA")
     assert_query(expect, :Location, :all, region: "USA, California")
 
-    expect = Observation.where("`where` LIKE '%California, USA'")
+    expect = Observation.where(
+      Observation[:where].matches("%California, USA")
+    )
     assert_query(expect, :Observation, :all, region: "California, USA")
 
-    expect = Location.where("name LIKE '%, USA' OR name LIKE '%, Canada'")
+    expect = Location.where(Location[:name].matches("%, USA").or(
+      Location[:name].matches("%, Canada")))
     assert(expect.include?(locations(:albion))) # usa
     assert(expect.include?(locations(:elgin_co))) # canada
     assert_query(expect, :Location, :all, region: "North America")
 
     ##### clade filter #####
-    expect_names = Name.where("classification LIKE '%Agaricales%'").
+    expect_names = Name.where(Name[:classification].matches("%Agaricales%")).
                    reject(&:correct_spelling_id).to_a
     expect_names << names(:agaricales)
     expect_obs = expect_names.map(&:observations).flatten
@@ -3302,7 +3317,7 @@ class QueryTest < UnitTestCase
     name2.update(classification: name1.classification)
     name2.save
 
-    children = Name.where("text_name LIKE 'Lactarius %'")
+    children = Name.where(Name[:text_name].matches("Lactarius %"))
 
     assert_lookup_names_by_name([name1] + children,
                                 names: ["Lactarius"],
