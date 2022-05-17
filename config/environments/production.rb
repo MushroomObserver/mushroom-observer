@@ -8,7 +8,7 @@ MushroomObserver::Application.configure do
   # ----------------------------
 
   config.domain      = "mushroomobserver.org"
-  config.http_domain = "http://mushroomobserver.org"
+  config.http_domain = "https://mushroomobserver.org"
 
   # List of alternate server domains.
   # We redirect from each of these to the real one.

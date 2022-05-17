@@ -120,10 +120,25 @@ class SpeciesList < AbstractModel
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
-    SpeciesList.connection.delete(%(
-      DELETE FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+
+    # Nimmo Note: afaik, we cannot yet use AR delete_all here because the
+    # observations_species_lists table is not backed by a model
+    # (i.e., it's has_and_belongs_to_many vs. has_many_through)
+    # Conversion to HMT is possible but not super-simple.
+    # SpeciesList.connection.delete(%(
+    #   DELETE FROM observations_species_lists
+    #   WHERE species_list_id = #{id}
+    # ))
+    delete_manager = arel_delete_observations_species_lists(id)
+    # puts(delete_manager.to_sql)
+    SpeciesList.connection.delete(delete_manager.to_sql)
+  end
+
+  def arel_delete_observations_species_lists(id)
+    osl = Arel::Table.new(:observations_species_lists)
+    Arel::DeleteManager.new.
+      from(osl).
+      where(osl[:species_list_id].eq(id))
   end
 
   ##############################################################################
@@ -173,7 +188,7 @@ class SpeciesList < AbstractModel
     title
   end
 
-  # Return formatted title with id appended to make in unique.
+  # Return formatted title with id appended to make unique.
   def unique_format_name
     title = self.title
     if title.blank?
@@ -190,7 +205,7 @@ class SpeciesList < AbstractModel
 
   # Get list of Names, sorted by sort_name, for this list's Observation's.
   def names
-    Name.where(id: observations.map(&:name_id).uniq).order("sort_name ASC")
+    Name.where(id: observations.map(&:name_id).uniq).order(sort_name: :asc)
   end
 
   # Tests to see if the species list includes an Observation with the given
@@ -201,13 +216,9 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE species_lists
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    SpeciesList.where(where: old_name).update_all(
+      where: location.name, location_id: location.id
+    )
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
