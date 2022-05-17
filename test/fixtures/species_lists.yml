@@ -85,3 +85,9 @@ one_genus_three_species_list:
   created_at: 2012-07-06 22:14:00
   updated_at: 2012-07-06 22:14:00
   when: 2017-01-20
+
+no_location_list:
+  <<: *DEFAULTS
+  when: 2022-05-09
+  where: Undefined 'where', Oregon, USA
+  location: nil
