@@ -22,9 +22,6 @@
 
 # access query records saved in the db
 class QueryRecord < ApplicationRecord
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   attr_accessor :query
 
   def query # rubocop:disable Lint/DuplicateMethods

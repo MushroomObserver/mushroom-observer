@@ -83,9 +83,6 @@
 ################################################################################
 #
 class SpeciesList < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
