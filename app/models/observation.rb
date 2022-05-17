@@ -169,9 +169,9 @@ class Observation < AbstractModel
                      through: :observation_views,
                      source: :user
 
-  before_destroy { destroy_orphaned_collection_numbers }
   before_save :cache_content_filter_data
   after_update :notify_users_after_change
+  before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
 
