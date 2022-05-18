@@ -550,12 +550,14 @@ class Api2Test < UnitTestCase
   def test_getting_collection_numbers
     params = { method: :get, action: :collection_number }
 
-    nums = CollectionNumber.where("year(created_at) = 2006")
+    # nums = CollectionNumber.where("year(created_at) = 2006")
+    nums = CollectionNumber.where(CollectionNumber[:created_at].year == 2006)
     assert_not_empty(nums)
     assert_api_pass(params.merge(created_at: "2006"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("year(updated_at) = 2005")
+    # nums = CollectionNumber.where("year(updated_at) = 2005")
+    nums = CollectionNumber.where(CollectionNumber[:updated_at].year == 2005)
     assert_not_empty(nums)
     assert_api_pass(params.merge(updated_at: "2005"))
     assert_api_results(nums)
@@ -576,7 +578,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(collector: "Mary Newbie"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("name LIKE '%mary%'")
+    # nums = CollectionNumber.where("name LIKE '%mary%'")
+    nums = CollectionNumber.where(CollectionNumber[:name].matches("%mary%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(collector_has: "Mary"))
     assert_api_results(nums)
@@ -586,7 +589,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(number: "174"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("number LIKE '%17%'")
+    # nums = CollectionNumber.where("number LIKE '%17%'")
+    nums = CollectionNumber.where(CollectionNumber[:number].matches("%17%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(number_has: "17"))
     assert_api_results(nums)
@@ -925,7 +929,8 @@ class Api2Test < UnitTestCase
       method: :get,
       action: :external_site
     }
-    sites = ExternalSite.where("name like '%inat%'")
+    # sites = ExternalSite.where("name like '%inat%'")
+    sites = ExternalSite.where(ExternalSite[:name].matches("%inat%"))
     assert_not_empty(sites)
     assert_api_pass(params.merge(name: "inat"))
     assert_api_results(sites)
@@ -941,7 +946,10 @@ class Api2Test < UnitTestCase
       action: :herbarium
     }
 
-    herbs = Herbarium.where("date(created_at) = '2012-10-21'")
+    herbs = Herbarium.where(
+      # "date(created_at) = '2012-10-21'"
+      Herbarium[:created_at].format("%Y-%m-%d") == "2012-10-21"
+    )
     assert_not_empty(herbs)
     assert_api_pass(params.merge(created_at: "2012-10-21"))
     assert_api_results(herbs)
@@ -956,17 +964,20 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(code: "NY"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("name like '%personal%'")
+    # herbs = Herbarium.where("name like '%personal%'")
+    herbs = Herbarium.where(Herbarium[:name].matches("%personal%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(name: "personal"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("description like '%awesome%'")
+    # herbs = Herbarium.where("description like '%awesome%'")
+    herbs = Herbarium.where(Herbarium[:description].matches("%awesome%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(description: "awesome"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("mailing_address like '%New York%'")
+    # herbs = Herbarium.where("mailing_address like '%New York%'")
+    herbs = Herbarium.where(Herbarium[:mailing_address].matches("%New York%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
@@ -979,12 +990,14 @@ class Api2Test < UnitTestCase
   def test_getting_herbarium_records
     params = { method: :get, action: :herbarium_record }
 
-    recs = HerbariumRecord.where("year(created_at) = 2012")
+    # recs = HerbariumRecord.where("year(created_at) = 2012")
+    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year == 2012)
     assert_not_empty(recs)
     assert_api_pass(params.merge(created_at: "2012"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("year(updated_at) = 2017")
+    # recs = HerbariumRecord.where("year(updated_at) = 2017")
+    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year == 2017)
     assert_not_empty(recs)
     assert_api_pass(params.merge(updated_at: "2017"))
     assert_api_results(recs)
@@ -1006,17 +1019,20 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(observation: obs.id))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("notes LIKE '%dried%'")
+    # recs = HerbariumRecord.where("notes LIKE '%dried%'")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].matches("%dried%"))
     assert_not_empty(recs)
     assert_api_pass(params.merge(notes_has: "dried"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("COALESCE(notes, '') = ''")
+    # recs = HerbariumRecord.where("COALESCE(notes, '') = ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("CONCAT(notes, '') != ''")
+    # recs = HerbariumRecord.where("CONCAT(notes, '') != ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].not_blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "yes"))
     assert_api_results(recs)
@@ -1026,7 +1042,10 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(initial_det: "Coprinus comatus"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("initial_det LIKE '%coprinus%'")
+    # recs = HerbariumRecord.where("initial_det LIKE '%coprinus%'")
+    recs = HerbariumRecord.where(
+      HerbariumRecord[:initial_det].matches("%coprinus%")
+    )
     assert_not_empty(recs)
     assert_api_pass(params.merge(initial_det_has: "coprinus"))
     assert_api_results(recs)
@@ -1036,7 +1055,10 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(accession_number: "1234"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("accession_number LIKE '%23%'")
+    # recs = HerbariumRecord.where("accession_number LIKE '%23%'")
+    recs = HerbariumRecord.where(
+      HerbariumRecord[:accession_number].matches("%23%")
+    )
     assert_not_empty(recs)
     assert_api_pass(params.merge(accession_number_has: "23"))
     assert_api_results(recs)
@@ -1188,13 +1210,19 @@ class Api2Test < UnitTestCase
     assert_api_results([img])
 
     assert_api_pass(params.merge(created_at: "2006"))
-    assert_api_results(Image.where("year(created_at) = 2006"))
+    # assert_api_results(Image.where("year(created_at) = 2006"))
+    assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-    assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+    # assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+    assert_api_results(Image.where(
+                         Image[:updated_at].format("%Y-%m-%d") == "2006-05-22"
+                       ))
 
     assert_api_pass(params.merge(date: "2007-03"))
-    assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+    # assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+    assert_api_results(Image.where((Image[:when].year == 2007).
+                             and(Image[:when].month == 3)))
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
     assert_api_results(Image.where(user: [mary, katrina]))
@@ -1265,9 +1293,11 @@ class Api2Test < UnitTestCase
     # assert_api_pass(params.merge(has_observation: "no"))
     # assert_api_results(unattached)
 
-    imgs = Image.where("width >= 1280 || height >= 1280")
+    # imgs = Image.where("width >= 1280 || height >= 1280")
+    imgs = Image.where((Image[:width] >= 1280).or(Image[:height] >= 1280))
     assert_empty(imgs)
-    imgs = Image.where("width >= 960 || height >= 960")
+    # imgs = Image.where("width >= 960 || height >= 960")
+    imgs = Image.where((Image[:width] >= 960).or(Image[:height] >= 960))
     assert_not_empty(imgs)
     assert_api_pass(params.merge(size: "huge"))
     assert_api_results([])
@@ -1287,25 +1317,36 @@ class Api2Test < UnitTestCase
     assert_api_results([pretty_img])
 
     assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
-    assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    # assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    assert_api_results(Image.where(
+                         Image[:copyright_holder].matches("%insil choi%")
+                       ))
     assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
-    assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+    # assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+    assert_api_results(Image.where(
+                         Image[:copyright_holder].matches("%nathan%")
+                       ))
 
     pd = licenses(:publicdomain)
     assert_api_pass(params.merge(license: pd.id))
     assert_api_results(Image.where(license: pd))
 
     assert_api_pass(params.merge(has_votes: "yes"))
-    assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    # assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].not_eq(nil)))
     assert_api_pass(params.merge(has_votes: "no"))
-    assert_api_results(Image.where("vote_cache IS NULL"))
+    # assert_api_results(Image.where("vote_cache IS NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].eq(nil)))
 
     assert_api_pass(params.merge(quality: "2-3"))
-    assert_api_results(Image.where("vote_cache > 2.0"))
+    # assert_api_results(Image.where("vote_cache > 2.0"))
+    assert_api_results(Image.where(Image[:vote_cache] > 2.0))
     assert_api_pass(params.merge(quality: "1-2"))
     assert_api_results([])
 
-    imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    # imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    imgs = Observation.where(Observation[:vote_cache] >= 2.0).
+           map(&:images).flatten
     assert_not_empty(imgs)
     assert_api_pass(params.merge(confidence: "2-3"))
     assert_api_results(imgs)
@@ -1501,12 +1542,16 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: loc.id))
     assert_api_results([loc])
 
-    locs = Location.where("year(created_at) = 2008")
+    # locs = Location.where("year(created_at) = 2008")
+    locs = Location.where(Location[:created_at].year == 2008)
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
 
-    locs = Location.where("date(created_at) = '2012-01-01'")
+    # locs = Location.where("date(created_at) = '2012-01-01'")
+    locs = Location.where(
+      Location[:created_at].format("%Y-%m-%d") == "2012-01-01"
+    )
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
@@ -1516,8 +1561,14 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.where("south >= 39 and north <= 40 and
-                           west >= -124 and east <= -123 and west <= east")
+    # locs = Location.where("south >= 39 and north <= 40 and
+    #                        west >= -124 and east <= -123 and west <= east")
+    locs = Location.where(
+      (Location[:south] >= 39).and(Location[:north] <= 40).
+      and(Location[:west] >= -124).and(Location[:east] <= -123).
+      and(Location[:west] <= Location[:east])
+    )
+
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
     assert_api_fail(params.merge(north: 40, east: -123, west: -124))
