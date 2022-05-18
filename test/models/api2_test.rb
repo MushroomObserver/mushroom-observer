@@ -2353,6 +2353,8 @@ class Api2Test < UnitTestCase
     # no_notes = Observation.no_notes_persisted
     # with = Observation.where("notes != ?", no_notes)
     # without = Observation.where("notes = ?", no_notes)
+    # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
+    # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.where(Observation[:notes] != Observation.no_notes)
     without = Observation.where(Observation[:notes] == Observation.no_notes)
     assert(with.length > 1)
@@ -3164,8 +3166,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    # Nimmo note: no_notes_persisted is just no_notes.to_yaml
-    # no_notes, rather than above, is what works for comparison in Arel here.
+    # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
+    # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.where(Observation[:notes] != Observation.no_notes)
     without = Observation.where(Observation[:notes] == Observation.no_notes)
 
