@@ -1198,13 +1198,14 @@ class Api2Test < UnitTestCase
     assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-    assert_api_results(Image.where(
-                         Image[:updated_at].format("%Y-%m-%d") == "2006-05-22"
-                       ))
+    assert_api_results(
+      Image.where(Image[:updated_at].format("%Y-%m-%d") == "2006-05-22")
+    )
 
     assert_api_pass(params.merge(date: "2007-03"))
-    assert_api_results(Image.where((Image[:when].year == 2007).
-                             and(Image[:when].month == 3)))
+    assert_api_results(
+      Image.where((Image[:when].year == 2007).and(Image[:when].month == 3))
+    )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
     assert_api_results(Image.where(user: [mary, katrina]))
@@ -1297,13 +1298,13 @@ class Api2Test < UnitTestCase
     assert_api_results([pretty_img])
 
     assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
-    assert_api_results(Image.where(
-                         Image[:copyright_holder].matches("%insil choi%")
-                       ))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%insil choi%"))
+    )
     assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
-    assert_api_results(Image.where(
-                         Image[:copyright_holder].matches("%nathan%")
-                       ))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%nathan%"))
+    )
 
     pd = licenses(:publicdomain)
     assert_api_pass(params.merge(license: pd.id))
