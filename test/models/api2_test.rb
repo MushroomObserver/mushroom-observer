@@ -936,6 +936,7 @@ class Api2Test < UnitTestCase
   #  :section: Herbarium Requests
   # -------------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_herbaria
     params = {
       method: :get,
@@ -974,6 +975,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
   end
+  # rubocop:enable Style/FormatStringToken
 
   # --------------------------------------
   #  :section: Herbarium Record Requests
@@ -1187,6 +1189,7 @@ class Api2Test < UnitTestCase
   #  :section: Image Requests
   # ---------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_images
     img = Image.all.sample
     params = { method: :get, action: :image }
@@ -1330,6 +1333,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(ok_for_export: "no"))
     assert_api_results([pretty_img])
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_two_agaricus_bug
     name = names(:agaricus_campestris) # the only Agaricus species with images
@@ -1510,6 +1514,7 @@ class Api2Test < UnitTestCase
   #  :section: Location Requests
   # ------------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_locations
     loc = Location.all.sample
     params = { method: :get, action: :location }
@@ -1549,6 +1554,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(north: 40, south: 39, east: -123, west: -124))
     assert_api_results(locs)
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_posting_locations
     name1  = "Reno, Nevada, USA"
@@ -1711,6 +1717,7 @@ class Api2Test < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_names
     params = { method: :get, action: :name }
 
@@ -1922,6 +1929,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(ok_for_export: "yes"))
     assert_api_results(names)
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_creating_names
     @name           = "Parmeliaceae"
@@ -2150,6 +2158,7 @@ class Api2Test < UnitTestCase
   #  :section: Observation Requests
   # ---------------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_observations
     params = { method: :get, action: :observation }
 
@@ -2358,6 +2367,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(region: "California, USA"))
     assert_api_results(obses)
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_post_minimal_observation
     @user = rolf
@@ -2894,6 +2904,7 @@ class Api2Test < UnitTestCase
   #  :section: Sequence Requests
   # ------------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_sequences
     params = { method: :get, action: :sequence }
 
@@ -3098,11 +3109,8 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
-    # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.where(Observation[:notes] != Observation.no_notes)
     without = Observation.where(Observation[:notes] == Observation.no_notes)
-
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_obs_notes: "yes"))
@@ -3121,6 +3129,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_creating_sequences
     rolfs_obs  = observations(:coprinus_comatus_obs)
@@ -3246,6 +3255,7 @@ class Api2Test < UnitTestCase
   #  :section: SpeciesList Requests
   # ---------------------------------
 
+  # rubocop:disable Style/FormatStringToken
   def test_getting_species_lists
     params = { method: :get, action: :species_list }
 
@@ -3363,6 +3373,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(comments_has: "double dare"))
     assert_api_results([spl])
   end
+  # rubocop:enable Style/FormatStringToken
 
   def test_creating_species_lists
     @user     = rolf
