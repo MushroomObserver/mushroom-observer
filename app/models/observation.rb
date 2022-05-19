@@ -234,9 +234,8 @@ class Observation < AbstractModel
     end
     # Refresh the mirror of a foreign table's column in the observations table.
     broken_caches.update_all(
-      sanitize_sql_for_assignment(
-        "observations.#{local} = #{type.pluralize}.#{foreign}"
-      )
+      Observation[local.to_sym].
+      eq(type.camelize.constantize[foreign.to_sym]).to_sql
     )
   end
 
@@ -254,12 +253,12 @@ class Observation < AbstractModel
     misspellings = Observation.joins(:name).
                    where(Name[:correct_spelling_id].not_eq(nil))
 
-    misspellings.pluck(Observation[:id], Name[:text_name]).map 
-      do |id, search_name|
+    misspellings.
+      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
     misspellings.update_all(
-      "`observations`.`name_id` = `names`.`correct_spelling_id`"
+      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
     )
   end
 
