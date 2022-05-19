@@ -540,8 +540,10 @@ class Name < AbstractModel
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
       where(nd[:classification].not_eq(Name[:classification])).
-      where(nd[:classification].coalesce("").not_eq("")).
-      update_all("names.classification = name_descriptions.classification")
+      where(nd[:classification].not_blank).
+      update_all(
+        Name[:classification].eq(NameDescription[:classification]).to_sql
+      )
     []
   end
 
