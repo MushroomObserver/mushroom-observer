@@ -1483,7 +1483,7 @@ class Api2Test < UnitTestCase
     assert_equal("new notes", rolfs_img.notes)
     assert_equal("new person", rolfs_img.copyright_holder)
     assert_objs_equal(pd, rolfs_img.license)
-    assert_nil(rolfs_img.original_name)
+    assert_equal("new name", rolfs_img.original_name)
     eol.images << marys_img
     marys_img.reload
     assert(marys_img.can_edit?(rolf))
