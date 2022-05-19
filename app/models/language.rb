@@ -58,11 +58,9 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    ts = Arel::Table.new(:translation_strings)
-    u = Arel::Table.new(:users)
     TranslationString.where(language: self).where.not(user_id: 0).
-      group(:user_id).order(ts[:id].count).limit(num).
-      joins(:user).pluck(u[:id], u[:login])
+      group(:user_id).order(TranslationString[:id].count).limit(num).
+      joins(:user).pluck(User[:id], User[:login])
   end
 
   # Count the number of lines the user has translated.  Include edits, as well.
@@ -93,9 +91,7 @@ class Language < AbstractModel
   def calculate_users_contribution(user)
     lines = 0
     select_manager = arel_select_translation_strings(user)
-    # puts(select_manager.to_sql)
     values = Language.connection.select_values(select_manager.to_sql)
-    # puts(values.inspect)
     for text in values
       lines += Language.score_lines(text)
     end
@@ -128,13 +124,13 @@ class Language < AbstractModel
   #   score
   # end
 
-  # rubocop:disable Metrics/AbcSize
   # SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
   # FROM translation_strings t, translation_strings_versions v
   # WHERE t.language_id = #{id}
   #   AND v.translation_string_id = t.id
   #   AND v.user_id = #{user.id}
   # GROUP BY t.id
+  # rubocop:disable Metrics/AbcSize
   def arel_select_translation_strings(user)
     t = Arel::Table.new(:translation_strings)
     v = Arel::Table.new(:translation_strings_versions)
