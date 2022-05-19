@@ -178,7 +178,7 @@ class Api2Test < UnitTestCase
     assert_equal(false, img.transferred)
     assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
     assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
-    assert_objs_equal(@vote, img.users_vote(@user))
+    assert_equal_even_if_nil(@vote, img.users_vote(@user))
   end
 
   def assert_last_location_correct
@@ -1388,6 +1388,8 @@ class Api2Test < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
+    rolf.update(keep_filenames: :keep_and_show)
+    rolf.reload
     @user   = rolf
     @proj   = projects(:eol_project)
     @date   = date("20120626")
@@ -1454,6 +1456,8 @@ class Api2Test < UnitTestCase
   end
 
   def test_patching_images
+    rolf.update(keep_filenames: :keep_and_show)
+    rolf.reload
     rolfs_img = images(:rolf_profile_image)
     marys_img = images(:in_situ_image)
     eol = projects(:eol_project)
@@ -1479,7 +1483,7 @@ class Api2Test < UnitTestCase
     assert_equal("new notes", rolfs_img.notes)
     assert_equal("new person", rolfs_img.copyright_holder)
     assert_objs_equal(pd, rolfs_img.license)
-    assert_equal("new name", rolfs_img.original_name)
+    assert_nil(rolfs_img.original_name)
     eol.images << marys_img
     marys_img.reload
     assert(marys_img.can_edit?(rolf))
