@@ -28,18 +28,14 @@ class Name < AbstractModel
     return [] unless parse = parse_name(in_str)
 
     finder = Name.with_rank(rank)
-    # Nimmo note: This syntax is gross but it's the only way to avoid a string
-    # Replaces the much more elegant "search_name = :name"
-    finder_in_search_name = finder.where(
-      Name[:search_name].eq(Name[:name]).to_sql, { name: parse.search_name }
-    )
-    results = name_search(finder_in_search_name, ignore_deprecated)
+    results = name_search(finder.where("search_name = :name",
+                                       { name: parse.search_name }),
+                          ignore_deprecated)
     return results if results.present?
 
-    finder_in_text_name = finder.where(
-      Name[:text_name].eq(Name[:name]).to_sql, { name: parse.text_name }
-    )
-    results = name_search(finder_in_text_name, ignore_deprecated)
+    results = name_search(finder.where("text_name = :name",
+                                       { name: parse.text_name }),
+                          ignore_deprecated)
     return results if parse.author.blank?
     return [] if results.any? { |n| n.author.present? }
 
