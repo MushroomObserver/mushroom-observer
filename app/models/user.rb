@@ -628,7 +628,7 @@ class User < AbstractModel
   #   when :ignoring; ...
   #   end
   #
-  # NIMMO NOTE: These methods were not previously covered by tests?
+  # NIMMO NOTE: This method was not previously covered by tests. Test added
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
@@ -643,28 +643,6 @@ class User < AbstractModel
       end
     end
   end
-
-  # def interest_in(object)
-  #   @interests ||= {}
-  #   @interests["#{object.class.name} #{object.id}"] ||= begin
-  #     sql = interest_in_sql(object)
-  #     case Interest.connection.select_value(sql).to_s
-  #     when "1"
-  #       :watching
-  #     when "0"
-  #       :ignoring
-  #     end
-  #   end
-  # end
-  #
-  # def interest_in_sql(object)
-  #   i = Interest.arel_table
-  #   i.project(i[:state]).
-  #     where(i[:user_id].eq(id).
-  #       and(i[:target_type].eq(object.class.name)).
-  #       and(i[:target_id].eq(object.id))).
-  #     take(1).to_sql
-  # end
 
   # Has this user expressed positive interest in a given object?
   #
