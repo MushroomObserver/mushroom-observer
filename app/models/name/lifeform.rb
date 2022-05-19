@@ -55,21 +55,24 @@ class Name < AbstractModel
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    # Using string interpolation because Rails 5 does not parse a concat node?
+    # Needs to be statement.to_sql because Rails 5 does not parse a concat node.
     # https://github.com/Faveod/arel-extensions/issues/76
-    # The following syntax should work in Rails 6:
+    # The following simpler syntax should work in Rails 6:
     # update_all(lifeform: Name[:lifeform] + concat_str)
     # update_all(lifeform: Name[:lifeform].concat(concat_str))
     Name.where(id: name_ids).
       where(Name[:lifeform].does_not_match(search_str)).
-      update_all("lifeform = #{(Name[:lifeform] + concat_str).to_sql}")
+      update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
 
     Observation.where(name_id: name_ids).
       where(Observation[:lifeform].does_not_match(search_str)).
-      update_all("lifeform = #{(Observation[:lifeform] + concat_str).to_sql}")
+      update_all(
+        Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
+      )
   end
 
   # Remove lifeform (one word only) from all children.
+  # Note that the simpler syntax for `replace` already works here in Rails 5
   def propagate_remove_lifeform(lifeform)
     replace_str = " #{lifeform} "
     search_str  = "% #{lifeform} %"

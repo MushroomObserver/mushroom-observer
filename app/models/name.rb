@@ -327,7 +327,7 @@ class Name < AbstractModel
 
   has_many :misspellings, class_name: "Name",
                           foreign_key: "correct_spelling_id"
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order num_views: :desc },
            class_name: "NameDescription",
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
@@ -403,7 +403,7 @@ class Name < AbstractModel
   end
 
   scope :with_rank,
-        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+        ->(rank) { where(rank: Name.ranks[rank]) if rank }
 
   def <=>(other)
     sort_name <=> other.sort_name

@@ -2902,9 +2902,9 @@ class NameTest < UnitTestCase
     ancestor = names(:basidiomycetes)
     assert(
       !ancestor.is_misspelling? &&
-      Name.joins(:namings).where(Name[:classification].matches(
-                                   "%#{ancestor.rank}: _#{ancestor.text_name}_%"
-                                 )).any?,
+      Name.joins(:namings).
+        where(Name[:classification].
+          matches("%#{ancestor.rank}: _#{ancestor.text_name}_%")).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
