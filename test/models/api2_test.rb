@@ -172,13 +172,13 @@ class Api2Test < UnitTestCase
     assert_nil(img.last_view)
     assert_equal(@width, img.width)
     assert_equal(@height, img.height)
-    assert(@vote == img.vote_cache)
+    assert_equal_even_if_nil(@vote, img.vote_cache)
     assert_equal(true, img.ok_for_export)
-    assert(@orig == img.original_name)
+    assert_equal_even_if_nil(@orig, img.original_name)
     assert_equal(false, img.transferred)
     assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
     assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
-    assert(@vote == img.users_vote(@user))
+    assert_objs_equal(@vote, img.users_vote(@user))
   end
 
   def assert_last_location_correct
@@ -350,6 +350,20 @@ class Api2Test < UnitTestCase
     assert_in_delta(Time.zone.now, vote.created_at, 1.minute)
     assert_in_delta(Time.zone.now, vote.updated_at, 1.minute)
     assert_true(vote.favorite)
+  end
+
+  # Used to be we could just used assert_equal, but now it complains that that
+  # assertion will soon no longer work if expect is nil.  We can change it to
+  # just assert(expect == actual), but that doesn't show as nice diagnostics
+  # when it fails.  So I'm restoring the old behavior of assert_equal here.
+  # This should probably move into a more general set of extensions, but for
+  # now this is the only place it is used.  -JPH 20220519
+  def assert_equal_even_if_nil(expect, actual)
+    if expect.nil?
+      assert_nil(actual)
+    else
+      assert_equal(expect, actual)
+    end
   end
 
   ##############################################################################
@@ -1358,8 +1372,10 @@ class Api2Test < UnitTestCase
       method: :post,
       action: :image,
       api_key: @api_key.key,
-      upload_file: "#{::Rails.root}/test/images/sticky.jpg"
+      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      original_name: "strip_this"
     }
+    assert_equal(:toss, @user.keep_filenames)
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
