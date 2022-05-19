@@ -1601,7 +1601,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:detailed_unknown_obs).created_at
     expect =
       Image.joins(:observations).
-      where(Observation[:created_at].gteq(created_at)).uniq
+      where(Observation[:created_at] >= created_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, created_at: created_at)
 
@@ -1609,14 +1609,13 @@ class QueryTest < UnitTestCase
     updated_at = observations(:detailed_unknown_obs).updated_at
     expect =
       Image.joins(:observations).
-      where(Observation[:updated_at].gteq(updated_at)).uniq
+      where(Observation[:updated_at] >= updated_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, updated_at: updated_at)
 
     # date
     date = observations(:detailed_unknown_obs).when
-    expect = Image.joins(:observations).
-             where(Observation[:when].gteq(date)).uniq
+    expect = Image.joins(:observations).where(Observation[:when] >= date).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, date: date)
 
@@ -1971,7 +1970,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     assert_query(
       Location.joins(:observations).
-               where(Observation[:created_at].gteq(created_at)).uniq,
+               where(Observation[:created_at] >= created_at).uniq,
       :Location, :with_observations, created_at: created_at
     )
 
@@ -1979,13 +1978,13 @@ class QueryTest < UnitTestCase
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Location.joins(:observations).
-               where(Observation[:updated_at].gteq(updated_at)).uniq,
+               where(Observation[:updated_at] >= updated_at).uniq,
       :Location, :with_observations, updated_at: updated_at
     )
     # date
     date = observations(:california_obs).when
     assert_query(
-      Location.joins(:observations).where(Observation[:when].gteq(date)).uniq,
+      Location.joins(:observations).where(Observation[:when] >= date).uniq,
       :Location, :with_observations, date: date
     )
 
@@ -2437,7 +2436,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     assert_query(
       Name.joins(:observations).
-           where(Observation[:created_at].gteq(created_at)).uniq,
+           where(Observation[:created_at] >= created_at).uniq,
       :Name, :with_observations, created_at: created_at
     )
 
@@ -2445,14 +2444,14 @@ class QueryTest < UnitTestCase
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Name.joins(:observations).
-           where(Observation[:updated_at].gteq(updated_at)).uniq,
+           where(Observation[:updated_at] >= updated_at).uniq,
       :Name, :with_observations, updated_at: updated_at
     )
 
     # date
     date = observations(:california_obs).when
     assert_query(
-      Name.joins(:observations).where(Observation[:when].gteq(date)).uniq,
+      Name.joins(:observations).where(Observation[:when] >= date).uniq,
       :Name, :with_observations, date: date
     )
 
@@ -2550,11 +2549,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_at_location
-    assert_query(Name.joins(:observations).
-                      where(observations: { location: locations(:burbank) }).
-                      distinct,
-                 :Name, :with_observations_at_location,
-                 location: locations(:burbank))
+    assert_query(
+      Name.joins(:observations).
+           where(observations: { location: locations(:burbank) }).distinct,
+      :Name, :with_observations_at_location, location: locations(:burbank)
+    )
   end
 
   def test_name_with_observations_at_where
@@ -3072,16 +3071,19 @@ class QueryTest < UnitTestCase
   def test_herbarium_record_pattern_search
     assert_query([], :HerbariumRecord, :pattern_search,
                  pattern: "no herbarium record has this")
-    assert_query(HerbariumRecord.where(
-                   HerbariumRecord[:initial_det].matches("%Agaricus%")
-                 ),
-                 :HerbariumRecord, :pattern_search, pattern: "Agaricus")
-    assert_query(HerbariumRecord.where(
-                   HerbariumRecord[:notes].matches("%rare%")
-                 ),
-                 :HerbariumRecord, :pattern_search, pattern: "rare")
-    assert_query(HerbariumRecord.all,
-                 :HerbariumRecord, :pattern_search, pattern: "")
+    assert_query(
+      HerbariumRecord.where(
+        HerbariumRecord[:initial_det].matches("%Agaricus%")
+      ),
+      :HerbariumRecord, :pattern_search, pattern: "Agaricus"
+    )
+    assert_query(
+      HerbariumRecord.where(HerbariumRecord[:notes].matches("%rare%")),
+      :HerbariumRecord, :pattern_search, pattern: "rare"
+    )
+    assert_query(
+      HerbariumRecord.all, :HerbariumRecord, :pattern_search, pattern: ""
+    )
   end
 
   def test_user_all
