@@ -50,41 +50,49 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    concat_str = "#{lifeform} "
     search_str = "% #{lifeform} %"
+    concat_str = "#{lifeform} "
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    # Needs to be statement.to_sql because Rails 5 does not parse a concat node.
-    # https://github.com/Faveod/arel-extensions/issues/76
-    # The following simpler syntax should work in Rails 6:
-    # update_all(lifeform: Name[:lifeform] + concat_str)
-    # update_all(lifeform: Name[:lifeform].concat(concat_str))
-    Name.where(id: name_ids).
-      where(Name[:lifeform].does_not_match(search_str)).
-      update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
-
-    Observation.where(name_id: name_ids).
-      where(Observation[:lifeform].does_not_match(search_str)).
-      update_all(
-        Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
-      )
+    update_all_add_lifeform(name_ids, search_str, concat_str)
   end
 
   # Remove lifeform (one word only) from all children.
   # Note that the simpler syntax for `replace` already works here in Rails 5
   def propagate_remove_lifeform(lifeform)
-    replace_str = " #{lifeform} "
     search_str  = "% #{lifeform} %"
+    replace_str = " #{lifeform} "
     name_ids = all_children.map(&:id)
     return unless name_ids.any?
 
-    Name.where(id: name_ids).
-      where(Name[:lifeform].matches(search_str)).
-      update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
-
-    Observation.where(name_id: name_ids).
-      where(Observation[:lifeform].matches(search_str)).
-      update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
+    update_all_remove_lifeform(name_ids, search_str, replace_str)
   end
+end
+
+private
+
+# Needs to be statement.to_sql because Rails 5 does not parse a concat node.
+# https://github.com/Faveod/arel-extensions/issues/76
+# The following simpler syntax should work in Rails 6:
+# update_all(lifeform: Name[:lifeform] + concat_str)
+# update_all(lifeform: Name[:lifeform].concat(concat_str))
+def update_all_add_lifeform(name_ids, search_str, concat_str)
+  Name.where(id: name_ids).
+    where(Name[:lifeform].does_not_match(search_str)).
+    update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
+  Observation.where(name_id: name_ids).
+    where(Observation[:lifeform].does_not_match(search_str)).
+    update_all(
+      Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
+    )
+end
+
+def update_all_remove_lifeform(name_ids, search_str, replace_str)
+  Name.where(id: name_ids).
+    where(Name[:lifeform].matches(search_str)).
+    update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
+  Observation.where(name_id: name_ids).
+    where(Observation[:lifeform].matches(search_str)).
+    update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
 end
