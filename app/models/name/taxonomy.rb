@@ -6,13 +6,11 @@ class Name < AbstractModel
         # NoMethodError: undefined method `ranks'
         #   test/fixtures/names.yml:28:in `get_binding'
         ->(rank, text_name) { # rubocop:disable Style/Lambda
-          # where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
   scope :with_name_like,
         ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
   scope :with_rank_below,
-        # ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def self.all_ranks
@@ -509,7 +507,6 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
-    # Deliberately skip validations
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
       update_all(classification: classification)
