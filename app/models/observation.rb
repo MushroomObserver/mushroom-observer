@@ -227,15 +227,14 @@ class Observation < AbstractModel
   def self.refresh_cached_column(type, foreign, local = foreign)
     tbl = type.camelize.constantize.arel_table
     broken_caches = Observation.joins(type.to_sym).
-                    where(Observation[local.to_s.to_sym].
-                          not_eq(tbl[foreign.to_s.to_sym]))
+                    where(Observation[local.to_sym].
+                          not_eq(tbl[foreign.to_sym]))
     broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
     # Refresh the mirror of a foreign table's column in the observations table.
     broken_caches.update_all(
-      Observation[local.to_sym].
-      eq(type.camelize.constantize[foreign.to_sym]).to_sql
+      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
     )
   end
 
