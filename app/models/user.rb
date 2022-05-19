@@ -844,9 +844,6 @@ class User < AbstractModel
 
   # Delete their observations' attachments.
   private_class_method def self.delete_observations_attachments(id)
-    # obs = Observation.arel_table
-    # obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
-    # obs_ids = User.connection.select_values(obs_select_manager.to_sql)
     obs_ids = Observation.where(user_id: id).pluck(:id)
     return unless obs_ids.any?
 
