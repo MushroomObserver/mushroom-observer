@@ -225,7 +225,8 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
-    broken_caches = get_broken_caches(type, foreign, local)
+    tbl = type.camelize.constantize.arel_table
+    broken_caches = get_broken_caches(type, tbl, foreign, local)
     broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
@@ -235,8 +236,7 @@ class Observation < AbstractModel
     )
   end
 
-  private_class_method def self.get_broken_caches(type, foreign, local)
-    tbl = type.camelize.constantize.arel_table
+  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
     Observation.joins(type.to_sym).
       where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
   end
