@@ -254,8 +254,8 @@ class Observation < AbstractModel
     misspellings = Observation.joins(:name).
                    where(Name[:correct_spelling_id].not_eq(nil))
 
-    misspellings.pluck(Observation[:id], Name[:text_name]).map do
-      |id, search_name|
+    misspellings.pluck(Observation[:id], Name[:text_name]).map 
+      do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
     misspellings.update_all(
