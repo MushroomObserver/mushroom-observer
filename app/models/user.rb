@@ -628,7 +628,6 @@ class User < AbstractModel
   #   when :ignoring; ...
   #   end
   #
-  # NIMMO NOTE: This method was not previously covered by tests. Test added
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
