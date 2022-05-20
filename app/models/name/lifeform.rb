@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
-  require "arel-helpers"
-  include ArelHelpers::ArelTable
-
   ALL_LIFEFORMS = %w[
     basidiolichen
     lichen
