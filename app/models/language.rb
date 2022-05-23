@@ -77,11 +77,11 @@ class Language < AbstractModel
 
   private_class_method def self.get_user_translation_contributions(user)
     v = Arel::Table.new(:translation_strings_versions)
-    values = TranslationString::Version.
-             where(v[:user_id].eq(user.id)).
-             group(v[:translation_string_id]).
-             select(v[:text].group_concat("\n", order: [v[:text].asc])).
-             pluck(v[:text])
+    TranslationString::Version.
+      where(v[:user_id].eq(user.id)).
+      group(v[:translation_string_id]).
+      select(v[:text].group_concat("\n", order: [v[:text].asc])).
+      pluck(v[:text])
   end
 
   def calculate_users_contribution(user)
@@ -96,13 +96,13 @@ class Language < AbstractModel
 
   def get_user_translation_contributions(user)
     v = Arel::Table.new(:translation_strings_versions)
-    values = TranslationString.
-             joins(:versions).
-             where(TranslationString[:language_id].eq(id)).
-             where(v[:user_id].eq(user.id)).
-             group(TranslationString[:id]).
-             select(v[:text].group_concat("\n", order: [v[:text].asc])).
-             pluck(v[:text])
+    TranslationString.
+      joins(:versions).
+      where(TranslationString[:language_id].eq(id)).
+      where(v[:user_id].eq(user.id)).
+      group(TranslationString[:id]).
+      select(v[:text].group_concat("\n", order: [v[:text].asc])).
+      pluck(v[:text])
   end
 
   def self.score_lines(text)
