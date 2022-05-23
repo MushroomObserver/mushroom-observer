@@ -67,20 +67,34 @@ class Language < AbstractModel
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    v = Arel::Table.new(:translation_strings_versions)
-    values = TranslationString::Version.
-             where(v[:user_id].eq(user.id)).
-             group(v[:translation_string_id]).
-             select(v[:text].group_concat("\n", order: [v[:text].asc])).
-             pluck(v[:text])
+    values = get_user_translation_contributions(user)
+
     for text in values
       lines += score_lines(text)
     end
     lines
   end
 
+  private_class_method def self.get_user_translation_contributions(user)
+    v = Arel::Table.new(:translation_strings_versions)
+    values = TranslationString::Version.
+             where(v[:user_id].eq(user.id)).
+             group(v[:translation_string_id]).
+             select(v[:text].group_concat("\n", order: [v[:text].asc])).
+             pluck(v[:text])
+  end
+
   def calculate_users_contribution(user)
     lines = 0
+    values = get_user_translation_contributions(user)
+
+    for text in values
+      lines += Language.score_lines(text)
+    end
+    lines
+  end
+
+  def get_user_translation_contributions(user)
     v = Arel::Table.new(:translation_strings_versions)
     values = TranslationString.
              joins(:versions).
@@ -89,11 +103,6 @@ class Language < AbstractModel
              group(TranslationString[:id]).
              select(v[:text].group_concat("\n", order: [v[:text].asc])).
              pluck(v[:text])
-
-    for text in values
-      lines += Language.score_lines(text)
-    end
-    lines
   end
 
   def self.score_lines(text)
