@@ -761,7 +761,7 @@ class User < AbstractModel
   # How to order - https://stackoverflow.com/a/71282345/3357635
   def self.primer_data
     users = User.select(:login, :name).order(
-      arel_last_login_if_recent.desc, User[:contribution].desc
+      orderby_last_login_if_recent.desc, User[:contribution].desc
     ).limit(1000).pluck(:login, :name)
 
     users.map do |login, name|
@@ -769,7 +769,7 @@ class User < AbstractModel
     end.sort
   end
 
-  private_class_method def self.arel_last_login_if_recent
+  private_class_method def self.orderby_last_login_if_recent
     User[:last_login].when(
       User[:last_login] > 1.month.ago
     ).then(
