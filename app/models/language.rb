@@ -67,93 +67,33 @@ class Language < AbstractModel
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    select_manager = arel_select_translation_strings_versions(user)
-    # puts(select_manager.to_sql)
-    values = Language.connection.select_values(select_manager.to_sql)
-    # # puts(values.inspect)
+    v = Arel::Table.new(:translation_strings_versions)
+    values = TranslationString::Version.
+             where(v[:user_id].eq(user.id)).
+             group(v[:translation_string_id]).
+             select(v[:text].group_concat("\n", order: [v[:text].asc])).
+             pluck(v[:text])
     for text in values
       lines += score_lines(text)
     end
     lines
   end
 
-  # SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
-  # FROM translation_strings_versions
-  # WHERE user_id = #{user.id}
-  # GROUP BY translation_string_id
-  private_class_method def self.arel_select_translation_strings_versions(user)
-    v = Arel::Table.new(:translation_strings_versions)
-    v.where(v[:user_id].eq(user.id)).
-      group(v[:translation_string_id]).
-      project(arel_function_group_concat_strings(v))
-  end
-
   def calculate_users_contribution(user)
     lines = 0
-    select_manager = arel_select_translation_strings(user)
-    values = Language.connection.select_values(select_manager.to_sql)
+    v = Arel::Table.new(:translation_strings_versions)
+    values = TranslationString.
+             joins(:versions).
+             where(TranslationString[:language_id].eq(id)).
+             where(v[:user_id].eq(user.id)).
+             group(TranslationString[:id]).
+             select(v[:text].group_concat("\n", order: [v[:text].asc])).
+             pluck(v[:text])
+
     for text in values
       lines += Language.score_lines(text)
     end
     lines
-  end
-
-  # def calculate_users_contribution(user)
-  #   v = Arel::Table.new(:translation_strings_versions)
-  #   hash = {}
-  #   strings = TranslationString.joins(:versions).
-  #             where(language_id: id,
-  #                   translation_strings_versions: { user_id: user.id }).
-  #             group(:id).pluck(:id, v[:text])
-  #   strings.each do |id, text|
-  #     text.split("\n").each do |str|
-  #       (hash[id] ||= {}) && (hash[id][str] = true) if str.present?
-  #     end
-  #     puts(hash)
-  #   end
-  #   score_lines(hash)
-  # end
-
-  # def score_lines(hash)
-  #   score = 0
-  #   hash.each_value do |hash2|
-  #     hash2.each_key do |key|
-  #       score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
-  #     end
-  #   end
-  #   score
-  # end
-
-  # SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
-  # FROM translation_strings t, translation_strings_versions v
-  # WHERE t.language_id = #{id}
-  #   AND v.translation_string_id = t.id
-  #   AND v.user_id = #{user.id}
-  # GROUP BY t.id
-  # rubocop:disable Metrics/AbcSize
-  def arel_select_translation_strings(user)
-    t = Arel::Table.new(:translation_strings)
-    v = Arel::Table.new(:translation_strings_versions)
-    TranslationString.joins(t.join(v).on(t[:language_id].eq(id).
-                            and(v[:translation_string_id].eq(t[:id])).
-                            and(v[:user_id].eq(user.id))).join_sources).
-      group(t[:id]).select(self.class.arel_function_group_concat_strings(v))
-  end
-  # rubocop:enable Metrics/AbcSize
-
-  # NIMMO QUESTION - Is there a way to rewrite these without the group_concat?
-  # I was thinking maybe just select the :text, and append the newlines in Ruby
-  # via map. But this gives a different score, because of the grouping.
-  # The command in PostgresQL is "STRING_AGG"
-  def self.arel_function_group_concat_strings(table)
-    Arel::Nodes::NamedFunction.new(
-      "GROUP_CONCAT",
-      [Arel::Nodes::NamedFunction.new(
-        "CONCAT",
-        [table[:text],
-         Arel::Nodes.build_quoted("\n")]
-      )]
-    )
   end
 
   def self.score_lines(text)
