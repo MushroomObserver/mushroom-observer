@@ -757,8 +757,7 @@ class User < AbstractModel
       readlines.map(&:chomp)
   end
 
-  # NIMMO NOTE: this method is not covered by tests?
-  # How to order - https://stackoverflow.com/a/71282345/3357635
+  # NIMMO NOTE: is this method covered by a test?
   def self.primer_data
     users = User.select(:login, :name).order(
       orderby_last_login_if_recent.desc, User[:contribution].desc
