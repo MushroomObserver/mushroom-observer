@@ -565,8 +565,7 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      herbarium_id = HerbariumRecord.where(user_id: id).
-                     order(created_at: :desc).take(1).pluck(:herbarium_id).first
+                     order(created_at: :desc).pluck(:herbarium_id).first
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
