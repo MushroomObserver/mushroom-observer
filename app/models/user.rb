@@ -632,7 +632,12 @@ class User < AbstractModel
       i = Interest.where(
         user_id: id, target_type: object.class.name, target_id: object.id
       ).pluck(:state).first
-      i ? :watching : :ignoring
+      case i
+      when true
+        :watching
+      when false
+        :ignoring
+      end
     end
   end
 
