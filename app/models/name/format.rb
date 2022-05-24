@@ -101,7 +101,7 @@ class Name < AbstractModel
                    where(Name[:display_name].matches("%*%")).
                    or(Name.where(deprecated: false).
                       where(Name[:display_name].does_not_match("%*%")))
-    needs_fixing.to_a.each do |name|
+    needs_fixing.each do |name|
       name.change_deprecated(name.deprecated)
       name.save
       msgs += "The name #{name.search_name.inspect} " \
