@@ -529,13 +529,13 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
-  # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
+    # Note: ActiveRecord joins: through is slower; produces two extra joins
     ugu = Arel::Table.new(:user_groups_users)
 
-    select_manager = Project.arel_table.project(Arel.star).join(ugu).
+    select_manager = Project.arel_table.join(ugu).
                      on(Project[:admin_group_id].eq(ugu[:user_group_id]).
                         and(ugu[:user_id].eq(id)))
 
@@ -566,7 +566,7 @@ class User < AbstractModel
   def preferred_herbarium
     @preferred_herbarium ||= begin
       herbarium_id = HerbariumRecord.where(user_id: id).
-                     order(created_at: :desc).take(1).pluck(:herbarium_id).first
+                     order(created_at: :desc).pluck(:herbarium_id).first
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
@@ -597,17 +597,15 @@ class User < AbstractModel
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
-      if projects_member.any?
-        SpeciesList.includes(include).
-          where(SpeciesList[:user_id].eq(id).
-          or(SpeciesList[:id].in(arel_species_list_ids_in_users_projects))).uniq
-      else
-        species_lists.includes(include)
-      end
+      return species_lists.includes(include) if projects_member.none?
+
+      SpeciesList.includes(include).
+        where(SpeciesList[:user_id].eq(id).
+        or(SpeciesList[:id].in(arel_species_list_ids_in_users_projects))).uniq
     end
   end
 
-  def arel_species_list_ids_in_users_projects
+  def species_lists_in_users_projects
     project_ids = projects_member.map(&:id)
     psl = Arel::Table.new(:projects_species_lists)
     psl.project(psl[:species_list_id]).
@@ -633,13 +631,8 @@ class User < AbstractModel
     @interests["#{object.class.name} #{object.id}"] ||= begin
       i = Interest.where(
         user_id: id, target_type: object.class.name, target_id: object.id
-      ).limit(1).pluck(:state).first
-      case i
-      when true
-        :watching
-      when false
-        :ignoring
-      end
+      ).pluck(:state).first
+      i ? :watching : :ignoring
     end
   end
 
@@ -757,7 +750,6 @@ class User < AbstractModel
       readlines.map(&:chomp)
   end
 
-  # NIMMO NOTE: is this method covered by a test?
   def self.primer_data
     users = User.select(:login, :name).order(
       orderby_last_login_if_recent.desc, User[:contribution].desc
