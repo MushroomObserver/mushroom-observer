@@ -242,11 +242,9 @@ class Location < AbstractModel
 
   # Get an instance of the Name that means "unknown".
   def self.unknown
-    names_for_unknown.each do |name|
-      location = Location.find_by(Location[:name].matches(name))
-      return location if location
-    end
-    raise("There is no \"unknown\" location!")
+    raise("There is no \"unknown\" location!") if names_for_unknown.empty?
+
+    Location.find_by(Location[:name].matches_any(names_for_unknown))
   end
 
   # Is this one of the names we recognize for the "unknown" location?
