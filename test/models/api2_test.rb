@@ -2214,7 +2214,9 @@ class Api2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    ssp_obs = Observation.where(
+      name: Name.where(Name[:text_name].matches("Agaricus%"))
+    )
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -2920,7 +2922,7 @@ class Api2Test < UnitTestCase
     assert_api_results(seqs)
 
     seqs = Sequence.where(
-      Sequence[:created_at].year.eq(2017).and(Sequence[:created_at].month.eq(2))
+      Sequence[:updated_at].year.eq(2017).and(Sequence[:updated_at].month.eq(2))
     )
     assert_not_empty(seqs)
     assert_api_pass(params.merge(updated_at: "2017-02"))
@@ -3090,7 +3092,7 @@ class Api2Test < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where(Name[:rank].lteq(genus).or(Name[:rank].eq(group)))
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -3270,8 +3272,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
 
-    # spls = SpeciesList.where("year(updated_at) = 2008")
-    spls = SpeciesList.where(SpeciesList[:updated_at].year == "2008")
+    spls = SpeciesList.where(SpeciesList[:updated_at].year == 2008)
     assert_not_empty(spls)
     assert_api_pass(params.merge(updated_at: "2008"))
     assert_api_results(spls)
