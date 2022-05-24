@@ -2,6 +2,10 @@
 
 class Name < AbstractModel
   scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+  # For a glitch discovered in the wild:
+  scope :with_self_referential_misspelling, lambda {
+    where(Name[:correct_spelling_id].eq(Name[:id]))
+  }
 
   # Is this Name misspelled?
   def is_misspelling?
@@ -169,12 +173,12 @@ class Name < AbstractModel
   # three cases of it in the database.  Presumably something to do with
   # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
   def self.fix_self_referential_misspellings
-    msgs = Name.select(:id, :text_name, :author).
-           where(Name[:correct_spelling_id].eq(Name[:id])).
+    msgs = Name.with_self_referential_misspelling.
+           select(:id, :text_name, :author).
            map do |id, text_name, author|
              "Name ##{id} #{text_name} #{author} was a misspelling of itself."
            end
-    Name.where(Name[:correct_spelling_id].eq(Name[:id])).
+    Name.with_self_referential_misspelling.
       update_all(correct_spelling_id: nil)
     msgs
   end
