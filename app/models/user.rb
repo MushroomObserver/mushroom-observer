@@ -597,10 +597,10 @@ class User < AbstractModel
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||=
-      calc_all_editable_species_lists(include: nil)
+      calc_all_editable_species_lists(include)
   end
 
-  def calc_all_editable_species_lists(include: nil)
+  def calc_all_editable_species_lists(include)
     return species_lists.includes(include) if projects_member.none?
 
     SpeciesList.includes(include).
