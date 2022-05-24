@@ -533,11 +533,10 @@ class Name < AbstractModel
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    nd = Arel::Table.new(:name_descriptions)
     Name.where(rank: 0..Name.ranks[:Genus]).
       joins(:description).
-      where(nd[:classification].not_eq(Name[:classification])).
-      where(nd[:classification].not_blank).
+      where(NameDescription[:classification].not_eq(Name[:classification])).
+      where(NameDescription[:classification].not_blank).
       update_all(
         Name[:classification].eq(NameDescription[:classification]).to_sql
       )
