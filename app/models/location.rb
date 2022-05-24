@@ -127,8 +127,9 @@ class Location < AbstractModel
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
-       Location::Version.where(location_id: ver.location_id,
-                               user_id: ver.user_id).none?
+       Location::Version.where(
+         location_id: ver.location_id, user_id: ver.user_id
+       ).count.zero?
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -240,7 +241,7 @@ class Location < AbstractModel
     []
   end
 
-  # Get an instance of the Name that means "unknown".
+  # Get an instance of the Location whose name means "unknown".
   def self.unknown
     raise("There is no \"unknown\" location!") if names_for_unknown.empty?
 
