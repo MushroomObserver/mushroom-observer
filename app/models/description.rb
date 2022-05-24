@@ -400,39 +400,29 @@ class Description < AbstractModel
   # Array of ids.  Caches result.
   def group_user_ids(table)
     @group_user_ids ||= {}
-    select_manager = arel_select_group_user_ids(table)
-    @group_user_ids[table] ||= self.class.connection.
-                               select_values(select_manager.to_sql).map(&:to_i)
+    @group_user_ids[table] ||=
+      self.class.connection.select_values(select_group_user_ids(table).to_sql)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
   # Caches result.  (Equivalent to using <tt>association.ids</tt>, I think.)
   def group_ids(table)
     @group_ids ||= {}
-    select_manager = arel_select_group_ids(table)
-    # puts(select_manager.to_sql)
-    @group_ids[table] ||= self.class.connection.
-                          select_values(select_manager.to_sql).map(&:to_i)
+    @group_ids[table] ||=
+      self.class.connection.select_values(select_group_ids(table).to_sql)
   end
 
   private
 
-  # SELECT DISTINCT u.user_id FROM #{table} t, user_groups_users u
-  # WHERE t.#{type_tag}_id = #{id}
-  #   AND t.user_group_id = u.user_group_id
-  # ORDER BY u.user_id ASC
-  def arel_select_group_user_ids(table)
+  def select_group_user_ids(table)
     table = Arel::Table.new(table.to_sym)
     ugu = Arel::Table.new(:user_groups_users)
     table.join(ugu).on(table[:"#{type_tag}_id"].eq(id).
-          and(table[:user_group_id].eq(ugu[:user_group_id]))).distinct.
+        and(table[:user_group_id].eq(ugu[:user_group_id]))).distinct.
       project(ugu[:user_id]).order(ugu[:user_id].asc)
   end
 
-  # SELECT DISTINCT user_group_id FROM #{table}
-  # WHERE #{type_tag}_id = #{id}
-  # ORDER BY user_group_id ASC
-  def arel_select_group_ids(table)
+  def select_group_ids(table)
     table = Arel::Table.new(table.to_sym)
     table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
       project(table[:user_group_id]).order(table[:user_group_id].asc)
