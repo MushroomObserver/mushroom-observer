@@ -936,16 +936,17 @@ class Api2Test < UnitTestCase
   #  :section: Herbarium Requests
   # -------------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_herbaria
     params = {
       method: :get,
       action: :herbarium
     }
 
+    # rubocop:disable Style/FormatStringToken
     herbs = Herbarium.where(
       Herbarium[:created_at].format("%Y-%m-%d") == "2012-10-21"
     )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(herbs)
     assert_api_pass(params.merge(created_at: "2012-10-21"))
     assert_api_results(herbs)
@@ -975,7 +976,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
   end
-  # rubocop:enable Style/FormatStringToken
 
   # --------------------------------------
   #  :section: Herbarium Record Requests
@@ -1189,7 +1189,6 @@ class Api2Test < UnitTestCase
   #  :section: Image Requests
   # ---------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_images
     img = Image.all.sample
     params = { method: :get, action: :image }
@@ -1201,9 +1200,11 @@ class Api2Test < UnitTestCase
     assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
+    # rubocop:disable Style/FormatStringToken
     assert_api_results(
       Image.where(Image[:updated_at].format("%Y-%m-%d") == "2006-05-22")
     )
+    # rubocop:enable Style/FormatStringToken
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
@@ -1333,7 +1334,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(ok_for_export: "no"))
     assert_api_results([pretty_img])
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_two_agaricus_bug
     name = names(:agaricus_campestris) # the only Agaricus species with images
@@ -1514,7 +1514,6 @@ class Api2Test < UnitTestCase
   #  :section: Location Requests
   # ------------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_locations
     loc = Location.all.sample
     params = { method: :get, action: :location }
@@ -1527,10 +1526,11 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
 
-    # Nimmo Note: I believe this should be updated_at, not created_at
+    # rubocop:disable Style/FormatStringToken
     locs = Location.where(
       Location[:updated_at].format("%Y-%m-%d") == "2012-01-01"
     )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
@@ -1554,7 +1554,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(north: 40, south: 39, east: -123, west: -124))
     assert_api_results(locs)
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_posting_locations
     name1  = "Reno, Nevada, USA"
@@ -1717,7 +1716,6 @@ class Api2Test < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_names
     params = { method: :get, action: :name }
 
@@ -1731,8 +1729,10 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
 
+    # rubocop:disable Style/FormatStringToken
     names = Name.where(Name[:updated_at].format("%Y-%m-%d") == "2008-09-05").
             reject(&:correct_spelling_id)
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(names)
     assert_api_pass(params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
@@ -1777,7 +1777,9 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(is_deprecated: "true"))
     assert_api_results(names)
 
+    # rubocop:disable Style/FormatStringToken
     names = Name.where(Name[:updated_at].format("%Y-%m-%d") == "2009-10-12")
+    # rubocop:enable Style/FormatStringToken
     goods = names.reject(&:correct_spelling_id)
     bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
@@ -1929,7 +1931,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(ok_for_export: "yes"))
     assert_api_results(names)
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_creating_names
     @name           = "Parmeliaceae"
@@ -2158,7 +2159,6 @@ class Api2Test < UnitTestCase
   #  :section: Observation Requests
   # ---------------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_observations
     params = { method: :get, action: :observation }
 
@@ -2171,9 +2171,11 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
 
+    # rubocop:disable Style/FormatStringToken
     obses = Observation.where(
       Observation[:updated_at].format("%Y-%m-%d") == "2007-06-24"
     )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(obses)
     assert_api_pass(params.merge(updated_at: "20070624"))
     assert_api_results(obses)
@@ -2369,7 +2371,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(region: "California, USA"))
     assert_api_results(obses)
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_post_minimal_observation
     @user = rolf
@@ -2906,7 +2907,6 @@ class Api2Test < UnitTestCase
   #  :section: Sequence Requests
   # ------------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_sequences
     params = { method: :get, action: :sequence }
 
@@ -2914,9 +2914,11 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: seq.id))
     assert_api_results([seq])
 
+    # rubocop:disable Style/FormatStringToken
     seqs = Sequence.where(
       Sequence[:created_at].format("%Y-%m-%d") == "2017-01-01"
     )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(seqs)
     assert_api_pass(params.merge(created_at: "2017-01-01"))
     assert_api_results(seqs)
@@ -3131,7 +3133,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_creating_sequences
     rolfs_obs  = observations(:coprinus_comatus_obs)
@@ -3257,7 +3258,6 @@ class Api2Test < UnitTestCase
   #  :section: SpeciesList Requests
   # ---------------------------------
 
-  # rubocop:disable Style/FormatStringToken
   def test_getting_species_lists
     params = { method: :get, action: :species_list }
 
@@ -3265,9 +3265,11 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(id: spl.id))
     assert_api_results([spl])
 
+    # rubocop:disable Style/FormatStringToken
     spls = SpeciesList.where(
       SpeciesList[:created_at].format("%Y-%m-%d") == "2012-07-06"
     )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(spls)
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
@@ -3374,7 +3376,6 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(comments_has: "double dare"))
     assert_api_results([spl])
   end
-  # rubocop:enable Style/FormatStringToken
 
   def test_creating_species_lists
     @user     = rolf
