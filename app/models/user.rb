@@ -596,7 +596,8 @@ class User < AbstractModel
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
-    @all_editable_species_lists ||= calc_all_editable_species_lists(include)
+    @all_editable_species_lists ||=
+      calc_all_editable_species_lists(include: nil)
   end
 
   def calc_all_editable_species_lists(include: nil)
