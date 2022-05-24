@@ -401,7 +401,7 @@ class Description < AbstractModel
   def group_user_ids(table)
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
-      self.class.connection.select_values(select_group_user_ids(table))
+      self.class.connection.select_values(select_group_user_ids(table).to_sql)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
@@ -409,7 +409,7 @@ class Description < AbstractModel
   def group_ids(table)
     @group_ids ||= {}
     @group_ids[table] ||=
-      self.class.connection.select_values(select_group_ids(table))
+      self.class.connection.select_values(select_group_ids(table).to_sql)
   end
 
   private
@@ -419,13 +419,13 @@ class Description < AbstractModel
     ugu = Arel::Table.new(:user_groups_users)
     table.join(ugu).on(table[:"#{type_tag}_id"].eq(id).
         and(table[:user_group_id].eq(ugu[:user_group_id]))).distinct.
-      project(ugu[:user_id]).order(ugu[:user_id].asc).to_sql
+      project(ugu[:user_id]).order(ugu[:user_id].asc)
   end
 
   def select_group_ids(table)
     table = Arel::Table.new(table.to_sym)
     table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
-      project(table[:user_group_id]).order(table[:user_group_id].asc).to_sql
+      project(table[:user_group_id]).order(table[:user_group_id].asc)
   end
 
   public
