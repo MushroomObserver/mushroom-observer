@@ -524,8 +524,7 @@ class Name < AbstractModel
     subtaxa = Name.with_name_like(text_name).where(deprecated: false).to_a
     uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
     # Beware of AR where.not gotcha - will not match a null classification below
-    synonyms = Name.where(deprecated: true).
-               where(synonym_id: uniq_subtaxa).
+    synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).
                where(Name[:classification].not_eq(classification))
     (subtaxa + synonyms).map(&:id).uniq
   end
