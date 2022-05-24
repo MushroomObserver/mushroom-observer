@@ -45,7 +45,7 @@ class Name < AbstractModel
 
   def self.name_search(finder, ignore_deprecated)
     unless ignore_deprecated
-      results = finder.where("deprecated = 0")
+      results = finder.where(deprecated: 0)
       return results.to_a if results.present?
     end
     finder.to_a
