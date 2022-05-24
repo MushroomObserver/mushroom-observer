@@ -601,7 +601,7 @@ class User < AbstractModel
 
       SpeciesList.includes(include).
         where(SpeciesList[:user_id].eq(id).
-        or(SpeciesList[:id].in(arel_species_list_ids_in_users_projects))).uniq
+        or(SpeciesList[:id].in(species_lists_in_users_projects))).uniq
     end
   end
 
