@@ -529,15 +529,14 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is an admin for.
-  # Note: Doing this the short way in ActiveRecord produces two extra joins!
   def projects_admin
-    prj = Project.arel_table
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
+    # Note: ActiveRecord joins: through is slower; produces two extra joins
     ugu = Arel::Table.new(:user_groups_users)
 
-    select_manager = prj.project(Arel.star).join(ugu).
-                     on(prj[:admin_group_id].eq(ugu[:user_group_id]).
+    select_manager = Project.arel_table.join(ugu).
+                     on(Project[:admin_group_id].eq(ugu[:user_group_id]).
                         and(ugu[:user_id].eq(id)))
 
     @projects_admin ||= Project.joins(*select_manager.join_sources)
@@ -566,11 +565,8 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     @preferred_herbarium ||= begin
-      hr = HerbariumRecord.arel_table
-      select_manager = hr.project(hr[:herbarium_id]).
-                       where(hr[:user_id].eq(id)).
-                       order(hr[:created_at].desc).take(1)
-      herbarium_id = Herbarium.connection.select_value(select_manager.to_sql)
+      herbarium_id = HerbariumRecord.where(user_id: id).
+                     order(created_at: :desc).pluck(:herbarium_id).first
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
@@ -601,23 +597,15 @@ class User < AbstractModel
   # Project that the User is a member of.
   def all_editable_species_lists(include: nil)
     @all_editable_species_lists ||= begin
-      if projects_member.any?
-        SpeciesList.includes(include).find_by_sql(
-          arel_select_species_lists_by_user_or_project.to_sql
-        )
-      else
-        species_lists.includes(include)
-      end
+      return species_lists.includes(include) if projects_member.none?
+
+      SpeciesList.includes(include).
+        where(SpeciesList[:user_id].eq(id).
+        or(SpeciesList[:id].in(species_lists_in_users_projects))).uniq
     end
   end
 
-  def arel_select_species_lists_by_user_or_project
-    sl = SpeciesList.arel_table
-    sl.project(Arel.star).where(sl[:user_id].eq(id).
-      or(sl[:id].in(arel_select_species_list_ids_in_users_projects))).uniq
-  end
-
-  def arel_select_species_list_ids_in_users_projects
+  def species_lists_in_users_projects
     project_ids = projects_member.map(&:id)
     psl = Arel::Table.new(:projects_species_lists)
     psl.project(psl[:species_list_id]).
@@ -641,23 +629,16 @@ class User < AbstractModel
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      sql = interest_in_sql(object)
-      case Interest.connection.select_value(sql).to_s
-      when "1"
+      i = Interest.where(
+        user_id: id, target_type: object.class.name, target_id: object.id
+      ).pluck(:state).first
+      case i
+      when true
         :watching
-      when "0"
+      when false
         :ignoring
       end
     end
-  end
-
-  def interest_in_sql(object)
-    i = Interest.arel_table
-    i.project(i[:state]).
-      where(i[:user_id].eq(id).
-        and(i[:target_type].eq(object.class.name)).
-        and(i[:target_id].eq(object.id))).
-      take(1).to_sql
   end
 
   # Has this user expressed positive interest in a given object?
@@ -774,41 +755,22 @@ class User < AbstractModel
       readlines.map(&:chomp)
   end
 
-  private_class_method def self.primer_data
-    # How to order - https://stackoverflow.com/a/71282345/3357635
-    users = User.arel_table
-    User.order(arel_function_last_login_if_recent.desc,
-               users[:contribution].desc).
-      limit(1000).pluck(arel_function_login_plus_name).uniq.sort
+  def self.primer_data
+    users = User.select(:login, :name).order(
+      orderby_last_login_if_recent.desc, User[:contribution].desc
+    ).limit(1000).pluck(:login, :name)
+
+    users.map do |login, name|
+      name.empty? ? login : "#{login} <#{name}>"
+    end.sort
   end
 
-  private_class_method def self.arel_function_last_login_if_recent
-    users = User.arel_table
-    Arel::Nodes::NamedFunction.new(
-      "IF",
-      [users[:last_login].gt(1.month.ago),
-       users[:last_login],
-       Arel.sql("NULL")]
-    )
-  end
-
-  private_class_method def self.arel_function_login_plus_name
-    users = User.arel_table
-    Arel::Nodes::NamedFunction.new(
-      "CONCAT",
-      [users[:login],
-       Arel::Nodes::NamedFunction.new(
-         "IF",
-         [users[:name].eq(""),
-          Arel::Nodes.build_quoted(""),
-          Arel::Nodes::NamedFunction.new(
-            "CONCAT",
-            [Arel::Nodes.build_quoted(" <"),
-             users[:name],
-             Arel::Nodes.build_quoted(">")]
-          )]
-       )]
-    )
+  private_class_method def self.orderby_last_login_if_recent
+    User[:last_login].when(
+      User[:last_login] > 1.month.ago
+    ).then(
+      User[:last_login]
+    ).else(nil)
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -878,9 +840,7 @@ class User < AbstractModel
 
   # Delete their observations' attachments.
   private_class_method def self.delete_observations_attachments(id)
-    obs = Observation.arel_table
-    obs_select_manager = obs.project(obs[:id]).where(obs[:user_id].eq(id))
-    obs_ids = User.connection.select_values(obs_select_manager.to_sql)
+    obs_ids = Observation.where(user_id: id).pluck(:id)
     return unless obs_ids.any?
 
     [
