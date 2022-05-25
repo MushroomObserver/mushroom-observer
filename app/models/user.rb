@@ -915,26 +915,6 @@ class User < AbstractModel
   end
   # rubocop:enable Metrics/MethodLength
 
-  # Does user have any unshown naming notifications?
-  # (I'm thoroughly confused about what role the observation plays in this
-  # complicated set of pages. -JPH)
-  def unshown_naming_notifications?(_observation = nil)
-    result = false
-    QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                      user_id: id).find_each do |q|
-      _naming_id, notification_id, shown =
-        q.get_integers([:naming, :notification, :shown])
-      next unless shown.nil?
-
-      notification = Notification.find(notification_id)
-      next unless notification&.note_template
-
-      result = true
-      break
-    end
-    result
-  end
-
   def remove_image(image)
     return unless self.image == image
 
