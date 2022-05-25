@@ -58,6 +58,8 @@ module TabsHelper
   end
 
   def manage_lists_link(obs, user)
+    return unless user
+
     link_with_query(:show_observation_manage_species_lists.t,
                     controller: :species_list, action: :manage_species_lists,
                     id: obs.id)
