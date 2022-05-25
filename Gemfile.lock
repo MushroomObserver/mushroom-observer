@@ -149,8 +149,6 @@ GEM
     mail (2.7.0)
       mini_mime (>= 0.1.1)
     marcel (1.0.2)
-    mass_insert (1.0.0)
-      activerecord (>= 5.2)
     matrix (0.4.2)
     method_source (1.0.0)
     mimemagic (0.4.3)
@@ -341,7 +339,6 @@ DEPENDENCIES
   jquery-rails
   jquery-slick-rails
   mail (= 2.7.0)
-  mass_insert
   mimemagic
   mini_racer
   minitest
