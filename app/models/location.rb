@@ -245,7 +245,7 @@ class Location < AbstractModel
   def self.unknown
     raise("There is no \"unknown\" location!") if names_for_unknown.empty?
 
-    Location.find_by(Location[:name].matches_any(names_for_unknown))
+    Location.find_by(name: MO.unknown_location_name)
   end
 
   # Is this one of the names we recognize for the "unknown" location?
