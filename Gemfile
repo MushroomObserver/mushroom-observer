@@ -18,10 +18,6 @@ gem("rails", "~> 6.0.4")
 # and get a report on outdated dependencies for any Rails application.
 gem("next_rails")
 
-# This is here only to ensure a patch for a code injection vulnerability.
-# Please remove next time we update everything.
-# gem("activestorage", ">= 5.2.6.3")
-
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
 gem("mysql2")
@@ -141,9 +137,9 @@ gem("brakeman", require: false)
 #
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses
-gem("rubocop", "= 0.89.0", require: false)
-gem("rubocop-performance", ">= 1.8.1")
-gem("rubocop-rails", ">= 2.8.1") # version of rubocop-rails for older rubocop
+gem("rubocop", "= 0.89", require: false)
+gem("rubocop-performance", ">= 1.8.1") # version for older rubocop
+gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
 # Rubocop extension for enforcing graphql-ruby best practices.
 # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
 # require:
