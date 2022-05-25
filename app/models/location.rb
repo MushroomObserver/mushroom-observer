@@ -243,7 +243,8 @@ class Location < AbstractModel
 
   # Get an instance of the Location whose name means "unknown".
   def self.unknown
-    raise("There is no \"unknown\" location!") if names_for_unknown.empty?
+    raise("There is no \"unknown\" location configured!") if
+      MO.unknown_location_name.blank?
 
     Location.find_by(name: MO.unknown_location_name)
   end
