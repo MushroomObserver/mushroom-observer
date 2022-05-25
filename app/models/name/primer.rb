@@ -48,15 +48,10 @@ class Name < AbstractModel
     # List of names sorted by how many times they've been used,
     # then re-sorted by name.
     def most_used_names
-      connection.select_values(%(
-        SELECT names.text_name, COUNT(*) AS n
-        FROM namings
-        LEFT OUTER JOIN names ON names.id = namings.name_id
-        WHERE correct_spelling_id IS NULL
-        GROUP BY names.text_name
-        ORDER BY n DESC
-        LIMIT 1000
-      )).uniq.sort
+      Name.left_outer_joins(:namings).select(:text_name, Arel.star.count).
+        where(correct_spelling_id: nil).group(:text_name).
+        order(Name[:text_name].count.desc).
+        limit(1000).pluck(:text_name).uniq.sort
     end
   end
 end

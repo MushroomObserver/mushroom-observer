@@ -277,8 +277,6 @@ class ObserverController
                   action: "create_location",
                   where: @observation.place_name,
                   set_observation: @observation.id)
-    elsif unshown_notifications?(@user, :naming)
-      redirect_to(action: "show_notifications", id: @observation.id)
     else
       redirect_to(action: "show_observation", id: @observation.id)
     end

@@ -725,7 +725,7 @@ class LocationControllerTest < FunctionalTestCase
     post(:edit_location, params)
     location.reload
     assert_true(location.locked)
-    assert_equal("Unknown", location.name)
+    assert_equal("Earth", location.name)
     assert_equal(90, location.north)
     assert_equal(-90, location.south)
     assert_equal(180, location.east)

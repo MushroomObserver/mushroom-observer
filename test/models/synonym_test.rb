@@ -10,9 +10,7 @@ class SynonymTest < UnitTestCase
 
     # Make sure there is at least one missing synonym.
     missing_id = names(:macrolepiota_rachodes).synonym_id
-    Name.connection.execute(%(
-      DELETE FROM synonyms WHERE id = #{missing_id}
-    ))
+    Synonym.where(id: missing_id).delete_all
     assert_nil(Synonym.safe_find(missing_id))
 
     # Run cronjob to fix these sorts of things and make sure it fixes them.

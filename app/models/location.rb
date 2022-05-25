@@ -127,10 +127,9 @@ class Location < AbstractModel
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
-       Location.connection.select_value(%(
-         SELECT COUNT(*) FROM locations_versions
-         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Location::Version.where(
+         location_id: ver.location_id, user_id: ver.user_id
+       ).count.zero?
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -242,13 +241,12 @@ class Location < AbstractModel
     []
   end
 
-  # Get an instance of the Name that means "unknown".
+  # Get an instance of the Location whose name means "unknown".
   def self.unknown
-    names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
-      return location if location
-    end
-    raise("There is no \"unknown\" location!")
+    raise("There is no \"unknown_location_name\" configured!") if
+      MO.unknown_location_name.blank?
+
+    Location.find_by(name: MO.unknown_location_name)
   end
 
   # Is this one of the names we recognize for the "unknown" location?
@@ -468,17 +466,9 @@ class Location < AbstractModel
     return false unless name
 
     @@location_cache ||= (
-      Location.connection.select_values(%(
-        SELECT name FROM locations
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `observations`
-        WHERE `where` is not NULL
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `species_lists`
-        WHERE `where` is not NULL
-      ))
+      Location.pluck(:name) +
+        Observation.where.not(where: nil).pluck(:where) +
+        SpeciesList.where.not(where: nil).pluck(:where)
     ).uniq
     @@location_cache.member?(name)
   end

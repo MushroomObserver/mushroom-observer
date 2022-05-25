@@ -327,7 +327,7 @@ class Name < AbstractModel
 
   has_many :misspellings, class_name: "Name",
                           foreign_key: "correct_spelling_id"
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order num_views: :desc },
            class_name: "NameDescription",
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
@@ -396,16 +396,14 @@ class Name < AbstractModel
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
     if (ver.version != 1) &&
-       Name.connection.select_value(%(
-         SELECT COUNT(*) FROM names_versions
-         WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Name::Version.where(name_id: ver.name_id,
+                           user_id: ver.user_id).none?
       SiteData.update_contribution(:add, :names_versions)
     end
   end
 
   scope :with_rank,
-        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+        ->(rank) { where(rank: Name.ranks[rank]) if rank }
 
   def <=>(other)
     sort_name <=> other.sort_name
@@ -417,15 +415,8 @@ class Name < AbstractModel
 
   # Used by show_name.
   def self.count_observations(names)
-    ids = names.map(&:id)
-    counts_and_ids = Name.connection.select_rows(%(
-        SELECT count(*) c, names.id i FROM observations, names
-        WHERE observations.name_id = names.id
-        AND names.id IN (#{ids.join(", ")}) group by names.id
-    ))
-    result = {}
-    counts_and_ids.each { |row| result[row[1]] = row[0] }
-    result
+    Hash[*Observation.group(:name_id).where(name: names).
+         pluck(:name_id, Arel.star.count).to_a.flatten]
   end
 
   ##############################################################################
