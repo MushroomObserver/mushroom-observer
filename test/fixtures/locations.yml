@@ -3,7 +3,8 @@
 # in a fixture on the opposite side of the association.
 # See https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-DEFAULTS: &DEFAULTS
+DEFAULTS:
+  &DEFAULTS
   locked: false
   user: rolf
   version: 1
@@ -44,7 +45,7 @@ mitrula_marsh:
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   name: '"Mitrula Marsh", Sand Lake, Bassetts, Yuba Co., California, USA'
-  scientific_name: 'USA, California, Yuba Co., Bassetts, Sand Lake'
+  scientific_name: "USA, California, Yuba Co., Bassetts, Sand Lake"
   north: 39.7184
   west: -120.687
   east: -120.487
@@ -128,8 +129,8 @@ unknown_location:
   created_at: 2012-01-01 15:24:18
   updated_at: 2012-01-01 15:24:18
   user_id: 0
-  name: Unknown
-  scientific_name: Unknown
+  name: Earth
+  scientific_name: Earth
   north: 90
   west: -180
   east: 180
@@ -147,7 +148,7 @@ nybg_location:
   east: -73.878
   south: 40.866
 
-# Do not use this location for any object
+  # Do not use this location for any object
   <<: *DEFAULTS
 unused_location:
   user_id: 0

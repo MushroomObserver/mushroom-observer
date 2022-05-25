@@ -124,14 +124,14 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def test_post_minimal_observation
-    params = { api_key: api_keys(:rolfs_api_key).key, location: "Unknown" }
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth" }
     post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
     assert_equal(Time.zone.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
-    assert_equal("Unknown", obs.where)
+    assert_equal("Earth", obs.where)
     assert_names_equal(names(:fungi), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)

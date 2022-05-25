@@ -113,6 +113,7 @@ MushroomObserver::Application.configure do
   config.location_states_file    = "#{location_path}states.yml"
   config.location_prefixes_file  = "#{location_path}prefixes.yml"
   config.location_bad_terms_file = "#{location_path}bad_terms.yml"
+  config.unknown_location_name = "Earth"
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
