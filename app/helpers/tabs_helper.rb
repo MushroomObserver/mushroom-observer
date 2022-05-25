@@ -13,7 +13,6 @@ module TabsHelper
     tabs = [
       show_obs_google_links_for(obs.name),
       general_questions_link(obs, user),
-      notifications_link(obs, user),
       manage_lists_link(obs, user),
       map_link,
       obs_change_links(obs),
@@ -46,14 +45,6 @@ module TabsHelper
 
     link_with_query(:show_observation_send_question.t,
                     controller: :observer, action: :ask_observation_question,
-                    id: obs.id)
-  end
-
-  def notifications_link(obs, user)
-    return unless user&.unshown_naming_notifications?(obs)
-
-    link_with_query(:show_observation_view_notifications.t,
-                    controller: :observation, action: :show_notifications,
                     id: obs.id)
   end
 
