@@ -30,6 +30,15 @@ end
 
 SimpleCov.start("rails")
 
+# Tracker deprecation messages in each file, for gem next_rails
+if ENV["DEPRECATION_TRACKER"]
+  DeprecationTracker.track_minitest(
+    shitlist_path: "test/support/deprecation_warning.shitlist.json",
+    mode: ENV["DEPRECATION_TRACKER"],
+    transform_message: ->(message) { message.gsub("#{Rails.root}/", "") }
+  )
+end
+
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")

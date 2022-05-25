@@ -1,3 +1,6 @@
+def next?
+  File.basename(__FILE__) == "Gemfile.next"
+end
 # frozen_string_literal: true
 
 source("https://rubygems.org")
@@ -8,11 +11,15 @@ gem("date", ">= 3.2.1")
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem("rails", "~> 5.2.2")
+gem("rails", "~> 6.0.4")
+# Toolkit to upgrade Rails application
+# It will help set up dual booting, track deprecation warnings,
+# and get a report on outdated dependencies for any Rails application.
+gem("next_rails")
 
 # This is here only to ensure a patch for a code injection vulnerability.
 # Please remove next time we update everything.
-gem("activestorage", ">= 5.2.6.3")
+# gem("activestorage", ">= 5.2.6.3")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -99,10 +106,7 @@ gem("simple_enum")
 gem("jquery-slick-rails")
 
 # email generation, parsing and sending
-# version locked to prevent test failures caused by added "=0D" at the
-# end of line in the body of plaintext emails.
-# See https://www.pivotaltracker.com/story/show/172299270/comments/213574631
-gem("mail", "= 2.7.0")
+gem("mail")
 
 # for detecting file type of uploaded images
 gem("mimemagic")
@@ -131,9 +135,9 @@ gem("brakeman", require: false)
 #
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses
-gem("rubocop", "= 0.89", require: false)
-gem("rubocop-performance")
-gem("rubocop-rails")
+gem("rubocop", "= 0.89.0", require: false)
+gem("rubocop-performance", ">= 1.8.1")
+gem("rubocop-rails", ">= 2.8.1") # version of rubocop-rails for older rubocop
 # Rubocop extension for enforcing graphql-ruby best practices.
 # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
 # require:
@@ -241,7 +245,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara")
+  gem("capybara", "~> 3.36.0") # for ruby 2.6
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
@@ -270,7 +274,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem("rails_db", "~> 2.3.0")
+  gem("rails_db", "~> 2.4.0")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")
