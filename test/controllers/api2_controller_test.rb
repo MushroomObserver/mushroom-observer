@@ -358,9 +358,12 @@ class Api2ControllerTest < FunctionalTestCase
     assert_equal("sequence notes", sequence.notes)
   end
 
+  # note: @response.body is just returning the query.
+  # the asserted match is found in the @results?
   def test_get_observation_with_gps_hidden
     obs = observations(:unknown_with_lat_long)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })
+    pp(JSON.parse(response.body))
     assert_match(/34.1622|118.3521/, @response.body)
     get(:observations, params: { id: obs.id, detail: :high, format: :xml })
     assert_match(/34.1622|118.3521/, @response.body)
@@ -400,6 +403,7 @@ class Api2ControllerTest < FunctionalTestCase
 
     params[:format] = :json
     get(:observations, params: params.merge(api_key: rolfs_key.key))
+    pp(JSON.parse(response.body))
     json = JSON.parse(response.body)
     votes = json["results"][0]["votes"]
     assert_equal(
