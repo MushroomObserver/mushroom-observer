@@ -19,7 +19,7 @@ unless @api.errors.any?(&:fatal)
   else
     type = @api.results.first.class.type_tag
     json.results(@api.results,
-                 partial: "api2/#{type}.json.builder",
+                 partial: "api2/#{type}.json.jbuilder",
                  as: :object,
                  locals: { detail: @api.detail == :high })
   end
