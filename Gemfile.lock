@@ -338,7 +338,7 @@ DEPENDENCIES
   jbuilder
   jquery-rails
   jquery-slick-rails
-  mail (= 2.7.0)
+  mail
   mimemagic
   mini_racer
   minitest
@@ -368,4 +368,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.3.13
+   2.3.5
