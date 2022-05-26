@@ -67,9 +67,7 @@ class Language < AbstractModel
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    values = get_user_translation_contributions(user)
-
-    for text in values
+    get_user_translation_contributions(user).each do |text|
       lines += score_lines(text)
     end
     lines
