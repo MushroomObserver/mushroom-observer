@@ -27,6 +27,11 @@ gem("mysql2")
 gem("arel_extensions")
 gem("arel-helpers")
 
+# Add method `mass_insert` for bulk db inserts in ActiveRecord.
+# Same basic syntax as upcoming Rails 6 `insert_all`
+# If upgrading to Rails 6, we can disable the gem and switch methods
+gem("mass_insert")
+
 # Use bootstrap style generator
 gem("bootstrap-sass")
 
@@ -99,10 +104,7 @@ gem("simple_enum")
 gem("jquery-slick-rails")
 
 # email generation, parsing and sending
-# version locked to prevent test failures caused by added "=0D" at the
-# end of line in the body of plaintext emails.
-# See https://www.pivotaltracker.com/story/show/172299270/comments/213574631
-gem("mail", "= 2.7.0")
+gem("mail")
 
 # for detecting file type of uploaded images
 gem("mimemagic")
