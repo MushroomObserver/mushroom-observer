@@ -58,22 +58,26 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    TranslationString.where(language: self).where.not(user_id: 0).
-      group(:user_id).order(TranslationString[:id].count).limit(num).
-      joins(:user).pluck(User[:id], User[:login])
+    TranslationString.
+      where(language: self).where.not(user_id: 0).
+      group(:user_id).
+      order(TranslationString[:id].count).
+      limit(num).
+      joins(:user).
+      pluck(User[:id], User[:login])
   end
 
   # Count the number of lines the user has translated.  Include edits, as well.
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    get_user_translation_contributions(user).each do |text|
+    get_user_translation_contributions_overall(user).each do |text|
       lines += score_lines(text)
     end
     lines
   end
 
-  private_class_method def self.get_user_translation_contributions(user)
+  private_class_method def self.get_user_translation_contributions_overall(user)
     v = Arel::Table.new(:translation_strings_versions)
     TranslationString::Version.
       where(v[:user_id].eq(user.id)).
@@ -82,11 +86,10 @@ class Language < AbstractModel
       pluck(v[:text])
   end
 
+  # For one language (instance method)
   def calculate_users_contribution(user)
     lines = 0
-    values = get_user_translation_contributions(user)
-
-    for text in values
+    get_user_translation_contributions(user).each do |text|
       lines += Language.score_lines(text)
     end
     lines
@@ -117,17 +120,20 @@ class Language < AbstractModel
 
   # Be generous to ensure that we don't accidentally miss anything that is
   # changed while the Rails app is booting.
+  # We need a class variable here
   @@last_update = 1.minute.ago
 
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
+    # We need a class variable here
     cutoff = @@last_update
     @@last_update = Time.zone.now
+
     strings = TranslationString.joins(:language).
-              where(TranslationString[:updated_at].gteq(cutoff)).
+              where(TranslationString[:updated_at] >= cutoff).
               pluck(Language[:locale], :tag, :text)
 
-    for locale, tag, text in strings
+    strings.each do |locale, tag, text|
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
