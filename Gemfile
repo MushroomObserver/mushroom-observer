@@ -27,6 +27,11 @@ gem("mysql2")
 gem("arel_extensions")
 gem("arel-helpers")
 
+# Add method `mass_insert` for bulk db inserts in ActiveRecord.
+# Same basic syntax as upcoming Rails 6 `insert_all`
+# If upgrading to Rails 6, we can disable the gem and switch methods
+gem("mass_insert")
+
 # Use bootstrap style generator
 gem("bootstrap-sass")
 
