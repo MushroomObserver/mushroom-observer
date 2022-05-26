@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-def next?
-  File.basename(__FILE__) == "Gemfile.next"
-end
-
 source("https://rubygems.org")
 
 # security fix for CVE-2021-41817 regex denial of service vulnerability
@@ -13,10 +9,6 @@ gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem("rails", "~> 6.0.4")
-# Toolkit to upgrade Rails application
-# It will help set up dual booting, track deprecation warnings,
-# and get a report on outdated dependencies for any Rails application.
-gem("next_rails")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -66,7 +58,7 @@ gem("uglifier")
 gem("jbuilder")
 
 # Use ActiveModel has_secure_password
-# gem("bcrypt", "~> 3.1.7")
+gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
 gem("unicorn", "5.4.1")

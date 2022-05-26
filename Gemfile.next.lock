@@ -83,6 +83,7 @@ GEM
     ast (2.4.2)
     autoprefixer-rails (10.4.7.0)
       execjs (~> 2)
+    bcrypt (3.1.18)
     bindex (0.8.1)
     blankslate (3.1.3)
     bootstrap-sass (3.4.1)
@@ -334,6 +335,7 @@ DEPENDENCIES
   RedCloth
   arel-helpers
   arel_extensions
+  bcrypt (~> 3.1.7)
   blankslate
   bootstrap-sass
   brakeman
@@ -367,7 +369,7 @@ DEPENDENCIES
   rails-controller-testing
   rails_db (~> 2.4.0)
   rtf
-  rubocop (= 0.89.0)
+  rubocop (= 0.89)
   rubocop-graphql
   rubocop-performance (>= 1.8.1)
   rubocop-rails (>= 2.8.1)
