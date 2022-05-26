@@ -58,53 +58,52 @@ class Language < AbstractModel
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
-    user_ids = self.class.connection.select_rows(%(
-      SELECT user_id
-      FROM translation_strings
-      WHERE language_id = #{id} AND user_id != 0
-      GROUP BY user_id
-      ORDER BY COUNT(id) DESC
-      LIMIT #{num}
-    ))
-    if user_ids.any?
-      user_ids = self.class.connection.select_rows(%(
-        SELECT id, login
-        FROM users
-        WHERE id IN (#{user_ids.join(",")})
-        ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
-      ))
-    end
-    user_ids
+    TranslationString.
+      where(language: self).where.not(user_id: 0).
+      group(:user_id).
+      order(TranslationString[:id].count).
+      limit(num).
+      joins(:user).
+      pluck(User[:id], User[:login])
   end
 
   # Count the number of lines the user has translated.  Include edits, as well.
   # It counts paragraphs, actually, and weights them according to length.
   def self.calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values(%(
-      SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
-      FROM translation_strings_versions
-      WHERE user_id = #{user.id}
-      GROUP BY translation_string_id
-    ))
+    get_user_translation_contributions_overall(user).each do |text|
       lines += score_lines(text)
     end
     lines
   end
 
+  private_class_method def self.get_user_translation_contributions_overall(user)
+    v = Arel::Table.new(:translation_strings_versions)
+    TranslationString::Version.
+      where(v[:user_id].eq(user.id)).
+      group(v[:translation_string_id]).
+      select(v[:text].group_concat("\n", order: [v[:text].asc])).
+      pluck(v[:text])
+  end
+
+  # For one language (instance method)
   def calculate_users_contribution(user)
     lines = 0
-    for text in Language.connection.select_values(%(
-      SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
-      FROM translation_strings t, translation_strings_versions v
-      WHERE t.language_id = #{id}
-        AND v.translation_string_id = t.id
-        AND v.user_id = #{user.id}
-      GROUP BY t.id
-    ))
+    get_user_translation_contributions(user).each do |text|
       lines += Language.score_lines(text)
     end
     lines
+  end
+
+  def get_user_translation_contributions(user)
+    v = Arel::Table.new(:translation_strings_versions)
+    TranslationString.
+      joins(:versions).
+      where(TranslationString[:language_id].eq(id)).
+      where(v[:user_id].eq(user.id)).
+      group(TranslationString[:id]).
+      select(v[:text].group_concat("\n", order: [v[:text].asc])).
+      pluck(v[:text])
   end
 
   def self.score_lines(text)
@@ -121,18 +120,20 @@ class Language < AbstractModel
 
   # Be generous to ensure that we don't accidentally miss anything that is
   # changed while the Rails app is booting.
+  # We need a class variable here
   @@last_update = 1.minute.ago
 
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
+    # We need a class variable here
     cutoff = @@last_update
     @@last_update = Time.zone.now
-    for locale, tag, text in Language.connection.select_rows(%(
-      SELECT locale, tag, text
-      FROM translation_strings t, languages l
-      WHERE t.language_id = l.id
-        AND t.updated_at >= #{Language.connection.quote(cutoff)}
-    ))
+
+    strings = TranslationString.joins(:language).
+              where(TranslationString[:updated_at] >= cutoff).
+              pluck(Language[:locale], :tag, :text)
+
+    strings.each do |locale, tag, text|
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
