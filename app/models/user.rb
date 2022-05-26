@@ -566,7 +566,7 @@ class User < AbstractModel
   def preferred_herbarium
     @preferred_herbarium ||= begin
       herbarium_id = HerbariumRecord.where(user_id: id).
-                     order(created_at: :desc).pluck(:herbarium_id).first
+                     order(created_at: :desc).pick(:herbarium_id)
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end
   end
@@ -634,7 +634,7 @@ class User < AbstractModel
     @interests["#{object.class.name} #{object.id}"] ||= begin
       i = Interest.where(
         user_id: id, target_type: object.class.name, target_id: object.id
-      ).pluck(:state).first
+      ).pick(:state)
       case i
       when true
         :watching
