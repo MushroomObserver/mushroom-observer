@@ -44,19 +44,22 @@ class Name < AbstractModel
     end
 
     def accepted_generic_classification_strings
-      Name.where(rank: Name.ranks[:Genus], deprecated: false).
-        where("author NOT LIKE 'sensu lato%'").
-        where("LENGTH(classification) > 2").
-        pluck(:text_name, :classification).
-        each_with_object({}) do |vals, classifications|
-          text_name, classification = vals
-          if classifications[text_name].present?
-            warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-          else
-            classifications[text_name] = classification
-          end
+      geni = Name.where(rank: Name.ranks[:Genus], deprecated: false).
+             where(Name[:author].does_not_match("sensu lato%")).
+             where(Name[:classification].length > 2).
+             pluck(:text_name, :classification)
+
+      geni.each_with_object({}) do |vals, classifications|
+        text_name, classification = vals
+        if classifications[text_name].present?
+          warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+        else
+          classifications[text_name] = classification
         end
+      end
     end
+
+    public
 
     def hash_of_names_with_observations
       Hash[

@@ -35,5 +35,7 @@ class InterestTest < UnitTestCase
                  Interest.find_by(user: rolf).target)
     assert_equal(names(:agaricus_campestris),
                  Interest.find_by(user: dick).target)
+
+    assert_equal(true, dick.watching?(names(:agaricus_campestris)))
   end
 end

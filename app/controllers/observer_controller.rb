@@ -21,7 +21,6 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/email_controller"
   require_dependency "observer_controller/info_controller"
   require_dependency "observer_controller/markup_controller"
-  require_dependency "observer_controller/notification_controller"
   require_dependency "observer_controller/rss_log_controller"
   require_dependency "observer_controller/search_controller"
   require_dependency "observer_controller/user_controller"

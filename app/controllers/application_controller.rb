@@ -23,7 +23,6 @@
 #  check_permission!::      Same, but flashes "denied" message, too.
 #  reviewer?::              Is the current User a reviewer?
 #  in_admin_mode?::         Is the current User in admin mode?
-#  unshown_notifications?:: Are there pending Notification's of a given type?
 #  autologin_cookie_set::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
 #  session_user_set::       (store user in session -- id only)
@@ -512,26 +511,6 @@ class ApplicationController < ActionController::Base
     session[:admin]
   end
   helper_method :in_admin_mode?
-
-  # Are there are any QueuedEmail's of the given flavor for the given User?
-  # Returns true or false.
-  #
-  # This only applies to emails that are associated with Notification's for
-  # which there is a note_template.  (Only one type now: Notification's with
-  # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  def unshown_notifications?(user, flavor = :naming)
-    QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
-      ints = q.get_integers(%w[shown notification], true)
-      next if ints["shown"]
-
-      notification = Notification.safe_find(ints["notification"].to_i)
-      next unless notification&.note_template
-
-      return true
-    end
-
-    false
-  end
 
   # ----------------------------
   #  "Private" methods.

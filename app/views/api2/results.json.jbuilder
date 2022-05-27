@@ -18,8 +18,9 @@ unless @api.errors.any?(&:fatal)
     json.results([])
   else
     type = @api.results.first.class.type_tag
+    # Must specify template folder, for an unknown reason
     json.results(@api.results,
-                 partial: "api2/#{type}.json.builder",
+                 partial: "api2/#{type}",
                  as: :object,
                  locals: { detail: @api.detail == :high })
   end

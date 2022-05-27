@@ -171,7 +171,7 @@ class Observation < AbstractModel
 
   before_save :cache_content_filter_data
   after_update :notify_users_after_change
-  before_destroy { destroy_orphaned_collection_numbers }
+  before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
 
@@ -225,43 +225,26 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
-    msgs = report_broken_caches(type, foreign, local)
-    refresh_cached_column_fix_errors(type, foreign, local)
-    msgs
-  end
-
-  # Check how many entries are broken in a mirrored column.  It will be good to
-  # keep track of this at first to make sure we've caught all the ways in which
-  # the mirror can get inadvertently broken.
-  def self.report_broken_caches(type, foreign, local)
-    Observation.connection.select_values(%(
-      SELECT o.id
-      FROM observations o, #{type}s x
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    )).map do |id|
+    tbl = type.camelize.constantize.arel_table
+    broken_caches = get_broken_caches(type, tbl, foreign, local)
+    broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
+    # Refresh the mirror of a foreign table's column in the observations table.
+    broken_caches.update_all(
+      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
+    )
   end
 
-  # Refresh the mirror of a foreign table's column in the observations table.
-  def self.refresh_cached_column_fix_errors(type, foreign, local)
-    Observation.connection.execute(%(
-      UPDATE observations o, #{type}s x
-      SET o.#{local} = x.#{foreign}
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    ))
+  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
+    Observation.joins(type.to_sym).
+      where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
   end
 
   # Used by Name and Location to update the observation cache when a cached
   # field value is changed.
   def self.update_cache(type, field, id, val)
-    Observation.connection.execute(%(
-      UPDATE observations
-      SET `#{field}` = #{Observation.connection.quote(val)}
-      WHERE #{type}_id = #{id}
-    ))
+    Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
 
   # Check for any observations whose consensus is a misspelled name.  This can
@@ -269,18 +252,16 @@ class Observation < AbstractModel
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
-    msgs = Observation.connection.select_rows(%(
-      SELECT o.id, n.text_name FROM observations o, names n
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    )).map do |id, search_name|
+    misspellings = Observation.joins(:name).
+                   where(Name[:correct_spelling_id].not_eq(nil))
+
+    misspellings.
+      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
-    Observation.connection.execute(%(
-      UPDATE observations o, names n
-      SET o.name_id = n.correct_spelling_id
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    ))
-    msgs
+    misspellings.update_all(
+      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
+    )
   end
 
   def update_view_stats

@@ -2902,10 +2902,9 @@ class NameTest < UnitTestCase
     ancestor = names(:basidiomycetes)
     assert(
       !ancestor.is_misspelling? &&
-      Name.joins(:namings).where(
-        "classification LIKE ?",
-        "%#{ancestor.rank}: _#{ancestor.text_name}_%"
-      ).any?,
+      Name.joins(:namings).
+        where(Name[:classification].
+          matches("%#{ancestor.rank}: _#{ancestor.text_name}_%")).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
@@ -3054,10 +3053,8 @@ class NameTest < UnitTestCase
   def test_mark_misspelled
     # Make sure target name has synonyms.
     syn = Synonym.create
-    Name.connection.execute(%(
-      UPDATE names SET synonym_id = #{syn.id}
-      WHERE text_name LIKE "Agaricus camp%"
-    ))
+    Name.where(Name[:text_name].matches("Agaricus camp%")).
+      update_all(synonym_id: syn.id)
 
     good = names(:agaricus_campestris)
     bad  = names(:coprinus_comatus)

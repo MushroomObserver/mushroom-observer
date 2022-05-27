@@ -43,19 +43,13 @@ class Synonym < AbstractModel
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
     if missing.any?
-      insert_manager = arel_insert_all(missing)
-      Name.connection.execute(insert_manager.to_sql)
+      # For mass_insert when setting the id, need to set `primary_key: true`
+      # Also, id in hash apparently needs a string (to check exists already?)
+      # but stores an integer. The above not necessary with Rails 6 insert_all
+      missing = missing.map { |m| Hash[id: m.to_s] }
+      Synonym.mass_insert(missing, primary_key: true)
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs
-  end
-
-  private_class_method def self.arel_insert_all(ids)
-    table = Synonym.arel_table
-    Arel::InsertManager.new.tap do |manager|
-      manager.into(table)
-      manager.columns << table[:id]
-      manager.values = manager.create_values(ids, table[:id])
-    end
   end
 end

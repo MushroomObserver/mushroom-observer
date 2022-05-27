@@ -582,13 +582,9 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          if unshown_notifications?(@user, :naming)
-            redirect_to(controller: :observer, action: :show_notifications)
-          else
-            redirect_to(controller: :observer,
-                        action: :show_observation,
-                        id: @set_observation)
-          end
+          redirect_to(controller: :observer,
+                      action: :show_observation,
+                      id: @set_observation)
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,
                       id: @set_species_list)
