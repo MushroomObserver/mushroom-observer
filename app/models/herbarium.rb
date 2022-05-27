@@ -170,11 +170,10 @@ class Herbarium < AbstractModel
     if User.current
       hc = Arel::Table.new(:herbaria_curators)
       Herbarium.
-        joins(:herbarium_records,
-              Herbarium.arel_table.join(hc).on(
-                Herbarium[:id].eq(hc[:herbarium_id]).
-                and(hc[:user_id].eq(1293))
-              ).join_sources).
+        joins(Herbarium.arel_table.join(hc).on(
+          Herbarium[:id].eq(hc[:herbarium_id]).
+          and(hc[:user_id].eq(user_id))
+        ).join_sources, :herbarium_records).
         select(:name).distinct.
         order(HerbariumRecord[:updated_at].desc).
         limit(100).pluck(:name).sort
