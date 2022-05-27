@@ -21,10 +21,6 @@
 #  mailing_address::  Postal address for sending specimens to (optional).
 #  description::      Random notes (optional).
 #
-#  == Class methods
-#
-#  Herbarium.primer::       List of names to prime autocompleter.
-#
 #  == Instance methods
 #
 #  herbarium_records::      HerbariumRecord(s) belonging to this Herbarium.
@@ -159,36 +155,6 @@ class Herbarium < AbstractModel
     dest = self
     dest.curators          += src.curators - dest.curators
     dest.herbarium_records += src.herbarium_records - dest.herbarium_records
-  end
-
-  # Look at the most recent HerbariumRecord's the current User has created.
-  # Return a list of the last 100 herbarium names used in those
-  # HerbariumRecords that this user is a curator for.
-  # This list is used to prime Herbarium auto-completers.
-  def self.primer
-    result = ""
-    if User.current
-      hc = Arel::Table.new(:herbaria_curators)
-      Herbarium.
-        joins(Herbarium.arel_table.join(hc).on(
-          Herbarium[:id].eq(hc[:herbarium_id]).
-          and(hc[:user_id].eq(user_id))
-        ).join_sources, :herbarium_records).
-        select(:name).distinct.
-        order(HerbariumRecord[:updated_at].desc).
-        limit(100).pluck(:name).sort
-      # This produces:
-      # SELECT DISTINCT `herbaria`.`name`
-      # FROM `herbaria`
-      # INNER JOIN `herbarium_records`
-      #   ON `herbarium_records`.`herbarium_id` = `herbaria`.`id`
-      # INNER JOIN `herbaria_curators`
-      #   ON (`herbaria`.`id` = `herbaria_curators`.`herbarium_id`)
-      #   AND (`herbaria_curators`.`user_id` = #{user_id})
-      # ORDER BY `herbarium_records`.`updated_at` DESC
-      # LIMIT 100
-    end
-    result
   end
 
   def self.find_by_code_with_wildcards(str)
