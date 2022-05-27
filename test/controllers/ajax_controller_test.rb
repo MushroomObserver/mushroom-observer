@@ -568,9 +568,9 @@ class AjaxControllerTest < FunctionalTestCase
   def build_name_primer_item(name)
     { id: name.id,
       text_name: name.text_name,
+      author: name.author,
       deprecated: name.deprecated,
-      synonym_id: name.synonym_id,
-      author: name.author }.to_json
+      synonym_id: name.synonym_id }.to_json
   end
 
   def test_location_primer
