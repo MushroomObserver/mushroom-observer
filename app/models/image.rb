@@ -974,8 +974,7 @@ class Image < AbstractModel
     return unless data.any?
 
     # The gem `mass_insert` anticipates Rails 6 method `insert_all`, same args
-    rows = copyright_change_new_rows(data, old_name, user)
-    CopyrightChange.mass_insert(rows)
+    CopyrightChange.mass_insert(copyright_change_new_rows(data, old_name, user))
 
     Image.where(user_id: user.id, copyright_holder: old_name).
       update_all(copyright_holder: new_name)
