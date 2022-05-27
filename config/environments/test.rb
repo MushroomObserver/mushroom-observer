@@ -34,11 +34,7 @@ MushroomObserver::Application.configure do
   # test suite.  You never need to work with it otherwise.  Remember that
   # your test database is "scratch space" for the test suite and is wiped
   # and recreated between test runs.  Don't rely on the data there!
-  # Rails 6 makes cache_classes default to false, but i'm keeping it true.
-  # Also adds config.action_view.cache_template_loading, seems desirable
-  # [Nimmo 20220526]
   config.cache_classes = true
-  config.action_view.cache_template_loading = true
 
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
