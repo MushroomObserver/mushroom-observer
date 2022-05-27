@@ -190,7 +190,7 @@ class HerbariaController < ApplicationController
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
     }.merge(args,
-            template: "/herbaria/index.html.erb", # render with this template
+            template: "/herbaria/index", # render with this template
             # Add some alternate sorting criteria.
             sorting_links: [["records",     :sort_by_records.t],
                             ["user",        :sort_by_user.t],
