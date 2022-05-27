@@ -79,6 +79,9 @@ I18n.enforce_available_locales = true
 
 module ActiveSupport
   class TestCase
+    # Run tests in parallel with specified workers
+    # parallelize(workers: :number_of_processors)
+
     ##########################################################################
     #  Transactional fixtures
     ##########################################################################

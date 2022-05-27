@@ -8,11 +8,7 @@ gem("date", ">= 3.2.1")
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem("rails", "~> 5.2.2")
-
-# This is here only to ensure a patch for a code injection vulnerability.
-# Please remove next time we update everything.
-gem("activestorage", ">= 5.2.6.3")
+gem("rails", "~> 6.0.4")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -62,7 +58,7 @@ gem("uglifier")
 gem("jbuilder")
 
 # Use ActiveModel has_secure_password
-# gem("bcrypt", "~> 3.1.7")
+gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
 gem("unicorn", "5.4.1")
@@ -134,8 +130,8 @@ gem("brakeman", require: false)
 # Temporarily lock RuboCop version while we are working our way through
 # auto-correctable offenses
 gem("rubocop", "= 0.89", require: false)
-gem("rubocop-performance")
-gem("rubocop-rails")
+gem("rubocop-performance", ">= 1.8.1") # version for older rubocop
+gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
 # Rubocop extension for enforcing graphql-ruby best practices.
 # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
 # require:
@@ -243,7 +239,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara")
+  gem("capybara", "~> 3.36.0") # for ruby 2.6
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
@@ -272,7 +268,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem("rails_db", "~> 2.3.0")
+  gem("rails_db", "~> 2.4.0")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")

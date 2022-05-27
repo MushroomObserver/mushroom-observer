@@ -18,8 +18,10 @@ unless @api.errors.any?(&:fatal)
     json.results([])
   else
     type = @api.results.first.class.type_tag
+    # Must use `.json.jbuilder` as the file extension, for an unknown reason
+    # ...Unlike the `api/` partials, where i can't seem to get that to work!
     json.results(@api.results,
-                 partial: "api2/#{type}.json.builder",
+                 partial: "api2/#{type}.json.jbuilder",
                  as: :object,
                  locals: { detail: @api.detail == :high })
   end
