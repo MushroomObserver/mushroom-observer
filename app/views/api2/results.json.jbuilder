@@ -21,7 +21,7 @@ unless @api.errors.any?(&:fatal)
     # Must use `.json.jbuilder` as the file extension, for an unknown reason
     # ...Unlike the `api/` partials, where i can't seem to get that to work!
     json.results(@api.results,
-                 partial: "api2/#{type}.json.jbuilder",
+                 partial: "api2/#{type}",
                  as: :object,
                  locals: { detail: @api.detail == :high })
   end
