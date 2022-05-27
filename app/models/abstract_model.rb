@@ -315,13 +315,15 @@ class AbstractModel < ApplicationRecord
   #   obj.errors.add(:attr, "message").
   def formatted_errors
     out = []
-    errors.each do |attr, msg|
-      if /^[A-Z]/.match?(msg)
-        out << msg
+    errors.each do |error|
+      attribute = error.attribute
+      message = error.message
+      if /^[A-Z]/.match?(message)
+        out << message
       else
-        name = attr.to_s.to_sym.l
+        name = attribute.to_s.to_sym.l
         obj = type_tag.to_s.upcase_first.to_sym.l
-        out << "#{obj} #{name} #{msg}."
+        out << "#{obj} #{name} #{message}."
       end
     end
     out
