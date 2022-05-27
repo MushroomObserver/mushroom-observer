@@ -621,8 +621,8 @@ class Image < AbstractModel
   # ever actually happens).  Provide default name if not provided.
   def validate_image_name
     name = upload_original_name.to_s
-    name.sub!(/^[a-zA-Z]:/, "")
-    name.sub!(%r{^.*[/\\]}, "")
+    name = name.sub(/^[a-zA-Z]:/, "")
+    name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     return unless name.present? && User.current &&

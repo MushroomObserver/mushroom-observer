@@ -232,6 +232,8 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
+    rolf.update(keep_filenames: :keep_and_show)
+    rolf.reload
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     proj = rolf.projects_member.first
     obs = rolf.observations.first
