@@ -44,9 +44,7 @@ class Synonym < AbstractModel
     end
     if missing.any?
       insert_manager = arel_insert_all(missing)
-
       Name.connection.execute(insert_manager.to_sql)
-
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs
