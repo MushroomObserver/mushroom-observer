@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+ruby(File.read(".ruby-version").strip)
+
 source("https://rubygems.org")
 
 # security fix for CVE-2021-41817 regex denial of service vulnerability
