@@ -2110,9 +2110,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(updated_at: "20070624"))
     assert_api_results(obses)
 
-    obses = Observation.where(
-      (Observation[:when].year >= 2012).and(Observation[:when].year <= 2014)
-    )
+    obses = Observation.where(Observation[:when].year.between(2012..2014))
     assert_not_empty(obses)
     assert_api_pass(params.merge(date: "2012-2014"))
     assert_api_results(obses)
@@ -2270,10 +2268,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(comments_has: "let's"))
     assert_api_results(obses)
 
-    obses = Observation.where(
-      (Observation[:lat] >= 34).and(Observation[:lat] <= 35).
-      and(Observation[:long] >= -119).and(Observation[:long] <= -118)
-    )
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
     locs = Location.where(
       (Location[:south] >= 34).and(Location[:north] <= 35).
       and(Location[:west] >= -119).and(Location[:east] <= -118).
@@ -2975,10 +2970,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(
-      (Observation[:lat] >= 34).and(Observation[:lat] <= 35).
-      and(Observation[:long] >= -119).and(Observation[:long] <= -118)
-    )
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
     locs = Location.where(
       (Location[:south] >= 34).and(Location[:north] <= 35).
       and(Location[:west] >= -119).and(Location[:east] <= -118).
