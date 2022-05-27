@@ -427,9 +427,8 @@ class Name < AbstractModel
   def icn_id_registrable
     return if icn_id.blank? || registrable?
 
-    errors[:base] << :name_error_unregistrable.t(
-      rank: rank.to_s, name: real_search_name
-    )
+    errors.add(:base, :name_error_unregistrable.t,
+               { rank: rank.to_s, name: real_search_name })
   end
 
   # Require icn_id to be unique
