@@ -8,7 +8,7 @@ gem("date", ">= 3.2.1")
 gem("sprockets")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem("rails", "~> 6.0.4")
+gem("rails", "~> 6.1")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
