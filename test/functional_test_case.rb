@@ -40,18 +40,4 @@ class FunctionalTestCase < ActionController::TestCase
     super(*args, &block)
     check_for_unsafe_html!
   end
-
-  def check_for_params(args)
-    return args if (args.length < 2) || args[1][:params]
-
-    [args[0], { params: args[1] }] + args[2..]
-  end
-
-  def extract_body(args)
-    if args.length >= 2
-      params = args[1][:params]
-      args[1][:body] = params.delete(:body).read if params.member?(:body)
-    end
-    args
-  end
 end
