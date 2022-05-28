@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/MushroomObserver/acts_as_versioned/
-  revision: 59a408816683875d14e1cce66b0feb493ab06747
+  revision: 57b2b4bfc9050c4ae5cef414a18d8ff475f97bfa
   specs:
-    cure_acts_as_versioned (0.6.3)
+    cure_acts_as_versioned (0.6.5)
       activerecord (>= 3.0.9)
 
 GIT
@@ -344,7 +344,7 @@ DEPENDENCIES
   byebug
   capybara (~> 3.36.0)
   coffee-rails
-  cure_acts_as_versioned!
+  cure_acts_as_versioned (>= 0.6.5)!
   date (>= 3.2.1)
   graphiql-rails!
   graphql
