@@ -969,29 +969,31 @@ class Image < AbstractModel
 
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
-    # This is orders of magnitude faster than doing via active-record.
-    old_name = Image.connection.quote(old_name)
-    new_name = Image.connection.quote(new_name)
-    data = Image.connection.select_rows(%(
-      SELECT id, YEAR(`when`), license_id FROM images
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    data = Image.where(user: user, copyright_holder: old_name).
+           pluck(:id, Image[:when].year, :license_id)
     return unless data.any?
 
-    # brakeman generates what appears to be a false positive SQL injection
-    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{data.map do |id, year, lic|
-            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
-          end.join(",\n")}
-    ))
-    Image.connection.update(%(
-      UPDATE images SET copyright_holder = #{new_name}
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    # The gem `mass_insert` anticipates Rails 6 method `insert_all`, same args
+    CopyrightChange.mass_insert(copyright_change_new_rows(data, old_name, user))
+
+    Image.where(user_id: user.id, copyright_holder: old_name).
+      update_all(copyright_holder: new_name)
+  end
+
+  private_class_method def self.copyright_change_new_rows(
+    data, old_name, user
+  )
+    data.map do |id, year, lic|
+      Hash[
+        "user_id" => user.id,
+        "updated_at" => Time.zone.now,
+        "target_type" => "Image",
+        "target_id" => id,
+        "year" => year,
+        "name" => old_name,
+        "license_id" => lic
+      ]
+    end
   end
 
   def year
