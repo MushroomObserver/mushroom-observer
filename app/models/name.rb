@@ -428,7 +428,7 @@ class Name < AbstractModel
     return if icn_id.blank? || registrable?
 
     errors.add(:base, :name_error_unregistrable.t,
-               { rank: rank.to_s, name: real_search_name })
+               rank: rank.to_s, name: real_search_name)
   end
 
   # Require icn_id to be unique
@@ -439,7 +439,7 @@ class Name < AbstractModel
     return if (conflicting_name = other_names_with_same_icn_id.first).blank?
 
     errors.add(:base, :name_error_icn_id_in_use.t,
-               { number: icn_id, name: conflicting_name.real_search_name })
+               number: icn_id, name: conflicting_name.real_search_name)
   end
 
   def other_names_with_same_icn_id
