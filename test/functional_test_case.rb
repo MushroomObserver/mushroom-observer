@@ -33,7 +33,6 @@ class FunctionalTestCase < ActionController::TestCase
   end
 
   def put(*args, &block)
-    args = check_for_params(args)
     super(*args, &block)
     check_for_unsafe_html!
   end
