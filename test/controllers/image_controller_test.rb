@@ -511,11 +511,11 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
 
     logout
-    send(:get, :reuse_image, params)
+    send(:get, :reuse_image, params: params)
     assert_response(:login, "No user: ")
 
     login("mary", "testpassword")
-    send(:get, :reuse_image, params)
+    send(:get, :reuse_image, params: params)
     # assert_redirected_to(%r{/#{obs.id}$})
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
