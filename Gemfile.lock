@@ -145,8 +145,6 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     mocha (1.14.0)
-    mry (0.78.0.0)
-      rubocop (>= 0.41.0)
     mysql2 (0.5.4)
     nokogiri (1.13.6-x86_64-linux)
       racc (~> 1.4)
@@ -296,16 +294,15 @@ DEPENDENCIES
   minitest
   minitest-reporters
   mocha
-  mry
   mysql2
   rack-cors
   rails-controller-testing
   railties (~> 6.1)
   rtf
-  rubocop (= 0.89)
+  rubocop
   rubocop-graphql
-  rubocop-performance (>= 1.8.1)
-  rubocop-rails (>= 2.8.1)
+  rubocop-performance
+  rubocop-rails
   rubyzip
   sassc-rails
   simple_enum
@@ -320,4 +317,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.3.13
+   2.3.6
