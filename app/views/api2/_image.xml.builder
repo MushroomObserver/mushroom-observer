@@ -19,6 +19,7 @@ xml.tag!(
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
   xml_string(xml, :license, object.license.try(&:display_name))
   xml_string(xml, :content_type, object.content_type)
+  xml_string(xml, :md5sum, object.upload_md5sum.to_s)
   xml_integer(xml, :width, object.width)
   xml_integer(xml, :height, object.height)
   xml_url(xml, :original_url, object.original_url)

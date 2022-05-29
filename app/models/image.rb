@@ -65,7 +65,7 @@ require("mimemagic")
 #
 #       # Supply any extra header info you may have.
 #       image.content_type = 'image/jpeg'
-#       image.md5sum = request.header[...]
+#       image.upload_md5sum = request.header[...]
 #
 #       # Validate and save record.
 #       image.save

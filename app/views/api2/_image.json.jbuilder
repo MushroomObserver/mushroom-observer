@@ -15,6 +15,7 @@ json.last_viewed(object.last_view.try(&:utc)) if object.last_view.present?
 json.ok_for_export(object.ok_for_export ? true : false)
 json.license(object.license.try(&:display_name).to_s)
 json.content_type(object.content_type.to_s)
+json.md5sum(object.upload_md5sum.to_s) if object.upload_md5sum.present?
 json.width(object.width) if object.width.present?
 json.height(object.height) if object.height.present?
 json.original_url(object.original_url)
