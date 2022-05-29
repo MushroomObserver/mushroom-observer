@@ -729,7 +729,8 @@ class ImageControllerTest < FunctionalTestCase
     img = images(:in_situ_image)
     obs.update_attribute(:gps_hidden, true)
     assert_false(img.gps_stripped)
-    post(:reuse_image, params: { mode: "observation", obs_id: obs.id, img_id: img.id })
+    post(:reuse_image,
+         params: { mode: "observation", obs_id: obs.id, img_id: img.id })
     assert_false(img.reload.gps_stripped)
   end
 
@@ -747,7 +748,10 @@ class ImageControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(:reuse_image, params: { mode: "observation", obs_id: obs.id, img_id: img.id })
+    post(:reuse_image,
+         params: { mode: "observation",
+                   obs_id: obs.id,
+                   img_id: img.id })
     assert_true(img.reload.gps_stripped)
     assert_not_equal(File.size(fixture),
                      File.size(img.local_file_name("orig")))
@@ -771,7 +775,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("bulk_vote_anonymity_updater")
 
     login("mary")
-    post(:bulk_vote_anonymity_updater, params: { commit: :image_vote_anonymity_make_anonymous.l })
+    post(:bulk_vote_anonymity_updater,
+         params: { commit: :image_vote_anonymity_make_anonymous.l })
     assert_redirected_to(controller: :account, action: :prefs)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)
@@ -779,7 +784,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
 
     login("rolf")
-    post(:bulk_vote_anonymity_updater, params: { commit: :image_vote_anonymity_make_public.l })
+    post(:bulk_vote_anonymity_updater,
+         params: { commit: :image_vote_anonymity_make_public.l })
     assert_redirected_to(controller: :account, action: :prefs)
     assert(ImageVote.find_by(image_id: img1.id, user_id: mary.id).anonymous)
     assert(ImageVote.find_by(image_id: img2.id, user_id: mary.id).anonymous)

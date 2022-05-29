@@ -153,14 +153,16 @@ class LocationControllerTest < FunctionalTestCase
   def test_location_bounding_box
     delta = 0.001
     login
-    get(:list_locations, params: { north: 0, south: 0, east: 0, west: 0 })
+    get(:list_locations,
+        params: { north: 0, south: 0, east: 0, west: 0 })
     query = Query.find(QueryRecord.last.id)
     assert_equal(0 + delta, query.params[:north])
     assert_equal(0 - delta, query.params[:south])
     assert_equal(0 + delta, query.params[:east])
     assert_equal(0 - delta, query.params[:west])
 
-    get(:list_locations, params: { north: 90, south: -90, east: 180, west: -180 })
+    get(:list_locations,
+        params: { north: 90, south: -90, east: 180, west: -180 })
     query = Query.find(QueryRecord.last.id)
     assert_equal(90, query.params[:north])
     assert_equal(-90, query.params[:south])
@@ -389,7 +391,10 @@ class LocationControllerTest < FunctionalTestCase
   # This was causing a crash in live server.
   def test_construct_location_empty_form
     login("mary")
-    post(:create_location, params: { where: "", approved_where: "", location: { display_name: "" } })
+    post(:create_location,
+         params: {
+          where: "", approved_where: "", location: { display_name: "" }
+         })
   end
 
   # Test a simple location creation.

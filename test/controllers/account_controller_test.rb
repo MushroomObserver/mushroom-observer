@@ -318,20 +318,27 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value("user_password_confirmation", "")
 
     # Password and confirmation don't match
-    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: { password: "mouse", password_confirmation: "moose" } })
+    post(:verify,
+         params: { id: user.id, auth_code: user.auth_code,
+                   user: { password: "mouse", password_confirmation: "moose" } })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mouse")
     assert_input_value("user_password_confirmation", "")
 
     # Password invalid (too short)
-    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: { password: "mo", password_confirmation: "mo" } })
+    post(:verify,
+         params: { id: user.id, auth_code: user.auth_code,
+                   user: { password: "mo", password_confirmation: "mo" } })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mo")
     assert_input_value("user_password_confirmation", "")
 
-    post(:verify, params: { id: user.id, auth_code: user.auth_code, user: { password: "mouse", password_confirmation: "mouse" } })
+    post(:verify,
+         params: {
+           id: user.id, auth_code: user.auth_code,
+           user: { password: "mouse", password_confirmation: "mouse" } })
     assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
@@ -655,7 +662,9 @@ class AccountControllerTest < FunctionalTestCase
     assert_select("a[data-role*=edit_api_key]", count: 0)
 
     # Create good key.
-    post(:api_keys, params: { commit: :account_api_keys_create_button.l, key: { notes: "app name" } })
+    post(:api_keys,
+         params: { commit: :account_api_keys_create_button.l,
+                   key: { notes: "app name" } })
     assert_flash_success
     assert_equal(1, ApiKey.count)
     assert_equal(1, mary.reload.api_keys.length)
@@ -664,7 +673,9 @@ class AccountControllerTest < FunctionalTestCase
     assert_select("a[data-role*=edit_api_key]", count: 1)
 
     # Create another key.
-    post(:api_keys, params: { commit: :account_api_keys_create_button.l, key: { notes: "another name" } })
+    post(:api_keys,
+         params: { commit: :account_api_keys_create_button.l,
+                   key: { notes: "another name" } })
     assert_flash_success
     assert_equal(2, ApiKey.count)
     assert_equal(2, mary.reload.api_keys.length)
@@ -679,7 +690,9 @@ class AccountControllerTest < FunctionalTestCase
     assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Remove first key.
-    post(:api_keys, params: { commit: :account_api_keys_remove_button.l, "key_#{key1.id}" => "1" })
+    post(:api_keys,
+         params: { commit: :account_api_keys_remove_button.l,
+                   "key_#{key1.id}" => "1" })
     assert_flash_success
     assert_equal(1, ApiKey.count)
     assert_equal(1, mary.reload.api_keys.length)
@@ -748,12 +761,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("app name", key.reload.notes)
 
     # Try to change notes to empty string.
-    post(:edit_api_key, params: { commit: :UPDATE.l, id: key.id, key: { notes: "" } })
+    post(:edit_api_key,
+         params: { commit: :UPDATE.l, id: key.id, key: { notes: "" } })
     assert_flash_error
     assert_response(:success) # means failure
 
     # Change notes correctly.
-    post(:edit_api_key, params: { commit: :UPDATE.l, id: key.id, key: { notes: "new name" } })
+    post(:edit_api_key,
+         params: { commit: :UPDATE.l, id: key.id, key: { notes: "new name" } })
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)

@@ -133,23 +133,28 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: "  71-1234-c <spam>   "
     }
 
-    post(:create_collection_number, params: { id: obs.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:create_collection_number, params: { id: obs.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:create_collection_number, params: { id: obs.id, collection_number: params.except(:name) })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params.except(:name) })
     assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:create_collection_number, params: { id: obs.id, collection_number: params.except(:number) })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params.except(:number) })
     assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
-    post(:create_collection_number, params: { id: obs.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     assert_response(:redirect)
@@ -174,13 +179,15 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    post(:create_collection_number, params: { id: obs.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_no_flash
     number = CollectionNumber.last
     assert_obj_list_equal([number], obs.reload.collection_numbers)
 
-    post(:create_collection_number, params: { id: obs.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
@@ -200,7 +207,8 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
 
     login("mary")
-    post(:create_collection_number, params: { id: obs2.id, collection_number: params })
+    post(:create_collection_number,
+         params: { id: obs2.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
@@ -275,23 +283,28 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: "  69-abc <spam>  "
     }
 
-    post(:edit_collection_number, params: { id: number.id, collection_number: params })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params })
     assert_redirected_to(controller: :account, action: :login)
 
     login("mary")
-    post(:edit_collection_number, params: { id: number.id, collection_number: params })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params })
     assert_flash_text(/permission denied/i)
 
     login("rolf")
-    post(:edit_collection_number, params: { id: number.id, collection_number: params.merge(name: "") })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params.merge(name: "") })
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    post(:edit_collection_number, params: { id: number.id, collection_number: params.merge(number: "") })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params.merge(number: "") })
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    post(:edit_collection_number, params: { id: number.id, collection_number: params })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params })
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
@@ -302,7 +315,8 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
-    post(:edit_collection_number, params: { id: number.id, collection_number: params })
+    post(:edit_collection_number,
+         params: { id: number.id, collection_number: params })
     assert_no_flash
   end
 
@@ -322,7 +336,8 @@ class CollectionNumberControllerTest < FunctionalTestCase
       number: num1.number
     }
     login("rolf")
-    post(:edit_collection_number, params: { id: num2.id, collection_number: params })
+    post(:edit_collection_number,
+         params: { id: num2.id, collection_number: params })
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first

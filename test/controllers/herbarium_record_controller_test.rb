@@ -103,7 +103,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   end
 
   def test_create_herbarium_record
-    get(:create_herbarium_record, params: { id: observations(:coprinus_comatus_obs).id })
+    get(:create_herbarium_record,
+        params: { id: observations(:coprinus_comatus_obs).id })
     assert_response(:redirect)
 
     login("rolf")
