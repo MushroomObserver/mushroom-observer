@@ -140,9 +140,6 @@ gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
 # http://github.com/DmitryTsepelev/rubocop-graphql
 gem("rubocop-graphql", require: false)
 
-# use mry to support safe updating of .rubocop.yml
-gem("mry", require: false)
-
 ########## GraphQL API ########################################
 
 # GraphQL-Ruby

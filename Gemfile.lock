@@ -183,8 +183,6 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     mocha (1.14.0)
-    mry (0.78.0.0)
-      rubocop (>= 0.41.0)
     mysql2 (0.5.4)
     nio4r (2.5.8)
     nokogiri (1.13.6-x86_64-linux)
@@ -361,7 +359,6 @@ DEPENDENCIES
   minitest
   minitest-reporters
   mocha
-  mry
   mysql2
   rack-cors
   rails (~> 6.1)
@@ -385,4 +382,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.3.14
+   2.3.6
