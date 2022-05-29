@@ -18,23 +18,23 @@ class FunctionalTestCase < ActionController::TestCase
   include ControllerExtensions
   include CheckForUnsafeHtml
 
-  def get(action, **args, &block)
-    super(action, **args, &block)
+  def get(action, **args)
+    super(action, **args)
     check_for_unsafe_html!
   end
 
-  def post(action, **args, &block)
-    super(action, **args, &block)
+  def post(action, **args)
+    super(action, **args)
     check_for_unsafe_html!
   end
 
-  def put(action, **args, &block)
-    super(action, **args, &block)
+  def put(action, **args)
+    super(action, **args)
     check_for_unsafe_html!
   end
 
-  def delete(action, **args, &block)
-    super(action, **args, &block)
+  def delete(action, **args)
+    super(action, **args)
     check_for_unsafe_html!
   end
 end

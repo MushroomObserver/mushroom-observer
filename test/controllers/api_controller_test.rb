@@ -28,7 +28,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def post_and_send(action, type, params, body)
     @request.env["CONTENT_TYPE"] = type
-    post(action, { params: params, body: body })
+    post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
