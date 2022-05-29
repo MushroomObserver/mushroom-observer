@@ -32,12 +32,6 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.2.0)
-    actiontext (6.1.6)
-      actionpack (= 6.1.6)
-      activerecord (= 6.1.6)
-      activestorage (= 6.1.6)
-      activesupport (= 6.1.6)
-      nokogiri (>= 1.8.5)
     actionview (6.1.6)
       activesupport (= 6.1.6)
       builder (~> 3.1)
@@ -52,13 +46,6 @@ GEM
     activerecord (6.1.6)
       activemodel (= 6.1.6)
       activesupport (= 6.1.6)
-    activestorage (6.1.6)
-      actionpack (= 6.1.6)
-      activejob (= 6.1.6)
-      activerecord (= 6.1.6)
-      activesupport (= 6.1.6)
-      marcel (~> 1.0)
-      mini_mime (>= 1.1.0)
     activesupport (6.1.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
@@ -141,7 +128,6 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
-    marcel (1.0.2)
     mass_insert (1.0.0)
       activerecord (>= 5.2)
     matrix (0.4.2)
@@ -276,7 +262,6 @@ DEPENDENCIES
   RedCloth
   actionmailer (~> 6.1)
   actionpack (~> 6.1)
-  actiontext (~> 6.1)
   actionview (~> 6.1)
   activejob (~> 6.1)
   activemodel (~> 6.1)
@@ -335,4 +320,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.3.14
+   2.3.13
