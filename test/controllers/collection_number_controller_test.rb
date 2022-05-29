@@ -299,7 +299,10 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_not_equal("new number", number.reload.number)
 
     post(:edit_collection_number,
-         params: { id: number.id, collection_number: params.merge(number: "") })
+         params: {
+           id: number.id,
+           collection_number: params.merge(number: "")
+         })
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 

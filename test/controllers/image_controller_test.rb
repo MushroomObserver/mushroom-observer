@@ -651,7 +651,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.reload.images.size == (img_count + 1))
     assert(updated_at != obs.updated_at)
     message = :runtime_image_uploaded_image.t(
-      name: "#" + obs.images.last.id.to_s
+      name: "##{obs.images.last.id}"
     )
     assert_flash_text(/#{message}/)
     img = Image.last
@@ -749,9 +749,7 @@ class ImageControllerTest < FunctionalTestCase
     FileUtils.cp(fixture, orig_file)
 
     post(:reuse_image,
-         params: { mode: "observation",
-                   obs_id: obs.id,
-                   img_id: img.id })
+         params: { mode: "observation", obs_id: obs.id, img_id: img.id })
     assert_true(img.reload.gps_stripped)
     assert_not_equal(File.size(fixture),
                      File.size(img.local_file_name("orig")))

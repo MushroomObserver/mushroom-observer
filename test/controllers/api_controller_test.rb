@@ -28,7 +28,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def post_and_send(action, type, params, body)
     @request.env["CONTENT_TYPE"] = type
-    post(action, { params: params, body: body })
+    post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
@@ -125,8 +125,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_minimal_observation
     post(:observations,
-         params: { api_key: api_keys(:rolfs_api_key).key,
-                   location: "Earth" })
+         params: { api_key: api_keys(:rolfs_api_key).key, location: "Earth" })
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -150,22 +149,24 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_maximal_observation
     post(:observations,
-         params: { api_key: api_keys(:rolfs_api_key).key,
-                   date: "2012-06-26",
-                   location: "Burbank, California, USA",
-                   name: "Coprinus comatus",
-                   vote: "2",
-                   latitude: "34.5678N",
-                   longitude: "123.4567W",
-                   altitude: "1234 ft",
-                   has_specimen: "yes",
-                   is_collection_location: "yes",
-                   notes: "These are notes.\nThey look like this.\n",
-                   images: "#{images(:in_situ_image).id}, "\
-                           "#{images(:turned_over_image).id}",
-                   thumbnail: images(:turned_over_image).id.to_s,
-                   projects: "EOL Project",
-                   species_lists: "Another Species List" })
+         params: {
+           api_key: api_keys(:rolfs_api_key).key,
+           date: "2012-06-26",
+           location: "Burbank, California, USA",
+           name: "Coprinus comatus",
+           vote: "2",
+           latitude: "34.5678N",
+           longitude: "123.4567W",
+           altitude: "1234 ft",
+           has_specimen: "yes",
+           is_collection_location: "yes",
+           notes: "These are notes.\nThey look like this.\n",
+           images: "#{images(:in_situ_image).id}, \
+                   #{images(:turned_over_image).id}",
+           thumbnail: images(:turned_over_image).id.to_s,
+           projects: "EOL Project",
+           species_lists: "Another Species List"
+         })
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -250,12 +251,14 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_user
     rolfs_key = api_keys(:rolfs_api_key)
     post(:users,
-         params: { api_key: rolfs_key.key,
-                   login: "miles",
-                   email: "miles@davis.com",
-                   password: "sivadselim",
-                   create_key: "New API Key",
-                   detail: :high })
+         params: {
+           api_key: rolfs_key.key,
+           login: "miles",
+           email: "miles@davis.com",
+           password: "sivadselim",
+           create_key: "New API Key",
+           detail: :high
+         })
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
@@ -296,9 +299,11 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     post(:api_keys,
-         params: { api_key: rolfs_key.key,
-                   app: "Mushroom Mapper",
-                   for_user: mary.id })
+         params: {
+           api_key: rolfs_key.key,
+           app: "Mushroom Mapper",
+           for_user: mary.id
+         })
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -313,13 +318,15 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_sequence
     obs = observations(:coprinus_comatus_obs)
     post(:sequences,
-         params: { observation: obs.id,
-                   api_key: api_keys(:marys_api_key).key,
-                   locus: "ITS",
-                   bases: "catg",
-                   archive: "GenBank",
-                   accession: "KT1234",
-                   notes: "sequence notes" })
+         params: {
+           observation: obs.id,
+           api_key: api_keys(:marys_api_key).key,
+           locus: "ITS",
+           bases: "catg",
+           archive: "GenBank",
+           accession: "KT1234",
+           notes: "sequence notes"
+         })
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
