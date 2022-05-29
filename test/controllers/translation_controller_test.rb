@@ -193,7 +193,10 @@ class TranslationControllerTest < FunctionalTestCase
   end
 
   def translation_for_one(page, locale, value)
-    post(page, params: { locale: locale, tag: "one", tag_one: value, commit: :SAVE.l })
+    post(page,
+         params: {
+           locale: locale, tag: "one", tag_one: value, commit: :SAVE.l
+         })
   end
 
   def test_edit_translation_form_post_save_z
@@ -213,7 +216,10 @@ class TranslationControllerTest < FunctionalTestCase
   def test_edit_translation_form_post_cancel
     login("rolf")
     old_one = :one.l
-    post(:edit_translations, params: { locale: "en", tag: "one", tag_one: "ichi", commit: :CANCEL.l })
+    post(:edit_translations,
+         params: {
+           locale: "en", tag: "one", tag_one: "ichi", commit: :CANCEL.l
+         })
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
@@ -222,7 +228,10 @@ class TranslationControllerTest < FunctionalTestCase
   def test_edit_translation_form_post_reload_greek
     login("rolf")
     old_one = :one.l
-    post(:edit_translations, params: { locale: "el", tag: "one", tag_one: "ichi", commit: :RELOAD.l })
+    post(:edit_translations,
+         params: {
+           locale: "el", tag: "one", tag_one: "ichi", commit: :RELOAD.l
+         })
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)

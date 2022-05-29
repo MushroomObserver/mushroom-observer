@@ -116,7 +116,7 @@ class NamingControllerTest < FunctionalTestCase
     params = assigns(:params)
     nam = params.naming
     assert_equal(new_name, nam.name.text_name)
-    assert_equal(new_name + " sensu Arora", nam.text_name)
+    assert_equal("#{new_name} sensu Arora", nam.text_name)
     assert_not_equal(old_name, nam.text_name)
   end
 
@@ -199,12 +199,18 @@ class NamingControllerTest < FunctionalTestCase
 
     # Rolf makes superficial changes to his naming.
     login("rolf")
-    post(:edit, params: { id: nam1.id, name: { name: names(:coprinus_comatus).search_name }, vote: { value: "3" }, reason: {
-           "1" => { check: "1", notes: "Change to macro notes." },
-           "2" => { check: "1", notes: "" },
-           "3" => { check: "0", notes: "Add some micro notes." },
-           "4" => { check: "0", notes: "" }
-         } })
+    post(:edit,
+         params: {
+           id: nam1.id,
+           name: { name: names(:coprinus_comatus).search_name },
+           vote: { value: "3" },
+           reason: {
+             "1" => { check: "1", notes: "Change to macro notes." },
+             "2" => { check: "1", notes: "" },
+             "3" => { check: "0", notes: "Add some micro notes." },
+             "4" => { check: "0", notes: "" }
+           }
+         })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
@@ -246,12 +252,18 @@ class NamingControllerTest < FunctionalTestCase
     # Now, Rolf makes name change to his naming (leave rest the same).
     login("rolf")
     assert_equal(10, rolf.contribution)
-    post(:edit, params: { id: nam1.id, name: { name: "Conocybe filaris" }, vote: { value: "2" }, reason: {
-           "1" => { check: "1", notes: "Isn't it obvious?" },
-           "2" => { check: "0", notes: "" },
-           "3" => { check: "0", notes: "" },
-           "4" => { check: "0", notes: "" }
-         } })
+    post(:edit,
+         params: {
+           id: nam1.id,
+           name: { name: "Conocybe filaris" },
+           vote: { value: "2" },
+           reason: {
+             "1" => { check: "1", notes: "Isn't it obvious?" },
+             "2" => { check: "0", notes: "" },
+             "3" => { check: "0", notes: "" },
+             "4" => { check: "0", notes: "" }
+           }
+         })
     assert_response(:redirect) # redirect indicates success
     assert_equal(12, rolf.reload.contribution)
 
