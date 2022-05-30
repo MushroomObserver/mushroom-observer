@@ -2,13 +2,28 @@
 
 source("https://rubygems.org")
 
-# security fix for CVE-2021-41817 regex denial of service vulnerability
-gem("date", ">= 3.2.1")
+# To bundle edge Rails instead: gem "rails", github: "rails/rails"
+# gem("rails", "~> 6.1")
+# Or bundle the constituent gems. Just be sure no gems depend on Rails
+# gem("actioncable", "~> 6.1")
+# gem("actionmailbox", "~> 6.1")
+gem("actionmailer", "~> 6.1")
+gem("actionpack", "~> 6.1")
+# gem("actiontext", "~> 6.1")
+gem("actionview", "~> 6.1")
+gem("activejob", "~> 6.1")
+gem("activemodel", "~> 6.1")
+gem("activerecord", "~> 6.1")
+# gem("activestorage", "~> 6.1")
+gem("activesupport", "~> 6.1")
+gem("bundler")
+gem("railties", "~> 6.1")
+gem("sprockets-rails")
 
 gem("sprockets")
 
-# To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem("rails", "~> 6.1")
+# security fix for CVE-2021-41817 regex denial of service vulnerability
+gem("date", ">= 3.2.1")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -123,15 +138,9 @@ gem("simplecov-lcov", require: false)
 gem("brakeman", require: false)
 
 # Use rubocop and associated gems for code quality control
-#
-# WARNING:
-# When upgrading RuboCop, please use the procedure specified in .rubocop.yml
-#
-# Temporarily lock RuboCop version while we are working our way through
-# auto-correctable offenses
-gem("rubocop", "= 0.89", require: false)
-gem("rubocop-performance", ">= 1.8.1") # version for older rubocop
-gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
+gem("rubocop", require: false)
+gem("rubocop-performance")
+gem("rubocop-rails")
 # Rubocop extension for enforcing graphql-ruby best practices.
 # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
 # require:
@@ -139,9 +148,6 @@ gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
 #  - rubocop-graphql
 # http://github.com/DmitryTsepelev/rubocop-graphql
 gem("rubocop-graphql", require: false)
-
-# use mry to support safe updating of .rubocop.yml
-gem("mry", require: false)
 
 ########## GraphQL API ########################################
 
@@ -268,7 +274,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem("rails_db", "~> 2.4.0")
+  # gem("rails_db", "~> 2.4.0")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")
