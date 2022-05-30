@@ -78,7 +78,7 @@ gem("jbuilder")
 gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
-gem("unicorn", "5.4.1")
+gem("unicorn")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
@@ -123,7 +123,23 @@ gem("mail")
 gem("mimemagic")
 
 # for creating zip files
-gem("rubyzip")
+# RubyZip 3.0 is coming!
+# **********************
+
+# The public API of some Rubyzip classes has been modernized to use named
+# parameters for optional arguments. Please check your usage of the
+# following classes:
+#   * `Zip::File`
+#   * `Zip::Entry`
+#   * `Zip::InputStream`
+#   * `Zip::OutputStream`
+
+# Please ensure that your Gemfiles and .gemspecs are suitably restrictive
+# to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
+# See https://github.com/rubyzip/rubyzip for details. The Changelog also
+# lists other enhancements and bugfixes that have been implemented since
+# version 2.3.0.
+gem("rubyzip", "~> 2.3.0")
 
 # to handle frontend requests from different port, e.g. dev GraphQL client
 gem("rack-cors")

@@ -233,7 +233,7 @@ GEM
     uglifier (4.2.0)
       execjs (>= 0.3.0, < 3)
     unicode-display_width (2.1.0)
-    unicorn (5.4.1)
+    unicorn (6.1.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
     uniform_notifier (1.16.0)
@@ -311,13 +311,13 @@ DEPENDENCIES
   sprockets
   sprockets-rails
   uglifier
-  unicorn (= 5.4.1)
+  unicorn
   web-console
   webmock
   xmlrpc
 
 RUBY VERSION
-   ruby 2.7.6p219
+   ruby 3.0.4p208
 
 BUNDLED WITH
-   2.3.6
+   2.3.14
