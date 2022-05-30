@@ -29,12 +29,12 @@ class Name < AbstractModel
 
     finder = Name.with_rank(rank)
     results = name_search(finder.where(search_name: :name,
-                                       { name: parse.search_name }),
+                                       name: parse.search_name ),
                           ignore_deprecated)
     return results if results.present?
 
     results = name_search(finder.where(text_name: :name,
-                                       { name: parse.text_name }),
+                                       name: parse.text_name ),
                           ignore_deprecated)
     return results if parse.author.blank?
     return [] if results.any? { |n| n.author.present? }
