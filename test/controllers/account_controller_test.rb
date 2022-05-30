@@ -858,7 +858,7 @@ class AccountControllerTest < FunctionalTestCase
 
     time = 1.minute.ago
     File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
-    get(:blocked_ips, add_bad: new_ip)
+    get(:blocked_ips, params: { add_bad: new_ip })
     assert_no_flash
     assert(time < File.mtime(MO.blocked_ips_file))
     IpStats.reset!
@@ -866,7 +866,7 @@ class AccountControllerTest < FunctionalTestCase
 
     time = 1.minute.ago
     File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
-    get(:blocked_ips, remove_bad: new_ip)
+    get(:blocked_ips, params: { remove_bad: new_ip })
     assert_no_flash
     assert(time < File.mtime(MO.blocked_ips_file))
     IpStats.reset!
