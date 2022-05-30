@@ -209,11 +209,10 @@ end
 
 def update_times_of_new_objects(times, table, last_update)
   model = table.classify.constantize
-  model.where(updated_at: last_update..).pluck(:id, :updated_at).each do 
+  model.where(updated_at: last_update..).pluck(:id, :updated_at).each do
     |id, time|
     times[id.to_i] = parse_mysql_time(time)
   end
-
 end
 
 def update_times_of_objects_with_new_images(times, last_update)
