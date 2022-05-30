@@ -4,6 +4,11 @@ require("test_helper")
 require("rexml/document")
 
 class Api2ControllerTest < FunctionalTestCase
+  def assert_api_failed
+    @api = assigns(:api)
+    assert_not(@api.errors.empty?, "Expected API to fail with errors.")
+  end
+
   def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
     return unless @api
@@ -21,20 +26,19 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def post_and_send_file(action, file, content_type, params)
-    data = Rack::Test::UploadedFile.new(file, "image/jpeg")
-    body = data.read
-    post_and_send(action, content_type, params, body)
+    body = Rack::Test::UploadedFile.new(file, "image/jpeg").read
+    md5sum = file_checksum(file)
+    post_and_send(action, body, content_type, md5sum, params)
   end
 
-  def post_and_send(action, type, params, body)
-    @request.env["CONTENT_TYPE"] = type
+  def post_and_send(action, body, content_type, md5sum, params)
+    @request.env["CONTENT_TYPE"] = content_type
+    @request.env["CONTENT_MD5"] = md5sum
     post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
-    File.open(filename) do |f|
-      Digest::MD5.hexdigest(f.read)
-    end
+    Digest::MD5.file(filename).hexdigest
   end
 
   def string_checksum(string)
@@ -195,9 +199,12 @@ class Api2ControllerTest < FunctionalTestCase
     setup_image_dirs
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
+    checksum = file_checksum(file)
     File.stub(:rename, false) do
       post_and_send_file(:images, file, "image/jpeg",
-                         api_key: api_keys(:rolfs_api_key).key)
+                         api_key: api_keys(:rolfs_api_key).key,
+                         detail: :low,
+                         format: :xml)
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
@@ -213,21 +220,53 @@ class Api2ControllerTest < FunctionalTestCase
     assert_equal(500, img.height)
     assert_obj_list_equal([], img.projects)
     assert_obj_list_equal([], img.observations)
+    doc = REXML::Document.new(@response.body)
+    checksum_returned = doc.root.elements["results/result/md5sum"].get_text.to_s
+    assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
 
   def test_post_minimal_image_via_multipart_form_data
     setup_image_dirs
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
+    upload = UploadedFileWithChecksum.new(file, "image/jpeg")
+    checksum = file_checksum(file)
     File.stub(:rename, false) do
       params = {
         api_key: api_keys(:rolfs_api_key).key,
-        upload: Rack::Test::UploadedFile.new(file, "image/jpeg")
+        upload: upload,
+        md5sum: checksum,
+        detail: :low,
+        format: :json
       }
       post(:images, params: params)
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
+    json = JSON.parse(response.body)
+    checksum_returned = json["results"][0]["md5sum"].to_s
+    assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
+  end
+
+  def test_post_corrupt_image
+    setup_image_dirs
+    count = Image.count
+    file = "#{::Rails.root}/test/images/sticky.jpg"
+    upload = UploadedFileWithChecksum.new(file, "image/jpeg")
+    checksum = file_checksum(file).reverse
+    File.stub(:rename, false) do
+      params = {
+        api_key: api_keys(:rolfs_api_key).key,
+        upload: upload,
+        md5sum: checksum,
+        detail: :low,
+        format: :json
+      }
+      post(:images, params: params)
+    end
+    assert_api_failed
+    assert_equal(count, Image.count)
+    assert_match(/MD5/, @api.errors.first.to_s)
   end
 
   def test_post_maximal_image
@@ -448,4 +487,8 @@ class Api2ControllerTest < FunctionalTestCase
                    elem.elements["owner"].attributes["type"])
     end
   end
+end
+
+class UploadedFileWithChecksum < Rack::Test::UploadedFile
+  attr_accessor :checksum
 end
