@@ -4,7 +4,12 @@ source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 # gem("rails", "~> 6.1")
-# Or bundle the constituent gems. Just be sure no gems depend on Rails
+
+# To skip loading parts of Rails, bundle the constituent gems separately.
+# NOTE: Remember to require these separately also, in config/application.rb
+# NOTE: Be sure no other gems list `rails` as a dependency in Gemfile.lock,
+#       or else all of Rails will load anyway.
+# 
 # gem("actioncable", "~> 6.1")
 # gem("actionmailbox", "~> 6.1")
 gem("actionmailer", "~> 6.1")

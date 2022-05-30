@@ -2,10 +2,12 @@
 
 require_relative("boot")
 
+# To load all of Rails:
 # require("rails/rails")
 
-require("rails")
-# Pick the frameworks you want:
+# To choose what Rails frameworks to load, and skip others:
+# NOTE: Be sure this list reflects the same choices made in the Gemfile
+require("rails") # note: not "rails/rails"
 require("active_model/railtie")
 require("active_job/railtie")
 require("active_record/railtie")
