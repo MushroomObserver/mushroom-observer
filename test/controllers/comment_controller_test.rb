@@ -51,7 +51,8 @@ class CommentControllerTest < FunctionalTestCase
   def test_add_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
     login(:katrina)
-    get(:add_comment, type: "NameDescription", id: katrina_is_not_reader.id)
+    get(:add_comment,
+        params: { type: "NameDescription", id: katrina_is_not_reader.id })
 
     assert_flash_error("MO should flash if trying to comment on object"\
                        "for which user lacks read privileges")
