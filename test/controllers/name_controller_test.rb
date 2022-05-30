@@ -20,8 +20,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def empty_notes
-    NameDescription.all_note_fields.each_with_object({}) do |field, result|
-      result[field] = ""
+    NameDescription.all_note_fields.index_with do |_field|
+      ""
     end
   end
 
