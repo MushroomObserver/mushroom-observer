@@ -210,10 +210,11 @@ end
 
 def update_times_of_new_objects(times, table, last_update)
   table = Arel::Table.new(table.to_sym)
-   Name.connection.select_rows(
-     table.where(table[:updated_at] > last_update).
-           project(table[:id], table[:updated_at]).to_sql
-        ).each do |id, time|    times[id.to_i] = parse_mysql_time(time)
+  Name.connection.select_rows(
+    table.where(table[:updated_at] > last_update).
+          project(table[:id], table[:updated_at]).to_sql
+  ).each do |id, time|    
+    times[id.to_i] = parse_mysql_time(time)
   end
 end
 
