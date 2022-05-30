@@ -303,7 +303,7 @@ DEPENDENCIES
   rubocop-graphql
   rubocop-performance
   rubocop-rails
-  rubyzip
+  rubyzip (~> 2.3.0)
   sassc-rails
   simple_enum
   simplecov
