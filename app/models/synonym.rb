@@ -25,7 +25,7 @@
 #  None.
 #
 class Synonym < AbstractModel
-  has_many :names
+  has_many :names, dependent: :nullify
 
   # Nightly cronjob to ensure that no synonym records accidentally got deleted.
   # This actually happened to Fungi itself(!)  Not sure how it happened, and
