@@ -856,12 +856,20 @@ class AccountControllerTest < FunctionalTestCase
     get(:blocked_ips, params: { add_bad: "garbage" })
     assert_flash_error
 
-    get(:blocked_ips, params: { add_bad: new_ip })
+    time = 1.minute.ago
+    File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+    get(:blocked_ips, add_bad: new_ip)
     assert_no_flash
+    assert(time < File.mtime(MO.blocked_ips_file))
+    IpStats.reset!
     assert_true(IpStats.blocked?(new_ip))
 
-    get(:blocked_ips, params: { remove_bad: new_ip })
+    time = 1.minute.ago
+    File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+    get(:blocked_ips, remove_bad: new_ip)
     assert_no_flash
+    assert(time < File.mtime(MO.blocked_ips_file))
+    IpStats.reset!
     assert_false(IpStats.blocked?(new_ip))
   end
 
