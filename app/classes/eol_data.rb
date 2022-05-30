@@ -139,7 +139,7 @@ class EolData
     )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
-  )
+  ).freeze
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
