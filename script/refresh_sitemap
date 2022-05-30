@@ -213,7 +213,7 @@ end
 def update_times_of_new_objects(times, table, last_update)
   Name.connection.select_rows(%(
     SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
-  )).each do |id, time|    
+  )).each do |id, time|
     times[id.to_i] = parse_mysql_time(time)
   end
 end

@@ -37,18 +37,17 @@ class Name < AbstractModel
     end
 
     def build_accepted_names_lookup_table
-      Name.not_deprecated.where.not(synonym_id: nil).
-        where(rank: 0..Name.ranks[:Genus]).
+      Name.where(rank: 0..Name.ranks[:Genus], deprecated: false).
+        where.not(synonym_id: nil).
         pluck(:synonym_id, :text_name).
         to_h
     end
 
     def accepted_generic_classification_strings
-      geni = Name.not_deprecated.with_rank(:Genus).
+      geni = Name.where(rank: Name.ranks[:Genus], deprecated: false).
              where(Name[:author].does_not_match("sensu lato%")).
              where(Name[:classification].length > 2).
              pluck(:text_name, :classification)
-
       geni.each_with_object({}) do |vals, classifications|
         text_name, classification = vals
         if classifications[text_name].present?
