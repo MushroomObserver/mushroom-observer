@@ -1,4 +1,0 @@
-{
-  "ruby.rubocop.configFilePath": "/vagrant/mushroom-observer/.rubocop.yml",
-  "ruby.rubocop.executePath": "/home/vagrant/.rvm/gems/ruby-2.7.6/bin/"
-}
