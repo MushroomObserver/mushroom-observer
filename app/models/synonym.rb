@@ -46,8 +46,8 @@ class Synonym < AbstractModel
       # For mass_insert when setting the id, need to set `primary_key: true`
       # Also, id in hash apparently needs a string (to check exists already?)
       # but stores an integer. The above not necessary with Rails 6 insert_all
-      missing = missing.map { |m| Hash[id: m.to_s] }
-      Synonym.mass_insert(missing, primary_key: true)
+      missing = missing.map { |m| Hash[id: m] }
+      Synonym.insert_all(missing)
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs
