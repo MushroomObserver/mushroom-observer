@@ -2,6 +2,10 @@
 
 ruby(File.read(".ruby-version").strip)
 
+# In Ruby, 3.0, the SortedSet class has been extracted from the set library.
+# You must use the sorted_set gem or other alternatives
+gem("sorted_set")
+
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
