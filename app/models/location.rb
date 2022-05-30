@@ -83,7 +83,7 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "LocationDescription"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
