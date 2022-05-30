@@ -9,7 +9,7 @@ source("https://rubygems.org")
 # NOTE: Remember to require these separately also, in config/application.rb
 # NOTE: Be sure no other gems list `rails` as a dependency in Gemfile.lock,
 #       or else all of Rails will load anyway.
-# 
+#
 # gem("actioncable", "~> 6.1")
 # gem("actionmailbox", "~> 6.1")
 gem("actionmailer", "~> 6.1")
