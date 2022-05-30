@@ -57,8 +57,8 @@ synonyms = {}
 aliases  = {}
 names    = {}
 ids      = {}
-name_data = Name.pluck(:id, :text_name, :rank, :deprecated, :synonym_id, 
-  :correct_spelling_id)
+name_data = Name.pluck(:id, :text_name, :rank, :deprecated, :synonym_id,
+                       :correct_spelling_id)
 
 # > 5 parameters needed for 2nd name.data block, and it's efficient
 # to use name_data for the 1st block to avoid hitting db twice
@@ -88,7 +88,7 @@ name_data.
 
 # Build table of number of observations per genus.
 observations = {}
-for id in Observation.pluck(:name_id) do
+Observation.pluck(:name_id).each do
   next unless real_id = aliases[id]
 
   text_name, rank, deprecated = names[real_id]
@@ -103,7 +103,7 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-for id, genus, classification in 
+for id, genus, classification in
   Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
   pluck(:id, :text_name, :classification) do
   kingdom =
@@ -140,8 +140,8 @@ end
 # Build table of species in each genus.
 genus_to_species = {}
 for species in Name.with_correct_spelling.not_deprecated.
-  with_rank(:Species).order(sort_name: :asc).
-  pluck(:text_name) do
+               with_rank(:Species).order(sort_name: :asc).
+               pluck(:text_name) do
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species
