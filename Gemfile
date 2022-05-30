@@ -138,15 +138,9 @@ gem("simplecov-lcov", require: false)
 gem("brakeman", require: false)
 
 # Use rubocop and associated gems for code quality control
-#
-# WARNING:
-# When upgrading RuboCop, please use the procedure specified in .rubocop.yml
-#
-# Temporarily lock RuboCop version while we are working our way through
-# auto-correctable offenses
-gem("rubocop", "= 0.89", require: false)
-gem("rubocop-performance", ">= 1.8.1") # version for older rubocop
-gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
+gem("rubocop", require: false)
+gem("rubocop-performance")
+gem("rubocop-rails")
 # Rubocop extension for enforcing graphql-ruby best practices.
 # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
 # require:
@@ -154,9 +148,6 @@ gem("rubocop-rails", ">= 2.8.1") # version for older rubocop
 #  - rubocop-graphql
 # http://github.com/DmitryTsepelev/rubocop-graphql
 gem("rubocop-graphql", require: false)
-
-# use mry to support safe updating of .rubocop.yml
-gem("mry", require: false)
 
 ########## GraphQL API ########################################
 
