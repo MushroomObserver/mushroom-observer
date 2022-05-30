@@ -677,18 +677,17 @@ class ImageControllerTest < FunctionalTestCase
     fixture = "#{MO.root}/test/images/geotagged.jpg"
     fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
 
-    post(:add_image, params: { id: obs.id, image: {
-        "when(1i)" => "2007",
-        "when(2i)" => "3",
-        "when(3i)" => "29",
-        copyright_holder: "Douglas Smith",
-        notes: "Some notes."
-      }, upload: {
-        image1: fixture,
-        image2: "",
-        image3: "",
-        image4: ""
-      } })
+    post(:add_image,
+         params: { id: obs.id,
+                   image: { "when(1i)" => "2007",
+                            "when(2i)" => "3",
+                            "when(3i)" => "29",
+                            copyright_holder: "Douglas Smith",
+                            notes: "Some notes." },
+                   upload: { image1: fixture,
+                             image2: "",
+                             image3: "",
+                             image4: "" } })
 
     img = Image.last
     assert_true(img.gps_stripped)
