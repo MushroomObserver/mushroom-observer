@@ -316,5 +316,8 @@ DEPENDENCIES
   webmock
   xmlrpc
 
+RUBY VERSION
+   ruby 2.7.6p219
+
 BUNDLED WITH
    2.3.6
