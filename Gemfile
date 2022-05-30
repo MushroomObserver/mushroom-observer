@@ -2,13 +2,28 @@
 
 source("https://rubygems.org")
 
-# security fix for CVE-2021-41817 regex denial of service vulnerability
-gem("date", ">= 3.2.1")
+# To bundle edge Rails instead: gem "rails", github: "rails/rails"
+# gem("rails", "~> 6.1")
+# Or bundle the constituent gems. Just be sure no gems depend on Rails
+# gem("actioncable", "~> 6.1")
+# gem("actionmailbox", "~> 6.1")
+gem("actionmailer", "~> 6.1")
+gem("actionpack", "~> 6.1")
+# gem("actiontext", "~> 6.1")
+gem("actionview", "~> 6.1")
+gem("activejob", "~> 6.1")
+gem("activemodel", "~> 6.1")
+gem("activerecord", "~> 6.1")
+# gem("activestorage", "~> 6.1")
+gem("activesupport", "~> 6.1")
+gem("bundler")
+gem("railties", "~> 6.1")
+gem("sprockets-rails")
 
 gem("sprockets")
 
-# To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem("rails", "~> 6.1")
+# security fix for CVE-2021-41817 regex denial of service vulnerability
+gem("date", ">= 3.2.1")
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -268,7 +283,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem("rails_db", "~> 2.4.0")
+  # gem("rails_db", "~> 2.4.0")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")
