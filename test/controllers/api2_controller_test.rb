@@ -22,13 +22,13 @@ class Api2ControllerTest < FunctionalTestCase
 
   def post_and_send_file(action, file, content_type, params)
     data = Rack::Test::UploadedFile.new(file, "image/jpeg")
-    params[:body] = data
-    post_and_send(action, content_type, params)
+    body = data.read
+    post_and_send(action, content_type, params, body)
   end
 
-  def post_and_send(action, type, params)
+  def post_and_send(action, type, params, body)
     @request.env["CONTENT_TYPE"] = type
-    post(action, params: params)
+    post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
