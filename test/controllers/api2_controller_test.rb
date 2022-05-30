@@ -26,15 +26,15 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def post_and_send_file(action, file, content_type, params)
-    params[:body] = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    body = Rack::Test::UploadedFile.new(file, "image/jpeg").read
     md5sum = file_checksum(file)
-    post_and_send(action, content_type, md5sum, params)
+    post_and_send(action, body, content_type, md5sum, params)
   end
 
-  def post_and_send(action, type, md5sum, params)
-    @request.env["CONTENT_TYPE"] = type
+  def post_and_send(action, body, content_type, md5sum, params)
+    @request.env["CONTENT_TYPE"] = content_type
     @request.env["CONTENT_MD5"] = md5sum
-    post(action, params: params)
+    post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
