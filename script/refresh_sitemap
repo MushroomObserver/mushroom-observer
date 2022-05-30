@@ -33,8 +33,6 @@
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
-require 'arel-helpers'
-
 DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml"
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html"
@@ -90,8 +88,9 @@ OTHER_ALLOWED_PATHS = [
   "/name/eol"
 ].freeze
 
-LOCALES = Language.where(beta: [false, nil]).order(order: :asc).
-                   select(:locale)
+LOCALES = Language.connection.select_values(%(
+  SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
+))
 
 # Control behavior of crowlers that follow robots.txt rules
 # For documentation, see:
@@ -186,15 +185,18 @@ def update_sitemap_files
 end
 
 def get_new_comments(last_update)
-  Comment.where(updated_at: last_update..).
-          select(:target_type, :target_id, :updated_at)
+  Name.connection.select_rows(%(
+    SELECT target_type, target_id, updated_at
+    FROM comments WHERE updated_at >= "#{last_update}"
+  ))
 end
 
 def get_new_images(last_update)
-  io = Arel::Table.new(:images_observations)
-  Image.joins(Image.arel_table.join(io).on(Image[:id].eq(io[:image_id]).
-                 and(Image[:updated_at].gteq(last_update))).join_sources).
-        select(io[:observation_id], Image[:updated_at])
+  Name.connection.select_rows(%(
+    SELECT io.observation_id, i.updated_at
+    FROM images i, images_observations io
+    WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
+  ))
 end
 
 def map_one_object_type(params, comments, last_update)
@@ -209,10 +211,9 @@ def map_one_object_type(params, comments, last_update)
 end
 
 def update_times_of_new_objects(times, table, last_update)
-  table = Arel::Table.new(table.to_sym)
-  Name.connection.select_rows(
-    table.where(table[:updated_at] > last_update).
-          project(table[:id], table[:updated_at]).to_sql).each do |id, time|
+  Name.connection.select_rows(%(
+    SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
+  )).each do |id, time|    
     times[id.to_i] = parse_mysql_time(time)
   end
 end
