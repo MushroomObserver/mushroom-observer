@@ -6,7 +6,12 @@ source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 # gem("rails", "~> 6.1")
-# Or bundle the constituent gems. Just be sure no gems depend on Rails
+
+# To skip loading parts of Rails, bundle the constituent gems separately.
+# NOTE: Remember to require these separately also, in config/application.rb
+# NOTE: Be sure no other gems list `rails` as a dependency in Gemfile.lock,
+#       or else all of Rails will load anyway.
+#
 # gem("actioncable", "~> 6.1")
 # gem("actionmailbox", "~> 6.1")
 gem("actionmailer", "~> 6.1")
@@ -39,11 +44,6 @@ gem("mysql2")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 gem("arel-helpers")
-
-# Add method `mass_insert` for bulk db inserts in ActiveRecord.
-# Same basic syntax as upcoming Rails 6 `insert_all`
-# If upgrading to Rails 6, we can disable the gem and switch methods
-gem("mass_insert")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
