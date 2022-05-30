@@ -3,13 +3,13 @@
 class Name < AbstractModel
   require Rails.root.join("app", "classes", "rank_matcher.rb")
 
-  AUCT_ABBR    = / auct\.? /xi.freeze
-  INED_ABBR    = / in\s?ed\.? /xi.freeze
-  NOM_ABBR     = / nomen | nom\.? /xi.freeze
-  COMB_ABBR    = / combinatio | comb\.? /xi.freeze
-  SENSU_ABBR   = / sensu?\.? /xi.freeze
-  NOV_ABBR     = / nova | novum | nov\.? /xi.freeze
-  PROV_ABBR    = / provisional | prov\.? /xi.freeze
+  AUCT_ABBR    = / auct\.? /xi
+  INED_ABBR    = / in\s?ed\.? /xi
+  NOM_ABBR     = / nomen | nom\.? /xi
+  COMB_ABBR    = / combinatio | comb\.? /xi
+  SENSU_ABBR   = / sensu?\.? /xi
+  NOV_ABBR     = / nova | novum | nov\.? /xi
+  PROV_ABBR    = / provisional | prov\.? /xi
   CRYPT_ABBR   = / crypt\.? \s temp\.? /xi
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
