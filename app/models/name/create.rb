@@ -28,13 +28,13 @@ class Name < AbstractModel
     return [] unless parse = parse_name(in_str)
 
     finder = Name.with_rank(rank)
-    results = name_search(finder.where(search_name: :name,
-                                       name: parse.search_name ),
+    results = name_search(finder.where("search_name = :name",
+                                       { name: parse.search_name }),
                           ignore_deprecated)
     return results if results.present?
 
-    results = name_search(finder.where(text_name: :name,
-                                       name: parse.text_name ),
+    results = name_search(finder.where("text_name = :name",
+                                       { name: parse.text_name }),
                           ignore_deprecated)
     return results if parse.author.blank?
     return [] if results.any? { |n| n.author.present? }
@@ -45,7 +45,7 @@ class Name < AbstractModel
 
   def self.name_search(finder, ignore_deprecated)
     unless ignore_deprecated
-      results = finder.not_deprecated
+      results = finder.where(deprecated: 0)
       return results.to_a if results.present?
     end
     finder.to_a
