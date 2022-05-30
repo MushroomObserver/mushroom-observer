@@ -405,6 +405,8 @@ class Name < AbstractModel
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
 
+  scope :not_deprecated, -> { where(deprecated: [false, nil]) }
+
   def <=>(other)
     sort_name <=> other.sort_name
   end

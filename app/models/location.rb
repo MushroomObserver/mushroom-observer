@@ -83,7 +83,7 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "LocationDescription"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
@@ -152,11 +152,11 @@ class Location < AbstractModel
     (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
     (?: (?<![\d.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
-  \s*$/x.freeze
+  \s*$/x
 
   ALTITUDE_REGEX = /^\s*
     (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
-  \s*$/x.freeze
+  \s*$/x
 
   # Shared logic between latitude and longitude
   def self.parse_lxxxitude(value, direction1, direction2, max_degrees)

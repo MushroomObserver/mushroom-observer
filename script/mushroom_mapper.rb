@@ -39,8 +39,8 @@ require(File.expand_path("../config/environment.rb", __dir__))
 
 require("json")
 
-JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json"
-RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
+JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json".freeze
+RAW_FILE  = "#{Rails.root}/public/taxonomy.csv".freeze
 
 # synonyms:         map from synonym_id to at least one accepted name_id
 # aliases:          map from name_id to accepted name_id
@@ -57,10 +57,8 @@ synonyms = {}
 aliases  = {}
 names    = {}
 ids      = {}
-name_data = Name.connection.select_rows(%(
-  SELECT id, text_name, `rank`, deprecated, synonym_id, correct_spelling_id
-  FROM names
-))
+name_data = Name.select(:id, :text_name, :rank, :deprecated, :synonym_id, 
+                        :correct_spelling_id)
 
 # > 5 parameters needed for 2nd name.data block, and it's efficient
 # to use name_data for the 1st block to avoid hitting db twice
@@ -90,10 +88,7 @@ name_data.
 
 # Build table of number of observations per genus.
 observations = {}
-for id in Name.connection.select_values(%(
-  SELECT name_id
-  FROM observations
-)) do
+for id in Observation.select(:name_id) do
   next unless real_id = aliases[id]
 
   text_name, rank, deprecated = names[real_id]
@@ -108,13 +103,10 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-for id, genus, classification in Name.connection.select_rows(%(
-  SELECT id as i, text_name as n, classification as c
-  FROM names
-  WHERE `rank` = #{Name.ranks[:Genus]}
-    AND !deprecated
-    AND correct_spelling_id IS NULL
-)) do
+for id, genus, classification in Name.with_correct_spelling.not_deprecated.
+                                      with_rank(:Genus).
+                                      select(:id, :text_name, :classification)
+  do
   kingdom =
     classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
   klass   =
@@ -148,14 +140,9 @@ end
 
 # Build table of species in each genus.
 genus_to_species = {}
-for species in Name.connection.select_values(%(
-  SELECT text_name as n
-  FROM names
-  WHERE `rank` = #{Name.ranks[:Species]}
-    AND !deprecated
-    AND correct_spelling_id IS NULL
-  ORDER BY sort_name
-)) do
+for species in Name.with_correct_spelling.not_deprecated.
+                    with_rank(:Species).
+                    select(:text_name).order(sort_name: :asc)
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species

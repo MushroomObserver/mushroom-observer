@@ -17,7 +17,7 @@ module PatternSearch
     end
 
     CONTAINS_QUOTES =
-      /^("([^"\\]+|\\.)*"|'([^"\\]+|\\.)*'|[^"',]*)(\s*,\s*|$)/.freeze
+      /^("([^"\\]+|\\.)*"|'([^"\\]+|\\.)*'|[^"',]*)(\s*,\s*|$)/
 
     def <<(val)
       while val.to_s =~ CONTAINS_QUOTES

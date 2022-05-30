@@ -2,7 +2,7 @@
 
 require("open3")
 
-GPS_TAGS = /latitude|longitude|gps/i.freeze
+GPS_TAGS = /latitude|longitude|gps/i
 
 # see ajax_controller.rb
 class AjaxController
