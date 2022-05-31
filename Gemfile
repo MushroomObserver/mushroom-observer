@@ -27,7 +27,7 @@ gem("bundler")
 gem("railties", "~> 6.1")
 gem("sprockets-rails")
 
-gem("sprockets")
+# gem("sprockets")
 
 # security fix for CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
@@ -59,6 +59,9 @@ gem("jquery-rails")
 # gem("therubyracer", platforms: :ruby)
 
 # Use mini_racer as a substitute for therubyracer
+# If this is giving problems:
+# gem update --system
+# bundler update
 gem("mini_racer")
 
 # Use CoffeeScript for .js.coffee assets and views
@@ -247,7 +250,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara", "~> 3.36.0") # for ruby 2.6
+  gem("capybara") # , "~> 3.36.0" for ruby 2.6
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
@@ -276,7 +279,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  # gem("rails_db", "~> 2.4.0")
+  # gem("rails_db", "~> 2.5.0", path: "../local_gems/rails_db")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")
