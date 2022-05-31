@@ -205,7 +205,8 @@ class Name < AbstractModel
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
-    @accepted_genus ||= begin
+    @accepted_genus ||= \
+    begin
       accepted = approved_name
       return unless accepted.text_name.include?(" ")
 
