@@ -139,8 +139,8 @@ end
 # Build table of species in each genus.
 genus_to_species = {}
 Name.with_correct_spelling.not_deprecated.
-               with_rank(:Species).order(sort_name: :asc).
-               pluck(:text_name).each do |species|
+  with_rank(:Species).order(sort_name: :asc).
+  pluck(:text_name).each do |species|
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species
