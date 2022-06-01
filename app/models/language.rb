@@ -112,7 +112,7 @@ class Language < AbstractModel
       hash[str] = true if str.present?
     end
     score = 0
-    hash.keys.each do |key|
+    hash.each_key do |key|
       score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
     end
     score
