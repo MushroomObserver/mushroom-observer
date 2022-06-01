@@ -267,7 +267,7 @@ class NameDescription < Description
       recipients.push(reviewer) if reviewer&.email_names_reviewer
 
       # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).each do |user|
+      User.where(email_names_all: true).find_each do |user|
         recipients.push(user)
       end
 
