@@ -54,6 +54,13 @@ AllCops:
 # Note: pending cops have no default, so must be explicitly specified
 
 # Rubocop supports multiple options and MO uses a non-default
+# Default: align "end" with **start of the line** that includes "begin"
+# MO align with "begin". This is how we've almost always done it.
+# And it's consistent with Layout/EndAlignment for other keywords.
+Layout/BeginEndAlignment:
+  EnforcedStyleAlignWith: begin
+
+# Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:
   EnforcedStyle: trailing
 
