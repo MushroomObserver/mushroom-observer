@@ -123,6 +123,8 @@ class Language < AbstractModel
   # We need a class variable here
   @@last_update = 1.minute.ago
 
+  # New idea. How about TranslationString.create updates I18N.backend?
+  # Then we might delete this method
   # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
     # We need a class variable here
@@ -130,11 +132,13 @@ class Language < AbstractModel
     @@last_update = Time.zone.now
 
     strings = TranslationString.joins(:language).
-              where(TranslationString[:updated_at] >= cutoff).
+              where(updated_at: cutoff..).
               pluck(Language[:locale], :tag, :text)
 
     strings.each do |locale, tag, text|
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
+      # In Ruby 3, you cannot modify this hash. It's frozen.
+      # But there's a method in the i18n gem to do it.
+      # I18n.backend.store_translations(locale.to_sym, { :tag => text })
     end
-  end
-end
+  endend
