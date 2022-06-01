@@ -231,7 +231,7 @@ module GeneralExtensions
     # email = QueuedEmail.find(:first, :offset => n)
     email = QueuedEmail.offset(offset).first
     assert(email)
-    args.keys.each do |arg|
+    args.each_key do |arg|
       case arg
       when :flavor
         assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
