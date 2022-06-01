@@ -38,7 +38,7 @@ File.open(FILE).readlines.each do |line|
   rec[3] += 1 if robot
 end
 
-data.each do |path, rec|
+data.each do |_path, rec|
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
   rec[1] = Math.sqrt(ssq / num - avg * avg)
