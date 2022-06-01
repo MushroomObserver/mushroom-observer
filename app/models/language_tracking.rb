@@ -43,7 +43,7 @@ module LanguageTracking
     @@tags_used = {}
     return unless (seed_tags = load_tags(last_page))
 
-    for tag in seed_tags
+    seed_tags.each do |tag|
       @@tags_used[tag] = true
     end
   end
@@ -68,7 +68,7 @@ module LanguageTracking
     name = String.random(16)
     file = tag_file(name)
     File.open(file, "w:utf-8") do |fh|
-      for tag in tags_used
+      tags_used.each do |tag|
         fh.puts(tag)
       end
     end
@@ -104,7 +104,7 @@ module LanguageTracking
 
     @@last_clean = Time.zone.now
     glob = tag_file("*")
-    for file in Dir.glob(glob)
+    Dir.glob(glob).each do |file|
       begin
         File.delete(file) if File.mtime(file) < cutoff
       rescue StandardError

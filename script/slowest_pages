@@ -38,7 +38,7 @@ File.open(FILE).readlines.each do |line|
   rec[3] += 1 if robot
 end
 
-for path, rec in data
+data.each do |path, rec|
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
   rec[1] = Math.sqrt(ssq / num - avg * avg)
@@ -47,7 +47,7 @@ end
 n = 0
 puts(format("%-40s %6s   %6s    %6s  %6s",
             path,  mean, sigma, num, robot))
-for path in data.keys.sort { |a, b| data[b][0] <=> data[a][0] }
+data.keys.sort { |a, b| data[b][0] <=> data[a][0] }.each do |path|
   avg, sig, num, robots = data[path]
   puts(format("%-40s %6.3f %6.3f %6d  %5d%%",
               path,  avg,  sig,  num, 100.0 * robots / num))

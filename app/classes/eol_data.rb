@@ -107,7 +107,7 @@ class EolData
 
   def prune_synonyms(names)
     synonyms = Hash.new { |h, k| h[k] = [] }
-    for name in names
+    names.each do |name|
       synonyms[name.synonym_id] << name if name.synonym_id
     end
     names_to_keep = {}
@@ -123,7 +123,7 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    for new_name in names[1..]
+    (names[1..]).each do |new_name|
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable
@@ -254,7 +254,7 @@ class EolData
       SELECT id, IF(COALESCE(name,'') = '', login, name) AS name
       FROM users WHERE contribution > 0
     ))
-    for id, legal_name in data
+    data.each do |id, legal_name|
       result[id] = legal_name
     end
     result
@@ -278,7 +278,7 @@ class EolData
 
   def make_list_hash_from_pairs(pairs)
     result = Hash.new { |h, k| h[k] = [] }
-    for x, y in pairs
+    pairs.each do |x, y|
       result[x].push(y)
     end
     result
@@ -296,7 +296,7 @@ class EolData
   end
 
   def create_triples(subjects, predicate)
-    for s in subjects
+    subjects.each do |s|
       Triple.new(subject: s.show_url, predicate: predicate,
                  object: eol_search_url(s.class.name, s)).save
     end

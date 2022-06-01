@@ -145,7 +145,7 @@ class Pivotal
     def user_vote(user)
       if user
         user_id = user.id
-        for vote in votes
+        votes.each do |vote|
           return vote.value if vote.id == user_id
         end
       end

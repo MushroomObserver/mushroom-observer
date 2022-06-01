@@ -893,7 +893,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def assert_project_checks(project_states)
-    for id, state in project_states
+    project_states.each do |id, state|
       assert_checkbox_state("project_id_#{id}", state)
     end
   end

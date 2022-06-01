@@ -165,7 +165,7 @@ module SessionExtensions
             val = nil
             field.options = opts = []
             context.assert_select(elem, "option") do |elems|
-              for elem in elems
+              elems.each do |elem|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(elem["value"])
                 opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
@@ -492,7 +492,7 @@ module SessionExtensions
     def submit(button = nil)
       found = false
       hash = {}
-      for field in inputs
+      inputs.each do |field|
         if field.type == :checkbox
           hash[field.name] =
             field.node["checked"] == "checked" ? field.on_value : "0"
