@@ -152,7 +152,7 @@ class LocationDescription < Description
     end
 
     # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).each do |user|
+    User.where(email_locations_all: true).find_each do |user|
       recipients.push(user)
     end
 
