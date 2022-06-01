@@ -564,11 +564,17 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    @preferred_herbarium ||= begin
-      herbarium_id = HerbariumRecord.where(user_id: id).
-                     order(created_at: :desc).pluck(:herbarium_id).first
-      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
-    end
+    @preferred_herbarium ||= \
+      begin
+        herbarium_id = HerbariumRecord.where(user_id: id).
+                         order(created_at: :desc).
+                         pluck(:herbarium_id).first
+        if herbarium_id.blank?
+          personal_herbarium
+        else
+          Herbarium.find(herbarium_id)
+        end
+      end
   end
 
   # Offers a default fallback for personal herbarium name
@@ -631,17 +637,18 @@ class User < AbstractModel
   #
   def interest_in(object)
     @interests ||= {}
-    @interests["#{object.class.name} #{object.id}"] ||= begin
-      i = Interest.where(
-        user_id: id, target_type: object.class.name, target_id: object.id
-      ).pluck(:state).first
-      case i
-      when true
-        :watching
-      when false
-        :ignoring
+    @interests["#{object.class.name} #{object.id}"] ||= \
+      begin
+        i = Interest.where(
+          user_id: id, target_type: object.class.name, target_id: object.id
+        ).pluck(:state).first
+        case i
+        when true
+          :watching
+        when false
+          :ignoring
+        end
       end
-    end
   end
 
   # Has this user expressed positive interest in a given object?
