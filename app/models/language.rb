@@ -141,4 +141,5 @@ class Language < AbstractModel
       # But there's a method in the i18n gem to do it.
       # I18n.backend.store_translations(locale.to_sym, { :tag => text })
     end
-  endend
+  end
+end

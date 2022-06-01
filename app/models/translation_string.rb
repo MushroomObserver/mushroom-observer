@@ -25,8 +25,8 @@ class TranslationString < AbstractModel
 
   belongs_to :language
   belongs_to :user
-  after_save :update_localisation 
-  after_destroy :delete_localisation
+  after_create :store_localization 
+  before_update :update_localization 
 
   acts_as_versioned(
     table_name: "translation_strings_versions",
@@ -36,14 +36,6 @@ class TranslationString < AbstractModel
     "language_id",
     "tag"
   )
-
-  def update_localisation
-    pp self.inspect
-  end
-
-  def delete_localisation
-    pp self.inspect
-  end
 
   # Called to determine whether or not to create a new version.
   # Aggregate changes by the same user for up to a day.
@@ -74,6 +66,11 @@ class TranslationString < AbstractModel
   end
 
   # Update this string in the translations I18n is using.
+  def store_localization
+    I18n.backend.store_translations(language.locale, { tag.to_sym => text })
+  end
+
+  # Check if tag exists before storing nonsense in the I18n backend
   def update_localization
     data = TranslationString.translations(language.locale.to_sym)
     unless data
@@ -85,10 +82,11 @@ class TranslationString < AbstractModel
       raise("Localization for :#{tag.to_sym} doesn't exist!")
     end
 
-    data[tag.to_sym] = text
+    # data[tag.to_sym] = text
     # In Ruby 3.0, the data hash is frozen and cannot be modified. 
     # The I18n gem, though, has a method to do this (dup'ing the hash)
     # I18n.backend.store_translations(language.locale, { tag.to_sym => text })
+    store_localization
   end
 
   # Get age of official language's banner.  (Used by application layout to
