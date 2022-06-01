@@ -105,12 +105,10 @@ module LanguageTracking
     @@last_clean = Time.zone.now
     glob = tag_file("*")
     Dir.glob(glob).each do |file|
-      begin
-        File.delete(file) if File.mtime(file) < cutoff
-      rescue StandardError
-        # I've seen this fail because of files presumably being deleted by
-        # another process between Dir.glob and File.mtime.
-      end
+      File.delete(file) if File.mtime(file) < cutoff
+    rescue StandardError
+      # I've seen this fail because of files presumably being deleted by
+      # another process between Dir.glob and File.mtime.
     end
   end
 end
