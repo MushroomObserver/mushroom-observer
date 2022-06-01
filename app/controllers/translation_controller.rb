@@ -136,12 +136,7 @@ class TranslationController < ApplicationController
 
   def create_translation(tag, val)
     str = @lang.translation_strings.create(tag: tag, text: val)
-    # FIXME: Fixed hash? in Rails 3 this ain't gon work, I think. 
-    pp "Whoa there"
-    pp @translated_records.class.inspect
     @translated_records[tag] = str
-    # NOTE: create fires store_localization
-    # str.update_localization
     return if @ajax
 
     flash_notice(:edit_translations_created_at.t(tag: tag, str: val))
@@ -149,7 +144,6 @@ class TranslationController < ApplicationController
 
   def change_translation(str, val)
     str.update!(text: val)
-    # str.update_localization
     return if @ajax
 
     flash_notice(:edit_translations_changed.t(tag: str.tag, str: val))

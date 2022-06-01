@@ -111,7 +111,7 @@ class ApplicationController < ActionController::Base
   before_action :autologin
   before_action :set_locale
   before_action :set_timezone
-  before_action :refresh_translations
+  # before_action :refresh_translations
   before_action :track_translations
   # before_action :extra_gc
   # after_action  :extra_gc
@@ -127,7 +127,7 @@ class ApplicationController < ActionController::Base
     skip_before_action(:fix_bad_domains)
     skip_before_action(:autologin)
     skip_before_action(:set_timezone)
-    skip_before_action(:refresh_translations)
+    # skip_before_action(:refresh_translations)
     skip_before_action(:track_translations)
     before_action(:disable_link_prefetching)
     before_action { User.current = nil }
@@ -262,10 +262,10 @@ class ApplicationController < ActionController::Base
 
   private :request_stats, :request_stats_log_message
 
-  # Update Globalite with any recent changes to translations.
-  def refresh_translations
-    Language.update_recent_translations
-  end
+  # Update I18n.backend with any recent changes to translations.
+  # def refresh_translations
+  #   Language.update_recent_translations
+  # end
 
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
