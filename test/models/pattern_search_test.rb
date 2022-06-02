@@ -406,7 +406,8 @@ class PatternSearchTest < UnitTestCase
   def test_translated_parameter_names
     # Ensure the translations are initialized
     assert_equal("user", :search_term_user.t)
-    TranslationString.translations(:fr)[:search_term_user] = "utilisateur"
+    I18n.backend.
+      store_translations(:fr, { mo: { :search_term_user => "utilisateur" } })
     I18n.locale = "fr"
     x = PatternSearch::Observation.new("")
     assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
