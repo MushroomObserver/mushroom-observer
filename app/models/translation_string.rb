@@ -75,7 +75,7 @@ class TranslationString < AbstractModel
     unless data[tag.to_sym]
       raise("Localization for :#{tag.to_sym} doesn't exist!")
     end
-    
+
     store_localization
   end
 
