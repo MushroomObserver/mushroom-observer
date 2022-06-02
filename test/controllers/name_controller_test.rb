@@ -2073,7 +2073,7 @@ class NameControllerTest < FunctionalTestCase
     new_versions = new_name.versions.size
     old_obs = old_name.namings[0].observation
     new_obs = new_name.namings.
-              select { |n| n.observation.name == new_name }[0].observation
+              find { |n| n.observation.name == new_name }.observation
 
     params = {
       id: old_name.id,
