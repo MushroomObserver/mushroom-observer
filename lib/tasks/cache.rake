@@ -140,11 +140,11 @@ namespace :cache do
 
     users = {}
     # for n in Name.find(:all) # Rails 3
-    for n in Name.all
+    Name.all.each do |n|
       user_ids = []
       author_id = nil
       last_version = 0
-      for v in n.versions
+      n.versions.each do |v|
         if last_version > v.version
           print("Expected version numbers to be strictly increasing\n")
           print("#{n.search_name}: #{last_version} > #{v.version}\n")
@@ -167,7 +167,7 @@ namespace :cache do
       end
       n.authors = authors.entries
       editors = Set.new(n.editors) # Make sure the editors are a set
-      for id in user_ids
+      user_ids.each do |id|
         editors.add(users[id])
       end
       n.editors = (editors - authors).entries

@@ -248,17 +248,17 @@ class NameDescription < Description
       recipients = []
 
       # Tell admins of the change.
-      for user in admins
+      admins.each do |user|
         recipients.push(user) if user.email_names_admin
       end
 
       # Tell authors of the change.
-      for user in authors
+      authors.each do |user|
         recipients.push(user) if user.email_names_author
       end
 
       # Tell editors of the change.
-      for user in editors
+      editors.each do |user|
         recipients.push(user) if user.email_names_editor
       end
 
@@ -267,13 +267,13 @@ class NameDescription < Description
       recipients.push(reviewer) if reviewer&.email_names_reviewer
 
       # Tell masochists who want to know about all name changes.
-      for user in User.where(email_names_all: true)
+      User.where(email_names_all: true).find_each do |user|
         recipients.push(user)
       end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in name.interests
+      name.interests.each do |interest|
         if interest.state
           recipients.push(interest.user)
         else
@@ -282,7 +282,7 @@ class NameDescription < Description
       end
 
       # Send notification to all except the person who triggered the change.
-      for recipient in recipients.uniq - [sender]
+      (recipients.uniq - [sender]).each do |recipient|
         QueuedEmail::NameChange.create_email(sender, recipient, name, self,
                                              saved_change_to_review_status?)
       end

@@ -137,28 +137,28 @@ class LocationDescription < Description
     recipients = []
 
     # Tell admins of the change.
-    for user in admins
+    admins.each do |user|
       recipients.push(user) if user.email_locations_admin
     end
 
     # Tell authors of the change.
-    for user in authors
+    authors.each do |user|
       recipients.push(user) if user.email_locations_author
     end
 
     # Tell editors of the change.
-    for user in editors
+    editors.each do |user|
       recipients.push(user) if user.email_locations_editor
     end
 
     # Tell masochists who want to know about all location changes.
-    for user in User.where(email_locations_all: true)
+    User.where(email_locations_all: true).find_each do |user|
       recipients.push(user)
     end
 
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
-    for interest in location.interests
+    location.interests.each do |interest|
       if interest.state
         recipients.push(interest.user)
       else
@@ -167,7 +167,7 @@ class LocationDescription < Description
     end
 
     # Send notification to all except the person who triggered the change.
-    for recipient in recipients.uniq - [sender]
+    (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::LocationChange.create_email(
         sender, recipient, location, self
       )

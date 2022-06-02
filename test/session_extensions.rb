@@ -50,7 +50,7 @@ module SessionExtensions
   # Dump out a list of all the links on the last page rendered.
   def dump_links
     assert_select("a[href]") do |links|
-      for link in links
+      links.each do |link|
         puts("link: #{link.attributes["href"]}")
       end
     end
@@ -156,7 +156,7 @@ module SessionExtensions
 
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
-      for key, value in expected_values
+      expected_values.each do |key, value|
         if value == true
           form.assert_checked(key)
         elsif value == false
@@ -279,7 +279,7 @@ module SessionExtensions
 
     done = false
     assert_select(select, *sargs) do |links|
-      for link in links
+      links.each do |link|
         match = true
 
         # Filter based on link "label" (can be an image too, for example).

@@ -139,7 +139,7 @@ class Symbol
       @@missing_tags << self if defined?(@@missing_tags)
       if args.any?
         pairs = []
-        for k, v in args
+        args.each do |k, v|
           pairs << "#{k}=#{v.inspect}"
         end
         args_str = "(#{pairs.join(",")})"

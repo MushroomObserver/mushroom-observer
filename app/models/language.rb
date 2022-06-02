@@ -108,11 +108,11 @@ class Language < AbstractModel
 
   def self.score_lines(text)
     hash = {}
-    for str in text.split("\n")
+    text.split("\n").each do |str|
       hash[str] = true if str.present?
     end
     score = 0
-    for key in hash.keys
+    hash.each_key do |key|
       score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
     end
     score

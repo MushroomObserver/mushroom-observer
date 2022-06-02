@@ -42,7 +42,7 @@ module PivotalHelper
     result += content_tag(:p, :COMMENTS.l + ":", class: "pivotal_heading")
     comments = []
     num = 0
-    for comment in story.comments
+    story.comments.each do |comment|
       num += 1
       comments << pivotal_comment(comment, num)
     end

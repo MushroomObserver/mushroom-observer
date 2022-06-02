@@ -103,9 +103,8 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-for id, genus, classification in
-  Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
-  pluck(:id, :text_name, :classification) do
+Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
+  pluck(:id, :text_name, :classification).each do |id, genus, classification|
   kingdom =
     classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
   klass   =
@@ -127,7 +126,7 @@ end
 
 # Build mapping from family to genus, complaining about ambiguous genera.
 family_to_genus = {}
-for genus in genus_to_family.keys.sort do
+genus_to_family.keys.sort.each do |genus|
   hash = genus_to_family[genus]
   if hash.keys.length > 1
     warn("Multiple families for #{genus}: #{hash.inspect}")
@@ -139,9 +138,9 @@ end
 
 # Build table of species in each genus.
 genus_to_species = {}
-for species in Name.with_correct_spelling.not_deprecated.
-               with_rank(:Species).order(sort_name: :asc).
-               pluck(:text_name) do
+Name.with_correct_spelling.not_deprecated.
+  with_rank(:Species).order(sort_name: :asc).
+  pluck(:text_name).each do |species|
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species
@@ -151,7 +150,7 @@ end
 data = {}
 data["version"] = 1
 data["families"] = []
-for family in family_to_genus.keys.sort do
+family_to_genus.keys.sort.each do |family|
   next unless observations[family]
 
   family2 = family.sub(/^Unknown Family in /, "")
@@ -160,7 +159,7 @@ for family in family_to_genus.keys.sort do
   family_data["name"] = family
   family_data["id"]   = ids[family2]
   family_data["genera"] = []
-  for genus in family_to_genus[family].sort do
+  family_to_genus[family].sort.each do |genus|
     next unless observations[genus]
 
     warn("Missing genus: #{genus}.") unless ids[genus]
@@ -170,7 +169,7 @@ for family in family_to_genus.keys.sort do
     genus_data["species"] = []
     next unless genus_to_species[genus]
 
-    for species in genus_to_species[genus].sort do
+    genus_to_species[genus].sort.each do |species|
       next unless observations[species]
 
       warn("Missing species: #{species}.") unless ids[species]
@@ -190,7 +189,7 @@ end
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|
   fh.puts(%w[id kingdom class order family genus num_obs].join("\t"))
-  for genus in classifications.keys.sort do
+  classifications.keys.sort.each do |genus|
     fh.puts(classifications[genus].join("\t"))
   end
 end
