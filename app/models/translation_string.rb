@@ -25,7 +25,6 @@ class TranslationString < AbstractModel
 
   belongs_to :language
   belongs_to :user
-  after_save :store_localization
 
   acts_as_versioned(
     table_name: "translation_strings_versions",
