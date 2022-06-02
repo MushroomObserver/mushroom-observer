@@ -14,8 +14,8 @@ class HerbariumRecordTest < UnitTestCase
     # Ensure the translations are initialized
     assert_equal("fungarium", :herbarium.t)
     TranslationString.store_localizations(
-      :fr, 
-      { :user_personal_herbarium => "[name]: Herbier Personnel" }
+      :fr,
+      { user_personal_herbarium: "[name]: Herbier Personnel" }
     )
     user = mary
     I18n.locale = "en"

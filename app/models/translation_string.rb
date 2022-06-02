@@ -82,13 +82,13 @@ class TranslationString < AbstractModel
   # Note that our translations are nested under the :mo key!
   def store_localization
     I18n.backend.store_translations(
-      language.locale, { :mo => { tag.to_sym => text } }
+      language.locale, { mo: { tag.to_sym => text } }
     )
   end
 
   # Utility method for batch updates. Currently used in tests.
   def self.store_localizations(locale, hash_of_tags_and_texts)
-    I18n.backend.store_translations(locale, { :mo => hash_of_tags_and_texts })
+    I18n.backend.store_translations(locale, { mo: hash_of_tags_and_texts })
   end  
 
   # Get age of official language's banner.  (Used by application layout to
