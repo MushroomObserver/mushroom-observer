@@ -80,8 +80,8 @@ class TranslationString < AbstractModel
 
   # Update this string in the translations I18n is using.
   def store_localization
-    I18n.backend.store_translations(language.locale,
-                                    { mo: { tag.to_sym => text } })
+    I18n.backend.
+      store_translations(language.locale, { mo: { tag.to_sym => text } })
   end
 
   # Get age of official language's banner.  (Used by application layout to
