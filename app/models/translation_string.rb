@@ -25,8 +25,8 @@ class TranslationString < AbstractModel
 
   belongs_to :language
   belongs_to :user
-  after_create :store_localization 
-  before_update :update_localization 
+  after_create :store_localization
+  before_update :update_localization
 
   acts_as_versioned(
     table_name: "translation_strings_versions",
@@ -86,7 +86,7 @@ class TranslationString < AbstractModel
     end
 
     # data[tag.to_sym] = text
-    # In Ruby 3.0, the data hash is frozen and cannot be modified. 
+    # In Ruby 3.0, the data hash is frozen and cannot be modified.
     # The I18n gem, though, has a method to do this (dup'ing the hash)
     # I18n.backend.store_translations(language.locale, { tag.to_sym => text })
     store_localization
