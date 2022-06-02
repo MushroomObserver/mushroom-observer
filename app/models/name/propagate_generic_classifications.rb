@@ -44,19 +44,22 @@ class Name < AbstractModel
     end
 
     def accepted_generic_classification_strings
-      Name.where(rank: Name.ranks[:Genus], deprecated: false).
-        where("author NOT LIKE 'sensu lato%'").
-        where("LENGTH(classification) > 2").
-        pluck(:text_name, :classification).
-        each_with_object({}) do |vals, classifications|
-          text_name, classification = vals
-          if classifications[text_name].present?
-            warn("Multiple accepted non-sensu lato genera for #{text_name}!")
-          else
-            classifications[text_name] = classification
-          end
+      geni = Name.where(rank: Name.ranks[:Genus], deprecated: false).
+             where(Name[:author].does_not_match("sensu lato%")).
+             where(Name[:classification].length > 2).
+             pluck(:text_name, :classification)
+
+      geni.each_with_object({}) do |vals, classifications|
+        text_name, classification = vals
+        if classifications[text_name].present?
+          warn("Multiple accepted non-sensu lato genera for #{text_name}!")
+        else
+          classifications[text_name] = classification
         end
+      end
     end
+
+    public
 
     def hash_of_names_with_observations
       Hash[
@@ -80,15 +83,12 @@ class Name < AbstractModel
     end
 
     def execute_bundled_propagation_fixes(bundles, dry_run)
-      # Deliberately skip validations
-      # rubocop:disable Rails/SkipsModelValidations
       bundles.each_with_object([]) do |bundle, msgs|
         classification, ids = bundle
         msgs << "Setting classifications for #{ids.join(",")}"
         Name.where(id: ids).update_all(classification: classification) \
           unless dry_run
       end
-      # rubocop:enable Rails/SkipsModelValidations
     end
 
     def describe_propagation_fix(name, old_class, new_class)

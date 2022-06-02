@@ -23,9 +23,8 @@ class AjaxController
   end
 
   def location_list
-    Observation.where.not(location: nil).
-      select(:location_id, :where).distinct.map do |obs|
-      { id: obs.location_id, name: obs.where }
+    Location.all.select(:id, :name).map do |loc|
+      { id: loc.id, name: loc.name }
     end
   end
 end

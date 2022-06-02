@@ -11,15 +11,16 @@
 #    edit_sequence::     Update sequence.
 #
 class SequenceController < ApplicationController
-  before_action :login_required, except: [
-    :index_sequence,
-    :list_sequences,
-    :sequence_search,
-    :observation_index,
-    :show_sequence,
-    :next_sequence,
-    :prev_sequence
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_sequence,
+  #   :list_sequences,
+  #   :sequence_search,
+  #   :observation_index,
+  #   :show_sequence,
+  #   :next_sequence,
+  #   :prev_sequence
+  # ]
 
   def index_sequence
     query = find_or_create_query(:Sequence, by: params[:by])

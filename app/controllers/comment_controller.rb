@@ -29,17 +29,18 @@
 #
 ################################################################################
 class CommentController < ApplicationController
-  before_action :login_required, except: [
-    :comment_search,
-    :index_comment,
-    :list_comments,
-    :next_comment,
-    :prev_comment,
-    :show_comment,
-    :show_comments_by_user,
-    :show_comments_for_target,
-    :show_comments_for_user
-  ]
+  before_action :login_required
+  # except: [
+  #   :comment_search,
+  #   :index_comment,
+  #   :list_comments,
+  #   :next_comment,
+  #   :prev_comment,
+  #   :show_comment,
+  #   :show_comments_by_user,
+  #   :show_comments_for_target,
+  #   :show_comments_for_user
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :add_comment,

@@ -48,7 +48,7 @@ module GeneralExtensions
   ##############################################################################
 
   def sql_collates_accents?
-    sql_sorted = u_and_umlaut_collated_by_sql.map { |x| x[:notes] }
+    sql_sorted = u_and_umlaut_collated_by_sql.pluck(:notes)
     sql_sorted == sql_sorted.sort
   end
 

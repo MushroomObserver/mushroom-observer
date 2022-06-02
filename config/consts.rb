@@ -113,6 +113,7 @@ MushroomObserver::Application.configure do
   config.location_states_file    = "#{location_path}states.yml"
   config.location_prefixes_file  = "#{location_path}prefixes.yml"
   config.location_bad_terms_file = "#{location_path}bad_terms.yml"
+  config.unknown_location_name = "Earth"
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
@@ -173,7 +174,7 @@ MushroomObserver::Application.configure do
   config.eol_min_observation_vote = 2.4
 
   # Default number of items for an RSS page
-  config.default_layout_count = 18
+  config.default_layout_count = 12
 
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000

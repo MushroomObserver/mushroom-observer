@@ -564,7 +564,7 @@ class AccountControllerTest < FunctionalTestCase
         mailing_address: ""
       }
     }
-    post_with_dump(:profile, params)
+    post(:profile, params)
     assert_flash_text(:runtime_profile_success.t)
 
     # Make sure changes were made.

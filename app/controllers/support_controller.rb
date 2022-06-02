@@ -2,8 +2,6 @@
 
 # Controller for community support including donations and summary letters
 class SupportController < ApplicationController
-  skip_before_action :redirect_anonymous_users
-
   def donate
     store_location
     @donation = Donation.new

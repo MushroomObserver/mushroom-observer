@@ -272,17 +272,27 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_user)
   end
 
-  # Make sure we display the thumbnail of observations without an rss_log.
   def test_observations_by_known_user
+    # Make sure fixtures are still okay
     obs = observations(:coprinus_comatus_obs)
     assert_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
-    url = Image.url(:small, obs.thumb_image_id)
+    user = rolf
+    assert(
+      user.layout_count >= rolf.observations.size,
+      "User must be able to display all rolf's Observations in a single page"
+    )
+
     test_show_owner_id_noone_logged_in
-    login
+
+    login(user.login)
     get(:observations_by_user, params: { id: rolf.id })
+
     assert_template(:list_observations)
-    assert_match(url, @response.body)
+    assert_match(
+      Image.url(:small, obs.thumb_image_id), @response.body,
+      "Observation thumbnail should display although this is not an rss_log"
+    )
   end
 
   def test_altering_types_shown_by_rss_log_index
@@ -823,11 +833,20 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observations_with_region_filter
-    login(users(:californian).name)
+    observations_in_region = Observation.where(
+      Observation.arel_table[:where].matches("%California, USA")
+    ).order(:id).to_a
+
+    user = users(:californian)
+    # Make sure the fixture is still okay
+    assert_equal({ region: "California, USA" }, user.content_filter)
+    assert(user.layout_count >= observations_in_region.size,
+           "User must be able to display search results in a single page.")
+
+    login(user.name)
     get(:list_observations)
-    expect = Observation.where("`where` LIKE '%California, USA'").to_a
-    results = @controller.instance_variable_get("@objects")
-    assert_obj_list_equal(expect.sort_by(&:id), results.sort_by(&:id))
+    results = @controller.instance_variable_get("@objects").sort_by(&:id)
+    assert_obj_list_equal(observations_in_region, results)
   end
 
   def test_send_webmaster_question
@@ -1560,27 +1579,6 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
-  def test_show_notifications
-    # First, create a naming notification email, making sure it has a template,
-    # and making sure the person requesting the notifcation is not the same
-    # person who created the underlying observation (otherwise nothing happens).
-    note = notifications(:coprinus_comatus_notification)
-    note.user = mary
-    note.note_template = "blah!"
-    assert(note.save)
-    QueuedEmail.queue_emails(true)
-    QueuedEmail::NameTracking.create_email(
-      note, namings(:coprinus_comatus_other_naming)
-    )
-
-    # Now we can be sure show_notifications is supposed to actually show a
-    # non-empty list, and thus that this test is meaningful.
-    requires_login(:show_notifications,
-                   id: observations(:coprinus_comatus_obs).id)
-    assert_template(:show_notifications)
-    QueuedEmail.queue_emails(false)
-  end
-
   def test_author_request
     id = name_descriptions(:coprinus_comatus_desc).id
     requires_login(:author_request, id: id, type: :name_description)
@@ -1984,7 +1982,7 @@ class ObserverControllerTest < FunctionalTestCase
     herbarium_record = obs.herbarium_records.first
     herbarium = herbarium_record.herbarium
     assert(herbarium.curator?(katrina))
-    assert(herbarium.name.match(/Katrina/))
+    assert(herbarium.name.include?("Katrina"))
   end
 
   def test_create_simple_observation_with_approved_unique_name
@@ -3945,17 +3943,6 @@ class ObserverControllerTest < FunctionalTestCase
       "+http://www.baidu.com/search/spider.html)"
     get(:intro) # only authorized robots and anonymous users are allowed here
     assert_equal(403, @response.status)
-  end
-
-  def test_anon_user_forbidden_action
-    obs = observations(:minimal_unknown_obs)
-    # only logged-in users and authorized robots can do this
-    get(:show_observation, params: { id: obs.id })
-
-    assert_redirected_to(
-      account_login_path,
-      "Anonymous user should be unable to view Observation"
-    )
   end
 
   def test_anon_user_ask_webmaster_question

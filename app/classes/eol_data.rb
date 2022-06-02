@@ -232,7 +232,7 @@ class EolData
   end
 
   def image_id_to_names
-    make_list_hash_from_pairs(name_images_list.reduce { |a, b| a + b })
+    make_list_hash_from_pairs(name_images_list.sum)
   end
 
   def name_images_list

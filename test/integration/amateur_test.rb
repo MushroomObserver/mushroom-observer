@@ -262,7 +262,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("account/login")
+    assert_template("observer/show_observation")
 
     login("dick")
     assert_template("observer/show_observation")
@@ -340,18 +340,16 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_template( # redirected login after storing location in session
-        "account/login"
-      )
+      assert_template("observer/show_observation")
+      click(label: /login/i)
+      assert_template("account/login")
       open_form do |form|
         form.change("login", namer.login)
         form.change("password", "testpassword")
         form.change("remember_me", true)
         form.submit("Login")
       end
-      assert_select( # Upon login, redirected to stored location
-        "a[href*='naming/edit'], a[href*='naming/destroy']", false
-      )
+      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
       click(label: /propose.*name/i)
     end
 

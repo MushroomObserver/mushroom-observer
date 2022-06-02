@@ -40,21 +40,22 @@
 class SpeciesListController < ApplicationController
   # require "rtf"
 
-  before_action :login_required, except: [
-    :download,
-    :index_species_list,
-    :list_species_lists,
-    :make_report,
-    :name_lister,
-    :next_species_list,
-    :prev_species_list,
-    :print_labels,
-    :show_species_list,
-    :species_list_search,
-    :species_lists_by_title,
-    :species_lists_by_user,
-    :species_lists_for_project
-  ]
+  before_action :login_required
+  # except: [
+  #   :download,
+  #   :index_species_list,
+  #   :list_species_lists,
+  #   :make_report,
+  #   :name_lister,
+  #   :next_species_list,
+  #   :prev_species_list,
+  #   :print_labels,
+  #   :show_species_list,
+  #   :species_list_search,
+  #   :species_lists_by_title,
+  #   :species_lists_by_user,
+  #   :species_lists_for_project
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_species_list,
@@ -604,7 +605,7 @@ class SpeciesListController < ApplicationController
     @any_changes = false
     @projects.each do |proj|
       if @project_states[proj.id]
-        if !@user.projects_member.include?(proj)
+        if @user.projects_member.exclude?(proj)
           flash_error(:species_list_projects_no_add_to_project.
                          t(proj: proj.title))
         else
@@ -828,8 +829,6 @@ class SpeciesListController < ApplicationController
         if @species_list.location.nil?
           redirect_to(controller: "location", action: "create_location",
                       where: @place_name, set_species_list: @species_list.id)
-        elsif unshown_notifications?(@user, :naming)
-          redirect_to(controller: "observer", action: "show_notifications")
         else
           redirect_to(action: "show_species_list", id: @species_list)
         end

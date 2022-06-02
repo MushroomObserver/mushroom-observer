@@ -90,9 +90,6 @@ class Name < AbstractModel
   # Super quick and low-level update to make sure no observation names are
   # misspellings.
   def change_misspelled_consensus_names
-    Observation.connection.execute(%(
-      UPDATE observations SET name_id = #{correct_spelling_id}
-      WHERE name_id = #{id}
-    ))
+    Observation.where(name_id: id).update_all(name_id: correct_spelling_id)
   end
 end

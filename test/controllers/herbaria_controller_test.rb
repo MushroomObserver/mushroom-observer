@@ -862,7 +862,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy_by_non_curator
-    assert(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
+    assert(HerbariumRecord.exists?(herbarium_id: nybg.id))
     # Must be curator or admin.
     login("mary")
     get(:destroy, params: { id: nybg.id })
@@ -878,10 +878,10 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:destroy, params: { id: nybg.id })
 
     assert_nil(Herbarium.safe_find(nybg.id))
-    assert_not(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
+    assert_not(HerbariumRecord.exists?(herbarium_id: nybg.id))
     assert_not(
       Observation.joins(:herbarium_records).
-                  where("herbarium_records.id" => record_ids).exists?,
+                  exists?("herbarium_records.id" => record_ids),
       "Destroying Herbarium should destroy herbarium records -- " \
       "There should not be herbarium records for Observations " \
       "whose only records were in destroyed herbarium #{nybg.name}"
@@ -932,5 +932,15 @@ class HerbariaControllerTest < FunctionalTestCase
       herbaria_path,
       "Attempt to destroy non-existent herbarium should redirect to index"
     )
+  end
+
+  # This was a bug found in the wild, presumably from a user which was deleted
+  # but the corresponding personal_user_id was not cleared and therefore then
+  # referred to a nonexistent user.  It caused the herbarium index to crash.
+  def test_herbarium_personal_user_id_corrupt
+    # Intentionally "break" the user link for Rolf's personal herbarium.
+    herbaria(:rolf_herbarium).update(personal_user_id: -1)
+    login("mary")
+    get(:index)
   end
 end

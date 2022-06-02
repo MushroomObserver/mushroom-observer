@@ -34,7 +34,24 @@ class ObserverController
   end
 
   def load_observation_for_show_observation_page
-    @observation = Observation.includes(
+    includes = @user ? show_obs_heavy_includes : show_obs_light_includes
+    @observation = Observation.includes(includes).find_by(id: params[:id]) ||
+                   flash_error_and_goto_index(Observation, params[:id])
+  end
+
+  def show_obs_light_includes
+    [
+      { comments: :user },
+      { images: [:license, :user] },
+      :location,
+      :name,
+      { namings: :name },
+      :user
+    ]
+  end
+
+  def show_obs_heavy_includes
+    [
       :collection_numbers,
       { comments: :user },
       { external_links: { external_site: :project } },
@@ -47,8 +64,7 @@ class ObserverController
       :sequences,
       { species_lists: :projects },
       :user
-    ).find_by(id: params[:id]) ||
-                   flash_error_and_goto_index(Observation, params[:id])
+    ]
   end
 
   # Make it really easy for users to elect to go public with their votes.

@@ -41,31 +41,35 @@
       <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
     </p>
 
-    <div id="observation_projects">
-      <% observation.projects.each do |project| %>
-           <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
-      <% end %>
-    </div>
+    <% if @user %>
+      <div id="observation_projects">
+        <% observation.projects.each do |project| %>
+             <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
+        <% end %>
+      </div>
+    <% end %>
 
     <div id="specimen_available">
       <%= observation.specimen ? :show_observation_specimen_available.t :
                                  :show_observation_specimen_not_available.t %>
     </div>
 
-    <div id="observation_collection_numbers">
-      <%= render(partial: "observer/collection_numbers",
-                locals: { observation: observation }) %>
-    </div>
+    <% if @user %>
+      <div id="observation_collection_numbers">
+        <%= render(partial: "observer/collection_numbers",
+                  locals: { observation: observation }) %>
+      </div>
 
-    <div id="observation_herbarium_records">
-      <%= render(partial: "observer/herbarium_records",
-                locals: { observation: observation }) %>
-    </div>
+      <div id="observation_herbarium_records">
+        <%= render(partial: "observer/herbarium_records",
+                  locals: { observation: observation }) %>
+      </div>
 
-    <div id="observation_sequences">
-      <%= render(partial: "observer/sequences",
-                locals: { observation: observation }) %>
-    </div>
+      <div id="observation_sequences">
+        <%= render(partial: "observer/sequences",
+                  locals: { observation: observation }) %>
+      </div>
+    <% end %>
   </div>
 
   <div class="col-xs-12 max-width-text obs-notes">

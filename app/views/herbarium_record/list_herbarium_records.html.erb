@@ -24,7 +24,7 @@
                 end %>
           </td>
           <td>
-            <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
+            <%= herbarium ? link_to(herbarium.name.t, herbarium.show_link_args) : :UNKNOWN.t %>
           </td>
           <td>
             <%= link_with_query(herbarium_record.herbarium_label.t,

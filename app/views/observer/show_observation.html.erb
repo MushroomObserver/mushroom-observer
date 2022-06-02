@@ -7,8 +7,8 @@
   javascript_include("vote_popup")
 
   show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
-  show_lists = @observation.species_lists.any?
-  show_links = @observation.external_links.any? || @new_sites.any?
+  show_lists = @user && @observation.species_lists.any?
+  show_links = @user && (@observation.external_links.any? || @new_sites.any?)
 %>
 
 <div class="row">
@@ -21,17 +21,19 @@
     </div>
   </div>
   <div class="col-md-4 pull-right-sm">
-    <div class="list-group">
-      <div class="list-group-item name-section small">
-        <%= render(partial: "show_name_info",
-                   locals: { observation: @observation }) %>
+    <% if @user %>
+      <div class="list-group">
+        <div class="list-group-item name-section small">
+          <%= render(partial: "show_name_info",
+                     locals: { observation: @observation }) %>
+        </div>
       </div>
-    </div>
-    <% if show_lists %>
-      <%= render(partial: "show_lists", locals: {observation: @observation}) %>
-    <% end %>
-    <% if show_links %>
-      <%= render(partial: "show_links", locals: {observation: @observation}) %>
+      <% if show_lists %>
+        <%= render(partial: "show_lists", locals: {observation: @observation}) %>
+      <% end %>
+      <% if show_links %>
+        <%= render(partial: "show_links", locals: {observation: @observation}) %>
+      <% end %>
     <% end %>
     <% if show_map %>
       <div class="hidden-xs">
@@ -42,9 +44,11 @@
     <%= render(partial: "show_images", locals: { observation: @observation }) %>
   </div>
   <div class="col-md-8 pull-left-sm">
-    <div id="naming_partial">
-      <%= render(partial: "naming/show", locals: { observation: @observation }) %>
-    </div>
+    <% if @user %>
+      <div id="naming_partial">
+        <%= render(partial: "naming/show", locals: { observation: @observation }) %>
+      </div>
+    <% end %>
     <%= render(partial: "comment/show_comments",
                locals: { object: @observation, controls: true, limit: nil }) %>
   </div>

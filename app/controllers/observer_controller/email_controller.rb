@@ -132,7 +132,7 @@ class ObserverController
     !@user && (
       /https?:/.match?(@content) ||
       %r{<[/a-zA-Z]+>}.match?(@content) ||
-      !@content.include?(" ")
+      @content.exclude?(" ")
     )
   end
 

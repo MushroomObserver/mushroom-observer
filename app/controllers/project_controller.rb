@@ -32,14 +32,15 @@
 ################################################################################
 
 class ProjectController < ApplicationController
-  before_action :login_required, except: [
-    :index_project,
-    :list_projects,
-    :next_project,
-    :prev_project,
-    :project_search,
-    :show_project
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_project,
+  #   :list_projects,
+  #   :next_project,
+  #   :prev_project,
+  #   :project_search,
+  #   :show_project
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :admin_request,

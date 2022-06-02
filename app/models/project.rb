@@ -149,24 +149,39 @@ class Project < AbstractModel
   def remove_observation(obs)
     return unless observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
-    if imgs.any?
-      img_ids = imgs.map(&:id).map(&:to_s).join(",")
-      # Leave images which are attached to other observations
-      # still attached to this project.
-      leave_these_img_ids = Image.connection.select_values(%(
-        SELECT io.image_id FROM images_observations io, observations_projects op
-        WHERE io.image_id IN (#{img_ids})
-          AND io.observation_id != #{obs.id}
-          AND io.observation_id = op.observation_id
-          AND op.project_id = #{id}
-      )).map(&:to_i)
-      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
-    end
+    imgs_to_delete(obs).each { |img| images.delete(img) }
     observations.delete(obs)
-    imgs.each { |img| images.delete(img) }
     update_attribute(:updated_at, Time.zone.now)
   end
+
+  def imgs_to_delete(obs)
+    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    return imgs if imgs.none?
+
+    # Do not delete images which are attached to other observations
+    # still attached to this project.
+    leave_these_img_ids = Image.connection.select_values(
+      arel_select_leave_these_img_ids(obs, imgs).to_sql
+    ).map(&:to_i)
+    imgs.reject { |img| leave_these_img_ids.include?(img.id) }
+  end
+
+  # Note: Arel is definitely more efficient than AR for this join.
+  # rubocop:disable Metrics/AbcSize
+  def arel_select_leave_these_img_ids(obs, imgs)
+    io = Arel::Table.new(:images_observations)
+    op = Arel::Table.new(:observations_projects)
+    img_ids = imgs.map(&:id)
+
+    io.join(op).on(
+      io[:image_id].in(img_ids).and(
+        io[:observation_id].not_eq(obs.id).and(
+          io[:observation_id].eq(op[:observation_id])
+        ).and(op[:project_id].eq(id))
+      )
+    ).project(io[:image_id])
+  end
+  # rubocop:enable Metrics/AbcSize
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)

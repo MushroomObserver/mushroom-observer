@@ -32,18 +32,19 @@
 #  process_image::         (helper for add_image)
 #
 class ImageController < ApplicationController
-  before_action :login_required, except: [
-    :advanced_search,
-    :image_search,
-    :images_by_user,
-    :images_for_project,
-    :index_image,
-    :list_images,
-    :next_image,
-    :prev_image,
-    :show_image,
-    :show_original
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :image_search,
+  #   :images_by_user,
+  #   :images_for_project,
+  #   :index_image,
+  #   :list_images,
+  #   :next_image,
+  #   :prev_image,
+  #   :show_image,
+  #   :show_original
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :add_image,
@@ -526,7 +527,7 @@ class ImageController < ApplicationController
 
     if !check_permission!(@observation)
       flash_error(:runtime_image_remove_denied.t(id: @image.id))
-    elsif !@observation.images.include?(@image)
+    elsif @observation.images.exclude?(@image)
       flash_error(:runtime_image_remove_missing.t(id: @image.id))
     else
       @observation.remove_image(@image)
@@ -769,13 +770,8 @@ class ImageController < ApplicationController
       update_licenses_history(images_to_update, row[:old_holder], row[:old_id])
 
       # Update the license info in the images
-      # Disable cop because we want to update all relevant records with
-      # a single SELECT. Otherwise license updating would take too long
-      # for users with many (e.g. thousands) of images
-      # rubocop:disable Rails/SkipsModelValidations
       images_to_update.update_all(license_id: row[:new_id],
                                   copyright_holder: row[:new_holder])
-      # rubocop:enable Rails/SkipsModelValidations
     end
   end
 

@@ -60,8 +60,8 @@ class Naming < AbstractModel
 
   before_save :did_name_change?
   before_save :enforce_default_reasons
-  after_save :create_emails
   after_destroy :log_destruction
+  after_save :create_emails
 
   # Override the default show_controller
   def self.show_controller

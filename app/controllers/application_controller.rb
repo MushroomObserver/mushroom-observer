@@ -23,7 +23,6 @@
 #  check_permission!::      Same, but flashes "denied" message, too.
 #  reviewer?::              Is the current User a reviewer?
 #  in_admin_mode?::         Is the current User in admin mode?
-#  unshown_notifications?:: Are there pending Notification's of a given type?
 #  autologin_cookie_set::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
 #  session_user_set::       (store user in session -- id only)
@@ -110,7 +109,6 @@ class ApplicationController < ActionController::Base
   before_action :verify_authenticity_token
   before_action :fix_bad_domains
   before_action :autologin
-  before_action :redirect_anonymous_users
   before_action :set_locale
   before_action :set_timezone
   before_action :refresh_translations
@@ -124,7 +122,6 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_before_action(:redirect_anonymous_users)
     skip_before_action(:create_view_instance_variable)
     skip_before_action(:verify_authenticity_token)
     skip_before_action(:fix_bad_domains)
@@ -444,16 +441,6 @@ class ApplicationController < ActionController::Base
 
   public ##########
 
-  # Filter that redirect anonymous users to login
-  # unless they're looking at allowed pages
-  def redirect_anonymous_users
-    return true if browser.bot? # recognized bots are handled elsewhere
-    return true if @user
-
-    store_location
-    redirect_to(account_login_path)
-  end
-
   # ----------------------------
   #  "Public" methods.
   # ----------------------------
@@ -524,26 +511,6 @@ class ApplicationController < ActionController::Base
     session[:admin]
   end
   helper_method :in_admin_mode?
-
-  # Are there are any QueuedEmail's of the given flavor for the given User?
-  # Returns true or false.
-  #
-  # This only applies to emails that are associated with Notification's for
-  # which there is a note_template.  (Only one type now: Notification's with
-  # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  def unshown_notifications?(user, flavor = :naming)
-    QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
-      ints = q.get_integers(%w[shown notification], true)
-      next if ints["shown"]
-
-      notification = Notification.safe_find(ints["notification"].to_i)
-      next unless notification&.note_template
-
-      return true
-    end
-
-    false
-  end
 
   # ----------------------------
   #  "Private" methods.
@@ -1054,7 +1021,7 @@ class ApplicationController < ActionController::Base
   def append_query_param_to_path(path, query_param)
     return path unless query_param
 
-    if path.match?(/\?/) # Does path already have a query string?
+    if path.include?("?") # Does path already have a query string?
       "#{path}&q=#{query_param}" # add query_param to existing query string
     else
       "#{path}?q=#{query_param}" # create a query string comprising query_param
@@ -1231,7 +1198,7 @@ class ApplicationController < ActionController::Base
 
   def invalid_q_param?
     params && params[:q] &&
-      !QueryRecord.where(id: params[:q].dealphabetize).exists?
+      !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
 
   public ##########

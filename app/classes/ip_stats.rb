@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# This class is used by a cronjob which is stripped down to the minimum and
+# apparently doesn't load the exclude? method, therefore we're just disabling
+# this cop locally to avoid any problems.
+# rubocop:disable Rails/NegateInclude
+
 class IpStats
   class << self
     STATS_TIME = 10 # minutes
@@ -36,7 +41,7 @@ class IpStats
     #     load::       Time used to serve request in seconds (float).
     #     controller:: Controller (string).
     #     action::     Action (string).
-    def read_stats(do_activity = false)
+    def read_stats(do_activity: false)
       data = {}
       now = Time.now.utc
       file = MO.ip_stats_file
@@ -205,3 +210,5 @@ class IpStats
     end
   end
 end
+
+# rubocop:enable Rails/NegateInclude

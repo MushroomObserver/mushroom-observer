@@ -25,7 +25,7 @@ module ObserverHelper
 
   # Observer Preference: Hydnum repandum
   def owner_id_line(obs)
-    return unless User.view_owner_id_on?
+    return unless User.current&.view_owner_id
 
     capture do
       concat(:show_observation_owner_id.t + ": ")
