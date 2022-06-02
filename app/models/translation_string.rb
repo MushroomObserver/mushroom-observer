@@ -61,13 +61,16 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(locale)
-    I18n.backend.load_translations if I18n.backend.send(:translations).empty?
-    I18n.backend.send(:translations)[locale.to_sym][MO.locale_namespace.to_sym]
+    I18n.backend.translations[locale.to_sym][MO.locale_namespace.to_sym]
+    # I18n.backend.load_translations if I18n.backend.send(:translations).empty?
+    # I18n.backend.send(:translations)[locale.to_sym]\
+    #   [MO.locale_namespace.to_sym]
   end
 
   # Update this string in the translations I18n is using.
   def store_localization
     I18n.backend.store_translations(language.locale, { tag.to_sym => text })
+    # I18n.backend.reload! # No, this will reload the yml
   end
 
   # Check if tag exists before storing nonsense in the I18n backend
