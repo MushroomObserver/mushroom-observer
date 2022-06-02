@@ -137,6 +137,7 @@ class TranslationController < ApplicationController
   def create_translation(tag, val)
     str = @lang.translation_strings.create(tag: tag, text: val)
     @translated_records[tag] = str
+    str.update_localization
     return if @ajax
 
     flash_notice(:edit_translations_created_at.t(tag: tag, str: val))
@@ -144,6 +145,7 @@ class TranslationController < ApplicationController
 
   def change_translation(str, val)
     str.update!(text: val)
+    str.update_localization
     return if @ajax
 
     flash_notice(:edit_translations_changed.t(tag: str.tag, str: val))

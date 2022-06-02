@@ -407,7 +407,7 @@ class PatternSearchTest < UnitTestCase
     # Ensure the translations are initialized
     assert_equal("user", :search_term_user.t)
     TranslationString.store_localizations(
-      :fr, { :search_term_user => "utilisateur" }
+      :fr, { search_term_user: "utilisateur" }
     )
     I18n.locale = "fr"
     x = PatternSearch::Observation.new("")

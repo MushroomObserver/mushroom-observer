@@ -380,7 +380,7 @@ class LocationTest < UnitTestCase
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
     TranslationString.store_localizations(
-      :es, { :unknown_locations => "Desconocido" }
+      :es, { unknown_locations: "Desconocido" }
     )
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
