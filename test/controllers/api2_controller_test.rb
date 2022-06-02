@@ -445,11 +445,11 @@ class Api2ControllerTest < FunctionalTestCase
     votes = json["results"][0]["votes"]
     assert_equal(
       "rolf",
-      votes.select { |v| v["id"] == rolfs_vote.id }[0]["owner"]["login_name"]
+      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]["login_name"]
     )
     assert_equal(
       "mary",
-      votes.select { |v| v["id"] == marys_vote.id }[0]["owner"]["login_name"]
+      votes.find { |v| v["id"] == marys_vote.id }["owner"]["login_name"]
     )
 
     get(:observations, params: params.merge(api_key: marys_key.key))
@@ -457,11 +457,11 @@ class Api2ControllerTest < FunctionalTestCase
     votes = json["results"][0]["votes"]
     assert_equal(
       :anonymous.l,
-      votes.select { |v| v["id"] == rolfs_vote.id }[0]["owner"]
+      votes.find { |v| v["id"] == rolfs_vote.id }["owner"]
     )
     assert_equal(
       "mary",
-      votes.select { |v| v["id"] == marys_vote.id }[0]["owner"]["login_name"]
+      votes.find { |v| v["id"] == marys_vote.id }["owner"]["login_name"]
     )
 
     params[:format] = :xml
