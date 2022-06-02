@@ -89,7 +89,7 @@ class TranslationString < AbstractModel
   # Utility method for batch updates. Currently used in tests.
   def self.store_localizations(locale, hash_of_tags_and_texts)
     I18n.backend.store_translations(locale, { mo: hash_of_tags_and_texts })
-  end  
+  end
 
   # Get age of official language's banner.  (Used by application layout to
   # determine if user has dismissed it yet.)

@@ -293,7 +293,7 @@ class AmateurTest < IntegrationTestCase
       :el,
       { test_tag1: "test_tag1 value",
         test_tag2: "test_tag2 value",
-        test_flash_redirection_title: "Testing Flash Redirection" } 
+        test_flash_redirection_title: "Testing Flash Redirection" }
     )
 
     session.run_test
