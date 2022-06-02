@@ -25,8 +25,7 @@ class TranslationString < AbstractModel
 
   belongs_to :language
   belongs_to :user
-  after_create :store_localization
-  before_update :update_localization
+  after_save :store_localization
 
   acts_as_versioned(
     table_name: "translation_strings_versions",
@@ -65,12 +64,6 @@ class TranslationString < AbstractModel
     I18n.backend.translations[locale.to_sym][MO.locale_namespace.to_sym]
   end
 
-  # Update this string in the translations I18n is using.
-  def store_localization
-    I18n.backend.store_translations(language.locale, 
-    { mo: { tag.to_sym => text } })
-  end
-
   # Check if tag exists before storing nonsense in the I18n backend
   def update_localization
     data = TranslationString.translations(language.locale.to_sym)
@@ -83,6 +76,12 @@ class TranslationString < AbstractModel
       raise("Localization for :#{tag.to_sym} doesn't exist!")
     end
     store_localization
+  end
+
+  # Update this string in the translations I18n is using.
+  def store_localization
+    I18n.backend.store_translations(language.locale,
+                                    { mo: { tag.to_sym => text } })
   end
 
   # Get age of official language's banner.  (Used by application layout to
