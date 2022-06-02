@@ -380,7 +380,7 @@ class LocationTest < UnitTestCase
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
     I18n.backend.store_translations(
-        :es, { :mo => { :unknown_locations => "Desconocido" } }
+      :es, { :mo => { :unknown_locations => "Desconocido" } }
     )
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)

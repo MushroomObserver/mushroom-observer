@@ -291,11 +291,10 @@ class AmateurTest < IntegrationTestCase
 
     I18n.backend.store_translations(
       :el,
-      { :mo => 
+      { :mo =>
         { :test_tag1 => "test_tag1 value",
           :test_tag2 => "test_tag2 value",
-          :test_flash_redirection_title => "Testing Flash Redirection" }
-      }
+          :test_flash_redirection_title => "Testing Flash Redirection" } }
     )
 
     session.run_test
