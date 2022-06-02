@@ -141,7 +141,7 @@ module GM
       north = south = nil
       east1 = west1 = nil  # E and W edges assuming not straddling date line
       east2 = west2 = nil  # E and West edges assuming DOES straddle date line
-      for lat, long in points
+      points.each do |lat, long|
         north = lat  if north.nil? || lat > north
         south = lat  if south.nil? || lat < south
         east1 = long if east1.nil? || long > east1

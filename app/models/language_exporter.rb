@@ -128,7 +128,7 @@ module LanguageExporter
   def strip
     any_changes = false
     good_tags = Language.official.read_export_file
-    for str in translation_strings.reject { |str| good_tags.key?(str.tag) }
+    translation_strings.reject { |str| good_tags.key?(str.tag) }.each do |str|
       verbose("  deleting :#{str.tag}")
       translation_strings.delete(str) unless safe_mode
       any_changes = true
@@ -157,7 +157,7 @@ module LanguageExporter
   # TranslationString (ActiveRecord instance).
   def translation_strings_hash
     hash = {}
-    for str in translation_strings
+    translation_strings.each do |str|
       hash[str.tag] = str
     end
     hash
@@ -200,7 +200,7 @@ module LanguageExporter
   def write_export_file_lines(output_lines)
     temp_file = export_file + "." + Process.pid.to_s
     File.open(temp_file, "w:utf-8") do |fh|
-      for line in output_lines
+      output_lines.each do |line|
         fh.write(line)
       end
     end
@@ -216,7 +216,7 @@ module LanguageExporter
   private
 
   def merge_localization_strings_into(data)
-    for str in translation_strings
+    translation_strings.each do |str|
       data[str.tag] = str.text
     end
     data
@@ -255,7 +255,7 @@ module LanguageExporter
     template_lines = Language.official.read_export_file_lines
     output_lines = []
     in_tag = false
-    for line in template_lines
+    template_lines.each do |line|
       if line =~ /^(\W+['"]?(\w+)['"]?:)/
         out = Regexp.last_match(1)
         tag = Regexp.last_match(2)
@@ -302,7 +302,7 @@ module LanguageExporter
     once = {}
     twice = {}
     pass = true
-    for line in read_export_file_lines
+    read_export_file_lines.each do |line|
       next unless line =~ /^ *['"]?(\w+)['"]?:/
 
       if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
@@ -319,7 +319,7 @@ module LanguageExporter
   def check_export_file_data
     pass = true
     data = read_export_file
-    for tag, str in data
+    data.each do |tag, str|
       unless tag.is_a?(String)
         verbose("#{locale} #{tag}: tag is a #{tag.class.name} " \
                 "instead of a String")
@@ -342,7 +342,7 @@ module LanguageExporter
     @pass = true
     @in_tag = false
     @line_number = 0
-    for line in read_export_file_lines
+    read_export_file_lines.each do |line|
       @line_number += 1
       check_export_line(line)
     end

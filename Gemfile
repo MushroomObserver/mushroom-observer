@@ -12,7 +12,7 @@ source("https://rubygems.org")
 # gem("rails", "~> 6.1")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
-# NOTE: Remember to require these separately also, in config/application.rb
+# NOTE: Remember to require the classes also, in config/application.rb
 # NOTE: Be sure no other gems list `rails` as a dependency in Gemfile.lock,
 #       or else all of Rails will load anyway.
 #
@@ -31,8 +31,6 @@ gem("bundler")
 gem("railties", "~> 6.1")
 gem("sprockets-rails")
 
-gem("sprockets")
-
 # security fix for CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")
 
@@ -45,9 +43,9 @@ gem("mysql2")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
+gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
-gem("arel-helpers")
 
 # Use bootstrap style generator
 gem("bootstrap-sass")
@@ -63,6 +61,9 @@ gem("jquery-rails")
 # gem("therubyracer", platforms: :ruby)
 
 # Use mini_racer as a substitute for therubyracer
+# If having trouble installing this gem in Vagrant:
+# gem update --system
+# bundler update
 gem("mini_racer")
 
 # Use CoffeeScript for .js.coffee assets and views
@@ -267,7 +268,7 @@ end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara", "~> 3.36.0") # for ruby 2.6
+  gem("capybara")
 
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
@@ -296,7 +297,7 @@ group :development do
   gem("web-console")
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  # gem("rails_db", "~> 2.4.0")
+  # gem("rails_db", "~> 2.5.0", path: "../local_gems/rails_db")
 
   # Additional generators for input types, search objects, and mutations
   # gem("graphql-rails-generators")

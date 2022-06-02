@@ -391,10 +391,9 @@ class SiteData
     data = User.connection.select_rows(query)
 
     # Fill in @user_data structure.
-    for count, user_id in data
-      user_id = user_id.to_i
-      @user_data[user_id] ||= {}
-      @user_data[user_id][field] = count.to_i
+    data.each do |cnt, usr_id|
+      @user_data[usr_id.to_i] ||= {}
+      @user_data[usr_id.to_i][field] = cnt.to_i
     end
   end
 

@@ -33,7 +33,7 @@ class Image
     end
 
     def url
-      for source in source_order
+      source_order.each do |source|
         return source_url(source) if source_exists?(source)
       end
       source_url(fallback_source)

@@ -3,7 +3,7 @@
 module GraphQLQueries
   def nonsense_query
     <<-GRAPHQL
-    query nonsense { nonsense } 
+    query nonsense { nonsense }
     GRAPHQL
   end
 
@@ -11,10 +11,10 @@ module GraphQLQueries
   # Refresh current schema with rails graphql:dump_schema
   def visitor_query
     <<-GRAPHQL
-    query visitor { 
-      visitor { 
-        login 
-      }, 
+    query visitor {
+      visitor {
+        login
+      },
       admin
     }
     GRAPHQL

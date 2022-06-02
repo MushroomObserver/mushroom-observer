@@ -272,7 +272,7 @@ class ProjectController < ApplicationController
 
     subject = params[:email][:subject]
     content = params[:email][:content]
-    for receiver in @project.admin_group.users
+    @project.admin_group.users.each do |receiver|
       AdminEmail.build(sender, receiver, @project,
                        subject, content).deliver_now
     end
