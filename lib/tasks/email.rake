@@ -14,7 +14,7 @@ namespace :email do
     require "#{::Rails.root}/app/extensions/extensions.rb"
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
-    for e in QueuedEmail.all
+    QueuedEmail.all.each do |e|
       now = Time.zone.now()
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.
       if e.queued + MO.email_queue_delay.seconds < now
@@ -71,7 +71,7 @@ namespace :email do
 
   desc "Purge the email queue without sending anything"
   task(purge: :environment) do
-    for e in QueuedEmail.all
+    QueuedEmail.all.each do |e|
       print("Purging #{e.id}: from => #{e&.user&.login}, "\
             "to => #{e.to_user.login}, flavor => #{e.flavor}, "\
             "queued => #{e.queued}\n")

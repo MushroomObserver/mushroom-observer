@@ -28,7 +28,7 @@ class MapSet
   end
 
   def init_objects
-    for obj in @objects
+    @objects.each do |obj|
       if obj.is_location?
         update_extents_with_box(obj)
       elsif obj.is_observation?

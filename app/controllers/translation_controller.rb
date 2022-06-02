@@ -59,7 +59,7 @@ class TranslationController < ApplicationController
   def error_message(error)
     msg = [error.to_s]
     if Rails.env.development? && @lang
-      for line in error.backtrace
+      error.backtrace.each do |line|
         break if /action_controller.*perform_action/.match?(line)
 
         msg << line
@@ -97,7 +97,7 @@ class TranslationController < ApplicationController
     # (If we just get the strings for the given tags, then it doesn't update
     # lang.translation_strings's cache correctly, and we have it end up loading
     # all the strings later, anyway!)
-    for str in lang.translation_strings
+    lang.translation_strings.each do |str|
       result[str.tag] = str
     end
     result
@@ -105,7 +105,7 @@ class TranslationController < ApplicationController
 
   def update_translations(tags)
     any_changes = false
-    for tag in tags
+    tags.each do |tag|
       old_val = @strings[tag].to_s
       new_val = begin
                   params["tag_#{tag}"].to_s
@@ -166,7 +166,7 @@ class TranslationController < ApplicationController
   def tags_to_edit(tag, strings)
     tag_list = []
     if tag.present?
-      for t in [tag, tag + "s", tag.upcase, (tag + "s").upcase]
+      [tag, tag + "s", tag.upcase, (tag + "s").upcase].each do |t|
         tag_list << t if strings.key?(t)
       end
       tag_list = [tag] if tag_list.empty?
@@ -185,7 +185,7 @@ class TranslationController < ApplicationController
 
   def tags_to_show(page, strings)
     hash = {}
-    for tag in tags_used_on_page(page) || strings.keys
+    (tags_used_on_page(page) || strings.keys).each do |tag|
       primary = primary_tag(tag, strings)
       hash[primary] = true
     end
@@ -195,7 +195,7 @@ class TranslationController < ApplicationController
   def primary_tag(tag3, strings)
     tag2 = tag3 + "s"
     tag1 = tag3.sub(/s$/i, "")
-    for tag in [
+    [
       tag1.downcase,
       tag2.downcase,
       tag3.downcase,
@@ -204,7 +204,7 @@ class TranslationController < ApplicationController
       tag3.upcase,
       tag1,
       tag2
-    ]
+    ].each do |tag|
       return tag if strings[tag]
     end
     tag3
