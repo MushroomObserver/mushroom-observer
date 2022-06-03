@@ -21,7 +21,7 @@ module PatternSearch
         if term.var == :pattern
           self.flavor = :pattern_search
           args[:pattern] = term.parse_pattern
-        elsif param = lookup_param(term.var)
+        elsif param = (lookup_param(term.var))
           query_param, parse_method = param
           args[query_param] = term.send(parse_method)
         else
