@@ -113,7 +113,7 @@ class API
   class RenderFailed < Error
     def initialize(error)
       super()
-      msg = error.to_s + "\n" + error.backtrace.join("\n")
+      msg = "#{error}\n#{error.backtrace.join("\n")}"
       args.merge!(error: msg)
     end
   end
@@ -220,8 +220,8 @@ class API
 
     def help_message
       if keys_for_patch.any?
-        "query params: " + render_keys(keys_for_get) +
-          "; update params: " + render_keys(keys_for_patch)
+        "query params: #{render_keys(keys_for_get)}; " \
+          "update params: #{render_keys(keys_for_patch)}"
       else
         render_keys(all_keys)
       end
