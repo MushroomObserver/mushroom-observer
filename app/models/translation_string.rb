@@ -59,8 +59,9 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(locale)
-    # NOTE: This method now checks if it's been initialized, i.e. not empty.
-    I18n.backend.translations[locale.to_sym][MO.locale_namespace.to_sym]
+    do_init = I18n.backend.translations.empty? ? true : false
+    I18n.backend.translations(do_init: do_init)\
+      [locale.to_sym][MO.locale_namespace.to_sym]
   end
 
   # Check if tag exists before storing nonsense in the I18n backend
