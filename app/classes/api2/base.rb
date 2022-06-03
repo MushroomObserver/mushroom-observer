@@ -269,7 +269,7 @@ class API2
   end
 
   def authenticate_user
-    clear_user && return unless key_str = parse(:string, :api_key)
+    clear_user && return unless (key_str = parse(:string, :api_key))
 
     key = ApiKey.find_by(key: key_str)
     raise(BadApiKey.new(key_str))        unless key
