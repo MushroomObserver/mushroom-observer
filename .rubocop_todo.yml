@@ -29,7 +29,7 @@ Lint/AssignmentInCondition:
 # Offense count: 8
 Lint/DuplicateMethods:
   Exclude:
-    - 'app/classes/api/upload.rb'
+    - 'app/classes/api/helpers/upload.rb'
     - 'app/classes/pivotal/comment.rb'
     - 'app/classes/query/modules/active_record.rb'
     - 'app/classes/query/modules/high_level_queries.rb'
@@ -67,7 +67,7 @@ Lint/MissingCopEnableDirective:
 # Offense count: 10
 Lint/MissingSuper:
   Exclude:
-    - 'app/classes/api/errors.rb'
+    - 'app/classes/api/error.rb'
     - 'app/classes/api/ordered_range.rb'
     - 'app/classes/api/upload.rb'
     - 'app/classes/checklist.rb'
@@ -322,7 +322,7 @@ Rails/Output:
 # Offense count: 9
 Rails/OutputSafety:
   Exclude:
-    - 'app/classes/gmaps.rb'
+    - 'app/classes/gm/gmap.rb'
     - 'app/extensions/array_extensions.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/application_helper.rb'
@@ -382,7 +382,7 @@ Style/AccessorGrouping:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/ArrayCoercion:
   Exclude:
-    - 'app/classes/map_collapsible.rb'
+    - 'app/classes/collapsible_collection_of_mappable_objects.rb'
     - 'app/classes/query/modules/conditions.rb'
     - 'app/controllers/application_controller.rb'
 
@@ -390,7 +390,7 @@ Style/ArrayCoercion:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/CaseLikeIf:
   Exclude:
-    - 'app/classes/api/results.rb'
+    - 'app/classes/api/helpers/results.rb'
     - 'app/classes/eol_data.rb'
     - 'app/classes/minimal_map_observation.rb'
     - 'app/classes/pivotal/story.rb'
@@ -472,7 +472,7 @@ Style/Documentation:
 # SupportedStyles: allowed_in_returns, forbidden
 Style/DoubleNegation:
   Exclude:
-    - 'app/classes/gmaps.rb'
+    - 'app/classes/gm/gmap.rb'
     - 'app/classes/query/modules/ordering.rb'
     - 'app/models/image.rb'
     - 'test/models/language_exporter_test.rb'
@@ -631,7 +631,7 @@ Style/StringConcatenation:
 # SupportedStyles: single_quotes, double_quotes
 Style/StringLiterals:
   Exclude:
-    - 'app/classes/gmaps.rb'
+    - 'app/classes/gm/gmap.rb'
     - 'app/classes/pattern_search/term.rb'
     - 'app/classes/query/modules/initialization.rb'
     - 'script/refresh_name_lister_cache'

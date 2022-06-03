@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-require("map_collapsible")
+require("collapsible_collection_of_mappable_objects")
 require("map_set")
 
 class BigDecimal

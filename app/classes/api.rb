@@ -38,7 +38,7 @@
 #  :observation corresponds to API::Observation.  The primary actions each
 #  correspond to one of the main object types:
 #
-#    :api_key               ApiKey's
+#    :api_key               APIKey's
 #    :comment               Comment's (on observations, names, etc.)
 #    :image                 Image's
 #    :image_vote            Vote's on image quality
@@ -106,7 +106,7 @@
 #  results::              List of objects found / updated.
 #  errors::               List of errors.
 #  user::                 Authenticated user making request.
-#  api_key::              ApiKey used to authenticate.
+#  api_key::              APIKey used to authenticate.
 #  version::              Version number of this request.
 #  query::                Rough copy of SQL query used.
 #  number::               Number of matching objects.
@@ -114,30 +114,20 @@
 #  pages::                Number of pages available.
 #
 class API
-  require_dependency "api/errors"
-  require_dependency "api/base"
-  require_dependency "api/parameters"
-  require_dependency "api/results"
-  require_dependency "api/upload"
-  require_dependency "api/model_api"
-  require_dependency "api/parsers/base"
-  require_dependency "api/helpers"
+  # require_dependency "api/error"
+  require_dependency "api/helpers/base"
+  require_dependency "api/helpers/parameters"
+  require_dependency "api/helpers/results"
+  require_dependency "api/helpers/upload"
+  # require_dependency "api/model_api"
+  # require_dependency "api/parsers/base"
+  require_dependency "api/helpers/helpers"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|
-    next if file !~ %r{(api/\w+_api)\.rb$}
-    next if Regexp.last_match(1) == "api/model_api"
+  # Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|
+  #   next if file !~ %r{(api/\w+_api)\.rb$}
+  #   next if Regexp.last_match(1) == "api/model_api"
 
-    require_dependency Regexp.last_match(1)
-  end
-end
-
-# Sometimes the Rails router insists on trying to autoload the constant 'Api'
-# and expects this file to do so.  It doesn't need to, but that doesn't seem
-# to matter, Rails insists on doing so anyway.  It's requests of the form
-# "/api/table/id" which cause this to happen.  Yes, they are poorly formed
-# requests, but people seem to try it all the time anyway.  I'm tired of
-# ignoring the error messages that result.  This stops the error message...
-# and in fact appears to cause these poorly-formed requests to work, too.
-class Api
+  #   require_dependency Regexp.last_match(1)
+  # end
 end

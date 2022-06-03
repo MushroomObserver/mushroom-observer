@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApiKey < AbstractModel
+class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 

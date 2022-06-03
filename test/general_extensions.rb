@@ -54,7 +54,7 @@ module GeneralExtensions
 
   # sql sort of 3 consecutive records whose :notes are, respectively: u, ü, u
   def u_and_umlaut_collated_by_sql
-    ApiKey.select(:notes).where(key: "sort_test").order(:notes).to_a
+    APIKey.select(:notes).where(key: "sort_test").order(:notes).to_a
   end
 
   # These used to be automatically instantiated fixtures, e.g., @dick, etc.

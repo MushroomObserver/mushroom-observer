@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-# API
-class API
-  attr_accessor :expected_params
-  attr_accessor :ignore_params
+# API2
+class API2
+  attr_accessor :expected_params, :ignore_params
 
   initializers << lambda do
     self.expected_params = {}
@@ -28,7 +27,7 @@ class API
   end
 
   # Simplified "parser" for getting the HTTP request -- this is passed in
-  # specially by ApiController: it should not be processed in any way.
+  # specially by API2Controller: it should not be processed in any way.
   def parse_upload
     expected_params[:upload] ||= ParameterDeclaration.new(:upload, :upload, {})
     params[:upload]
@@ -69,6 +68,7 @@ class API
   private
 
   def parser(type, key, args = {})
-    "API::Parsers::#{type.to_s.camelize}Parser".constantize.new(self, key, args)
+    klass = "API2::Parsers::#{type.to_s.camelize}Parser".constantize
+    klass.new(self, key, args)
   end
 end

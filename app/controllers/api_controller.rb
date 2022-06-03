@@ -11,7 +11,7 @@
 #
 ################################################################################
 #
-class ApiController < ApplicationController
+class APIController < ApplicationController
   require "xmlrpc/client"
   require_dependency "api"
 
@@ -157,11 +157,11 @@ class ApiController < ApplicationController
   end
 
   def do_render_xml
-    render(layout: false, template: "/api/results")
+    render(layout: false, template: "/api/helpers/results")
   end
 
   def do_render_json
-    render(layout: false, template: "/api/results")
+    render(layout: false, template: "/api/helpers/results")
   end
 
   def set_cors_headers

@@ -7,7 +7,7 @@
 #
 ################################################################################
 
-module ApiHelper
+module APIHelper
   def xml_boolean(xml, tag, val)
     str = val ? "true" : "false"
     xml.tag!(tag, type: "boolean", value: str)

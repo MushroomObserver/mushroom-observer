@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class API
-  # API for ApiKey
-  class ApiKeyAPI < ModelAPI
-    self.model = ApiKey
+  # API for APIKey
+  class APIKeyAPI < ModelAPI
+    self.model = APIKey
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000

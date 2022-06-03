@@ -35,6 +35,6 @@ module PatternSearch
   require_dependency "pattern_search/base"
   require_dependency "pattern_search/parser"
   require_dependency "pattern_search/term"
-  require_dependency "pattern_search/errors"
+  require_dependency "pattern_search/error"
   # (the others should auto-load)
 end

@@ -7,8 +7,8 @@
 #
 ################################################################################
 
-module Api2Helper
-  include Api2InlineHelper
+module API2Helper
+  include API2InlineHelper
 
   def xml_boolean(xml, tag, val)
     str = val ? "true" : "false"

@@ -144,7 +144,7 @@ class LocalizationFilesTest < UnitTestCase
 
   def test_api_error_translations
     tags = []
-    file = "#{::Rails.root}/app/classes/api/errors.rb"
+    file = "#{::Rails.root}/app/classes/api/error.rb"
     File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
         next unless line.match(/^\s*class (\w+) < /) &&

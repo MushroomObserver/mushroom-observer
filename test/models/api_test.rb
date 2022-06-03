@@ -108,7 +108,7 @@ class ApiTest < UnitTestCase
   end
 
   def assert_last_api_key_correct
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -397,7 +397,7 @@ class ApiTest < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: ApiKey Requests
+  #  :section: APIKey Requests
   # ----------------------------
 
   def test_getting_api_keys
@@ -424,7 +424,7 @@ class ApiTest < UnitTestCase
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -445,7 +445,7 @@ class ApiTest < UnitTestCase
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -3980,7 +3980,7 @@ class ApiTest < UnitTestCase
       api_key: @api_key.key,
       location: "Anywhere"
     }
-    ApiKey.update(@api_key.id, verified: nil)
+    APIKey.update(@api_key.id, verified: nil)
     assert_api_fail(params)
     @api_key.verify!
     assert_api_pass(params)

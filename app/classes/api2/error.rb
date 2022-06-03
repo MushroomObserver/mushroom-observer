@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
-class API
+class API2
   # API exception base class.
   class Error < ::StandardError
     attr_accessor :tag, :args, :fatal, :trace
 
     def initialize
-      self.tag = self.class.name.underscore.tr("/", "_").to_sym
+      super
+      self.tag = self.class.name.underscore.tr("/", "_").
+                 sub(/^api\d+/, "api").to_sym
       self.args = {}
       self.fatal = false
       self.trace = caller
@@ -77,16 +79,16 @@ class API
     end
   end
 
-  # ApiKey not valid.
-  class BadApiKey < Error
+  # APIKey not valid.
+  class BadAPIKey < Error
     def initialize(str)
       super()
       args.merge!(key: str.to_s)
     end
   end
 
-  # ApiKey not verified yet.
-  class ApiKeyNotVerified < Error
+  # APIKey not verified yet.
+  class APIKeyNotVerified < Error
     def initialize(key)
       super()
       args.merge!(key: key.key.to_s, notes: key.notes.to_s)
@@ -113,7 +115,7 @@ class API
   class RenderFailed < Error
     def initialize(error)
       super()
-      msg = error.to_s + "\n" + error.backtrace.join("\n")
+      msg = "#{error}\n#{error.backtrace.join("\n")}"
       args.merge!(error: msg)
     end
   end
@@ -220,8 +222,8 @@ class API
 
     def help_message
       if keys_for_patch.any?
-        "query params: " + render_keys(keys_for_get) +
-          "; update params: " + render_keys(keys_for_patch)
+        "query params: #{render_keys(keys_for_get)}; " \
+          "update params: #{render_keys(keys_for_patch)}"
       else
         render_keys(all_keys)
       end
@@ -250,7 +252,7 @@ class API
 
   ##############################################################################
 
-  # Request requires valid ApiKey.
+  # Request requires valid APIKey.
   class MustAuthenticate < Error
   end
 
@@ -285,6 +287,10 @@ class API
   # Tried to add herbarium record to observation that you don't own, and you
   # are not a curator of the herbarium.
   class CantAddHerbariumRecord < Error
+  end
+
+  # Tried to create api key for user with incorrect password.
+  class PasswordIncorrect < Error
   end
 
   ##############################################################################

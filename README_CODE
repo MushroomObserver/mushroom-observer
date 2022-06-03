@@ -110,7 +110,7 @@ LocationDescriptionVersion::  Old versions of LocationDescription's.
 
 And several other random database classes:
 
-ApiKey::            Used to authenticate user for API requests.
+APIKey::            Used to authenticate user for API requests.
 CopyrightChange::   Tracks changes in copyright of Image's (later will include Name/LocationDescription's, too).
 Donation::          Records User's financial donations to MO.
 ImageVote::         Votes on quality of Image's.
@@ -164,7 +164,7 @@ SpeciesListController:: Deals with SpeciesList's.
 ProjectController::     Deals with Project's.
 InterestController::    Deals with Interest's.
 SupportController::     Deals with Donation's.
-ApiController::         Handles AJAX and API requests.
+APIController::         Handles AJAX and API requests.
 PivotalController::     Handles minimal interface with Pivotal Tracker website.
 
 These controllers are all subclasses of ActionController.  Actions are just

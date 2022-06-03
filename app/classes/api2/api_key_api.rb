@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 class API2
-  # API for ApiKey
-  class ApiKeyAPI < ModelAPI
-    self.model = ApiKey
+  # API for APIKey
+  class APIKeyAPI < ModelAPI
+    require_relative("../../models/api_key")
+
+    self.model = APIKey
 
     self.high_detail_page_length = 1000
     self.low_detail_page_length  = 1000
