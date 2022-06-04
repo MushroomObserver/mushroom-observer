@@ -206,6 +206,7 @@ Performance/StringInclude:
 # Causes test failures when used with Rubocop auto-correct
 # Could we get autocorrect to work by configuring the Whitelist parameter
 Rails/DynamicFindBy:
+  AllowedMethods: find_by_sql, find_by_sql_with_limit, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
   AutoCorrect: false
 
 # MO uses HABTM extensively; RuboCop prefers the newer has_many through
