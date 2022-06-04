@@ -131,17 +131,6 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
-  # Add limit to a SQL query, then pass it to find_by_sql.
-  #
-  #   sql = "SELECT id FROM names WHERE user_id = 123"
-  #   names = Name.find_by_sql_with_limit(sql, 20, 10)
-  #
-  def self.find_by_sql_with_limit(sql, offset, limit)
-    sql = sanitize_sql(sql)
-    add_limit!(sql, limit: limit, offset: offset)
-    find_by_sql(sql)
-  end
-
   # Wrap a normal SQL query in a <tt>COUNT(*)</tt> query, then pass it to
   # count_by_sql.
   #
@@ -502,7 +491,7 @@ class AbstractModel < ApplicationRecord
   #   name.eol_url => "http://eol.org/blah/blah/blah"
   #
   def eol_url
-    triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
+    triple = Triple.find_by(subject: show_url, predicate: eol_predicate)
     triple&.object
   end
 

@@ -79,7 +79,7 @@ module PatternSearch
           ::Name.safe_find(val) ||
             raise(BadNameError.new(var: var, val: val))
         else
-          ::Name.find_by_text_name(val) || ::Name.find_by_search_name(val) ||
+          ::Name.find_by(text_name: val) || ::Name.find_by(search_name: val) ||
             raise(BadNameError.new(var: var, val: val))
         end
       end.flatten.map(&:id).uniq
@@ -157,7 +157,7 @@ module PatternSearch
         User.safe_find(val) ||
           raise(BadUserError.new(var: var, val: val))
       else
-        User.find_by_login(val) ||
+        User.find_by(login: val) ||
           User.find_by_name(val) ||
           raise(BadUserError.new(var: var, val: val))
       end

@@ -311,7 +311,7 @@ class ProjectController < ApplicationController
   def find_member(str)
     return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-    User.find_by_login(str.to_s.sub(/ <.*>$/, ""))
+    User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
   end
 
   # Form to make a given User either a member or an admin.

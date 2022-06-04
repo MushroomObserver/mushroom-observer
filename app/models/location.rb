@@ -235,7 +235,7 @@ class Location < AbstractModel
   def self.official_unknown
     # yikes! need to make sure we always include the English words
     # for "unknown", even when viewing the site in another language
-    Language.official.translation_strings.find_by_tag("unknown_locations").
+    Language.official.translation_strings.find_by(tag: "unknown_locations").
       text.split(/, */)
   rescue StandardError
     []

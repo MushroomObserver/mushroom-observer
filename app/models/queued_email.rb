@@ -322,7 +322,7 @@ class QueuedEmail < AbstractModel
     if @integers.key?(key)
       result = @integers[key]
     else
-      int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
+      int = QueuedEmailInteger.find_by(queued_email_id: id, key: key.to_s)
       result = @integers[key] = int ? int.value.to_i : nil
     end
     result
@@ -347,7 +347,7 @@ class QueuedEmail < AbstractModel
     if @strings.key?(key)
       result = @strings[key]
     else
-      str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
+      str = QueuedEmailString.find_by(queued_email_id: id, key: key.to_s)
       result = @strings[key] = str ? str.value.to_s : nil
     end
     result
@@ -434,7 +434,7 @@ class QueuedEmail < AbstractModel
   #   email.add_integer('observation_id', obs.id)
   #
   def add_integer(key, value)
-    int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
+    int = QueuedEmailInteger.find_by(queued_email_id: id, key: key.to_s)
     unless int
       int = QueuedEmailInteger.new
       int.queued_email_id = id
@@ -450,7 +450,7 @@ class QueuedEmail < AbstractModel
   #   email.add_string('login', user.login)
   #
   def add_string(key, value)
-    str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
+    str = QueuedEmailString.find_by(queued_email_id: id, key: key.to_s)
     unless str
       str = QueuedEmailString.new
       str.queued_email_id = id

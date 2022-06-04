@@ -203,10 +203,10 @@ Performance/StringInclude:
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
-# Causes test failures when used with Rubocop auto-correct
-# Could we get autocorrect to work by configuring the Whitelist parameter
+# Make autocorrect saf(er) by whitelisting our find_by methods
 Rails/DynamicFindBy:
-  AutoCorrect: false
+  AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
+  AutoCorrect: true
 
 # MO uses HABTM extensively; RuboCop prefers the newer has_many through
 # Switching would require a migration process, detailed here:

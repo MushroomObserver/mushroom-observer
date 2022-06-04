@@ -823,7 +823,7 @@ class Image < AbstractModel
     save_changes = !changed?
 
     # Modify image_votes table first.
-    vote = image_votes.find_by_user_id(user_id)
+    vote = image_votes.find_by(user_id: user_id)
     if (value = self.class.validate_vote(value))
       if vote
         vote.value = value
