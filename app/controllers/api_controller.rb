@@ -157,11 +157,11 @@ class APIController < ApplicationController
   end
 
   def do_render_xml
-    render(layout: false, template: "/api/helpers/results")
+    render(layout: false, template: "/api/results")
   end
 
   def do_render_json
-    render(layout: false, template: "/api/helpers/results")
+    render(layout: false, template: "/api/results")
   end
 
   def set_cors_headers
