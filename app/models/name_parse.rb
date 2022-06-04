@@ -79,7 +79,7 @@ class NameParse
       @name = @line_str[0..equal_pos - 1].strip
       @synonym = @line_str[equal_pos + 1..-1].strip
       @synonym_comment = nil
-      if match = COMMENT_PAT.match(@synonym)
+      if (match = COMMENT_PAT.match(@synonym))
         @synonym = match[1]
         @synonym_comment = match[2]
       end
@@ -90,7 +90,7 @@ class NameParse
       @synonym = nil
       @synonym_rank = nil
       @synonym_search_name = nil
-      if match = COMMENT_PAT.match(@name)
+      if (match = COMMENT_PAT.match(@name))
         @name = match[1]
         @comment = match[2]
       end

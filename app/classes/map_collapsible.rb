@@ -89,7 +89,7 @@ class CollapsibleCollectionOfMappableObjects
       elsif obj.is_observation?
         if obj.lat && !obj.lat_long_dubious?
           add_point_set(obj, [obj], MAX_PRECISION)
-        elsif loc = obj.location
+        elsif (loc = obj.location)
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else

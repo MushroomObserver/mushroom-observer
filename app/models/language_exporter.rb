@@ -95,7 +95,7 @@ module LanguageExporter
   # Import changes from export file.
   def import_from_file
     any_changes = false
-    unless old_user = User.current
+    unless (old_user = User.current)
       raise("Must specify a user to import translation file!") unless official
 
       User.current = User.admin

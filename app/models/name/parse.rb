@@ -275,7 +275,7 @@ class Name < AbstractModel
 
   def self.parse_below_genus(str, deprecated, rank, pattern)
     results = nil
-    if match = pattern.match(str)
+    if (match = pattern.match(str))
       name = match[1]
       author = match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species
@@ -355,9 +355,9 @@ class Name < AbstractModel
   # Convert to: Amanita vaginatae var. vaginatae Author
   def self.fix_autonym(name, author, rank)
     last_word = name.split(" ").last.gsub(/[()]/, "")
-    if match = author.to_s.match(
+    if (match = author.to_s.match(
       /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
-    )
+    ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
       words = match[2].split(" ")

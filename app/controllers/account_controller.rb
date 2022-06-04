@@ -626,7 +626,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key
-    return unless @key = find_or_goto_index(ApiKey, params[:id].to_s)
+    return unless (@key = find_or_goto_index(ApiKey, params[:id].to_s))
     return redirect_to(action: :api_keys) unless check_permission!(@key)
     return if request.method != "POST"
 
