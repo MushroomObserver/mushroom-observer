@@ -491,7 +491,7 @@ class AbstractModel < ApplicationRecord
   #   name.eol_url => "http://eol.org/blah/blah/blah"
   #
   def eol_url
-    triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
+    triple = Triple.find_by(subject: show_url, predicate: eol_predicate)
     triple&.object
   end
 

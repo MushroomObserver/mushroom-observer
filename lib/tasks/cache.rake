@@ -113,7 +113,7 @@ namespace :cache do
     group = UserGroup.find_by_name("reviewers")
     # Should be a list of logins for users you want to add to reviewers list
     [].each do |login|
-      user = User.find_by_login(login)
+      user = User.find_by(login: login)
       if user.user_groups.member?(group)
         print("#{login} is already in the reviewers group\n")
       else

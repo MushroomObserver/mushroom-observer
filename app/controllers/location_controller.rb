@@ -451,8 +451,9 @@ class LocationController < ApplicationController
       if subversion.present? &&
          (version.version != subversion.to_i)
         version = LocationDescription::Version.
-                  find_by_version_and_location_description_id(
-                    params[:version], @old_parent_id
+                  find_by(
+                    version: params[:version],
+                    location_description_id: @old_parent_id
                   )
       end
       @description.clone_versioned_model(version, @description)
