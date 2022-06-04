@@ -23,7 +23,7 @@ module VersionHelper
     html += safe_br
     return html unless latest_version
 
-    if previous_version = latest_version.previous
+    if (previous_version = latest_version.previous)
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
       html += link_with_query(str, action: obj.show_past_action, id: obj.id,
                                    version: previous_version.version)
@@ -72,7 +72,7 @@ module VersionHelper
              end
 
       # User making the change.
-      user = if user = User.safe_find(ver.user_id)
+      user = if (user = User.safe_find(ver.user_id))
                user_link(user, user.login)
              else
                :unknown.t

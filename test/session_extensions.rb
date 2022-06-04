@@ -72,7 +72,7 @@ module SessionExtensions
     send(method.downcase.to_s, url, *args, **kwargs)
     follow_redirect! while response.redirect?
     if status == 500
-      msg = if error = controller.instance_variable_get("@error")
+      msg = if (error = controller.instance_variable_get("@error"))
               "#{error}\n#{error.backtrace.join("\n")}"
             else
               "Got unknown 500 error from outside our application?!\n" \
@@ -250,7 +250,7 @@ module SessionExtensions
     sargs  = []
 
     # Filter links based on URL.
-    if arg = args[:href]
+    if (arg = args[:href])
       if arg.is_a?(Regexp)
         select = "a:match('href',?)"
         sargs << arg
@@ -260,7 +260,7 @@ module SessionExtensions
     end
 
     # Filter links by parent element types.
-    if arg = args[:in]
+    if (arg = args[:in])
       if arg == :left_tabs
         arg = "div#left_tabs"
       elsif arg == :right_tabs
@@ -283,7 +283,7 @@ module SessionExtensions
         match = true
 
         # Filter based on link "label" (can be an image too, for example).
-        if arg = args[:label]
+        if (arg = args[:label])
           if arg == :image
             match = false unless /img /.match?(link.to_s)
           elsif arg.is_a?(Regexp)
