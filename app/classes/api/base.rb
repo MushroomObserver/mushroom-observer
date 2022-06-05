@@ -120,7 +120,7 @@
 #  parameters "declaration" (that is, the expected syntax and limits).  The
 #  result is that the client can autodiscover all the available parameters (via
 #  the special "help" pseudoparameter).  Errors are raised as exceptions which
-#  must be caught by the client (or ApiController).
+#  must be caught by the client (or APIController).
 #
 #  There are four standard parsing methods:
 #

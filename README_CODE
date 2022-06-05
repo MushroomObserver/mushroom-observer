@@ -164,7 +164,7 @@ SpeciesListController:: Deals with SpeciesList's.
 ProjectController::     Deals with Project's.
 InterestController::    Deals with Interest's.
 SupportController::     Deals with Donation's.
-ApiController::         Handles AJAX and API requests.
+APIController::         Handles AJAX and API requests.
 PivotalController::     Handles minimal interface with Pivotal Tracker website.
 
 These controllers are all subclasses of ActionController.  Actions are just
