@@ -2,8 +2,7 @@
 
 # API
 class API
-  attr_accessor :expected_params
-  attr_accessor :ignore_params
+  attr_accessor :expected_params, :ignore_params
 
   initializers << lambda do
     self.expected_params = {}

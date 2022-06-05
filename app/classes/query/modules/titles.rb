@@ -4,8 +4,7 @@ module Query
   module Modules
     # Deal with titles.
     module Titles
-      attr_accessor :title_tag
-      attr_accessor :title_args
+      attr_accessor :title_tag, :title_args
 
       def initialize_title
         @title_tag = "query_title_#{flavor}".to_sym

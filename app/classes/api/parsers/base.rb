@@ -4,9 +4,7 @@ class API
   module Parsers
     # API parser base class.
     class Base
-      attr_accessor :api
-      attr_accessor :key
-      attr_accessor :args
+      attr_accessor :api, :key, :args
 
       def initialize(api, key, args)
         @api  = api

@@ -134,11 +134,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   ##############################################################################
 
   module NameDescriptionDsl
-    attr_accessor :user
-    attr_accessor :abilities
-    attr_accessor :name_we_are_working_on
-    attr_accessor :name_description_data
-    attr_accessor :group_expectations
+    attr_accessor :user, :abilities, :name_we_are_working_on,
+                  :name_description_data, :group_expectations
 
     def show_description_link_should_be(val)
       abilities[:show] = val

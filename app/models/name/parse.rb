@@ -133,8 +133,8 @@ class Name < AbstractModel
 
   # parsing a string to a Name
   class ParsedName
-    attr_accessor :text_name, :search_name, :sort_name, :display_name
-    attr_accessor :rank, :author, :parent_name
+    attr_accessor :text_name, :search_name, :sort_name, :display_name, :rank,
+                  :author, :parent_name
 
     def initialize(params)
       @text_name = params[:text_name]
