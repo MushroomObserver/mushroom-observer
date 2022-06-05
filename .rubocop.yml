@@ -220,7 +220,7 @@ Rails/HasAndBelongsToMany:
 Rails/WhereExists:
   Enabled: false
 
-# (0.87) pending cop
+# Enable with default EnforcedStyle: grouped; saves lines in some classes
 Style/AccessorGrouping:
   Enabled: true
 
