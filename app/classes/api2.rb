@@ -114,7 +114,7 @@
 #  pages::                Number of pages available.
 #
 class API2
-  require_dependency "api2/errors"
+  require_dependency "api2/error"
   require_dependency "api2/base"
   require_dependency "api2/parameters"
   require_dependency "api2/results"

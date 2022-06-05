@@ -20,6 +20,9 @@
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   # Rails thinks all words ending in "men" are already plural
   inflect.irregular("specimen", "specimens")
+  # The following acronym inflections will make Zeitwerk's life easier if
+  # we consistently use them whenever they apear separately in snake case
+  # eg, apizza_buona ApizzaBuona is ok, but api_concern ApiConcern is not
   inflect.acronym("API")
   inflect.acronym("API2")
   inflect.acronym("GM")
