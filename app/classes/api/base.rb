@@ -27,8 +27,8 @@
 #    method           Method: :get, :post, :patch, :delete
 #    action           "Action": :comment, :name, :observation, etc.
 #    version          Version of API caller requests to use -- not used yet.
-#    user             User whose ApiKey was passed in for authentication.
-#    api_key          ApiKey passed in for authentication.
+#    user             User whose APIKey was passed in for authentication.
+#    api_key          APIKey passed in for authentication.
 #
 #    params           Validated hash of parameters you passed in.
 #    expected_params  Hash of parameters API tried to parse.  This is a full
@@ -281,9 +281,9 @@ class API
       User.current = self.user = nil
       User.current_location_format = :postal
     else
-      key = ApiKey.find_by(key: key_str)
-      raise(BadApiKey.new(key_str))        unless key
-      raise(ApiKeyNotVerified.new(key))    unless key.verified
+      key = APIKey.find_by(key: key_str)
+      raise(BadAPIKey.new(key_str))        unless key
+      raise(APIKeyNotVerified.new(key))    unless key.verified
       raise(UserNotVerified.new(key.user)) unless key.user.verified
 
       User.current = self.user = key.user

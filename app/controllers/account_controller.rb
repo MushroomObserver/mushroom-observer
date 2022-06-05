@@ -578,7 +578,7 @@ class AccountController < ApplicationController
   end
 
   def api_keys
-    @key = ApiKey.new
+    @key = APIKey.new
     return unless request.method == "POST"
 
     if params[:commit] == :account_api_keys_create_button.l
@@ -589,10 +589,10 @@ class AccountController < ApplicationController
   end
 
   def create_api_key
-    @key = ApiKey.new(params[:key].permit!)
+    @key = APIKey.new(params[:key].permit!)
     @key.verified = Time.zone.now
     @key.save!
-    @key = ApiKey.new # blank out form for if they want to create another key
+    @key = APIKey.new # blank out form for if they want to create another key
     flash_notice(:account_api_keys_create_success.t)
   rescue StandardError => e
     flash_error(:account_api_keys_create_failed.t(msg: e.to_s))
@@ -614,7 +614,7 @@ class AccountController < ApplicationController
   end
 
   def activate_api_key
-    if (key = find_or_goto_index(ApiKey, params[:id].to_s))
+    if (key = find_or_goto_index(APIKey, params[:id].to_s))
       if check_permission!(key)
         key.verify!
         flash_notice(:account_api_keys_activated.t(notes: key.notes))
@@ -626,7 +626,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key
-    return unless (@key = find_or_goto_index(ApiKey, params[:id].to_s))
+    return unless (@key = find_or_goto_index(APIKey, params[:id].to_s))
     return redirect_to(action: :api_keys) unless check_permission!(@key)
     return if request.method != "POST"
 

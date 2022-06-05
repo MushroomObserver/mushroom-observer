@@ -292,7 +292,7 @@ class ApiControllerTest < FunctionalTestCase
     rolfs_key = api_keys(:rolfs_api_key)
     post(:api_keys, params: { api_key: rolfs_key.key, app: "Mushroom Mapper" })
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
@@ -305,7 +305,7 @@ class ApiControllerTest < FunctionalTestCase
            for_user: mary.id
          })
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)

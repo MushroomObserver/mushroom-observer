@@ -2,16 +2,16 @@
 
 require("test_helper")
 
-class ApiKeyTest < UnitTestCase
+class APIKeyTest < UnitTestCase
   def test_create
-    count = ApiKey.count
+    count = APIKey.count
 
     User.current = dick
-    ApiKey.create
-    assert_equal(count, ApiKey.count)
+    APIKey.create
+    assert_equal(count, APIKey.count)
 
-    ApiKey.create(notes: "app name")
-    key = ApiKey.last
+    APIKey.create(notes: "app name")
+    key = APIKey.last
     assert(key.created_at > 1.minute.ago)
     assert_nil(key.last_used)
     assert_equal(0, key.num_uses)
@@ -20,7 +20,7 @@ class ApiKeyTest < UnitTestCase
     assert_equal("app name", key.notes)
 
     key.touch!
-    key = ApiKey.last
+    key = APIKey.last
     assert(key.last_used > 1.minute.ago)
     assert_equal(1, key.num_uses)
   end

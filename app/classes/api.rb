@@ -38,7 +38,7 @@
 #  :observation corresponds to API::Observation.  The primary actions each
 #  correspond to one of the main object types:
 #
-#    :api_key               ApiKey's
+#    :api_key               APIKey's
 #    :comment               Comment's (on observations, names, etc.)
 #    :image                 Image's
 #    :image_vote            Vote's on image quality
@@ -106,7 +106,7 @@
 #  results::              List of objects found / updated.
 #  errors::               List of errors.
 #  user::                 Authenticated user making request.
-#  api_key::              ApiKey used to authenticate.
+#  api_key::              APIKey used to authenticate.
 #  version::              Version number of this request.
 #  query::                Rough copy of SQL query used.
 #  number::               Number of matching objects.

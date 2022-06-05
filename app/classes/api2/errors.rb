@@ -79,16 +79,16 @@ class API2
     end
   end
 
-  # ApiKey not valid.
-  class BadApiKey < Error
+  # APIKey not valid.
+  class BadAPIKey < Error
     def initialize(str)
       super()
       args.merge!(key: str.to_s)
     end
   end
 
-  # ApiKey not verified yet.
-  class ApiKeyNotVerified < Error
+  # APIKey not verified yet.
+  class APIKeyNotVerified < Error
     def initialize(key)
       super()
       args.merge!(key: key.key.to_s, notes: key.notes.to_s)
@@ -252,7 +252,7 @@ class API2
 
   ##############################################################################
 
-  # Request requires valid ApiKey.
+  # Request requires valid APIKey.
   class MustAuthenticate < Error
   end
 

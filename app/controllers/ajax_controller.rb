@@ -17,7 +17,7 @@
 #
 #  == Actions
 #
-#  api_key::          Activate and edit ApiKey's.
+#  api_key::          Activate and edit APIKey's.
 #  auto_complete::    Return list of strings matching a given string.
 #  create_image_object::  Uploads image without observation yet.
 #  exif::             Get EXIF header info of an image.

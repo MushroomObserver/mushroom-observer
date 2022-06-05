@@ -665,8 +665,8 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_api_key_manager
-    ApiKey.all.each(&:destroy)
-    assert_equal(0, ApiKey.count)
+    APIKey.all.each(&:destroy)
+    assert_equal(0, APIKey.count)
 
     # Get initial (empty) form.
     requires_login(:api_keys)
@@ -678,7 +678,7 @@ class AccountControllerTest < FunctionalTestCase
     login("mary")
     post(:api_keys, params: { commit: :account_api_keys_create_button.l })
     assert_flash_error
-    assert_equal(0, ApiKey.count)
+    assert_equal(0, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 0)
 
     # Create good key.
@@ -688,7 +688,7 @@ class AccountControllerTest < FunctionalTestCase
            key: { notes: "app name" }
          })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key1 = mary.api_keys.first
     assert_equal("app name", key1.notes)
@@ -701,7 +701,7 @@ class AccountControllerTest < FunctionalTestCase
            key: { notes: "another name" }
          })
     assert_flash_success
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_equal(2, mary.reload.api_keys.length)
     key2 = mary.api_keys.last
     assert_equal("another name", key2.notes)
@@ -710,7 +710,7 @@ class AccountControllerTest < FunctionalTestCase
     # Press "remove" without selecting anything.
     post(:api_keys, params: { commit: :account_api_keys_remove_button.l })
     assert_flash_warning
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Remove first key.
@@ -720,7 +720,7 @@ class AccountControllerTest < FunctionalTestCase
            "key_#{key1.id}" => "1"
          })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key = mary.api_keys.last
     assert_objs_equal(key, key2)
@@ -728,7 +728,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_activate_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = nil
     key.notes = "Testing"
