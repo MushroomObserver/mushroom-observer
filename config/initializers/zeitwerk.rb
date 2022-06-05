@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-Rails.autoloaders.main.inflector.inflect({ 
+Rails.autoloaders.main.inflector.inflect({
   # "api" => "API",
   # "api2" => "API2",
   "mo_paginator" => "MOPaginator",
@@ -12,9 +12,12 @@ Rails.autoloaders.main.inflector.inflect({
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api/helpers",
-  "app/classes/api/error",
+  # "app/classes/api/error",
+  # "app/classes/api",
   "app/classes/api2/helpers",
-  "app/classes/api2/error",
+  # "app/classes/api2/error",
+  # "app/classes/api2/upload",
+  # "app/classes/api2",
   "app/classes/report",
   "app/controllers/ajax_controller",
   "app/controllers/name_controller",
@@ -26,3 +29,13 @@ Rails.autoloaders.main.ignore(
   "app/models/queued_email",
   "app/views"
 )
+
+FLATTEN_SUBDIRECTORIES = %w(
+  api2
+)
+
+Rails.autoloaders.each do |loader|
+  FLATTEN_SUBDIRECTORIES.each do |subdir|
+    loader.collapse("app/classes/#{subdir}/error")
+  end
+end

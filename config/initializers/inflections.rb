@@ -23,4 +23,6 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("API")
   inflect.acronym("API2")
   inflect.acronym("GM")
+  inflect.acronym("HTTP")
+  inflect.acronym("URL")
 end

@@ -114,13 +114,13 @@
 #  pages::                Number of pages available.
 #
 class API
-  # require_dependency "api/error"
+  # require_dependency "api/error" #
   require_dependency "api/helpers/base"
   require_dependency "api/helpers/parameters"
   require_dependency "api/helpers/results"
   require_dependency "api/helpers/upload"
-  # require_dependency "api/model_api"
-  # require_dependency "api/parsers/base"
+  # require_dependency "api/model_api" #
+  # require_dependency "api/parsers/base" #
   require_dependency "api/helpers/helpers"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
