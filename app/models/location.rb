@@ -378,8 +378,7 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    find_by_name(name) ||
-      find_by_scientific_name(name)
+    Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
   def self.user_name(user, name)
