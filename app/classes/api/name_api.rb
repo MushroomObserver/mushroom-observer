@@ -263,7 +263,7 @@ class API
 
     def add_synonym(name)
       return unless @synonymize_with
-      raise(CanOnlySynonymizeUnsynonimizedNames.new) if name.synonym_id
+      raise(CanOnlySynonymizeUnsynonymizedNames.new) if name.synonym_id
 
       name.merge_synonyms(@synonymize_with)
     end
@@ -277,7 +277,7 @@ class API
     def change_correct_spelling(name)
       return unless @correct_spelling
       return if name.correct_spelling_id == @correct_spelling.id
-      raise(CanOnlySynonymizeUnsynonimizedNames.new) \
+      raise(CanOnlySynonymizeUnsynonymizedNames.new) \
         if name.synonym_id && name_synonym_id != @correct_spelling.synonym_id
 
       name.change_deprecated(true) unless name.deprecated

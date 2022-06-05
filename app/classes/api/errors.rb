@@ -530,6 +530,6 @@ class API
   # We're not allowing client to merge to sets of synonyms.  Even more, we're
   # only allowing them to synonymize unsynonmized names with other names.
   # (The name they synonymize it with, however, can have synonyms.)
-  class CanOnlySynonymizeUnsynonimizedNames < Error
+  class CanOnlySynonymizeUnsynonymizedNames < Error
   end
 end
