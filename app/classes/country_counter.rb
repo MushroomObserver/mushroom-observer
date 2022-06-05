@@ -8,9 +8,12 @@
 ################################################################################
 
 class CountryCounter
+  # Disable cop to allow comments on each accessor in a separate line
+  # rubocop:disable Style/AccessorGrouping
   attr_accessor :known_by_count # known countries with observations
   attr_accessor :unknown_by_count # known countries without observations
   attr_accessor :missing # other locations with observations
+  # rubocop:enable Style/AccessorGrouping
 
   def initialize
     @counts = {}
