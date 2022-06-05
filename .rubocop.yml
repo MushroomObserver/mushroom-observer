@@ -223,6 +223,16 @@ Rails/WhereExists:
 # Enable with default EnforcedStyle: grouped; saves lines in some classes
 Style/AccessorGrouping:
   Enabled: true
+  # Exclude files that individually comment accessors
+  # else Rubocop concatenates the accessors and comments on a single line.
+  # Disabling Style/AccessorGrouping around the accessors doesn't
+  # work in this context because Rubocop v1.30.0 generates a
+  # Style/EmptyLinesAroundAttributeAccessor offense
+  # See https://github.com/rubocop/rubocop/issues/10693
+  Exclude:
+    - "app/classes/country_counter.rb"
+    - "app/classes/gmaps.rb"
+
 
 # (0.88) pending cop
 Style/ArrayCoercion:

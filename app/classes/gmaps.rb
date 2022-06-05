@@ -103,8 +103,6 @@ module GM
       </script>".html_safe
     end
 
-    # Disable cop to allow comments on each accessor in a separate line
-    # rubocop:disable Style/AccessorGrouping
     attr_accessor :name       # name of map div & global variable for Map object
     attr_accessor :lat        # center & zoom \
     attr_accessor :long       #                |  option one for positioning map
@@ -116,7 +114,6 @@ module GM
     attr_accessor :large      # is this a "large" map? (versus "small")
     attr_accessor :events     # array of [overlay_obj, event_type, javascript]
     attr_accessor :overlays   # array of markers and polylines to overlay on map
-    # rubocop:enable Style/AccessorGrouping
 
     def initialize(name)
       self.name     = name
@@ -251,16 +248,13 @@ module GM
 
   # represent a GoogleMaps marker object, e.g., a balloon-pin
   class GMarker
-    # Disable cop to allow comments on each accessor in a separate line
-    # rubocop:disable Style/AccessorGrouping
     attr_accessor :var          # name of global variable to assign it to if any
     attr_accessor :lat          # latitude
     attr_accessor :long         # longitude
     attr_accessor :title        # roll-over text
     attr_accessor :draggable    # is this draggable?
-    attr_accessor :info_window  # content of "info window" to pop up
-                                # if user clicks on marker
-    # rubocop:enable Style/AccessorGrouping
+    # content of "info window" to pop up if user clicks on marker
+    attr_accessor :info_window
 
     def initialize(lat_long, opts)
       self.var         = nil
@@ -295,14 +289,11 @@ module GM
 
   # represent a GoogleMaps Polyline object, e.g., a rectangle
   class GPolyline
-    # Disable cop to allow comments on each accessor in a separate line
-    # rubocop:disable Style/AccessorGrouping
     attr_accessor :var      # name of global variable to assign it to if any
     attr_accessor :points   # array of [lat, long]
     attr_accessor :color    # css-format color string
     attr_accessor :weight   # width of line in pixels
     attr_accessor :opacity  # from 0.0 to 1.0
-    # rubocop:enable Style/AccessorGrouping
 
     def initialize(points, color, weight, opacity)
       self.var     = nil
