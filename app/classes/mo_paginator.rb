@@ -84,8 +84,6 @@
 ################################################################################
 #
 class MOPaginator
-  # Disable cop to allow comments on each accessor in a separate line
-  # rubocop:disable Style/AccessorGrouping
   attr_accessor :letter_arg    # Name of parameter to use for letter (if any).
   attr_accessor :number_arg    # Name of parameter to use for page number.
   attr_reader :letter        # Current letter (if any).
@@ -93,7 +91,6 @@ class MOPaginator
   attr_reader :num_per_page  # Number of results per page (default is 100).
   attr_reader :num_total     # Total number of results.
   attr_reader :used_letters  # List of letters that have results.
-  # rubocop:enable Style/AccessorGrouping
 
   alias page_arg number_arg
   alias page number

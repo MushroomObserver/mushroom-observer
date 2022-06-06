@@ -234,7 +234,7 @@ Style/AccessorGrouping:
   Exclude:
     - "app/classes/country_counter.rb"
     - "app/classes/gmaps.rb"
-
+    - "app/classes/mo_paginator.rb"
 
 # (0.88) pending cop
 Style/ArrayCoercion:
