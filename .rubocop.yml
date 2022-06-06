@@ -220,9 +220,11 @@ Rails/HasAndBelongsToMany:
 Rails/WhereExists:
   Enabled: false
 
-# Enable with default EnforcedStyle: grouped; saves lines in some classes
 Style/AccessorGrouping:
-  Enabled: true
+  # Disabled. See discussion at
+  # https://github.com/MushroomObserver/mushroom-observer/pull/988
+  Enabled: false
+  # The follow in case we re-enable the cop
   # Exclude files that individually comment accessors
   # else Rubocop concatenates the accessors and comments on a single line.
   # Disabling Style/AccessorGrouping around the accessors doesn't
