@@ -16,13 +16,28 @@
 <!-- /WHEN -->
 
 <!-- WHERE_REASONS -->
-<% if @dubious_where_reasons.any? %>
+<% if @dubious_where_reasons.any? || @location_suggestions.any? ||
+      @location_suggestion_reasons.any? %>
   <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
   <div class="alert alert-warning max-width-text" id="location_messages">
-    <%= @dubious_where_reasons.safe_join(safe_br) %>
-    <p class="help-block max-width-text">
-      <%= :form_observations_dubious_help.t(button: button_name) %>
-    </p>
+    <% if @dubious_where_reasons.any? %>
+      <%= @dubious_where_reasons.safe_join(safe_br) %>
+      <p class="help-block max-width-text">
+        <%= :form_observations_dubious_help.t(button: button_name) %>
+      </p>
+    <% end %>
+    <% if @location_suggestion_reasons.any? %>
+      <%= @location_suggestion_reasons.safe_join(safe_br) %>
+    <% end %>
+    <% if @location_suggestions.any? %>
+      <%= :form_observations_location_suggestions.t %>
+      <br>
+      <% @location_suggestions.each do |location| %>
+        <%= indent + radio_button(:location_suggestions, :name,
+                                  location.name, checked: false) %>
+        <%= location.name.t %><br/>
+      <% end %>
+    <% end %>
   </div>
 <% end %>
 <!-- /WHERE_REASONS -->
@@ -127,6 +142,10 @@
     </div>
   </div>
 </div>
+<%= hidden_field_tag(:country, @country) %>
+<%= hidden_field_tag(:state, @state) %>
+<%= hidden_field_tag(:county, @county) %>
+<%= hidden_field_tag(:city, @city) %>
 <!-- /LAT_LONG_ALT -->
 
 <div class="row push-down">

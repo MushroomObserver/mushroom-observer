@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
+#  Actions:
+#
+#    create_observation::
+#    edit_observation::
+#    destroy_observation::
+#    hide_thumbnail_map::
+#    recalc::               recalculate consensus ID
+#
 class ObserverController
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
@@ -41,6 +49,10 @@ class ObserverController
       create_observation_post(params)
     end
   end
+
+  ##############################################################################
+
+  private
 
   def create_observation_get
     @observation = Observation.new
@@ -107,12 +119,20 @@ class ObserverController
 
   def rough_cut(params)
     @observation = create_observation_object(params[:observation])
+    choose_location_suggestion(@observation)
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct(params[:naming], @observation)
     @vote = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
+  end
+
+  def choose_location_suggestion(observation)
+    suggested_location = param_lookup([:location_suggestions, :name], "").to_s
+    return if suggested_location.blank?
+
+    observation.place_name = suggested_location
   end
 
   # Symbolize keys; delete key/value pair if value blank
@@ -139,15 +159,89 @@ class ObserverController
   end
 
   def validate_place_name(params)
-    success = true
     @place_name = @observation.place_name
     @dubious_where_reasons = []
-    if @place_name != params[:approved_where] && @observation.location.nil?
-      db_name = Location.user_name(@user, @place_name)
-      @dubious_where_reasons = Location.dubious_name?(db_name, true)
-      success = false if @dubious_where_reasons != []
+    @location_suggestion_reasons = []
+    @location_suggestions = []
+    return true if @place_name.present? &&
+                   @place_name == params[:approved_where]
+    return false if (@place_name.blank? || Location.is_unknown?(@place_name)) &&
+                    location_missing
+    return false if @observation.location.nil? && location_doesnt_exist
+    return false if @observation.location && location_inaccurate?(@observation)
+
+    true
+  end
+
+  # Location not given at all.  If geolocation data available, suggest a name
+  # for the location based on geolocation info, and suggest existing locations
+  # which contain the lat/long given.  If geolocation data not available, gripe
+  # about it.  Always return true to tell parent not to create observation
+  # yet.  User can still opt to resubmit without changes to override this.
+  def location_missing
+    @location_suggestion_reasons << :form_observations_location_missing.t
+    geo = geolocation(params)
+    if geo[:country].present?
+      @place_name = Location.geolocation_to_name(geo)
+      @location_suggestions = Location.suggestions(@place_name, geo)
+      @place_name = Location.user_name(@user, @place_name)
     end
-    success
+    if geo[:latitude].present?
+      @location_suggestions += Location.suggestions_for_latlong(geo[:latitude],
+                                                                geo[:longitude])
+    end
+    true
+  end
+
+  # Location doesn't exist.  If we can come up with any suggestions for fixing
+  # it, return true to tell parent not to create observation yet, so user has
+  # a chance to fix it or choose an existing location.
+  def location_doesnt_exist
+    db_name = Location.user_name(@user, @place_name)
+    @dubious_where_reasons = Location.dubious_name?(
+      db_name, provide_reasons: true
+    )
+    @location_suggestion_reasons << :form_observations_location_doesnt_exist.t
+    @location_suggestions = Location.suggestions(db_name, geolocation(params))
+    @dubious_where_reasons.any? || @location_suggestions.any?
+  end
+
+  # The user's given Location already exists and could be fine.  However, if
+  # geolocation data is available, check if there are more accurate locations
+  # available.  If so, return true to tell parent not to create observation
+  # yet, so user has a chance to choose one of the more accurate locations.
+  def location_inaccurate?(obs)
+    return false if obs.lat.blank?
+
+    @location_suggestions = more_accurate_suggestions(obs)
+    if @location_suggestions.any?
+      @location_suggestion_reasons << :form_observations_location_inaccurate.t
+    end
+    unless obs.location&.close?(obs.lat, obs.long)
+      @location_suggestion_reasons << :form_observations_location_outside.t
+    end
+    @location_suggestion_reasons.any?
+  end
+
+  # Suggest more accurate locations that contain the given lat/long.
+  def more_accurate_suggestions(obs)
+    close = obs.location&.close?(obs.lat, obs.long)
+    # If current location isn't even close, then suggest *any* location that
+    # contains the point, otherwise restrict to more accurate locations.
+    area = close ? obs.location.pseudoarea : 360 * 360
+    Location.suggestions_for_latlong(obs.lat, obs.long).
+      select { |loc| loc.pseudoarea <= area }.
+      reject { |loc| loc == obs.location }
+  end
+
+  # If user changes the lat/long of an existing observation make sure the
+  # new coordinates are still close to the location's bounding box, and
+  # suggest some alternatives if not.
+  def validate_lat_long_if_changed
+    return true unless @observation.lat_changed? || @observation.long_changed?
+    return false if @observation.location && location_inaccurate?(@observation)
+
+    true
   end
 
   def save_everything_else(reason)
@@ -291,6 +385,10 @@ class ObserverController
     init_list_vars_for_reload(@observation)
   end
 
+  ##############################################################################
+
+  public
+
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -332,15 +430,8 @@ class ObserverController
       @observation.notes = notes_to_sym_and_compact
       warn_if_unchecking_specimen_with_records_present!
       strip_images! if @observation.gps_hidden
-
-      # Validate place name
-      @place_name = @observation.place_name
-      @dubious_where_reasons = []
-      if @place_name != params[:approved_where] && @observation.location.nil?
-        db_name = Location.user_name(@user, @place_name)
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        any_errors = true if @dubious_where_reasons.any?
-      end
+      any_errors = true unless validate_place_name(params)
+      any_errors = true unless validate_lat_long_if_changed
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
@@ -389,6 +480,10 @@ class ObserverController
     end
   end
 
+  ##############################################################################
+
+  private
+
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}
   end
@@ -404,7 +499,11 @@ class ObserverController
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
 
-  # Callback to destroy an observation (and associated namings, votes, etc.)
+  ##############################################################################
+
+  public
+
+  # Destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
@@ -458,6 +557,10 @@ class ObserverController
   end
 
   ##############################################################################
+
+  private
+
+  ##############################################################################
   #
   #  :section: Helpers
   #
@@ -480,22 +583,25 @@ class ObserverController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.zone.now
-    observation = if args
-                    Observation.new(args.permit(whitelisted_observation_args))
-                  else
-                    Observation.new
-                  end
+    observation = Observation.new(args&.permit(whitelisted_observation_args))
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
     observation.name       = Name.unknown
-    if Location.is_unknown?(observation.place_name) ||
-       (observation.lat && observation.long && observation.place_name.blank?)
-      observation.location = Location.unknown
-      observation.where = nil
-    end
+    # clear_location(observation) if is_location_unknown?(observation)
     observation
   end
+
+  # I really don't understand what the purpose of this was!
+  # def is_location_unknown?(observation)
+  #   Location.is_unknown?(observation.place_name) ||
+  #     (observation.lat && observation.long && observation.place_name.blank?)
+  # end
+  #
+  # def clear_location(observation)
+  #   observation.location = Location.unknown
+  #   observation.where = nil
+  # end
 
   def init_specimen_vars_for_create
     @collectors_name   = @user.legal_name
@@ -729,6 +835,10 @@ class ObserverController
     image
   end
 
+  ##############################################################################
+
+  public
+
   def hide_thumbnail_map
     pass_query_params
     id = params[:id].to_s
@@ -741,16 +851,16 @@ class ObserverController
     redirect_with_query(action: :show_observation, id: id)
   end
 
+  ##############################################################################
+
+  private
+
   def strip_images!
     @observation.images.each do |img|
       error = img.strip_gps!
       flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
     end
   end
-
-  ##############################################################################
-
-  private
 
   def update_naming(reason)
     return unless @name
@@ -771,5 +881,16 @@ class ObserverController
     return unless params[:observation]
 
     params[:observation].permit(whitelisted_observation_args)
+  end
+
+  def geolocation(params)
+    {
+      country: params[:country],
+      state: params[:state],
+      county: params[:county],
+      city: params[:city],
+      latitude: @observation.lat, # already parsed
+      longitude: @observation.long
+    }
   end
 end

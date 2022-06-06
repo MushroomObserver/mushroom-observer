@@ -126,6 +126,9 @@ gem("mimemagic")
 # for creating zip files
 gem("rubyzip")
 
+# for doing fuzzy string matches
+gem("levenshtein")
+
 # to handle frontend requests from different port, e.g. dev GraphQL client
 gem("rack-cors")
 

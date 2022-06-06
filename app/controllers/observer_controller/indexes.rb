@@ -218,12 +218,11 @@ class ObserverController
 
     unless locations.empty?
       # Eager-load corresponding locations.
-      @locations = Location.connection.select_rows(%(
-        SELECT id, name, north, south, east, west FROM locations
-        WHERE id IN (#{locations.keys.sort.map(&:to_s).join(",")})
-      )).map do |id, *the_rest|
-        locations[id.to_i] = MinimalMapLocation.new(id, *the_rest)
-      end
+      @locations = Location.where(id: locations.keys.sort).
+                   pluck("id, name, north, south, east, west").
+                   map do |id, *the_rest|
+                     locations[id] = MinimalMapLocation.new(id, *the_rest)
+                   end
       @observations.each do |obs|
         obs.location = locations[obs.location_id] if obs.location_id
       end

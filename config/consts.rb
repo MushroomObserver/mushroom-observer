@@ -108,12 +108,13 @@ MushroomObserver::Application.configure do
 
   # Configuration files for location validator.
   location_path = "#{config.root}/config/location/"
-  config.location_continents_file = "#{location_path}continents.yml"
-  config.location_countries_file = "#{location_path}countries.yml"
-  config.location_states_file    = "#{location_path}states.yml"
-  config.location_prefixes_file  = "#{location_path}prefixes.yml"
-  config.location_bad_terms_file = "#{location_path}bad_terms.yml"
-  config.unknown_location_name = "Earth"
+  config.location_continents_file  = "#{location_path}continents.yml"
+  config.location_countries_file   = "#{location_path}countries.yml"
+  config.location_states_file      = "#{location_path}states.yml"
+  config.location_prefixes_file    = "#{location_path}prefixes.yml"
+  config.location_bad_terms_file   = "#{location_path}bad_terms.yml"
+  config.location_state_abbrs_file = "#{location_path}state_abbrs.yml"
+  config.unknown_location_name     = "Earth"
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100

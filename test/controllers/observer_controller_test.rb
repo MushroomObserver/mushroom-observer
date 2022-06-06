@@ -1395,6 +1395,19 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def test_destroy_observation_failure
+    obs = observations(:minimal_unknown_obs)
+    params = { id: obs.id.to_s }
+    login(obs.user.login)
+
+    Observation.any_instance.stubs(:destroy).returns(false)
+    post(:destroy_observation, params: params)
+
+    assert_redirected_to(/#{obs.id}/)
+    assert_not(obs.destroyed?)
+    assert(Observation.where(id: obs.id).exists?)
+  end
+
   # Prove that recalc redirects to show_observation, and
   # corrects an Observation's name.
   def test_recalc
@@ -1411,6 +1424,14 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_observation, id: obs.id)
     assert_equal(accurate_consensus, obs.name)
+  end
+
+  def test_recalc_error
+    login
+    # Make recalc throw an error with Observation.find(-1)
+    get(:recalc, params: { id: -1 })
+
+    assert_flash_text(/Caught exception/)
   end
 
   def test_some_admin_pages
@@ -1923,6 +1944,35 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:herbarium_record_herbarium_id, "1234")
   end
 
+  def test_create_observation_herbarium_record_already_used
+    record = herbarium_records(:field_museum_record)
+    user = dick
+    assert_not(
+      record.can_edit?(user),
+      "Test needs different fixture: herbarim_record not editable by user"
+    )
+    old_record_obs_count = record.observations.count
+    included_in_flash = :create_herbarium_record_already_used_by_someone_else.t(
+      herbarium_name: record.herbarium.name
+    )
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: record.herbarium.name,
+          herbarium_id: record.accession_number
+        },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0, dick
+    )
+    obs = assigns(:observation)
+
+    assert(obs.specimen)
+    assert_flash_text(/#{included_in_flash}/)
+    assert(obs.herbarium_records.count.zero?)
+    assert_equal(old_record_obs_count, record.observations.count)
+  end
+
   def test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
     generic_construct_observation(
@@ -2148,9 +2198,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
-                                    observation: { place_name: "",
+                                    observation: { place_name: "Unknown",
                                                    lat: lat, long: long },
-                                    name: { name: "Unknown" }
+                                    name: { name: "Unknown" },
+                                    approved_where: "Unknown"
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
@@ -2164,9 +2215,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat2 = "34°9’43.92”N"
     long2 = "118°21′7.56″W"
     generic_construct_observation({
-                                    observation: { place_name: "",
+                                    observation: { place_name: "Unknown",
                                                    lat: lat2, long: long2 },
-                                    name: { name: "Unknown" }
+                                    name: { name: "Unknown" },
+                                    approved_where: "Unknown"
                                   }, 1, 0, 0)
     obs = assigns(:observation)
 
@@ -2186,12 +2238,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observations_with_unknown_location_and_empty_geolocation
-    # But create observation if explicitly tell it "unknown" location.
+    # No longer accepts "Earth" until you approve it.
     generic_construct_observation({
                                     observation: { place_name: "Earth",
                                                    lat: "", long: "" },
                                     name: { name: "Unknown" }
-                                  }, 1, 0, 0)
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_with_various_altitude_formats
@@ -2201,15 +2253,13 @@ class ObserverControllerTest < FunctionalTestCase
       ["500 ft.", 152],
       [" 500' ", 152]
     ].each do |input, output|
-      where = "Unknown, Massachusetts, USA"
-
+      where = "California, USA"
       generic_construct_observation({
                                       observation: { place_name: where,
                                                      alt: input },
                                       name: { name: "Unknown" }
                                     }, 1, 0, 0)
       obs = assigns(:observation)
-
       assert_equal(output, obs.alt)
       assert_equal(where, obs.where) # Make sure it's the right observation
       assert_not_nil(obs.rss_log)
@@ -2218,7 +2268,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_class
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "California, USA", lat: "", long: "" },
         name: { name: "Lecanoromycetes L." },
         approved_name: "Lecanoromycetes L." },
       1, 1, 1
@@ -2231,7 +2281,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_family
     params = {
-      observation: { place_name: "Earth", lat: "", long: "" },
+      observation: { place_name: "California, USA", lat: "", long: "" },
       name: { name: "Acarosporaceae" },
       approved_name: "Acarosporaceae"
     }
@@ -2268,9 +2318,10 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_group
     generic_construct_observation(
-      { observation: { place_name: "Earth", lat: "", long: "" },
+      { observation: { place_name: "Unknown", lat: "", long: "" },
         name: { name: "Morchella elata group" },
-        approved_name: "Morchella elata group" },
+        approved_name: "Morchella elata group",
+        approved_where: "Unknown" },
       1, 1, 2
     )
     name = Name.last
@@ -2298,9 +2349,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
 
     generic_construct_observation({
-                                    observation: { place_name: "Earth" },
+                                    observation: { place_name: "Unknown" },
                                     name: { name: "Cladina pictum" },
-                                    approved_name: "Cladina pictum"
+                                    approved_name: "Cladina pictum",
+                                    approved_where: "Unknown"
                                   }, 1, 1, 1, roy)
 
     name = Name.last
@@ -2308,98 +2360,173 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(name.deprecated)
   end
 
-  def test_construct_observation_dubious_place_names
-    # Test a reversed name with a scientific user
+  def assert_no_dubious_reasons
+    assert_empty(@controller.instance_variable_get("@dubious_where_reasons"))
+  end
+
+  def assert_dubious_reasons_present
+    assert_not_empty(
+      @controller.instance_variable_get("@dubious_where_reasons")
+    )
+  end
+
+  def test_construct_observation_dubious_place_names_1
+    # Name reversed, not dubious, and since it has no suggestions of
+    # similar names, it will go ahead and create it.
     where = "USA, Massachusetts, Reversed"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test missing space.
+  def test_construct_observation_dubious_place_names_2
+    # Missing space.
     where = "Reversible, Massachusetts,USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
-    # (This is accepted now for some reason.)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_3
+    # This missing space is auto-corrected when the name is reversed.
+    # No suggestions of similar names, so it creates it.
     where = "USA,Massachusetts, Reversible"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test a bogus country name
+  def test_construct_observation_dubious_place_names_4
+    # Bogus country is dubious.
     where = "Bogus, Massachusetts, UAS"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_5
+    # Bogus country is dubious.
     where = "UAS, Massachusetts, Bogus"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_dubious_reasons_present
+  end
 
-    # Test a bad state name
+  def test_construct_observation_dubious_place_names_6
+    # Bogus state is dubious.
     where = "Bad State Name, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_7
+    # Bogus state is dubious.
     where = "USA, Bad State Name"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_dubious_reasons_present
+  end
 
-    # Test mix of city and county
+  def test_construct_observation_dubious_place_names_8
+    # County is now allowed, so this is not dubious, but it will
+    # suggest the existing name which has no county.
     where = "Burbank, Los Angeles Co., California, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_no_dubious_reasons
+  end
+
+  def test_construct_observation_dubious_place_names_9
+    # County is now allowed, so this is not dubious, but it will
+    # suggest the existing name which has no county.
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test mix of city and county
+  def test_construct_observation_dubious_place_names_10
+    # County is now allowed, so this is not dubious, and since there
+    # are no similar names, it will go ahead and create it.
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
-                                  }, 0, 0, 0)
+                                  }, 1, 0, 0)
+    assert_no_dubious_reasons
+  end
+
+  def test_construct_observation_dubious_place_names_11
+    # County is now allowed, so this is not dubious, and since there
+    # are no similar names, it will go ahead and create it.
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
-                                  }, 0, 0, 0, roy)
+                                  }, 1, 0, 0, roy)
+    assert_no_dubious_reasons
+  end
 
-    # Test some bad terms
+  def test_construct_observation_dubious_place_names_12
+    # "County" should be abbreviated, so this is dubious.
     where = "Some County, Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_13
+    # "Rd" should have period, so this is dubious.
     where = "Old Rd, Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
+    assert_dubious_reasons_present
+  end
+
+  def test_construct_observation_dubious_place_names_14
+    # "Rd." is correct, so this is not dubious, and since there are
+    # no similar locations, it should create this.
     where = "Old Rd., Ohio, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
+    assert_no_dubious_reasons
+  end
 
-    # Test some acceptable additions
+  def test_construct_observation_dubious_place_names_15
+    # Adding "near" and "Southern" are fair, so not dubious, and since
+    # it the existing "Burbank, California, USA" is so different, it
+    # won't suggest it, and thus it should create this.
     where = "near Burbank, Southern California, USA"
     generic_construct_observation({
                                     observation: { place_name: where },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
+    assert_no_dubious_reasons
   end
 
   def test_name_resolution
@@ -2611,6 +2738,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_strip_images
     login("rolf")
+    loc = locations(:burbank)
 
     setup_image_dirs
     fixture = "#{MO.root}/test/images/geotagged.jpg"
@@ -2633,9 +2761,9 @@ class ObserverControllerTest < FunctionalTestCase
       params: {
         observation: {
           when: Time.zone.now,
-          place_name: "Burbank, California, USA",
-          lat: "45.4545",
-          long: "-90.1234",
+          place_name: loc.name,
+          lat: loc.center.first,
+          long: loc.center.last,
           alt: "456",
           specimen: "0",
           thumb_image_id: "0",
@@ -2668,6 +2796,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  def test_create_observation_pending_naming_notification
+    params = {
+      observation: {
+        when: Time.zone.now,
+        place_name: locations(:albion).name,
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      name: {},
+      vote: { value: "3" }
+    }
+    login("rolf")
+
+    ObserverController.any_instance.stubs(:unshown_notifications?).returns(true)
+    post(:create_observation, params: params)
+
+    assert_redirected_to(/#{observer_show_notifications_path}/)
   end
 
   # ----------------------------------------------------------------
@@ -2935,6 +3082,76 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Second pre-existing image has missing file, so stripping should fail.
     assert_false(old_img2.reload.gps_stripped)
+  end
+
+  def test_edit_observation_save_failure
+    obs = observations(:minimal_unknown_obs)
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: { other: "new notes" },
+        place_name: obs.where,
+        "when(1i)" => "2006",
+        "when(2i)" => "05",
+        "when(3i)" => "11",
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Observation.any_instance.stubs(:save).returns(false)
+    assert_no_difference(
+      "Observation.count", "An Observation should not be created"
+    ) do
+      post(:edit_observation, params: params)
+    end
+
+    assert_flash_text(/#{:runtime_no_save.l(type: "observation")}/)
+    assert_response(:success, "Edit form should be reloaded")
+  end
+
+  def test_edit_observation_image_save_failure
+    obs = observations(:detailed_unknown_obs)
+    # more detailed location to avoid location flash warning and redirection
+    location = locations(:point_reyes)
+    obs.update(location: location)
+    img = obs.images.first
+    img_notes = img.notes
+
+    params = {
+      id: obs.id.to_s,
+      observation: {
+        notes: obs.notes,
+        place_name: obs.where,
+        "when(1i)" => obs.when.strftime("%Y"),
+        "when(2i)" => obs.when.strftime("%m"),
+        "when(3i)" => obs.when.strftime("%d"),
+        specimen: obs.specimen,
+        thumb_image_id: obs.thumb_image_id
+      },
+      good_images: "#{img.id} #{images(:turned_over_image).id}",
+      good_image: {
+        img.id.to_s => {
+          notes: "change something to force image to be saved",
+          original_name: img.original_name,
+          copyright_holder: img.copyright_holder,
+          "when(1i)" => img.when.strftime("%Y"),
+          "when(2i)" => img.when.strftime("%m"),
+          "when(3i)" => img.when.strftime("%d"),
+          license_id: img.license_id
+        }
+      },
+      log_change: { checked: "0" }
+    }
+
+    login(obs.user.name)
+    Image.any_instance.stubs(:save).returns(false)
+    post(:edit_observation, params: params)
+
+    assert_redirected_to(/#{obs.id}$/)
+    assert_equal(img_notes, img.reload.notes)
   end
 
   # --------------------------------------------------------------------
@@ -3455,6 +3672,356 @@ class ObserverControllerTest < FunctionalTestCase
     list_states.each do |id, state|
       assert_checkbox_state("list_id_#{id}", state)
     end
+  end
+
+  def do_loc_test(str: "", gps: [], geo: [], approved: false, succeed: false)
+    params = {
+      observation: {
+        place_name: str.to_s,
+        lat: gps[0].to_s,
+        long: gps[1].to_s
+      },
+      country: geo[0].to_s,
+      state: geo[1].to_s,
+      county: geo[2].to_s,
+      city: geo[3].to_s,
+      approved_where: approved ? str : "something else"
+    }
+    login("rolf") unless User.current
+    post(:create_observation,
+         params: modified_generic_params(params, User.current))
+    if succeed
+      expect_obs_form_to_succeed
+    else
+      expect_obs_form_to_fail
+    end
+  end
+
+  def expect_obs_form_to_succeed
+    assert_empty(
+      @controller.instance_variable_get("@dubious_where_reasons") +
+      @controller.instance_variable_get("@location_suggestion_reasons") +
+      @controller.instance_variable_get("@location_suggestions")
+    )
+    assert_response(:redirect, "expected it to accept this submission")
+  end
+
+  def expect_obs_form_to_fail
+    assert_response(:success, "expected it to reload the form")
+    @reasons = \
+      @controller.instance_variable_get("@location_suggestion_reasons")
+    @suggestions = @controller.instance_variable_get("@location_suggestions")
+    @place_name = @controller.instance_variable_get("@place_name")
+  end
+
+  def assert_suggestions_include(loc)
+    assert_includes(@suggestions.map(&:name), loc.name)
+  end
+
+  # First submit with nothing: no place_name, lat/long or geolocation.
+  def test_create_observation_without_location_latlong_or_geolocation
+    do_loc_test(str: "")
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_empty(@suggestions)
+    assert_blank(@place_name)
+  end
+
+  # Now add lat/long to see if it finds a location which contains it.
+  def test_create_observation_with_just_latlong
+    loc = locations(:burbank)
+    do_loc_test(gps: loc.center)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_blank(@place_name)
+  end
+
+  # Now add reverse geolocation to make sure it fills in place_name.
+  def test_create_observation_with_just_geolocation
+    loc = locations(:burbank)
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    do_loc_test(geo: geolocation)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("Burbank, Los Angeles Co., California, USA", @place_name)
+  end
+
+  # Same thing but reverse location order (and explicitly enter "Earth"
+  # for the place name to make sure it catches that, too).
+  def test_create_observation_with_just_geolocation_reversed
+    loc = locations(:burbank)
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    users(:rolf).update(location_format: :scientific)
+    do_loc_test(str: "Earth", geo: geolocation)
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("USA, California, Los Angeles Co., Burbank", @place_name)
+  end
+
+  # And submit again with "Earth" approved to prove that user can override
+  # our whinging.
+  def test_create_observation_with_no_location_but_approved
+    geolocation = ["USA", "California", "Los Angeles Co.", "Burbank"]
+    str = Location.unknown.name
+    do_loc_test(str: str, geo: geolocation, approved: true, succeed: true)
+  end
+
+  # Submit a point within Burbank, but only list location as "California".
+  def test_create_observation_with_inaccurate_location
+    loc = locations(:burbank)
+    str = "California, USA"
+    do_loc_test(str: str, gps: loc.center)
+    assert_includes(@reasons, :form_observations_location_inaccurate.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # Submit a point that's not even close to Burbank while listing it
+  # erroneously as "Burbank".
+  def test_create_observation_with_pin_way_off
+    loc = locations(:burbank)
+    lat2 = loc.north + (loc.north - loc.south)
+    long2 = loc.west - (loc.east - loc.west)
+    assert_false(loc.close?(lat2, long2))
+    do_loc_test(str: loc.name, gps: [lat2, long2])
+    assert_includes(@reasons, :form_observations_location_outside.t)
+    # Should at least see that this point is in California!
+    assert_suggestions_include(locations(:california))
+    assert_equal(loc.name, @place_name)
+  end
+
+  # Submit a point that's close but not actually in Burbank (off by 9%),
+  # listing it as "Burbank".
+  def test_create_observation_with_pin_at_least_close
+    loc = locations(:burbank)
+    lat2 = loc.north + (loc.north - loc.south) * 0.09
+    long2 = loc.west - (loc.east - loc.west) * 0.09
+    assert_true(loc.close?(lat2, long2))
+    do_loc_test(str: loc.name, gps: [lat2, long2], succeed: true)
+  end
+
+  # Try a point within Burbank and actually list it as "Burbank".
+  def test_create_observation_with_correct_pin
+    loc = locations(:burbank)
+    do_loc_test(str: loc.name, gps: loc.center, succeed: true)
+  end
+
+  # Submit a location with a county that lacks the county in the database.
+  def test_create_observation_bad_location_00
+    loc = locations(:burbank)
+    assert_equal("Burbank, California, USA", loc.name)
+    str = "Burbank, Los Angeles Co., California, USA"
+    do_loc_test(str: str)
+    assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # Approve it and try again.
+  def test_create_observation_bad_location_0
+    str = "Burbank, Los Angeles Co., California, USA"
+    do_loc_test(str: str, approved: true, succeed: true)
+  end
+
+  # Submit a location without a county that has a county in the database.
+  def test_create_observation_bad_location_1
+    loc = locations(:brett_woods)
+    assert_equal("Brett Woods, Fairfield Co., Connecticut, USA", loc.name)
+    str = "Brett Woods, Connecticut, USA"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but omitting the country.
+  def test_create_observation_bad_location_2
+    loc = locations(:brett_woods)
+    str = "Brett Woods, CT"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but with misspelled country.
+  def test_create_observation_bad_location_3
+    loc = locations(:elgin_co)
+    assert_equal("Elgin Co., Ontario, Canada", loc.name)
+    str = "Elgin Co., Ontario, KKanada"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with badly misspelled country, but google
+  # provides a correct country.
+  def test_create_observation_bad_location_4
+    loc = locations(:elgin_co)
+    str = "Elgin Co., Ontario, Oops"
+    do_loc_test(str: str, geo: ["Canada"])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location but with misspelled country and abbreviated
+  # state.
+  def test_create_observation_bad_location_5
+    loc = locations(:elgin_co)
+    str = "Elgin Co., ON, Kanada"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with misspelled state in country without
+  # states.
+  def test_create_observation_bad_location_6
+    loc = locations(:birgu)
+    assert_equal("Birgu, Malta", loc.name)
+    do_loc_test(str: "Bigru, Malta")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with misspelled state in country with states.
+  def test_create_observation_bad_location_7
+    loc = locations(:burbank)
+    assert_equal("Burbank, California, USA", loc.name)
+    do_loc_test(str: "Burbank, Calfiornia, USA")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location with badly misspelled state in country with
+  # states, but google provides correct state.
+  def test_create_observation_bad_location_8
+    loc = locations(:burbank)
+    do_loc_test(str: "Burbank, Cali, USA",
+                geo: ["USA", "California", "Los Angeles Co."])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location that has county misspelled.
+  def test_create_observation_bad_location_9
+    loc = locations(:brett_woods)
+    assert_equal("Brett Woods, Fairfield Co., Connecticut, USA", loc.name)
+    str = "Brett Woods, Connecticut, USA"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location that has city misspelled.
+  def test_create_observation_bad_location_10
+    loc = locations(:brett_woods)
+    str = "Brett's Woods, CT"
+    do_loc_test(str: str)
+    assert_suggestions_include(loc)
+  end
+
+  # Submit an existing location omitting a name below county but above
+  # the final term.
+  def test_create_observation_bad_location_11
+    loc = locations(:mitrula_marsh)
+    assert_equal(
+      '"Mitrula Marsh", Sand Lake, Bassetts, Yuba Co., California, USA',
+      loc.name
+    )
+    do_loc_test(str: "Mitrula Marsh, Bassetts, CA")
+    assert_suggestions_include(loc)
+  end
+
+  # Submit something totally wonky, but google gives something we can work
+  # with.
+  def test_create_observation_bad_location_12
+    loc = locations(:burbank)
+    do_loc_test(str: "Burbank",
+                geo: ["USA", "California", "Los Angeles Co.", "Burbank"])
+    assert_suggestions_include(loc)
+  end
+
+  # Submit something totally wonky and google is no help.
+  def test_create_observation_bad_location_13
+    do_loc_test(str: "Willy Wonka's Toy Factory",
+                geo: %w[unknown unknown unknown])
+    assert_empty(@suggestions)
+  end
+
+  def test_create_observation_choosing_location_suggestion
+    user = rolf
+    login(user.login)
+    loc = locations(:burbank)
+    params = {
+      observation: { place_name: "whatever" },
+      approved_where: "something else",
+      location_suggestions: { name: loc.name }
+    }
+    post(:create_observation, params: modified_generic_params(params, user))
+    assert_response(:redirect, "expected this to submit successfully")
+    obs = Observation.last
+    assert_objs_equal(loc, obs.location)
+  end
+
+  # User tries to remove the place name, but google comes to the rescue.
+  def test_edit_observation_try_to_remove_location
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:gualala)
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: Location.unknown.name },
+      country: "USA",
+      state: "California",
+      county: "Mendocino Co.",
+      city: "Gualala"
+    }
+    post(:edit_observation, params: params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_missing.t)
+    assert_suggestions_include(loc)
+    assert_equal("Gualala, Mendocino Co., California, USA", @place_name)
+  end
+
+  # User tries to change place name to something less accurate.
+  def test_edit_observation_try_to_change_to_less_accurate
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:burbank)
+    lat, long = loc.center
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: "California, USA", lat: lat, long: long }
+    }
+    post(:edit_observation, params: params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_inaccurate.t)
+    assert_suggestions_include(loc)
+    assert_equal("California, USA", @place_name)
+  end
+
+  # User tries to change place name to something screwy that we can correct.
+  def test_edit_observation_try_to_change_location_to_something_screwy
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = locations(:brett_woods)
+    str = "Brett's Woods, CT"
+    params = {
+      id: obs.id.to_s,
+      observation: { place_name: str }
+    }
+    post(:edit_observation, params: params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_doesnt_exist.t)
+    assert_suggestions_include(loc)
+    assert_equal(str, @place_name)
+  end
+
+  # User moves the pin way outside of chosen location.
+  def test_edit_observation_try_to_move_pin_outside_of_location
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+    loc = obs.reload.location
+    lat = loc.south - (loc.north - loc.south) * 0.5
+    long = loc.east + (loc.east - loc.west) * 0.5
+    params = {
+      id: obs.id.to_s,
+      observation: { lat: lat, long: long }
+    }
+    post(:edit_observation, params: params)
+    expect_obs_form_to_fail
+    assert_includes(@reasons, :form_observations_location_outside.t)
+    assert_suggestions_include(locations(:california))
+    assert_equal(loc.name, @place_name)
   end
 
   # ----------------------------
