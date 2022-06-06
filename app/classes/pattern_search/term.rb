@@ -6,7 +6,6 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
-    require_dependency "pattern_search/term/dates"
     include Dates
 
     attr_accessor :var, :vals
