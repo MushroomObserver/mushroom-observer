@@ -2,8 +2,7 @@
 
 class Pivotal
   class User
-    attr_accessor :id
-    attr_accessor :name
+    attr_accessor :id, :name
 
     def initialize(id, name)
       @id   = id.to_i

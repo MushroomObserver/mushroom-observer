@@ -2,9 +2,7 @@
 
 class ContentFilter
   class BooleanFilter < ContentFilter
-    attr_accessor :on_vals
-    attr_accessor :prefs_vals
-    attr_accessor :off_val
+    attr_accessor :on_vals, :prefs_vals, :off_val
 
     def type
       :boolean

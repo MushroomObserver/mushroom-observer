@@ -30,8 +30,7 @@
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
 class ContentFilter
-  attr_accessor :sym
-  attr_accessor :models
+  attr_accessor :sym, :models
 
   def initialize(opts)
     opts.each do |key, val|

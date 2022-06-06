@@ -2,16 +2,8 @@
 
 class Pivotal
   class Story
-    attr_accessor :id
-    attr_accessor :type
-    attr_accessor :time
-    attr_accessor :state
-    attr_accessor :user
-    attr_accessor :name
-    attr_accessor :description
-    attr_accessor :labels
-    attr_accessor :comments
-    attr_accessor :votes
+    attr_accessor :id, :type, :time, :state, :user, :name, :description,
+                  :labels, :comments, :votes
 
     LABEL_VALUE = {
       "critical" => 4,

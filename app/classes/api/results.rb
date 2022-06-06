@@ -21,9 +21,7 @@ class API
   self.put_page_length         = 1000
   self.delete_page_length      = 1000
 
-  attr_accessor :query
-  attr_accessor :detail
-  attr_accessor :page_number
+  attr_accessor :query, :detail, :page_number
 
   initializers << lambda do
     self.detail = parse(:enum, :detail, limit: [:none, :low, :high]) || :none

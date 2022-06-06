@@ -220,9 +220,21 @@ Rails/HasAndBelongsToMany:
 Rails/WhereExists:
   Enabled: false
 
-# (0.87) pending cop
 Style/AccessorGrouping:
-  Enabled: true
+  # Disabled. See discussion at
+  # https://github.com/MushroomObserver/mushroom-observer/pull/988
+  Enabled: false
+  # The follow in case we re-enable the cop
+  # Exclude files that individually comment accessors
+  # else Rubocop concatenates the accessors and comments on a single line.
+  # Disabling Style/AccessorGrouping around the accessors doesn't
+  # work in this context because Rubocop v1.30.0 generates a
+  # Style/EmptyLinesAroundAttributeAccessor offense
+  # See https://github.com/rubocop/rubocop/issues/10693
+  Exclude:
+    - "app/classes/country_counter.rb"
+    - "app/classes/gmaps.rb"
+    - "app/classes/mo_paginator.rb"
 
 # (0.88) pending cop
 Style/ArrayCoercion:
