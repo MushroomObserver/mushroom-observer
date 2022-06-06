@@ -1,0 +1,76 @@
+#!/bin/bash
+set -e
+source $(dirname "$0")/bash_include
+
+config_file=$app_root/config/mysql-$RAILS_ENV.cnf
+mysql="mysql --defaults-extra-file=$config_file -q -s"
+
+all_types="article glossary_term location name observation project \
+           species_list"
+
+for type in $all_types; do
+  types="$type"s
+  type_id="$type"_id
+
+
+
+  # echo orphans with $types...
+  cat <<EOB | $mysql
+    SELECT id, "orphan with $type", $type_id FROM rss_logs WHERE
+      notes NOT REGEXP '^[0-9]{14}' AND $type_id IS NOT NULL
+EOB
+
+  cat <<EOB | $mysql
+    UPDATE rss_logs SET $type_id = NULL WHERE
+      notes NOT REGEXP '^[0-9]{14}' AND $type_id IS NOT NULL
+EOB
+
+
+
+  # echo nonorphans with bogus $types...
+  cat <<EOB | $mysql
+    SELECT id, "nonorphan with bogus $type", $type_id FROM rss_logs WHERE
+      notes REGEXP '^[0-9]{14}' AND
+      $type_id IS NOT NULL AND
+      $type_id NOT IN (SELECT id FROM $types)
+EOB
+
+  cat <<EOB | $mysql
+    DELETE FROM rss_logs WHERE
+      notes REGEXP '^[0-9]{14}' AND
+      $type_id IS NOT NULL AND
+      $type_id NOT IN (SELECT id FROM $types)
+EOB
+
+done
+
+
+
+# echo ghosts...
+cat <<EOB | $mysql
+  SELECT id, "ghost" FROM rss_logs WHERE
+    notes REGEXP '^[0-9]{14}' AND
+    article_id IS NULL AND
+    glossary_term_id IS NULL AND
+    location_id IS NULL AND
+    name_id IS NULL AND
+    observation_id IS NULL AND
+    project_id IS NULL AND
+    species_list_id IS NULL
+EOB
+
+cat <<EOB | $mysql
+  DELETE FROM rss_logs WHERE
+    notes REGEXP '^[0-9]{14}' AND
+    article_id IS NULL AND
+    glossary_term_id IS NULL AND
+    location_id IS NULL AND
+    name_id IS NULL AND
+    observation_id IS NULL AND
+    project_id IS NULL AND
+    species_list_id IS NULL
+EOB
+
+
+
+exit 0

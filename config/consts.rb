@@ -111,9 +111,10 @@ MushroomObserver::Application.configure do
   config.location_continents_file  = "#{location_path}continents.yml"
   config.location_countries_file   = "#{location_path}countries.yml"
   config.location_states_file      = "#{location_path}states.yml"
-  config.location_state_abbrs_file = "#{location_path}state_abbrs.yml"
   config.location_prefixes_file    = "#{location_path}prefixes.yml"
   config.location_bad_terms_file   = "#{location_path}bad_terms.yml"
+  config.location_state_abbrs_file = "#{location_path}state_abbrs.yml"
+  config.unknown_location_name     = "Earth"
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
@@ -131,9 +132,9 @@ MushroomObserver::Application.configure do
   # Search order when serving images.
   # Key is size, e.g., :thumbnail, :small, etc.
   # config.image_precedence = {
-  #   :default => [:local, :cdmr]
+  #   :default => [:local, :mycolab]
   # }
-  # config.image_fallback_source = :cdmr
+  # config.image_fallback_source = :mycolab
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
   config.keep_these_image_sizes_local =
@@ -173,19 +174,8 @@ MushroomObserver::Application.configure do
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
 
-  # Configuration of S3 image store on dreamhost.  Example:
-  #   config.s3_credentials = {
-  #     cdmr: {
-  #       server:            "https://objects.dreamhost.com",
-  #       bucket:            "mo-images",
-  #       access_key_id:     "xxxxxxxxxxxxxxxxxxxx",
-  #       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  #     }
-  #   }
-  config.s3_credentials = {}
-
   # Default number of items for an RSS page
-  config.default_layout_count = 18
+  config.default_layout_count = 12
 
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000

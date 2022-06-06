@@ -2,7 +2,7 @@
 /* globals $, google */
 
 var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
-                       "<%= GM::GMap.key %>";
+                       "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
 
 // ./observer/create_observation
 $(document).ready(function() {
@@ -35,22 +35,6 @@ $(document).ready(function() {
 
       // init elevation service
       var elevation = new google.maps.ElevationService();
-
-      // init geocoding service
-      var geocoder = new google.maps.Geocoder();
-
-      // Have the submit buttons wait until geocoder returns.
-      var wait_for_geocoder = 0;
-      $('form[name="observation_form"]').submit(function (e) {
-        var _this = $(this);
-        if (wait_for_geocoder <= 0) return;
-        wait_for_geocoder--;
-        e.preventDefault();
-        _this.find(':input[type="submit"]').prop("disabled", true);
-        window.setTimeout(function() {
-          _this.submit();
-        }, 1000);
-      });
 
       addGmapsListener(map, 'click');
 
@@ -93,6 +77,7 @@ $(document).ready(function() {
 
       // use the geocoder to focus on a specific region on the map
       function focusMap() {
+        var geocoder = new google.maps.Geocoder();
 
         // even a single letter will return a result
         if ( $(searchInput).val().length <= 0 ) {
@@ -145,63 +130,6 @@ $(document).ready(function() {
             }
           }
         });
-
-        geocoder.geocode({
-          'location': marker.position
-        }, function(results, status) {
-          var country, level1, level2, level3, locality, park, feature, route;
-          var all = "";
-          if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
-            for (var i=0; i<results.length; i++) {
-              var addrs = results[i].address_components;
-              for (var j=0; j<addrs.length; j++) {
-                var types = addrs[j].types;
-                for (var k=0; k<types.length; k++) {
-                  all += types[k] + " = " + addrs[j].long_name + "\n";
-                  if (types[k] == "country")
-                    country ||= addrs[j].long_name;
-                  else if (types[k] == "administrative_area_level_1")
-                    level1 ||= addrs[j].long_name;
-                  else if (types[k] == "administrative_area_level_2")
-                    level2 ||= addrs[j].long_name;
-                  else if (types[k] == "administrative_area_level_3")
-                    level3 ||= addrs[j].long_name;
-                  else if (types[k] == "locality")
-                    locality ||= addrs[j].long_name;
-                  else if (types[k] == "park")
-                    park ||= addrs[j].long_name;
-                  else if (types[k] == "natural_feature")
-                    feature ||= addrs[j].long_name;
-                  else if (types[k] == "point_of_interest")
-                    feature ||= addrs[j].long_name;
-                  else if (types[k] == "route")
-                    route ||= addrs[j].long_name;
-                }
-              }
-            }
-            var city = "";
-            if (park || feature) {
-              city = "";
-              if (park) city = park + ", " + city;
-              if (feature) city = feature + ", " + city;
-            } else if (level3) {
-              city = level3;
-            } else if (locality) {
-              city = locality;
-            }
-            // if (route) city = route + ", " + city;
-            if (city) city = city.replace(/, $/, "");
-            if (level2) level2 = level2.replace(/ County$/, " Co.");
-            $("#country").val(country || "");
-            $("#state").val(level1 || "");
-            $("#county").val(level2 || "");
-            $("#city").val(city || "");
-          }
-          wait_for_geocoder = 0;
-        });
-
-        // Tell submit buttons to wait up to 10 seconds for geocoder to return.
-        wait_for_geocoder = 10;
       }
 
       function clearMap() {

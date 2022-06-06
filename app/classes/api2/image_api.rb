@@ -62,9 +62,8 @@ class API2
                           user.legal_name,
         # rubocop:enable Layout/MultilineOperationIndentation
         license: parse(:license, :license) || user.license,
-        original_name: parse(
-          :string, :original_name, limit: 120, help: :original_name
-        ),
+        original_name: parse_original_name(:original_name),
+        upload_md5sum: parse(:string, :md5sum),
         projects: parse_array(:project, :projects, must_be_member: true) || [],
         observations: @observations,
         user: @user
@@ -77,9 +76,7 @@ class API2
         notes: parse(:string, :set_notes),
         copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
         license: parse(:license, :set_license),
-        original_name: parse(
-          :string, :set_original_name, limit: 120, help: :original_name
-        )
+        original_name: parse_original_name(:set_original_name)
       }
     end
 
@@ -95,14 +92,14 @@ class API2
 
     def after_create(img)
       strip = @observations.any?(&:gps_hidden)
-      img.process_image(strip) || raise(ImageUploadFailed.new(img))
+      img.process_image(strip: strip) || raise(ImageUploadFailed.new(img))
       @observations.each do |obs|
         obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
-        obs.log_create_image(img)
+        img.log_create_for(obs)
       end
       return unless @vote
 
-      img.change_vote(@user, @vote, (@user.votes_anonymous == :yes))
+      img.change_vote(@user, @vote, anon: @user.votes_anonymous == :yes)
     end
 
     ############################################################################
@@ -118,6 +115,19 @@ class API2
       @upload = prepare_upload
     end
 
+    def parse_original_name(arg)
+      # Important to call parse, even if the guard clause below is true.
+      val = parse(:string, arg, limit: 120, help: :original_name)
+
+      # This is just a sanity check for the benefit of the mobile app to make
+      # sure it doesn't accidentally explicitly set the original_name even if
+      # the user has requested not to save it.  I'm not sure the mobile app
+      # has access to that preference.
+      return nil if User.current&.keep_filenames == :toss
+
+      val
+    end
+
     def upload_params
       return {} unless @upload
 
@@ -126,7 +136,7 @@ class API2
         upload_length: @upload.content_length,
         upload_type: @upload.content_type,
         upload_md5sum: @upload.content_md5
-      }
+      }.compact
     end
   end
 end

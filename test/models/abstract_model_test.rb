@@ -207,7 +207,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Location.safe_find(loc_id))
-    assert_equal(:location, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_name_rss_log_life_cycle
@@ -254,7 +254,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_name_merged, rss_log)
     assert(rss_log.updated_at > time)
     assert_nil(Name.safe_find(name_id))
-    assert_equal(:name, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_observation_rss_log_life_cycle
@@ -301,7 +301,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_observation_destroyed, rss_log)
     # assert_in_delta(time, rss_log.updated_at, 1.second)
     assert_nil(Observation.safe_find(obs_id))
-    assert_equal(:observation, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_project_rss_log_life_cycle
@@ -353,7 +353,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_project_destroyed, rss_log)
     assert(proj.rss_log.updated_at > time)
     assert_nil(Project.safe_find(proj_id))
-    assert_equal(:project, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   def test_species_list_rss_log_life_cycle
@@ -394,7 +394,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_species_list_destroyed, rss_log)
     assert_nil(SpeciesList.safe_find(spl_id))
-    assert_equal(:species_list, rss_log.target_type)
+    assert_nil(rss_log.target_type)
   end
 
   # -------------------------------------------------------------------
@@ -428,5 +428,45 @@ class AbstractModelTest < UnitTestCase
 
   # fixture for above tests
   class Phony < AbstractModel
+  end
+
+  # -------------------------------------------
+  #  Show_url is missing slash in some cases.
+  # -------------------------------------------
+
+  def test_show_urls
+    assert_show_url(ApiKey, "account/show_api_key")
+    assert_show_url(CollectionNumber,
+                    "collection_number/show_collection_number")
+    assert_show_url(Comment, "comment/show_comment")
+    assert_show_url(ExternalSite, "external_site/show_external_site")
+    assert_show_url(Herbarium, "herbaria")
+    assert_show_url(HerbariumRecord, "herbarium_record/show_herbarium_record")
+    assert_show_url(Image, "image/show_image")
+    assert_show_url(Location, "location/show_location")
+    assert_show_url(Name, "name/show_name")
+    assert_show_url(Naming, "observer/show_naming")
+    assert_show_url(Observation, "observer/show_observation")
+    assert_show_url(Project, "project/show_project")
+    assert_show_url(Sequence, "sequence/show_sequence")
+    assert_show_url(SpeciesList, "species_list/show_species_list")
+    assert_show_url(User, "observer/show_user")
+  end
+
+  def assert_show_url(model, path)
+    domain = "http://mushroomobserver.org"
+    obj = model.first
+    assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
+  end
+
+  # -------------------------------------------------------------------------
+  #  Checks that arel-helpers are included (from the gem) in ApplicationRecord.
+  #  In the test below, the brackets in User[:login] referring to table column
+  #  will throw  NoMethodError: undefined method `[]' for #<Class>
+  #  if arel-helpers not included. Error could be mystifying at first.
+  # -------------------------------------------------------------------------
+  def test_arel_helpers_included
+    arel_find_user = User.find_by(User[:login].eq(rolf.login))
+    assert_equal(arel_find_user.login, rolf.login)
   end
 end

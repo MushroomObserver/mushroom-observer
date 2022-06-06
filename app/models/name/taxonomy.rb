@@ -6,10 +6,12 @@ class Name < AbstractModel
         # NoMethodError: undefined method `ranks'
         #   test/fixtures/names.yml:28:in `get_binding'
         ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where "classification LIKE ?", "%#{rank}: _#{text_name}_%"
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
+  scope :with_name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
   scope :with_rank_below,
-        ->(rank) { where("`rank` < ?", Name.ranks[rank]) }
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def self.all_ranks
     [:Form, :Variety, :Subspecies, :Species,
@@ -47,6 +49,10 @@ class Name < AbstractModel
 
   def at_or_below_genus?
     rank == :Genus || below_genus?
+  end
+
+  def above_genus?
+    Name.ranks_above_genus.include?(rank)
   end
 
   def below_genus?
@@ -173,7 +179,7 @@ class Name < AbstractModel
   #    Eukarya
   #
   def all_parents
-    parents(:all)
+    parents(all: true)
   end
 
   # Returns an Array of all Name's under this one.  Ignores misspellings, but
@@ -192,17 +198,19 @@ class Name < AbstractModel
   #   'Letharia vulpina f. californica'
   #
   def all_children
-    children(:all)
+    children(all: true)
   end
 
   # Returns the Name of the genus above this taxon.  If there are multiple
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
-  def genus
-    @genus ||= begin
-      return unless text_name.include?(" ")
+  def accepted_genus
+    @accepted_genus ||= \
+    begin
+      accepted = approved_name
+      return unless accepted.text_name.include?(" ")
 
-      genus_name = text_name.split(" ", 2).first
+      genus_name = accepted.text_name.split(" ", 2).first
       genera     = Name.with_correct_spelling.where(text_name: genus_name)
       accepted   = genera.reject(&:deprecated)
       genera     = accepted if accepted.any?
@@ -226,7 +234,7 @@ class Name < AbstractModel
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
-  def parents(all = false)
+  def parents(all: false)
     parents = []
 
     # Start with infrageneric and genus names.
@@ -304,21 +312,20 @@ class Name < AbstractModel
   #   # BUT NOT THIS!!
   #   'Letharia vulpina var. bogus f. foobar'
   #
-  def children(all = false)
-    if at_or_below_genus?
-      sql_conditions = "correct_spelling_id IS NULL AND text_name LIKE ? "
-      sql_args = "#{text_name} %"
-    else
-      sql_conditions = "correct_spelling_id IS NULL AND classification LIKE ?"
-      sql_args = "%#{rank}: _#{text_name}_%"
-    end
+  def children(all: false)
+    scoped_children =
+      if at_or_below_genus?
+        Name.with_correct_spelling.with_name_like(text_name)
+      else
+        Name.with_correct_spelling.with_classification_like(rank, text_name)
+      end
 
-    return Name.where(sql_conditions, sql_args).to_a if all
+    return scoped_children.to_a if all
 
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
 
-      matches = Name.with_rank(rank2).where(sql_conditions, sql_args)
+      matches = scoped_children.with_rank(rank2)
       return matches.to_a if matches.any?
     end
     []
@@ -452,17 +459,13 @@ class Name < AbstractModel
     notes&.match(/\S/)
   end
 
-  def text_before_rank
-    text_name.split(" #{rank.to_s.downcase}").first
-  end
-
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
-    return unless genus # this sets the name instance @genus as side-effect
+    return unless accepted_genus
 
-    self.classification ||= genus.classification
-    self.lifeform       ||= genus.lifeform
+    self.classification ||= accepted_genus.classification
+    self.lifeform       ||= accepted_genus.lifeform
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -487,13 +490,14 @@ class Name < AbstractModel
     change_classification(str)
   end
 
-  # Change this name's classification.  Change parent genus, too, if below
-  # genus.  Propagate to subtaxa if changing genus.
+  # Change this name's classification.  Change its synonyms and its parent
+  # genus, too, if below genus.  Propagate to subtaxa if at or below genus.
   def change_classification(new_str)
-    root = below_genus? && genus || self
-    root.update(classification: new_str)
-    root.description.update(classification: new_str) if
-      root.description_id
+    root = below_genus? && accepted_genus || self
+    root.synonyms.each do |name|
+      name.update(classification: new_str)
+      name.description.update(classification: new_str) if name.description_id
+    end
     root.propagate_classification if root.rank == :Genus
   end
 
@@ -504,38 +508,38 @@ class Name < AbstractModel
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
 
-    escaped_string = Name.connection.quote(classification)
-    Name.connection.execute(%(
-      UPDATE names SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE name_descriptions nd, names n
-      SET nd.classification = #{escaped_string}
-      WHERE nd.id = n.description_id
-        AND n.text_name LIKE "#{text_name} %"
-        AND nd.classification != #{escaped_string}
-    ))
-    Name.connection.execute(%(
-      UPDATE observations
-      SET classification = #{escaped_string}
-      WHERE text_name LIKE "#{text_name} %"
-        AND classification != #{escaped_string}
-    ))
+    subtaxa = subtaxa_whose_classification_needs_to_be_changed
+    Name.where(id: subtaxa).
+      update_all(classification: classification)
+    NameDescription.where(name_id: subtaxa).
+      update_all(classification: classification)
+    Observation.where(name_id: subtaxa).
+      update_all(classification: classification)
+  end
+
+  # Get list of subtaxa whose classification doesn't match (and therefore
+  # needs to be updated to be in sync with this name).  Start with approved
+  # names below genus with the same generic epithet.  Then add all those
+  # names' synonyms.
+  def subtaxa_whose_classification_needs_to_be_changed
+    subtaxa = Name.with_name_like(text_name).not_deprecated.to_a
+    uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
+    # Beware of AR where.not gotcha - will not match a null classification below
+    synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).
+               where(Name[:classification].not_eq(classification))
+    (subtaxa + synonyms).map(&:id).uniq
   end
 
   # This is meant to be run nightly to ensure that all the classification
   # caches are up to date.  It only pays attention to genera or higher.
   def self.refresh_classification_caches
-    Name.connection.execute(%(
-      UPDATE names n, name_descriptions nd
-      SET n.classification = nd.classification
-      WHERE nd.id = n.description_id
-        AND n.`rank` <= #{Name.connection.quote(Name.ranks[:Genus])}
-        AND nd.classification != n.classification
-        AND COALESCE(nd.classification, "") != ""
-    ))
+    Name.where(rank: 0..Name.ranks[:Genus]).
+      joins(:description).
+      where(NameDescription[:classification].not_eq(Name[:classification])).
+      where(NameDescription[:classification].not_blank).
+      update_all(
+        Name[:classification].eq(NameDescription[:classification]).to_sql
+      )
     []
   end
 
@@ -560,8 +564,7 @@ class Name < AbstractModel
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.where("text_name LIKE ?", "#{text_name} %").
-        with_correct_spelling.any?
+      Name.with_name_like(text_name).with_correct_spelling.any?
     else
       Name.with_classification_like(rank, text_name).with_correct_spelling.any?
     end
@@ -580,7 +583,6 @@ class Name < AbstractModel
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).where("text_name LIKE ?", "#{text_name} %").
-      with_rank_below(rank).any?
+    Name.joins(:namings).with_name_like(text_name).with_rank_below(rank).any?
   end
 end

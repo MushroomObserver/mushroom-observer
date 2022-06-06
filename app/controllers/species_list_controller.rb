@@ -40,21 +40,22 @@
 class SpeciesListController < ApplicationController
   # require "rtf"
 
-  before_action :login_required, except: [
-    :download,
-    :index_species_list,
-    :list_species_lists,
-    :make_report,
-    :name_lister,
-    :next_species_list,
-    :prev_species_list,
-    :print_labels,
-    :show_species_list,
-    :species_list_search,
-    :species_lists_by_title,
-    :species_lists_by_user,
-    :species_lists_for_project
-  ]
+  before_action :login_required
+  # except: [
+  #   :download,
+  #   :index_species_list,
+  #   :list_species_lists,
+  #   :make_report,
+  #   :name_lister,
+  #   :next_species_list,
+  #   :prev_species_list,
+  #   :print_labels,
+  #   :show_species_list,
+  #   :species_list_search,
+  #   :species_lists_by_title,
+  #   :species_lists_by_user,
+  #   :species_lists_for_project
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_species_list,
@@ -66,6 +67,13 @@ class SpeciesListController < ApplicationController
 
   before_action :require_successful_user, only: [
     :create_species_list, :name_lister
+  ]
+
+  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
+    # Bullet wants us to eager load synonyms for @deprecated_names in
+    # edit_species_list, and I thought it would be possible, but I can't
+    # get it to work.  Seems to minor to waste any more time on.
+    :edit_species_list
   ]
 
   ##############################################################################
@@ -597,7 +605,7 @@ class SpeciesListController < ApplicationController
     @any_changes = false
     @projects.each do |proj|
       if @project_states[proj.id]
-        if !@user.projects_member.include?(proj)
+        if @user.projects_member.exclude?(proj)
           flash_error(:species_list_projects_no_add_to_project.
                          t(proj: proj.title))
         else
@@ -823,8 +831,6 @@ class SpeciesListController < ApplicationController
         if @species_list.location.nil?
           redirect_to(controller: "location", action: "create_location",
                       where: @place_name, set_species_list: @species_list.id)
-        elsif unshown_notifications?(@user, :naming)
-          redirect_to(controller: "observer", action: "show_notifications")
         else
           redirect_to(action: "show_species_list", id: @species_list)
         end
@@ -996,7 +1002,7 @@ class SpeciesListController < ApplicationController
 
   def init_name_vars_for_edit(spl)
     init_name_vars_for_create
-    @deprecated_names = spl.names.select(&:deprecated)
+    @deprecated_names = spl.names.where(deprecated: true)
     @place_name = spl.place_name
   end
 
@@ -1096,7 +1102,8 @@ class SpeciesListController < ApplicationController
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title)
+    @projects = User.current.projects_member(order: :title,
+                                             include: { user_group: :users })
     @project_checks = {}
   end
 
@@ -1132,28 +1139,36 @@ class SpeciesListController < ApplicationController
     return unless checks
 
     any_changes = false
-    User.current.projects_member.each do |project|
+    Project.where(id: User.current.projects_member.map(&:id)).
+      includes(:species_lists).each do |project|
       before = spl.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next if before == after
 
-      if after
-        project.add_species_list(spl)
-        flash_notice(:attached_to_project.t(object: :species_list,
-                                            project: project.title))
-      else
-        project.remove_species_list(spl)
-        flash_notice(:removed_from_project.t(object: :species_list,
-                                             project: project.title))
-      end
+      change_project_species_lists(
+        project: project, spl: spl, change: (after ? :add : :remove)
+      )
       any_changes = true
     end
+
     flash_notice(:species_list_show_manage_observations_too.t) if any_changes
   end
 
   ##############################################################################
 
   private
+
+  def change_project_species_lists(project:, spl:, change: :add)
+    if change == :add
+      project.add_species_list(spl)
+      flash_notice(:attached_to_project.t(object: :species_list,
+                                          project: project.title))
+    else
+      project.remove_species_list(spl)
+      flash_notice(:removed_from_project.t(object: :species_list,
+                                           project: project.title))
+    end
+  end
 
   def whitelisted_species_list_args
     ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]

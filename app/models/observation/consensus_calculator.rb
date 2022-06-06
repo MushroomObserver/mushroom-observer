@@ -3,7 +3,7 @@
 class Observation
   class ConsensusCalculator
     def initialize(namings)
-      @namings     = namings
+      @namings     = namings.includes(:name, votes: [:observation, :user])
       @name_votes  = {}  # Strongest vote for a given name for a user.
       @taxon_votes = {}  # Strongest vote for any names in a group of
       #                    synonyms for a given user.
@@ -115,10 +115,10 @@ class Observation
     end
 
     def update_naming_cache(naming, value)
-      if naming.vote_cache != value
-        naming.vote_cache = value
-        naming.save
-      end
+      return unless naming.vote_cache != value
+
+      naming.vote_cache = value
+      naming.save
     end
 
     def find_taxon_votes

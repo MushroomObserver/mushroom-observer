@@ -36,6 +36,7 @@ class AjaxController < ApplicationController
   require_dependency "ajax_controller/external_link"
   require_dependency "ajax_controller/old_translation"
   require_dependency "ajax_controller/pivotal"
+  require_dependency "ajax_controller/primers"
   require_dependency "ajax_controller/upload_image"
   require_dependency "ajax_controller/vote"
 

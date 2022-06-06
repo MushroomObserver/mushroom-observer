@@ -351,6 +351,7 @@ imged_unvouchered_obs:
   <<: *DEFAULTS
   images: query_first_image
   thumb_image: query_first_image
+  rss_log: imged_unvouchered_obs_rss_log
 
 vouchered_obs:
   <<: *DEFAULTS

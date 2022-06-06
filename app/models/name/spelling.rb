@@ -2,6 +2,10 @@
 
 class Name < AbstractModel
   scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+  # For a glitch discovered in the wild:
+  scope :with_self_referential_misspelling, lambda {
+    where(Name[:correct_spelling_id].eq(Name[:id]))
+  }
 
   # Is this Name misspelled?
   def is_misspelling?
@@ -52,7 +56,7 @@ class Name < AbstractModel
     result = nil
     names = find_or_create_name_and_parents(str)
     if names.any? && names.last && names.last.deprecated
-      for name in names.reverse
+      names.reverse_each do |name|
         return name if name.id
       end
     end
@@ -75,9 +79,10 @@ class Name < AbstractModel
       # synonym = <Lepiota>
       parent.synonyms.each do |synonym|
         # "Lepiota bog% var. nam%"
-        conditions = ["text_name like ? AND correct_spelling_id IS NULL",
-                      "#{synonym.text_name} #{child_pat}"]
-        result += Name.where(conditions).select do |name|
+        result += Name.with_correct_spelling.
+                  where(Name[:text_name].
+                        matches("#{synonym.text_name} #{child_pat}")).
+                  select do |name|
           # name = <Lepiota boga var. nama>
           valid_alternate_genus?(name, synonym.text_name, child_pat)
         end
@@ -123,8 +128,8 @@ class Name < AbstractModel
     patterns = []
 
     # Restrict search to names close in length.
-    min_len = Name.connection.quote((name.length - 2).to_s)
-    max_len = Name.connection.quote((name.length + 2).to_s)
+    min_len = name.length - 2
+    max_len = name.length + 2
 
     # Create a bunch of SQL "like" patterns.
     name = name.gsub(/ \w+\. /, " % ")
@@ -147,12 +152,9 @@ class Name < AbstractModel
     end
 
     # Create SQL query out of these patterns.
-    conds = patterns.map do |pat|
-      "text_name LIKE #{Name.connection.quote(pat)}"
-    end.join(" OR ")
-    all_conds = "(LENGTH(text_name) BETWEEN #{min_len} AND #{max_len}) " \
-                "AND (#{conds}) AND correct_spelling_id IS NULL"
-    where(all_conds).limit(10).to_a
+    Name.with_correct_spelling.
+      where(Name[:text_name].length.between(min_len..max_len)).
+      where(Name[:text_name].matches_any(patterns)).limit(10).to_a
   end
 
   # String words together replacing the one at +index+ with +sub+.
@@ -165,4 +167,19 @@ class Name < AbstractModel
   end
 
   private_class_method :guess_pattern
+
+  # This catches cases where correct_spelling_id = id and just clears it.
+  # Not sure why this would ever happen, but empirically there are presently
+  # three cases of it in the database.  Presumably something to do with
+  # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
+  def self.fix_self_referential_misspellings
+    msgs = Name.with_self_referential_misspelling.
+           select(:id, :text_name, :author).
+           map do |id, text_name, author|
+             "Name ##{id} #{text_name} #{author} was a misspelling of itself."
+           end
+    Name.with_self_referential_misspelling.
+      update_all(correct_spelling_id: nil)
+    msgs
+  end
 end

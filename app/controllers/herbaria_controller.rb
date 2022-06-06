@@ -22,7 +22,7 @@
 
 # Table: legacy Herbariums actions vs updated Herbaria actions
 #
-# legacy Herbarium action (method)  upddated Herbaria action (method)
+# legacy Herbarium action (method)  updated Herbaria action (method)
 # --------------------------------  ---------------------------------
 # create_herbarium (get)            new (get)
 # create_herbarium (post)           create (post)
@@ -46,8 +46,8 @@
 
 # View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController
-  # filters
-  before_action :login_required, only: [:create, :destroy, :edit, :new, :update]
+  before_action :login_required
+  # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
   before_action :pass_query_params, only: [
     :create, :destroy, :edit, :new, :show, :update
@@ -142,7 +142,7 @@ class HerbariaController < ApplicationController
     if user_can_destroy_herbarium?
       @herbarium.destroy
       redirect_to_referrer ||
-        redirect_with_query(herbaria_path(id: @herbarium.try(&:id)))
+        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
       redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
@@ -190,7 +190,7 @@ class HerbariaController < ApplicationController
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
     }.merge(args,
-            template: "/herbaria/index.html.erb", # render with this template
+            template: "/herbaria/index", # render with this template
             # Add some alternate sorting criteria.
             sorting_links: [["records",     :sort_by_records.t],
                             ["user",        :sort_by_user.t],

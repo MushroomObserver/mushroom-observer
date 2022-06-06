@@ -93,7 +93,7 @@ class Comment
 
   def users_with_other_comments
     Comment.where(target_type: target_type, target_id: target_id).
-      map(&:user).uniq
+      includes(:user).map(&:user).uniq
   end
 
   USER_LINK_PAT = /
@@ -127,7 +127,7 @@ class Comment
     if /^\d+$/.match?(name)
       User.safe_find(name)
     else
-      User.find_by_login(name) || User.find_by_name(name)
+      User.find_by(login: name) || User.find_by_name(name)
     end
   end
 

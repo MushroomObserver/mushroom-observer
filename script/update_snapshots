@@ -3,17 +3,20 @@ set -e
 
 source $(dirname $0)/bash_include
 
-config_file=$app_root/config/mysql-production.cnf
+config_file=$app_root/config/mysql-$RAILS_ENV.cnf
 public=$app_root/public
 
-echo "image_id  observation_id" > $public/images_observations.csv
+echo "image_id	observation_id" > $public/images_observations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select image_id, observation_id from images_observations' >> $public/images_observations.csv
 
-echo "id  name  north south east  west  high  low" > $public/locations.csv
+echo "id	name	north	south	east	west	high	low" > $public/locations.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name, north, south, east, west, high, low from locations' >> $public/locations.csv
 
-echo "id  text_name author  deprecated  correct_spelling_id synonym_id  rank" > $public/names.csv
+echo "id	text_name	author	deprecated	correct_spelling_id	synonym_id	rank" > $public/names.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, text_name, author, deprecated, correct_spelling_id, synonym_id, `rank` from names' >> $public/names.csv
 
-echo "id  name_id when  location_id lat long  alt vote_cache  is_collection_location" > $public/observations.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location from observations' >> $public/observations.csv
+echo "id	name_id	when	location_id	lat	long	alt	vote_cache	is_collection_location	thumb_image_id" > $public/observations.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, location_id, if(gps_hidden, round(lat, 0), lat) as lat, if(gps_hidden, round(`long`, 0), `long`) as `long`, alt, vote_cache, is_collection_location, thumb_image_id from observations' >> $public/observations.csv
+
+echo "id	name_id	source_type	source_name	general_description	diagnostic_description	distribution	habitat	look_alikes	uses	notes	refs" > $public/name_descriptions.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, source_type, source_name, gen_desc, diag_desc, distribution, habitat, look_alikes, uses, notes, refs from name_descriptions where public is true' >> $public/name_descriptions.csv

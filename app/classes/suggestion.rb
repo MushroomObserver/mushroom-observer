@@ -37,7 +37,7 @@ class Suggestion
   end
 
   def sum
-    @sum ||= @probs.inject(0.0) { |sum, val| sum + val }
+    @sum ||= @probs.sum(0.0)
   end
 
   def confident?
@@ -78,14 +78,14 @@ class Suggestion
   end
 
   def example_image_obs
-    id = Observation.connection.select_value(%(
-      SELECT o.id FROM observations o
-      JOIN images i ON i.id = o.thumb_image_id
-      WHERE o.name_id IN (#{@name.synonym_ids.join(",")})
-      AND o.vote_cache >= 2
-      ORDER BY o.vote_cache + i.vote_cache DESC
-      LIMIT 1
-    ))
-    Observation.safe_find(id)
+    # Joining the Arel tables explicitly on(x) generates a clean INNER JOIN:
+    o_i_inner_join = Observation.arel_table.join(Image.arel_table).
+                     on(Image[:id].eq(Observation[:thumb_image_id]))
+
+    # Below we just return the observation itself, not the id then safe_find(id)
+    # Note: Ruby 2.7 will allow endless ranges like (vote_cache: 2..)
+    Observation.joins(o_i_inner_join.join_sources).
+      where(name_id: @name.synonym_ids, vote_cache: 2..Float::INFINITY).
+      order((Observation[:vote_cache] + Image[:vote_cache]).desc).take
   end
 end

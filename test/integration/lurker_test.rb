@@ -5,6 +5,7 @@ require("test_helper")
 # Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < IntegrationTestCase
   def test_poke_around
+    login
     # Start at index.
     get("/")
     assert_template("observer/list_rss_logs")
@@ -14,8 +15,8 @@ class LurkerTest < IntegrationTestCase
     assert_template("observer/show_observation")
 
     # Click on prev/next
-    click(label: "« Prev", in: :title)
     click(label: "Next »", in: :title)
+    click(label: "« Prev", in: :title)
 
     # Click on the first image.
     click(label: :image, href: /show_image/)
@@ -91,6 +92,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_search
+    login
     get("/")
 
     # Search for a name.  (Only one.)
@@ -107,13 +109,15 @@ class LurkerTest < IntegrationTestCase
     assert_match(%r{^/#{observations(:coprinus_comatus_obs).id}\?},
                  @request.fullpath)
 
+    # Image pattern searches temporarily disabled for performamce
+    # 2021-09-12 JDC
     # Search for images of the same thing.  (Still only one.)
-    form.select("type", "Images")
-    form.submit("Search")
-    assert_match(
-      %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
-      @request.fullpath
-    )
+    # form.select("type", "Images")
+    # form.submit("Search")
+    # assert_match(
+    #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+    #   @request.fullpath
+    # )
 
     # There should be no locations of that name, though.
     form.select("type", "Locations")
@@ -138,6 +142,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_search_next
+    login
     get("/")
 
     # Search for a name.  (More than one.)
@@ -152,6 +157,7 @@ class LurkerTest < IntegrationTestCase
   end
 
   def test_obs_at_location
+    login
     # Start at distribution map for Fungi.
     get("/name/map/#{names(:fungi).id}")
 

@@ -28,10 +28,11 @@ class Query::ImageAdvancedSearch < Query::ImageBase
   end
 
   def execute_content_search(args)
-    args2 = args.dup
-    args2.delete(:select)
-    params2 = params.dup
-    params2.delete(:by)
+    # [Sorry, yes, this is a mess. But I don't expect this type of search
+    # to survive much longer. Image searches are in desperate need of
+    # critical revision for performance concerns, anyway. -JPH 20210809]
+    args2 = args.except(:select, :order, :group)
+    params2 = params.except(:by)
     ids = Query.lookup(:Observation, flavor, params2).result_ids(args2)
     ids = clean_id_set(ids)
     args2 = args.dup

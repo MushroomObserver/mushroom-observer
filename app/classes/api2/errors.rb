@@ -289,6 +289,10 @@ class API2
   class CantAddHerbariumRecord < Error
   end
 
+  # Tried to create api key for user with incorrect password.
+  class PasswordIncorrect < Error
+  end
+
   ##############################################################################
 
   # Request requires upload.

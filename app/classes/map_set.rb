@@ -28,13 +28,13 @@ class MapSet
   end
 
   def init_objects
-    for obj in @objects
+    @objects.each do |obj|
       if obj.is_location?
         update_extents_with_box(obj)
       elsif obj.is_observation?
         if obj.lat && !obj.lat_long_dubious?
           update_extents_with_point(obj)
-        elsif loc = obj.location
+        elsif (loc = obj.location)
           update_extents_with_box(loc)
         end
       else

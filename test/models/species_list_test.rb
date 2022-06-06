@@ -127,4 +127,29 @@ class SpeciesListTest < UnitTestCase
     assert_users_equal(mary, v.user)
     assert_equal(Vote.next_best_vote, v.value)
   end
+
+  def test_destroy_orphans_log
+    spl = species_lists(:first_species_list)
+    log = spl.rss_log
+    assert_not_nil(log)
+    spl.destroy!
+    assert_nil(log.reload.target_id)
+  end
+
+  def test_define_location
+    list = species_lists(:no_location_list)
+    old_where_name = list.where
+    new_location = locations(:with_single_quotes_location)
+
+    SpeciesList.define_a_location(new_location, old_where_name)
+
+    assert_equal(
+      new_location.name, list.reload.where,
+      "SpeciesList#where should change upon defining that Location"
+    )
+    assert_equal(
+      new_location.id, list.location_id,
+      "SpeciesList#location_id should change upon defining that Location"
+    )
+  end
 end

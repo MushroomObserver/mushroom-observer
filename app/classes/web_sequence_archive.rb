@@ -29,7 +29,7 @@ class WebSequenceArchive
     end
 
     def all_archives
-      archives.map { |archive| archive[:name] }
+      archives.pluck(:name)
     end
 
     def valid_archive?(str)

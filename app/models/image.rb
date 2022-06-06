@@ -65,7 +65,7 @@ require("mimemagic")
 #
 #       # Supply any extra header info you may have.
 #       image.content_type = 'image/jpeg'
-#       image.md5sum = request.header[...]
+#       image.upload_md5sum = request.header[...]
 #
 #       # Validate and save record.
 #       image.save
@@ -209,8 +209,11 @@ require("mimemagic")
 #  ==== Callbacks and Logging
 #  update_thumbnails::  Change thumbnails before destroy.
 #  track_copyright_changes:: Log changes in copyright info.
-#  log_update::         Log update in associated Observation's.
-#  log_destroy::        Log destroy in associated Observation's.
+#  log_update::         Log update in associated observations, etc.
+#  log_destroy::        Log destroy in associated observations, etc.
+#  log_create_for::     Log adding new image to associated observtion, etc.
+#  log_reuse_for::      Log adding existing image to associated observtion, etc.
+#  log_remove_from::    Log removing image from associated observtion, etc.
 #
 ################################################################################
 #
@@ -235,8 +238,8 @@ class Image < AbstractModel
 
   has_many :copyright_changes, as: :target, dependent: :destroy
 
-  before_destroy :update_thumbnails
   after_update :track_copyright_changes
+  before_destroy :update_thumbnails
 
   def all_glossary_terms
     best_glossary_terms + glossary_terms
@@ -281,6 +284,11 @@ class Image < AbstractModel
     else
       title + " (#{id || "?"})"
     end
+  end
+
+  # How this image is refered to in the rss logs.
+  def log_name
+    "#{:Image.t} ##{id || was || "?"}"
   end
 
   ##############################################################################
@@ -613,8 +621,8 @@ class Image < AbstractModel
   # ever actually happens).  Provide default name if not provided.
   def validate_image_name
     name = upload_original_name.to_s
-    name.sub!(/^[a-zA-Z]:/, "")
-    name.sub!(%r{^.*[/\\]}, "")
+    name = name.sub(/^[a-zA-Z]:/, "")
+    name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     return unless name.present? && User.current &&
@@ -673,7 +681,7 @@ class Image < AbstractModel
   # be called after the image has been validated and the record saved.  (We
   # need to have an ID at this point.)  Adds any errors to the :image field
   # and returns false.
-  def process_image(strip = false)
+  def process_image(strip: false)
     result = true
     if new_record?
       errors.add(:image, "Called process_image before saving image record.")
@@ -810,12 +818,12 @@ class Image < AbstractModel
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
   # integers.  Returns value of new vote.
-  def change_vote(user, value = nil, anon = false)
+  def change_vote(user, value, anon: false)
     user_id = user.is_a?(User) ? user.id : user.to_i
     save_changes = !changed?
 
     # Modify image_votes table first.
-    vote = image_votes.find_by_user_id(user_id)
+    vote = image_votes.find_by(user_id: user_id)
     if (value = self.class.validate_vote(value))
       if vote
         vote.value = value
@@ -898,14 +906,33 @@ class Image < AbstractModel
     end
   end
 
-  # Log update in associated Observation's.
+  # Log update in associated observations, glossary terms, etc.
   def log_update
-    observations.each { |obs| obs.log_update_image(self) }
+    (glossary_terms + observations).each do |object|
+      object.log(:log_image_updated, name: log_name, touch: false)
+    end
   end
 
-  # Log destruction in associated Observation's.
+  # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
-    observations.each { |obs| obs.log_destroy_image(self) }
+    (glossary_terms + observations).each do |object|
+      object.log(:log_image_destroyed, name: log_name, touch: true)
+    end
+  end
+
+  # Log adding new image to an associated observation, glossary term, etc.
+  def log_create_for(object)
+    object.log(:log_image_created, name: log_name, touch: true)
+  end
+
+  # Log adding existing image to an associated observation, glossary term, etc.
+  def log_reuse_for(object)
+    object.log(:log_image_reused, name: log_name, touch: true)
+  end
+
+  # Log removing an image from an associated observation, glossary term, etc.
+  def log_remove_from(object)
+    object.log(:log_image_removed, name: log_name, touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.
@@ -942,29 +969,30 @@ class Image < AbstractModel
 
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
-    # This is orders of magnitude faster than doing via active-record.
-    old_name = Image.connection.quote(old_name)
-    new_name = Image.connection.quote(new_name)
-    data = Image.connection.select_rows(%(
-      SELECT id, YEAR(`when`), license_id FROM images
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    data = Image.where(user: user, copyright_holder: old_name).
+           pluck(:id, Image[:when].year, :license_id)
     return unless data.any?
 
-    # brakeman generates what appears to be a false positive SQL injection
-    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{data.map do |id, year, lic|
-            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
-          end.join(",\n")}
-    ))
-    Image.connection.update(%(
-      UPDATE images SET copyright_holder = #{new_name}
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    CopyrightChange.insert_all(copyright_change_new_rows(data, old_name, user))
+
+    Image.where(user_id: user.id, copyright_holder: old_name).
+      update_all(copyright_holder: new_name)
+  end
+
+  private_class_method def self.copyright_change_new_rows(
+    data, old_name, user
+  )
+    data.map do |id, year, lic|
+      Hash[
+        "user_id" => user.id,
+        "updated_at" => Time.zone.now,
+        "target_type" => "Image",
+        "target_id" => id,
+        "year" => year,
+        "name" => old_name,
+        "license_id" => lic
+      ]
+    end
   end
 
   def year

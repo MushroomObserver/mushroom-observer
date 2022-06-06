@@ -97,12 +97,13 @@ class ObserverController
     @life_list = Checklist::ForUser.new(@show_user)
     @query = Query.lookup(:Observation, :by_user,
                           user: @show_user, by: :owners_thumbnail_quality)
-    @observations = @query.results(limit: 6)
+    image_includes = { thumb_image: [:image_votes, :license, :user] }
+    @observations = @query.results(limit: 6, include: image_includes)
     return unless @observations.length < 6
 
     @query = Query.lookup(:Observation, :by_user,
                           user: @show_user, by: :thumbnail_quality)
-    @observations = @query.results(limit: 6)
+    @observations = @query.results(limit: 6, include: image_includes)
   end
 
   # Go to next user: redirects to show_user.

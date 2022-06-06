@@ -1,14 +1,9 @@
 # frozen_string_literal: true
 
+# Control information about publications that benefit from or cite MO
 class PublicationsController < ApplicationController
-  before_action :login_required, except: [
-    :index,
-    :show
-  ]
-
-  before_action :require_successful_user, only: [
-    :create
-  ]
+  before_action :login_required, except: [:index, :show]
+  before_action :require_successful_user, only: [:create]
 
   # GET /publications
   # GET /publications.xml

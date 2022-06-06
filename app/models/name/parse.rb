@@ -22,10 +22,10 @@ class Name < AbstractModel
                       (?:\s|$) /x.freeze
 
   UPPER_WORD = /
-                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]"
+                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
   /x.freeze
   LOWER_WORD = /
-    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]"
+    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
     /x.freeze
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x.freeze
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
@@ -38,7 +38,7 @@ class Name < AbstractModel
   AUTHOR_START = /
     #{ANY_AUTHOR_ABBR} |
     van\s | d[eu]\s |
-    [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] |
+    [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
     "[^a-z\s]
   /x.freeze
 
@@ -275,7 +275,7 @@ class Name < AbstractModel
 
   def self.parse_below_genus(str, deprecated, rank, pattern)
     results = nil
-    if match = pattern.match(str)
+    if (match = pattern.match(str))
       name = match[1]
       author = match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species
@@ -355,9 +355,9 @@ class Name < AbstractModel
   # Convert to: Amanita vaginatae var. vaginatae Author
   def self.fix_autonym(name, author, rank)
     last_word = name.split(" ").last.gsub(/[()]/, "")
-    if match = author.to_s.match(
+    if (match = author.to_s.match(
       /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
-    )
+    ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
       words = match[2].split(" ")
@@ -421,23 +421,29 @@ class Name < AbstractModel
     end
   end
 
+  # matches to ranks that are included in the name proper
+  # subspecies is not included because it's the catchall default
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i.freeze
+
+  # convert rank start_match to standard form of rank
+  # subspecies is not included because it's the catchall default
+  STANDARD_SECONDARY_RANKS = {
+    f: "f.",
+    sect: "sect.",
+    stirps: "stirps",
+    subg: "subg.",
+    subsect: "subsect.",
+    v: "var."
+  }.freeze
+
   def self.standardize_name(str)
     words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i.positive?
-      words[i] = if /^f/i.match?(words[i])
-                   "f."
-                 elsif /^v/i.match?(words[i])
-                   "var."
-                 elsif /^sect/i.match?(words[i])
-                   "sect."
-                 elsif /^stirps/i.match?(words[i])
-                   "stirps"
-                 elsif /^subg/i.match?(words[i])
-                   "subgenus"
-                 elsif /^subsect/i.match?(words[i])
-                   "subsect."
+      words[i] = if (match_start_of_rank = RANK_START_MATCHER.match(words[i]))
+                   start_of_rank = match_start_of_rank[0]
+                   STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
                  else
                    "subsp."
                  end
@@ -496,9 +502,9 @@ class Name < AbstractModel
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
-          sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
+          sub(/ "(sp[\-.])/, ' {\1'). # put "sp-1" at end
           gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-          sub(" subgenus ", " {1subgenus ").
+          sub(" subg. ", " {1subg. ").
           sub(" sect. ",    " {2sect. ").
           sub(" subsect. ", " {3subsect. ").
           sub(" stirps ",   " {4stirps ").

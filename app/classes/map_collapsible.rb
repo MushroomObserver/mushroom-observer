@@ -83,13 +83,13 @@ class CollapsibleCollectionOfMappableObjects
     raise("Tried to create empty map!") if objects.empty?
 
     @sets = {}
-    for obj in objects
+    objects.each do |obj|
       if obj.is_location?
         add_box_set(obj, [obj], MAX_PRECISION)
       elsif obj.is_observation?
         if obj.lat && !obj.lat_long_dubious?
           add_point_set(obj, [obj], MAX_PRECISION)
-        elsif loc = obj.location
+        elsif (loc = obj.location)
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
@@ -103,7 +103,7 @@ class CollapsibleCollectionOfMappableObjects
     while @sets.length > @max_objects && prec >= MIN_PRECISION
       old_sets = @sets.values
       @sets = {}
-      for set in old_sets
+      old_sets.each do |set|
         add_box_set(set, set.objects, prec)
       end
       prec = next_precision(prec)
@@ -141,7 +141,7 @@ class CollapsibleCollectionOfMappableObjects
 
   def calc_extents
     result = MapSet.new
-    for mapset in mapsets
+    mapsets.each do |mapset|
       result.update_extents_with_box(mapset)
     end
     result

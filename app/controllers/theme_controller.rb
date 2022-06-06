@@ -9,9 +9,8 @@
 #
 class ThemeController < ApplicationController
   # callbacks
-  before_action :login_required, except: MO.themes + [
-    :color_themes
-  ]
+  before_action :login_required
+  # except: MO.themes + [:color_themes]
   before_action :disable_link_prefetching
 
   # Show general information on color themes

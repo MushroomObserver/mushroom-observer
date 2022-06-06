@@ -23,8 +23,8 @@ class QueuedEmail::NameProposal < QueuedEmail
 
   def deliver_email
     # Make sure nothing's been deleted since email was queued.
-    if naming && observation
-      NameProposalEmail.build(user, to_user, naming, observation).deliver_now
-    end
+    return unless naming && observation
+
+    NameProposalEmail.build(user, to_user, naming, observation).deliver_now
   end
 end

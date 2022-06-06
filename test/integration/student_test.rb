@@ -32,6 +32,7 @@ class StudentTest < IntegrationTestCase
     rolf_session.check_admin(url, gen_desc, project)
     katrina_session.check_another_student(url)
     dick_session.check_another_user(url)
+    lurker_session.login
     lurker_session.check_another_user(url)
   end
 
@@ -64,7 +65,7 @@ class StudentTest < IntegrationTestCase
   module CreatorDsl
     # Navigate to show name (no descriptions) and create draft.
     def create_draft(name, gen_desc, project)
-      assert_nil(NameDescription.find_by_gen_desc(gen_desc))
+      assert_nil(NameDescription.find_by(gen_desc: gen_desc))
       get("/")
       click(label: "Names", in: :left_panel)
       click(label: name.text_name)
@@ -111,7 +112,7 @@ class StudentTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      assert_not_nil(NameDescription.find_by_gen_desc(gen_desc))
+      assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))
       url
     end
   end

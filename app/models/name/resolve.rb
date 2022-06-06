@@ -158,8 +158,10 @@ class Name < AbstractModel
 
     log ||= :log_name_updated
     args = { touch: altered? }.merge(args)
+    return false unless save
+
     log(log, args)
-    save
+    true
   end
 
   # A common mistake is capitalizing the species epithet. If the second word
@@ -171,13 +173,13 @@ class Name < AbstractModel
     return str unless str.match?(/^\S+ [A-Z]/)
 
     # Trust it if there is actually a name with that author present.
-    return str if Name.find_by_search_name(str).present?
+    return str if Name.find_by(search_name: str).present?
 
     # Try converting second word to lowercase.
     str2 = str.sub(/ [A-Z]/, &:downcase)
 
     # Return corrected name if that name exists, else keep original name.
-    if Name.where("search_name = ? OR text_name = ?", str2, str2).present?
+    if Name.where(search_name: str2).or(Name.where(text_name: str2)).present?
       str2
     else
       str

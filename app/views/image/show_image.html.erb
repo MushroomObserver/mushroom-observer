@@ -131,7 +131,7 @@
               <tr>
                 <td>
                   <%= chgs[-1].updated_at.web_date %> &rarr;
-                  <%= @image.updated_at.web_date %>
+                  <%= Time.zone.now.web_date %>
                 </td>
                 <td>
                   <%= link_to(@image.license.display_name.t, @image.license.url) %>

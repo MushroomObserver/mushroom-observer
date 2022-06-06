@@ -159,13 +159,17 @@ app/extensions/symbol_extensions.rb. See also README_TRANSLATIONS.
 
 = Continuous Integration
 
-We use Travis CI for continuous integration. Travis will run on pushes to our
-GitHub repository. The Travis job runs:
-- our test suite,
-- Codeclimate, which uses RuboCop and Brakeman to provide style and code
-  quality information and metrics; and
-- Coveralls, which provides code coverage details.
+We use GitHub Actions and Codeclimate for continuous integration.
+They run on pushes or PRs to our GitHub repository.
+- The GitHub Actions workflow runs:
+  - our Minitest test suite,
+  - creates a coverage file and submits it to Coveralls.
+- Coveralls then uses that file to report code coverage details.
+- Codeclimate uses RuboCop, Brakeman, and other linters
+  to provide style and code quality information and metrics.
+  Codeclimate runs independently of, and in parallel to, Github Actions.
 
-Developers should not only clean up test errors and failures, but also any new
-Codecllimate issues and any test coverage decreases.
-
+Developers should
+- fix any test errors and failures,
+- fix any new Codeclimate issues,
+- fix any test coverage decreases.

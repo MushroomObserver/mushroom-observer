@@ -286,6 +286,7 @@ class Name < AbstractModel
   require_dependency "name/notify"
   require_dependency "name/parse"
   require_dependency "name/primer"
+  require_dependency "name/propagate_generic_classifications"
   require_dependency "name/resolve"
   require_dependency "name/synonymy"
   require_dependency "name/taxonomy"
@@ -326,7 +327,7 @@ class Name < AbstractModel
 
   has_many :misspellings, class_name: "Name",
                           foreign_key: "correct_spelling_id"
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order num_views: :desc },
            class_name: "NameDescription",
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
@@ -386,23 +387,25 @@ class Name < AbstractModel
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
-  # (Destruction is already logged as a merge.)
-  self.autolog_events = []
+  # (Create should not be logged at all.  Update is already logged with more
+  # sphistication than the autologger allows.  Merge will already log the
+  # destruction as a merge and orphan the log.
+  self.autolog_events = [:destroyed]
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
     if (ver.version != 1) &&
-       Name.connection.select_value(%(
-         SELECT COUNT(*) FROM names_versions
-         WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Name::Version.where(name_id: ver.name_id,
+                           user_id: ver.user_id).none?
       SiteData.update_contribution(:add, :names_versions)
     end
   end
 
   scope :with_rank,
-        ->(rank) { where("`rank` = ?", Name.ranks[rank]) if rank }
+        ->(rank) { where(rank: Name.ranks[rank]) if rank }
+
+  scope :not_deprecated, -> { where(deprecated: false) }
 
   def <=>(other)
     sort_name <=> other.sort_name
@@ -414,15 +417,8 @@ class Name < AbstractModel
 
   # Used by show_name.
   def self.count_observations(names)
-    ids = names.map(&:id)
-    counts_and_ids = Name.connection.select_rows(%(
-        SELECT count(*) c, names.id i FROM observations, names
-        WHERE observations.name_id = names.id
-        AND names.id IN (#{ids.join(", ")}) group by names.id
-    ))
-    result = {}
-    counts_and_ids.each { |row| result[row[1]] = row[0] }
-    result
+    Hash[*Observation.group(:name_id).where(name: names).
+         pluck(:name_id, Arel.star.count).to_a.flatten]
   end
 
   ##############################################################################
@@ -433,9 +429,8 @@ class Name < AbstractModel
   def icn_id_registrable
     return if icn_id.blank? || registrable?
 
-    errors[:base] << :name_error_unregistrable.t(
-      rank: rank.to_s, name: real_search_name
-    )
+    errors.add(:base, :name_error_unregistrable.t,
+               rank: rank.to_s, name: real_search_name)
   end
 
   # Require icn_id to be unique
@@ -445,9 +440,8 @@ class Name < AbstractModel
     return if icn_id.nil?
     return if (conflicting_name = other_names_with_same_icn_id.first).blank?
 
-    errors[:base] << :name_error_icn_id_in_use.t(
-      number: icn_id, name: conflicting_name.real_search_name
-    )
+    errors.add(:base, :name_error_icn_id_in_use.t,
+               number: icn_id, name: conflicting_name.real_search_name)
   end
 
   def other_names_with_same_icn_id

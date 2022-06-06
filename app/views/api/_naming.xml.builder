@@ -16,7 +16,7 @@ xml.tag!(tag,
       end
     end
   end
-  reasons = object.get_reasons.select(&:used?)
+  reasons = object.reasons_array.select(&:used?)
   if reasons.any?
     xml.reasons(number: reasons.length) do
       reasons.each do |reason|

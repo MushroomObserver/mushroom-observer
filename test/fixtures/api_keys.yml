@@ -21,6 +21,15 @@ marys_api_key:
   key: aSFGWQWER14kjhdfasd134k1dxASrfh
   notes: Doesn't get used very often.
 
+rolfs_mo_app_api_key:
+  created_at: 2021-02-09 01:23:45
+  verified: 2021-02-09 01:23:45
+  last_used: 2021-11-05 22:41:27
+  num_uses: 10
+  user: rolf
+  key: aSDfkljJsdfglkDJSwEarLKjkerADGl
+  notes: MO App
+
 # The next 3 fixtures are used to test whether sql collates accented letters.
 # Has nothing to do with APIs; This is just a convenient spot to add fixtures.
 api_key_u_1:

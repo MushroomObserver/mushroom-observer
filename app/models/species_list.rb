@@ -120,10 +120,25 @@ class SpeciesList < AbstractModel
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
-    SpeciesList.connection.delete(%(
-      DELETE FROM observations_species_lists
-      WHERE species_list_id = #{id}
-    ))
+
+    # Nimmo Note: afaik, we cannot yet use AR delete_all here because the
+    # observations_species_lists table is not backed by a model
+    # (i.e., it's has_and_belongs_to_many vs. has_many_through)
+    # Conversion to HMT is possible but not super-simple.
+    # SpeciesList.connection.delete(%(
+    #   DELETE FROM observations_species_lists
+    #   WHERE species_list_id = #{id}
+    # ))
+    delete_manager = arel_delete_observations_species_lists(id)
+    # puts(delete_manager.to_sql)
+    SpeciesList.connection.delete(delete_manager.to_sql)
+  end
+
+  def arel_delete_observations_species_lists(id)
+    osl = Arel::Table.new(:observations_species_lists)
+    Arel::DeleteManager.new.
+      from(osl).
+      where(osl[:species_list_id].eq(id))
   end
 
   ##############################################################################
@@ -173,7 +188,7 @@ class SpeciesList < AbstractModel
     title
   end
 
-  # Return formatted title with id appended to make in unique.
+  # Return formatted title with id appended to make unique.
   def unique_format_name
     title = self.title
     if title.blank?
@@ -190,43 +205,7 @@ class SpeciesList < AbstractModel
 
   # Get list of Names, sorted by sort_name, for this list's Observation's.
   def names
-    # Takes 0.07 seconds on Sebastopol Observations.
-    # (Methods that call this don't need the description, review status, etc.)
-    Name.find_by_sql(%(
-      SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
-             n.author, n.display_name, n.display_name, n.synonym_id,
-             n.correct_spelling_id, n.citation
-      FROM names n, observations o, observations_species_lists os
-      WHERE n.id = o.name_id
-        AND os.observation_id = o.id
-        AND os.species_list_id = #{id}
-      ORDER BY n.sort_name ASC
-    ))
-
-    # Takes 0.10 seconds on Sebastopol Observations.
-    # Name.find_by_sql %(
-    #   SELECT DISTINCT n.*
-    #   FROM names n, observations o, observations_species_lists os
-    #   WHERE n.id = o.name_id
-    #     AND os.observation_id = o.id
-    #     AND os.species_list_id = #{id}
-    #   ORDER BY n.sort_name ASC
-    # )
-
-    # Takes 0.25 seconds on Sebastopol Observations.
-    # ids = observations.map(&:name_id).uniq
-    # Name.find(:all, :conditions => ['id IN (?)', ids], :
-    #           order => 'sort_name ASC')
-
-    # Takes 0.71 seconds on Sebastopol Observations.
-    # self.observations.map {|o| o.name_id}.
-    #   uniq.map {|id| Name.find(id)}.sort_by(&:sort_name)
-
-    # Takes 1.00 seconds on Sebastopol Observations.
-    # Name.all(:conditions =>
-    #            ['observations_species_lists.species_list_id = ?', id],
-    #          :include => {:observations => :species_lists},
-    #          :order => 'names.sort_name ASC')
+    Name.where(id: observations.map(&:name_id).uniq).order(sort_name: :asc)
   end
 
   # Tests to see if the species list includes an Observation with the given
@@ -237,13 +216,9 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
-    old_name = connection.quote(old_name)
-    new_name = connection.quote(location.name)
-    connection.update(%(
-      UPDATE species_lists
-      SET `where` = #{new_name}, location_id = #{location.id}
-      WHERE `where` = #{old_name}
-    ))
+    SpeciesList.where(where: old_name).update_all(
+      where: location.name, location_id: location.id
+    )
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
@@ -467,8 +442,11 @@ class SpeciesList < AbstractModel
 
   protected
 
-  validate :check_requirements
-  def check_requirements # :nodoc:
+  include Validations
+
+  validate :check_requirements, :check_when
+
+  def check_requirements
     # Clean off leading/trailing whitespace from +where+.
     self.where = where.strip_squeeze if where
     self.where = nil if where == ""
@@ -485,8 +463,13 @@ class SpeciesList < AbstractModel
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 
-    if !user && !User.current
-      errors.add(:user, :validate_species_list_user_missing.t)
-    end
+    return unless !user && !User.current
+
+    errors.add(:user, :validate_species_list_user_missing.t)
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    validate_when(self.when, errors)
   end
 end

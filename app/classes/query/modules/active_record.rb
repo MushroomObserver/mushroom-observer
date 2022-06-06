@@ -46,7 +46,7 @@ module Query
 
         def get_record(query)
           desc = query.serialize
-          QueryRecord.find_by_description(desc) ||
+          QueryRecord.find_by(description: desc) ||
             QueryRecord.new(
               description: desc,
               updated_at: Time.zone.now,

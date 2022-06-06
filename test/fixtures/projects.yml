@@ -52,6 +52,7 @@ two_list_project:
   user_group: mary_only
   admin_group: mary_only
   species_lists: query_first_list, query_second_list
+  rss_log: project_rss_log
 
 obs_collected_and_displayed_project:
   <<: *DEFAULTS

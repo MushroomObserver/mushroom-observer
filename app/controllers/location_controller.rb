@@ -6,30 +6,31 @@ require("geocoder")
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_action :login_required, except: [
-    :advanced_search,
-    :help,
-    :index_location,
-    :index_location_description,
-    :list_by_country,
-    :list_countries,
-    :list_location_descriptions,
-    :list_locations,
-    :location_descriptions_by_author,
-    :location_descriptions_by_editor,
-    :location_search,
-    :locations_by_editor,
-    :locations_by_user,
-    :map_locations,
-    :next_location,
-    :prev_location,
-    :next_location_description,
-    :prev_location_description,
-    :show_location,
-    :show_location_description,
-    :show_past_location,
-    :show_past_location_description
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :help,
+  #   :index_location,
+  #   :index_location_description,
+  #   :list_by_country,
+  #   :list_countries,
+  #   :list_location_descriptions,
+  #   :list_locations,
+  #   :location_descriptions_by_author,
+  #   :location_descriptions_by_editor,
+  #   :location_search,
+  #   :locations_by_editor,
+  #   :locations_by_user,
+  #   :map_locations,
+  #   :next_location,
+  #   :prev_location,
+  #   :next_location_description,
+  #   :prev_location_description,
+  #   :show_location,
+  #   :show_location_description,
+  #   :show_past_location,
+  #   :show_past_location_description
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_location,
@@ -450,8 +451,9 @@ class LocationController < ApplicationController
       if subversion.present? &&
          (version.version != subversion.to_i)
         version = LocationDescription::Version.
-                  find_by_version_and_location_description_id(
-                    params[:version], @old_parent_id
+                  find_by(
+                    version: params[:version],
+                    location_description_id: @old_parent_id
                   )
       end
       @description.clone_versioned_model(version, @description)
@@ -480,7 +482,7 @@ class LocationController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create/Edit Location
+  #  :section: Create/Edit/Destroy Location
   #
   ##############################################################################
   def create_location
@@ -583,13 +585,9 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          if unshown_notifications?(@user, :naming)
-            redirect_to(controller: :observer, action: :show_notifications)
-          else
-            redirect_to(controller: :observer,
-                        action: :show_observation,
-                        id: @set_observation)
-          end
+          redirect_to(controller: :observer,
+                      action: :show_observation,
+                      id: @set_observation)
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,
                       id: @set_species_list)
@@ -634,8 +632,19 @@ class LocationController < ApplicationController
     if merge && merge != @location
       post_edit_location_merge(merge)
     else
+      email_admin_location_change if nontrivial_location_change?
       post_edit_location_change(db_name)
     end
+  end
+
+  def destroy_location
+    return unless in_admin_mode?
+    return unless (@location = find_or_goto_index(Location, params[:id].to_s))
+
+    if @location.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Location, value: params[:id]))
+    end
+    redirect_to(location_list_locations_path)
   end
 
   # Merge this location with another.
@@ -691,6 +700,30 @@ class LocationController < ApplicationController
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(@location.show_link_args)
     end
+  end
+
+  def nontrivial_location_change?
+    old_name = @location.display_name
+    new_name = @display_name
+    new_name.percent_match(old_name) < 0.9
+  end
+
+  def email_admin_location_change
+    subject = "Nontrivial Location Change"
+    content = email_location_change_content
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+    LocationControllerTest.report_email(content) if Rails.env.test?
+  end
+
+  def email_location_change_content
+    :email_location_change.l(
+      user: @user.login,
+      old: @location.display_name,
+      new: @display_name,
+      observations: @location.observations.length,
+      show_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
+      edit_url: "#{MO.http_domain}/location/edit_location/#{@location.id}"
+    )
   end
 
   def create_location_description

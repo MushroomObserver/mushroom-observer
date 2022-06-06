@@ -75,6 +75,7 @@ delete from queued_email_strings;
 delete from queued_emails;
 
 update users set email = 'webmaster@mushroomobserver.org';
+# Set all passwords to just "password".
 update users set password = 'ae98587c6f1599fbdcc800e66db6874a8fa0e713';
 
 update votes

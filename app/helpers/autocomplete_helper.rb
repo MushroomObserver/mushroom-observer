@@ -12,11 +12,11 @@ module AutocompleteHelper
   # id::   id of text_field
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts = {})
-    if can_do_ajax?
-      opts[:input_id] = id
-      js_args = escape_js_opts(opts)
-      inject_javascript_at_end("new MOAutocompleter(#{js_args})")
-    end
+    return unless can_do_ajax?
+
+    opts[:input_id] = id
+    js_args = escape_js_opts(opts)
+    inject_javascript_at_end("new MOAutocompleter(#{js_args})")
   end
 
   # Make text_field auto-complete for fixed set of strings.

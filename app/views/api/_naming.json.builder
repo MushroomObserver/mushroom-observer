@@ -11,7 +11,7 @@ if detail
     json_detailed_object(json, vote)
   end
 end
-reasons = object.get_reasons.select(&:used?)
+reasons = object.reasons_array.select(&:used?)
 if reasons.any?
   json.reasons reasons.map do |reason|
     {

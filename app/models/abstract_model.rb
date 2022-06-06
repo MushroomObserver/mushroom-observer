@@ -59,7 +59,6 @@
 #  log_remove_image::   Log removal of Image.
 #  log_destroy_image::  Log destruction of Image.
 #  init_rss_log::       Create and attach RssLog if not already there.
-#  attach_rss_log::     Attach RssLog after creating new record.
 #  autolog_created::    Callback to log creation.
 #  autolog_updated::    Callback to log an update.
 #  autolog_destroyed::  Callback to log destruction.
@@ -132,17 +131,6 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
-  # Add limit to a SQL query, then pass it to find_by_sql.
-  #
-  #   sql = "SELECT id FROM names WHERE user_id = 123"
-  #   names = Name.find_by_sql_with_limit(sql, 20, 10)
-  #
-  def self.find_by_sql_with_limit(sql, offset, limit)
-    sql = sanitize_sql(sql)
-    add_limit!(sql, limit: limit, offset: offset)
-    find_by_sql(sql)
-  end
-
   # Wrap a normal SQL query in a <tt>COUNT(*)</tt> query, then pass it to
   # count_by_sql.
   #
@@ -182,8 +170,6 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    # self.created_at ||= Time.now        if respond_to?('created_at=')
-    # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id ||= User.current_id if respond_to?("user_id=")
     autolog_created if has_rss_log?
   end
@@ -195,7 +181,7 @@ class AbstractModel < ApplicationRecord
   after_create :update_contribution
   def update_contribution
     SiteData.update_contribution(:add, self)
-    attach_rss_log if has_rss_log?
+    attach_rss_log_final_step if has_rss_log?
   end
 
   # This is called just before an object's changes are saved.
@@ -208,7 +194,6 @@ class AbstractModel < ApplicationRecord
   # either of these things.
   before_update :do_log_update
   def do_log_update
-    # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
     autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
@@ -226,7 +211,7 @@ class AbstractModel < ApplicationRecord
   before_destroy :do_log_destroy
   def do_log_destroy
     SiteData.update_contribution(:del, self)
-    autolog_destroyed if has_rss_log?
+    autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end
 
@@ -319,13 +304,15 @@ class AbstractModel < ApplicationRecord
   #   obj.errors.add(:attr, "message").
   def formatted_errors
     out = []
-    errors.each do |attr, msg|
-      if /^[A-Z]/.match?(msg)
-        out << msg
+    errors.each do |error|
+      attribute = error.attribute
+      message = error.message
+      if /^[A-Z]/.match?(message)
+        out << message
       else
-        name = attr.to_s.to_sym.l
+        name = attribute.to_s.to_sym.l
         obj = type_tag.to_s.upcase_first.to_sym.l
-        out << "#{obj} #{name} #{msg}."
+        out << "#{obj} #{name} #{message}."
       end
     end
     out
@@ -504,7 +491,7 @@ class AbstractModel < ApplicationRecord
   #   name.eol_url => "http://eol.org/blah/blah/blah"
   #
   def eol_url
-    triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
+    triple = Triple.find_by(subject: show_url, predicate: eol_predicate)
     triple&.object
   end
 
@@ -593,7 +580,7 @@ class AbstractModel < ApplicationRecord
   #   name.destroy_action => "destroy_name"
   #
   def self.destroy_action
-    "destroy_" + name.underscore
+    "destroy_#{name.underscore}"
   end
 
   def destroy_action
@@ -663,7 +650,7 @@ class AbstractModel < ApplicationRecord
   #
   def log(tag, args = {})
     init_rss_log unless rss_log
-    touch unless new_record? || # rubocop:disable Rails/SkipsModelValidations
+    touch unless new_record? ||
                  args[:touch] == false
     rss_log.add_with_date(tag, args)
   end
@@ -675,51 +662,8 @@ class AbstractModel < ApplicationRecord
   #   orphan_log(:log_observation_destroyed)
   #
   def orphan_log(*args)
-    rss_log = init_rss_log(:orphan)
+    rss_log = init_rss_log(orphan: true)
     rss_log.orphan(format_name, *args)
-  end
-
-  # Logs addition of new Image.
-  def log_create_image(image)
-    log_image(:log_image_created, image, true)
-  end
-
-  # Logs addition of existing Image.
-  def log_reuse_image(image)
-    log_image(:log_image_reused, image, true)
-  end
-
-  # Logs update of Image.
-  def log_update_image(image)
-    log_image(:log_image_updated, image, false)
-  end
-
-  # Logs removal of Image.
-  def log_remove_image(image)
-    log_image(:log_image_removed, image, false)
-  end
-
-  # Logs destruction of Image.
-  def log_destroy_image(image)
-    log_image(:log_image_destroyed, image, false)
-  end
-
-  # Log addition of new Sequence to object
-  def log_add_sequence(sequence)
-    log_sequence(:log_sequence_added, sequence, true)
-  end
-
-  # Log Sequence's accession to archive
-  def log_accession_sequence(sequence)
-    log_sequence(:log_sequence_accessioned, sequence, true)
-  end
-
-  def log_update_sequence(sequence)
-    log_sequence(:log_sequence_updated, sequence, false)
-  end
-
-  def log_destroy_sequence(sequence)
-    log_sequence(:log_sequence_destroyed, sequence, true)
   end
 
   # Callback that logs creation.
@@ -734,19 +678,20 @@ class AbstractModel < ApplicationRecord
 
   # Callback that logs destruction.
   def autolog_destroyed
-    autolog_event(:destroyed, :orphan)
+    autolog_event(:destroyed, orphan: true)
   end
 
   # Do we log this event? and how?
-  def autolog_event(event, orphan = nil)
+  def autolog_event(event, orphan: nil)
     return unless RunLevel.is_normal?
 
-    touch = if autolog_events.include?(event)
-              false
-            elsif autolog_events.include?("#{event}!".to_sym)
-              true
-            end
-    return if touch.nil?
+    if autolog_events.include?(event)
+      touch = false
+    elsif autolog_events.include?("#{event}!".to_sym)
+      touch = true
+    else
+      return
+    end
 
     type = type_tag
     msg = "log_#{type}_#{event}".to_sym
@@ -756,69 +701,42 @@ class AbstractModel < ApplicationRecord
   # Create RssLog and attach it if we don't already have one.  This is
   # primarily for the benefit of old objects that don't have RssLog's already.
   # All new objects automatically get one.
-  def init_rss_log(orphan = false)
-    result = nil
-    if rss_log
-      result = rss_log
-    else
-      rss_log = RssLog.new
-      # Don't attach to object if about to destroy.
-      if !orphan
-        rss_log.send("#{type_tag}_id=", id) if id
-        rss_log.save
-        # Save it now unless we are sure it will be saved later.
-        need_to_save = !new_record? && !changed?
-        self.rss_log_id = rss_log.id
-        self.rss_log    = rss_log
-        save if need_to_save
-      else
-        # Always save the rss_log.
-        rss_log.save
-      end
-      result = rss_log
-    end
-    # We need to return it in case we created an orphaned log, otherwise
-    # the caller won't have access to it!
-    result
+  def init_rss_log(orphan: false)
+    return rss_log if rss_log
+
+    rss_log = RssLog.new
+    rss_log.created_at = created_at unless new_record?
+    rss_log.send("#{type_tag}_id=", id) if id && !orphan
+    rss_log.save
+    attach_rss_log_first_step(rss_log) unless orphan
+    rss_log
+  end
+
+  # Point object to its new RssLog and save the object unless we are sure
+  # it will be saved later.
+  def attach_rss_log_first_step(rss_log)
+    will_save_later = new_record? || changed?
+    self.rss_log_id = rss_log.id
+    self.rss_log    = rss_log
+    save unless will_save_later
   end
 
   # Fill in reverse-lookup id in RssLog after creating new record.
-  def attach_rss_log
+  def attach_rss_log_final_step
     return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
 
     rss_log.send("#{type_tag}_id=", id)
     rss_log.save
   end
 
-  # The label which is displayed for the model's tab in the RssLog tabset
-  # e.g. "Names", "Species Lists"
-  def self.rss_log_tab_label
-    to_s.pluralized_title
-  end
-
-  # Add a note
+  # Add a note to the notes field with paragraph break between different notes.
   def add_note(note)
-    if notes
-      self.notes += "\n\n" + note
-    else
-      self.notes = note
-    end
+    self.notes = notes.present? ? "\n\n#{note}" : note
     save
   end
 
-  def process_image_reuse(image, query_params)
-    add_image(image)
-    log_reuse_image(image)
-    {
-      controller: show_controller,
-      action: show_action,
-      id: id,
-      q: query_params[:q]
-    }
-  end
-
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user == user))
+    !respond_to?("user") || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)
@@ -838,19 +756,5 @@ class AbstractModel < ApplicationRecord
   # See notes at https://www.pivotaltracker.com/story/show/163189614
   def saved_version_changes?
     track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Layout/LineLength
-  end
-
-  ##############################################################################
-
-  private
-
-  def log_image(tag, image, touch) # :nodoc:
-    name = "#{:Image.t} ##{image.id || image.was || "??"}"
-    log(tag, name: name, touch: touch)
-  end
-
-  def log_sequence(tag, sequence, touch) # :nodoc:
-    name = "#{:SEQUENCE.t} ##{sequence.id || "??"}"
-    log(tag, name: name, touch: touch)
   end
 end

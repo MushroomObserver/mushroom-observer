@@ -165,7 +165,7 @@ module SessionExtensions
             val = nil
             field.options = opts = []
             context.assert_select(elem, "option") do |elems|
-              for elem in elems
+              elems.each do |elem|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(elem["value"])
                 opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
@@ -431,13 +431,11 @@ module SessionExtensions
       field.node["checked"] = "checked" if field.type == :checkbox
 
       # Uncheck all the other radio-boxes in this group.
-      if field.type == :radio
-        field.value = true
-        inputs.each do |field2|
-          if (field2 != field) && (field2.name == field.name)
-            field2.value = false
-          end
-        end
+      return unless field.type == :radio
+
+      field.value = true
+      inputs.each do |field2|
+        field2.value = false if (field2 != field) && (field2.name == field.name)
       end
     end
 
@@ -494,7 +492,7 @@ module SessionExtensions
     def submit(button = nil)
       found = false
       hash = {}
-      for field in inputs
+      inputs.each do |field|
         if field.type == :checkbox
           hash[field.name] =
             field.node["checked"] == "checked" ? field.on_value : "0"

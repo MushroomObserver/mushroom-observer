@@ -41,7 +41,12 @@ module Query::Modules::HighLevelQueries
       if @result_ids
         @result_ids.count
       else
-        rows = select_rows(args.merge(select: "count(*)"))
+        # Explicitly disable GROUP BY and ORDER clauses for the purposes of
+        # simply counting the number of results.  This is important because
+        # GROUP BY in particular will mess up the COUNT(*) spec.  Passing in
+        # empty strings for group and order will tell it to explicitly override
+        # anything in self.group and self.order.
+        rows = select_rows(args.merge(select: "COUNT(*)", group: "", order: ""))
         begin
           rows[0][0].to_i
         rescue StandardError
@@ -106,13 +111,15 @@ module Query::Modules::HighLevelQueries
 
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    if !letters.is_a?(String)
+    unless letters.is_a?(String)
       raise("You must pass a SQL expression to 'need_letters'.")
-    elsif need_letters != letters
-      @result_ids = nil
-      @num_results = nil
-      @need_letters = letters
     end
+
+    return if need_letters == letters
+
+    @result_ids = nil
+    @num_results = nil
+    @need_letters = letters
   end
 
   # Returns a subset of the results (as ids).  Optional arguments:

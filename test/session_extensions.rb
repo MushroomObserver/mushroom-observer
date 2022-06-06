@@ -50,7 +50,7 @@ module SessionExtensions
   # Dump out a list of all the links on the last page rendered.
   def dump_links
     assert_select("a[href]") do |links|
-      for link in links
+      links.each do |link|
         puts("link: #{link.attributes["href"]}")
       end
     end
@@ -66,13 +66,13 @@ module SessionExtensions
 
   # Call follow_redirect!, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
-  def process_with_error_checking(method, url, *args)
+  def process_with_error_checking(method, url, *args, **kwargs)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send(method.downcase.to_s, url, *args)
+    send(method.downcase.to_s, url, *args, **kwargs)
     follow_redirect! while response.redirect?
     if status == 500
-      msg = if error = controller.instance_variable_get("@error")
+      msg = if (error = controller.instance_variable_get("@error"))
               "#{error}\n#{error.backtrace.join("\n")}"
             else
               "Got unknown 500 error from outside our application?!\n" \
@@ -88,35 +88,35 @@ module SessionExtensions
   end
 
   # Override all 'get' calls and do a bunch of extra error checking.
-  def get(*args)
+  def get(action, **args)
     if !@doing_with_error_checking
-      process_with_error_checking("get", *args)
+      process_with_error_checking("get", action, **args)
     else
       super
     end
   end
 
   # Override all 'post' calls and do a bunch of extra error checking.
-  def post(*args)
+  def post(action, **args)
     if !@doing_with_error_checking
-      process_with_error_checking("POST", *args)
+      process_with_error_checking("POST", action, **args)
     else
       super
     end
   end
 
   # Call the original +get+.
-  def get_without_redirecting(*args)
+  def get_without_redirecting(action, **args)
     @doing_with_error_checking = true
-    get(*args)
+    get(action, **args)
   ensure
     @doing_with_error_checking = false
   end
 
   # Call the original +post+.
-  def post_without_redirecting(*args)
+  def post_without_redirecting(action, **args)
     @doing_with_error_checking = true
-    post(*args)
+    post(action, **args)
   ensure
     @doing_with_error_checking = false
   end
@@ -156,7 +156,7 @@ module SessionExtensions
 
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
-      for key, value in expected_values
+      expected_values.each do |key, value|
         if value == true
           form.assert_checked(key)
         elsif value == false
@@ -250,7 +250,7 @@ module SessionExtensions
     sargs  = []
 
     # Filter links based on URL.
-    if arg = args[:href]
+    if (arg = args[:href])
       if arg.is_a?(Regexp)
         select = "a:match('href',?)"
         sargs << arg
@@ -260,7 +260,7 @@ module SessionExtensions
     end
 
     # Filter links by parent element types.
-    if arg = args[:in]
+    if (arg = args[:in])
       if arg == :left_tabs
         arg = "div#left_tabs"
       elsif arg == :right_tabs
@@ -279,11 +279,11 @@ module SessionExtensions
 
     done = false
     assert_select(select, *sargs) do |links|
-      for link in links
+      links.each do |link|
         match = true
 
         # Filter based on link "label" (can be an image too, for example).
-        if arg = args[:label]
+        if (arg = args[:label])
           if arg == :image
             match = false unless /img /.match?(link.to_s)
           elsif arg.is_a?(Regexp)

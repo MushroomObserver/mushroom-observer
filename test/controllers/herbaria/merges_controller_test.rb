@@ -54,7 +54,7 @@ module Herbaria
         post(:create, params: { src: src.id, dest: dest.id })
       end
       assert_flash_success
-      assert_redirected_to(herbaria_path(id: dest.id))
+      assert_redirected_to(herbarium_path(dest))
       assert_equal(
         dest.personal_user_id, mary.id,
         "Destination Herbarium should remain Mary's personal Herbarium"
@@ -65,7 +65,7 @@ module Herbaria
       make_admin("mary")
       post(:create, params: { src: nybg.id, dest: field_museum.id })
       assert_flash_success
-      assert_redirected_to(herbaria_path(id: field_museum))
+      assert_redirected_to(herbarium_path(field_museum))
     end
 
     def test_merge_no_login

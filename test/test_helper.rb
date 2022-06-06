@@ -11,17 +11,24 @@
 #
 ################################################################################
 
-# Code to allow both local and coveralls coverage.  From:
-# https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+# Code to allow Coveralls exor local coverage reports.  See:
+# https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
 require("rails")
 require("simplecov")
-require("coveralls")
+require("simplecov-lcov")
 
-# Coveralls.wear!("rails")
-formatters = [SimpleCov::Formatter::HTMLFormatter,
-              Coveralls::SimpleCov::Formatter]
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
-SimpleCov.start
+if ENV["CI"] == "true"
+  SimpleCov::Formatter::LcovFormatter.config do |config|
+    config.report_with_single_file = true
+    config.lcov_file_name = "lcov.info"
+  end
+
+  SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
+else
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+end
+
+SimpleCov.start("rails")
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
@@ -45,6 +52,8 @@ require("rails/test_help")
 require("mocha/minitest")
 
 %w[
+  bullet_helper
+
   general_extensions
   flash_extensions
   controller_extensions
@@ -70,6 +79,9 @@ I18n.enforce_available_locales = true
 
 module ActiveSupport
   class TestCase
+    # Run tests in parallel with specified workers
+    # parallelize(workers: :number_of_processors)
+
     ##########################################################################
     #  Transactional fixtures
     ##########################################################################

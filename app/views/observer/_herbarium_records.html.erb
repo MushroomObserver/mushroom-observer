@@ -22,7 +22,7 @@
         <li>
           <%= link_to(record.accession_at_herbarium.t,
                       add_query_param(record.show_link_args, query)) %>
-          <% if in_admin_mode? || record.can_edit? %>
+          <% if record.can_edit? || in_admin_mode? %>
             [<%= link_with_query(:EDIT.t, controller: :herbarium_record,
                                  action: :edit_herbarium_record, id: record.id,
                                  back: observation.id) %> |

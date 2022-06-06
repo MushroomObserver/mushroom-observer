@@ -97,7 +97,7 @@ module PaginationHelper
       if from > 2
         result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
       end
-      for n in from..to
+      (from..to).each do |n|
         if n == this
           result << content_tag(:li, content_tag(:span, n), class: "active")
         elsif n.positive? && n <= num

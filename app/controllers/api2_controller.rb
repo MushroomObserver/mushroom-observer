@@ -90,7 +90,12 @@ class Api2Controller < ApplicationController
     args = params_to_api_args(type)
 
     if request.method == "POST"
-      args[:upload] = upload_api if upload_present?
+      if args[:upload].present?
+        args[:upload] = upload_from_multipart_form_data(args[:upload])
+        logger.warn("API UPLOAD: #{args[:upload].inspect}")
+      elsif is_request_body_an_upload?
+        args[:upload] = upload_from_request_body
+      end
       # Special exception to let caller who creates new user to see that user's
       # new API keys.  Otherwise there is no way to get that info via the API.
       @show_api_keys_for_new_user = true if type == :user
@@ -108,32 +113,25 @@ class Api2Controller < ApplicationController
     args
   end
 
-  def upload_present?
-    (upload_length.positive? &&
-     upload_type.present? &&
-     upload_type != "application/x-www-form-urlencoded" &&
-     upload_data.present?)
+  def upload_from_multipart_form_data(data)
+    API2::Upload.new(data: data)
   end
 
-  def upload_api
+  def is_request_body_an_upload?
+    (request.content_length.positive? &&
+     request.media_type.present? &&
+     request.media_type != "application/x-www-form-urlencoded" &&
+     request.media_type != "multipart/form-data" &&
+     request.body.present?)
+  end
+
+  def upload_from_request_body
     API2::Upload.new(
-      data: upload_data,
-      length: upload_length,
-      content_type: upload_type,
+      data: request.body,
+      length: request.content_length,
+      content_type: request.media_type,
       checksum: request.headers["CONTENT_MD5"].to_s
     )
-  end
-
-  def upload_length
-    request.content_length
-  end
-
-  def upload_type
-    request.media_type
-  end
-
-  def upload_data
-    request.body
   end
 
   def render_api_results(args)
@@ -156,11 +154,11 @@ class Api2Controller < ApplicationController
   end
 
   def do_render_xml
-    render(layout: false, template: "/api/results")
+    render(layout: false, template: "/api2/results")
   end
 
   def do_render_json
-    render(layout: false, template: "/api/results")
+    render(layout: false, template: "/api2/results")
   end
 
   def set_cors_headers

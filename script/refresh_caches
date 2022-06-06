@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-#
 #  USAGE::
 #
 #    script/refresh_caches
@@ -23,13 +22,28 @@
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
-msgs =
-  Synonym.make_sure_all_referenced_synonyms_exist +
-  Name.make_sure_names_are_bolded_correctly +
-  Name.refresh_classification_caches +
-  Name.propagate_generic_classifications +
-  Observation.refresh_content_filter_caches +
-  Observation.make_sure_no_observations_are_misspelled
+dry_run = false
+ARGV.each do |flag|
+  case flag
+  when "-n", "--dry-run"
+    dry_run = true
+  else
+    puts("USAGE: script/refresh_caches [-n|--dry-run]")
+    exit(1)
+  end
+end
+
+msgs = if dry_run
+         Name.propagate_generic_classifications(dry_run: true)
+       else
+         Synonym.make_sure_all_referenced_synonyms_exist +
+           Name.fix_self_referential_misspellings +
+           Name.make_sure_names_are_bolded_correctly +
+           Name.refresh_classification_caches +
+           Name.propagate_generic_classifications +
+           Observation.make_sure_no_observations_are_misspelled +
+           Observation.refresh_content_filter_caches
+       end
 warn(msgs.join("\n")) if msgs.any?
 
 exit(0)

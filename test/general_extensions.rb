@@ -48,7 +48,7 @@ module GeneralExtensions
   ##############################################################################
 
   def sql_collates_accents?
-    sql_sorted = u_and_umlaut_collated_by_sql.map { |x| x[:notes] }
+    sql_sorted = u_and_umlaut_collated_by_sql.pluck(:notes)
     sql_sorted == sql_sorted.sort
   end
 
@@ -231,7 +231,7 @@ module GeneralExtensions
     # email = QueuedEmail.find(:first, :offset => n)
     email = QueuedEmail.offset(offset).first
     assert(email)
-    for arg in args.keys
+    args.each_key do |arg|
       case arg
       when :flavor
         assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
@@ -421,10 +421,10 @@ module GeneralExtensions
       print(" = #{txt}")
     end
     print("\n")
-    if exp.has_elements?
-      exp.elements.each do |child|
-        dump_xml(child, indent + "  ")
-      end
+    return unless exp.has_elements?
+
+    exp.elements.each do |child|
+      dump_xml(child, indent + "  ")
     end
   end
 
@@ -482,7 +482,7 @@ module GeneralExtensions
     return assert(false, msg) unless result
 
     # Clean out old files from previous failure(s).
-    for file in files
+    files.each do |file|
       filename = Array(file).first
       new_filename = filename + ".new"
       File.delete(new_filename) if File.exist?(new_filename)

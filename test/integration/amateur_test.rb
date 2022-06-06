@@ -118,14 +118,13 @@ class AmateurTest < IntegrationTestCase
     message2 = "This may be _Xylaria polymorpha_, no?"
 
     # Start by showing the observation...
+    login("katrina")
     get("/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
 
     click(label: "Add Comment")
-    assert_template("account/login")
-    login("katrina")
     assert_template("comment/add_comment")
 
     # (Make sure the form is for the correct object!)
@@ -264,11 +263,6 @@ class AmateurTest < IntegrationTestCase
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
-    assert_select("div.thumbnail-map", 1)
-
-    click(label: "Hide thumbnail map.")
-    assert_template("observer/show_observation")
-    assert_select("div.thumbnail-map", 0)
 
     login("dick")
     assert_template("observer/show_observation")
@@ -295,10 +289,12 @@ class AmateurTest < IntegrationTestCase
     I18n.locale = "el"
     mary.save
 
-    data = TranslationString.translations("el")
-    data[:test_tag1] = "test_tag1 value"
-    data[:test_tag2] = "test_tag2 value"
-    data[:test_flash_redirection_title] = "Testing Flash Redirection"
+    TranslationString.store_localizations(
+      :el,
+      { test_tag1: "test_tag1 value",
+        test_tag2: "test_tag2 value",
+        test_flash_redirection_title: "Testing Flash Redirection" }
+    )
 
     session.run_test
   end
@@ -346,8 +342,8 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
-      click(label: /propose.*name/i)
+      assert_template("observer/show_observation")
+      click(label: /login/i)
       assert_template("account/login")
       open_form do |form|
         form.change("login", namer.login)
@@ -355,6 +351,8 @@ class AmateurTest < IntegrationTestCase
         form.change("remember_me", true)
         form.submit("Login")
       end
+      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
+      click(label: /propose.*name/i)
     end
 
     def create_name(obs, text_name)

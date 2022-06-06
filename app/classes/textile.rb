@@ -343,7 +343,7 @@ class Textile < String
     gsub!(%r{(<a[^>]*>.*?</a>|<img[^>]*>)}) do |href|
       if do_object_links
         href = href.gsub(/
-          x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+          x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
         /x, '\\2')
       end
       saved_links.push(href)
@@ -355,12 +355,12 @@ class Textile < String
   def restore_pre_existing_links!(saved_links)
     gsub!(/<XXX(\d+)>/) do
       saved_links[Regexp.last_match(1).to_i].to_s.
-        gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
+        gsub(/ x\{ ([^{}]*) \}x /x, '\\1')
     end
   end
 
   def convert_bare_urls_to_links!
-    gsub!(%r{([a-z]+:\/\/[^\s<>]+)}) do |url|
+    gsub!(%r{([a-z]+://[^\s<>]+)}) do |url|
       extra = url.sub!(%r{([^\w/]+$)}, "") ? Regexp.last_match(1) : ""
       # Leave as much untouched as possible, but some characters will cause the
       # HTML to be badly formed, so escape them.
@@ -385,7 +385,7 @@ class Textile < String
 
   def convert_object_tags_to_proper_links!
     gsub!(/
-      x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+      x\{([A-Z]+) \s+ ([^{}]+?) \s+\}\{\s+ ([^{}]+?) \s+\}x
     /x) do |_orig|
       type = Regexp.last_match(1)
       label = Regexp.last_match(2)

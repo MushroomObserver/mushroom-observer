@@ -138,11 +138,11 @@ class Checklist
   end
 
   def count_species(text_name)
-    if text_name.present?
-      g, s = text_name.split(" ", 3)
-      @genera[g] = g
-      @species[[g, s]] = "#{g} #{s}"
-    end
+    return if text_name.blank?
+
+    g, s = text_name.split(" ", 3)
+    @genera[g] = g
+    @species[[g, s]] = "#{g} #{s}"
   end
 
   def ranks_to_consider

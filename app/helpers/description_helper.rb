@@ -90,7 +90,7 @@ module DescriptionHelper
     type = obj.type_tag
 
     # Filter out empty descriptions (unless it's public or one you own).
-    list = obj.descriptions.select do |desc|
+    list = obj.descriptions.includes(:user).select do |desc|
       desc.notes? || (desc.user == @user) ||
         reviewer? || (desc.source_type == :public)
     end
@@ -244,10 +244,10 @@ module DescriptionHelper
   end
 
   def name_section_link(title, data, query)
-    if data && data != 0
-      action = { controller: :observer, action: :index_observation }
-      url = add_query_param(action, query)
-      content_tag(:p, link_to(title, url))
-    end
+    return unless data && data != 0
+
+    action = { controller: :observer, action: :index_observation }
+    url = add_query_param(action, query)
+    content_tag(:p, link_to(title, url))
   end
 end

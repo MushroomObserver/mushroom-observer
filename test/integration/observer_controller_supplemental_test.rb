@@ -1,12 +1,26 @@
 # frozen_string_literal: true
 
+# This cop doesn't understand that find_by_id is not being called on an
+# ActiveRecord instance, and therefore is not a rails dynamic finder.
+# rubocop:disable Rails/DynamicFindBy
+
 require("test_helper")
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
+  def login(user = users(:zero_user))
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+  end
+
+  # ------------------------------------------------------------
+
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
+    login
     visit("/observer/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
     click_button("Test")
@@ -15,6 +29,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
 
   # Covers ObservationController#map_observations.
   def test_map_observations
+    login
     name = names(:boletus_edulis)
     visit("/name/map/#{name.id}")
     click_link("Show Observations")
@@ -30,11 +45,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     # Test needs a user with multiple observations with predictable sorts.
     user = users(:sortable_obs_user)
 
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
-
+    login(user)
     click_link("Your Observations", match: :first)
     # Predict 1st and 2nd Observations on this page.
     sort_order = QueryRecord.last.query.default_order
@@ -63,10 +74,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     project = projects(:obs_collected_and_displayed_project)
 
     # Log in user
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+    login(user)
 
     # Edit the Observation, unchecking the Project.
     visit("/observer/edit_observation/#{observation.id}")
@@ -85,11 +93,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     # which is part of this Species List.
     species_list = species_lists(:unknown_species_list)
 
-    # Log in user
-    visit("/account/login")
-    fill_in("User name or Email address:", with: user.login)
-    fill_in("Password:", with: "testpassword")
-    click_button("Login")
+    login(user)
 
     # Edit the Observation, unchecking the Project.
     visit("/observer/edit_observation/#{observation.id}")
@@ -98,4 +102,38 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
 
     assert_not_includes(species_list.observations, observation)
   end
+
+  def test_locales_when_sending_email_question
+    sender = users(:rolf)
+    receiver = users(:mary)
+    sender.update(locale: "fr")
+    assert_equal("fr", sender.locale)
+    assert_equal("en", receiver.locale)
+
+    # I have no clue how to ensure translations are set any particular way.
+    # This stub causes every single translation to be simply:
+    #   "locale:mo.tag"
+    # Makes it very easy to test which language is being used!
+    # But note that the standard login helper won't work because it is
+    # expecting the English translations to work correctly.
+    translator = lambda do |*args|
+      "#{I18n.locale}:#{args.first}"
+    end
+
+    I18n.stub(:t, translator) do
+      Capybara.reset_sessions!
+      visit("/account/login")
+      fill_in("en:mo.login_user:", with: sender.login)
+      fill_in("en:mo.login_password:", with: "testpassword")
+      click_button("en:mo.login_login")
+      visit("/observer/ask_user_question/#{receiver.id}")
+      fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
+      fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
+      click_button("fr:mo.SEND")
+      notices = page.find_by_id("flash-notices")
+      notices.assert_text("fr:mo.runtime_ask_user_question_success")
+    end
+  end
 end
+
+# rubocop:enable Rails/DynamicFindBy

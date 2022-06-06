@@ -84,21 +84,6 @@ class LanguageTest < UnitTestCase
     assert_equal(expected_version, str.version)
   end
 
-  def test_update_recent_translations
-    one = translation_strings(:english_waiting_for_update)
-    one.text = "new"
-    one.save
-    old_val = one.tag.to_sym.l
-    new_val = one.text
-    assert_not_equal(old_val, new_val)
-    Language.last_update = one.updated_at + 1.minute
-    Language.update_recent_translations
-    assert_equal(old_val, one.tag.to_sym.l)
-    Language.last_update = one.updated_at - 1.minute
-    Language.update_recent_translations
-    assert_equal(new_val, one.tag.to_sym.l)
-  end
-
   def test_score_lines
     len = Language::CHARACTERS_PER_LINE
     assert_equal(0, Language.score_lines(""))

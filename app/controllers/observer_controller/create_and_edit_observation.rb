@@ -78,8 +78,7 @@ class ObserverController
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
-    %w[when where location lat long alt
-       is_collection_location gps_hidden].each do |attr|
+    %w[when where location is_collection_location gps_hidden].each do |attr|
       @observation.send("#{attr}=", last_observation.send(attr))
     end
     last_observation.projects.each do |project|
@@ -279,14 +278,15 @@ class ObserverController
   end
 
   def save_herbarium_record(obs, params)
-    herbarium, initial_det, accession_number =
+    herbarium, initial_det, accession_number, herbarium_record_notes =
       normalize_herbarium_record_params(obs, params)
     return if not_creating_record?(obs, herbarium, accession_number)
 
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
-      herbarium_record = create_herbarium_record(herbarium, initial_det,
-                                                 accession_number)
+      herbarium_record = create_herbarium_record(
+        herbarium, initial_det, accession_number, herbarium_record_notes
+      )
     elsif herbarium_record.can_edit?
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
@@ -319,7 +319,8 @@ class ObserverController
     init_det  = initial_determination(obs)
     accession = params2[:herbarium_id].to_s.strip_html.strip_squeeze
     accession = default_accession_number(obs, params) if accession.blank?
-    [herbarium, init_det, accession]
+    notes = params2[:herbarium_record_notes]
+    [herbarium, init_det, accession, notes]
   end
 
   def initial_determination(obs)
@@ -354,11 +355,13 @@ class ObserverController
     ).first
   end
 
-  def create_herbarium_record(herbarium, initial_det, accession_number)
+  def create_herbarium_record(herbarium, initial_det, accession_number,
+                              herbarium_record_notes)
     HerbariumRecord.create(
       herbarium: herbarium,
       initial_det: initial_det,
-      accession_number: accession_number
+      accession_number: accession_number,
+      notes: herbarium_record_notes
     )
   end
 
@@ -368,8 +371,6 @@ class ObserverController
                   action: "create_location",
                   where: @observation.place_name,
                   set_observation: @observation.id)
-    elsif unshown_notifications?(@user, :naming)
-      redirect_to(action: "show_notifications", id: @observation.id)
     else
       redirect_to(action: "show_observation", id: @observation.id)
     end
@@ -679,7 +680,7 @@ class ObserverController
   def update_projects(obs, checks)
     return unless checks
 
-    User.current.projects_member.each do |project|
+    User.current.projects_member(include: :observations).each do |project|
       before = obs.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next unless before != after
@@ -753,8 +754,7 @@ class ObserverController
           if !image.save
             bad_images.push(image)
             flash_object_errors(image)
-          elsif !image.process_image(observation.gps_hidden)
-            logger.error("Unable to upload image")
+          elsif !image.process_image(strip: observation.gps_hidden)
             name_str = name ? "'#{name}'" : "##{image.id}"
             flash_notice(:runtime_no_upload_image.t(name: name_str))
             bad_images.push(image)
@@ -821,7 +821,7 @@ class ObserverController
     images.each do |image|
       unless observation.image_ids.include?(image.id)
         observation.add_image(image)
-        observation.log_create_image(image)
+        image.log_create_for(observation)
       end
     end
   end

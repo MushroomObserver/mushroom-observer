@@ -59,11 +59,12 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(locale)
-    I18n.backend.load_translations if I18n.backend.send(:translations).empty?
-    I18n.backend.send(:translations)[locale.to_sym][MO.locale_namespace.to_sym]
+    do_init = I18n.backend.translations.empty? ? true : false
+    I18n.backend.translations(do_init: do_init)\
+      [locale.to_sym][MO.locale_namespace.to_sym]
   end
 
-  # Update this string in the translations I18n is using.
+  # Check if tag exists before storing nonsense in the I18n backend
   def update_localization
     data = TranslationString.translations(language.locale.to_sym)
     unless data
@@ -75,7 +76,20 @@ class TranslationString < AbstractModel
       raise("Localization for :#{tag.to_sym} doesn't exist!")
     end
 
-    data[tag.to_sym] = text
+    store_localization
+  end
+
+  # Update this string in the translations I18n is using.
+  # Note that our translations are nested under the :mo key!
+  def store_localization
+    I18n.backend.store_translations(
+      language.locale, { mo: { tag.to_sym => text } }
+    )
+  end
+
+  # Utility method for batch updates. Currently used in tests.
+  def self.store_localizations(locale, hash_of_tags_and_texts)
+    I18n.backend.store_translations(locale, { mo: hash_of_tags_and_texts })
   end
 
   # Get age of official language's banner.  (Used by application layout to

@@ -57,26 +57,26 @@ module ControllerExtensions
   ##############################################################################
 
   # Second "get" won't update fullpath, so we must reset the request.
-  def reget(*args)
+  def reget(action, **args)
     @request = @request.class.new
-    get(*args)
+    get(action, **args)
   end
 
   # Call +get+ without clearing the flash (which we do by default).
-  def get_without_clearing_flash(*args)
+  def get_without_clearing_flash(action, **args)
     @without_clearing_flash = true
-    get(*args)
+    get(action, **args)
   end
 
   # Call +post+ without clearing the flash (which we do by default).
-  def post_without_clearing_flash(*args)
+  def post_without_clearing_flash(action, **args)
     @without_clearing_flash = true
-    post(*args)
+    post(action, **args)
   end
 
   # Log a user in (affects session only).
   def login(user = "rolf", password = "testpassword")
-    user = User.authenticate(user, password)
+    user = User.authenticate(login: user, password: password)
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
     @request.session[:user_id] = user.id
@@ -324,6 +324,12 @@ module ControllerExtensions
     else
       opts
     end
+  end
+
+  # assert that the text of the html HEAD title matches the argument.
+  def assert_head_title(title)
+    assert_select("head title", { text: /#{title}/, count: 1 },
+                  "Incorrect page or page title displayed")
   end
 
   # Assert the existence of a given link in the response body, and check

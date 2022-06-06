@@ -46,7 +46,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     reviewer.check_abilities
     owner.check_abilities
     random_user.check_abilities
-    lurker.check_abilities
+    lurker.shouldnt_be_able_to_do_anything
   end
 
   def test_creating_user_description
@@ -173,7 +173,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def edit_description_requires_login?
-      abilities[:edit].to_s.match(/login/)
+      abilities[:edit].to_s.include?("login")
     end
 
     def destroy_description_link_there?

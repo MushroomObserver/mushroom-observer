@@ -4,17 +4,18 @@ require("test_helper")
 
 class UserTest < UnitTestCase
   def test_auth
-    assert_equal(rolf, User.authenticate("rolf", "testpassword"))
-    assert_nil(User.authenticate("nonrolf", "testpassword"))
+    assert_equal(rolf,
+                 User.authenticate(login: "rolf", password: "testpassword"))
+    assert_nil(User.authenticate(login: "nonrolf", password: "testpassword"))
   end
 
   def test_password_change
     mary.change_password("marypasswd")
-    assert_equal(mary, User.authenticate("mary", "marypasswd"))
-    assert_nil(User.authenticate("mary", "longtest"))
+    assert_equal(mary, User.authenticate(login: "mary", password: "marypasswd"))
+    assert_nil(User.authenticate(login: "mary", password: "longtest"))
     mary.change_password("longtest")
-    assert_equal(mary, User.authenticate("mary", "longtest"))
-    assert_nil(User.authenticate("mary", "marypasswd"))
+    assert_equal(mary, User.authenticate(login: "mary", password: "longtest"))
+    assert_nil(User.authenticate(login: "mary", password: "marypasswd"))
   end
 
   def test_disallowed_passwords
@@ -30,6 +31,11 @@ class UserTest < UnitTestCase
     assert(u.errors[:password].any?)
 
     u.password = u.password_confirmation = "huge" * 43 # size = 4 * 43 == 172
+    assert_not(u.save)
+    assert(u.errors[:password].any?)
+
+    u.password = "unconfirmed_password"
+    u.password_confirmation = ""
     assert_not(u.save)
     assert(u.errors[:password].any?)
 
@@ -223,12 +229,15 @@ class UserTest < UnitTestCase
     num_name_descriptions = NameDescription.count
     assert(user.name_descriptions.length > 1)
     sample_name_description_id = user.name_descriptions.first.id
+    herbarium = user.personal_herbarium
+    assert_not_nil(herbarium.personal_user)
     User.erase_user(user.id)
     assert_equal(num_comments - 1, Comment.count)
     assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
     assert_equal(num_name_descriptions, NameDescription.count)
     desc = NameDescription.find(sample_name_description_id)
     assert_equal(0, desc.user_id)
+    assert_equal(0, herbarium.reload.personal_user_id)
   end
 
   def test_erase_user_with_observation
@@ -293,12 +302,12 @@ class UserTest < UnitTestCase
     end
   end
 
-  def test_is_successful_contributor?
-    assert(rolf.is_successful_contributor?)
+  def test_successful_contributor?
+    assert(rolf.successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?
-    assert_false(users(:spammer).is_successful_contributor?)
+    assert_false(users(:spammer).successful_contributor?)
   end
 
   def test_notes_template_validation

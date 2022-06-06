@@ -32,14 +32,15 @@
 ################################################################################
 
 class ProjectController < ApplicationController
-  before_action :login_required, except: [
-    :index_project,
-    :list_projects,
-    :next_project,
-    :prev_project,
-    :project_search,
-    :show_project
-  ]
+  before_action :login_required
+  # except: [
+  #   :index_project,
+  #   :list_projects,
+  #   :next_project,
+  #   :prev_project,
+  #   :project_search,
+  #   :show_project
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :admin_request,
@@ -82,7 +83,8 @@ class ProjectController < ApplicationController
     args = {
       action: :list_projects,
       letters: "projects.title",
-      num_per_page: 50
+      num_per_page: 50,
+      include: :user
     }.merge(args)
 
     @links ||= []
@@ -110,7 +112,7 @@ class ProjectController < ApplicationController
   def show_project
     store_location
     pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
     @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
     @is_member = @project.is_member?(@user)
@@ -206,7 +208,7 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project
     pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
     if !check_permission!(@project)
       redirect_with_query(action: "show_project", id: @project.id)
@@ -235,17 +237,17 @@ class ProjectController < ApplicationController
   # Outputs: none
   def destroy_project
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if !check_permission!(@project)
-        redirect_with_query(action: "show_project", id: @project.id)
-      elsif !@project.destroy
-        flash_error(:destroy_project_failed.t)
-        redirect_with_query(action: "show_project", id: @project.id)
-      else
-        @project.log_destroy
-        flash_notice(:destroy_project_success.t)
-        redirect_with_query(action: :index_project)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+
+    if !check_permission!(@project)
+      redirect_with_query(action: "show_project", id: @project.id)
+    elsif !@project.destroy
+      flash_error(:destroy_project_failed.t)
+      redirect_with_query(action: "show_project", id: @project.id)
+    else
+      @project.log_destroy
+      flash_notice(:destroy_project_success.t)
+      redirect_with_query(action: :index_project)
     end
   end
 
@@ -265,18 +267,17 @@ class ProjectController < ApplicationController
   def admin_request
     sender = @user
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if request.method == "POST"
-        subject = params[:email][:subject]
-        content = params[:email][:content]
-        for receiver in @project.admin_group.users
-          AdminEmail.build(sender, receiver, @project,
-                           subject, content).deliver_now
-        end
-        flash_notice(:admin_request_success.t(title: @project.title))
-        redirect_with_query(action: :show_project, id: @project.id)
-      end
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
+    return unless request.method == "POST"
+
+    subject = params[:email][:subject]
+    content = params[:email][:content]
+    @project.admin_group.users.each do |receiver|
+      AdminEmail.build(sender, receiver, @project,
+                       subject, content).deliver_now
     end
+    flash_notice(:admin_request_success.t(title: @project.title))
+    redirect_with_query(action: :show_project, id: @project.id)
   end
 
   # View that lists all users with links to add each as a member.
@@ -310,7 +311,7 @@ class ProjectController < ApplicationController
   def find_member(str)
     return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-    User.find_by_login(str.to_s.sub(/ <.*>$/, ""))
+    User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
   end
 
   # Form to make a given User either a member or an admin.

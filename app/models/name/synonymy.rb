@@ -38,6 +38,12 @@ class Name < AbstractModel
     approved_synonyms - [self]
   end
 
+  # Returns the first approved synonym unless the name itself is approved.
+  # If no synonyms are approved, it just returns itself.
+  def approved_name
+    deprecated && approved_synonyms.first || self
+  end
+
   # Returns an Array of approved Synonym Name's and an Array of deprecated
   # Synonym Name's, including misspellings, but _NOT_ including itself.
   #
@@ -192,9 +198,9 @@ class Name < AbstractModel
 
   # (if no namings, returns created_at)
   def time_of_last_naming
-    @time_of_last_naming ||= begin
-      Naming.where(name_id: id).maximum(:created_at) || created_at
-    end
+    @time_of_last_naming ||= \
+      Naming.where(name_id: id).maximum(:created_at) ||
+      created_at
   end
 
   # "Best" preferred synonym of a deprecated name.

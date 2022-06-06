@@ -1,18 +1,24 @@
 # frozen_string_literal: true
 
+# Permissions for user_agents
 class Robots
   class << self
-    def allowed?(args)
-      populate_allowed_robot_actions unless defined?(@@allowed_robot_actions)
-      return true  if args[:controller].start_with?("api")
-      return false if args[:ua].downcase.include?("yandex")
+    # Is the robot authorized to be on the site?
+    def authorized?(user_agent)
+      # Googlebot not followed by a hyphen excludes Googlebot-Image, etc.
+      /Googlebot(?!-)|bingbot/.match?(user_agent)
+    end
 
-      @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
+    def action_allowed?(args)
+      populate_allowed_robot_actions unless defined?(@allowed_robot_actions)
+      return true if args[:controller].start_with?("api")
+
+      @allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end
 
     def populate_allowed_robot_actions
       file = MO.robots_dot_text_file
-      @@allowed_robot_actions = parse_robots_dot_text(file)
+      @allowed_robot_actions = parse_robots_dot_text(file)
     end
 
     def parse_robots_dot_text(file)

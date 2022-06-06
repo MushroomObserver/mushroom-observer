@@ -38,7 +38,7 @@ class LocalizationFilesTest < UnitTestCase
       data.each do |tag, str|
         next unless str.is_a?(String)
 
-        str.gsub(/[\[\=]:(\w+)/) do
+        str.gsub(/[\[=]:(\w+)/) do
           unless tags.key?(Regexp.last_match(1).downcase)
             errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
           end
@@ -135,7 +135,7 @@ class LocalizationFilesTest < UnitTestCase
       Dir.glob("#{path}/*").each do |file|
         if /\.(rb|rhtml|rxml|erb)$/.match?(file)
           yield(file)
-        elsif File.directory?(file) && file.match(%r{\/\w+$})
+        elsif File.directory?(file) && file.match(%r{/\w+$})
           source_files(file, &block)
         end
       end
@@ -148,8 +148,8 @@ class LocalizationFilesTest < UnitTestCase
     File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
         next unless line.match(/^\s*class (\w+) < /) &&
-                    !%w[Error ObjectError BadParameterValue].
-                    include?(Regexp.last_match(1))
+                    %w[Error ObjectError BadParameterValue].
+                    exclude?(Regexp.last_match(1))
 
         tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
       end

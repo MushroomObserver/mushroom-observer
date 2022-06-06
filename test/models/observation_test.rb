@@ -582,9 +582,9 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.users_vote(namg1, rolf))
     assert_nil(obs.users_vote(namg1, mary))
     assert_nil(obs.users_vote(namg1, dick))
-    assert_not(obs.is_users_favorite?(namg1, rolf))
-    assert_not(obs.is_users_favorite?(namg1, mary))
-    assert_not(obs.is_users_favorite?(namg1, dick))
+    assert_not(obs.users_favorite?(namg1, rolf))
+    assert_not(obs.users_favorite?(namg1, mary))
+    assert_not(obs.users_favorite?(namg1, dick))
 
     # They're all the same, none with votes yet, so first apparently wins.
     obs.calc_consensus
@@ -599,22 +599,22 @@ class ObservationTest < UnitTestCase
     assert(vote = obs.owners_vote(namg1))
     assert_equal(vote, obs.users_vote(namg1, rolf))
     assert_equal(vote, namg1.users_vote(rolf))
-    assert(obs.is_owners_favorite?(namg1))
-    assert(obs.is_users_favorite?(namg1, rolf))
-    assert(namg1.is_users_favorite?(rolf))
+    assert(obs.owners_favorite?(namg1))
+    assert(obs.users_favorite?(namg1, rolf))
+    assert(namg1.users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, 0.01, rolf)
     namg1.reload
-    assert(obs.is_owners_favorite?(namg1))
+    assert(obs.owners_favorite?(namg1))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, -0.01, rolf)
     namg1.reload
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(namg1.is_users_favorite?(rolf))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(namg1.users_favorite?(rolf))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
@@ -623,36 +623,36 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 1, rolf)
     namings.each(&:reload)
     namg2.reload
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert(obs.is_owners_favorite?(namg2))
-    assert_not(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert(obs.owners_favorite?(namg2))
+    assert_not(obs.owners_favorite?(namg3))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     obs.change_vote(namg3, 2, rolf)
     namings.each(&:reload)
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert(obs.owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
 
     # Make votes namg1: 3, namg2: 1, namg3: 2
     obs.change_vote(namg1, 3, rolf)
     namings.each(&:reload)
-    assert(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert_not(obs.is_owners_favorite?(namg3))
+    assert(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert_not(obs.owners_favorite?(namg3))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     # Make votes namg1: 1, namg2: 1, namg3: 2
     obs.change_vote(namg1, 1, rolf)
     namings.each(&:reload)
-    assert_not(obs.is_owners_favorite?(namg1))
-    assert_not(obs.is_owners_favorite?(namg2))
-    assert(obs.is_owners_favorite?(namg3))
+    assert_not(obs.owners_favorite?(namg1))
+    assert_not(obs.owners_favorite?(namg2))
+    assert(obs.owners_favorite?(namg3))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
 
@@ -664,9 +664,9 @@ class ObservationTest < UnitTestCase
     obs.change_vote(namg2, 2, mary)
     obs.change_vote(namg3, -1, mary)
     namings.each(&:reload)
-    assert_not(namg1.is_users_favorite?(mary))
-    assert(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
+    assert_not(namg1.users_favorite?(mary))
+    assert(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, obs.consensus_naming)
 
@@ -675,23 +675,23 @@ class ObservationTest < UnitTestCase
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
     obs.change_vote(namg2, 0.01, mary)
     namings.each(&:reload)
-    assert(namg1.is_users_favorite?(mary))
-    assert_not(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
+    assert(namg1.users_favorite?(mary))
+    assert_not(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, obs.consensus_naming)
 
     obs.change_vote(namg1, -0.01, mary)
     namings.each(&:reload)
-    assert_not(namg1.is_users_favorite?(mary))
-    assert(namg2.is_users_favorite?(mary))
-    assert_not(namg3.is_users_favorite?(mary))
-    assert_not(namg1.is_users_favorite?(rolf))
-    assert_not(namg2.is_users_favorite?(rolf))
-    assert(namg3.is_users_favorite?(rolf))
-    assert_not(namg1.is_users_favorite?(dick))
-    assert_not(namg2.is_users_favorite?(dick))
-    assert_not(namg3.is_users_favorite?(dick))
+    assert_not(namg1.users_favorite?(mary))
+    assert(namg2.users_favorite?(mary))
+    assert_not(namg3.users_favorite?(mary))
+    assert_not(namg1.users_favorite?(rolf))
+    assert_not(namg2.users_favorite?(rolf))
+    assert(namg3.users_favorite?(rolf))
+    assert_not(namg1.users_favorite?(dick))
+    assert_not(namg2.users_favorite?(dick))
+    assert_not(namg3.users_favorite?(dick))
     assert_names_equal(@name3, obs.name)
     assert_equal(namg3, obs.consensus_naming)
   end
@@ -911,7 +911,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days)
     end
-    assert_match(:validate_observation_future_time.t, exception.message)
+    assert_match(:validate_future_time.t, exception.message)
   end
 
   def test_check_requirements_future_time
@@ -921,7 +921,7 @@ class ObservationTest < UnitTestCase
       # Note that 'when' gets automagically converted to Date
       Observation.create!(name_id: fungi.id, when: Time.zone.now + 2.days)
     end
-    assert_match(:validate_observation_future_time.t, exception.message)
+    assert_match(:validate_future_time.t, exception.message)
   end
 
   def test_check_requirements_invalid_year
@@ -930,7 +930,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1))
     end
-    assert_match(:validate_observation_invalid_year.t, exception.message)
+    assert_match(:validate_invalid_year.t, exception.message)
   end
 
   def test_check_requirements_where_too_long
@@ -1028,5 +1028,13 @@ class ObservationTest < UnitTestCase
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
     assert_operator(obs.old_last_viewed_by(dick), :>=, time - 2.seconds)
     assert_operator(obs.old_last_viewed_by(dick), :<=, time + 2.seconds)
+  end
+
+  def test_destroy_orphans_log
+    obs = observations(:detailed_unknown_obs)
+    log = obs.rss_log
+    assert_not_nil(log)
+    obs.destroy!
+    assert_nil(log.reload.target_id)
   end
 end

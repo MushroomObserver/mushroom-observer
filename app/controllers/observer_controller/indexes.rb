@@ -54,7 +54,7 @@ class ObserverController
     names = Name.where(id: name_str).to_a
     names = Name.where(search_name: name_str).to_a if names.empty?
     names = Name.where(text_name: name_str).to_a if names.empty?
-    names.map(&:parents).flatten.map(&:id).uniq
+    names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
   # Displays matrix of User's Observation's, by date.

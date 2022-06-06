@@ -25,7 +25,7 @@ class Name < AbstractModel
   #
   def self.find_names(in_str, rank = nil, ignore_deprecated: false,
                       fill_in_authors: false)
-    return [] unless parse = parse_name(in_str)
+    return [] unless (parse = parse_name(in_str))
 
     finder = Name.with_rank(rank)
     results = name_search(finder.where("search_name = :name",
@@ -45,7 +45,7 @@ class Name < AbstractModel
 
   def self.name_search(finder, ignore_deprecated)
     unless ignore_deprecated
-      results = finder.where("deprecated = 0")
+      results = finder.where(deprecated: 0)
       return results.to_a if results.present?
     end
     finder.to_a

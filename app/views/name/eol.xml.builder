@@ -12,11 +12,11 @@ xml.response(
   "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 "\
                           "http://services.eol.org/schema/content_0_2.xsd"
 ) do
-  for taxon in @data.names
+  @data.names.each do |taxon|
     xml.taxon do
       xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
       xml.dc(:source, "#{MO.http_domain}/name/show_name/#{taxon.id}")
-      for (rank, name) in Name.parse_classification(taxon.classification)
+      Name.parse_classification(taxon.classification).each do |(rank, name)|
         xml.dwc(rank, name) if MO.eol_ranks.member?(rank)
       end
       xml.dwc(:ScientificName, taxon.real_search_name)
@@ -34,8 +34,8 @@ xml.response(
         end
       end
       refs.uniq.each { |ref| xml.reference(ref.t) }
-      for desc in @data.descriptions(taxon.id)
-        for f in NameDescription.eol_note_fields
+      @data.descriptions(taxon.id).each do |desc|
+        NameDescription.eol_note_fields.each do |f|
           value = desc.send(f)
           next if value.blank?
 
@@ -62,7 +62,7 @@ xml.response(
           end
         end
       end
-      for image in @data.images(taxon.id)
+      @data.images(taxon.id).each do |image|
         # for image_id, obs_id, user_id,
         #     license_id, created in @image_data[taxon.id]
         user = @data.rights_holder(image)

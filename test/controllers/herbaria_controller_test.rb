@@ -109,6 +109,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
     query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
+    login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
@@ -119,6 +120,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_all
+    login
     get(:index, params: { flavor: :all })
 
     assert_response(:success)
@@ -185,8 +187,9 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
 
-  def test_index_all_merge_source_links_presence_no_login
+  def test_index_all_no_login
     get(:index, params: { flavor: :all })
+    assert_redirected_to(account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
   end
@@ -235,11 +238,13 @@ class HerbariaControllerTest < FunctionalTestCase
     source = field_museum
     get(:index, params: { flavor: :all, merge: source.id })
 
+    assert_redirected_to(account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("form[action *= 'herbaria_merges_path']", count: 0)
   end
 
   def test_index_nonpersonal
+    login
     get(:index, params: { flavor: :nonpersonal })
 
     assert_select("#title-caption", text: :query_title_nonpersonal.l)
@@ -261,6 +266,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_pattern_text
     pattern = "Personal Herbarium"
+    login
     get(:index, params: { pattern: pattern })
 
     assert_select("#title-caption").text.start_with?(
@@ -283,12 +289,35 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_pattern_integer
+    login
     get(:index, params: { pattern: nybg.id })
 
     assert_redirected_to(
       herbarium_path(nybg),
       "Herbarium search for ##{nybg.id} should show #{nybg.name} herbarium"
     )
+  end
+
+  def test_reverse_records
+    login
+    get(:index, params: { by: "reverse_records" })
+
+    assert_response(:success)
+    assert_select(
+      "#title-caption",
+      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
+      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
+    )
+    assert_select(
+      "#sorts", true,
+      "Fungaria by #Records Reversed is missing sort tabs"
+    )
+    Herbarium.find_each do |herbarium|
+      assert_select(
+        "a[href *= '#{herbarium_path(herbarium)}']", true,
+        "Fungaria by reverse #Records missing link to #{herbarium.format_name})"
+      )
+    end
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -833,7 +862,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_destroy_by_non_curator
-    assert(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
+    assert(HerbariumRecord.exists?(herbarium_id: nybg.id))
     # Must be curator or admin.
     login("mary")
     get(:destroy, params: { id: nybg.id })
@@ -849,10 +878,10 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:destroy, params: { id: nybg.id })
 
     assert_nil(Herbarium.safe_find(nybg.id))
-    assert_not(HerbariumRecord.where(herbarium_id: nybg.id).exists?)
+    assert_not(HerbariumRecord.exists?(herbarium_id: nybg.id))
     assert_not(
       Observation.joins(:herbarium_records).
-                  where("herbarium_records.id" => record_ids).exists?,
+                  exists?("herbarium_records.id" => record_ids),
       "Destroying Herbarium should destroy herbarium records -- " \
       "There should not be herbarium records for Observations " \
       "whose only records were in destroyed herbarium #{nybg.name}"
@@ -903,5 +932,15 @@ class HerbariaControllerTest < FunctionalTestCase
       herbaria_path,
       "Attempt to destroy non-existent herbarium should redirect to index"
     )
+  end
+
+  # This was a bug found in the wild, presumably from a user which was deleted
+  # but the corresponding personal_user_id was not cleared and therefore then
+  # referred to a nonexistent user.  It caused the herbarium index to crash.
+  def test_herbarium_personal_user_id_corrupt
+    # Intentionally "break" the user link for Rolf's personal herbarium.
+    herbaria(:rolf_herbarium).update(personal_user_id: -1)
+    login("mary")
+    get(:index)
   end
 end

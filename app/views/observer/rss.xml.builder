@@ -7,7 +7,7 @@ xml.rss(version: "2.0") do
     xml.link(MO.http_domain + "/observer/list_rss_logs")
     xml.description(:rss_description.l)
     xml.language(I18n.locale.to_s)
-    for log in @logs
+    @logs.each do |log|
       xml.item do
         xml.title(log.unique_text_name)
         xml.description(

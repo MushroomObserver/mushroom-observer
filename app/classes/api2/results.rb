@@ -47,7 +47,7 @@ class API2
   end
 
   def result_ids
-    @result_ids ||= query.paginate_ids(paginator)
+    @result_ids ||= query&.paginate_ids(paginator)
   end
 
   def num_results

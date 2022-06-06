@@ -23,7 +23,7 @@
       </span>
     </p>
     <p class="Data">
-      <% for name in @deprecated_names
+      <% @deprecated_names.each do |name|
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
         <% if approved_names != [] %>

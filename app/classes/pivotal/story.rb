@@ -93,20 +93,20 @@ class Pivotal
 
     def activity
       @activity ||= begin
-        result = "none"
-        if @comments.any?
-          comment = @comments.last
-          time = Time.zone.parse(comment.time)
-          if time > 1.day.ago
-            result = "day"
-          elsif time > 1.week.ago
-            result = "week"
-          elsif time > 1.month.ago
-            result = "month"
-          end
-        end
-        result
-      end
+                      result = "none"
+                      if @comments.any?
+                        comment = @comments.last
+                        time = Time.zone.parse(comment.time)
+                        if time > 1.day.ago
+                          result = "day"
+                        elsif time > 1.week.ago
+                          result = "week"
+                        elsif time > 1.month.ago
+                          result = "month"
+                        end
+                      end
+                      result
+                    end
     end
 
     def story_order
@@ -145,7 +145,7 @@ class Pivotal
     def user_vote(user)
       if user
         user_id = user.id
-        for vote in votes
+        votes.each do |vote|
           return vote.value if vote.id == user_id
         end
       end

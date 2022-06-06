@@ -484,12 +484,12 @@ class ApiTest < UnitTestCase
   def test_getting_collection_numbers
     params = { method: :get, action: :collection_number }
 
-    nums = CollectionNumber.where("year(created_at) = 2006")
+    nums = CollectionNumber.where(CollectionNumber[:created_at].year == 2006)
     assert_not_empty(nums)
     assert_api_pass(params.merge(created_at: "2006"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("year(updated_at) = 2005")
+    nums = CollectionNumber.where(CollectionNumber[:updated_at].year == 2005)
     assert_not_empty(nums)
     assert_api_pass(params.merge(updated_at: "2005"))
     assert_api_results(nums)
@@ -510,7 +510,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(collector: "Mary Newbie"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("name LIKE '%mary%'")
+    nums = CollectionNumber.where(CollectionNumber[:name].matches("%mary%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(collector_has: "Mary"))
     assert_api_results(nums)
@@ -520,7 +520,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(number: "174"))
     assert_api_results(nums)
 
-    nums = CollectionNumber.where("number LIKE '%17%'")
+    nums = CollectionNumber.where(CollectionNumber[:number].matches("%17%"))
     assert_not_empty(nums)
     assert_api_pass(params.merge(number_has: "17"))
     assert_api_results(nums)
@@ -859,7 +859,7 @@ class ApiTest < UnitTestCase
       method: :get,
       action: :external_site
     }
-    sites = ExternalSite.where("name like '%inat%'")
+    sites = ExternalSite.where(ExternalSite[:name].matches("%inat%"))
     assert_not_empty(sites)
     assert_api_pass(params.merge(name: "inat"))
     assert_api_results(sites)
@@ -875,7 +875,11 @@ class ApiTest < UnitTestCase
       action: :herbarium
     }
 
-    herbs = Herbarium.where("date(created_at) = '2012-10-21'")
+    # rubocop:disable Style/FormatStringToken
+    herbs = Herbarium.where(
+      Herbarium[:created_at].format("%Y-%m-%d") == "2012-10-21"
+    )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(herbs)
     assert_api_pass(params.merge(created_at: "2012-10-21"))
     assert_api_results(herbs)
@@ -890,17 +894,17 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(code: "NY"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("name like '%personal%'")
+    herbs = Herbarium.where(Herbarium[:name].matches("%personal%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(name: "personal"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("description like '%awesome%'")
+    herbs = Herbarium.where(Herbarium[:description].matches("%awesome%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(description: "awesome"))
     assert_api_results(herbs)
 
-    herbs = Herbarium.where("mailing_address like '%New York%'")
+    herbs = Herbarium.where(Herbarium[:mailing_address].matches("%New York%"))
     assert_not_empty(herbs)
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
@@ -913,12 +917,12 @@ class ApiTest < UnitTestCase
   def test_getting_herbarium_records
     params = { method: :get, action: :herbarium_record }
 
-    recs = HerbariumRecord.where("year(created_at) = 2012")
+    recs = HerbariumRecord.where(HerbariumRecord[:created_at].year == 2012)
     assert_not_empty(recs)
     assert_api_pass(params.merge(created_at: "2012"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("year(updated_at) = 2017")
+    recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year == 2017)
     assert_not_empty(recs)
     assert_api_pass(params.merge(updated_at: "2017"))
     assert_api_results(recs)
@@ -940,17 +944,17 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(observation: obs.id))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("notes LIKE '%dried%'")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].matches("%dried%"))
     assert_not_empty(recs)
     assert_api_pass(params.merge(notes_has: "dried"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("COALESCE(notes, '') = ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("CONCAT(notes, '') != ''")
+    recs = HerbariumRecord.where(HerbariumRecord[:notes].not_blank)
     assert_not_empty(recs)
     assert_api_pass(params.merge(has_notes: "yes"))
     assert_api_results(recs)
@@ -960,7 +964,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(initial_det: "Coprinus comatus"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("initial_det LIKE '%coprinus%'")
+    recs = HerbariumRecord.
+           where(HerbariumRecord[:initial_det].matches("%coprinus%"))
     assert_not_empty(recs)
     assert_api_pass(params.merge(initial_det_has: "coprinus"))
     assert_api_results(recs)
@@ -970,7 +975,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(accession_number: "1234"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("accession_number LIKE '%23%'")
+    recs = HerbariumRecord.
+           where(HerbariumRecord[:accession_number].matches("%23%"))
     assert_not_empty(recs)
     assert_api_pass(params.merge(accession_number_has: "23"))
     assert_api_results(recs)
@@ -1122,13 +1128,19 @@ class ApiTest < UnitTestCase
     assert_api_results([img])
 
     assert_api_pass(params.merge(created_at: "2006"))
-    assert_api_results(Image.where("year(created_at) = 2006"))
+    assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-    assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+    # rubocop:disable Style/FormatStringToken
+    assert_api_results(
+      Image.where(Image[:updated_at].format("%Y-%m-%d") == "2006-05-22")
+    )
+    # rubocop:enable Style/FormatStringToken
 
     assert_api_pass(params.merge(date: "2007-03"))
-    assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+    assert_api_results(
+      Image.where((Image[:when].year == 2007).and(Image[:when].month == 3))
+    )
 
     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
     assert_api_results(Image.where(user: [mary, katrina]))
@@ -1199,9 +1211,9 @@ class ApiTest < UnitTestCase
     # assert_api_pass(params.merge(has_observation: "no"))
     # assert_api_results(unattached)
 
-    imgs = Image.where("width >= 1280 || height >= 1280")
+    imgs = Image.where((Image[:width] >= 1280).or(Image[:height] >= 1280))
     assert_empty(imgs)
-    imgs = Image.where("width >= 960 || height >= 960")
+    imgs = Image.where((Image[:width] >= 960).or(Image[:height] >= 960))
     assert_not_empty(imgs)
     assert_api_pass(params.merge(size: "huge"))
     assert_api_results([])
@@ -1221,25 +1233,30 @@ class ApiTest < UnitTestCase
     assert_api_results([pretty_img])
 
     assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
-    assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%insil choi%"))
+    )
     assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
-    assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+    assert_api_results(
+      Image.where(Image[:copyright_holder].matches("%nathan%"))
+    )
 
     pd = licenses(:publicdomain)
     assert_api_pass(params.merge(license: pd.id))
     assert_api_results(Image.where(license: pd))
 
     assert_api_pass(params.merge(has_votes: "yes"))
-    assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].not_eq(nil)))
     assert_api_pass(params.merge(has_votes: "no"))
-    assert_api_results(Image.where("vote_cache IS NULL"))
+    assert_api_results(Image.where(Image[:vote_cache].eq(nil)))
 
     assert_api_pass(params.merge(quality: "2-3"))
-    assert_api_results(Image.where("vote_cache > 2.0"))
+    assert_api_results(Image.where(Image[:vote_cache] > 2.0))
     assert_api_pass(params.merge(quality: "1-2"))
     assert_api_results([])
 
-    imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    imgs = Observation.where(Observation[:vote_cache] >= 2.0).
+           map(&:images).flatten
     assert_not_empty(imgs)
     assert_api_pass(params.merge(confidence: "2-3"))
     assert_api_results(imgs)
@@ -1435,12 +1452,16 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: loc.id))
     assert_api_results([loc])
 
-    locs = Location.where("year(created_at) = 2008")
+    locs = Location.where(Location[:created_at].year == 2008)
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
 
-    locs = Location.where("date(created_at) = '2012-01-01'")
+    # rubocop:disable Style/FormatStringToken
+    locs = Location.where(
+      Location[:updated_at].format("%Y-%m-%d") == "2012-01-01"
+    )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
@@ -1450,8 +1471,11 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.where("south >= 39 and north <= 40 and
-                           west >= -124 and east <= -123 and west <= east")
+    locs = Location.where(
+      (Location[:south] >= 39).and(Location[:north] <= 40).
+      and(Location[:west] >= -124).and(Location[:east] <= -123).
+      and(Location[:west] <= Location[:east])
+    )
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
     assert_api_fail(params.merge(north: 40, east: -123, west: -124))
@@ -1629,14 +1653,16 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: name.id))
     assert_api_results([name])
 
-    names = Name.where("year(created_at) = 2008").
+    names = Name.where(Name[:created_at].year == 2008).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
 
-    names = Name.where("date(updated_at) = '2008-09-05'").
+    # rubocop:disable Style/FormatStringToken
+    names = Name.where(Name[:updated_at].format("%Y-%m-%d") == "2008-09-05").
             reject(&:correct_spelling_id)
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(names)
     assert_api_pass(params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
@@ -1665,9 +1691,9 @@ class ApiTest < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.where("classification like '%Fungi%'").each do |n|
+    names = Name.where(Name[:classification].matches("%Fungi%")).each do |n|
       genus = n.text_name.split.first
-      Name.where("text_name like '#{genus} %'") + [n]
+      Name.where(Name[:text_name].matches("#{genus} %")) + [n]
     end.flatten.uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
@@ -1681,7 +1707,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(is_deprecated: "true"))
     assert_api_results(names)
 
-    names = Name.where("date(updated_at) = '2009-10-12'")
+    # rubocop:disable Style/FormatStringToken
+    names = Name.where(Name[:updated_at].format("%Y-%m-%d") == "2009-10-12")
+    # rubocop:enable Style/FormatStringToken
     goods = names.reject(&:correct_spelling_id)
     bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
@@ -1727,9 +1755,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
 
-    with    = Name.where.not("author is null or author = ''").
+    with    = Name.where.not(Name[:author].blank).
               reject(&:correct_spelling_id)
-    without = Name.where("author is null or author = ''").
+    without = Name.where(Name[:author].blank).
               reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
@@ -1738,9 +1766,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_author: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("citation is null or citation = ''").
+    with    = Name.where.not(Name[:citation].blank).
               reject(&:correct_spelling_id)
-    without = Name.where("citation is null or citation = ''").
+    without = Name.where(Name[:citation].blank).
               reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
@@ -1749,9 +1777,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_citation: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("classification is null or classification = ''").
+    with    = Name.where.not(Name[:classification].blank).
               reject(&:correct_spelling_id)
-    without = Name.where("classification is null or classification = ''").
+    without = Name.where(Name[:classification].blank).
               reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
@@ -1760,9 +1788,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_classification: "no"))
     assert_api_results(without)
 
-    with    = Name.where.not("notes is null or notes = ''").
+    with    = Name.where.not(Name[:notes].blank).
               reject(&:correct_spelling_id)
-    without = Name.where("notes is null or notes = ''").
+    without = Name.where(Name[:notes].blank).
               reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
@@ -1788,39 +1816,39 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.where("text_name like '%bunny%'").
+    names = Name.where(Name[:text_name].matches("%bunny%")).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.where("author like '%peck%'").
+    names = Name.where(Name[:author].matches("%peck%")).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.where("citation like '%lichenes%'").
+    names = Name.where(Name[:citation].matches("%lichenes%")).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.where("classification like '%lecanorales%'").
+    names = Name.where(Name[:classification].matches("%lecanorales%")).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
-    names = Name.where("notes like '%known%'").
+    names = Name.where(Name[:notes].matches("%known%")).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
 
-    names = Comment.where("target_type = 'Name' and comment like '%mess%'").
-            map(&:target).uniq.sort_by(&:id).
-            reject(&:correct_spelling_id)
+    names = Comment.where(
+      Comment[:target_type].eq("Name").and(Comment[:comment].matches("%mess%"))
+    ).map(&:target).uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(comments_has: "mess"))
     assert_api_results(names)
@@ -2068,17 +2096,21 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: obs.id))
     assert_api_results([obs])
 
-    obses = Observation.where("year(created_at) = 2010")
+    obses = Observation.where(Observation[:created_at].year == 2010)
     assert_not_empty(obses)
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
 
-    obses = Observation.where("date(updated_at) = '2007-06-24'")
+    # rubocop:disable Style/FormatStringToken
+    obses = Observation.where(
+      Observation[:updated_at].format("%Y-%m-%d") == "2007-06-24"
+    )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(obses)
     assert_api_pass(params.merge(updated_at: "20070624"))
     assert_api_results(obses)
 
-    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    obses = Observation.where(Observation[:when].year.between(2012..2014))
     assert_not_empty(obses)
     assert_api_pass(params.merge(date: "2012-2014"))
     assert_api_results(obses)
@@ -2112,7 +2144,9 @@ class ApiTest < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    ssp_obs = Observation.where(
+      name: Name.where(Name[:text_name].matches("Agaricus%"))
+    )
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -2180,7 +2214,7 @@ class ApiTest < UnitTestCase
 
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
-    names = Name.where("`rank` <= #{genus} or `rank` = #{group}")
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
 
     with    = Observation.where(name: names)
     without = Observation.where.not(name: names)
@@ -2206,9 +2240,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without)
 
-    no_notes = Observation.no_notes_persisted
-    with     = Observation.where("notes != ?", no_notes)
-    without  = Observation.where("notes = ?", no_notes)
+    with = Observation.where(Observation[:notes] != Observation.no_notes)
+    without = Observation.where(Observation[:notes] == Observation.no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -2216,27 +2249,31 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    obses = Observation.where("notes like '%:substrate:%'").
-            reject { |o| o.notes[:substrate].blank? }
+    obses = Observation.where(
+      Observation[:notes].matches("%:substrate:%")
+    ).reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.where("notes like '%orphan%'")
+    obses = Observation.where(Observation[:notes].matches("%orphan%"))
     assert(obses.length > 1)
     assert_api_pass(params.merge(notes_has: "orphan"))
     assert_api_results(obses)
 
-    obses = Comment.where("concat(summary, comment) like \"%let's%\"").
-            map(&:target).uniq.sort_by(&:id)
+    obses = Comment.where(
+      Comment[:summary].concat(Comment[:comment]).matches("%let's%")
+    ).map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
     assert_api_pass(params.merge(comments_has: "let's"))
     assert_api_results(obses)
 
-    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
-                               `long` >= -119 and `long` <= -118")
-    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
-                            east <= -118 and west <= east")
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    locs = Location.where(
+      (Location[:south] >= 34).and(Location[:north] <= 35).
+      and(Location[:west] >= -119).and(Location[:east] <= -118).
+      and(Location[:west] <= Location[:east])
+    )
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
     assert_api_fail(params.merge(south: 34, east: -118, west: -119))
@@ -2246,8 +2283,10 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses)
 
-    obses = Observation.where("`where` like '%, California, USA' OR " \
-                              "`where` = 'California, USA'")
+    obses = Observation.where(
+      Observation[:where].matches("%, California, USA").
+      or(Observation[:where].matches("California, USA"))
+    )
     assert_not_empty(obses)
     assert_api_pass(params.merge(region: "California, USA"))
     assert_api_results(obses)
@@ -2596,13 +2635,14 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: proj.id))
     assert_api_results([proj])
 
-    projs = Project.where("year(created_at) = 2008")
+    projs = Project.where(Project[:created_at].year == 2008)
     assert_not_empty(projs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(projs)
 
-    projs = Project.where("year(updated_at) = 2008 and
-                           month(updated_at) = 9")
+    projs = Project.where(
+      (Project[:updated_at].year == 2008).and(Project[:updated_at].month == 9)
+    )
     assert_not_empty(projs)
     assert_api_pass(params.merge(updated_at: "2008-09"))
     assert_api_results(projs)
@@ -2633,8 +2673,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(projs)
 
-    with    = Project.where("summary is not null and summary != ''")
-    without = Project.where("summary is null or summary = ''")
+    with    = Project.where(Project[:summary].not_blank)
+    without = Project.where(Project[:summary].blank)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_summary: "yes"))
@@ -2642,12 +2682,12 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_summary: "no"))
     assert_api_results(without)
 
-    projs = Project.where("title like '%bolete%'")
+    projs = Project.where(Project[:title].matches("%bolete%"))
     assert_not_empty(projs)
     assert_api_pass(params.merge(title_has: "bolete"))
     assert_api_results(projs)
 
-    projs = Project.where("summary like '%article%'")
+    projs = Project.where(Project[:summary].matches("%article%"))
     assert_not_empty(projs)
     assert_api_pass(params.merge(summary_has: "article"))
     assert_api_results(projs)
@@ -2785,13 +2825,18 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: seq.id))
     assert_api_results([seq])
 
-    seqs = Sequence.where("date(created_at) = '2017-01-01'")
+    # rubocop:disable Style/FormatStringToken
+    seqs = Sequence.where(
+      Sequence[:created_at].format("%Y-%m-%d") == "2017-01-01"
+    )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(seqs)
     assert_api_pass(params.merge(created_at: "2017-01-01"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("year(updated_at) = 2017 and
-                           month(updated_at) = 2")
+    seqs = Sequence.where(
+      Sequence[:updated_at].year.eq(2017).and(Sequence[:updated_at].month.eq(2))
+    )
     assert_not_empty(seqs)
     assert_api_pass(params.merge(updated_at: "2017-02"))
     assert_api_results(seqs)
@@ -2819,17 +2864,17 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(accession: "KT968605"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("locus like '%its%'")
+    seqs = Sequence.where(Sequence[:locus].matches("%its%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(locus_has: "ITS"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("accession like '%kt%'")
+    seqs = Sequence.where(Sequence[:accession].matches("%kt%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(accession_has: "KT"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where("notes like '%formatted%'")
+    seqs = Sequence.where(Sequence[:notes].matches("%formatted%"))
     assert_not_empty(seqs)
     assert_api_pass(params.merge(notes_has: "formatted"))
     assert_api_results(seqs)
@@ -2842,7 +2887,9 @@ class ApiTest < UnitTestCase
                        archive: "GenBank", accession: "MO#{obs.id}")
     end
 
-    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    obses = Observation.where(
+      (Observation[:when].year >= 2012).and(Observation[:when].year <= 2014)
+    )
     assert_not_empty(obses)
     assert_api_pass(params.merge(obs_date: "2012-2014"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -2923,10 +2970,12 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
-                               `long` >= -119 and `long` <= -118")
-    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
-                            east <= -118 and west <= east")
+    obses = Observation.where(lat: [34..35], long: [-119..-118])
+    locs = Location.where(
+      (Location[:south] >= 34).and(Location[:north] <= 35).
+      and(Location[:west] >= -119).and(Location[:east] <= -118).
+      and(Location[:west] <= Location[:east])
+    )
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
     assert_api_fail(params.merge(south: 34, east: -118, west: -119))
@@ -2952,8 +3001,8 @@ class ApiTest < UnitTestCase
 
     genus   = Name.ranks[:Genus]
     group   = Name.ranks[:Group]
-    names   = Name.where("`rank` <= #{genus} or `rank` = #{group}")
-    with    = Observation.where(name: names)
+    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
+    with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
     assert(without.length > 1)
@@ -2971,9 +3020,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    no_notes = Observation.no_notes_persisted
-    with     = Observation.where("notes != ?", no_notes)
-    without  = Observation.where("notes = ?", no_notes)
+    with = Observation.where(Observation[:notes] != Observation.no_notes)
+    without = Observation.where(Observation[:notes] == Observation.no_notes)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_obs_notes: "yes"))
@@ -2981,13 +3029,13 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("notes like '%:substrate:%'").
+    obses = Observation.where(Observation[:notes].matches("%:substrate:%")).
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where("notes like '%orphan%'")
+    obses = Observation.where(Observation[:notes].matches("%orphan%"))
     assert(obses.length > 1)
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -3124,12 +3172,16 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(id: spl.id))
     assert_api_results([spl])
 
-    spls = SpeciesList.where("date(created_at) = '2012-07-06'")
+    # rubocop:disable Style/FormatStringToken
+    spls = SpeciesList.where(
+      SpeciesList[:created_at].format("%Y-%m-%d") == "2012-07-06"
+    )
+    # rubocop:enable Style/FormatStringToken
     assert_not_empty(spls)
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("year(updated_at) = 2008")
+    spls = SpeciesList.where(SpeciesList[:updated_at].year == 2008)
     assert_not_empty(spls)
     assert_api_pass(params.merge(updated_at: "2008"))
     assert_api_results(spls)
@@ -3139,8 +3191,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("`when` >= '2006-03-01' and
-                              `when` <= '2006-03-02'")
+    spls = SpeciesList.where(SpeciesList[:when] >= "2006-03-01").
+           where(SpeciesList[:when] <= "2006-03-02")
     assert_not_empty(spls)
     assert_api_pass(params.merge(date: "2006-03-01-2006-03-02"))
     assert_api_results(spls)
@@ -3201,8 +3253,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(project: "#{proj1.id}, #{proj2.id}"))
     assert_api_results(spls)
 
-    with    = SpeciesList.where("COALESCE(notes,'') != ''")
-    without = SpeciesList.where("COALESCE(notes,'') = ''")
+    with    = SpeciesList.where(SpeciesList[:notes].not_blank)
+    without = SpeciesList.where(SpeciesList[:notes].blank)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -3216,12 +3268,12 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results([spl])
 
-    spls = SpeciesList.where("title like '%mysteries%'")
+    spls = SpeciesList.where(SpeciesList[:title].matches("%mysteries%"))
     assert_not_empty(spls)
     assert_api_pass(params.merge(title_has: "mysteries"))
     assert_api_results(spls)
 
-    spls = SpeciesList.where("notes like '%skunk%'")
+    spls = SpeciesList.where(SpeciesList[:notes].matches("%skunk%"))
     assert_not_empty(spls)
     assert_api_pass(params.merge(notes_has: "skunk"))
     assert_api_results(spls)
@@ -4009,7 +4061,7 @@ class ApiTest < UnitTestCase
     assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
   end
 
-  def test_api_key_help
+  def test_help
     do_help_test(:get, :api_key, :fail)
     do_help_test(:post, :api_key)
     do_help_test(:patch, :api_key, :fail)

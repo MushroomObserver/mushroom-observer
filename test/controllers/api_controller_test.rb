@@ -22,13 +22,13 @@ class ApiControllerTest < FunctionalTestCase
 
   def post_and_send_file(action, file, content_type, params)
     data = Rack::Test::UploadedFile.new(file, "image/jpeg")
-    params[:body] = data
-    post_and_send(action, content_type, params)
+    body = data.read
+    post_and_send(action, content_type, params, body)
   end
 
-  def post_and_send(action, type, params)
+  def post_and_send(action, type, params, body)
     @request.env["CONTENT_TYPE"] = type
-    post(action, params)
+    post(action, params: params, body: body)
   end
 
   def file_checksum(filename)
@@ -46,7 +46,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_robot_permissions
     @request.user_agent = "Googlebot"
     obs = Observation.first
-    get(:observations, id: obs.id)
+    get(:observations, params: { id: obs.id })
     assert_equal(200, @response.status)
   end
 
@@ -109,7 +109,7 @@ class ApiControllerTest < FunctionalTestCase
   def do_basic_get_request_for_model(model)
     [:none, :low, :high].each do |detail|
       [:xml, :json].each do |format|
-        get(model.table_name.to_sym, detail: detail, format: format)
+        get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)
       end
@@ -117,7 +117,7 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_num_of_pages
-    get(:observations, detail: :high, format: :json)
+    get(:observations, params: { detail: :high, format: :json })
     json = JSON.parse(response.body)
     assert_equal((Observation.count / 10.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
@@ -125,14 +125,13 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_minimal_observation
     post(:observations,
-         api_key: api_keys(:rolfs_api_key).key,
-         location: "Unknown")
+         params: { api_key: api_keys(:rolfs_api_key).key, location: "Earth" })
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
     assert_equal(Time.zone.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
-    assert_equal("Unknown", obs.where)
+    assert_equal("Earth", obs.where)
     assert_names_equal(names(:fungi), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
@@ -149,24 +148,25 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_observation
-    post(
-      :observations,
-      api_key: api_keys(:rolfs_api_key).key,
-      date: "2012-06-26",
-      location: "Burbank, California, USA",
-      name: "Coprinus comatus",
-      vote: "2",
-      latitude: "34.5678N",
-      longitude: "123.4567W",
-      altitude: "1234 ft",
-      has_specimen: "yes",
-      is_collection_location: "yes",
-      notes: "These are notes.\nThey look like this.\n",
-      images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
-      thumbnail: images(:turned_over_image).id.to_s,
-      projects: "EOL Project",
-      species_lists: "Another Species List"
-    )
+    post(:observations,
+         params: {
+           api_key: api_keys(:rolfs_api_key).key,
+           date: "2012-06-26",
+           location: "Burbank, California, USA",
+           name: "Coprinus comatus",
+           vote: "2",
+           latitude: "34.5678N",
+           longitude: "123.4567W",
+           altitude: "1234 ft",
+           has_specimen: "yes",
+           is_collection_location: "yes",
+           notes: "These are notes.\nThey look like this.\n",
+           images: "#{images(:in_situ_image).id}, \
+                   #{images(:turned_over_image).id}",
+           thumbnail: images(:turned_over_image).id.to_s,
+           projects: "EOL Project",
+           species_lists: "Another Species List"
+         })
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -251,12 +251,14 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_user
     rolfs_key = api_keys(:rolfs_api_key)
     post(:users,
-         api_key: rolfs_key.key,
-         login: "miles",
-         email: "miles@davis.com",
-         password: "sivadselim",
-         create_key: "New API Key",
-         detail: :high)
+         params: {
+           api_key: rolfs_key.key,
+           login: "miles",
+           email: "miles@davis.com",
+           password: "sivadselim",
+           create_key: "New API Key",
+           detail: :high
+         })
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
@@ -288,9 +290,7 @@ class ApiControllerTest < FunctionalTestCase
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
-    post(:api_keys,
-         api_key: rolfs_key.key,
-         app: "Mushroom Mapper")
+    post(:api_keys, params: { api_key: rolfs_key.key, app: "Mushroom Mapper" })
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -299,9 +299,11 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     post(:api_keys,
-         api_key: rolfs_key.key,
-         app: "Mushroom Mapper",
-         for_user: mary.id)
+         params: {
+           api_key: rolfs_key.key,
+           app: "Mushroom Mapper",
+           for_user: mary.id
+         })
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -315,16 +317,16 @@ class ApiControllerTest < FunctionalTestCase
   # Prove user can add Sequence to someone else's Observation
   def test_post_sequence
     obs = observations(:coprinus_comatus_obs)
-    post(
-      :sequences,
-      observation: obs.id,
-      api_key: api_keys(:marys_api_key).key,
-      locus: "ITS",
-      bases: "catg",
-      archive: "GenBank",
-      accession: "KT1234",
-      notes: "sequence notes"
-    )
+    post(:sequences,
+         params: {
+           observation: obs.id,
+           api_key: api_keys(:marys_api_key).key,
+           locus: "ITS",
+           bases: "catg",
+           archive: "GenBank",
+           accession: "KT1234",
+           notes: "sequence notes"
+         })
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
@@ -339,15 +341,15 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_get_observation_with_gps_hidden
     obs = observations(:unknown_with_lat_long)
-    get(:observations, id: obs.id, detail: :high, format: :json)
+    get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_match(/34.1622|118.3521/, @response.body)
-    get(:observations, id: obs.id, detail: :high, format: :xml)
+    get(:observations, params: { id: obs.id, detail: :high, format: :xml })
     assert_match(/34.1622|118.3521/, @response.body)
 
     obs.update_attribute(:gps_hidden, true)
-    get(:observations, id: obs.id, detail: :high, format: :json)
+    get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_no_match(/34.1622|118.3521/, @response.body)
-    get(:observations, id: obs.id, detail: :high, format: :xml)
+    get(:observations, params: { id: obs.id, detail: :high, format: :xml })
     assert_no_match(/34.1622|118.3521/, @response.body)
   end
 end

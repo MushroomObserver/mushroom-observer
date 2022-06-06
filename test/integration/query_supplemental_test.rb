@@ -14,6 +14,10 @@ class QuerySupplementalTest < IntegrationTestCase
     obs = observations(:boletus_edulis_obs)
 
     visit("/")
+    visit("/account/login")
+    fill_in("user_login", with: users(:zero_user).login)
+    fill_in("user_password", with: "testpassword")
+    click_button("Login")
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")
@@ -21,7 +25,6 @@ class QuerySupplementalTest < IntegrationTestCase
     click_link("Map Locations")
 
     title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
-
     title.assert_text("‘#{obs.name.text_name}’")
   end
 end

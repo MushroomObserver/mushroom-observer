@@ -33,6 +33,8 @@
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
+require "arel-helpers"
+
 DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml"
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html"
@@ -88,35 +90,44 @@ OTHER_ALLOWED_PATHS = [
   "/name/eol"
 ].freeze
 
-LOCALES = Language.connection.select_values(%(
-  SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
-))
+LOCALES = Language.where(beta: [false, nil]).order(order: :asc).pluck(:locale)
 
+# Control behavior of crowlers that follow robots.txt rules
+# For documentation, see:
+# https://developers.google.com/search/docs/advanced/robots/robots_txt
+# http://www.robotstxt.org
+
+# Other ways for MO to block/control robots include:
+# - Manually block ip address ranges at the firewall
+# - Automatically block in Rails an anonymous user (including robots)
+#   that's hogging the webserver. See script/update_ip_stats.rb
+# - Automatically block in Rails a fake GoogleBot.
+#    See script/update_googlebots.rb
+# - Manually block in Rails an anonymous user via the Admin UI
+# - Limit them via browser gem and #bot? method
 ROBOTS_HEADER = <<~"TXT"
-  # For documentation, see:
-  # https://developers.google.com/search/docs/advanced/robots/robots_txt
-  # http://www.robotstxt.org
+
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
-  # Completely disallowed bots
-  User-agent: ltx71
+  # Block non-whitelisted crawlers
+  # Google AdBot crawlers must be named explicitly
+  # https://developers.google.com/search/docs/advanced/robots/create-robots-txt
   User-agent: AdsBot-Google
-  User-agent: AhrefsBot
-  User-agent: Applebot
-  User-agent: DAUM
-  User-agent: MauiBot
-  User-agent: MJ12bot
-  User-agent: SpiderLing
-  User-agent: spbot
+  User-agent: AdsBot-Google-Mobile
+  User-agent: AdsBot-Google-Mobile-Apps
+  # This bot must be named explicity, else it follows GoogleBot rules
+  # https://developers.facebook.com/docs/sharing/bot/
+  User-agent: FacebookBot
+  User-agent: Facebot # Unofficial Facebook bots (subset of facebookexternalhit)
+  User-agent: * # Block everything else not whitelisted below
   Disallow: /
 
-  # Rules applying to some allowed bots
+  # Whitelisted crawlers
+  # All are assume to use wildcards in their robots.txt parser
+  User-agent: bingbot
   User-agent: CCBot
-  Crawl-Delay: 30
-
-  # Rules applying to all alloed bots
-  # (Note: the rest of #write_robots_file output follows this immeediately.)
-  User-agent: *
+  User-agent: GoogleBot
+  User-agent: facebookexternalhit
   Crawl-Delay: 15
   Disallow: *page=*
   Disallow: *letter=*
@@ -128,7 +139,10 @@ ROBOTS_HEADER = <<~"TXT"
   Disallow: */lookup*user_locale=*
   Disallow: /*?*q= # block urls having the q parameter
   Disallow: /name/show_name
+
 TXT
+# The rest of #write_robots_file must follow immediately
+# after the rules for whitelisted crawlers/user agents.
 ROBOTS_FOOTER = <<"TXT"
 TXT
 
@@ -171,18 +185,15 @@ def update_sitemap_files
 end
 
 def get_new_comments(last_update)
-  Name.connection.select_rows(%(
-    SELECT target_type, target_id, updated_at
-    FROM comments WHERE updated_at >= "#{last_update}"
-  ))
+  Comment.where(updated_at: last_update..).
+    pluck(:target_type, :target_id, :updated_at)
 end
 
 def get_new_images(last_update)
-  Name.connection.select_rows(%(
-    SELECT io.observation_id, i.updated_at
-    FROM images i, images_observations io
-    WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
-  ))
+  io = Arel::Table.new(:images_observations)
+  Image.joins(Image.arel_table.join(io).on(Image[:id].eq(io[:image_id]).
+              and(Image[:updated_at].gteq(last_update))).join_sources).
+    pluck(io[:observation_id], Image[:updated_at])
 end
 
 def map_one_object_type(params, comments, last_update)
@@ -197,9 +208,9 @@ def map_one_object_type(params, comments, last_update)
 end
 
 def update_times_of_new_objects(times, table, last_update)
-  Name.connection.select_rows(%(
-    SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
-  )).each do |id, time|
+  model = table.classify.constantize
+  model.where(updated_at: last_update..).pluck(:id, :updated_at).each do
+    |id, time|
     times[id.to_i] = parse_mysql_time(time)
   end
 end

@@ -16,8 +16,8 @@
     <th width="20">&nbsp;</th>
   </tr>
 
-  <% table = @naming.calc_vote_table %>
-  <% for str in table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}
+  <% table = naming.calc_vote_table %>
+  <% table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}.each do |str|
     val = table[str][:value]
     wgt = table[str][:wgt]
     num = table[str][:num] %>
@@ -32,7 +32,7 @@
         <td>&nbsp;</td>
         <td align="center"><%= num %></td>
         <td align="left"><small><%=
-          votes = table[str][:votes].select(&:anonymous?) \
+          votes = table[str][:votes].reject(&:anonymous?) \
                                     .sort_by {|v| v.id.to_s.reverse}
                                     # pseudorandom but deterministic order
           if votes.length > 0
@@ -61,8 +61,8 @@
   <tr>
     <td>&nbsp;</td>
     <td colspan="3" align="center"><%= :show_votes_total.t %></td>
-    <td colspan="2" align="center"><%= "%.2f" % @naming.vote_cache %></td>
-    <td colspan="2" align="center"><%= "%.2f%%" % @naming.vote_percent %></td>
+    <td colspan="2" align="center"><%= "%.2f" % naming.vote_cache %></td>
+    <td colspan="2" align="center"><%= "%.2f%%" % naming.vote_percent %></td>
     <td>&nbsp;</td>
   </tr>
 
@@ -73,13 +73,13 @@
           link_with_query(:show_votes_go_public.t,
                           {controller: :observer,
                            action: :show_observation,
-                           id: @naming.observation.id,
+                           id: naming.observation_id,
                            go_public: "1"},
                   { data: { confirm: :show_votes_go_public_confirm.l }})
         else
           link_to(:show_votes_go_private.t, {controller: :observer,
                                                   action: :show_observation,
-                                                  id: @naming.observation.id, go_private: "1"},
+                                                  id: naming.observation_id, go_private: "1"},
                   { data: { confirm: :show_votes_go_private_confirm.l }})
         end %>
       </td>

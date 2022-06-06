@@ -42,7 +42,7 @@ class GlossaryTerm < AbstractModel
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
   # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  self.autolog_events = [:created!, :updated!, :destroyed!]
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
@@ -68,13 +68,11 @@ class GlossaryTerm < AbstractModel
   end
 
   def add_image(image)
-    return unless image
+    return false unless image
+    return false if images.include?(image)
 
-    if thumb_image.nil?
-      self.thumb_image = image
-    else
-      images.push(image)
-    end
+    self.thumb_image = image if thumb_image.nil?
+    images.push(image)
   end
 
   def all_images
@@ -102,7 +100,7 @@ class GlossaryTerm < AbstractModel
   def must_have_description_or_image
     return if description.present? || thumb_image.present?
 
-    errors[:base] << :glossary_error_description_or_image.t
+    errors.add(:base, :glossary_error_description_or_image.t)
   end
 
   def destroy_unused_images

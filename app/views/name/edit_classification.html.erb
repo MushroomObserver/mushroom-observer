@@ -13,7 +13,7 @@
       <%= label_tag(:classification, :"form_names_classification".t + ":") %>
       <p class="help-block" style="margin-top:0">
         <%= rank = rank_as_lower_string(@name.rank)
-        :"form_names_classification_help".l(rank: rank) %>
+        :form_names_classification_help.l(rank: rank) %>
       </p>
       <%= text_area_tag(:classification, @name.classification,
                         rows: 10, class: "form-control",

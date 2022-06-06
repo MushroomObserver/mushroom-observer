@@ -67,33 +67,34 @@ class NameController < ApplicationController
   # No idea how to fix this offense.  If I add another
   #    before_action :login_required, except: :show_name_description
   # in name_controller/show_name_description.rb, it ignores it.
-  before_action :login_required, except: [
-    :advanced_search,
-    :authored_names,
-    :eol,
-    :eol_preview,
-    :index_name,
-    :index_name_description,
-    :map,
-    :list_name_descriptions,
-    :list_names,
-    :name_search,
-    :name_descriptions_by_author,
-    :name_descriptions_by_editor,
-    :names_by_user,
-    :names_by_editor,
-    :needed_descriptions,
-    :next_name,
-    :next_name_description,
-    :observation_index,
-    :prev_name,
-    :prev_name_description,
-    :show_name,
-    :show_name_description,
-    :show_past_name,
-    :show_past_name_description,
-    :test_index
-  ]
+  before_action :login_required
+  # except: [
+  #   :advanced_search,
+  #   :authored_names,
+  #   :eol,
+  #   :eol_preview,
+  #   :index_name,
+  #   :index_name_description,
+  #   :map,
+  #   :list_name_descriptions,
+  #   :list_names,
+  #   :name_search,
+  #   :name_descriptions_by_author,
+  #   :name_descriptions_by_editor,
+  #   :names_by_user,
+  #   :names_by_editor,
+  #   :needed_descriptions,
+  #   :next_name,
+  #   :next_name_description,
+  #   :observation_index,
+  #   :prev_name,
+  #   :prev_name_description,
+  #   :show_name,
+  #   :show_name_description,
+  #   :show_past_name,
+  #   :show_past_name_description,
+  #   :test_index
+  # ]
 
   before_action :disable_link_prefetching, except: [
     :approve_name,
@@ -396,7 +397,12 @@ class NameController < ApplicationController
     # Determine which queries actually have results and instantiate the ones
     # we'll use.
     @best_description = @name.best_brief_description
-    @first_four       = @obs_with_images_query.results(limit: 4)
+    @first_four       = @obs_with_images_query.results(
+      limit: 4,
+      include: {
+        thumb_image: [:image_votes, :license, :user]
+      }
+    )
     @first_child      = @children_query.results(limit: 1).first
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
@@ -438,9 +444,10 @@ class NameController < ApplicationController
       subversion = params[:version]
       if subversion.present? &&
          (version.version != subversion.to_i)
-        version = NameDescription::Version.
-                  find_by_version_and_name_description_id(params[:version],
-                                                          @old_parent_id)
+        version = NameDescription::Version.find_by(
+          version: params[:version],
+          name_description_id: @old_parent_id
+        )
       end
       @description.clone_versioned_model(version, @description)
     end
@@ -1092,7 +1099,8 @@ class NameController < ApplicationController
 
     @query = create_query(:Observation, :all, names: @name.id)
     apply_content_filters(@query)
-    @observations = @query.results.select { |o| o.lat || o.location }
+    @observations = @query.results(include: :location).
+                    select { |o| o.lat || o.location }
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications
@@ -1105,8 +1113,7 @@ class NameController < ApplicationController
 
     flavor = Notification.flavors[:name]
     @notification = Notification.
-                    find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
-                                                          @user.id)
+                    find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
     if request.method != "POST"
       initialize_tracking_form
     else

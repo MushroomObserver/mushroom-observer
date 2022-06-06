@@ -52,6 +52,7 @@ coprinus:
   display_name: '**__Coprinus__**'
   search_name: Coprinus
   sort_name: Coprinus
+  rss_log: name_rss_log2
   created_at: 2007-02-26 20:48:00
   updated_at: 2007-02-27 20:48:00
   rank: <%= Name.ranks[:Genus] %>
@@ -315,6 +316,7 @@ lactarius:
   created_at: 2007-04-30 15:14:10
   updated_at: 2007-04-30 15:14:10
   rank: <%= Name.ranks[:Genus] %>
+  icn_id: 17895
 
 lactarius_alpinus:
   <<: *DEFAULTS
@@ -867,10 +869,10 @@ abortiporus_biennis_for_eol:
 amanita_subgenus_lepidella:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Subgenus] %>
-  text_name: Amanita subgenus Lepidella
-  search_name: Amanita subgenus Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
-  sort_name: Amanita subgenus Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
-  display_name: '**__Amanita__ subgenus __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
+  text_name: Amanita subg. Lepidella
+  search_name: Amanita subg. Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
+  sort_name: Amanita subg. Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
+  display_name: '**__Amanita__ subg. __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01

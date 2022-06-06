@@ -48,7 +48,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: @target.type_tag),
-    "#{MO.http_domain}/#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
+    "#{MO.http_domain}#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
   links.push([:email_links_post_comment.t,
     "#{MO.http_domain}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}"])
   links.push([:email_links_not_interested.t(type: @target.type_tag),

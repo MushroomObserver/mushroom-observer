@@ -41,10 +41,10 @@ module LanguageTracking
   # and so on, until done redirecting.
   def track_usage(last_page = nil)
     @@tags_used = {}
-    if seed_tags = load_tags(last_page)
-      for tag in seed_tags
-        @@tags_used[tag] = true
-      end
+    return unless (seed_tags = load_tags(last_page))
+
+    seed_tags.each do |tag|
+      @@tags_used[tag] = true
     end
   end
 
@@ -68,7 +68,7 @@ module LanguageTracking
     name = String.random(16)
     file = tag_file(name)
     File.open(file, "w:utf-8") do |fh|
-      for tag in tags_used
+      tags_used.each do |tag|
         fh.puts(tag)
       end
     end
@@ -100,17 +100,15 @@ module LanguageTracking
 
   def periodically_clean_up
     cutoff = 10.minutes.ago
-    if !@@last_clean || @@last_clean < cutoff
-      @@last_clean = Time.zone.now
-      glob = tag_file("*")
-      for file in Dir.glob(glob)
-        begin
-          File.delete(file) if File.mtime(file) < cutoff
-        rescue StandardError
-          # I've seen this fail because of files presumably being deleted by
-          # another process between Dir.glob and File.mtime.
-        end
-      end
+    return unless !@@last_clean || @@last_clean < cutoff
+
+    @@last_clean = Time.zone.now
+    glob = tag_file("*")
+    Dir.glob(glob).each do |file|
+      File.delete(file) if File.mtime(file) < cutoff
+    rescue StandardError
+      # I've seen this fail because of files presumably being deleted by
+      # another process between Dir.glob and File.mtime.
     end
   end
 end

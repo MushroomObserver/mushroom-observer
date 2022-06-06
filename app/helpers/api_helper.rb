@@ -144,18 +144,18 @@ module ApiHelper
   end
 
   def xml_minimal_object_old(xml, tag, model, id)
-    if id.present?
-      model = model.constantize unless model.is_a?(Class)
-      url = begin
-              model.show_url(id)
-            rescue StandardError
-              nil
-            end
-      if url
-        xml.tag!(tag, id: id, url: url, type: model.type_tag.to_s)
-      else
-        xml.tag!(tag, id: id, type: model.type_tag.to_s)
-      end
+    return if id.blank?
+
+    model = model.constantize unless model.is_a?(Class)
+    url = begin
+            model.show_url(id)
+          rescue StandardError
+            nil
+          end
+    if url
+      xml.tag!(tag, id: id, url: url, type: model.type_tag.to_s)
+    else
+      xml.tag!(tag, id: id, type: model.type_tag.to_s)
     end
   end
 

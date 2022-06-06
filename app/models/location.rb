@@ -82,7 +82,7 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "LocationDescription"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
@@ -118,17 +118,17 @@ class Location < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
-  # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  # Automatically log standard events.  Merge will already log the destruction
+  # as a merge and orphan the log.
+  self.autolog_events = [:created!, :updated!, :destroyed]
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
-       Location.connection.select_value(%(
-         SELECT COUNT(*) FROM locations_versions
-         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == "0"
+       Location::Version.where(
+         location_id: ver.location_id, user_id: ver.user_id
+       ).count.zero?
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -279,13 +279,12 @@ class Location < AbstractModel
     []
   end
 
-  # Get an instance of the Name that means "unknown".
+  # Get an instance of the Location whose name means "unknown".
   def self.unknown
-    names_for_unknown.each do |name|
-      location = Location.find_by("name LIKE ?", name)
-      return location if location
-    end
-    raise("There is no \"unknown\" location!")
+    raise("There is no \"unknown_location_name\" configured!") if
+      MO.unknown_location_name.blank?
+
+    Location.find_by(name: MO.unknown_location_name)
   end
 
   # Is this one of the names we recognize for the "unknown" location?
@@ -417,7 +416,7 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    find_by(name: name) || find_by(scientific_name: name)
+    Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
   def self.user_name(user, name)
@@ -510,17 +509,9 @@ class Location < AbstractModel
     return false unless name
 
     @@location_cache ||= (
-      Location.connection.select_values(%(
-        SELECT name FROM locations
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `observations`
-        WHERE `where` is not NULL
-      )) +
-      Location.connection.select_values(%(
-        SELECT `where` FROM `species_lists`
-        WHERE `where` is not NULL
-      ))
+      Location.pluck(:name) +
+        Observation.where.not(where: nil).pluck(:where) +
+        SpeciesList.where.not(where: nil).pluck(:where)
     ).uniq
     @@location_cache.member?(name)
   end
@@ -723,6 +714,7 @@ class Location < AbstractModel
     # Log the action.
     old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
+    old_loc.rss_log = nil
 
     # Destroy past versions.
     editors = []

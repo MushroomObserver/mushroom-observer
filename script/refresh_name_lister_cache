@@ -66,7 +66,7 @@ end
 
 # How many times is each name used?
 occurs = {}
-for rec in species
+species.each do |rec|
   n = rec["n"]
   occurs[n] ||= 0
   occurs[n] += 1
@@ -74,7 +74,7 @@ end
 
 # Build map from synonym_id to list of valid names.
 valid = {}
-for rec in species
+species.each do |rec|
   n, a, d, s = rec.values_at("n", "a", "d", "s")
   need_author = occurs[n] > 1
   n += "|" + a if a.present? && need_author

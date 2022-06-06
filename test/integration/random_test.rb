@@ -4,6 +4,7 @@ require("test_helper")
 
 class RandomTest < IntegrationTestCase
   test "pivotal tracker" do
+    login(users(:zero_user))
     get("/")
     click(label: "Feature Tracker")
     assert_template("pivotal/index")
@@ -20,6 +21,7 @@ class RandomTest < IntegrationTestCase
   end
 
   test "the homepage" do
+    login(users(:zero_user))
     get("/")
     assert_template("observer/list_rss_logs")
     assert(/account/i, response.body)
@@ -40,8 +42,8 @@ class RandomTest < IntegrationTestCase
     assert_no_link_exists("/account/logout_user")
     assert_no_link_exists("/observer/show_user/#{rolf.id}")
 
-    click(label: "How To Help")
-    assert_template("observer/how_to_help")
+    click(label: "Introduction")
+    assert_template("observer/intro")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
     assert_no_link_exists("/observer/show_user/#{rolf.id}")

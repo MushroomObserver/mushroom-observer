@@ -5,7 +5,7 @@ module PatternSearch
     attr_accessor :incoming_string, :terms
 
     VAL_REGEX = /
-      "([^\\\"]+|\\.)*" | '([^\\\']+|\\.)*' | ([^\s\\,]+|\\.)+
+      "([^\\"]+|\\.)*" | '([^\\']+|\\.)*' | ([^\s\\,]+|\\.)+
     /x.freeze
     TERM_REGEX = /
       ^(\S+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)

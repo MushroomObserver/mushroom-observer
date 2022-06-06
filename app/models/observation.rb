@@ -105,9 +105,9 @@
 #  owners_vote::            Owner's Vote on a given Naming.
 #  users_vote::             A given User's Vote on a given Naming
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
-#  is_owners_favorite?::    Is a given Naming one of the owner's favorite(s)
+#  owners_favorite?::       Is a given Naming one of the owner's favorite(s)
 #                           for this Observation?
-#  is_users_favorite?::     Is a given Naming one of the given user's
+#  users_favorite?::        Is a given Naming one of the given user's
 #                           favorites for this Observation?
 #  owner_preference         owners's unique prefered Name (if any) for this Obs
 #  change_vote::            Change a given User's Vote for a given Naming.
@@ -169,9 +169,9 @@ class Observation < AbstractModel
                      through: :observation_views,
                      source: :user
 
-  before_destroy { destroy_orphaned_collection_numbers }
   before_save :cache_content_filter_data
   after_update :notify_users_after_change
+  before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
 
@@ -180,7 +180,7 @@ class Observation < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "observer"
+    "/observer"
   end
 
   def is_location?
@@ -225,43 +225,26 @@ class Observation < AbstractModel
   # Refresh a column which is a mirror of a foreign column.  Fixes all the
   # errors, and reports which ids were broken.
   def self.refresh_cached_column(type, foreign, local = foreign)
-    msgs = report_broken_caches(type, foreign, local)
-    refresh_cached_column_fix_errors(type, foreign, local)
-    msgs
-  end
-
-  # Check how many entries are broken in a mirrored column.  It will be good to
-  # keep track of this at first to make sure we've caught all the ways in which
-  # the mirror can get inadvertently broken.
-  def self.report_broken_caches(type, foreign, local)
-    Observation.connection.select_values(%(
-      SELECT o.id
-      FROM observations o, #{type}s x
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    )).map do |id|
+    tbl = type.camelize.constantize.arel_table
+    broken_caches = get_broken_caches(type, tbl, foreign, local)
+    broken_caches.map do |id|
       "Fixing #{type} #{foreign} for obs ##{id}."
     end
+    # Refresh the mirror of a foreign table's column in the observations table.
+    broken_caches.update_all(
+      Observation[local.to_sym].eq(tbl[foreign.to_sym]).to_sql
+    )
   end
 
-  # Refresh the mirror of a foreign table's column in the observations table.
-  def self.refresh_cached_column_fix_errors(type, foreign, local)
-    Observation.connection.execute(%(
-      UPDATE observations o, #{type}s x
-      SET o.#{local} = x.#{foreign}
-      WHERE o.#{type}_id = x.id
-        AND o.#{local} != x.#{foreign}
-    ))
+  private_class_method def self.get_broken_caches(type, tbl, foreign, local)
+    Observation.joins(type.to_sym).
+      where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
   end
 
   # Used by Name and Location to update the observation cache when a cached
   # field value is changed.
   def self.update_cache(type, field, id, val)
-    Observation.connection.execute(%(
-      UPDATE observations
-      SET `#{field}` = #{Observation.connection.quote(val)}
-      WHERE #{type}_id = #{id}
-    ))
+    Observation.where("#{type}_id": id).update_all("#{field}": val)
   end
 
   # Check for any observations whose consensus is a misspelled name.  This can
@@ -269,18 +252,16 @@ class Observation < AbstractModel
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
   def self.make_sure_no_observations_are_misspelled
-    msgs = Observation.connection.select_rows(%(
-      SELECT o.id, n.text_name FROM observations o, names n
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    )).map do |id, search_name|
+    misspellings = Observation.joins(:name).
+                   where(Name[:correct_spelling_id].not_eq(nil))
+
+    misspellings.
+      pluck(Observation[:id], Name[:text_name]).map do |id, search_name|
       "Observation ##{id} was misspelled: #{search_name.inspect}"
     end
-    Observation.connection.execute(%(
-      UPDATE observations o, names n
-      SET o.name_id = n.correct_spelling_id
-      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
-    ))
-    msgs
+    misspellings.update_all(
+      Observation[:name_id].eq(Name[:correct_spelling_id]).to_sql
+    )
   end
 
   def update_view_stats
@@ -712,15 +693,15 @@ class Observation < AbstractModel
   # votes from the owner of this observation.
   # Note: multiple namings can return true for a given observation.
   # This is used to display eyes next to Proposed Name on Observation page
-  def is_owners_favorite?(naming)
-    lookup_naming(naming).is_users_favorite?(user)
+  def owners_favorite?(naming)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # Returns true if a given Naming has received one of the highest positive
   # votes from the given user (among namings for this observation).
   # Note: multiple namings can return true for a given user and observation.
-  def is_users_favorite?(naming, user)
-    lookup_naming(naming).is_users_favorite?(user)
+  def users_favorite?(naming, user)
+    lookup_naming(naming).users_favorite?(user)
   end
 
   # All of observation.user's votes on all Namings for this Observation
@@ -842,14 +823,13 @@ class Observation < AbstractModel
 
   def find_new_favorite(user)
     max = max_positive_vote(user)
+    return unless max.positive?
 
-    if max.positive?
-      user_votes(user).each do |v|
-        next if v.value != max || v.favorite
+    user_votes(user).each do |v|
+      next if v.value != max || v.favorite
 
-        v.favorite = true
-        v.save
-      end
+      v.favorite = true
+      v.save
     end
   end
 
@@ -881,13 +861,13 @@ class Observation < AbstractModel
   def downgrade_totally_confident_votes(value, user)
     # First downgrade any existing 100% votes (if casting a 100% vote).
     v80 = Vote.next_best_vote
-    if value > v80
-      user_votes(user).each do |v|
-        if v.value > v80
-          v.value = v80
-          v.save
-        end
-      end
+    return if value <= v80
+
+    user_votes(user).each do |v|
+      next unless v.value > v80
+
+      v.value = v80
+      v.save
     end
   end
 
@@ -1098,10 +1078,11 @@ class Observation < AbstractModel
     recipients.uniq.each do |recipient|
       next if !recipient || recipient == sender
 
-      if action == :destroy
+      case action
+      when :destroy
         QueuedEmail::ObservationChange.destroy_observation(sender, recipient,
                                                            self)
-      elsif action == :change
+      when :change
         QueuedEmail::ObservationChange.change_observation(sender, recipient,
                                                           self)
       else
@@ -1169,9 +1150,11 @@ class Observation < AbstractModel
 
   protected
 
-  validate :check_requirements
-  def check_requirements # :nodoc:
-    check_when
+  include Validations
+
+  validate :check_requirements, :check_when
+
+  def check_requirements
     check_where
     check_user
     check_coordinates
@@ -1189,47 +1172,6 @@ class Observation < AbstractModel
     end
   end
 
-  def check_when
-    self.when ||= Time.zone.now
-    check_date && check_time && check_year
-  end
-
-  def check_date
-    return true unless self.when.is_a?(Date) && self.when > Time.zone.tomorrow
-
-    errors.add(:when, when_message("Time.zone.today=#{Time.zone.today}"))
-    errors.add(:when, :validate_observation_future_time.t)
-    false
-  end
-
-  def when_message(details = nil)
-    start = "self.when=#{self.when.class.name}:#{self.when}"
-    return start unless details
-
-    "#{start} #{details}"
-  end
-
-  def check_time
-    unless self.when.is_a?(Time) && self.when > Time.zone.now + 1.day
-      return true
-    end
-
-    # As of July 5, 2020 these statements appear to be unreachable
-    # because 'when' is a 'date' in the database.
-    errors.add(:when, when_message("Time.now=#{Time.zone.now + 6.hours}"))
-    errors.add(:when, :validate_observation_future_time.t)
-    false
-  end
-
-  def check_year
-    return true unless !self.when.respond_to?(:year) || self.when.year < 1500 ||
-                       self.when.year > (Time.zone.now + 1.day).year
-
-    errors.add(:when, when_message)
-    errors.add(:when, :validate_observation_invalid_year.t)
-    false
-  end
-
   def check_where
     # Clean off leading/trailing whitespace from +where+.
     self.where = where.strip_squeeze if where
@@ -1244,9 +1186,9 @@ class Observation < AbstractModel
   end
 
   def check_user
-    if !user && !User.current
-      errors.add(:user, :validate_observation_user_missing.t)
-    end
+    return if user || User.current
+
+    errors.add(:user, :validate_observation_user_missing.t)
   end
 
   def check_coordinates
@@ -1270,10 +1212,15 @@ class Observation < AbstractModel
   end
 
   def check_altitude
-    if alt.present? && !Location.parse_altitude(alt)
-      # As of July 5, 2020 this statement appears to be unreachable
-      # because .to_i returns 0 for unparsable strings.
-      errors.add(:alt, :runtime_altitude_error.t)
-    end
+    return unless alt.present? && !Location.parse_altitude(alt)
+
+    # As of July 5, 2020 this statement appears to be unreachable
+    # because .to_i returns 0 for unparsable strings.
+    errors.add(:alt, :runtime_altitude_error.t)
+  end
+
+  def check_when
+    self.when ||= Time.zone.now
+    validate_when(self.when, errors)
   end
 end

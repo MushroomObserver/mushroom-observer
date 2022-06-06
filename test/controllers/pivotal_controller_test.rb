@@ -4,6 +4,7 @@ require("test_helper")
 
 class PivotalControllerTest < FunctionalTestCase
   def test_index_disabled
+    login
     enabled = MO.pivotal_enabled
     MO.pivotal_enabled = false
     get_with_dump(:index)
@@ -12,6 +13,7 @@ class PivotalControllerTest < FunctionalTestCase
   end
 
   def test_index_enabled
+    login
     stub_request(
       :get,
       "https://www.pivotaltracker.com/services/v5/projects/224629/stories?" \

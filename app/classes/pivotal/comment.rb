@@ -35,12 +35,12 @@ class Pivotal
     # Delay parsing of JSON until actually need the comment.
     # In most cases we probably won't ever need it.
     def parse
-      unless @id
-        data = @json.is_a?(String) ? JSON.parse(@json) : @json
-        @id = data["id"]
-        @time = data["created_at"]
-        @text = parse_text(data["text"])
-      end
+      return if @id
+
+      data = @json.is_a?(String) ? JSON.parse(@json) : @json
+      @id = data["id"]
+      @time = data["created_at"]
+      @text = parse_text(data["text"])
     end
 
     def parse_text(str)

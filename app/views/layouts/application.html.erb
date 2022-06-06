@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <% if Rails.env == "production" %>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PJKJR59');</script>
+    <!-- End Google Tag Manager -->
+  <% end %>
+
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <%= auto_discovery_link_tag(
     :rss, observer_rss_path, { title: :app_rss.l }
   ) %>
   <title><%= :app_title.l%>: <%= title_tag_contents(controller.action_name)%></title>
-  <link rel="SHORTCUT ICON" href="https://mushroomobserver.org/favicon.ico"/>
+  <link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
   <% if @canonical_url %>
   <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
   <% end %>
@@ -41,11 +51,17 @@
   <![endif]-->
 </head>
 <body>
+  <% if Rails.env == "production" %>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PJKJR59&nojscript=true"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+  <% end %>
 
 <div id="main_container" class="container-fluid">
 
   <!--CALLOUT_BANNER-->
-  <div class="row hidden-xs hidden-print">
+  <div class="row hidden-print">
     <div class="col-xs-12">
       <% if in_admin_mode? %>
         <div class="Admin">
@@ -78,8 +94,13 @@
   <div class="row row-offcanvas row-offcanvas-left">
 
     <!--NAVIGATION-->
-    <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print" id="navigation">
-      <%= render(partial: "/shared/nav_left") %>
+    <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print">
+      <a id="logo-link" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+        <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
+      </a>
+      <div id="navigation">
+        <%= render(partial: "/shared/nav_left") %>
+      </div>
     </div>
     <!--/NAVIGATION-->
 
@@ -118,6 +139,7 @@
                 when 2; "alert-danger"
               end
               content_tag(:div, flash_get_notices,
+                          id: "flash-notices",
                           class: "alert push-down #{klass}")
             %>
           </div>
@@ -126,6 +148,16 @@
       <% flash_clear %>
 
       <div id="content" class="row">
+        <% unless @user&.verified? %>
+          <div class="max-width-text">
+            <p class="align-center hidden-sm hidden-md hidden-lg">
+              <img id="logo-trim" alt="MO Logo" src="/logo-trim.png">
+            </p>
+            <p class="sub-caption align-center">Mushroom Observer (MO)</p>
+            <p><%= :login_layout_description.t %></p>
+          </div>
+        <% end %>
+
         <%= render(partial: "/shared/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->
