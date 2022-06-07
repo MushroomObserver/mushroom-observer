@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Parse
+class Name < AbstractModel
   require Rails.root.join("app", "classes", "rank_matcher.rb")
 
   AUCT_ABBR    = / auct\.? /xi.freeze

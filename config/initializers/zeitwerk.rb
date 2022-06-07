@@ -25,7 +25,7 @@ Rails.autoloaders.main.ignore(
   "app/extensions",
   "app/javascripts",
   "app/models/comment",
-  # "app/models/name",
+  "app/models/name",
   "app/models/queued_email",
   "app/views"
 )

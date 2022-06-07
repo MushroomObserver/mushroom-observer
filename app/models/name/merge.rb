@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Combine two Name objects (and associations) into one
-module Name::Merge
+class Name < AbstractModel
   # Would merger into another Name destroy data in the sense that the
   # merger could not be uncrambled? If any information will get
   # lost we return true.

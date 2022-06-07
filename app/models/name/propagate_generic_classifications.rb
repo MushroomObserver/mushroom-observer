@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::PropagateGenericClassifications
+class Name < AbstractModel
   class << self
     # This is used only by script/refresh_caches.  I have placed it here in
     # order to make it easily accessible to unit testing.  As a separate file,

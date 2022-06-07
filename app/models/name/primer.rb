@@ -2,7 +2,7 @@
 
 #
 # Prime the name auto-completer
-module Name::Primer
+class Name < AbstractModel
   # Get list of most used names to prime auto-completer.
   # Return a simple Array of up to 1000 name String's (no authors).
   #

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Notify
+class Name < AbstractModel
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users

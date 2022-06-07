@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Resolve
+class Name < AbstractModel
   # Resolves the name using these heuristics:
   #   First time through:
   #     Only 'what' will be filled in.

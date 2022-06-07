@@ -277,12 +277,20 @@ class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
 
-  include Validation, Taxonomy, Synonymy, Resolve,
-    PropagateGenericClassifications, Primer, Parse, Notify, Spelling, Merge,
-    Lifeform, Format, Create, Change
-  extend Validation, Taxonomy, Synonymy, Resolve,
-    PropagateGenericClassifications, Primer, Parse, Notify, Spelling, Merge,
-    Lifeform, Format, Create, Change
+  require_dependency "name/change"
+  require_dependency "name/create"
+  require_dependency "name/format"
+  require_dependency "name/lifeform"
+  require_dependency "name/merge"
+  require_dependency "name/spelling"
+  require_dependency "name/notify"
+  require_dependency "name/parse"
+  require_dependency "name/primer"
+  require_dependency "name/propagate_generic_classifications"
+  require_dependency "name/resolve"
+  require_dependency "name/synonymy"
+  require_dependency "name/taxonomy"
+  require_dependency "name/validation"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
