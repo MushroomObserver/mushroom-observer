@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Lifeform
+  # When we `include` a module, `self` refers to the module not the class,
+  # so only instance methods are added. Add class methods like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
   ALL_LIFEFORMS = %w[
     basidiolichen
     lichen
@@ -8,8 +14,10 @@ class Name < AbstractModel
     lichenicolous
   ].freeze
 
-  def self.all_lifeforms
-    ALL_LIFEFORMS
+  module ClassMethods
+    def all_lifeforms
+      ALL_LIFEFORMS
+    end
   end
 
   # This will include "lichen", "lichenicolous" and "lichen-ally" -- the usual
@@ -23,8 +31,6 @@ class Name < AbstractModel
   def not_lichen?
     lifeform.exclude?(" lichen ")
   end
-
-  validate :validate_lifeform
 
   # Sorts and uniquifies the lifeform words, and complains about any that are
   # not recognized.  It adds an extra space before and after to ensure that it
@@ -65,31 +71,31 @@ class Name < AbstractModel
 
     update_all_remove_lifeform(name_ids, search_str, replace_str)
   end
-end
 
-private
+  private
 
-# Needs to be statement.to_sql because Rails 5 does not parse a concat node.
-# https://github.com/Faveod/arel-extensions/issues/76
-# The following simpler syntax should work in Rails 6:
-# update_all(lifeform: Name[:lifeform] + concat_str)
-# update_all(lifeform: Name[:lifeform].concat(concat_str))
-def update_all_add_lifeform(name_ids, search_str, concat_str)
-  Name.where(id: name_ids).
-    where(Name[:lifeform].does_not_match(search_str)).
-    update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
-  Observation.where(name_id: name_ids).
-    where(Observation[:lifeform].does_not_match(search_str)).
-    update_all(
-      Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
-    )
-end
+  # Needs to be statement.to_sql because Rails 5 does not parse a concat node.
+  # https://github.com/Faveod/arel-extensions/issues/76
+  # The following simpler syntax should work in Rails 6:
+  # update_all(lifeform: Name[:lifeform] + concat_str)
+  # update_all(lifeform: Name[:lifeform].concat(concat_str))
+  def update_all_add_lifeform(name_ids, search_str, concat_str)
+    Name.where(id: name_ids).
+      where(Name[:lifeform].does_not_match(search_str)).
+      update_all(Name[:lifeform].eq(Name[:lifeform] + concat_str).to_sql)
+    Observation.where(name_id: name_ids).
+      where(Observation[:lifeform].does_not_match(search_str)).
+      update_all(
+        Observation[:lifeform].eq(Observation[:lifeform] + concat_str).to_sql
+      )
+  end
 
-def update_all_remove_lifeform(name_ids, search_str, replace_str)
-  Name.where(id: name_ids).
-    where(Name[:lifeform].matches(search_str)).
-    update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
-  Observation.where(name_id: name_ids).
-    where(Observation[:lifeform].matches(search_str)).
-    update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
+  def update_all_remove_lifeform(name_ids, search_str, replace_str)
+    Name.where(id: name_ids).
+      where(Name[:lifeform].matches(search_str)).
+      update_all(lifeform: Name[:lifeform].replace(replace_str, " "))
+    Observation.where(name_id: name_ids).
+      where(Observation[:lifeform].matches(search_str)).
+      update_all(lifeform: Observation[:lifeform].replace(replace_str, " "))
+  end
 end

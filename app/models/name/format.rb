@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-# portion of Name dealing for formatting of Names for display
-class Name < AbstractModel
+module Name::Format
+  # When we `include` a module, `self` refers to the module not the class,
+  # so only instance methods are added. Add class methods like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
   ##### Display of names #######################################################
   def display_name
     str = self[:display_name]
@@ -75,56 +80,6 @@ class Name < AbstractModel
     Name.display_to_real_search(self)
   end
 
-  def self.display_to_real_text(name)
-    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
-      gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-      # (this part should be unnecessary)
-      # Because "group" was removed by the 1st gsub above,
-      # tack it back on (if it was part of display_name)
-      gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
-      concat(group_suffix(name))
-  end
-
-  def self.display_to_real_search(name)
-    name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-  end
-
-  def self.group_suffix(name)
-    GROUP_CHUNK.match(name.display_name).to_s
-  end
-
-  # Make sure display names are in boldface for accepted names, and not in
-  # boldface for deprecated names.
-  def self.make_sure_names_are_bolded_correctly
-    msgs = ""
-    needs_fixing = Name.where(deprecated: true).
-                   where(Name[:display_name].matches("%*%")).
-                   or(Name.not_deprecated.
-                      where(Name[:display_name].does_not_match("%*%")))
-    needs_fixing.each do |name|
-      name.change_deprecated(name.deprecated)
-      name.save
-      msgs += "The name #{name.search_name.inspect} " \
-              "should #{name.deprecated && "not "}have been in boldface."
-    end
-    msgs
-  end
-
-  ##### Names treated specially ################################################
-
-  # Array of strings that mean "unknown" in the local language:
-  #
-  #   "unknown", ""
-  #
-  def self.names_for_unknown
-    ["unknown", :unknown.l, ""]
-  end
-
-  # Get an instance of the Name that means "unknown".
-  def self.unknown
-    Name.find_by(text_name: "Fungi")
-  end
-
   # Is this the "unknown" name?
   def unknown?
     text_name == "Fungi"
@@ -163,5 +118,59 @@ class Name < AbstractModel
   def brief_author
     author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
       sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
+  end
+
+  public
+
+  module ClassMethods
+    def display_to_real_text(name)
+      name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
+        gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
+        # (this part should be unnecessary)
+        # Because "group" was removed by the 1st gsub above,
+        # tack it back on (if it was part of display_name)
+        gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
+        concat(group_suffix(name))
+    end
+
+    def display_to_real_search(name)
+      name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+    end
+
+    def group_suffix(name)
+      GROUP_CHUNK.match(name.display_name).to_s
+    end
+
+    # Make sure display names are in boldface for accepted names, and not in
+    # boldface for deprecated names.
+    def make_sure_names_are_bolded_correctly
+      msgs = ""
+      needs_fixing = Name.where(deprecated: true).
+                    where(Name[:display_name].matches("%*%")).
+                    or(Name.not_deprecated.
+                        where(Name[:display_name].does_not_match("%*%")))
+      needs_fixing.each do |name|
+        name.change_deprecated(name.deprecated)
+        name.save
+        msgs += "The name #{name.search_name.inspect} " \
+                "should #{name.deprecated && "not "}have been in boldface."
+      end
+      msgs
+    end
+
+    ##### Names treated specially ################################################
+
+    # Array of strings that mean "unknown" in the local language:
+    #
+    #   "unknown", ""
+    #
+    def names_for_unknown
+      ["unknown", :unknown.l, ""]
+    end
+
+    # Get an instance of the Name that means "unknown".
+    def unknown
+      Name.find_by(text_name: "Fungi")
+    end
   end
 end

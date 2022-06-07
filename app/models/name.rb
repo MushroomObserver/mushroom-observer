@@ -277,20 +277,24 @@ class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
 
-  require_dependency "name/change"
-  require_dependency "name/create"
-  require_dependency "name/format"
-  require_dependency "name/lifeform"
-  require_dependency "name/merge"
-  require_dependency "name/spelling"
-  require_dependency "name/notify"
-  require_dependency "name/parse"
-  require_dependency "name/primer"
-  require_dependency "name/propagate_generic_classifications"
-  require_dependency "name/resolve"
-  require_dependency "name/synonymy"
-  require_dependency "name/taxonomy"
-  require_dependency "name/validation"
+  # require_dependency "name/change"
+  # require_dependency "name/create"
+  # require_dependency "name/format"
+  # require_dependency "name/lifeform"
+  # require_dependency "name/merge"
+  # require_dependency "name/spelling"
+  # require_dependency "name/notify"
+  # require_dependency "name/parse"
+  # require_dependency "name/primer"
+  # require_dependency "name/propagate_generic_classifications"
+  # require_dependency "name/resolve"
+  # require_dependency "name/synonymy"
+  # require_dependency "name/taxonomy"
+  # require_dependency "name/validation"
+
+  include Validation, Taxonomy, Synonymy, Resolve,
+    PropagateGenericClassifications, Primer, Parse, Notify, Spelling, Merge,
+    Lifeform, Format, Create, Change
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -375,6 +379,8 @@ class Name < AbstractModel
                                      greater_than_or_equal_to: 1 }
   validate :icn_id_registrable
   validate :icn_id_unique
+  validate :validate_lifeform
+  validate :check_user, :check_text_name, :check_author
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -406,6 +412,29 @@ class Name < AbstractModel
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
 
   scope :not_deprecated, -> { where(deprecated: false) }
+
+  ### Module Name::Spelling
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
+  # For a glitch discovered in the wild:
+  scope :with_self_referential_misspelling, lambda {
+    where(Name[:correct_spelling_id].eq(Name[:id]))
+  }
+
+  ### Module Name::Taxonomy
+  scope :with_classification_like,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+        }
+
+  scope :with_name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+
+  scope :with_rank_below,
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def <=>(other)
     sort_name <=> other.sort_name
