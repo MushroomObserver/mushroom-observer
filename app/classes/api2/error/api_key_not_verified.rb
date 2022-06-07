@@ -8,5 +8,4 @@ class API2
       args.merge!(key: key.key.to_s, notes: key.notes.to_s)
     end
   end
-
 end

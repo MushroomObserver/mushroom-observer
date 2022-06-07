@@ -8,5 +8,4 @@ class API2
       args.merge!(action: action.to_s)
     end
   end
-
 end
