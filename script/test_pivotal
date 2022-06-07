@@ -45,11 +45,11 @@ TESTING = true
 #  Access via Pivotal class.
 # ----------------------------
 
-require_relative("../app/classes/pivotal.rb")
-require_relative("../app/classes/pivotal/story.rb")
-require_relative("../app/classes/pivotal/comment.rb")
-require_relative("../app/classes/pivotal/vote.rb")
-require_relative("../app/classes/pivotal/user.rb")
+require_relative("../app/classes/pivotal")
+require_relative("../app/classes/pivotal/story")
+require_relative("../app/classes/pivotal/comment")
+require_relative("../app/classes/pivotal/vote")
+require_relative("../app/classes/pivotal/user")
 
 # id = MO.pivotal_test_id
 # story = Pivotal.get_story(id, :refresh_cache)
