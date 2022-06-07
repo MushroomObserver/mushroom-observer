@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # portion of Name dealing for formatting of Names for display
-class Name < AbstractModel
+module Name::Format
   ##### Display of names #######################################################
   def display_name
     str = self[:display_name]

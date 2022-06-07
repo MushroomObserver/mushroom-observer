@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 class Name < AbstractModel
+
+  private
+
+  validate :check_user, :check_text_name, :check_author
+
+  public
+
+  module Validation
   # :string field size limits in characters, based on this algorithm:
   # Theoretical max differences between (text_name + author) and the field
   #   search_name: 4
@@ -51,7 +59,7 @@ class Name < AbstractModel
 
   private
 
-  validate :check_user, :check_text_name, :check_author
+  # validate :check_user, :check_text_name, :check_author
 
   # :stopdoc:
   def check_author
@@ -77,4 +85,5 @@ class Name < AbstractModel
   def check_user
     errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
   end
+end
 end

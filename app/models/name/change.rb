@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Change
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
   #
@@ -15,7 +15,7 @@ class Name < AbstractModel
                                         name: in_str))
     end
     if parse.parent_name &&
-       !Name.find_by_text_name(parse.parent_name)
+      !Name.find_by_text_name(parse.parent_name)
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       if parents.last.nil?
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))

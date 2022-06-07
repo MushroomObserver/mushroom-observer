@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Create
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
   def self.find_names_filling_in_authors(in_str, rank = nil,
                                          ignore_deprecated: false)
