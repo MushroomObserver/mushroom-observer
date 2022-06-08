@@ -90,7 +90,7 @@
 #    comment.target_changed?
 #
 class Comment < AbstractModel
-  require_dependency "comment/callbacks"
+  include Callbacks
 
   belongs_to :target, polymorphic: true
   belongs_to :user
