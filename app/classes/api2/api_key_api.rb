@@ -3,8 +3,6 @@
 class API2
   # API for APIKey
   class APIKeyAPI < ModelAPI
-    require_relative("../../models/api_key")
-
     self.model = APIKey
 
     self.high_detail_page_length = 1000
