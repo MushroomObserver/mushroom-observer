@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::Primers
   # Get list of names for autocompletion in mobile app.
   def name_primer
     render(json: name_list)

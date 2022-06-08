@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::Vote
   # Cast vote. Renders new set of vote controls for HTML page if image,
   # nothing if naming.
   # type::  Type of object.

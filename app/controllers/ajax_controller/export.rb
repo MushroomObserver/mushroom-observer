@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::Export
   # Mark an object for export. Renders updated export controls.
   # type::  Type of object.
   # id::    Object id.

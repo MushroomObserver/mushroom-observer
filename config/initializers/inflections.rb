@@ -25,4 +25,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("GM")
   inflect.acronym("HTTP")
   inflect.acronym("URL")
+  inflect.acronym("EXIF")
 end

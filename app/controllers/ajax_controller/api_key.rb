@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::APIKey
   # Activate mode: sets verified field of given APIKey, returns nothing.
   # Edit mode: sets notes field of given APIKey, returns new value.
   # In both cases returns error message if there is an error.
