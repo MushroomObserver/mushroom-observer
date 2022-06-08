@@ -14,7 +14,7 @@ Rails.autoloaders.main.ignore(
   "app/classes/api/helpers",
   # "app/classes/api/error",
   # "app/classes/api",
-  "app/classes/api2/helpers",
+  # "app/classes/api2/helpers",
   # "app/classes/api2/error",
   # "app/classes/api2/upload",
   # "app/classes/api2",
@@ -30,13 +30,14 @@ Rails.autoloaders.main.ignore(
   "app/views"
 )
 
-FLATTEN_ERROR_SUBDIRECTORIES = %w(
-  api2
-  pattern_search
-)
+FLATTEN_CLASSES_SUBDIRECTORIES = [
+  %w(api2 error),
+  %w(api2 helpers),
+  %w(pattern_search error)
+]
 
 Rails.autoloaders.each do |loader|
-  FLATTEN_ERROR_SUBDIRECTORIES.each do |subdir|
-    loader.collapse("app/classes/#{subdir}/error")
+  FLATTEN_CLASSES_SUBDIRECTORIES.each do |subdir, subsub|
+    loader.collapse("app/classes/#{subdir}/#{subsub}")
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # miscellaneous helpers for parameter parsing, location validation
-class API2
+module API2::Helpers
   def parse_names_parameters
     args = {
       names: parse_array(:name, :name, as: :verbatim),

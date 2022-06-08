@@ -7,12 +7,12 @@ class API2
     def initialize(url)
       super()
       fetch(url)
-    rescue StandardError => e
-      raise(CouldntDownloadURL.new(url, e))
+    rescue ::StandardError => e
+      raise(API2::CouldntDownloadURL.new(url, e))
     end
 
     def fetch(url, limit = 10)
-      raise(ArgumentError.new("Too many HTTP redirects")) if limit <= 0
+      raise(::ArgumentError.new("Too many HTTP redirects")) if limit <= 0
 
       uri = URI(url)
       Net::HTTP.start(
@@ -38,8 +38,8 @@ class API2
     end
 
     def process_http_success(response)
-      @temp_file = Tempfile.new("api_upload")
-      File.open(@temp_file, "w:utf-8") do |fh|
+      @temp_file = ::Tempfile.new("api_upload")
+      ::File.open(@temp_file, "w:utf-8") do |fh|
         response.read_body do |chunk|
           fh.write(chunk.force_encoding("utf-8"))
         end
@@ -51,7 +51,7 @@ class API2
     end
 
     def clean_up
-      File.delete(@temp_file) if @temp_file
+      ::File.delete(@temp_file) if @temp_file
     end
   end
 end

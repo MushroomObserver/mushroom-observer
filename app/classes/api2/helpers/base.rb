@@ -213,41 +213,37 @@
 #  +localization_files_test.rb+ will automatically search through all the
 #  parsers looking for missing error message.
 #
-class API2
-  API_VERSION = 2.0
-
-  def self.version
-    API_VERSION
+module API2::Base
+  # When we `include` a module, `self` refers to the module not the class,
+  # so only instance methods are added. Add class methods like this:
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
-  attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
+  module ClassMethods
+    # Initialize and process a request.
+    def execute(params)
+      api = instantiate_subclass(params)
+      api.handle_version
+      api.authenticate_user
+      api.process_request
+      api
+    rescue API2::Error => e
+      api ||= new(params)
+      api.errors << e
+      e.fatal = true
+      api
+    end
 
-  # Give other modules ability to do additional initialization.
-  class_attribute :initializers
-  self.initializers = []
-
-  # Initialize and process a request.
-  def self.execute(params)
-    api = instantiate_subclass(params)
-    api.handle_version
-    api.authenticate_user
-    api.process_request
-    api
-  rescue API2::Error => e
-    api ||= new(params)
-    api.errors << e
-    e.fatal = true
-    api
-  end
-
-  # :stopdoc:
-  def self.instantiate_subclass(params)
-    action = params[:action].to_s
-    subclass = "API2::#{action.camelize}API"
-    subclass = subclass.constantize
-    subclass.new(params)
-  rescue StandardError
-    raise(BadAction.new(action))
+    # :stopdoc:
+    def instantiate_subclass(params)
+      action = params[:action].to_s
+      subclass = "API2::#{action.camelize}API"
+      subclass = subclass.constantize
+      subclass.new(params)
+    rescue StandardError
+      raise(BadAction.new(action))
+    end
   end
 
   def initialize(params = {})
