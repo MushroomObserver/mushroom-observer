@@ -277,6 +277,207 @@ class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
 
+  # modules with instance methods and maybe class methods
+  include Validation, Taxonomy, Synonymy, Resolve,
+    PropagateGenericClassifications, Primer, Notify, Spelling, Merge,
+    Lifeform, Format, Change
+
+  # modules with class methods only
+  extend Parse, Create
+
+  ### RANK MATCHER CONSTANTS
+
+  # Match text_name to rank
+  TEXT_NAME_MATCHERS = [
+    RankMatcher.new(:Group,      / (group|clade|complex)$/),
+    RankMatcher.new(:Form,       / f\. /),
+    RankMatcher.new(:Variety,    / var\. /),
+    RankMatcher.new(:Subspecies, / subsp\. /),
+    RankMatcher.new(:Stirps,     / stirps /),
+    RankMatcher.new(:Subsection, / subsect\. /),
+    RankMatcher.new(:Section,    / sect\. /),
+    RankMatcher.new(:Subgenus,   / subg\. /),
+    RankMatcher.new(:Species,    / /),
+    RankMatcher.new(:Family,     /^\S+aceae$/),
+    RankMatcher.new(:Family,     /^\S+ineae$/),     # :Suborder
+    RankMatcher.new(:Order,      /^\S+ales$/),
+    RankMatcher.new(:Order,      /^\S+mycetidae$/), # :Subclass
+    RankMatcher.new(:Class,      /^\S+mycetes$/),
+    RankMatcher.new(:Class,      /^\S+mycotina$/),  # :Subphylum
+    RankMatcher.new(:Phylum,     /^\S+mycota$/),
+    RankMatcher.new(:Phylum,     /^Fossil-/),
+    RankMatcher.new(:Genus,      //)                # match anything else
+  ].freeze
+
+  # All abbrevisations for a given rank
+  # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
+  SUBG_ABBR    = / subgenus | subg\.?                      /xi.freeze
+  SECT_ABBR    = / section | sect\.?                       /xi.freeze
+  SUBSECT_ABBR = / subsection | subsect\.?                 /xi.freeze
+  STIRPS_ABBR  = / stirps                                  /xi.freeze
+  SP_ABBR      = / species | sp\.?                         /xi.freeze
+  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi.freeze
+  VAR_ABBR     = / variety | var\.? | v\.?                 /xi.freeze
+  F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi.freeze
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi.freeze
+
+  # Matcher abbreviation to rank
+  RANK_FROM_ABBREV_MATCHERS = [
+    RankMatcher.new(:Subgenus,   SUBG_ABBR),
+    RankMatcher.new(:Section,    SECT_ABBR),
+    RankMatcher.new(:Subsection, SUBSECT_ABBR),
+    RankMatcher.new(:Stirps,     STIRPS_ABBR),
+    RankMatcher.new(:Subspecies, SSP_ABBR),
+    RankMatcher.new(:Variety,    VAR_ABBR),
+    RankMatcher.new(:Form,       F_ABBR),
+    RankMatcher.new(nil,         //) # match anything else
+  ].freeze
+
+  ### PARSE CONSTANTS
+
+  AUCT_ABBR    = / auct\.? /xi.freeze
+  INED_ABBR    = / in\s?ed\.? /xi.freeze
+  NOM_ABBR     = / nomen | nom\.? /xi.freeze
+  COMB_ABBR    = / combinatio | comb\.? /xi.freeze
+  SENSU_ABBR   = / sensu?\.? /xi.freeze
+  NOV_ABBR     = / nova | novum | nov\.? /xi.freeze
+  PROV_ABBR    = / provisional | prov\.? /xi.freeze
+  CRYPT_ABBR   = / crypt\.? \s temp\.? /xi.freeze
+
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
+                      #{STIRPS_ABBR} /x.freeze
+  ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x.freeze
+  ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
+                      #{GROUP_ABBR} /x.freeze
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
+                          #{COMB_ABBR} | #{SENSU_ABBR} | #{CRYPT_ABBR} )
+                      (?:\s|$) /x.freeze
+
+  UPPER_WORD = /
+                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+  /x.freeze
+  LOWER_WORD = /
+    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
+    /x.freeze
+  BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x.freeze
+  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
+                           sp\.\s\S*\d\S* /x.freeze
+
+  # Matches the last epithet in a (standardized) name,
+  # including preceding abbreviation if there is one.
+  LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x.freeze
+
+  AUTHOR_START = /
+    #{ANY_AUTHOR_ABBR} |
+    van\s | d[eu]\s |
+    [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
+    "[^a-z\s]
+  /x.freeze
+
+  # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
+  #   AUTHOR_PAT ensures "sp", "ssp", etc., aren't included in author.
+  #   AUTHOR_PAT removes the author first thing.
+  # Then the other parsers have a much easier job.
+  AUTHOR_PAT =
+    /^
+      ( "?
+        #{UPPER_WORD}
+        (?:
+            # >= 1 of (rank Epithet)
+            \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+          |
+            \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+          |
+            "? \s #{SP_ABBR}
+        )?
+      )
+      ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
+    $/x.freeze
+
+  # Disable cop to allow alignment and easier comparison of regexps
+  # rubocop:disable Layout/LineLength
+
+  # Taxa without authors (for use by GROUP PAT)
+  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x.freeze
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
+  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x.freeze
+  # rubocop:enable Layout/LineLength
+
+  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x.freeze
+  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x.freeze
+  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x.freeze
+  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x.freeze
+  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x.freeze
+  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x.freeze
+  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x.freeze
+  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x.freeze
+  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x.freeze
+
+  GROUP_PAT       = /^(?<taxon>
+                        #{GENUS_OR_UP_TAXON} |
+                        #{SUBGENUS_TAXON}    |
+                        #{SECTION_TAXON}     |
+                        #{SUBSECTION_TAXON}  |
+                        #{STIRPS_TAXON}      |
+                        #{SPECIES_TAXON}     |
+                        (?: "? #{UPPER_WORD} # infra-species taxa
+                          (?: \s #{LOWER_WORD}
+                            (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                          )? "?
+                        )
+                      )
+                      (
+                        ( # group, optionally followed by author
+                          \s #{GROUP_ABBR} (\s (#{AUTHOR_START}.*))?
+                        )
+                        | # or
+                        ( # author followed by group
+                          ( \s (#{AUTHOR_START}.*)) \s #{GROUP_ABBR}
+                        )
+                      )
+                    $/x.freeze
+
+  # group or clade part of name, with
+  # <group_wd> capture group capturing the stripped group or clade abbr
+  GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x.freeze
+
+  # matches to ranks that are included in the name proper
+  # subspecies is not included because it's the catchall default
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i.freeze
+
+  # convert rank start_match to standard form of rank
+  # subspecies is not included because it's the catchall default
+  STANDARD_SECONDARY_RANKS = {
+    f: "f.",
+    sect: "sect.",
+    stirps: "stirps",
+    subg: "subg.",
+    subsect: "subsect.",
+    v: "var."
+  }.freeze
+
   # require_dependency "name/change"
   # require_dependency "name/create"
   # require_dependency "name/format"
@@ -291,10 +492,6 @@ class Name < AbstractModel
   # require_dependency "name/synonymy"
   # require_dependency "name/taxonomy"
   # require_dependency "name/validation"
-
-  include Validation, Taxonomy, Synonymy, Resolve,
-    PropagateGenericClassifications, Primer, Parse, Notify, Spelling, Merge,
-    Lifeform, Format, Create, Change
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value

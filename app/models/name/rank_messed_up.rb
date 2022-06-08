@@ -1,2 +1,2 @@
-module Name::RankMessedUp < ::StandardError
+class Name::RankMessedUp < ::StandardError
 end

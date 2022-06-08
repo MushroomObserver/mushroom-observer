@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # parsing a string to a Name
-module Name::ParsedName
+class Name::Parse::ParsedName
   attr_accessor :text_name, :search_name, :sort_name, :display_name
   attr_accessor :rank, :author, :parent_name
 

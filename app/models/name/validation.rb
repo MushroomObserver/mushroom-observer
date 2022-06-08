@@ -27,7 +27,7 @@ module Name::Validation
     # them to migrations.
 
     # An arbitrary number intended to be large enough for all Names
-    def self.text_name_limit
+    def text_name_limit
       100
     end
 
@@ -35,22 +35,22 @@ module Name::Validation
     # authors. There are now some Names with > text_name_limit worth of authors.
     # Rather than increase this limit, we will suggest that multiple authors be
     # listed as "first_author & al." per ICN Recommendation 46C.2.
-    def self.author_limit
+    def author_limit
       100
     end
 
     # text_name_limit + author_limit + 4
-    def self.search_name_limit
+    def search_name_limit
       204
     end
 
     # text_name_limit + author_limit + 21
-    def self.sort_name_limit
+    def sort_name_limit
       221
     end
 
     # text_name_limit + author_limit + 41
-    def self.display_name_limit
+    def display_name_limit
       241
     end
   end

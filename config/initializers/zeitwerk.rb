@@ -30,12 +30,13 @@ Rails.autoloaders.main.ignore(
   "app/views"
 )
 
-FLATTEN_SUBDIRECTORIES = %w(
+FLATTEN_ERROR_SUBDIRECTORIES = %w(
   api2
+  pattern_search
 )
 
 Rails.autoloaders.each do |loader|
-  FLATTEN_SUBDIRECTORIES.each do |subdir|
+  FLATTEN_ERROR_SUBDIRECTORIES.each do |subdir|
     loader.collapse("app/classes/#{subdir}/error")
   end
 end

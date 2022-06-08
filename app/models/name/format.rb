@@ -125,7 +125,8 @@ module Name::Format
   module ClassMethods
     def display_to_real_text(name)
       name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
-        gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
+        gsub(/__\*?\*? [^_*]* \s (#{Name::ANY_NAME_ABBR}) \s \*?\*?__/x,
+             ' \1 ').
         # (this part should be unnecessary)
         # Because "group" was removed by the 1st gsub above,
         # tack it back on (if it was part of display_name)
@@ -138,7 +139,7 @@ module Name::Format
     end
 
     def group_suffix(name)
-      GROUP_CHUNK.match(name.display_name).to_s
+      Name::GROUP_CHUNK.match(name.display_name).to_s
     end
 
     # Make sure display names are in boldface for accepted names, and not in
