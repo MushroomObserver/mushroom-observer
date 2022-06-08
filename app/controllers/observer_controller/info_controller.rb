@@ -2,7 +2,7 @@
 
 # TODO: move this into a new InfoController
 # Display canned informations about site
-class ObserverController
+module ObserverController::InfoController
   # Intro to site.
   def intro
     store_location

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: where does this stuff belong?
-class ObserverController
+module ObserverController::Other
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
     if tags.any?
