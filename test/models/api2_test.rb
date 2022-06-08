@@ -19,7 +19,7 @@ class Hash
   end
 end
 
-class Api2Test < UnitTestCase
+class API2Test < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
     super

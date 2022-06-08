@@ -33,7 +33,7 @@ module API2::Helpers
       Location.check_for_bad_chars(name)
     return if citations.none?
 
-    raise(DubiousLocationName.new(citations))
+    raise(API2::DubiousLocationName.new(citations))
   end
 
   def parse_bounding_box!
@@ -44,7 +44,7 @@ module API2::Helpers
     return if no_edges(n, s, e, w)
     return [n, s, e, w] if all_edges(n, s, e, w)
 
-    raise(NeedAllFourEdges.new)
+    raise(API2::NeedAllFourEdges.new)
   end
 
   #########
