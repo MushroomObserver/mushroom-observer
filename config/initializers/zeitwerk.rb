@@ -9,13 +9,12 @@ Rails.autoloaders.main.inflector.inflect({
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api",
-
   "app/extensions",
   "app/javascripts",
-
   "app/views"
 )
 
+# These subdirs are for organization only, should not create new namespaces
 FLATTEN_CLASSES_SUBDIRECTORIES = [
   %w(api2 error),
   %w(api2 core),
