@@ -427,11 +427,11 @@ class AbstractModel < ApplicationRecord
   # Return the URL of the "show_<object>" action
   #
   #   # normalized controller
-  #   Article.index_action => "https://mushroomobserver.org/article/12"
+  #   Article.index_action => "http://mushroomobserver.org/article/12"
   #
   #   # unnormalized controller
-  #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
+  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
   #
   # Note that show_controller has a leading forward slash
   def self.show_url(id)
@@ -546,8 +546,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "edit_<object>" action
   #
-  #   Name.edit_url(12) => "https://mushroomobserver.org/name/edit_name/12"
-  #   name.edit_url     => "https://mushroomobserver.org/name/edit_name/12"
+  #   Name.edit_url(12) => "http://mushroomobserver.org/name/edit_name/12"
+  #   name.edit_url     => "http://mushroomobserver.org/name/edit_name/12"
   #
   def self.edit_url(id)
     "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
@@ -600,8 +600,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "destroy_<object>" action
   #
-  #   Name.destroy_url(12) => "https://mushroomobserver.org/name/destroy_name/12"
-  #   name.destroy_url     => "https://mushroomobserver.org/name/destroy_name/12"
+  #   Name.destroy_url(12) => "http://mushroomobserver.org/name/destroy_name/12"
+  #   name.destroy_url     => "http://mushroomobserver.org/name/destroy_name/12"
   #
   def self.destroy_url(id)
     "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"

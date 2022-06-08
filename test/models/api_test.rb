@@ -1368,7 +1368,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_image_via_url
     setup_image_dirs
-    url = "https://mushroomobserver.org/images/thumb/459340.jpg"
+    url = "http://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
       to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
     params = {
