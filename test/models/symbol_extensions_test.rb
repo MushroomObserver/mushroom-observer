@@ -98,7 +98,7 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_with_a_link
-    assert_equal("<a href=\"http://mushroomobserver.org\">See this link</a>",
+    assert_equal("<a href=\"https://mushroomobserver.org\">See this link</a>",
                  :with_a_link.t)
   end
 
