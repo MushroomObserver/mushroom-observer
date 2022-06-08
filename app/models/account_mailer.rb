@@ -31,7 +31,7 @@ class AccountMailer < ActionMailer::Base
     msg << " from=#{from.id}" if from
     msg << " to=#{to.id}" if to
     objects.each do |k, v|
-      value = v.nil? || v.class == String ? v : v.id
+      value = v.nil? || v.instance_of?(String) ? v : v.id
       msg << " #{k}=#{value}"
     end
     QueuedEmail.debug_log(msg)

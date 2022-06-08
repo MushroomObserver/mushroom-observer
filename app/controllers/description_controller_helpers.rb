@@ -395,7 +395,7 @@ module DescriptionControllerHelpers
   # Look up a name or location description by id, using the controller name
   # to decide which kind.
   def find_description(id)
-    if self.class.name == "NameController"
+    if self.instance_of?(NameController)
       find_or_goto_index(NameDescription, id)
     else
       find_or_goto_index(LocationDescription, id)
