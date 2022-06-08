@@ -8,4 +8,11 @@ module Mail
       string.ascii_only?
     end
   end
+  # module Encodings
+  #   class QuotedPrintable < SevenBit
+  #     def self.encode(str)
+  #       ::Mail::Utilities.to_crlf([::Mail::Utilities.to_lf(str)].pack("M"))
+  #     end
+  #   end
+  # end
 end
