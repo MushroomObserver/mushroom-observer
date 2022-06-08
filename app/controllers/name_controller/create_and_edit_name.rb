@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
-  before_action :disable_link_prefetching, except: [
-    :create_name,
-    :edit_name
-  ]
-
+module NameController::CreateAndEditName
   def create_name
     store_location
     pass_query_params

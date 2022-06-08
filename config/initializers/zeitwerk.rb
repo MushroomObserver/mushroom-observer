@@ -13,7 +13,6 @@ Rails.autoloaders.main.ignore(
   # "app/classes/api",
   "app/classes/report",
 
-  "app/controllers/name_controller",
   "app/controllers/observer_controller",
 
   "app/extensions",
