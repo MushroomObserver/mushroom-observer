@@ -515,7 +515,7 @@ class Observation
 
   def post_observation
     http = Net::HTTP.new(HOST, PORT)
-    path = make_path("/api/observations",
+    path = make_path("/api2/observations",
                      api_key: KEY,
                      date: date,
                      location: location,
@@ -540,7 +540,7 @@ class Observation
 
   def post_image(img)
     http = Net::HTTP.new(HOST, PORT)
-    path = make_path("/api/images",
+    path = make_path("/api2/images",
                      api_key: KEY,
                      date: date,
                      notes: captions[img][1],
