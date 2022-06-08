@@ -2,7 +2,7 @@
 
 module Report
   # base table class
-  class BaseTable < Report::Base
+  class BaseTable < Base
     attr_accessor :query
 
     class_attribute :separator

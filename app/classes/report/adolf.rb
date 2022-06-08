@@ -2,7 +2,7 @@
 
 module Report
   # Special format for Adolf.
-  class Adolf < Report::CSV
+  class Adolf < CSV
     self.mime_type = "application/vnd.ms-excel"
 
     # rubocop:disable Metrics/MethodLength

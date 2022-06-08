@@ -26,4 +26,6 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("HTTP")
   inflect.acronym("URL")
   inflect.acronym("EXIF")
+  inflect.acronym("CSV")
+  inflect.acronym("TSV")
 end

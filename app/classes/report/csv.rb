@@ -2,7 +2,7 @@
 
 module Report
   # Provides rendering ability for CSV-type reports.
-  class CSV < Report::BaseTable
+  class CSV < BaseTable
     require "csv"
 
     self.default_encoding = "UTF-8"

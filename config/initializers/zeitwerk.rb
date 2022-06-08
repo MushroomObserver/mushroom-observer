@@ -9,11 +9,6 @@ Rails.autoloaders.main.inflector.inflect({
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api/helpers",
-  # "app/classes/api/error",
-  # "app/classes/api",
-  "app/classes/report",
-
-  # "app/controllers/observer_controller",
 
   "app/extensions",
   "app/javascripts",
