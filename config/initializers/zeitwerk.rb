@@ -8,7 +8,7 @@ Rails.autoloaders.main.inflector.inflect({
 
 Rails.autoloaders.main.ignore(
   "app/assets",
-  "app/classes/api/helpers",
+  "app/classes/api",
 
   "app/extensions",
   "app/javascripts",
@@ -18,7 +18,7 @@ Rails.autoloaders.main.ignore(
 
 FLATTEN_CLASSES_SUBDIRECTORIES = [
   %w(api2 error),
-  %w(api2 helpers),
+  %w(api2 core),
   %w(pattern_search error)
 ]
 

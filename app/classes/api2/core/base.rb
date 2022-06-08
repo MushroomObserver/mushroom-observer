@@ -242,7 +242,7 @@ module API2::Base
       subclass = subclass.constantize
       subclass.new(params)
     rescue StandardError
-      raise(BadAction.new(action))
+      raise(API2::BadAction.new(action))
     end
   end
 
@@ -258,7 +258,7 @@ module API2::Base
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
-      raise(BadVersion.new(version))
+      raise(API2::BadVersion.new(version))
     else
       self.version = version.to_f
     end
@@ -268,9 +268,9 @@ module API2::Base
     clear_user && return unless key_str = parse(:string, :api_key)
 
     key = APIKey.find_by(key: key_str)
-    raise(BadAPIKey.new(key_str))        unless key
-    raise(APIKeyNotVerified.new(key))    unless key.verified
-    raise(UserNotVerified.new(key.user)) unless key.user.verified
+    raise(API2::BadAPIKey.new(key_str))        unless key
+    raise(API2::APIKeyNotVerified.new(key))    unless key.verified
+    raise(API2::UserNotVerified.new(key.user)) unless key.user.verified
 
     login_user(key)
   end
@@ -291,17 +291,17 @@ module API2::Base
   def process_request
     tmp_method  = parse(:string, :method)
     self.method = tmp_method.downcase.to_sym
-    raise(MissingMethod.new)     unless method
-    raise(BadMethod.new(method)) unless respond_to?(method)
+    raise(API2::MissingMethod.new)     unless method
+    raise(API2::BadMethod.new(method)) unless respond_to?(method)
 
     send(method)
   end
 
   def abort_if_any_errors!
-    raise(AbortDueToErrors.new) if errors.any?
+    raise(API2::AbortDueToErrors.new) if errors.any?
   end
 
   def must_authenticate!
-    raise(MustAuthenticate.new) unless user
+    raise(API2::MustAuthenticate.new) unless user
   end
 end
