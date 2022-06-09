@@ -5,9 +5,9 @@ Subject: [MO] Please do something or other
 
 Author Request
 
-<%= (User.find(ActiveRecord::FixtureSet.identify(:katrina)).name) %> (katrina@collectivesource.com) asked the Mushroom Observer websit=
+Katrina (katrina@collectivesource.com) asked the Mushroom Observer websit=
 e to forward the following request to you regarding Coprinus comatus (O.F=
-. M=C3=BCll.) Pers. (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>):
+. M=C3=BCll.) Pers. (288002050):
 
 and this is why...
 
@@ -15,10 +15,10 @@ and this is why...
 
 Here are some handy links:
 
-Make sender an author: https://mushroomobserver.org/observer/review_author=
-s/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=3Dname_description&add=3D<%= ActiveRecord::FixtureSet.identify(:katrina) %>
-Show user's profile: https://mushroomobserver.org/observer/show_user/48423=
-3936
+Make sender an author: https://mushroomobserver.org/observer/review_autho=
+rs/13286265?type=3Dname_description&add=3D484233936
+Show user's profile: https://mushroomobserver.org/observer/show_user/4842=
+33936
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 
 If you feel this user is abusing this service please forward this entire =

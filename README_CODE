@@ -3,7 +3,7 @@ Last Revised: May 25, 2012
 = MushroomObserver
 
 The following is an overview of the code for the Mushroom Observer website for
-prospective developers.  See https://mushroomobserver.org/observer/intro for an
+prospective developers.  See http://mushroomobserver.org/observer/intro for an
 introduction to the website itself.
 
 
@@ -170,13 +170,13 @@ PivotalController::     Handles minimal interface with Pivotal Tracker website.
 These controllers are all subclasses of ActionController.  Actions are just
 instance methods.  These correspond directly to the URL of the request:
 
-  https://mushroomobserver.org/controller/action
+  http://mushroomobserver.org/controller/action
 
 Note that the default controller is "observer" and the "id" parameter is
 shortened to a bare integer:
 
-  https://mo.org/42                      Show observation #42.
-  https://mo.org/observer/show_user/252  Show summary for user #3.
+  http://mo.org/42                      Show observation #42.
+  http://mo.org/observer/show_user/252  Show summary for user #3.
 
 Controller methods -- that is, actions -- have access to quite a number of
 helpers and data.  Here are just a few, see ActionController for more:

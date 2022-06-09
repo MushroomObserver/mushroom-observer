@@ -16,14 +16,14 @@ By: Tricky Dick (dick)
 Here are some handy links:
 
 Show this observation: https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>
-Post a comment: https://mushroomobserver.org/comment/add_comment?id=3D432=
-936842&type=3DObservation
-I'm not interested in this observation: https://mushroomobserver.org/inte=
-rest/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=3DObservation&user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=
+Post a comment: https://mushroomobserver.org/comment/add_comment?id=3D4329=
+36842&type=3DObservation
+I'm not interested in this observation: https://mushroomobserver.org/inter=
+est/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&type=3DObservation&user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=
 =3D-1
-Stop sending me email like this: https://mushroomobserver.org/account/no_=
-email_observations_consensus/<%= ActiveRecord::FixtureSet.identify(:mary) %>
-Change your preferences: https://mushroomobserver.org/account/prefs/36579=
-0011
+Stop sending me email like this: https://mushroomobserver.org/account/no_e=
+mail_observations_consensus/<%= ActiveRecord::FixtureSet.identify(:mary) %>
+Change your preferences: https://mushroomobserver.org/account/prefs/365790=
+011
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 
