@@ -9,7 +9,7 @@ Last Revised: January 28, 2019
 
 This README provides a quick overview of the tools used by Mushroom Observer
 (MO) and an overview of the other READMEs that accompany this file.  See
-<https://mushroomobserver.org/observer/intro> for an introduction to the website
+<http://mushroomobserver.org/observer/intro> for an introduction to the website
 itself.
 
 Tools

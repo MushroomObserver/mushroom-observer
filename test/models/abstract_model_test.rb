@@ -454,7 +454,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   def assert_show_url(model, path)
-    domain = "https://mushroomobserver.org"
+    domain = "http://mushroomobserver.org"
     obj = model.first
     assert_equal("#{domain}/#{path}/#{obj.id}", obj.show_url)
   end
