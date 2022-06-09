@@ -5,8 +5,7 @@ Subject: [MO] Albion, California, USA Has Been Changed
 
 Location was Changed
 
-There were change(s) made to the location Albion, California, USA (820908=
-802):
+There were change(s) made to the location Albion, California, USA (820908802):
 
 Time: 2007-12-27 01:41:20 EST (-0500)
 By: Tricky Dick (dick)
@@ -18,16 +17,13 @@ West edge changed to: -123.82
 
 Notes changed to:
 --------------------------------------------------
-Here are some new =E2=80=98notes=E2=80=99 to play with.
+Here are some new ‘notes’ to play with.
 --------------------------------------------------
 
 Here are some handy links:
 
-Show this location: https://mushroomobserver.org/location/show_location/82=
-0908802
-I'm not interested in this location: https://mushroomobserver.org/interest=
-/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:albion) %>&type=3DLocation&user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=3D-1
-Change your preferences: https://mushroomobserver.org/account/prefs/365790=
-011
+Show this location: https://mushroomobserver.org/location/show_location/820908802
+I'm not interested in this location: https://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:albion) %>&type=Location&user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&state=-1
+Change your preferences: https://mushroomobserver.org/account/prefs/365790011
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 

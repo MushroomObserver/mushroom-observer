@@ -1,8 +1,7 @@
 From: news@mushroomobserver.org
 Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
-Subject: [MO] Observation Changed, Coprinus comatus (O.F. Mull.) Pers.
- (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>)
+Subject: [MO] Observation Changed, Coprinus comatus (O.F. Mull.) Pers. (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>)
 
 Observation was Changed
 
