@@ -4250,7 +4250,7 @@ class Api2Test < UnitTestCase
     }
     params[:api_key] = @api_key.key if method != :get
     api = API2.execute(params)
-    others = api.errors.reject { |e| e.class.name == "API2::HelpMessage" }
+    others = api.errors.reject { |e| e.instance_of?(API2::HelpMessage) }
     assert_equal(1, api.errors.length, others.map(&:to_s))
     if fail
       assert_equal("API2::NoMethodForAction", api.errors.first.class.name)
