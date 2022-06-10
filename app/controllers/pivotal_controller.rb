@@ -26,8 +26,6 @@
 ################################################################################
 
 class PivotalController < ApplicationController
-  require_dependency "pivotal"
-
   before_action :login_required
 
   def index
