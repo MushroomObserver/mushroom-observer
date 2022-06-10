@@ -41,11 +41,13 @@ class AccountMailerTest < UnitTestCase
   end
 
   # Tests used to be brittle because they compared the entire encoded email,
-  # including the exact line breaks enforced by the gem (after version 2.7.1)
-  # Here instead we are using `mail` gem's .decode method to get the email
+  # including the exact line breaks enforced by the gem (after version 2.7.1).
+  # It was impossible to anticipate line breaks in dynamically inserted text.
+  # Here instead we are using `mail` gem's `decoded` method to get the email
   # body, adding email fields back into it, for string comparison.
+  # - Nimmo 06/2022
 
-  # NOTE: `mail` gem's {html_mail}.decode reproduces html indents faithfully!
+  # NOTE: `{html_mail}.decoded` reproduces html indents faithfully!
   # Indents need to be removed from the .erb email build templates, or else
   # reproduced in the mail test fixtures exactly.
 
