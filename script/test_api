@@ -17,14 +17,14 @@ KEY = "xxx"
 # # Get observation #1.
 # http = Net::HTTP.new(HOST, PORT)
 # http.use_ssl = true if PORT == 443
-# response = http.get('/api/observations?id=1')
+# response = http.get('/api2/observations?id=1')
 # puts response.body
 # exit
 
 # Create observation.
 http = Net::HTTP.new(HOST, PORT)
 http.use_ssl = true if PORT == 443
-path = "/api/observations?" + [
+path = "/api2/observations?" + [
   "api_key=" + KEY,
   "help=1"
 ].join("&")
@@ -35,7 +35,7 @@ exit
 # # Create image via upload.
 # http = Net::HTTP.new(HOST, PORT)
 # http.use_ssl = true if PORT == 443
-# path = '/api/images?' + [
+# path = '/api2/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
 #   'api_key=' + KEY,
@@ -53,7 +53,7 @@ exit
 # # Create image via url.
 # http = Net::HTTP.new(HOST, PORT)
 # http.use_ssl = true if PORT == 443
-# path = '/api/images?' + [
+# path = '/api2/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
 #   'auth_id=252',
@@ -66,7 +66,7 @@ exit
 # # Create image via local file (admin would have to upload to server first).
 # http = Net::HTTP.new(HOST, PORT)
 # http.use_ssl = true if PORT == 443
-# path = '/api/images?' + [
+# path = '/api2/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
 #   'auth_id=252',
