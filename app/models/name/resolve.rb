@@ -33,9 +33,9 @@ module Name::Resolve
     #     Else 'what' has been approved, create it if necessary.
     #
     # INPUTS:
-    #   what            params[:name][:name]            Text field.
-    #   approved_name   params[:approved_name]          Last name user entered.
-    #   chosen_name     params[:chosen_name][:name_id]  Name id from radio boxes.
+    #   what           params[:name][:name]            Text field.
+    #   approved_name  params[:approved_name]          Last name user entered.
+    #   chosen_name    params[:chosen_name][:name_id]  Name id from radio boxes.
     #   (User.current -- might be used by one or more things)
     #
     # RETURNS:
@@ -80,7 +80,7 @@ module Name::Resolve
         # EXCEPT in the case of user supplying author for existing name that
         # has no author.)
         if names.empty? &&
-          (name = create_needed_names(approved_name2, what2))
+           (name = create_needed_names(approved_name2, what2))
           names << name
         end
 
@@ -99,7 +99,7 @@ module Name::Resolve
           target_name = names.first
           # Single matching name.  Check if it's deprecated.
           if target_name.deprecated &&
-            (ignore_approved_name || (approved_name != what))
+             (ignore_approved_name || (approved_name != what))
             # User has not explicitly approved the deprecated name: get list of
             # valid synonyms.  Will display them for user to choose among.
             valid_names = target_name.approved_synonyms
@@ -133,7 +133,7 @@ module Name::Resolve
       end
 
       [success, what, name, names, valid_names, parent_deprecated,
-      suggest_corrections]
+       suggest_corrections]
     end
 
     def create_needed_names(input_what, output_what = nil)

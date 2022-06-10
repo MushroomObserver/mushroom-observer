@@ -2,7 +2,6 @@
 
 # NOTE: Use `Name extend Parse`: these are all class methods
 module Name::Parse
-
   class RankMessedUp < ::StandardError
   end
 
@@ -90,9 +89,11 @@ module Name::Parse
       author = standardize_author(author)
       author2 = author.blank? ? "" : " " + author
       text_name = name.tr("ë", "e")
-      parent_name =
-        Name.ranks_below_genus.include?(rank) ?
-        name.sub(Name::LAST_PART, "") : nil
+      parent_name = if Name.ranks_below_genus.include?(rank)
+                      name.sub(Name::LAST_PART, "")
+                    else
+                      nil
+                    end
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         text_name: text_name,
@@ -191,9 +192,9 @@ module Name::Parse
   # Convert to: Amanita vaginatae var. vaginatae Author
   def fix_autonym(name, author, rank)
     last_word = name.split(" ").last.gsub(/[()]/, "")
-    if match = author.to_s.match(
+    if (match = author.to_s.match(
       /^(.*?)(( (#{Name::ANY_SUBG_ABBR}|#{Name::ANY_SSP_ABBR}) #{last_word})+)$/
-    )
+    ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
       words = match[2].split(" ")
@@ -209,8 +210,8 @@ module Name::Parse
 
   def make_sure_ranks_ordered_right!(prev_rank, next_rank)
     if compare_ranks(prev_rank, next_rank) <= 0 ||
-      Name.ranks_above_species.include?(prev_rank) &&
-      Name.ranks_below_species.include?(next_rank)
+       Name.ranks_above_species.include?(prev_rank) &&
+       Name.ranks_below_species.include?(next_rank)
       raise(RankMessedUp.new)
     end
   end
@@ -261,11 +262,11 @@ module Name::Parse
     while i.positive?
       words[i] = if (match_start_of_rank =
                      Name::RANK_START_MATCHER.match(words[i]))
-                  start_of_rank = match_start_of_rank[0]
-                  Name::STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
-                else
-                  "subsp."
-                end
+                   start_of_rank = match_start_of_rank[0]
+                   Name::STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
+                 else
+                   "subsp."
+                 end
       i -= 2
     end
     words.join(" ")
@@ -344,10 +345,10 @@ module Name::Parse
 
     if author.present?
       str += "  " + author.
-            gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-            gsub(/[Đđ]/, "d"). # mysql isn't collating these right
-            gsub(/[Øø]/, "O").
-            strip
+                    gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+                    gsub(/[Đđ]/, "d"). # mysql isn't collating these right
+                    gsub(/[Øø]/, "O").
+                    strip
     end
     str
   end

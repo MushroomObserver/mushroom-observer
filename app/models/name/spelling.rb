@@ -47,7 +47,7 @@ module Name::Spelling
       results
     end
 
-    # Check if the reason that the given name (String) is unrecognized is because
+    # Check if the reason that given name (String) is unrecognized is because
     # it's within a deprecated genus.  Use case: Cladina has been included back
     # within Cladonia, but tons of guides use Cladina anyway, so people like to
     # enter novel names under Cladina, not realizing those names already exist
@@ -93,12 +93,12 @@ module Name::Spelling
       result
     end
 
-    # The SQL pattern, e.g., "Lepiota test%", is too permissive.  Verify that the
+    # The SQL pattern, e.g., "Lepiota test%", is too permissive. Verify that the
     # results really are of the form /^Lepiota test(a|us|um)$/.
     def valid_alternate_genus?(name, parent, child_pat)
-      unless (
-        match = name.text_name.match(/^#{parent} #{child_pat.gsub('%', '(.*)')}$/)
-      )
+      unless (match = name.text_name.match(
+                /^#{parent} #{child_pat.gsub('%', '(.*)')}$/
+              ))
         return false
       end
 
@@ -108,7 +108,7 @@ module Name::Spelling
       true
     end
 
-    ##############################################################################
+    ############################################################################
 
     # Guess correct name of partial string.
     # This method should be private.
@@ -176,10 +176,10 @@ module Name::Spelling
     # name merges?  Whatever.  This fixes it and will run nightly. -JPH 20210812
     def fix_self_referential_misspellings
       msgs = Name.with_self_referential_misspelling.
-            select(:id, :text_name, :author).
-            map do |id, text_name, author|
-              "Name ##{id} #{text_name} #{author} was a misspelling of itself."
-            end
+             select(:id, :text_name, :author).
+             map do |id, text_name, author|
+               "Name ##{id} #{text_name} #{author} was a misspelling of itself."
+             end
       Name.with_self_referential_misspelling.
         update_all(correct_spelling_id: nil)
       msgs

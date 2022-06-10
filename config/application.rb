@@ -42,7 +42,6 @@ module MushroomObserver
       #{config.root}/app/extensions
     ]
 
-
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names.
@@ -79,4 +78,4 @@ module MushroomObserver
 end
 
 MO = MushroomObserver::Application.config
-require_relative("consts.rb")
+require_relative("consts")

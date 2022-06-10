@@ -141,8 +141,8 @@ class API2
   ### RESULTS ###
 
   class_attribute :model, :table, :high_detail_includes, :low_detail_includes,
-  :high_detail_page_length, :low_detail_page_length,
-  :put_page_length, :delete_page_length
+                  :high_detail_page_length, :low_detail_page_length,
+                  :put_page_length, :delete_page_length
 
   self.high_detail_includes = []
   self.low_detail_includes  = []

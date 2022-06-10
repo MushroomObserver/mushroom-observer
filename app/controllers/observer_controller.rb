@@ -10,11 +10,11 @@ class ObserverController < ApplicationController
 
   # These will mostly form the new ObservationController:
   include Other, Suggestions, SiteStats, Indexes, CreateAndEditObservation,
-    ShowObservation
+          ShowObservation
 
   # These all belong in new controllers:
   include UserController, SearchController, RssLogController, MarkupController,
-    InfoController, EmailController, AuthorController
+          InfoController, EmailController, AuthorController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter

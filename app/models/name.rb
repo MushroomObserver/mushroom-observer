@@ -272,15 +272,15 @@
 #                              NameDescription.
 #  notify_users::            After save: notify interested User's of changes.
 #
-################################################################################
+###############################################################################
 class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
 
   # modules with instance methods and maybe class methods
   include Validation, Taxonomy, Synonymy, Resolve,
-    PropagateGenericClassifications, Primer, Notify, Spelling, Merge,
-    Lifeform, Format, Change
+          PropagateGenericClassifications, Primer, Notify, Spelling, Merge,
+          Lifeform, Format, Change
 
   # modules with class methods only
   extend Parse, Create

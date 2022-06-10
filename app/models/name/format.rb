@@ -6,7 +6,7 @@ module Name::Format
     base.extend(ClassMethods)
   end
 
-  ##### Display of names #######################################################
+  ##### Display of names ######################################################
   def display_name
     str = self[:display_name]
     if User.current &&
@@ -92,7 +92,7 @@ module Name::Format
     text_name == "Imageless"
   end
 
-  ##### Miscellaneous ##########################################################
+  ##### Miscellaneous #########################################################
 
   # Info to include about each name in merge requests.
   def merge_info
@@ -108,7 +108,7 @@ module Name::Format
       Notification.where(flavor: Notification.flavors[:name], obj_id: id).count
   end
 
-  ##############################################################################
+  #############################################################################
 
   private
 
@@ -118,8 +118,6 @@ module Name::Format
     author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
       sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
   end
-
-  public
 
   module ClassMethods
     def display_to_real_text(name)
@@ -146,9 +144,9 @@ module Name::Format
     def make_sure_names_are_bolded_correctly
       msgs = ""
       needs_fixing = Name.where(deprecated: true).
-                    where(Name[:display_name].matches("%*%")).
-                    or(Name.not_deprecated.
-                        where(Name[:display_name].does_not_match("%*%")))
+                          where(Name[:display_name].matches("%*%")).
+                          or(Name.not_deprecated.
+                             where(Name[:display_name].does_not_match("%*%")))
       needs_fixing.each do |name|
         name.change_deprecated(name.deprecated)
         name.save
@@ -158,7 +156,7 @@ module Name::Format
       msgs
     end
 
-    ##### Names treated specially ################################################
+    ##### Names treated specially #############################################
 
     # Array of strings that mean "unknown" in the local language:
     #

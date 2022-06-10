@@ -22,4 +22,3 @@ class Name::RankMatcher
     str.match?(@pattern)
   end
 end
-

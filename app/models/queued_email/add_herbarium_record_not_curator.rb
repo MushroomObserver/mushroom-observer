@@ -22,4 +22,3 @@ class QueuedEmail::AddHerbariumRecordNotCurator < QueuedEmail
     AddHerbariumRecordEmail.build(user, to_user, herbarium_record).deliver_now
   end
 end
-

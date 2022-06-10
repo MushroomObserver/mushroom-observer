@@ -394,14 +394,12 @@ module Name::Taxonomy
     Name.joins(:namings).with_name_like(text_name).with_rank_below(rank).any?
   end
 
-  public
-
   module ClassMethods
     def all_ranks
       [:Form, :Variety, :Subspecies, :Species,
-      :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
-      :Group]
+       :Stirps, :Subsection, :Section, :Subgenus, :Genus,
+       :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
+       :Group]
     end
 
     # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).
@@ -419,12 +417,12 @@ module Name::Taxonomy
 
     def ranks_above_species
       [:Stirps, :Subsection, :Section, :Subgenus, :Genus,
-      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+       :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
     end
 
     def ranks_below_genus
       [:Form, :Variety, :Subspecies, :Species,
-      :Stirps, :Subsection, :Section, :Subgenus]
+       :Stirps, :Subsection, :Section, :Subgenus]
     end
 
     def ranks_below_species
@@ -476,7 +474,9 @@ module Name::Taxonomy
       result = text
       if text
         parsed_names = {}
-        raise(:runtime_user_bad_rank.t(rank: rank.to_s)) if rank_index(rank).nil?
+        if rank_index(rank).nil?
+          raise(:runtime_user_bad_rank.t(rank: rank.to_s))
+        end
 
         rank_idx = [rank_index(:Genus), rank_index(rank)].max
         rank_str = "rank_#{rank}".downcase.to_sym.l

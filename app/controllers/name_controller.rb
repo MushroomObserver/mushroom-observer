@@ -58,7 +58,7 @@
 #
 class NameController < ApplicationController
   include DescriptionControllerHelpers, ShowNameDescription, Classification,
-    CreateAndEditName
+          CreateAndEditName
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another

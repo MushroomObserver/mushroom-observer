@@ -6,8 +6,8 @@ module Name::Create
   def find_names_filling_in_authors(in_str, rank = nil,
                                     ignore_deprecated: false)
     find_names(in_str, rank,
-              ignore_deprecated: ignore_deprecated,
-              fill_in_authors: true)
+               ignore_deprecated: ignore_deprecated,
+               fill_in_authors: true)
   end
 
   # Look up Name's with a given name.  By default tries to weed out deprecated
@@ -25,17 +25,17 @@ module Name::Create
   #  names = Name.find_names('Letharia vulpina')
   #
   def find_names(in_str, rank = nil, ignore_deprecated: false,
-                  fill_in_authors: false)
-    return [] unless parse = parse_name(in_str)
+                 fill_in_authors: false)
+    return [] unless (parse = parse_name(in_str))
 
     finder = Name.with_rank(rank)
-    results = name_search(finder.where("search_name = :name",
-                                      { name: parse.search_name }),
+    results = name_search(finder.where(search_name: :name,
+                                       name: parse.search_name),
                           ignore_deprecated)
     return results if results.present?
 
-    results = name_search(finder.where("text_name = :name",
-                                      { name: parse.text_name }),
+    results = name_search(finder.where(text_name: :name,
+                                       name: parse.text_name),
                           ignore_deprecated)
     return results if parse.author.blank?
     return [] if results.any? { |n| n.author.present? }

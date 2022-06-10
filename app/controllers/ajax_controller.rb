@@ -30,7 +30,7 @@
 #
 class AjaxController < ApplicationController
   include Vote, UploadImage, Primers, Pivotal, OldTranslation, ExternalLink,
-    Export, EXIF, AutoComplete, APIKey
+          Export, EXIF, AutoComplete, APIKey
 
   disable_filters
   around_action :catch_ajax_errors
