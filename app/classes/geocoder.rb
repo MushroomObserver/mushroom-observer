@@ -8,11 +8,7 @@ require("rexml/document")
 #  Wraps a call to the Google Geocoding webservice
 #
 class Geocoder < BlankSlate
-  attr_reader :north
-  attr_reader :south
-  attr_reader :east
-  attr_reader :west
-  attr_reader :valid
+  attr_reader :north, :south, :east, :west, :valid
 
   GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)

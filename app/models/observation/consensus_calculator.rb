@@ -139,8 +139,7 @@ class Observation
     end
 
     class VoteScale
-      attr_reader :weight
-      attr_reader :age
+      attr_reader :weight, :age
 
       def initialize(vote: nil, age: nil)
         @weight = vote && vote[1]

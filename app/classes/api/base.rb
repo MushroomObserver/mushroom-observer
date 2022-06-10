@@ -221,13 +221,7 @@ class API
     API_VERSION
   end
 
-  attr_accessor :params
-  attr_accessor :method
-  attr_accessor :action
-  attr_accessor :version
-  attr_accessor :user
-  attr_accessor :api_key
-  attr_accessor :errors
+  attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
 
   # Give other modules ability to do additional initialization.
   class_attribute :initializers

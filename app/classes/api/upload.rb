@@ -33,8 +33,8 @@ class API
 
   # Class holding info about an upload
   class Upload
-    attr_accessor :data, :length, :content_type, :checksum
-    attr_accessor :content, :content_length, :content_type, :content_md5
+    attr_accessor :data, :length, :content_type, :checksum,
+                  :content, :content_length, :content_md5
 
     def initialize(args)
       @data         = args[:data]

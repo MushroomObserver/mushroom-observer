@@ -50,15 +50,8 @@
 ################################################################################
 
 class NameParse
-  attr_reader :line_str
-  attr_reader :name
-  attr_reader :rank
-  attr_reader :search_name
-  attr_reader :comment
-  attr_reader :synonym
-  attr_reader :synonym_rank
-  attr_reader :synonym_search_name
-  attr_reader :synonym_comment
+  attr_reader :line_str, :name, :rank, :search_name, :comment,
+              :synonym, :synonym_rank, :synonym_search_name, :synonym_comment
 
   COMMENT_PAT = /^\s* ([^\[\]]*) \s+ \[(.*)\] \s*$/x.freeze
 
