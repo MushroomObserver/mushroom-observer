@@ -540,7 +540,7 @@ class Image < AbstractModel
   end
 
   def upload_from_url(url)
-    upload = API::UploadFromURL.new(url)
+    upload = API2::UploadFromURL.new(url)
     self.image         = upload.content
     self.upload_length = upload.content_length
     self.upload_type   = upload.content_type

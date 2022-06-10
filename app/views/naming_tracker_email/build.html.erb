@@ -49,9 +49,9 @@ if @user.email_html %>
 <%= fields.html_safe %>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% for label, url in links %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <%= report_abuse.tp %>
 <br/>
