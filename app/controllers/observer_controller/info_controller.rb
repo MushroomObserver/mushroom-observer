@@ -50,6 +50,5 @@ class ObserverController
   alias textile textile_sandbox
 
   # Allow translator to enter a special note linked to from the lower left.
-  def translators_note
-  end
+  def translators_note; end
 end

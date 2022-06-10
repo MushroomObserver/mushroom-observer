@@ -28,8 +28,7 @@ class AccountMailerTest < UnitTestCase
     if text_files.any?
       user.email_html = false if user
       yield
-      email = ActionMailer::Base.deliveries.last.encoded
-      email = remove_extraneous_email_headers(email)
+      email = String.new(whole_email(space: true))
       assert_string_equal_file(email, *text_files)
     end
 
@@ -37,38 +36,33 @@ class AccountMailerTest < UnitTestCase
 
     user.email_html = true if user
     yield
-    email = ActionMailer::Base.deliveries.last.encoded
-    email = remove_extraneous_email_headers(email)
-    fix_mac_vs_pc!(email)
+    email = String.new(whole_email(space: false))
     assert_string_equal_file(email, *html_files)
   end
 
-  # At the moment at least Redcloth produces slightly different output on
-  # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
-  # common form so that we don't need to continue to tweak two separate copies
-  # of every email response.  But I'm failing...
-  def fix_mac_vs_pc!(email)
-    email.gsub!(/&#38;/, "&amp;")
-    email.gsub!(/ &#8212;/, "&#8212;")
-    email.gsub!(/^\s+/, "")
-    email.gsub!(/\r\n?/, "\n")
-  end
+  # Tests used to be brittle because they compared the entire encoded email,
+  # including the exact line breaks enforced by the gem (after version 2.7.1).
+  # It was impossible to anticipate line breaks in dynamically inserted text.
+  # Here instead we are using `mail` gem's `decoded` method to get the email
+  # body, adding email fields back into it, for string comparison.
+  # - Nimmo 06/2022
 
-  def remove_extraneous_email_headers(str)
-    in_header = true
-    keep_wrapped_line = false
-    str.split("\n").select do |line|
-      in_header = false if /^\s*$|<html>/.match?(line)
-      if !in_header
-        true
-      elsif /^(To|From|Reply-To|Cc|Bcc|Subject):/.match?(line)
-        keep_wrapped_line = true
-      elsif keep_wrapped_line && line !~ /^[A-Z][\w\-]+:/
-        true
-      else
-        keep_wrapped_line = false
-      end
-    end.join("\n")
+  # NOTE: `{html_mail}.decoded` reproduces html indents faithfully!
+  # Indents need to be removed from the .erb email build templates, or else
+  # reproduced in the mail test fixtures exactly.
+
+  # Build a whole email string, minus extra headers and force-encoded newlines.
+  def whole_email(space: false)
+    last = ActionMailer::Base.deliveries.last
+    # Text emails expect a newline before the body, html does not
+    newline = space ? "\n" : ""
+    <<~"EMAIL"
+      From: #{last.from.first}
+      Reply-To: #{last.reply_to.first}
+      To: #{last.to.first}
+      Subject: #{last.subject}
+      #{newline + last.decoded}
+    EMAIL
   end
 
   ##############################################################################

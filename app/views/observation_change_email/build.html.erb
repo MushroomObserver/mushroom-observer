@@ -61,15 +61,15 @@ if @user.email_html %>
 <%= fields.tp %>
 <%= changes.tp %>
 <% if notes_changed %>
-  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-    <%= @observation.notes_export_formatted.tp %>
-  </div>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+<%= @observation.notes_export_formatted.tp %>
+</div>
 <% end %>
 <%= handy_links.tp %>
 <ul type=none>
-  <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
-  <% end %>
+<% for label, url in links %>
+<li><%= label %>: <%= link_to(url, url) %></li>
+<% end %>
 </ul>
 <br/>
 </body>

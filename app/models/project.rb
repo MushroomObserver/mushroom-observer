@@ -166,7 +166,7 @@ class Project < AbstractModel
     imgs.reject { |img| leave_these_img_ids.include?(img.id) }
   end
 
-  # Note: Arel is definitely more efficient than AR for this join.
+  # NOTE: Arel is definitely more efficient than AR for this join.
   # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
     io = Arel::Table.new(:images_observations)

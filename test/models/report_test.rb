@@ -127,7 +127,7 @@ class ReportTest < UnitTestCase
       "5",
       "2006",
       "2006-05-11",
-      "http://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/#{obs.id}",
       "/remote_images/orig/#{img1.id}.jpg " \
         "/remote_images/orig/#{img2.id}.jpg",
       "FunDiS",
@@ -173,7 +173,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "http://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/#{obs.id}",
       "",
       "FunDiS",
       "John Doe",
@@ -210,7 +210,7 @@ class ReportTest < UnitTestCase
       "7",
       "2010",
       "2010-07-22",
-      "http://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/#{obs.id}",
       "",
       "FunDiS",
       "",
@@ -260,7 +260,7 @@ class ReportTest < UnitTestCase
       "X",
       obs.thumb_image.id.to_s,
       "Found in a strange place... & with śtrangè characters™",
-      "http://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/#{obs.id}"
     ]
     do_csv_test(Report::Raw, obs, expect, &:id)
   end
@@ -304,9 +304,9 @@ class ReportTest < UnitTestCase
       "Agaricus",
       "Habitat: lawn Other: First line. Second line.",
       obs.id.to_s,
-      "http://mushroomobserver.org/#{obs.id}",
-      "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
-        "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
@@ -340,7 +340,7 @@ class ReportTest < UnitTestCase
       "",
       "From somewhere else",
       obs.id.to_s,
-      "http://mushroomobserver.org/#{obs.id}"
+      "https://mushroomobserver.org/#{obs.id}"
     ]
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end

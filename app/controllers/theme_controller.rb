@@ -14,8 +14,7 @@ class ThemeController < ApplicationController
   before_action :disable_link_prefetching
 
   # Show general information on color themes
-  def color_themes
-  end
+  def color_themes; end
 
   # Individual theme actions. Each shows a sample page in that theme,
   # explaining the colors for that theme.

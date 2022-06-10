@@ -5,7 +5,7 @@
 ##################################################################
 #
 # This reads a mrtg.cfg file form std input or cmdline argument
-# and it takes a regexp on the cmdline to specify which 
+# and it takes a regexp on the cmdline to specify which
 # targets to look at.
 #
 # from this info it produces a router index on stdout or
@@ -125,7 +125,7 @@ sub main {
 	if ($opt{sidebyside}) {
 		$opt{div} = 'td';
 	}
-	
+
     # slurp config files
     my %rcfg;
     my %cfg;
@@ -138,7 +138,7 @@ sub main {
 	    readcfg($cfgfile,\@routers,\%cfg,\%rcfg);
 	    if (($opt{sectionhost}) or ($opt{perhost})) {
 	    	#We need to cache the "hostname" as appeared in cfgfile,
-	    	#since it does change in cfgcheck (for ex. if multiple 
+	    	#since it does change in cfgcheck (for ex. if multiple
 	    	#overlapping cfgfiles are specified)
 	    	for my $targ (@routers) {
 	    		if ( !defined $rcfg{host}{$targ} and
@@ -168,7 +168,7 @@ sub main {
 }
 
 sub cleanurl ($) {
-    my $url = shift;    
+    my $url = shift;
     $url =~ s|([^/.][^/.]*/)\.\./\1|$1|g;
     return $url;
 }
@@ -221,10 +221,10 @@ sub genindex ($$$$) {
 		my ($area,$comp,$regex) = ($1,$2,$3);
 		my $value;
 	        for ($area) {
-		    /^title|pagetop$/ && 
+		    /^title|pagetop$/ &&
 		      do { $value = $$rcfg{$area}{$item}; last };
 
-		    /^name$/ && 
+		    /^name$/ &&
 		      do { $value = $item; last };
 
 		    die "ERROR: unknown filter area $_\n";
@@ -259,10 +259,10 @@ sub genindex ($$$$) {
 	    do {
 	      @order =
 	        sort {
-		  $$rcfg{pagetop}{$a} =~ 
+		  $$rcfg{pagetop}{$a} =~
 	           m[<td>Description:</td>\s*<td>(?:\S+\s+)?(.+?)</td>]i;
 		  my $aval = lc $1;
-		  $$rcfg{pagetop}{$b} =~ 
+		  $$rcfg{pagetop}{$b} =~
 	           m[<td>Description:</td>\s*<td>(?:\S+\s+)?(.+?)</td>]i;
 		  my $bval = lc $1;
 		  $aval cmp $bval;
@@ -351,7 +351,7 @@ ECHO
     $index .= <<ECHO if $$opt{subtitle};
 <p>$$opt{subtitle}</p>
 ECHO
-    
+
     $index .= <<ECHO;
 
 <TABLE BORDER=0 CELLPADDING=0 CELLSPACING=$$opt{cellspacing}>
@@ -364,7 +364,7 @@ ECHO
     my $itemnr = 0;
     my $first = $order[0];
     my $host = $$rcfg{host}{$first};
-    if ($host){    
+    if ($host){
        $index .= "<a NAME=\"$host\"></a><tr><td>$$opt{headon}Interfaces of $host $$opt{headoff}</td></tr>" if $$opt{perhost};
     } else {
        $index .= "<a NAME=\"$host\"></a><tr><td>$$opt{headon}Special Items$$opt{headoff}</td></tr>" if $$opt{perhost};
@@ -414,12 +414,12 @@ ECHO
                   $section = "No Description for $item";
 		  $$rcfg{setenv}{$item} =~ /MRTG_INT_DESCR="(.+?)"/  #"
                         and $section = $1;
-                  $$rcfg{pagetop}{$item} =~ 
+                  $$rcfg{pagetop}{$item} =~
    		          m,<td>Description:</td>\s*<td>\Q$section\E\s*([^< ][^<]+?)</td>,i
                         and $section = $1;
                   last;
               };
-             /^portname$/ && 
+             /^portname$/ &&
                do{
                  $section = "No Portname for $item";
                  $$rcfg{pagetop}{$item} =~ m,<td>Port Name:</td>\s*<td>(.*?)</td>,i
@@ -444,8 +444,8 @@ ECHO
 
     if (not $image) {
            if ($$cfg{logformat} eq 'rrdtool') {
-                my $sep = $$opt{rrdviewer} =~ /\?/ ? '&amp;' : '?'; 
-                $index .= 
+                my $sep = $$opt{rrdviewer} =~ /\?/ ? '&amp;' : '?';
+                $index .=
                "<A HREF=\"$$opt{rrdviewer}".$sep."log=$item&amp;cfg=$$cfgfile{$item}\">".
                        "$$opt{boldon}".
                      "$section$$opt{boldoff}</A>";
@@ -473,11 +473,11 @@ ECHO
 			    }
 	 	        $index .= "</$$opt{div}>\n<$$opt{div}>" if $picfirstloop;
 		    }
-		    
+
 		    if ( !($picfirstloop^$$opt{picfirst}) ) {
 		    	# figure show name for rrd viewer
 			    if ($$cfg{logformat} eq 'rrdtool') {
-               my $sep = $$opt{rrdviewer} =~ /\?/ ? '&amp;' : '?'; 
+               my $sep = $$opt{rrdviewer} =~ /\?/ ? '&amp;' : '?';
                $index .= "<A HREF=\"$$opt{rrdviewer}".$sep."log=$item&amp;cfg=$$cfgfile{$item}\">".
 		                          "<IMG BORDER=$$opt{imgborder} ALT=\"$item Traffic Graph\" ".
  "SRC=\"$$opt{rrdviewer}".$sep."log=$item&amp;cfg=$$cfgfile{$item}&amp;png=$$opt{show}.".
@@ -491,7 +491,7 @@ ECHO
 					  $$rcfg{directory_web}{$item}.$dirrel.
 					  $$cfg{imagehtml}.$$rcfg{directory_web}{$item}).
 					  "$image\"";
-				$index .= ' WIDTH="'.$$opt{width}.'"' 
+				$index .= ' WIDTH="'.$$opt{width}.'"'
 		                      if defined $$opt{width};
 				$index .= ' HEIGHT="'.$$opt{height}.'"'
 				      if defined $$opt{height};
@@ -526,8 +526,8 @@ ECHO
 </tr>
   <TR>
     <TD WIDTH=388><A
-    HREF="http://mushroomobserver.org/stats/robot.list.txt"><IMG
-    BORDER=0 SRC="http://mushroomobserver.org/images/960/681110.jpg" 
+    HREF="https://mushroomobserver.org/stats/robot.list.txt"><IMG
+    BORDER=0 SRC="https://mushroomobserver.org/images/960/681110.jpg"
     ALT="Mushrroom Observer"></A></TD>
   </TR>
 </TABLE>
@@ -573,7 +573,7 @@ sub options ($) {
 	       'filter=s@',
            'addhead=s',
 	       'title=s',
-           'subtitle=s',        
+           'subtitle=s',
 	       'bodyopt=s',
 	       'pagetopend=s',
 	       'pagetop=s',
@@ -608,9 +608,9 @@ sub options ($) {
 		$fileopt =~ s/=s$/-file=s/;
 		push @options, $fileopt;
 	}
-	
+
     GetOptions( $opt, @options ) or pod2usage(-verbose => 1);
-    
+
     if ($$opt{prefix}){
 	$$opt{prefix} .= '/';
 	$$opt{prefix} =~ s|/+$|/|;
@@ -618,7 +618,7 @@ sub options ($) {
     die ("Indexmaker for mrtg-2.17.4\n") if $$opt{version};
     pod2usage(-exitval => 1, -verbose => 2) if $$opt{man};
     pod2usage(-verbose => 1) if not @ARGV;
-    
+
     #take care of --fileoption --> --option
     for my $fileopt ( grep /-file$/, keys %{$opt} ) {
     	my $orgopt = $fileopt;
@@ -706,7 +706,7 @@ indexmaker [options] mrtg.cfg [other.cfg ...]
  --prefix=path       path from the location of the index.html to the graphs
  --headeradd=string  add string to the html page header
  --autoprefix        try to set prefix automatically
- 
+
  --<opt>-file=file   read string argument for option <opt> from file
 
 =head1 DESCRIPTION
@@ -781,7 +781,7 @@ interface description). B<portname> is the C<Port Name:> from pagetop.
 
 =item B<--sectionhost>
 
-Extract the hostname from the target line (this does not work if the 
+Extract the hostname from the target line (this does not work if the
 target is a mathematial expression). Prepend the hostname (and a colon)
 to the section if not already present.
 
@@ -816,7 +816,7 @@ which could confuse simple browsers.
 =item B<--someoption-file> I<filename>
 
 For any someoption which takes a I<string> as parameter you can read the
-string from a file by adding <-file> to the option keyword. The whole 
+string from a file by adding <-file> to the option keyword. The whole
 content of the file will be read and used as the I<string>. The file must
 exist.
 
