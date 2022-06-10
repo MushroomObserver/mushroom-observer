@@ -187,6 +187,11 @@ Style/AsciiComments:
 Style/DateTime:
   Enabled: false
 
+# Rubocop does not enable this cop by defaul
+# MO uses parentheses
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
+
 # Repeat the RuboCop defaults because Codeclimate silently overrides them
 # Is that still true? JDC 2020-08-17?
 Style/PercentLiteralDelimiters:
