@@ -97,8 +97,8 @@ module Name::Spelling
     # results really are of the form /^Lepiota test(a|us|um)$/.
     def valid_alternate_genus?(name, parent, child_pat)
       unless (match = name.text_name.match(
-                /^#{parent} #{child_pat.gsub('%', '(.*)')}$/
-              ))
+        /^#{parent} #{child_pat.gsub('%', '(.*)')}$/
+      ))
         return false
       end
 
@@ -158,6 +158,7 @@ module Name::Spelling
     end
 
     private
+
     # String words together replacing the one at +index+ with +sub+.
     def guess_pattern(words, index, sub) # :nodoc:
       result = []
@@ -167,7 +168,6 @@ module Name::Spelling
       result.join(" ")
     end
 
-    # private_class_method :guess_pattern
     public
 
     # This catches cases where correct_spelling_id = id and just clears it.

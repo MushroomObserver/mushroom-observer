@@ -144,9 +144,9 @@ module Name::Format
     def make_sure_names_are_bolded_correctly
       msgs = ""
       needs_fixing = Name.where(deprecated: true).
-                          where(Name[:display_name].matches("%*%")).
-                          or(Name.not_deprecated.
-                             where(Name[:display_name].does_not_match("%*%")))
+                     where(Name[:display_name].matches("%*%")).
+                     or(Name.not_deprecated.
+                        where(Name[:display_name].does_not_match("%*%")))
       needs_fixing.each do |name|
         name.change_deprecated(name.deprecated)
         name.save

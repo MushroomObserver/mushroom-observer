@@ -261,7 +261,7 @@ module Name::Parse
     i = words.length - 2
     while i.positive?
       words[i] = if (match_start_of_rank =
-                     Name::RANK_START_MATCHER.match(words[i]))
+                       Name::RANK_START_MATCHER.match(words[i]))
                    start_of_rank = match_start_of_rank[0]
                    Name::STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
                  else
@@ -345,10 +345,10 @@ module Name::Parse
 
     if author.present?
       str += "  " + author.
-                    gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-                    gsub(/[Đđ]/, "d"). # mysql isn't collating these right
-                    gsub(/[Øø]/, "O").
-                    strip
+             gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+             gsub(/[Đđ]/, "d"). # mysql isn't collating these right
+             gsub(/[Øø]/, "O").
+             strip
     end
     str
   end
