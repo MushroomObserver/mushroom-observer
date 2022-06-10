@@ -186,7 +186,7 @@ end
 
 norobots = [
   "/ajax/",
-  "/api/"
+  "/api2/"
 ]
 
 # These are all being redirected from observer.
