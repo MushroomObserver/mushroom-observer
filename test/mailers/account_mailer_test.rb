@@ -28,7 +28,7 @@ class AccountMailerTest < UnitTestCase
     if text_files.any?
       user.email_html = false if user
       yield
-      email = String.new(whole_email(true))
+      email = String.new(whole_email(space: true))
       assert_string_equal_file(email, *text_files)
     end
 
@@ -36,7 +36,7 @@ class AccountMailerTest < UnitTestCase
 
     user.email_html = true if user
     yield
-    email = String.new(whole_email(false))
+    email = String.new(whole_email(space: false))
     assert_string_equal_file(email, *html_files)
   end
 
@@ -50,7 +50,7 @@ class AccountMailerTest < UnitTestCase
   # reproduced in the mail test fixtures exactly.
 
   # Build a whole email string, minus extra headers and force-encoded newlines.
-  def whole_email(space = false)
+  def whole_email(space: false)
     last = ActionMailer::Base.deliveries.last
     # Text emails expect a newline before the body, html does not
     newline = space ? "\n" : ""
