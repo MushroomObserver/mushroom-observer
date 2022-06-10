@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 module MapHelper
-  require_dependency "collapsible_collection_of_mappable_objects"
-  require_dependency "map_set"
-  require_dependency "gm/gmap"
-
   def make_map(objects, args = {})
     args = provide_defaults(args,
                             map_div: "map_div",
