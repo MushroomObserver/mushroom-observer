@@ -499,7 +499,6 @@ module GeneralExtensions
   def clean_string!(str)
     str.delete!("\r")
     str.sub!(/\s*\z/, "\n")
-    # str.sub!(/\n[[:blank:]]+/, "\n")
   end
 
   def match_ignoring_some_bits(str, template)
