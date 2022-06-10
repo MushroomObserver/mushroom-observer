@@ -70,7 +70,7 @@ class TranslationController < ApplicationController
 
   def get_language_and_authorize_user
     locale = params[:locale] || I18n.locale
-    lang = Language.find_by_locale(locale)
+    lang = Language.find_by(locale: locale)
     validate_language_and_user(locale, lang)
     lang
   end

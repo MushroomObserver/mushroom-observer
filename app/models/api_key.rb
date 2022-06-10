@@ -45,7 +45,7 @@ class APIKey < AbstractModel
 
   validate :check_key
   def check_key
-    other = self.class.find_by_key(key)
+    other = self.class.find_by(key: key)
     if other && other.id != id
       # This should never happen.
       errors.add(:key, "api keys must be unique")

@@ -49,7 +49,7 @@ class License < AbstractModel
 
   # Use this license if all else equal.
   def self.preferred
-    License.find_by_form_name(PREFERRED_LICENSE_FORM_NAME)
+    License.find_by(form_name: PREFERRED_LICENSE_FORM_NAME)
   end
 
   # Various debugging things require all models respond to text_name.  Just

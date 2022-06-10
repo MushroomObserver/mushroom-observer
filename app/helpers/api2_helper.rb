@@ -17,14 +17,14 @@ module API2Helper
 
   def xml_integer(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:to_i)
+    return unless (str = val.try(:to_i))
 
     xml.tag!(tag, str.to_s, type: "integer")
   end
 
   def xml_float(xml, tag, val, places)
     return if val.blank?
-    return unless str = val.try(:round, places)
+    return unless (str = val.try(:round, places))
 
     xml.tag!(tag, str.to_s, type: "float")
   end
@@ -55,42 +55,42 @@ module API2Helper
 
   def xml_date(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:api_date)
+    return unless (str = val.try(:api_date))
 
     xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
   end
 
   def xml_datetime(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:utc).try(:api_time)
+    return unless (str = val.try(:utc).try(:api_time))
 
     xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
   end
 
   def xml_ellapsed_time(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:round, 4)
+    return unless (str = val.try(:round, 4))
 
     xml.tag!(tag, str.to_s, type: "float", units: "seconds")
   end
 
   def xml_latitude(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:round, 4)
+    return unless (str = val.try(:round, 4))
 
     xml.tag!(tag, str.to_s, type: "float", units: "degrees north")
   end
 
   def xml_longitude(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:round, 4)
+    return unless (str = val.try(:round, 4))
 
     xml.tag!(tag, str.to_s, type: "float", units: "degrees east")
   end
 
   def xml_altitude(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:to_i)
+    return unless (str = val.try(:to_i))
 
     xml.tag!(tag, str.to_s, type: "integer", units: "meters")
   end
@@ -105,14 +105,14 @@ module API2Helper
 
   def xml_confidence_level(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:round, 2)
+    return unless (str = val.try(:round, 2))
 
     xml.tag!(tag, str.to_s, type: "float", range: "-3.0 to 3.0")
   end
 
   def xml_image_quality(xml, tag, val)
     return if val.blank?
-    return unless str = val.try(:round, 2)
+    return unless (str = val.try(:round, 2))
 
     xml.tag!(tag, str.to_s, type: "float", range: "0.0 to 4.0")
   end

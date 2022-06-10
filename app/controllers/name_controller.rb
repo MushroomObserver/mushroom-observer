@@ -1115,8 +1115,7 @@ class NameController < ApplicationController
 
     flavor = Notification.flavors[:name]
     @notification = Notification.
-                    find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
-                                                          @user.id)
+                    find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
     if request.method != "POST"
       initialize_tracking_form
     else

@@ -111,7 +111,7 @@ module Name::Parse
 
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
-    if match = pattern.match(str)
+    if (match = pattern.match(str))
       name = match[1]
       author = match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species

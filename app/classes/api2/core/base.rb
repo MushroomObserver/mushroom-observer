@@ -265,7 +265,7 @@ module API2::Base
   end
 
   def authenticate_user
-    clear_user && return unless key_str = parse(:string, :api_key)
+    clear_user && return unless (key_str = parse(:string, :api_key))
 
     key = APIKey.find_by(key: key_str)
     raise(API2::BadAPIKey.new(key_str))        unless key

@@ -2,16 +2,9 @@
 
 # Encapsulates parameters needed for NamingController pages
 class NamingParams
-  attr_accessor :naming
-  attr_accessor :observation
-  attr_accessor :vote
-  attr_reader :what
-  attr_reader :name
-  attr_reader :names
-  attr_reader :valid_names
-  attr_reader :reason
-  attr_reader :parent_deprecated
-  attr_reader :suggest_corrections
+  attr_accessor :naming, :observation, :vote
+  attr_reader :what, :name, :names, :valid_names, :reason, :parent_deprecated,
+              :suggest_corrections
 
   def initialize(what = "")
     @naming = Naming.new

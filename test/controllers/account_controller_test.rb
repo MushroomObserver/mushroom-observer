@@ -95,7 +95,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:signup, params: { new_user: params })
     assert_flash_success
     assert_response(:redirect)
-    assert_not_nil(User.find_by_login("newbob"))
+    assert_not_nil(User.find_by(login: "newbob"))
   end
 
   def test_signup_theme_errors
@@ -113,14 +113,14 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = referrer
     post(:signup, params: { new_user: params.merge(theme: "") })
     assert_no_flash
-    assert_nil(User.find_by_login("spammer"))
+    assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
 
     @request.session["return-to"] = referrer
     post(:signup, params: { new_user: params.merge(theme: "spammer") })
     assert_no_flash
-    assert_nil(User.find_by_login("spammer"))
+    assert_nil(User.find_by(login: "spammer"))
     assert_nil(@request.session["user_id"])
     assert_redirected_to(referrer)
   end

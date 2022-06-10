@@ -4,12 +4,7 @@ module Query
   module Modules
     # Helper methods for turning Query parameters into SQL conditions.
     module Initialization
-      attr_accessor :join
-      attr_accessor :tables
-      attr_accessor :where
-      attr_accessor :group
-      attr_accessor :order
-      attr_accessor :executor
+      attr_accessor :join, :tables, :where, :group, :order, :executor
 
       def initialized?
         @initialized ? true : false

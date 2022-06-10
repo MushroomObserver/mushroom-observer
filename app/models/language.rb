@@ -81,8 +81,8 @@ class Language < AbstractModel
   private_class_method def self.get_user_translation_contributions_overall(user)
     v = Arel::Table.new(:translation_strings_versions)
     TranslationString::Version.
-      where(v[:user_id].eq(user.id)).
-      group(v[:translation_string_id]).
+      where(user_id: user.id).
+      group(:translation_string_id).
       select(v[:text].group_concat("\n", order: [v[:text].asc]))
   end
 
@@ -100,9 +100,9 @@ class Language < AbstractModel
     v = Arel::Table.new(:translation_strings_versions)
     TranslationString.
       joins(:versions).
-      where(TranslationString[:language_id].eq(id)).
+      where(language_id: id).
       where(v[:user_id].eq(user.id)).
-      group(TranslationString[:id]).
+      group(:id).
       select(v[:text].group_concat("\n", order: [v[:text].asc]))
   end
 
@@ -122,19 +122,4 @@ class Language < AbstractModel
   # changed while the Rails app is booting.
   # We need a class variable here
   @@last_update = 1.minute.ago
-
-  # Update I18n backend with any recent changes in translations.
-  def self.update_recent_translations
-    # We need a class variable here
-    cutoff = @@last_update
-    @@last_update = Time.zone.now
-
-    strings = TranslationString.joins(:language).
-              where(TranslationString[:updated_at] >= cutoff).
-              pluck(Language[:locale], :tag, :text)
-
-    strings.each do |locale, tag, text|
-      TranslationString.translations(locale.to_sym)[tag.to_sym] = text
-    end
-  end
 end
