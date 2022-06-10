@@ -140,8 +140,8 @@ class NameSorter
     else
       raise(
         TypeError.new(
-          "Only Arrays can be appended to a NameSorter synonym list not %s" %
-            synonyms.class
+          "Only Arrays can be appended to a NameSorter synonym list " \
+          "not #{synonyms.class}"
         )
       )
     end
