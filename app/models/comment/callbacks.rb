@@ -127,7 +127,7 @@ class Comment
     if /^\d+$/.match?(name)
       User.safe_find(name)
     else
-      User.find_by_login(name) || User.find_by_name(name)
+      User.find_by(login: name) || User.find_by_name(name)
     end
   end
 

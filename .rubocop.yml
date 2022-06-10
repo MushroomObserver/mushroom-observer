@@ -36,7 +36,13 @@ AllCops:
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js
     - app/assets/javascripts/lightbox.js
+    # old API is frozen
+    - app/classes/api.rb
+    - "app/classes/api/**/*"
+    - app/controllers/api_controller.rb
+    - app/helpers/api_helper.rb
     - "app/views/api/**/*"
+    - test/models/api_test.rb
     - "db/**/*"
     - "log/**/*"
     - public/design_test/jquery-1.5.2.min.js
@@ -203,10 +209,10 @@ Performance/StringInclude:
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
-# Causes test failures when used with Rubocop auto-correct
-# Could we get autocorrect to work by configuring the Whitelist parameter
+# Make autocorrect saf(er) by whitelisting our find_by methods
 Rails/DynamicFindBy:
-  AutoCorrect: false
+  AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
+  AutoCorrect: true
 
 # MO uses HABTM extensively; RuboCop prefers the newer has_many through
 # Switching would require a migration process, detailed here:
@@ -220,9 +226,21 @@ Rails/HasAndBelongsToMany:
 Rails/WhereExists:
   Enabled: false
 
-# (0.87) pending cop
 Style/AccessorGrouping:
-  Enabled: true
+  # Disabled. See discussion at
+  # https://github.com/MushroomObserver/mushroom-observer/pull/988
+  Enabled: false
+  # The follow in case we re-enable the cop
+  # Exclude files that individually comment accessors
+  # else Rubocop concatenates the accessors and comments on a single line.
+  # Disabling Style/AccessorGrouping around the accessors doesn't
+  # work in this context because Rubocop v1.30.0 generates a
+  # Style/EmptyLinesAroundAttributeAccessor offense
+  # See https://github.com/rubocop/rubocop/issues/10693
+  Exclude:
+    - "app/classes/country_counter.rb"
+    - "app/classes/gmaps.rb"
+    - "app/classes/mo_paginator.rb"
 
 # (0.88) pending cop
 Style/ArrayCoercion:

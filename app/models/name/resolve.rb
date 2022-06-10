@@ -173,7 +173,7 @@ class Name < AbstractModel
     return str unless str.match?(/^\S+ [A-Z]/)
 
     # Trust it if there is actually a name with that author present.
-    return str if Name.find_by_search_name(str).present?
+    return str if Name.find_by(search_name: str).present?
 
     # Try converting second word to lowercase.
     str2 = str.sub(/ [A-Z]/, &:downcase)

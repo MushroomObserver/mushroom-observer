@@ -59,8 +59,8 @@ class InterestController < ApplicationController
     uid    = params[:user]
     target = Comment.find_object(type, oid)
     if @user
-      interest = Interest.find_by_target_type_and_target_id_and_user_id(
-        type, oid, @user.id
+      interest = Interest.find_by(
+        target_type: type, target_id: oid, user_id: @user.id
       )
       if uid && @user.id != uid.to_i
         flash_error(:set_interest_user_mismatch.l)

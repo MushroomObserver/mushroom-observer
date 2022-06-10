@@ -89,7 +89,7 @@ name_data.
 # Build table of number of observations per genus.
 observations = {}
 Observation.pluck(:name_id).each do
-  next unless real_id = aliases[id]
+  next unless (real_id = aliases[id])
 
   text_name, rank, deprecated = names[real_id]
   next if rank > Name.ranks[:Genus]

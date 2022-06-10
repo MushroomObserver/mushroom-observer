@@ -90,12 +90,12 @@ module DescriptionControllerHelpers
       target = params[:target].to_s
       if target =~ /^parent_(\d+)$/
         target_id = Regexp.last_match(1)
-        if dest = find_or_goto_index(src.parent.class, target_id)
+        if (dest = find_or_goto_index(src.parent.class, target_id))
           do_move_description(src, dest, delete_after)
         end
       elsif target =~ /^desc_(\d+)$/
         target_id = Regexp.last_match(1)
-        if dest = find_description(target_id)
+        if (dest = find_description(target_id))
           do_merge_description(src, dest, delete_after)
         end
       else
@@ -613,9 +613,9 @@ module DescriptionControllerHelpers
   def update_writein(desc, name, reader, writer, admin)
     result = true
     group = if name =~ /^(.*\S) +<.*>$/
-              User.find_by_login(Regexp.last_match(1))
+              User.find_by(login: Regexp.last_match(1))
             else
-              User.find_by_login(name) ||
+              User.find_by(login: name) ||
                 UserGroup.find_by_name(name)
             end
     group = UserGroup.one_user(group) if group.is_a?(User)
@@ -633,7 +633,7 @@ module DescriptionControllerHelpers
   # groups.
   def update_groups(desc, type, groups)
     groups.each do |id, val|
-      if group = UserGroup.safe_find(id)
+      if (group = UserGroup.safe_find(id))
         update_group(desc, type, group, (val == "1"))
       else
         flash_error(:runtime_description_user_not_found.t(name: id))

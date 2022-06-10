@@ -626,7 +626,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key
-    return unless @key = find_or_goto_index(ApiKey, params[:id].to_s)
+    return unless (@key = find_or_goto_index(ApiKey, params[:id].to_s))
     return redirect_to(action: :api_keys) unless check_permission!(@key)
     return if request.method != "POST"
 
@@ -676,7 +676,7 @@ class AccountController < ApplicationController
     elsif str.match?(/^\d+$/)
       User.safe_find(str)
     else
-      User.find_by_login(str) || User.find_by_email(str.sub(/ <.*>$/, ""))
+      User.find_by(login: str) || User.find_by(email: str.sub(/ <.*>$/, ""))
     end
   end
 

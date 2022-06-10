@@ -2,11 +2,7 @@
 
 class Pivotal
   class Comment
-    attr_accessor :id
-    attr_accessor :time
-    attr_accessor :user
-    attr_accessor :text
-    attr_accessor :json
+    attr_accessor :id, :time, :user, :text, :json
 
     def initialize(json)
       @json = json

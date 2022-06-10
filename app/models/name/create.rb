@@ -25,7 +25,7 @@ class Name < AbstractModel
   #
   def self.find_names(in_str, rank = nil, ignore_deprecated: false,
                       fill_in_authors: false)
-    return [] unless parse = parse_name(in_str)
+    return [] unless (parse = parse_name(in_str))
 
     finder = Name.with_rank(rank)
     results = name_search(finder.where("search_name = :name",

@@ -124,7 +124,7 @@ class NameController
     @options = @message = nil
     return Name.find(chosen_id) if chosen_id.present?
 
-    name = Name.find_by_search_name(in_str)
+    name = Name.find_by(search_name: in_str)
     return name if name
 
     matches = matching_names(in_str)

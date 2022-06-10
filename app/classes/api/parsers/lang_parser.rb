@@ -11,7 +11,7 @@ class API
       end
 
       def parse(str)
-        lang = Language.find_by_locale(str)
+        lang = Language.find_by(locale: str)
         return lang.locale if lang
 
         raise(BadLimitedParameterValue.new(str, limit))

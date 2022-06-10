@@ -99,8 +99,7 @@ module SessionExtensions
 
       # Tiny class used to represent option in select field.
       class Option
-        attr_accessor :value
-        attr_accessor :label
+        attr_accessor :value, :label
       end
     end
 

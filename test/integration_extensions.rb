@@ -27,7 +27,7 @@ module IntegrationExtensions
   def login!(user, *args)
     login(user, *args)
     assert_flash(/success/i)
-    user = User.find_by_login(user) if user.is_a?(String)
+    user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
   end
 end

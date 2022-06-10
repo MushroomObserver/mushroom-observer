@@ -112,7 +112,7 @@ class ProjectController < ApplicationController
   def show_project
     store_location
     pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
     @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
     @is_member = @project.is_member?(@user)
@@ -208,7 +208,7 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project
     pass_query_params
-    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    return unless (@project = find_or_goto_index(Project, params[:id].to_s))
 
     if !check_permission!(@project)
       redirect_with_query(action: "show_project", id: @project.id)
@@ -311,7 +311,7 @@ class ProjectController < ApplicationController
   def find_member(str)
     return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-    User.find_by_login(str.to_s.sub(/ <.*>$/, ""))
+    User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
   end
 
   # Form to make a given User either a member or an admin.
