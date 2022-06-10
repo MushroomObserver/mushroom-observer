@@ -3,7 +3,7 @@ Last Revised: May 25, 2012
 = MushroomObserver
 
 The following is an overview of the code for the Mushroom Observer website for
-prospective developers.  See http://mushroomobserver.org/observer/intro for an
+prospective developers.  See https://mushroomobserver.org/observer/intro for an
 introduction to the website itself.
 
 
@@ -170,7 +170,7 @@ PivotalController::     Handles minimal interface with Pivotal Tracker website.
 These controllers are all subclasses of ActionController.  Actions are just
 instance methods.  These correspond directly to the URL of the request:
 
-  http://mushroomobserver.org/controller/action
+  https://mushroomobserver.org/controller/action
 
 Note that the default controller is "observer" and the "id" parameter is
 shortened to a bare integer:
