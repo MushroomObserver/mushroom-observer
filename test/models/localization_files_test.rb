@@ -142,7 +142,6 @@ class LocalizationFilesTest < UnitTestCase
     end
   end
 
-  # FIXME: This test needs to search through files
   def test_api_error_translations
     tags = []
     Dir.glob("#{::Rails.root}/app/classes/api2/error/*.rb").each do |file|

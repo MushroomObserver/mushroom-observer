@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Name::Spelling
-  # When we `include` a module, `self` refers to the module not the class,
-  # so only instance methods are added. Add class methods like this:
+  # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)
   end
