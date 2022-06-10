@@ -134,8 +134,8 @@ class NameSorter
   def append_approved_synonyms(synonyms)
     return unless synonyms # Allow for nil
 
-    synonyms = synonyms.split("/") if synonyms.class == String
-    if synonyms.class == Array
+    synonyms = synonyms.split("/") if synonyms.instance_of?(String)
+    if synonyms.instance_of?(Array)
       synonyms.each { |id| push_synonym(id.to_i) }
     else
       raise(
@@ -159,9 +159,9 @@ class NameSorter
   def add_approved_deprecated_names(new_names)
     return unless new_names
 
-    if new_names.class == String
+    if new_names.instance_of?(String)
       new_names.split("\n").each { |n| @approved_deprecated_names += n.split }
-    elsif new_names.class == Array
+    elsif new_names.instance_of?(Array)
       @approved_deprecated_names += new_names
     end
   end

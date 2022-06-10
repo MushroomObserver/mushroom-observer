@@ -105,14 +105,14 @@ module Query
       # Safely add to +arg+ in +args+.  Dups <tt>args[arg]</tt>, casts it into
       # an Array, and returns the new Array.
       def extend_arg(args, arg)
-        case old_arg = args[arg]
-        when Symbol, String
-          args[arg] = [old_arg]
-        when Array
-          args[arg] = old_arg.dup
-        else
-          args[arg] = []
-        end
+        args[arg] = case old_arg = args[arg]
+                    when Symbol, String
+                      [old_arg]
+                    when Array
+                      old_arg.dup
+                    else
+                      []
+                    end
       end
     end
   end
