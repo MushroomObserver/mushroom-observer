@@ -277,7 +277,7 @@ class NameController < ApplicationController
         end
       end
     else
-      # Note: if show_selected_name is called with a block
+      # NOTE: if show_selected_name is called with a block
       # it will *not* get passed to show_index_of_objects.
       show_index_of_objects(query, args)
     end
