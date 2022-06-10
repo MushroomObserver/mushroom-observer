@@ -84,10 +84,10 @@ end
 ################################################################################
 
 if testing
-  LOCAL_URL = "https://localhost:3000/api2/observations?id=1"
+  LOCAL_URL = "http://localhost:3000/api2/observations?id=1"
   REMOTE_URL = "https://mushroomobserver.org/api2/observations?id=1"
 else
-  LOCAL_URL = "https://localhost:3000/name/eol"
+  LOCAL_URL = "http://localhost:3000/name/eol"
   REMOTE_URL = "https://mushroomobserver.org/name/eol"
 end
 
