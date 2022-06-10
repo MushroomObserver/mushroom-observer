@@ -57,7 +57,7 @@ AllCops:
 #####  Individual Cops
 
 # Use RuboCop's default configuration, except as specified below
-# Note: pending cops have no default, so must be explicitly specified
+# NOTE: pending cops have no default, so it must be specified
 
 # Rubocop supports multiple options and MO uses a non-default
 # Default: align "end" with **start of the line** that includes "begin"
@@ -70,10 +70,6 @@ Layout/BeginEndAlignment:
 Layout/DotPosition:
   EnforcedStyle: trailing
 
-# (0.83) pending cop
-Layout/EmptyLinesAroundAttributeAccessor:
-  Enabled: true
-
 # Repeat the default because Codeclimate ignores it as of 2019-07-09
 Layout/HashAlignment:
   EnforcedColonStyle: key
@@ -82,66 +78,6 @@ Layout/HashAlignment:
 Layout/LineLength:
   # RuboCop default is 120 as of 0.84
   Max: 80
-
-# (0.82) pending cop
-Layout/SpaceAroundMethodCallOperator:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/BinaryOperatorWithIdenticalOperands:
-  Enabled: true
-
-# (0.84) pending cop
-Lint/DeprecatedOpenSSLConstant:
-  Enabled: true
-
-# (0.88) pending cop
-Lint/DuplicateElsifCondition:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/DuplicateRescueException:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/EmptyConditionalBody:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/FloatComparison:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/MissingSuper:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/OutOfRangeRegexpRef:
-  Enabled: true
-
-# (0.85) pending cop
-Lint/MixedRegexpCaptureTypes:
-  Enabled: true
-
-# (0.81) pending cop
-Lint/RaiseException:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/SelfAssignment:
-  Enabled: true
-
-# (0.81) pending cop
-Lint/StructNewOverride:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/TopLevelReturnWithArgument:
-  Enabled: true
-
-# (0.89) pending cop
-Lint/UnreachableLoop:
-  Enabled: true
 
 Metrics/AbcSize:
 # Can we try relaxing this one?  Even short simple methods sometimes exceed
@@ -242,74 +178,14 @@ Style/AccessorGrouping:
     - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
 
-# (0.88) pending cop
-Style/ArrayCoercion:
-  Enabled: true
-
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
-
-# (0.87) pending cop
-Style/BisectedAttrAccessor:
-  Enabled: true
-
-# (0.88) pending cop
-# Unsafe -- although the 0.88 documentation says "Safe"
-# The edge case is an if-elsif with a regex,
-# where the following code depends on $1 being something other than true/false,
-# e.g., where it uses a named capture group.
-# This has been reported https://github.com/rubocop-hq/rubocop/issues/8541
-Style/CaseLikeIf:
-  Enabled: true
 
 # Repeat the RuboCop default because CodeClimate silently overrides it
 # Is this still true? JDC 2020-08-17
 Style/DateTime:
   Enabled: false
-
-# (0.89) pending cop
-Style/ExplicitBlockArgument:
-  Enabled: true
-
-# (0.82) pending cop
-Style/ExponentialNotation:
-  Enabled: true
-
-# (0.89) pending cop
-Style/GlobalStdStream:
-  Enabled: true
-
-# (0.88) pending cop
-Style/HashAsLastArrayItem:
-  Enabled: true
-
-# (0.80) pending cop
-Style/HashEachMethods:
-  Enabled: true
-
-# (0.88) pending cop
-Style/HashLikeCase:
-  Enabled: true
-
-# (0.80) pending cop
-Style/HashTransformKeys:
-  Enabled: true
-
-# (0.80) pending cop
-Style/HashTransformValues:
-  Enabled: true
-
-Style/FrozenStringLiteralComment:
-  AutoCorrect: true
-
-# When the cop is enabled, the default is require_parentheses.
-Style/MethodCallWithArgsParentheses:
-  Enabled: true
-
-# (0.89) pending cop
-Style/OptionalBooleanParameter:
-  Enabled: true
 
 # Repeat the RuboCop defaults because Codeclimate silently overrides them
 # Is that still true? JDC 2020-08-17?
@@ -325,38 +201,6 @@ Style/PercentLiteralDelimiters:
 # I can't figure out how to get exploded to work with API.
 Style/RaiseArgs:
   EnforcedStyle: compact
-
-# (0.87) pending cop
-Style/RedundantAssignment:
-  Enabled: true
-
-# (0.86) pending cop
-Style/RedundantFetchBlock:
-  Enabled: true
-
-# (0.88) pending cop
-Style/RedundantFileExtensionInRequire:
-  Enabled: true
-
-# (0.85) pending cop
-Style/RedundantRegexpCharacterClass:
-  Enabled: true
-
-# (0.85) pending cop
-Style/RedundantRegexpEscape:
-  Enabled: true
-
-# (0.89) pending cop
-Style/SingleArgumentDig:
-  Enabled: true
-
-# (0.83) pending cop
-Style/SlicingWithRange:
-  Enabled: true
-
-# (0.89) pending cop
-Style/StringConcatenation:
-  Enabled: true
 
 # Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
