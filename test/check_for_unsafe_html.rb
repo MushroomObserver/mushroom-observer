@@ -19,7 +19,8 @@ module CheckForUnsafeHtml
     str.gsub!(/<!\[CDATA\[.*?\]\]>/mu, "")
     return unless str =~ /&lt;[a-z]+|&amp;[#\w]+;/i
 
-    msg = "..." + $`[-200..] + "***HERE***" + $& + $'[0..200] + "..."
+    msg = "... #{Regexp.last_match.pre_match[-200..]} ***HERE***" \
+          "#{Regexp.last_match(0)}#{Regexp.last_match.post_match[0..200]}..."
     flunk("Unsafe HTML found!" \
           "Here's the appropriate part of the HTML page:\n #{msg} \n")
   end
