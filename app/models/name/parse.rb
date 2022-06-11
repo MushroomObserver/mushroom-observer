@@ -91,8 +91,6 @@ module Name::Parse
       text_name = name.tr("ë", "e")
       parent_name = if Name.ranks_below_genus.include?(rank)
                       name.sub(Name::LAST_PART, "")
-                    else
-                      nil
                     end
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(

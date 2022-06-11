@@ -307,7 +307,7 @@ class Name < AbstractModel
     RankMatcher.new(:Phylum,     /^\S+mycota$/),
     RankMatcher.new(:Phylum,     /^Fossil-/),
     RankMatcher.new(:Genus,      //)                # match anything else
-  ]
+  ].freeze
 
   # All abbrevisations for a given rank
   # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
@@ -331,7 +331,7 @@ class Name < AbstractModel
     RankMatcher.new(:Variety,    VAR_ABBR),
     RankMatcher.new(:Form,       F_ABBR),
     RankMatcher.new(nil,         //) # match anything else
-  ]
+  ].freeze
 
   ### PARSE CONSTANTS
 
@@ -476,7 +476,7 @@ class Name < AbstractModel
     subg: "subg.",
     subsect: "subsect.",
     v: "var."
-  }
+  }.freeze
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
