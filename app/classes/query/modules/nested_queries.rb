@@ -78,7 +78,6 @@ module Query
                      tweak_outer_query&.call(outer)
                      outer
                    end
-
       end
 
       # Each inner query corresponds to a single result of the outer query. This
