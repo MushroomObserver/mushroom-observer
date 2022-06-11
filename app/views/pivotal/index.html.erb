@@ -60,7 +60,7 @@
     <tr>
       <td>
         <table>
-          <% %w[
+          <% %w(
             open -
             critical bottleneck -
             started unstarted unscheduled -
@@ -69,7 +69,7 @@
             api comments descriptions email i18n images lists locations maps
             names observations performance projects search specimen voting
             other
-          ].each do label %>
+          ).each do label %>
             <tr>
               <td align="right" style="font-size:120%; white-space:nowrap"><%=
                 if label == "-"
