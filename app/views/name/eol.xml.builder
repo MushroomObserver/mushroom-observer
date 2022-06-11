@@ -63,8 +63,8 @@ xml.response(
         end
       end
       @data.images(taxon.id).each do |image|
-        # for image_id, obs_id, user_id,
-        #     license_id, created in @image_data[taxon.id]
+        # @image_data[taxon.id].each do
+        #   |image_id, obs_id, user_id, license_id, created|
         user = @data.rights_holder(image)
         xml.dataObject do
           xml.dc(:identifier, "Image-#{image.id}")

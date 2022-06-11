@@ -42,7 +42,7 @@
         <th><%= :account_manager_last_login.t %></th>
         <th><%= :account_manager_actions.t %></th>
       </tr>
-      <% for user in @users %>
+      <% @users.each do |user| %>
         <tr>
           <td><%= user.id %></td>
           <td><%= h(user.login) %></td>

@@ -39,7 +39,7 @@
       </thead>
 
       <tbody>
-        <% for publication in @publications %>
+        <% @publications.each do |publication| %>
           <tr>
             <td>
               <%= link_to(publication.full.t.strip_links.html_safe, publication) %>

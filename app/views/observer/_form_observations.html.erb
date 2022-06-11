@@ -246,7 +246,7 @@
       <div class="col-xs-12">
         <b>Images:</b>
       </div>
-      <% for image in @good_images %>
+      <% @good_images.each do |image| %>
         <div class="col-xs-12 push-down">
           <div class="row form_image">
 
@@ -387,7 +387,7 @@
         </div>
       </div>
       <strong><%= :PROJECTS.t %>:</strong>
-      <% for project in @projects %>
+      <% @projects.each do |project| %>
         <div class="form-inline max-width-text">
           <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
                         disabled: @observation.user != @user && !project.is_member?(@user),
@@ -409,7 +409,7 @@
         </div>
       </div>
       <strong><%= :SPECIES_LISTS.t %>:</strong>
-      <% for list in @lists %>
+      <% @lists.each do |list| %>
         <div class="form-inline max-width-text">
           <%= check_box(:list, "id_#{list.id}", checked: @list_checks[list.id],
                         disabled: !check_permission(list), class: "form-control-xxx") %>

@@ -3,10 +3,10 @@
   javascript_include("pivotal")
 
   label_map = {}
-  for story in @stories
+  @stories.each do |story|
 
     # Gather stories by label.
-    for label in story.labels
+    story.labels.each do |label|
       if story.label_value(label) >= 0
         (label_map[label] ||= []) << story.id
       end
@@ -32,7 +32,7 @@
   label_map["all"] = @stories.map(&:id)
 
   data = []
-  for label in label_map.keys
+  label_map.keys.each do |label|
     data << "'#{label}': [#{label_map[label].join(',')}]"
   end
 
@@ -60,7 +60,7 @@
     <tr>
       <td>
         <table>
-          <% for label in %w( 
+          <% %w[
             open -
             critical bottleneck -
             started unstarted unscheduled -
@@ -69,7 +69,7 @@
             api comments descriptions email i18n images lists locations maps
             names observations performance projects search specimen voting
             other
-          ) %>
+          ].each do label %>
             <tr>
               <td align="right" style="font-size:120%; white-space:nowrap"><%=
                 if label == "-"
@@ -106,7 +106,7 @@
   </table>
 
   <div id="pivotal_stories" class="list-group">
-    <% for story in @stories %>
+    <% @stories.each do |story| %>
       <div class="list-group-item pivotal" id="pivotal_<%= story.id %>">
         <div class="pivotal_name" id="pivotal_name_<%= story.id %>">
           <span class="pivotal_name"><%=
@@ -119,7 +119,7 @@
             <span class="pivotal_state pivotal_<%= story.state %>"><%=
               :"pivotal_state_#{story.state}".l
             %></span>
-            <span class="pivotal_num_comments">(<%= :comments.l %>: 
+            <span class="pivotal_num_comments">(<%= :comments.l %>:
               <span id="pivotal_num_comments_<%= story.id %>"><%=
                 story.comments.length.to_s
               %></span>)</span>

@@ -50,7 +50,7 @@
 
   many_liners = []
   if new_desc
-    for field in LocationDescription.all_note_fields
+    LocationDescription.all_note_fields.each do |field|
       old_val = old_desc.send(field) rescue nil
       new_val = new_desc.send(field)
       many_liners.push([("form_locations_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
@@ -86,7 +86,7 @@ if @user.email_html %>
 <%= intro.tp %>
 <%= fields.tp %>
 <%= one_liners.tp if !one_liners.blank? %>
-<% for var, val in many_liners %>
+<% many_liners.each do |var, val| %>
 <%= "*#{var} #{:email_field_is_now.l}:*".tp %>
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
 <%= val.tp %>
@@ -94,7 +94,7 @@ if @user.email_html %>
 <% end %>
 <%= handy_links.tp %>
 <ul type=none>
-<% for label, url in links %>
+<% links.each do |label, url| %>
 <li><%= label %>: <%= link_to(url, url) %></li>
 <% end %>
 </ul>
@@ -106,7 +106,7 @@ if @user.email_html %>
 <%= fields.tp.html_to_ascii %>
 
 <%= one_liners.tp.html_to_ascii if !one_liners.blank? %>
-<% for var, val in many_liners %>
+<% many_liners.each do |var, val| %>
 
 <%= "#{var} #{:email_field_is_now.l}:" %>
 --------------------------------------------------
@@ -117,7 +117,7 @@ if @user.email_html %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = "".html_safe
-  for label, url in links
+  links.each do |label, url|
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
