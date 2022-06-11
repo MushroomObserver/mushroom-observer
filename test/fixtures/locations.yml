@@ -228,3 +228,11 @@ with_single_quotes_location:
   west: -120.500
   east: -120.500
   south: 44.000
+
+east_lt_west_location:
+  <<: *DEFAULTS
+  name: Wrangel Island, Russia
+  north: 71.588
+  west: 178.648
+  east: -177.433
+  south: 70.759
