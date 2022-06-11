@@ -570,16 +570,16 @@ end
 def route_actions_hash
   ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
-    get controller.to_s => "#{controller}#index"
+    get(controller.to_s => "#{controller}#index")
 
     # Standard routes
     actions.each_key do |action|
-      get "#{controller}/#{action}", controller: controller, action: action
-      match "#{controller}(/#{action}(/:id))",
+      get("#{controller}/#{action}", controller: controller, action: action)
+      match("#{controller}(/#{action}(/:id))",
             controller: controller,
             action: action,
             via: [:get, :post],
-            id: /\d+/
+            id: /\d+/)
     end
   end
 end

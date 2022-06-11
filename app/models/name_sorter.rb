@@ -279,8 +279,10 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        raise TypeError.new(
-          "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
+        raise(
+          TypeError.new(
+            "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
+          )
         )
       end
     end
