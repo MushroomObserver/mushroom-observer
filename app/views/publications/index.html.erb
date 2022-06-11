@@ -42,12 +42,14 @@
         <% @publications.each do |publication| %>
           <tr>
             <td>
-              <%= link_to(publication.full.t.strip_links.html_safe, publication) %>
+              <%= link_to(publication.full.t.strip_links.html_safe,
+                          publication) %>
             </td>
             <td>
               <%= if publication.link
                 str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
-                link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"})
+                link_to(str.html_safe, publication.link,
+                        title: publication.link, data: {toggle: "tooltip"})
               end %>
             </td>
             <td>
