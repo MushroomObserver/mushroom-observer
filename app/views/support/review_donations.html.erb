@@ -16,13 +16,13 @@
     <table class="table-striped table-review-donations push-up push-down">
       <thead>
         <tr>
-          <% for label in [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email] %>
+          <% [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email].each do |label| %>
             <th><%= label.t %></th>
           <% end %>
         </tr>
       </thead>
       <tbody>
-        <% for d in @donations %>
+        <% @donations.each do |d| %>
           <tr>
             <td><%= check_box(:reviewed, d.id, checked: d.reviewed,
                               class: "form-control") %></td>

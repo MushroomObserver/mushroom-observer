@@ -7,7 +7,7 @@ module PaginationHelper
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= paginate_block(@pages) do %>
-  #     <% for object in @objects %>
+  #     <% @objects.each do |object| %>
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>

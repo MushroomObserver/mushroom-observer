@@ -28,7 +28,7 @@
 
         <tbody>
           <% row = 0
-          for datum in @data
+          @data.each do |datum|
             row += 1
             licenses = datum["licenses"]
             license_id = datum["license_id"].to_i

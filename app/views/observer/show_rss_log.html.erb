@@ -5,7 +5,7 @@
 
 <% if @rss_log.notes %>
   <table>
-    <% for key, args, time in @rss_log.parse_log
+    <% @rss_log.parse_log.each do |key, args, time|
       if key != :log_orphan %>
         <tr>
           <td style="white-space:nowrap; vertical-align:text-top">

@@ -70,9 +70,9 @@
     <% num_cols = 5
     names = @data.species
     col_length = ((names.length + num_cols - 1).to_f / num_cols).truncate
-    for row in 1..col_length %>
+    (1..col_length).each do |row| %>
       <tr>
-        <% for col in 1..num_cols %>
+        <% (1..num_cols).each do |col| %>
           <% i = (col-1) * col_length + row - 1
           if i < names.length %>
             <td><i>
