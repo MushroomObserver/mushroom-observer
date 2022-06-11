@@ -12,6 +12,7 @@
 
   changes = ""
   if @observation and @note
+    notes_changed = false
     @note.split(",").each do |field|
       case field
         when "date"
