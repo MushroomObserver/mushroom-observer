@@ -930,7 +930,7 @@ class AccountController < ApplicationController
     live.com
   ].freeze
 
-  BOGUS_LOGINS = /houghgype|vemslons/.freeze
+  BOGUS_LOGINS = /houghgype|vemslons/
 
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")

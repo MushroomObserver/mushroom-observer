@@ -2,7 +2,7 @@
 
 module PaginationHelper
   # Letters used as text in pagination links
-  LETTERS = ("A".."Z").freeze
+  LETTERS = ("A".."Z")
 
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #

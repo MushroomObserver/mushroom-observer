@@ -5,7 +5,7 @@ module AjaxController::EXIF
   require "English"
   require("open3")
 
-  GPS_TAGS = /latitude|longitude|gps/i.freeze
+  GPS_TAGS = /latitude|longitude|gps/i
 
   # Get EXIF header of image, return as HTML table.
   def exif

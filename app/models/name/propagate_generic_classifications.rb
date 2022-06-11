@@ -53,7 +53,6 @@ module Name::PropagateGenericClassifications
              where(Name[:author].does_not_match("sensu lato%")).
              where(Name[:classification].length > 2).
              pluck(:text_name, :classification)
-
       geni.each_with_object({}) do |vals, classifications|
         text_name, classification = vals
         if classifications[text_name].present?

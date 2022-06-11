@@ -98,13 +98,13 @@ module Comment::Callbacks
 
   USER_LINK_PAT = /
     (?:^|\W) _+user\s+ ([^_\s](?:[^_\n]+[^_\s])?) _+ (?!\w)
-  /xi.freeze
+  /xi
   AT_USER_AT_PAT = /
     (?:^|\W) @ ([^@\s][^@\n]+[^@\s]) @ (?=\W|$)
-  /x.freeze
+  /x
   AT_USER_PAT = /
     (?:^|\W) @ (\w+) (?=[^@]|$)
-  /x.freeze
+  /x
 
   def highlighted_users(str)
     users = []
