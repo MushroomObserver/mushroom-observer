@@ -48,7 +48,7 @@
             <td>
               <%= if publication.link
                 str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
-                link_to(str.html_safe, publication.link,
+                link_to(str, publication.link.html_safe,
                         title: publication.link, data: {toggle: "tooltip"})
               end %>
             </td>
