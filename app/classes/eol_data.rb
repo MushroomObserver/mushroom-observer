@@ -139,7 +139,7 @@ class EolData
     )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
-  ).freeze
+  )
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -175,7 +175,7 @@ class EolData
     AND names.`rank` IN (#{Name.ranks.values_at(
       :Form, :Variety, :Subspecies, :Species, :Genus
     ).join(",")})
-  ).freeze
+  )
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
