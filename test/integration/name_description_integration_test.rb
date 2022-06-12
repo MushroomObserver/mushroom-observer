@@ -9,7 +9,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by(text_name: "Strobilurus diminutivus")
     assert_equal([], @name.descriptions)
     @description_data = {
-      source_type: :public,
+      source_type: "public",
       source_name: nil,
       readable: true,
       writable: true,
@@ -55,7 +55,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by(text_name: "Peltigera")
     assert_equal(4, @name.descriptions.length)
     @description_data = {
-      source_type: :user,
+      source_type: "user",
       source_name: "Mary's Corner",
       readable: true,
       writable: false,
@@ -322,7 +322,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_name_description_data
       desc = name_description
       data = name_description_data
-      assert_equal(data[:source_type], desc.source_type.to_sym)
+      assert_equal(data[:source_type], desc.source_type)
       assert(data[:source_name] == desc.source_name)
       assert_equal(data[:writable], desc.public_write)
       assert_equal(data[:readable], desc.public)

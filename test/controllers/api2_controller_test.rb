@@ -456,7 +456,7 @@ class Api2ControllerTest < FunctionalTestCase
     json = JSON.parse(response.body)
     votes = json["results"][0]["votes"]
     assert_equal(
-      :anonymous.l,
+      "anonymous",
       votes.find { |v| v["id"] == rolfs_vote.id }["owner"]
     )
     assert_equal(
