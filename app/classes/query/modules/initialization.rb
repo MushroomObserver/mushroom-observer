@@ -40,7 +40,7 @@ module Query
 
       # Clean a pattern for use in LIKE condition.  Takes and returns a String.
       def clean_pattern(pattern)
-        pattern.gsub(/[%'"\\]/) { |x| '\\' + x }.tr("*", "%")
+        pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
       end
 
       # Combine args into one parenthesized condition by ANDing them.

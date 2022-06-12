@@ -23,7 +23,7 @@ require("string_extensions")
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
 def escape(str)
-  str.to_s.gsub('\\', '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").
+  str.to_s.gsub("\\", '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").
     gsub(/["']/) { |m| "\\#{m}" }
 end
 

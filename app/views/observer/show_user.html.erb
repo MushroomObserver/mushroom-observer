@@ -4,7 +4,7 @@
   @title = :show_user_title.t(user: name)
 
   links = {}
-  for key, controller, action in [
+  [
     [ :comments,                      :comment,      :show_comments_by_user           ],
     [ :comments_for,                  :comment,      :show_comments_for_user          ],
     [ :images,                        :image,        :images_by_user                  ],
@@ -19,7 +19,7 @@
     [ :observations,                  :observer,     :observations_by_user            ],
     [ :species_lists,                 :species_list, :species_lists_by_user           ],
     [ :life_list,                     :observer,     :checklist                       ]
-  ]
+  ].each do |key, controller, action|
     links[key] = url_for(controller: controller, action: action, id: id)
   end
 
@@ -77,7 +77,7 @@
 
   # Add bonuses for translations.
   if @user_data[:languages_itemized]
-    for lang, score in @user_data[:languages_itemized]
+    @user_data[:languages_itemized].each do |lang, score|
       rows << {
         label: :show_user_language_contribution.t(name: lang.name),
         points: score.to_i
@@ -87,7 +87,7 @@
 
   # Add bonuses at the bottom.
   if @show_user.bonuses
-    for points, reason in @show_user.bonuses
+    @show_user.bonuses.each do |points, reason|
       rows << {
         label: reason.to_s.t,
         points: points.to_i
@@ -136,7 +136,7 @@
 
       <div class="col-sm-3">
         <% if @observations %>
-          <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
+          <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
             <%= thumbnail(obs.thumb_image,
                           link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
                           votes: true) %>
@@ -194,7 +194,7 @@
 
       <div class="col-sm-3">
         <% if @observations %>
-          <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
+          <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
             <%= thumbnail(obs.thumb_image,
                           link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
                           votes: true) %>

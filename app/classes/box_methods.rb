@@ -75,8 +75,8 @@ module BoxMethods
     if west <= east
       return false if long > east + delta_long
       return false if long < west - delta_long
-    else
-      return false if long < west + delta_long && long > east - delta_long
+    elsif long < west + delta_long && long > east - delta_long
+      return false
     end
     true
   end
