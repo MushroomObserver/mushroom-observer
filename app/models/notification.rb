@@ -32,19 +32,19 @@
 class Notification < AbstractModel
   belongs_to :user
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:flavor,
-          { name: 1,
-            observation: 2,
-            user: 3,
-            all_comments: 4 },
-          source: :flavor,
-          accessor: :whiny)
+  enum flavor:
+       {
+         name: 1,
+         observation: 2,
+         user: 3,
+         all_comments: 4
+       },
+       _suffix: :flavor
 
-  # List of all available flavors (Symbol's).
+        # List of all available flavors (strings).
   def self.all_flavors
-    [:name]
+    ["name"]
   end
 
   # Create body of the email we're about to send.  Each flavor requires a
@@ -77,12 +77,12 @@ class Notification < AbstractModel
   # name::   Name that User is tracking.
   #
   def target
-    @target ||= flavor == :name ? Name.find(obj_id) : nil
+    @target ||= flavor == "name" ? Name.find(obj_id) : nil
   end
 
   # Return a string summarizing what this Notification is about.
   def summary
-    if flavor == :name
+    if flavor == "name"
       "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
     else
       "Unrecognized notification flavor"
@@ -96,7 +96,7 @@ class Notification < AbstractModel
   #
   def link_params
     result = {}
-    if flavor == :name
+    if flavor == "name"
       result[:controller] = :name
       result[:action] = :email_tracking
       result[:id] = obj_id
