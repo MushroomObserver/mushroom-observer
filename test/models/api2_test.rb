@@ -1840,7 +1840,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.id))
     assert_api_results(names)
 
-    names = Name.with_rank("Variety").reject(&:correct_spelling_id)
+    names = Name.with_rank(:Variety).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
@@ -1955,7 +1955,7 @@ class API2Test < UnitTestCase
   def test_creating_names
     @name           = "Parmeliaceae"
     @author         = ""
-    @rank           = "Family"
+    @rank           = :Family
     @deprecated     = true
     @citation       = ""
     @classification = ""
@@ -2075,7 +2075,7 @@ class API2Test < UnitTestCase
     agaricus.reload
     assert_equal("new notes", agaricus.notes)
     assert_equal("new citation", agaricus.citation)
-    assert_equal(Name.validate_classification("Genus", new_classification),
+    assert_equal(Name.validate_classification(:Genus, new_classification),
                  agaricus.classification)
   end
 
@@ -2093,7 +2093,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(set_author: "L."))
     assert_equal("Suciraga L.", agaricus.reload.search_name)
     assert_api_pass(params.merge(set_rank: "order"))
-    assert_equal("Order", agaricus.reload.rank)
+    assert_equal(:Order, agaricus.reload.rank)
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(set_name: "Agaricus bitorquis",

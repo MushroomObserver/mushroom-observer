@@ -614,7 +614,7 @@ class NamingControllerTest < FunctionalTestCase
   def test_automatic_author_bug
     obs = observations(:minimal_unknown_obs)
     name = names(:peltigera)
-    assert_equal("Genus", name.rank)
+    assert_equal(:Genus, name.rank)
     assert_not_empty(name.author)
     old_author = name.author
 

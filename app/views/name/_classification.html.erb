@@ -23,7 +23,7 @@
                          controller: :name, action: :refresh_classification,
                          id: @name.id) %></p>
 <% end %>
-<% if @name.rank == "Genus" && @first_child && @name.classification.present? %>
+<% if @name.rank == :Genus && @first_child && @name.classification.present? %>
   <p><%= link_with_query(:show_name_propagate_classification.t,
                          controller: :name, action: :propagate_classification,
                          id: @name.id) %></p>

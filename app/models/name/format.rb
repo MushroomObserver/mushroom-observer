@@ -41,7 +41,7 @@ module Name::Format
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
   def display_name_brief_authors
-    if rank == "Group"
+    if rank == :Group
       # Xxx yyy group author
       display_name.sub(/ #{Regexp.quote(author)}$/, " #{brief_author}")
     else
@@ -57,7 +57,7 @@ module Name::Format
   # This depends on display_name having markup around name proper
   # Otherwise, it might delete author if that were part of the name proper
   def display_name_without_authors
-    if rank == "Group"
+    if rank == :Group
       # Remove author and preceding space at end
       display_name.sub(/ #{Regexp.quote(author)}$/, "")
     else

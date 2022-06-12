@@ -146,15 +146,15 @@ class Textile < String
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
     @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
-    if rank == "Species"
+    if rank == :Species
       @@last_species    = name
       @@last_subspecies = nil
       @@last_variety    = nil
-    elsif rank == "Subspecies"
+    elsif rank == :Subspecies
       @@last_species    = name.sub(/ ssp\. .*/, "")
       @@last_subspecies = name
       @@last_variety    = nil
-    elsif rank == "Variety"
+    elsif rank == :Variety
       @@last_species    = name.sub(/ (ssp|var)\. .*/, "")
       @@last_subspecies = name.sub(/ var\. .*/, "")
       @@last_variety    = name
@@ -222,7 +222,7 @@ class Textile < String
          # "Lichen Flora of the Greater Sonoran Region".
          # I'm sure it can still break with species but it should be
          # very infrequent (I don't see it in current tests). -JPH
-         (parse.author.blank? || parse.rank != "Genus")
+         (parse.author.blank? || parse.rank != :Genus)
         Textile.private_register_name(parse.real_text_name, parse.rank)
         prefix + "x{NAME __#{label}__ }{ #{name} }x"
       else

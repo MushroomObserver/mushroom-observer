@@ -409,42 +409,42 @@ class ReportTest < UnitTestCase
   end
 
   def test_split_name
-    do_split_test("Fungi", "Bartl.", "Kingdom", genus: "Fungi")
-    do_split_test("Agaricus", "L.", "Genus", genus: "Agaricus")
-    do_split_test("Rhizocarpon geographicum group", "", "Group",
+    do_split_test("Fungi", "Bartl.", :Kingdom, genus: "Fungi")
+    do_split_test("Agaricus", "L.", :Genus, genus: "Agaricus")
+    do_split_test("Rhizocarpon geographicum group", "", :Group,
                   genus: "Rhizocarpon",
                   species: "geographicum group")
-    do_split_test("Rhizocarpon geographicum group", "sensu MO", "Group",
+    do_split_test("Rhizocarpon geographicum group", "sensu MO", :Group,
                   genus: "Rhizocarpon",
                   species: "geographicum group",
                   species_author: "sensu MO")
-    do_split_test("Rhizocarpon geographicum", "", "Species",
+    do_split_test("Rhizocarpon geographicum", "", :Species,
                   genus: "Rhizocarpon",
                   species: "geographicum")
-    do_split_test("Rhizocarpon geographicum", "(L.) DC.", "Species",
+    do_split_test("Rhizocarpon geographicum", "(L.) DC.", :Species,
                   genus: "Rhizocarpon",
                   species: "geographicum",
                   species_author: "(L.) DC.")
-    do_split_test("Some thing ssp. else", "", "Subspecies",
+    do_split_test("Some thing ssp. else", "", :Subspecies,
                   genus: "Some",
                   species: "thing",
                   subspecies: "else")
-    do_split_test("Some thing ssp. else", "Seuss", "Subspecies",
+    do_split_test("Some thing ssp. else", "Seuss", :Subspecies,
                   genus: "Some",
                   species: "thing",
                   subspecies: "else",
                   subspecies_author: "Seuss")
-    do_split_test("Some thing var. else", "Seuss", "Variety",
+    do_split_test("Some thing var. else", "Seuss", :Variety,
                   genus: "Some",
                   species: "thing",
                   variety: "else",
                   variety_author: "Seuss")
-    do_split_test("Some thing f. else", "Seuss", "Form",
+    do_split_test("Some thing f. else", "Seuss", :Form,
                   genus: "Some",
                   species: "thing",
                   form: "else",
                   form_author: "Seuss")
-    do_split_test("Some thing ssp. else var. or f. other cfr.", "Seuss", "Form",
+    do_split_test("Some thing ssp. else var. or f. other cfr.", "Seuss", :Form,
                   genus: "Some",
                   species: "thing",
                   subspecies: "else",

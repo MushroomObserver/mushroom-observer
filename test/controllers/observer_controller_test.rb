@@ -2226,7 +2226,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
-    assert_equal("Class", name.rank)
+    assert_equal(:Class, name.rank)
   end
 
   def test_create_observation_creating_family
@@ -2263,7 +2263,7 @@ class ObserverControllerTest < FunctionalTestCase
       "Wrong image id"
     )
     assert_equal("Acarosporaceae", name.text_name)
-    assert_equal("Family", name.rank)
+    assert_equal(:Family, name.rank)
   end
 
   def test_create_observation_creating_group
@@ -2276,7 +2276,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
-    assert_equal("Group", name.rank)
+    assert_equal(:Group, name.rank)
   end
 
   def test_prevent_creation_of_species_under_deprecated_genus

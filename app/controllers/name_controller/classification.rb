@@ -80,7 +80,7 @@ module NameController::Classification
   end
 
   def make_sure_name_is_genus!(name)
-    return true if name.rank == "Genus"
+    return true if name.rank == :Genus
 
     flash_error("only works on genera!")
     redirect_with_query(name.show_link_args)

@@ -879,7 +879,7 @@ class NameControllerTest < FunctionalTestCase
         icn_id: icn_id,
         text_name: text_name,
         author: author,
-        rank: "Species",
+        rank: :Species,
         citation: "??Mycol. Writ.?? 9(15). 1898."
       }
     }
@@ -899,7 +899,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "",
         author: "",
-        rank: "Species",
+        rank: :Species,
         citation: ""
       }
     }
@@ -915,7 +915,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: text_name,
         author: "",
-        rank: "Species",
+        rank: :Species,
         citation: ""
       }
     }
@@ -940,7 +940,7 @@ class NameControllerTest < FunctionalTestCase
         icn_id: old_name.icn_id.to_s,
         text_name: "Something else",
         author: "(Thank You) Why Not",
-        rank: "Species",
+        rank: :Species,
         citation: "I'll pass"
       }
     }
@@ -976,7 +976,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_create_name_unauthored_authored
-    # Prove user can't create authored non-"Group" Name if unauthored one exists.
+    # Prove user can't create authored non-:Group Name if unauthored one exists.
     old_name_count = Name.count
     name = names(:strobilurus_diminutivus_no_author)
     params = {
@@ -1000,7 +1000,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(expect, user.reload.contribution)
 
     # And vice versa
-    # Prove user can't create unauthored non-"Group" Name if authored one exists.
+    # Prove user can't create unauthored non-:Group Name if authored one exists.
     name = names(:coprinus_comatus)
     author = name.author
     params = {
@@ -1029,7 +1029,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: text_name,
         author: "Author",
-        rank: "Group",
+        rank: :Group,
         citation: ""
       }
     }
@@ -1052,7 +1052,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        rank: "Species"
+        rank: :Species
       }
     }
     login("rolf")
@@ -1072,7 +1072,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: text_name,
         author: author,
-        rank: "Genus"
+        rank: :Genus
       }
     }
     post_requires_login(:create_name, params)
@@ -1088,7 +1088,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        rank: "Phylum"
+        rank: :Phylum
       }
     }
     login("rolf")
@@ -1107,7 +1107,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        rank: "Form"
+        rank: :Form
       }
     }
     login("rolf")
@@ -1129,7 +1129,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Agaricus Raf.",
       display_name: "**__Agaricus__** Raf.",
       author: "Raf.",
-      rank: "Genus",
+      rank: :Genus,
       deprecated: false,
       correct_spelling: nil
     )
@@ -1141,7 +1141,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Agaricus endoxanthus",
         author: "",
-        rank: "Species",
+        rank: :Species,
         citation: "",
         deprecated: "false"
       }
@@ -1157,14 +1157,14 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Lecideaceae",
         author: "",
-        rank: "Genus",
+        rank: :Genus,
         citation: "",
         deprecated: "false"
       }
     }
     post(:create_name, params: params)
     assert_flash_error
-    params[:name][:rank] = "Family"
+    params[:name][:rank] = :Family
     post(:create_name, params: params)
     assert_flash_success
   end
@@ -1176,7 +1176,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "#{text_name} #{author}",
         author: "",
-        rank: "Variety",
+        rank: :Variety,
         deprecated: "false"
       }
     }
@@ -1187,7 +1187,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    assert_equal("Variety", name.rank)
+    assert_equal(:Variety, name.rank)
     assert_equal("#{text_name} #{author}", name.search_name)
     assert_equal(author, name.author)
     assert(Name.find_by(text_name: "Pleurotus djamor"))
@@ -1208,7 +1208,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Conocybe filaris",
         author: "(Fr.) Kühner",
-        rank: "Species",
+        rank: :Species,
         citation: "__Le Genera Galera__, 139. 1935.",
         deprecated: (name.deprecated ? "true" : "false")
       }
@@ -1266,7 +1266,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        rank: "Species",
+        rank: :Species,
         citation: "__Le Genera Galera__, 139. 1935.",
         deprecated: (name.deprecated ? "true" : "false")
       }
@@ -1319,7 +1319,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Conocybe filaris",
         author: "",
-        rank: "Species",
+        rank: :Species,
         citation: "",
         notes: new_notes,
         deprecated: (name.deprecated ? "true" : "false")
@@ -1345,7 +1345,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name.text_name,
         author: "",
-        rank: "Species",
+        rank: :Species,
         citation: "new citation",
         deprecated: (name.deprecated ? "true" : "false")
       }
@@ -1372,7 +1372,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: old_text_name,
         author: new_author,
-        rank: "Species",
+        rank: :Species,
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
@@ -1523,7 +1523,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name.text_name,
         author: name.author,
-        rank: "Species",
+        rank: :Species,
         citation: name.citation,
         deprecated: (name.deprecated ? "true" : "false")
       }
@@ -1594,7 +1594,7 @@ class NameControllerTest < FunctionalTestCase
         # (test what happens if user puts author in wrong field)
         text_name: "Xanthoparmelia coloradoënsis (Gyelnik) Hale",
         author: "",
-        rank: "Species",
+        rank: :Species,
         deprecated: "false"
       }
     }
@@ -1633,7 +1633,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
       display_name: "**__Pleurotus djamor__** (Fr.) Boedijn var. djamor",
       author: "(Fr.) Boedijn var. djamor",
-      rank: "Species",
+      rank: :Species,
       deprecated: false,
       correct_spelling: nil
     )
@@ -1642,7 +1642,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
         author: "",
-        rank: "Variety",
+        rank: :Variety,
         deprecated: "false"
       }
     }
@@ -1652,7 +1652,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
     name.reload
-    assert_equal("Variety", name.rank)
+    assert_equal(:Variety, name.rank)
     assert_equal("Pleurotus djamor var. djamor", name.text_name)
     assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
     assert_equal("(Fr.) Boedijn", name.author)
@@ -1669,7 +1669,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Lepiota echinatae Group",
       display_name: "**__Lepiota echinatae__** Group",
       author: "Group",
-      rank: "Species",
+      rank: :Species,
       deprecated: false,
       correct_spelling: nil
     )
@@ -1678,7 +1678,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Lepiota echinatae",
         author: "Group",
-        rank: "Group",
+        rank: :Group,
         deprecated: "false"
       }
     }
@@ -1688,7 +1688,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
     name.reload
-    assert_equal("Group", name.rank)
+    assert_equal(:Group, name.rank)
     assert_equal("Lepiota echinatae group", name.text_name)
     assert_equal("Lepiota echinatae group", name.search_name)
     assert_equal("**__Lepiota echinatae__** group", name.display_name)
@@ -1703,7 +1703,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Ganoderma applanatum",
       display_name: "__Ganoderma applanatum__",
       author: "",
-      rank: "Species",
+      rank: :Species,
       deprecated: true,
       correct_spelling: nil,
       citation: "",
@@ -1719,7 +1719,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Ganoderma applanatum",
         author: "",
-        rank: "Species",
+        rank: :Species,
         deprecated: "true",
         citation: "",
         notes: "Changed notes."
@@ -1810,7 +1810,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(params[:name][:icn_id], name.icn_id)
     assert_equal("Foo", name.text_name)
     assert_equal("Bar", name.author)
-    assert_equal("Genus", name.rank)
+    assert_equal(:Genus, name.rank)
     assert_false(name.locked)
     assert_redirected_to("#{name_deprecate_name_path}/#{name.id}")
   end
@@ -2080,7 +2080,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: agaricus_campestris.text_name,
         author: agaricus_campestris.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: agaricus_campestris.deprecated
       }
     }
@@ -2124,7 +2124,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: old_name.text_name,
         author: new_name.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -2233,7 +2233,7 @@ class NameControllerTest < FunctionalTestCase
         text_name: bad_name.text_name,
         author: good_author,
         notes: bad_notes,
-        rank: "Species",
+        rank: :Species,
         deprecated: (bad_name.deprecated ? "true" : "false")
       }
     }
@@ -2290,7 +2290,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: new_name.text_name,
         author: new_name.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -2327,7 +2327,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: good_name.text_name,
         author: good_name.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: "false"
       }
     }
@@ -2627,7 +2627,7 @@ class NameControllerTest < FunctionalTestCase
       id: old_name.id,
       name: {
         text_name: new_name.text_name,
-        rank: "Genus",
+        rank: :Genus,
         deprecated: "false"
       }
     }
@@ -2660,7 +2660,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name1.text_name,
         author: name1.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: "true"
       }
     }
@@ -2689,7 +2689,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name1.text_name,
         author: name1.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: "false"
       }
     }
@@ -2719,7 +2719,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name1.text_name,
         author: name1.author,
-        rank: "Species",
+        rank: :Species,
         deprecated: "false"
       }
     }
@@ -2743,7 +2743,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Russula sect. Compactae",
       display_name: "**__Russula__** sect. **__Compactae__**",
       author: "",
-      rank: "Section",
+      rank: :Section,
       deprecated: false,
       correct_spelling: nil
     )
@@ -2753,7 +2753,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Russula sect. Compactae Fr.",
       display_name: "__Russula__ sect. __Compactae__ Fr.",
       author: "Fr.",
-      rank: "Section",
+      rank: :Section,
       deprecated: true,
       correct_spelling: name2
     )
@@ -2762,7 +2762,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: name1.text_name,
         author: name1.author,
-        rank: "Section",
+        rank: :Section,
         deprecated: "false"
       }
     }
@@ -2782,7 +2782,7 @@ class NameControllerTest < FunctionalTestCase
   # Another one found in the wild, probably already fixed.
   def test_update_name_merge_authored_with_old_style_unauthored
     login("rolf")
-    # Obsolete intrageneric Name, "Genus" with rank & author in the author field.
+    # Obsolete intrageneric Name, :Genus with rank & author in the author field.
     # (NameController no longer allows this.)
     old_style_name = Name.create!(
       text_name: "Amanita",
@@ -2790,7 +2790,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Amanita  (sect. Vaginatae)",
       display_name: "**__Amanita__** (sect. Vaginatae)",
       author: "(sect. Vaginatae)",
-      rank: "Genus",
+      rank: :Genus,
       deprecated: false,
       correct_spelling: nil
     )
@@ -2801,7 +2801,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Amanita sect. Vaginatae  (Fr.)   Quél.",
       display_name: "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
       author: "(Fr.) Quél.",
-      rank: "Section",
+      rank: :Section,
       deprecated: false,
       correct_spelling: nil
     )
@@ -2839,7 +2839,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Cortinarius subg. Sericeocybe",
       display_name: "**__Cortinarius__** subg. **__Sericeocybe__**",
       author: "",
-      rank: "Subgenus",
+      rank: :Subgenus,
       deprecated: false,
       correct_spelling: nil,
       synonym: syn
@@ -2851,7 +2851,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Cortinarius (sub Genus Sericeocybe)",
       display_name: "__Cortinarius__ (sub Genus Sericeocybe)",
       author: "(sub Genus Sericeocybe)",
-      rank: "Genus",
+      rank: :Genus,
       deprecated: true,
       correct_spelling: nil,
       synonym: syn
@@ -2861,7 +2861,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Cortinarius subg. Sericeocybe",
         author: "",
-        rank: "Subgenus",
+        rank: :Subgenus,
         deprecated: "false"
       }
     }
