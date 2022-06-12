@@ -322,7 +322,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_name_description_data
       desc = name_description
       data = name_description_data
-      assert_equal(data[:source_type], desc.source_type)
+      assert_equal(data[:source_type], desc.source_type.to_sym)
       assert(data[:source_name] == desc.source_name)
       assert_equal(data[:writable], desc.public_write)
       assert_equal(data[:readable], desc.public)

@@ -14,10 +14,9 @@ class Name < AbstractModel
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def self.all_ranks
-    [:Form, :Variety, :Subspecies, :Species,
-     :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-     :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
-     :Group]
+    self.ranks.map do |name, integer|
+      name.to_sym
+    end
   end
 
   # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).

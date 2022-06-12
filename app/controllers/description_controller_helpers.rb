@@ -468,7 +468,7 @@ module DescriptionControllerHelpers
   def initialize_description_permissions(desc)
     read  = desc.public
     write = (desc.public_write == "1")
-    case desc.source_type
+    case desc.source_type.to_sym
 
     # Creating standard "public" description.
     when :public
@@ -513,7 +513,7 @@ module DescriptionControllerHelpers
       desc.admin_groups << UserGroup.one_user(@user)
 
     else
-      raise(:runtime_invalid_source_type.t(value: desc.source_type.inspect))
+      raise(:runtime_invalid_source_type.t(value: desc.source_type.to_sym))
     end
   end
 

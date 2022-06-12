@@ -200,7 +200,7 @@ class ApiTest < UnitTestCase
     assert_users_equal(@user, name.user)
     assert_equal(@name, name.text_name)
     assert_equal(@author, name.author)
-    assert_equal(@rank, name.rank)
+    assert_equal(@rank, name.rank.to_sym)
     assert_equal(@deprecated, name.deprecated)
     assert_equal(@citation, name.citation)
     assert_equal(@classification, name.classification)
@@ -2003,7 +2003,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(set_author: "L."))
     assert_equal("Suciraga L.", agaricus.reload.search_name)
     assert_api_pass(params.merge(set_rank: "order"))
-    assert_equal(:Order, agaricus.reload.rank)
+    assert_equal(:Order, agaricus.reload.rank.to_sym)
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(set_name: "Agaricus bitorquis",
@@ -2011,7 +2011,7 @@ class ApiTest < UnitTestCase
                                  set_rank: "species"))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
-    assert_equal(:Species, agaricus.rank)
+    assert_equal(:Species, agaricus.rank.to_sym)
     parent = Name.where(text_name: "Agaricus").to_a
     assert_not_empty(parent)
     assert_not_equal(agaricus.id, parent[0].id)
@@ -2415,7 +2415,7 @@ class ApiTest < UnitTestCase
       action: :observation,
       api_key: @api_key.key
     }
-    assert_equal(:postal, rolf.location_format)
+    assert_equal(:postal, rolf.location_format.to_sym)
 
     params[:location] = "New Place, California, USA"
     api = API.execute(params)
@@ -2436,7 +2436,7 @@ class ApiTest < UnitTestCase
     # problem because apps don't have access to the user's prefs, so they have
     # no way of knowing how to pass in locations on the behalf of the user.
     User.update(rolf.id, location_format: :scientific)
-    assert_equal(:scientific, rolf.reload.location_format)
+    assert_equal(:scientific, rolf.reload.location_format.to_sym)
 
     # params[:location] = "USA, California, Somewhere Else"
     params[:location] = "Somewhere Else, California, USA"

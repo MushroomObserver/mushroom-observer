@@ -478,7 +478,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
-    assert_equal(rank, new_name.rank)
+    assert_equal(rank, new_name.rank.to_sym)
     assert(spl.name_included(new_name))
   end
 
@@ -596,7 +596,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
-    assert_equal(:Family, new_name.rank)
+    assert_equal(:Family, new_name.rank.to_sym)
     assert(spl.name_included(new_name))
   end
 

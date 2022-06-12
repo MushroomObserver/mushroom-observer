@@ -1187,7 +1187,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    assert_equal(:Variety, name.rank)
+    assert_equal(:Variety, name.rank.to_sym)
     assert_equal("#{text_name} #{author}", name.search_name)
     assert_equal(author, name.author)
     assert(Name.find_by(text_name: "Pleurotus djamor"))
@@ -1251,7 +1251,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_equal(text_name, name.reload.text_name)
     assert_equal(author, name.author)
-    assert_equal(rank, name.rank)
+    assert_equal(rank, name.rank.to_sym)
     assert_equal(citation, name.citation)
     assert_equal(deprecated, name.deprecated)
     assert_equal(user, name.user)
@@ -1652,7 +1652,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
     name.reload
-    assert_equal(:Variety, name.rank)
+    assert_equal(:Variety, name.rank.to_sym)
     assert_equal("Pleurotus djamor var. djamor", name.text_name)
     assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
     assert_equal("(Fr.) Boedijn", name.author)
@@ -1688,7 +1688,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
     name.reload
-    assert_equal(:Group, name.rank)
+    assert_equal(:Group, name.rank.to_sym)
     assert_equal("Lepiota echinatae group", name.text_name)
     assert_equal("Lepiota echinatae group", name.search_name)
     assert_equal("**__Lepiota echinatae__** group", name.display_name)
@@ -1703,7 +1703,7 @@ class NameControllerTest < FunctionalTestCase
       sort_name: "Ganoderma applanatum",
       display_name: "__Ganoderma applanatum__",
       author: "",
-      rank: :Species,
+      rank: "Species",
       deprecated: true,
       correct_spelling: nil,
       citation: "",
@@ -1719,7 +1719,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: "Ganoderma applanatum",
         author: "",
-        rank: :Species,
+        rank: "Species",
         deprecated: "true",
         citation: "",
         notes: "Changed notes."
@@ -1786,7 +1786,7 @@ class NameControllerTest < FunctionalTestCase
     # locked attributes should not change
     assert_true(name.locked)
     assert_nil(name.icn_id)
-    assert_equal(:Species, name.rank)
+    assert_equal(:Species, name.rank.to_sym)
     assert_false(name.deprecated)
     assert_equal("Stereum hirsutum", name.text_name)
     assert_equal("(Willd.) Pers.", name.author)
@@ -1810,7 +1810,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(params[:name][:icn_id], name.icn_id)
     assert_equal("Foo", name.text_name)
     assert_equal("Bar", name.author)
-    assert_equal(:Genus, name.rank)
+    assert_equal(:Genus, name.rank.to_sym)
     assert_false(name.locked)
     assert_redirected_to("#{name_deprecate_name_path}/#{name.id}")
   end
@@ -1933,7 +1933,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(189_826, name.reload.icn_id)
     assert_no_emails
 
-    assert_equal(rank, Name.ranks.key(name.versions.first.rank),
+    assert_equal(rank, Name.ranks.key(name.versions.first.rank.to_sym),
                  "Rank versioned incorrectly.")
   end
 
@@ -3049,12 +3049,12 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(new_name_str, new_name.text_name)
     assert_equal("**__#{new_name_str}__**", new_name.display_name)
     assert_not(new_name.deprecated)
-    assert_equal(:Species, new_name.rank)
+    assert_equal(:Species, new_name.rank.to_sym)
     assert(synonym_name = Name.find_by(text_name: new_synonym_str))
     assert_equal(new_synonym_str, synonym_name.text_name)
     assert_equal("__#{new_synonym_str}__", synonym_name.display_name)
     assert(synonym_name.deprecated)
-    assert_equal(:Species, synonym_name.rank)
+    assert_equal(:Species, synonym_name.rank.to_sym)
     assert_not_nil(new_name.synonym_id)
     assert_equal(new_name.synonym_id, synonym_name.synonym_id)
   end
@@ -3120,7 +3120,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not(approved_name.reload.deprecated)
     assert(synonym_name = Name.find_by(search_name: new_synonym_str))
     assert(synonym_name.deprecated)
-    assert_equal(:Species, synonym_name.rank)
+    assert_equal(:Species, synonym_name.rank.to_sym)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
     assert_equal(target_synonym_id, approved_name.synonym_id)
@@ -3142,7 +3142,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: "list_rss_logs")
     assert(approved_name = Name.find_by(search_name: new_name_str))
     assert_not(approved_name.deprecated)
-    assert_equal(:Species, approved_name.rank)
+    assert_equal(:Species, approved_name.rank.to_sym)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
@@ -4289,7 +4289,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_set_review_status_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
-    assert_equal(:unreviewed, desc.review_status)
+    assert_equal(:unreviewed, desc.review_status.to_sym)
     assert(rolf.in_group?("reviewers"))
     params = {
       id: desc.id,
@@ -4297,12 +4297,12 @@ class NameControllerTest < FunctionalTestCase
     }
     post_requires_login(:set_review_status, params)
     assert_redirected_to(action: :show_name, id: desc.name_id)
-    assert_equal(:vetted, desc.reload.review_status)
+    assert_equal(:vetted, desc.reload.review_status.to_sym)
   end
 
   def test_set_review_status_non_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
-    assert_equal(:unreviewed, desc.review_status)
+    assert_equal(:unreviewed, desc.review_status.to_sym)
     assert_not(mary.in_group?("reviewers"))
     params = {
       id: desc.id,
@@ -4310,7 +4310,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post_requires_login(:set_review_status, params, "mary")
     assert_redirected_to(action: :show_name, id: desc.name_id)
-    assert_equal(:unreviewed, desc.reload.review_status)
+    assert_equal(:unreviewed, desc.reload.review_status.to_sym)
   end
 
   # ----------------------------
@@ -4568,7 +4568,7 @@ class NameControllerTest < FunctionalTestCase
     # Make sure it requires login.
     requires_login(:create_name_description, params)
     desc = assigns(:description)
-    assert_equal(:public, desc.source_type)
+    assert_equal(:public, desc.source_type.to_sym)
     assert_equal("", desc.source_name.to_s)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
@@ -4579,7 +4579,7 @@ class NameControllerTest < FunctionalTestCase
     get(:create_name_description, params: params.merge(project: project.id))
     assert_template(:create_name_description, partial: "_form_name_description")
     desc = assigns(:description)
-    assert_equal(:project, desc.source_type)
+    assert_equal(:project, desc.source_type.to_sym)
     assert_equal(project.title, desc.source_name)
     assert_equal(false, desc.public)
     assert_equal(false, desc.public_write)
@@ -4600,7 +4600,7 @@ class NameControllerTest < FunctionalTestCase
     # Make sure it requires login.
     requires_login(:create_name_description, params)
     desc = assigns(:description)
-    assert_equal(:public, desc.source_type)
+    assert_equal(:public, desc.source_type.to_sym)
     assert_equal("", desc.source_name.to_s)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
@@ -4611,7 +4611,7 @@ class NameControllerTest < FunctionalTestCase
     get(:create_name_description, params: params.merge(project: project.id))
     assert_template(:create_name_description, partial: "_form_name_description")
     desc = assigns(:description)
-    assert_equal(:project, desc.source_type)
+    assert_equal(:project, desc.source_type.to_sym)
     assert_equal(project.title, desc.source_name)
     assert_equal(false, desc.public)
     assert_equal(false, desc.public_write)
@@ -4636,7 +4636,7 @@ class NameControllerTest < FunctionalTestCase
     get(:create_name_description, params: params.merge(clone: other.id))
     assert_template(:create_name_description, partial: "_form_name_description")
     desc = assigns(:description)
-    assert_equal(:user, desc.source_type)
+    assert_equal(:user, desc.source_type.to_sym)
     assert_equal("", desc.source_name.to_s)
     assert_equal(false, desc.public)
     assert_equal(false, desc.public_write)
@@ -4667,7 +4667,7 @@ class NameControllerTest < FunctionalTestCase
     name.reload
     assert_objs_equal(desc, name.description)
     assert_obj_list_equal([desc], name.descriptions)
-    assert_equal(:public, desc.source_type)
+    assert_equal(:public, desc.source_type.to_sym)
     assert_equal("", desc.source_name.to_s)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
@@ -4691,7 +4691,7 @@ class NameControllerTest < FunctionalTestCase
     name.reload
     assert_objs_equal(default, name.description)
     assert_true(name.descriptions.include?(desc))
-    assert_equal(:public, desc.source_type)
+    assert_equal(:public, desc.source_type.to_sym)
     assert_equal("Alternate Description", desc.source_name.to_s)
     assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
     assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
@@ -4759,7 +4759,7 @@ class NameControllerTest < FunctionalTestCase
     name.reload
     assert_nil(name.description)
     assert_true(name.descriptions.include?(desc))
-    assert_equal(:source, desc.source_type)
+    assert_equal(:source, desc.source_type.to_sym)
     assert_equal("Mushrooms Demystified", desc.source_name)
     assert_false(desc.public)
     assert_false(desc.public_write)

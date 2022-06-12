@@ -142,7 +142,7 @@ class Name < AbstractModel
       @sort_name = params[:sort_name]
       @display_name = params[:display_name]
       @parent_name = params[:parent_name]
-      @rank = params[:rank]
+      @rank = params[:rank] ? params[:rank].to_sym : nil
       @author = params[:author]
     end
 
