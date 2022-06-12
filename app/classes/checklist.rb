@@ -146,7 +146,7 @@ class Checklist
   end
 
   def ranks_to_consider
-    Name.ranks.values_at(:Species, :Subspecies, :Variety, :Form).join(", ")
+    Name.ranks.values_at("Species", "Subspecies", "Variety", "Form").join(", ")
   end
 
   def query(args = {})

@@ -450,7 +450,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_construct_species_list_new_family
     list_title = "List Title"
-    rank = :Family
+    rank = "Family"
     new_name_str = "Lecideaceae"
     new_list_str = "#{rank} #{new_name_str}"
     assert_nil(Name.find_by(text_name: new_name_str))
@@ -596,7 +596,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
-    assert_equal(:Family, new_name.rank)
+    assert_equal("Family", new_name.rank)
     assert(spl.name_included(new_name))
   end
 

@@ -226,7 +226,7 @@ module PatternSearch
     end
 
     def alt_rank_check(rank, val)
-      if [:Phylum, :Group].include?(rank)
+      if ["Phylum", "Group"].include?(rank)
         ranks = :"rank_alt_#{rank.to_s.downcase}".l.split(",")
         ranks.map(&:strip).include?(val)
       else

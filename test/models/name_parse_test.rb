@@ -82,7 +82,7 @@ class NameParseTest < UnitTestCase
   def test_genus
     name_parse = NameParse.new("Genus Foobar")
     assert_not_nil(name_parse)
-    assert_equal(:Genus, name_parse.rank)
+    assert_equal("Genus", name_parse.rank)
     assert_equal("Foobar", name_parse.search_name)
     assert_not(name_parse.has_synonym)
     assert_equal([], name_parse.find_names)
@@ -134,10 +134,10 @@ class NameParseTest < UnitTestCase
   def test_genus_synonym
     name_parse = NameParse.new("Genus Foobar = Genus Bazwoof")
     assert_not_nil(name_parse)
-    assert_equal(:Genus, name_parse.rank)
+    assert_equal("Genus", name_parse.rank)
     assert_equal("Foobar", name_parse.search_name)
     assert(name_parse.has_synonym)
-    assert_equal(:Genus, name_parse.synonym_rank)
+    assert_equal("Genus", name_parse.synonym_rank)
     assert_equal("Bazwoof", name_parse.synonym_search_name)
     assert_equal([], name_parse.find_names)
     assert_equal([], name_parse.find_synonym_names)

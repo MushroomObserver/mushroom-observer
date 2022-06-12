@@ -181,7 +181,7 @@ module Name::Create
   # and we should just ignore the request.
   #
   def names_matching_desired_new_name(parsed_name)
-    if parsed_name.rank == :Group
+    if parsed_name.rank == "Group"
       Name.where(search_name: parsed_name.search_name)
     elsif parsed_name.author.empty?
       Name.where(text_name: parsed_name.text_name)

@@ -231,7 +231,7 @@ class NameDescription < Description
     if (name.description_id == id) &&
        (name.classification != classification)
       name.update(classification: classification)
-      name.propagate_classification if name.rank == :Genus
+      name.propagate_classification if name.rank == "Genus"
     end
   end
 

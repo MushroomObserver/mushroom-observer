@@ -953,7 +953,7 @@ class NameController < ApplicationController
   # Show the data getting sent to EOL
   def eol_preview
     @timer_start = Time.current
-    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
+    eol_data(NameDescription.review_statuses.values_at("unvetted", "vetted"))
     @timer_end = Time.current
   end
 

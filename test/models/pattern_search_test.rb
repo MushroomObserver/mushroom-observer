@@ -368,21 +368,21 @@ class PatternSearchTest < UnitTestCase
     x.vals = ["blah"]
     assert_raises(PatternSearch::BadRankRangeError) { x.parse_rank_range }
     x.vals = ["genus"]
-    assert_equal([:Genus], x.parse_rank_range)
+    assert_equal(["Genus"], x.parse_rank_range)
     x.vals = ["PHYLUM"]
-    assert_equal([:Phylum], x.parse_rank_range)
+    assert_equal(["Phylum"], x.parse_rank_range)
     x.vals = ["dIvIsIoN"]
-    assert_equal([:Phylum], x.parse_rank_range)
+    assert_equal(["Phylum"], x.parse_rank_range)
     x.vals = ["Group"]
-    assert_equal([:Group], x.parse_rank_range)
+    assert_equal(["Group"], x.parse_rank_range)
     x.vals = ["cLADe"]
-    assert_equal([:Group], x.parse_rank_range)
+    assert_equal(["Group"], x.parse_rank_range)
     x.vals = ["compleX"]
-    assert_equal([:Group], x.parse_rank_range)
+    assert_equal(["Group"], x.parse_rank_range)
     x.vals = ["order-genus"]
-    assert_equal([:Order, :Genus], x.parse_rank_range)
+    assert_equal(["Order", "Genus"], x.parse_rank_range)
     x.vals = ["GENUS-ORDER"]
-    assert_equal([:Genus, :Order], x.parse_rank_range)
+    assert_equal(["Genus", "Order"], x.parse_rank_range)
   end
 
   def test_parser
@@ -714,7 +714,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_rank
-    expect = Name.with_rank(:Genus).where(correct_spelling: nil)
+    expect = Name.with_rank("Genus").where(correct_spelling: nil)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:genus")
     assert_name_list_equal(expect, x.query.results, :sort)

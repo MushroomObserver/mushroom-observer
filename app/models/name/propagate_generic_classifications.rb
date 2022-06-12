@@ -49,7 +49,7 @@ module Name::PropagateGenericClassifications
     end
 
     def accepted_generic_classification_strings
-      geni = Name.not_deprecated.with_rank(:Genus).
+      geni = Name.not_deprecated.with_rank("Genus").
              where(Name[:author].does_not_match("sensu lato%")).
              where(Name[:classification].length > 2).
              pluck(:text_name, :classification)
