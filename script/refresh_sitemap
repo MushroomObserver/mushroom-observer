@@ -36,13 +36,13 @@ require(File.expand_path("../config/environment.rb", __dir__))
 require "arel-helpers"
 
 DOMAIN      = "https://mushroomobserver.org"
-SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml"
-INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html"
+SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
+INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html".freeze
 
-ROBOTS_FILE     = "#{::Rails.root}/public/robots.txt"
-SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml"
-INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html"
-CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb"
+ROBOTS_FILE     = "#{::Rails.root}/public/robots.txt".freeze
+SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml".freeze
+INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html".freeze
+CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 
 OBJECT_TYPES = [
   ["observations",
@@ -105,7 +105,7 @@ LOCALES = Language.where(beta: [false, nil]).order(order: :asc).pluck(:locale)
 #    See script/update_googlebots.rb
 # - Manually block in Rails an anonymous user via the Admin UI
 # - Limit them via browser gem and #bot? method
-ROBOTS_HEADER = <<~"TXT"
+ROBOTS_HEADER = <<~"TXT".freeze
 
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
