@@ -161,8 +161,8 @@ namespace :cache do
       if n.gen_desc && n.gen_desc != ""
         if n.authors # If there are already authors, make sure they are a set
           authors.merge(n.authors)
-        else
-          authors.add(users[author_id]) if author_id
+        elsif author_id
+          authors.add(users[author_id])
         end
       end
       n.authors = authors.entries

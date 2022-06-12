@@ -7,7 +7,7 @@
       </span>
     </p>
     <p class="Data">
-      <% for n in @new_names %>
+      <% @new_names.each do |n| %>
       <br/><%= indent + h(n) %>
       <% end %>
     </p>
@@ -27,7 +27,7 @@
         approved_names = name.approved_synonyms %>
         <%= name.display_name.t %><br/>
         <% if approved_names != [] %>
-          <% for other_name in approved_names %>
+          <% approved_names.each do |other_name| %>
             <%= indent + radio_button("chosen_approved_names", name.id,
                                       other_name.id) %>
             <%= other_name.display_name.t %><br/>
@@ -47,9 +47,9 @@
       </span>
     </p>
     <p class="Data">
-      <% for name in @multiple_names %>
+      <% @multiple_names.each do |name| %>
         <%= name.display_name.t %><br/>
-        <% for other_name in name.other_authors %>
+        <% name.other_authors.each do |other_name| %>
           <%= indent + radio_button("chosen_multiple_names", name.id,
                                     other_name.id) %>
           <%= other_name.display_name.t %>

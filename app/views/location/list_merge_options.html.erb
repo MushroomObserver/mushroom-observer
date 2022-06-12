@@ -9,7 +9,7 @@
         <%= :list_merge_options_near_matches.t %>
       </div>
       <table class="table table-striped table-location-merge-options">
-        <% for location in @matches %>
+        <% @matches.each do |location| %>
           <tr>
             <td>
               <%= link_to(location.display_name.t,
@@ -28,7 +28,7 @@
         <%= :list_merge_options_others.t %>
       </div>
       <table class="table table-striped table-location-merge-options">
-        <% for location in @others %>
+        <% @others.each do |location| %>
           <tr>
             <td>
               <%= link_to(location.display_name.t,

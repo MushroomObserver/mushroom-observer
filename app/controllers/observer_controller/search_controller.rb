@@ -127,7 +127,7 @@ module ObserverController::SearchController
     end
   end
 
-  def redirect_to_search_or_index(pattern: nil, search_path:, index_path:)
+  def redirect_to_search_or_index(search_path:, index_path:, pattern: nil)
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
       redirect_to(index_path)

@@ -350,17 +350,15 @@ module ObserverController::CreateAndEditObservation
       any_errors = true if @bad_images.any?
 
       # Only save observation if there are changes.
-      if @dubious_where_reasons == []
-        if @observation.changed?
-          @observation.updated_at = Time.zone.now
-          if save_observation(@observation)
-            id = @observation.id
-            flash_notice(:runtime_edit_observation_success.t(id: id))
-            touch = (param_lookup([:log_change, :checked]) == "1")
-            @observation.log(:log_observation_updated, touch: touch)
-          else
-            any_errors = true
-          end
+      if @dubious_where_reasons == [] && @observation.changed?
+        @observation.updated_at = Time.zone.now
+        if save_observation(@observation)
+          id = @observation.id
+          flash_notice(:runtime_edit_observation_success.t(id: id))
+          touch = (param_lookup([:log_change, :checked]) == "1")
+          @observation.log(:log_observation_updated, touch: touch)
+        else
+          any_errors = true
         end
       end
 

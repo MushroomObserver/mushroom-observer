@@ -10,7 +10,7 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
     <span class="HelpNote"><%= :merge_descriptions_merge_help.t %></span></p>
 
   <ul type="none">
-    <% for desc in merges %>
+    <% merges.each do |desc| %>
       <li><%= radio_button_tag(:target, "desc_#{desc.id}",
                                merges.length == 1 && moves.length == 0) %>
           <%= description_title(desc) %></li>
@@ -25,9 +25,8 @@ form_tag(action: :merge_descriptions, id: description.id) do %>
       <span class="HelpNote"><%= :merge_descriptions_move_help.t %></span></p>
 
     <ul type="none">
-      <% for name in moves.sort_by do |name|
-        [ (a.deprecated ? 1 : 0), a.sort_name, a.id ]
-      end %>
+      <% moves.sort_by.each do |name|
+        [ (a.deprecated ? 1 : 0), a.sort_name, a.id ] %>
         <li><%= radio_button_tag(:target, "parent_#{name.id}",
                                  merges.length == 0 && moves.length == 1) %>
             <%= name.display_name.t %></li>
