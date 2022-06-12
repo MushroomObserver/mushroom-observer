@@ -18,7 +18,7 @@ class NameChangeEmail < AccountMailer
   private
 
   def calc_review_status(status)
-    "review_#{status}".to_sym.l if status != :no_change
+    "review_#{status}".to_sym.l if status != "no_change"
   end
 
   def calc_search_name(name_change)
