@@ -10,7 +10,7 @@ class GlossaryTerm < AbstractModel
              inverse_of: :best_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
-  has_and_belongs_to_many :images, -> { order("vote_cache DESC") }
+  has_and_belongs_to_many :images, -> { order(vote_cache: :desc) }
 
   validates :name, presence: {
     message: proc { :glossary_error_name_blank.t }
