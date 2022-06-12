@@ -15,7 +15,7 @@ class ApiControllerTest < FunctionalTestCase
   def format_api_errors(api, msg)
     lines = [msg, "Caught API Errors:"]
     lines += api.errors.map do |error|
-      error.to_s + "\n" + error.trace.join("\n")
+      "#{error.to_s}\n#{error.trace.join("\n")}"
     end
     lines.reject(&:blank?).join("\n")
   end

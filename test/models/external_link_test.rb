@@ -23,7 +23,7 @@ class ExternalLinkTest < UnitTestCase
   end
 
   def test_create_validate_url
-    link = ExternalLink.create(url: "http://" + "too long" * 100)
+    link = ExternalLink.create(url: "http://#{"too long" * 100}")
     assert_not_empty(link.errors[:url])
     site = ExternalLink.create(url: "invalid url")
     assert_not_empty(site.errors[:url])
