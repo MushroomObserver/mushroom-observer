@@ -430,7 +430,7 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_vote_anonymity
     obs = observations(:coprinus_comatus_obs)
-    rolf.update!(votes_anonymous: :yes)
+    rolf.votes_anonymous = "yes"
     rolfs_key = api_keys(:rolfs_api_key)
     marys_key = api_keys(:marys_api_key)
     rolfs_vote = obs.votes.find_by(user: rolf)

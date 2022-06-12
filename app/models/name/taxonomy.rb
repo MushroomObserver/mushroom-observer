@@ -11,7 +11,7 @@ class Name < AbstractModel
   scope :with_name_like,
         ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
   scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+        ->(rank) { where(Name[:rank] < Name.ranks[rank.to_sym]) }
 
   def self.all_ranks
     self.ranks.map do |name, integer|
@@ -47,16 +47,16 @@ class Name < AbstractModel
   end
 
   def at_or_below_genus?
-    rank == :Genus || below_genus?
+    rank.to_sym == :Genus || below_genus?
   end
 
   def above_genus?
-    Name.ranks_above_genus.include?(rank)
+    Name.ranks_above_genus.include?(rank.to_sym)
   end
 
   def below_genus?
-    Name.ranks_below_genus.include?(rank) ||
-      rank == :Group && text_name.include?(" ")
+    Name.ranks_below_genus.include?(rank.to_sym) ||
+      rank.to_sym == :Group && text_name.include?(" ")
   end
 
   def between_genus_and_species?
@@ -64,7 +64,7 @@ class Name < AbstractModel
   end
 
   def at_or_below_species?
-    (rank == :Species) || Name.ranks_below_species.include?(rank)
+    (rank.to_sym == :Species) || Name.ranks_below_species.include?(rank.to_sym)
   end
 
   def self.rank_index(rank)
@@ -80,7 +80,8 @@ class Name < AbstractModel
   end
 
   def has_eol_data?
-    if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
+    if ok_for_export && !deprecated &&
+      MO.eol_ranks_for_export.member?(rank.to_sym)
       observations.each do |o|
         next unless o.vote_cache && o.vote_cache >= MO.eol_min_observation_vote
 
@@ -112,12 +113,12 @@ class Name < AbstractModel
   # Is name definitely in a fungal nomenclature repository?
   # (A heuristic that works for almost all cases)
   def unregistrable?
-    rank == :Group ||
-      rank == :Domain ||
+    rank.to_sym == :Group ||
+      rank.to_sym == :Domain ||
       unpublished? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
-      /"/ =~ text_name && rank >= :Class ||
+      /"/ =~ text_name && rank.to_sym >= :Class ||
       # Use kingdom: Protozoa as a rough proxy for slime molds
       # Slime molds, which are Protozoa, are in fungal nomenclature registries.
       # But most Protozoa are not slime molds and there's no efficient way
@@ -134,7 +135,7 @@ class Name < AbstractModel
 
   def unsearchable_in_registry?
     kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
-      rank == :Domain ||
+      rank.to_sym == :Domain ||
       /\bcrypt temp\b/i =~ author&.delete(".")
   end
 
@@ -149,9 +150,9 @@ class Name < AbstractModel
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
   def kingdom
-    return text_name if rank == :Kingdom
+    return text_name if rank.to_sym == :Kingdom
 
-    parse_classification.find { |rank| rank.first == :Kingdom }&.last
+    parse_classification.find { |rank| rank.first.to_sym == :Kingdom }&.last
   end
 
   public
@@ -352,7 +353,7 @@ class Name < AbstractModel
       parsed_names = {}
       raise(:runtime_user_bad_rank.t(rank: rank.to_s)) if rank_index(rank).nil?
 
-      rank_idx = [rank_index(:Genus), rank_index(rank)].max
+      rank_idx = [rank_index(:Genus), rank_index(rank.to_sym)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
@@ -360,12 +361,14 @@ class Name < AbstractModel
       parse_classification(text).each do |line_rank, line_name|
         real_rank = Name.guess_rank(line_name)
         real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
-        expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
-                        line_rank
+        expect_rank = if ranks_between_kingdom_and_genus.include?(
+                        line_rank.to_sym
+                      )
+                        line_rank.to_sym
                       else
                         :Genus # cannot guess Kingdom or Domain
                       end
-        line_rank_idx = rank_index(line_rank)
+        line_rank_idx = rank_index(line_rank.to_sym)
         if line_rank_idx.nil?
           raise(:runtime_user_bad_rank.t(rank: line_rank.to_s))
         end
@@ -376,7 +379,7 @@ class Name < AbstractModel
           raise(:runtime_invalid_rank.t(line_rank: line_rank_str,
                                         rank: rank_str))
         end
-        if parsed_names[line_rank]
+        if parsed_names[line_rank.to_sym]
           raise(:runtime_duplicate_rank.t(rank: line_rank_str))
         end
 
@@ -384,15 +387,15 @@ class Name < AbstractModel
           raise(:runtime_wrong_rank.t(expect: line_rank_str,
                                       actual: real_rank_str, name: line_name))
         end
-        parsed_names[line_rank] = line_name
-        kingdom = line_name if line_rank == :Kingdom
+        parsed_names[line_rank.to_sym] = line_name
+        kingdom = line_name if line_rank.to_sym == :Kingdom
       end
 
       # Reformat output, writing out lines in correct order.
       if parsed_names != {}
         result = ""
         Name.all_ranks.reverse_each do |rank|
-          if (name = parsed_names[rank])
+          if (name = parsed_names[rank.to_sym])
             result += "#{rank}: _#{name}_\r\n"
           end
         end
@@ -497,7 +500,7 @@ class Name < AbstractModel
       name.update(classification: new_str)
       name.description.update(classification: new_str) if name.description_id
     end
-    root.propagate_classification if root.rank == :Genus
+    root.propagate_classification if root.rank.to_sym == :Genus
   end
 
   # Copy the classification of a genus to all of its children.  Does not change
@@ -505,7 +508,7 @@ class Name < AbstractModel
   # in the name and default description records.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
-      if rank != :Genus
+      if rank.to_sym != :Genus
 
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
@@ -572,7 +575,9 @@ class Name < AbstractModel
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+    if [:Genus, :Species].include?(rank.to_sym)
+      return genus_or_species_is_ancestor?
+    end
 
     false
   end
@@ -582,6 +587,7 @@ class Name < AbstractModel
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).with_name_like(text_name).with_rank_below(rank).any?
+    Name.joins(:namings).with_name_like(text_name).
+      with_rank_below(rank.to_sym).any?
   end
 end
