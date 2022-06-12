@@ -1583,13 +1583,13 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_1
     do_validate_classification_test(
-      :Species, "Kingdom: Fungi", "Kingdom: _Fungi_"
+      "Species", "Kingdom: Fungi", "Kingdom: _Fungi_"
     )
   end
 
   def test_validate_classification_2
     do_validate_classification_test(
-      :Species,
+      "Species",
       %(Kingdom: Fungi\r
         Phylum: Basidiomycota\r
         Class: Basidiomycetes\r
@@ -1604,14 +1604,14 @@ class NameTest < UnitTestCase
   end
 
   def test_validate_classification_3
-    do_validate_classification_test(:Species, %(Kingdom: Fungi\r
+    do_validate_classification_test("Species", %(Kingdom: Fungi\r
       \r
       Family: Amanitaceae),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_4
-    do_validate_classification_test(:Species, %(Kingdom: _Fungi_\r
+    do_validate_classification_test("Species", %(Kingdom: _Fungi_\r
       Family: _Amanitaceae_),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
@@ -1630,7 +1630,7 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_8
     do_validate_classification_test(
-      :Species, "Family: Amanitaceae", "Family: _Amanitaceae_"
+      "Species", "Family: Amanitaceae", "Family: _Amanitaceae_"
     )
   end
 
