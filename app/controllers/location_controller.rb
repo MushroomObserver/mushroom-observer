@@ -403,7 +403,7 @@ class LocationController < ApplicationController
       end
 
     # User doesn't have permission to see this description.
-    elsif @description.source_type == "project"
+    elsif @description.source_type == :project
       flash_error(:runtime_show_draft_denied.t)
       if (project = @description.project)
         redirect_to(controller: :project, action: :show_project,

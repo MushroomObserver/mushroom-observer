@@ -611,7 +611,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_update_location_with_scientific_names
     rolf.location_format = :scientific
-    rolf.save
+    rolf.reload
     login("rolf")
     loc = locations(:burbank)
     normal_name = loc.name

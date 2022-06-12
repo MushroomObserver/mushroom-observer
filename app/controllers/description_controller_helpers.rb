@@ -548,7 +548,7 @@ module DescriptionControllerHelpers
                # originally was
                # (desc.source_type != :project && desc.source_type != :project))
                # see https://www.pivotaltracker.com/story/show/174566300
-               desc.source_type != "project")
+               desc.source_type != :project)
         params.delete(:source_name)
       end
       params.delete(:license_id) unless root || admin || author
