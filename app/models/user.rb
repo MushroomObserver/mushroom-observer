@@ -207,7 +207,7 @@ class User < AbstractModel
        {
          thumbnail: 1,
          small: 2
-       }, _suffix: :thumb_size
+       }, _prefix: :thumb_size
   enum image_size:
        {
          thumbnail: 1,
@@ -216,29 +216,29 @@ class User < AbstractModel
          large: 4,
          huge: 5,
          full_size: 6
-       }, _suffix: :image_size
+       }, _prefix: true
   enum votes_anonymous:
        {
          no: 1,
          yes: 2,
          old: 3
-       }, _suffix: :votes_anon
+       }, _prefix: :votes_anon
   enum location_format:
        {
          postal: 1,
          scientific: 2
-       }
+       }, _prefix: true
   enum hide_authors:
        {
-         do_not_hide: 1, # changed from none
+         none: 1,
          above_species: 2
-       }
+       }, _prefix: true
   enum keep_filenames:
        {
          toss: 1,
          keep_but_hide: 2,
          keep_and_show: 3
-       }
+       }, _suffix: :filenames
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
