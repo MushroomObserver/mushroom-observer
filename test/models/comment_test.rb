@@ -131,7 +131,6 @@ class CommentTest < UnitTestCase
     strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
       "to: #{mail["to"]}, subject: #{mail["subject"]}"
     end
-    "These emails were sent:\n" \
-    "#{strs.join("\n")}"
+    "These emails were sent:\n#{strs.join("\n")}"
   end
 end
