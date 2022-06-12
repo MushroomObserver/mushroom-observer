@@ -50,7 +50,7 @@ module GM
     # Escape carrier returns, single and double quotes for JavaScript segments.
     # Lifted from ActionView::Helpers::JavascriptHelper (2.1.1) -JPH
     def self.escape_javascript(javascript)
-      (javascript || "").gsub('\\', '\0\0').gsub("</", '<\/').
+      (javascript || "").gsub("\\", '\0\0').gsub("</", '<\/').
         gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
     end
 

@@ -32,13 +32,11 @@ class PublicationsControllerTest < FunctionalTestCase
     link = "http://some_journal.com/mo_rocks.html"
     help = "it exists"
     assert_difference("Publication.count", +1) do
-      post :create, params: { publication: {
-        full: ref,
-        link: link,
-        how_helped: help,
-        mo_mentioned: true,
-        peer_reviewed: true
-      } }
+      post(:create, params: { publication: { full: ref,
+                                             link: link,
+                                             how_helped: help,
+                                             mo_mentioned: true,
+                                             peer_reviewed: true } })
     end
     pub = Publication.last
     assert_equal(user.id, pub.user_id)
@@ -53,14 +51,14 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_not_create_publication_if_user_not_successful
     login("spamspamspam")
     assert_no_difference("Publication.count") do
-      post :create, params: { publication: {} }
+      post(:create, params: { publication: {} })
     end
   end
 
   def test_should_not_create_publication_if_form_empty
     login
     assert_no_difference("Publication.count") do
-      post :create, params: { publication: {} }
+      post(:create, params: { publication: {} })
     end
   end
 
@@ -87,7 +85,7 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_destroy_publication
     login
     assert_difference("Publication.count", -1) do
-      delete :destroy, params: { id: publications(:one_pub).id }
+      delete(:destroy, params: { id: publications(:one_pub).id })
     end
 
     assert_redirected_to(publications_path)

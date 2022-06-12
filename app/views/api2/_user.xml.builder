@@ -28,14 +28,13 @@ xml.tag!(
   else
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)
-    if @user == object ||
+    if (@user == object ||
        # (exception: show API keys of new user when API creates new user)
-       @show_api_keys_for_new_user
-      if object.api_keys.any?
-        xml.api_keys(number: object.api_keys.length) do
-          object.api_keys.each do |api_key|
-            xml_detailed_object(xml, :api_key, api_key)
-          end
+       @show_api_keys_for_new_user) &&
+       object.api_keys.any?
+      xml.api_keys(number: object.api_keys.length) do
+        object.api_keys.each do |api_key|
+          xml_detailed_object(xml, :api_key, api_key)
         end
       end
     end
