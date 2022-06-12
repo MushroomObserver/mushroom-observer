@@ -1145,7 +1145,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
       display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
       deprecated: false,
-      rank: :Species
+      rank: "Species"
     )
 
     list = species_lists(:first_species_list)

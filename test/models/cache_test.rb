@@ -31,7 +31,7 @@ class CacheTest < UnitTestCase
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
     first_updated_at = name.observations.first.updated_at
-    name.change_text_name("Stereum blah", "Foo", :Species)
+    name.change_text_name("Stereum blah", "Foo", "Species")
     name.save
     assert(name.observations.all? { |o| o.text_name == name.text_name })
     assert_equal(first_updated_at, name.observations.first.updated_at)
