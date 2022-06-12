@@ -218,7 +218,7 @@ module Name::Parse
   end
 
   # Parse a name given no additional information. Returns a ParsedName instance.
-  def parse_name(str, rank: :Genus, deprecated: false)
+  def parse_name(str, rank: "Genus", deprecated: false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated) ||
       parse_subgenus(str, deprecated) ||
@@ -250,7 +250,7 @@ module Name::Parse
     return unless GROUP_PAT.match(str)
 
     result = parse_name(str_without_group(str),
-                        rank: :Group, deprecated: deprecated)
+                        rank: "Group", deprecated: deprecated)
     return nil unless result
 
     # Adjust the parsed name
@@ -271,7 +271,7 @@ module Name::Parse
       result.display_name += " #{group_type}"
     end
 
-    result.rank = :Group
+    result.rank = "Group"
     result.parent_name ||= ""
 
     result
@@ -291,7 +291,7 @@ module Name::Parse
     GROUP_CHUNK.match(str)[:group_wd]
   end
 
-  def parse_genus_or_up(str, deprecated = false, rank = :Genus)
+  def parse_genus_or_up(str, deprecated = false, rank = "Genus")
     results = nil
     if (match = GENUS_OR_UP_PAT.match(str))
       name = match[1]
@@ -349,35 +349,35 @@ module Name::Parse
   end
 
   def parse_subgenus(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subgenus, SUBGENUS_PAT)
+    parse_below_genus(str, deprecated, "Subgenus", Name::SUBGENUS_PAT)
   end
 
   def parse_section(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Section, SECTION_PAT)
+    parse_below_genus(str, deprecated, "Section", Name::SECTION_PAT)
   end
 
   def parse_subsection(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subsection, SUBSECTION_PAT)
+    parse_below_genus(str, deprecated, "Subsection", Name::SUBSECTION_PAT)
   end
 
   def parse_stirps(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
+    parse_below_genus(str, deprecated, "Stirps", Name::STIRPS_PAT)
   end
 
   def parse_species(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Species, SPECIES_PAT)
+    parse_below_genus(str, deprecated, "Species", Name::SPECIES_PAT)
   end
 
   def parse_subspecies(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subspecies, SUBSPECIES_PAT)
+    parse_below_genus(str, deprecated, "Subspecies", Name::SUBSPECIES_PAT)
   end
 
   def parse_variety(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Variety, VARIETY_PAT)
+    parse_below_genus(str, deprecated, "Variety", Name::VARIETY_PAT)
   end
 
   def parse_form(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Form, FORM_PAT)
+    parse_below_genus(str, deprecated, "Form", Name::FORM_PAT)
   end
 
   def parse_rank_abbreviation(str)

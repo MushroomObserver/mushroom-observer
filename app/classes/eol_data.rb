@@ -173,7 +173,7 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
     AND names.`rank` IN (#{Name.ranks.values_at(
-      :Form, :Variety, :Subspecies, :Species, :Genus
+      "Form", "Variety", "Subspecies", "Species", "Genus"
     ).join(",")})
   ).freeze
   def image_names

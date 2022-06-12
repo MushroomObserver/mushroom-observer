@@ -7,7 +7,7 @@ module Name::Taxonomy
   end
 
   def at_or_below_genus?
-    rank == :Genus || below_genus?
+    rank == "Genus" || below_genus?
   end
 
   def above_genus?
@@ -16,7 +16,7 @@ module Name::Taxonomy
 
   def below_genus?
     Name.ranks_below_genus.include?(rank) ||
-      rank == :Group && text_name.include?(" ")
+      rank == "Group" && text_name.include?(" ")
   end
 
   def between_genus_and_species?
@@ -24,11 +24,11 @@ module Name::Taxonomy
   end
 
   def at_or_below_species?
-    (rank == :Species) || Name.ranks_below_species.include?(rank)
+    (rank == "Species") || Name.ranks_below_species.include?(rank)
   end
 
   def rank_index(rank)
-    Name.all_ranks.index(rank.to_sym)
+    Name.all_ranks.index(rank)
   end
 
   def has_eol_data?
@@ -65,12 +65,12 @@ module Name::Taxonomy
   # Is name definitely in a fungal nomenclature repository?
   # (A heuristic that works for almost all cases)
   def unregistrable?
-    rank == :Group ||
-      rank == :Domain ||
+    rank == "Group" ||
+      rank == "Domain" ||
       unpublished? ||
       # name includes quote marks, but limit this to below Order in order to
       # account for things like "Discomycetes", which is registered & quoted
-      /"/ =~ text_name && rank >= :Class ||
+      /"/ =~ text_name && rank >= "Class" ||
       # Use kingdom: Protozoa as a rough proxy for slime molds
       # Slime molds, which are Protozoa, are in fungal nomenclature registries.
       # But most Protozoa are not slime molds and there's no efficient way
@@ -87,7 +87,7 @@ module Name::Taxonomy
 
   def unsearchable_in_registry?
     kingdom.present? && /(Fungi|Protozoa)/ !~ kingdom ||
-      rank == :Domain ||
+      rank == "Domain" ||
       /\bcrypt temp\b/i =~ author&.delete(".")
   end
 
@@ -102,9 +102,9 @@ module Name::Taxonomy
 
   # Kingdom as a string, e.g., "Fungi", or nil if no Kingdom
   def kingdom
-    return text_name if rank == :Kingdom
+    return text_name if rank == "Kingdom"
 
-    parse_classification.find { |rank| rank.first == :Kingdom }&.last
+    parse_classification.find { |rank| rank.first == "Kingdom" }&.last
   end
 
   public
@@ -320,7 +320,7 @@ module Name::Taxonomy
       name.update(classification: new_str)
       name.description.update(classification: new_str) if name.description_id
     end
-    root.propagate_classification if root.rank == :Genus
+    root.propagate_classification if root.rank == "Genus"
   end
 
   # Copy the classification of a genus to all of its children.  Does not change
@@ -328,7 +328,7 @@ module Name::Taxonomy
   # in the name and default description records.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
-      if rank != :Genus
+      if rank != "Genus"
 
     subtaxa = subtaxa_whose_classification_needs_to_be_changed
     Name.where(id: subtaxa).
@@ -382,7 +382,7 @@ module Name::Taxonomy
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
+    return genus_or_species_is_ancestor? if ["Genus", :Species].include?(rank)
 
     false
   end
@@ -397,45 +397,45 @@ module Name::Taxonomy
 
   module ClassMethods
     def all_ranks
-      [:Form, :Variety, :Subspecies, :Species,
-       :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-       :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
-       :Group]
+      ranks.map do |name, _integer|
+        name
+      end
     end
 
     # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).
     def alt_ranks
-      { Division: :Phylum }
+      { Division: "Phylum" }
     end
 
     def ranks_above_genus
-      [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
+      ["Family", "Order", "Class", "Phylum", "Kingdom", "Domain", "Group"]
     end
 
     def ranks_between_kingdom_and_genus
-      [:Phylum, :Subphylum, :Class, :Subclass, :Order, :Suborder, :Family]
+      ["Phylum", "Subphylum", "Class", "Subclass", "Order", "Suborder",
+       "Family"]
     end
 
     def ranks_above_species
-      [:Stirps, :Subsection, :Section, :Subgenus, :Genus,
-       :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+      ["Stirps", "Subsection", "Section", "Subgenus", "Genus",
+       "Family", "Order", "Class", "Phylum", "Kingdom", "Domain"]
     end
 
     def ranks_below_genus
-      [:Form, :Variety, :Subspecies, :Species,
-       :Stirps, :Subsection, :Section, :Subgenus]
+      ["Form", "Variety", "Subspecies", "Species",
+       "Stirps", "Subsection", "Section", "Subgenus"]
     end
 
     def ranks_below_species
-      [:Form, :Variety, :Subspecies]
+      ["Form", "Variety", "Subspecies"]
     end
 
     def rank_index(rank)
-      Name.all_ranks.index(rank.to_sym)
+      Name.all_ranks.index(rank)
     end
 
     def compare_ranks(rank_a, rank_b)
-      all_ranks.index(rank_a.to_sym) <=> all_ranks.index(rank_b.to_sym)
+      all_ranks.index(rank_a) <=> all_ranks.index(rank_b)
     end
 
     # Handy method which searches for a plain old text name and picks the "best"
@@ -479,7 +479,7 @@ module Name::Taxonomy
           raise(:runtime_user_bad_rank.t(rank: rank.to_s))
         end
 
-        rank_idx = [rank_index(:Genus), rank_index(rank)].max
+        rank_idx = [rank_index("Genus"), rank_index(rank)].max
         rank_str = "rank_#{rank}".downcase.to_sym.l
 
         # Check parsed output to make sure ranks are correct, names exist, etc.
@@ -490,7 +490,7 @@ module Name::Taxonomy
           expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
                           line_rank
                         else
-                          :Genus # cannot guess Kingdom or Domain
+                          "Genus" # cannot guess Kingdom or Domain
                         end
           line_rank_idx = rank_index(line_rank)
           if line_rank_idx.nil?
@@ -512,7 +512,7 @@ module Name::Taxonomy
                                         actual: real_rank_str, name: line_name))
           end
           parsed_names[line_rank] = line_name
-          kingdom = line_name if line_rank == :Kingdom
+          kingdom = line_name if line_rank == "Kingdom"
         end
 
         # Reformat output, writing out lines in correct order.
@@ -531,8 +531,8 @@ module Name::Taxonomy
 
     # Parses the Classification String to eturns an Array of pairs of values.
     #
-    #  [[:Kingdom, "Fungi"], [:Phylum, "Basidiomycota"],
-    #   [:Class, "Basidiomycetes"]]
+    #  [["Kingdom", "Fungi"], ["Phylum", "Basidiomycota"],
+    #   ["Class", "Basidiomycetes"]]
     #
     # String syntax is a bunch of lines of the form "rank: name":
     #
@@ -545,7 +545,7 @@ module Name::Taxonomy
     #
     #   lines = Name.parse_classification(str)
     #   for (rank, name) in lines
-    #     # rank = :Family
+    #     # rank = "Family"
     #     # name = "Agaricaceae"
     #   end
     #

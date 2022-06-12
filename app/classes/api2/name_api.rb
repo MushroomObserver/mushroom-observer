@@ -138,7 +138,7 @@ class API2
       return unless @classification
 
       params[:classification] = \
-        Name.validate_classification(:Genus, @classification)
+        Name.validate_classification("Genus", @classification)
     rescue RuntimeError
       raise(BadClassification.new)
     end
