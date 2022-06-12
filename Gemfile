@@ -110,7 +110,7 @@ gem("cure_acts_as_versioned", ">= 0.6.5",
 # In Rails 4.0, use simple_enum to replace enum_column3
 # In the future, replace simple_enum with Rails native enums
 # https://www.pivotaltracker.com/story/show/90595194
-gem("simple_enum")
+# gem("simple_enum")
 
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/

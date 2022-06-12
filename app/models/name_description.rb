@@ -70,21 +70,21 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:review_status,
-          { unreviewed: 1,
-            unvetted: 2,
-            vetted: 3,
-            inaccurate: 4 },
-          source: :review_status,
-          accessor: :whiny)
-  as_enum(:source_type,
-          { public: 1,
-            foreign: 2,
-            project: 3,
-            source: 4,
-            user: 5 },
-          source: :source_type,
-          accessor: :whiny)
+  enum review_status:
+       {
+         unreviewed: 1,
+         unvetted: 2,
+         vetted: 3,
+         inaccurate: 4
+       }
+  enum source_type:
+       {
+         public: 1,
+         foreign: 2,
+         project: 3,
+         source: 4,
+         user: 5
+       }, _suffix: :source
 
   belongs_to :license
   belongs_to :name

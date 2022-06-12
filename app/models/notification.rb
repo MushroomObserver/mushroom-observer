@@ -34,13 +34,13 @@ class Notification < AbstractModel
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:flavor,
-          { name: 1,
-            observation: 2,
-            user: 3,
-            all_comments: 4 },
-          source: :flavor,
-          accessor: :whiny)
+  enum flavor:
+       {
+         name: 1,
+         observation: 2,
+         user: 3,
+         all_comments: 4
+       }, _suffix: :flavor
 
   # List of all available flavors (Symbol's).
   def self.all_flavors

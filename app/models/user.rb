@@ -203,54 +203,42 @@ class User < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  as_enum(:thumbnail_size,
-          {
-            thumbnail: 1,
-            small: 2
-          },
-          source: :thumbnail_size,
-          accessor: :whiny)
-  as_enum(:image_size,
-          {
-            thumbnail: 1,
-            small: 2,
-            medium: 3,
-            large: 4,
-            huge: 5,
-            full_size: 6
-          },
-          source: :image_size,
-          accessor: :whiny)
-  as_enum(:votes_anonymous,
-          {
-            no: 1,
-            yes: 2,
-            old: 3
-          },
-          source: :votes_anonymous,
-          accessor: :whiny)
-  as_enum(:location_format,
-          {
-            postal: 1,
-            scientific: 2
-          },
-          source: :location_format,
-          accessor: :whiny)
-  as_enum(:hide_authors,
-          {
-            none: 1,
-            above_species: 2
-          },
-          source: :hide_authors,
-          accessor: :whiny)
-  as_enum(:keep_filenames,
-          {
-            toss: 1,
-            keep_but_hide: 2,
-            keep_and_show: 3
-          },
-          source: :keep_filenames,
-          accessor: :whiny)
+  enum thumbnail_size:
+       {
+         thumbnail: 1,
+         small: 2
+       }, _suffix: :thumb_size
+  enum image_size:
+       {
+         thumbnail: 1,
+         small: 2,
+         medium: 3,
+         large: 4,
+         huge: 5,
+         full_size: 6
+       }, _suffix: :image_size
+  enum votes_anonymous:
+       {
+         no: 1,
+         yes: 2,
+         old: 3
+       }, _suffix: :votes_anon
+  enum location_format:
+       {
+         postal: 1,
+         scientific: 2
+       }
+  enum hide_authors:
+       {
+         do_not_hide: 1, # changed from none
+         above_species: 2
+       }
+  enum keep_filenames:
+       {
+         toss: 1,
+         keep_but_hide: 2,
+         keep_and_show: 3
+       }
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
