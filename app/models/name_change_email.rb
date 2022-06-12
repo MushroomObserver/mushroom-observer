@@ -9,7 +9,7 @@ class NameChangeEmail < AccountMailer
     @title = :email_subject_name_change.l(name: calc_search_name(@name_change))
     @sender = email.user
     @time = email.queued
-    @review_status = calc_review_status(email.review_status)
+    @review_status = calc_review_status(email.review_status.to_sym)
     debug_log(:name_change, @sender, @user,
               name: @name_change.object, description: @desc_change.object)
     mo_mail(@title, to: @user)

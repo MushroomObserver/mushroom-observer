@@ -182,11 +182,11 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
-
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses
-    ALL_REVIEW_STATUSES
+    self.review_statuses.map do |name, _integer|
+      name.to_sym
+    end
   end
 
   # Update the review status.  Saves the changes if there are no substantive
@@ -205,12 +205,12 @@ class NameDescription < Description
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
-      value = :unreviewed
+      value = "unreviewed"
       reviewer_id = nil
     else
       reviewer_id = user.id
     end
-    self.review_status = value
+    self.review_status = value.to_s
     self.reviewer_id   = reviewer_id
     self.last_review   = Time.zone.now
 

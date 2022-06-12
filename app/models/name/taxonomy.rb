@@ -14,7 +14,7 @@ class Name < AbstractModel
         ->(rank) { where(Name[:rank] < Name.ranks[rank.to_sym]) }
 
   def self.all_ranks
-    self.ranks.map do |name, integer|
+    self.ranks.map do |name, _integer|
       name.to_sym
     end
   end
@@ -93,7 +93,8 @@ class Name < AbstractModel
         end
       end
       descriptions.each do |d|
-        return true if d.review_status == :vetted && d.ok_for_export && d.public
+        return true if d.review_status.to_sym == :vetted &&
+                       d.ok_for_export && d.public
       end
     end
     false
