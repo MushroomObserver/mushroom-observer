@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-
-File.open("/dev/stdin", "r:utf-8") do |fh|
-  fh.each_line do |line|
-    line.match(/.*/)
-  end
-end

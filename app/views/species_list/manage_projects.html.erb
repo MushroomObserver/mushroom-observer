@@ -28,8 +28,8 @@
 
     <div class="form-group form-inline push-down">
       <b><%= :species_list_projects_which_projects.t %></b><br/>
-      <% for proj in @projects.sort_by(&:text_name) %>
-        <%= check_box_tag("projects_#{proj.id}", 1, @project_states[proj.id], 
+      <% @projects.sort_by(&:text_name).each do |proj| %>
+        <%= check_box_tag("projects_#{proj.id}", 1, @project_states[proj.id],
                           class: "form-control") %>
         <%= proj.title.t %><br/>
       <% end %>

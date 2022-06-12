@@ -17,7 +17,7 @@
       </thead>
 
       <tbody>
-        <% for group in groups %>
+        <% groups.each do |group| %>
           <%
             if (group.name == "all users") and
                (description.source_type == :public) and
@@ -58,7 +58,7 @@
                 <%= user_link(user) %>
                 <%=
                   words = []
-                  for g in groups
+                  groups.each do |g|
                     if (g.name != "all users") and
                        (g.name != "reviewers") and
                        !g.name.match(/^user \d+$/) and
@@ -90,7 +90,7 @@
           </tr>
         <% end %>
 
-        <% for n in 1..6 %>
+        <% (1..6).each do |n| %>
           <% datum = data[n] || {} rescue {} %>
           <tr>
             <td>
