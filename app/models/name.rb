@@ -481,24 +481,24 @@ class Name < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   enum rank:
-        {
-          Form: 1,
-          Variety: 2,
-          Subspecies: 3,
-          Species: 4,
-          Stirps: 5,
-          Subsection: 6,
-          Section: 7,
-          Subgenus: 8,
-          Genus: 9,
-          Family: 10,
-          Order: 11,
-          Class: 12,
-          Phylum: 13,
-          Kingdom: 14,
-          Domain: 15,
-          Group: 16 # used for both "group" and "clade"
-        }
+       {
+         Form: 1,
+         Variety: 2,
+         Subspecies: 3,
+         Species: 4,
+         Stirps: 5,
+         Subsection: 6,
+         Section: 7,
+         Subgenus: 8,
+         Genus: 9,
+         Family: 10,
+         Order: 11,
+         Class: 12,
+         Phylum: 13,
+         Kingdom: 14,
+         Domain: 15,
+         Group: 16 # used for both "group" and "clade"
+       }
 
   belongs_to :correct_spelling, class_name: "Name",
                                 foreign_key: "correct_spelling_id"
