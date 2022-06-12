@@ -23,14 +23,14 @@
 #                                   Omphalia ericetorum [Lichen Mushroom]"
 #      np.name                   # "Lichenomphalia umbellifera"
 #      np.search_name            # "Lichenomphalia umbellifera"
-#      np.rank                   # "Species"
+#      np.rank                   # :Species
 #      np.comment                # nil
 #      np.find_names             # (Array of Name instances matching
 #                                   "L. umbellifera")
 #      np.has_synonym            # true
 #      np.synonym                # "Omphalia ericetorum"
 #      np.synonym_search_name    # "Omphalia ericetorum"
-#      np.synonym_rank           # "Species"
+#      np.synonym_rank           # :Species
 #      np.synonym_comment        # "Lichen Mushroom"
 #      np.find_synonym_names     # (Array of Name instances matching
 #                                   "L. umbellifera")
