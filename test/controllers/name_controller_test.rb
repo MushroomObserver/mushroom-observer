@@ -3126,7 +3126,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(target_synonym_id, approved_name.synonym_id)
   end
 
-  def test_update_bulk_names_new_synonym
+  def test_update_bulk_names_ne_synonym
     new_name_str = "New name Wilson"
     assert_nil(Name.find_by(search_name: new_name_str))
     synonym_name = names(:macrolepiota_rachodes)
@@ -3142,7 +3142,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: "list_rss_logs")
     assert(approved_name = Name.find_by(search_name: new_name_str))
     assert_not(approved_name.deprecated)
-    assert_equal("Species", Name.ranks.key(approved_name.rank))
+    assert_equal("Species", approved_name.rank)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
