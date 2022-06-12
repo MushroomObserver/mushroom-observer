@@ -40,7 +40,7 @@
                 <% if @extra_data %>
                     <% data = @extra_data[name.id]
                        if data.any?
-                         for val in data %>
+                         data.each do |val| %>
                             <td><%= val %></td>
                         <% end
                            else %>

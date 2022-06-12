@@ -78,12 +78,10 @@ class InterestController < ApplicationController
             flash_notice(:set_interest_already_deleted.l(name: name))
           elsif !interest.destroy
             flash_notice(:set_interest_failure.l(name: name))
+          elsif interest.state
+            flash_notice(:set_interest_success_was_on.l(name: name))
           else
-            if interest.state
-              flash_notice(:set_interest_success_was_on.l(name: name))
-            else
-              flash_notice(:set_interest_success_was_off.l(name: name))
-            end
+            flash_notice(:set_interest_success_was_off.l(name: name))
           end
         elsif interest.state == true && state.positive?
           flash_notice(
@@ -98,16 +96,14 @@ class InterestController < ApplicationController
           interest.updated_at = Time.zone.now
           if !interest.save
             flash_notice(:set_interest_failure.l(name: target.unique_text_name))
+          elsif state.positive?
+            flash_notice(
+              :set_interest_success_on.l(name: target.unique_text_name)
+            )
           else
-            if state.positive?
-              flash_notice(
-                :set_interest_success_on.l(name: target.unique_text_name)
-              )
-            else
-              flash_notice(
-                :set_interest_success_off.l(name: target.unique_text_name)
-              )
-            end
+            flash_notice(
+              :set_interest_success_off.l(name: target.unique_text_name)
+            )
           end
         end
       end

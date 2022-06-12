@@ -16,7 +16,7 @@
 <div class="max-width-text">
   <center>
     <table class="table-striped table-donors push-down push-up">
-      <% for donor in @donor_list %>
+      <% @donor_list.each do |donor| %>
         <tr>
           <td>
             <%= donor["who"] %>

@@ -354,7 +354,7 @@ module LanguageExporter
       indent = Regexp.last_match(1)
       quoted_tag = Regexp.last_match(2)
       tag = Regexp.last_match(3)
-      str = $'
+      str = Regexp.last_match.post_match
       check_export_tag_def_line(quoted_tag, tag, str) \
         unless indent.empty? && (tag == locale) && (str.strip == "")
     elsif @in_tag

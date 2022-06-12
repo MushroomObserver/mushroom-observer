@@ -257,7 +257,7 @@ class TranslationController < ApplicationController
   def process_template_line(line)
     if line =~ /^\s*['"]?(\w+)['"]?:\s*/
       tag = Regexp.last_match(1)
-      str = $'
+      str = Regexp.last_match.post_match
       process_tag_line(tag)
       @in_tag = true if str.start_with?(">")
     elsif @in_tag

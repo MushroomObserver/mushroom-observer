@@ -11,7 +11,7 @@
   <%= render(partial: "shared/textilize_help") %>
 
   <% rank = rank_as_lower_string(@description.parent.rank) %>
-  <% for f in NameDescription.all_note_fields %>
+  <% NameDescription.all_note_fields.each do |f| %>
     <div class="form-group">
       <%= label_tag("description_#{f}", :"form_names_#{f}".t + ":") %>
       <p class="help-block" style="margin-top:0">
