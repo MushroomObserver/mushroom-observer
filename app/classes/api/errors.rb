@@ -252,6 +252,16 @@ class API
 
   # Request requires valid ApiKey.
   class MustAuthenticate < Error
+    def to_s
+      "API version 1 is going to retire in July 2022.  Please migrate to
+      version 2.  Superficially, version 2 is very similar.  It mostly involves
+      moving data fields around in the responses.  You may need only change the
+      request end point from /api/observations to /api2/observations.
+      Meanwhile, you may continue to use version 1 by creating and passing in
+      an API key (add the query parameter '?api_key=...' to your requests).  To
+      create an API key, please visit /account/api_keys (accessible from your
+      preferences page)."
+    end
   end
 
   # Attempted to add object you don't own to a project.
