@@ -86,6 +86,16 @@ class AbstractModel < ApplicationRecord
     self.class.name.underscore.to_sym
   end
 
+  # Default value (as a symbol) for an enum attribute
+  def self.enum_default_value(attr)
+    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
+  end
+
+  # number (or nil) that is the default value for attr
+  def self.default_cardinal(attr)
+    column_defaults[attr.to_s]
+  end
+
   ##############################################################################
   #
   #  :section: "Find" Extensions
