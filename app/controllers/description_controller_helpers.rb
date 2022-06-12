@@ -481,7 +481,7 @@ module DescriptionControllerHelpers
       desc.save
 
     # Creating draft for project.
-    when "project"
+    when :project
       project = desc.project
       if read
         desc.reader_groups << UserGroup.all_users
@@ -499,7 +499,7 @@ module DescriptionControllerHelpers
       desc.admin_groups << UserGroup.one_user(@user)
 
     # Creating personal description, or entering one from a specific source.
-    when "source", "user"
+    when :source, :user
       desc.reader_groups << if read
                               UserGroup.all_users
                             else
