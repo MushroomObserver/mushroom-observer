@@ -112,7 +112,7 @@ class NameParse
     result = [nil, str]
     space_pos = str.index(" ")
     if space_pos
-      rank = str[0..space_pos - 1]
+      rank = str[0..space_pos - 1].to_sym
       result = [rank, str[space_pos..-1].strip] if Name.all_ranks.member?(rank)
     end
     result

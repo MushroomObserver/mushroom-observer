@@ -556,7 +556,7 @@ module Name::Taxonomy
         text.split(/\r?\n/).each do |line|
           match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
           if match
-            line_rank = match[1].downcase.capitalize
+            line_rank = match[1].downcase.capitalize.to_sym
             if (alt_rank = alt_ranks[line_rank])
               line_rank = alt_rank
             end
