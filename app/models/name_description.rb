@@ -77,14 +77,15 @@ class NameDescription < Description
             inaccurate: 4 },
           source: :review_status,
           accessor: :whiny)
-  enum source_type:
-        {
-          public: 1,
-          foreign: 2,
-          project: 3,
-          source: 4,
-          user: 5
-        }, _suffix: :source
+  as_enum(:source_type,
+          { public: 1,
+            foreign: 2,
+            project: 3,
+            source: 4,
+            user: 5 },
+          source: :source_type,
+          accessor: :whiny)
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
