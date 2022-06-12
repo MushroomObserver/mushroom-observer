@@ -231,7 +231,7 @@ module NameController::CreateAndEditName
     text_name = parsed_text_name
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
-    in_rank = params[:name][:rank]
+    in_rank = params[:name][:rank].to_sym
     old_deprecated = @name ? @name.deprecated : false
     parse = Name.parse_name(in_str, rank: in_rank, deprecated: old_deprecated)
     if !parse || parse.rank != in_rank
