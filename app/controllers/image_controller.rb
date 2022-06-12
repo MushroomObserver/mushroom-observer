@@ -341,7 +341,7 @@ class ImageController < ApplicationController
     # The 1st save (or !save) puts the image's original filename in the db,
     # whether or not the user wants it.  So if we don't want it,
     # we must empty it and save a 2nd time.
-    @image.original_name = "" if @user.keep_filenames == :toss
+    @image.original_name = "" if @user.keep_filenames == "toss"
     return flash_object_errors(@image) unless @image.save
 
     if !@image.process_image(strip: @observation.gps_hidden)

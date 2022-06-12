@@ -795,34 +795,34 @@ class ImageControllerTest < FunctionalTestCase
     img_id = images(:agaricus_campestris_image).id
     login("mary")
 
-    rolf.keep_filenames = :toss
+    rolf.keep_filenames = "toss"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_false(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_but_hide
+    rolf.keep_filenames = "keep_but_hide"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_false(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_and_show
+    rolf.keep_filenames = "keep_and_show"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_true(@response.body.include?("áč€εиts"))
 
     login("rolf")
 
-    rolf.keep_filenames = :toss
+    rolf.keep_filenames = "toss"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_true(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_but_hide
+    rolf.keep_filenames = "keep_but_hide"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_true(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_and_show
+    rolf.keep_filenames = "keep_and_show"
     rolf.save
     get(:show_image, params: { id: img_id })
     assert_true(@response.body.include?("áč€εиts"))

@@ -437,17 +437,17 @@ class AccountControllerTest < FunctionalTestCase
       email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
-      hide_authors: :above_species,
-      keep_filenames: :keep_but_hide,
+      hide_authors: "above_species",
+      keep_filenames: "keep_but_hide",
       license_id: licenses(:publicdomain).id.to_s,
       layout_count: "100",
       locale: "el",
-      location_format: :scientific,
+      location_format: "scientific",
       notes_template: "Collector's #",
       theme: "Agaricus",
       thumbnail_maps: "",
       view_owner_id: "",
-      votes_anonymous: :yes,
+      votes_anonymous: "yes",
       has_images: "1",
       has_specimen: "1",
       lichen: "yes",
@@ -481,17 +481,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_email_observations_all, "")
     assert_input_value(:user_email_observations_consensus, "1")
     assert_input_value(:user_email_observations_naming, "1")
-    assert_input_value(:user_hide_authors, :above_species)
-    assert_input_value(:user_keep_filenames, :keep_but_hide)
+    assert_input_value(:user_hide_authors, "above_species")
+    assert_input_value(:user_keep_filenames, "keep_but_hide")
     assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
     assert_input_value(:user_layout_count, "100")
     assert_input_value(:user_locale, "el")
-    assert_input_value(:user_location_format, :scientific)
+    assert_input_value(:user_location_format, "scientific")
     assert_textarea_value(:user_notes_template, "Collector's #")
     assert_input_value(:user_theme, "Agaricus")
     assert_input_value(:user_thumbnail_maps, "")
     assert_input_value(:user_view_owner_id, "")
-    assert_input_value(:user_votes_anonymous, :yes)
+    assert_input_value(:user_votes_anonymous, "yes")
     assert_input_value(:user_has_images, "1")
     assert_input_value(:user_has_specimen, "1")
     assert_input_value(:user_lichen, "yes")
@@ -522,17 +522,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(false, user.email_observations_all)
     assert_equal(true, user.email_observations_consensus)
     assert_equal(true, user.email_observations_naming)
-    assert_equal(:above_species, user.hide_authors)
-    assert_equal(:keep_but_hide, user.keep_filenames)
+    assert_equal("above_species", user.hide_authors)
+    assert_equal("keep_but_hide", user.keep_filenames)
     assert_equal(100, user.layout_count)
     assert_equal(licenses(:publicdomain), user.license)
     assert_equal("el", user.locale)
-    assert_equal(:scientific, user.location_format)
+    assert_equal("scientific", user.location_format)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(false, user.view_owner_id)
-    assert_equal(:yes, user.votes_anonymous)
+    assert_equal("yes", user.votes_anonymous)
     assert_equal("yes", user.content_filter[:has_images])
     assert_equal("yes", user.content_filter[:has_specimen])
     assert_equal("yes", user.content_filter[:lichen])

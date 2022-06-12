@@ -1776,7 +1776,7 @@ class ApplicationController < ActionController::Base
       @user.thumbnail_size
     else
       session[:thumbnail_size]
-    end || :thumbnail
+    end || "thumbnail"
   end
   helper_method :default_thumbnail_size
 
