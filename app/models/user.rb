@@ -370,7 +370,7 @@ class User < AbstractModel
   #
   def self.current_location_format
     @@location_format = :postal unless defined?(@@location_format)
-    @@location_format
+    @@location_format.to_sym
   end
 
   # Set the location format to use throughout the site.
