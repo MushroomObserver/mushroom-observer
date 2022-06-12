@@ -33,7 +33,7 @@ module NameController::CreateAndEditName
 
   def init_create_name_form
     @name = Name.new
-    @name.rank = :Species
+    @name.rank = "Species"
     @name_string = ""
   end
 

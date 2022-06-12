@@ -113,7 +113,7 @@ module Name::Parse
     if (match = pattern.match(str))
       name = match[1]
       author = match[2].to_s
-      name = standardize_sp_nov_variants(name) if rank == :Species
+      name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)

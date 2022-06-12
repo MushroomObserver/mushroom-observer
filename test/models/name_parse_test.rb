@@ -37,7 +37,7 @@ class NameParseTest < UnitTestCase
   def test_explicit
     name_parse = NameParse.new("Species Foo bar")
     assert_not_nil(name_parse)
-    assert_equal(:Species, name_parse.rank)
+    assert_equal("Species", name_parse.rank)
     assert_equal("Foo bar", name_parse.search_name)
     assert_not(name_parse.has_synonym)
     assert_equal([], name_parse.find_names)
