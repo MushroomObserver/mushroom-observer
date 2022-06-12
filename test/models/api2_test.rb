@@ -1395,7 +1395,7 @@ class API2Test < UnitTestCase
       upload_file: "#{::Rails.root}/test/images/sticky.jpg",
       original_name: "strip_this"
     }
-    assert_equal(:toss, @user.keep_filenames)
+    assert_equal("toss", @user.keep_filenames)
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
@@ -1408,7 +1408,7 @@ class API2Test < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     @user   = rolf
     @proj   = projects(:eol_project)
@@ -1476,7 +1476,7 @@ class API2Test < UnitTestCase
   end
 
   def test_patching_images
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     rolfs_img = images(:rolf_profile_image)
     marys_img = images(:in_situ_image)
@@ -2519,7 +2519,7 @@ class API2Test < UnitTestCase
       action: :observation,
       api_key: @api_key.key
     }
-    assert_equal(:postal, rolf.location_format)
+    assert_equal("postal", rolf.location_format)
 
     params[:location] = "New Place, California, USA"
     api = API2.execute(params)
@@ -2539,8 +2539,8 @@ class API2Test < UnitTestCase
     # is supposed to make it more consistent for apps.  It would be a real
     # problem because apps don't have access to the user's prefs, so they have
     # no way of knowing how to pass in locations on the behalf of the user.
-    User.update(rolf.id, location_format: :scientific)
-    assert_equal(:scientific, rolf.reload.location_format)
+    User.update(rolf.id, location_format: "scientific")
+    assert_equal("scientific", rolf.reload.location_format)
 
     # params[:location] = "USA, California, Somewhere Else"
     params[:location] = "Somewhere Else, California, USA"

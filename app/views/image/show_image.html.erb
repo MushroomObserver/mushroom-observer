@@ -91,7 +91,7 @@
             <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
           <% end %>
           <% if !@image.original_name.blank? &&
-                (check_permission(@image) || @image.user && @image.user.keep_filenames == :keep_and_show) %>
+                (check_permission(@image) || @image.user && @image.user.keep_filenames == "keep_and_show") %>
             <%= @image.original_name %>
           <% end %>
         </div>

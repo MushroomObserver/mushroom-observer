@@ -39,7 +39,7 @@ module Query::Modules::Ordering
         self.group = "images.id"
         "MIN(names.sort_name) ASC, images.when DESC"
       elsif model == Location
-        if User.current_location_format == :scientific
+        if User.current_location_format == "scientific"
           "locations.scientific_name ASC"
         else
           "locations.name ASC"
@@ -77,7 +77,7 @@ module Query::Modules::Ordering
       if columns.include?("location_id")
         # Join Users with null locations, else join records with locations
         model == User ? add_join(:locations!) : add_join(:locations)
-        if User.current_location_format == :scientific
+        if User.current_location_format == "scientific"
           "locations.scientific_name ASC"
         else
           "locations.name ASC"

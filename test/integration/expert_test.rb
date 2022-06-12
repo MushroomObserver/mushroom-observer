@@ -122,7 +122,7 @@ class ExpertTest < IntegrationTestCase
     newer_location_reverse = "USA, California, Somewhere Else"
 
     # Good opportunity to test scientific location notation!
-    dick.location_format = :scientific
+    dick.location_format = "scientific"
     dick.save
 
     # First attempt at creating a list.

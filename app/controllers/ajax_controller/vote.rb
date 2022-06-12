@@ -42,7 +42,7 @@ module AjaxController::Vote
     raise("Bad value.") if value != "0" && !Image.validate_vote(value)
 
     value = value == "0" ? nil : Image.validate_vote(value)
-    anon = (@user.votes_anonymous == :yes)
+    anon = (@user.votes_anonymous == "yes")
     image.change_vote(@user, value, anon: anon)
     render(partial: "image/image_vote_links", locals: { image: image })
   end

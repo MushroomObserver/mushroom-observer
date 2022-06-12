@@ -2209,8 +2209,8 @@ class NameTest < UnitTestCase
   end
 
   def test_hiding_authors
-    dick.hide_authors = :above_species
-    mary.hide_authors = :none
+    dick.hide_authors = "above_species"
+    mary.hide_authors = "none"
 
     name = names(:agaricus_campestris)
     User.current = mary

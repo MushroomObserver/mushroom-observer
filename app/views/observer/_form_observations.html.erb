@@ -44,7 +44,7 @@
       <%=
         loc1 = "Albion, Mendocino Co., California, USA"
         loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
-        if User.current_location_format == :scientific
+        if User.current_location_format == "scientific"
           loc1 = Location.reverse_name(loc1)
           loc2 = Location.reverse_name(loc2)
         end

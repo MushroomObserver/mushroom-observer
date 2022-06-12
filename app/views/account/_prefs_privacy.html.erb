@@ -28,11 +28,11 @@
   <%= label_tag(:user_keep_filenames,
                 :prefs_keep_image_filenames.t + ":") %><br/>
   <%= form.select(:keep_filenames,
-                   [[:prefs_keep_image_filenames_toss.l, :toss],
+                   [[:prefs_keep_image_filenames_toss.l, "toss"],
                     [:prefs_keep_image_filenames_keep_but_hide.l,
-                     :keep_but_hide],
+                     "keep_but_hide"],
                     [:prefs_keep_image_filenames_keep_and_show.l,
-                     :keep_and_show]],
+                     "keep_and_show"]],
                   class: "form-control") %>
   <span class="HelpNote">
     <%= link_to(:prefs_bulk_filename_purge.t,
