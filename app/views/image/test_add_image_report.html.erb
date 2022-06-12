@@ -21,7 +21,7 @@
   </thead>
 
   <tbody>
-    <% for entry in @log_entries %>
+    <% @log_entries.each do |entry| %>
       <tr>
         <td><%= entry.id %></td>
         <td><%= entry.user ? entry.user.login : "" %></td>

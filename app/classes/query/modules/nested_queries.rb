@@ -73,12 +73,10 @@ module Query
       # Get instance for +outer_id+, modifying it slightly to skip results with
       # empty inner queries.
       def outer
-        @outer ||= begin
-                     if outer_id
-                       outer = Query.find(outer_id)
-                       tweak_outer_query&.call(outer)
-                       outer
-                     end
+        @outer ||= if outer_id
+                     outer = Query.find(outer_id)
+                     tweak_outer_query&.call(outer)
+                     outer
                    end
       end
 

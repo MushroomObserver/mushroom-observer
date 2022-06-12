@@ -7,12 +7,12 @@
   # telling which names will be referred to in the comment.  Likewise, include
   # all synonyms if commenting on taxonomy of Name.
   if @comment.target_type == "Observation"
-    for naming in @comment.target.namings
+    @comment.target.namings.each do |naming|
       Textile.register_name(naming.name)
     end
     Textile.register_name(@comment.target.name)
   elsif @comment.target_type == "Name"
-    for name in @comment.target.synonyms
+    @comment.target.synonyms.each do |name|
       Textile.register_name(name)
     end
     Textile.register_name(@comment.target)

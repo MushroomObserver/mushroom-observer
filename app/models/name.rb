@@ -513,7 +513,7 @@ class Name < AbstractModel
 
   has_many :misspellings, class_name: "Name",
                           foreign_key: "correct_spelling_id"
-  has_many :descriptions, -> { order num_views: :desc },
+  has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "NameDescription",
            inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target

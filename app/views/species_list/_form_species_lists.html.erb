@@ -16,7 +16,7 @@
         <b class="nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
       </p>
       <p>
-        <% for (name, id) in @checklist.sort_by(&:first) %>
+        <% @checklist.sort_by(&:first).each do |name, id| %>
           <%= check_box(:checklist_data, id, checked: @checklist_names[id]) %>
           <%= label_tag("checklist_data_#{id}", name.t) %>
           <br/>
@@ -128,7 +128,7 @@
           <span class="HelpNote"><%= :form_species_lists_project_help.t %></span>
         </p>
         <p>
-          <% for project in @projects %>
+          <% @projects.each do |project| %>
             <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
                           disabled: @species_list.user_id != @user.id && !project.is_member?(@user)) %>
             <%= label_tag("project_id_#{project.id}", link_to_object(project)) %>

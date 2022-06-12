@@ -1811,7 +1811,7 @@ class ApplicationController < ActionController::Base
   def render_xml(args)
     request.format = "xml"
     respond_to do |format|
-      format.xml { render args }
+      format.xml { render(args) }
     end
   end
 
