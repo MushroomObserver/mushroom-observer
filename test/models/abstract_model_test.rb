@@ -9,18 +9,18 @@ class AbstractModelTest < UnitTestCase
       old_val = old_attrs[key]
       new_val = new_attrs[key]
       if key == "num_views"
-        assert_equal((old_val || 0) + 1, new_val, msg + "num_views wrong")
+        assert_equal((old_val || 0) + 1, new_val, "#{msg}num_views wrong")
       elsif key == "last_view"
         if new_val
-          assert(new_val > 1.hour.ago, msg + "#{key} more than one hour old")
-          assert(new_val > old_val, msg + "#{key} wasn't updated") if old_val
+          assert(new_val > 1.hour.ago, "#{msg}#{key} more than one hour old")
+          assert(new_val > old_val, "#{msg}#{key} wasn't updated") if old_val
         end
       elsif %w[rss_log_id reasons].member?(key) && (new_val != old_val)
         assert(new_val)
       elsif key == "updated_at"
-        assert(new_val >= old_val, msg + "#{key} is older than it was")
+        assert(new_val >= old_val, "#{msg}#{key} is older than it was")
       else
-        assert(old_val == new_val, msg + "#{key} shouldn't have changed!")
+        assert(old_val == new_val, "#{msg}#{key} shouldn't have changed!")
       end
     end
   end
