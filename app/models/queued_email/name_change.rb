@@ -69,7 +69,7 @@ class QueuedEmail::NameChange < QueuedEmail
       result.add_integer(:description, 0)
       result.add_integer(:new_description_version, 0)
       result.add_integer(:old_description_version, 0)
-      result.add_string(:review_status, "no_change")
+      result.add_string(:review_status, :no_change)
     end
     result.finish
     result
