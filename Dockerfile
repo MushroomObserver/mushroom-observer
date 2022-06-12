@@ -10,6 +10,7 @@ RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 COPY ./Gemfile $APP_HOME/Gemfile
 COPY ./Gemfile.lock $APP_HOME/Gemfile.lock
+COPY ./.ruby-version $APP_HOME/.ruby-version
 RUN gem install bundler
 RUN bundle install
 RUN rails webpacker:install
