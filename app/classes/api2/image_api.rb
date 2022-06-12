@@ -63,6 +63,7 @@ class API2
         # rubocop:enable Layout/MultilineOperationIndentation
         license: parse(:license, :license) || user.license,
         original_name: parse_original_name(:original_name),
+        upload_md5sum: parse(:string, :md5sum),
         projects: parse_array(:project, :projects, must_be_member: true) || [],
         observations: @observations,
         user: @user

@@ -69,7 +69,7 @@ class AutoCompleteByString < AutoComplete
 
     # Apply characters in order until matches fits within limit.
     used = ""
-    for letter in string.split("")
+    string.split("").each do |letter|
       used += letter
       regex = /(^|#{PUNCTUATION})#{used}/i
       matches.select! { |m| m.match(regex) }
@@ -90,10 +90,10 @@ class AutoCompleteByWord < AutoComplete
     words = string.split
     used  = ""
     n     = 0
-    for word in words
+    words.each do |word|
       n += 1
       part = ""
-      for letter in word.split("")
+      word.split("").each do |letter|
         part += letter
         regex = /(^|#{PUNCTUATION})#{part}/i
         matches.select! { |m| m.match(regex) }

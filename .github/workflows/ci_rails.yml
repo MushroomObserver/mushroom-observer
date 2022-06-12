@@ -2,10 +2,10 @@
 # Runs the tests and publishes the results to Coveralls
 name: Continuous Integration
 
-on: 
+on:
   push:
     # branches: master
-    branches: 
+    branches:
       - "*" # Run on pushes on all branches
   pull_request:
     branches: master
@@ -17,9 +17,9 @@ jobs:
     # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
     # https://github.com/actions/checkout
     - name: Checkout code
-      uses: actions/checkout@v2  
+      uses: actions/checkout@v2
 
-    # https://github.com/actions/setup-ruby
+    # https://github.com/ruby/setup-ruby
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -32,12 +32,12 @@ jobs:
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
     - name: Start mySQL
       run: sudo systemctl start mysql.service
-      
+
     - name: Create and configure db
       run: |
         mysql -u root -proot < db/initialize.sql
         cp db/vagrant/database.yml config
-      
+
     - name: Configure gmaps api key
       run: |
         cp config/gmaps_api_key.yml-template config/gmaps_api_key.yml
@@ -53,7 +53,7 @@ jobs:
         done
 
     - name: install exifautotran
-      run: | 
+      run: |
         sudo cp script/exifautotran /usr/local/bin/exifautotran
         sudo chmod 755 /usr/local/bin/exifautotran
 

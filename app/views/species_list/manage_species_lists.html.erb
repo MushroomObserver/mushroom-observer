@@ -8,7 +8,7 @@
 
   obs_lists = []
   other_lists = []
-  for list in @all_lists
+  @all_lists.each do |list|
     if list.observations.member?(@observation)
       obs_lists << list
     else
@@ -20,7 +20,7 @@
 <% if obs_lists.any? %>
   <p><%= :species_list_manage_belongs_to.t %>:</p>
   <table class="table-striped table-manage-species-lists">
-    <% for species_list in obs_lists %>
+    <% obs_lists.each do |species_list| %>
       <tr>
 
         <td>
@@ -49,7 +49,7 @@
 <% if other_lists.any? %>
   <p class="push-down"><%= :species_list_manage_doesnt_contain.t %>:</p>
   <table class="table-striped table-manage-species-lists">
-    <% for species_list in other_lists %>
+    <% other_lists.each do |species_list| %>
       <tr>
 
         <td>

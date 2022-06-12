@@ -57,21 +57,21 @@ module ControllerExtensions
   ##############################################################################
 
   # Second "get" won't update fullpath, so we must reset the request.
-  def reget(*args)
+  def reget(action, **args)
     @request = @request.class.new
-    get(*args)
+    get(action, **args)
   end
 
   # Call +get+ without clearing the flash (which we do by default).
-  def get_without_clearing_flash(*args)
+  def get_without_clearing_flash(action, **args)
     @without_clearing_flash = true
-    get(*args)
+    get(action, **args)
   end
 
   # Call +post+ without clearing the flash (which we do by default).
-  def post_without_clearing_flash(*args)
+  def post_without_clearing_flash(action, **args)
     @without_clearing_flash = true
-    post(*args)
+    post(action, **args)
   end
 
   # Log a user in (affects session only).

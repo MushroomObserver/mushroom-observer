@@ -4,12 +4,7 @@ module Query
   module Modules
     # Helper methods for turning Query parameters into SQL conditions.
     module Initialization
-      attr_accessor :join
-      attr_accessor :tables
-      attr_accessor :where
-      attr_accessor :group
-      attr_accessor :order
-      attr_accessor :executor
+      attr_accessor :join, :tables, :where, :group, :order, :executor
 
       def initialized?
         @initialized ? true : false
@@ -110,14 +105,14 @@ module Query
       # Safely add to +arg+ in +args+.  Dups <tt>args[arg]</tt>, casts it into
       # an Array, and returns the new Array.
       def extend_arg(args, arg)
-        case old_arg = args[arg]
-        when Symbol, String
-          args[arg] = [old_arg]
-        when Array
-          args[arg] = old_arg.dup
-        else
-          args[arg] = []
-        end
+        args[arg] = case old_arg = args[arg]
+                    when Symbol, String
+                      [old_arg]
+                    when Array
+                      old_arg.dup
+                    else
+                      []
+                    end
       end
     end
   end

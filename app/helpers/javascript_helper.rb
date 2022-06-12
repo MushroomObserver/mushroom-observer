@@ -36,7 +36,7 @@ module JavascriptHelper
   #   # Example usage in view template:
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
-    if args.reject { |arg| arg.class == String } != []
+    if args.reject { |arg| arg.instance_of?(String) } != []
       raise(
         ArgumentError.new(
           "javascript_include doesn't take symbols like :default, etc."

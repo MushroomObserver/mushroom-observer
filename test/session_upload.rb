@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class FileUpload
-  attr_accessor :filename
-  attr_accessor :content_type
+  attr_accessor :filename, :content_type
 
   def initialize(filename, content_type)
     self.filename = filename

@@ -74,12 +74,12 @@ module Query
       # empty inner queries.
       def outer
         @outer ||= begin
-          if outer_id
-            outer = Query.find(outer_id)
-            tweak_outer_query&.call(outer)
-            outer
-          end
-        end
+                     if outer_id
+                       outer = Query.find(outer_id)
+                       tweak_outer_query&.call(outer)
+                       outer
+                     end
+                   end
       end
 
       # Each inner query corresponds to a single result of the outer query. This

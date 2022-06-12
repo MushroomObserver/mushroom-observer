@@ -83,7 +83,7 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, -> { order "num_views DESC" },
+  has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "LocationDescription"
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
@@ -235,7 +235,7 @@ class Location < AbstractModel
   def self.official_unknown
     # yikes! need to make sure we always include the English words
     # for "unknown", even when viewing the site in another language
-    Language.official.translation_strings.find_by_tag("unknown_locations").
+    Language.official.translation_strings.find_by(tag: "unknown_locations").
       text.split(/, */)
   rescue StandardError
     []
@@ -378,8 +378,7 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    find_by_name(name) ||
-      find_by_scientific_name(name)
+    Location.where(name: name).or(Location.where(scientific_name: name)).first
   end
 
   def self.user_name(user, name)

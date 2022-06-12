@@ -205,7 +205,8 @@ class Name < AbstractModel
   # matching genera, it prefers accepted ones that are not "sensu xxx".
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
-    @accepted_genus ||= begin
+    @accepted_genus ||= \
+    begin
       accepted = approved_name
       return unless accepted.text_name.include?(" ")
 
@@ -521,7 +522,7 @@ class Name < AbstractModel
   # names below genus with the same generic epithet.  Then add all those
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
-    subtaxa = Name.with_name_like(text_name).where(deprecated: false).to_a
+    subtaxa = Name.with_name_like(text_name).not_deprecated.to_a
     uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
     # Beware of AR where.not gotcha - will not match a null classification below
     synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).

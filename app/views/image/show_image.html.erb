@@ -114,7 +114,7 @@
               </tr>
             </thead>
             <tbody>
-              <% for i in (0..chgs.length-1) %>
+              <% (0..chgs.length-1).each do |i| %>
                 <tr>
                   <td>
                     <%= i > 0 ? chgs[i-1].updated_at.web_date : @image.created_at.web_date %> &rarr;
@@ -217,7 +217,7 @@
               <div class="push-down">
                 <% args = add_query_param(id: @image.id)
                 args[:size] = @size if @size != @default_size
-                for value in [0] + Image.all_votes
+                ([0] + Image.all_votes).each do |value|
                   str1 = image_vote_as_short_string(value)
                   str2 = image_vote_as_help_string(value)
                   str3 = :image_show_vote_and_next.t(value: str1)
@@ -256,7 +256,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% for vote in @votes %>
+                  <% @votes.each do |vote| %>
                     <tr>
                       <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
                       <td><%= :"image_vote_short_#{vote.value}".t %></td>

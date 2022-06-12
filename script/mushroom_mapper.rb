@@ -57,10 +57,8 @@ synonyms = {}
 aliases  = {}
 names    = {}
 ids      = {}
-name_data = Name.connection.select_rows(%(
-  SELECT id, text_name, `rank`, deprecated, synonym_id, correct_spelling_id
-  FROM names
-))
+name_data = Name.pluck(:id, :text_name, :rank, :deprecated, :synonym_id,
+                       :correct_spelling_id)
 
 # > 5 parameters needed for 2nd name.data block, and it's efficient
 # to use name_data for the 1st block to avoid hitting db twice
@@ -90,11 +88,8 @@ name_data.
 
 # Build table of number of observations per genus.
 observations = {}
-for id in Name.connection.select_values(%(
-  SELECT name_id
-  FROM observations
-)) do
-  next unless real_id = aliases[id]
+Observation.pluck(:name_id).each do
+  next unless (real_id = aliases[id])
 
   text_name, rank, deprecated = names[real_id]
   next if rank > Name.ranks[:Genus]
@@ -108,13 +103,8 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-for id, genus, classification in Name.connection.select_rows(%(
-  SELECT id as i, text_name as n, classification as c
-  FROM names
-  WHERE `rank` = #{Name.ranks[:Genus]}
-    AND !deprecated
-    AND correct_spelling_id IS NULL
-)) do
+Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
+  pluck(:id, :text_name, :classification).each do |id, genus, classification|
   kingdom =
     classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
   klass   =
@@ -136,7 +126,7 @@ end
 
 # Build mapping from family to genus, complaining about ambiguous genera.
 family_to_genus = {}
-for genus in genus_to_family.keys.sort do
+genus_to_family.keys.sort.each do |genus|
   hash = genus_to_family[genus]
   if hash.keys.length > 1
     warn("Multiple families for #{genus}: #{hash.inspect}")
@@ -148,14 +138,9 @@ end
 
 # Build table of species in each genus.
 genus_to_species = {}
-for species in Name.connection.select_values(%(
-  SELECT text_name as n
-  FROM names
-  WHERE `rank` = #{Name.ranks[:Species]}
-    AND !deprecated
-    AND correct_spelling_id IS NULL
-  ORDER BY sort_name
-)) do
+Name.with_correct_spelling.not_deprecated.
+  with_rank(:Species).order(sort_name: :asc).
+  pluck(:text_name).each do |species|
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
   list_of_species << species
@@ -165,7 +150,7 @@ end
 data = {}
 data["version"] = 1
 data["families"] = []
-for family in family_to_genus.keys.sort do
+family_to_genus.keys.sort.each do |family|
   next unless observations[family]
 
   family2 = family.sub(/^Unknown Family in /, "")
@@ -174,7 +159,7 @@ for family in family_to_genus.keys.sort do
   family_data["name"] = family
   family_data["id"]   = ids[family2]
   family_data["genera"] = []
-  for genus in family_to_genus[family].sort do
+  family_to_genus[family].sort.each do |genus|
     next unless observations[genus]
 
     warn("Missing genus: #{genus}.") unless ids[genus]
@@ -184,7 +169,7 @@ for family in family_to_genus.keys.sort do
     genus_data["species"] = []
     next unless genus_to_species[genus]
 
-    for species in genus_to_species[genus].sort do
+    genus_to_species[genus].sort.each do |species|
       next unless observations[species]
 
       warn("Missing species: #{species}.") unless ids[species]
@@ -204,7 +189,7 @@ end
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|
   fh.puts(%w[id kingdom class order family genus num_obs].join("\t"))
-  for genus in classifications.keys.sort do
+  classifications.keys.sort.each do |genus|
     fh.puts(classifications[genus].join("\t"))
   end
 end

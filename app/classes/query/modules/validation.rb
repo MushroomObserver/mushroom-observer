@@ -4,8 +4,7 @@ module Query
   module Modules
     # validation of Query parameters
     module Validation
-      attr_accessor :params
-      attr_accessor :params_cache
+      attr_accessor :params, :params_cache
 
       def required_parameters
         keys = parameter_declarations.keys

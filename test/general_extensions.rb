@@ -231,7 +231,7 @@ module GeneralExtensions
     # email = QueuedEmail.find(:first, :offset => n)
     email = QueuedEmail.offset(offset).first
     assert(email)
-    for arg in args.keys
+    args.each_key do |arg|
       case arg
       when :flavor
         assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
@@ -482,7 +482,7 @@ module GeneralExtensions
     return assert(false, msg) unless result
 
     # Clean out old files from previous failure(s).
-    for file in files
+    files.each do |file|
       filename = Array(file).first
       new_filename = filename + ".new"
       File.delete(new_filename) if File.exist?(new_filename)

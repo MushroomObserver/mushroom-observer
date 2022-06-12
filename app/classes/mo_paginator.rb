@@ -82,7 +82,7 @@
 #  from_to::        Same as <tt>pages.from..pages.to</tt>.
 #
 ################################################################################
-
+#
 class MOPaginator
   attr_accessor :letter_arg    # Name of parameter to use for letter (if any).
   attr_accessor :number_arg    # Name of parameter to use for page number.

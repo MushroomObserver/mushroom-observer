@@ -1455,7 +1455,7 @@ class Api2Test < UnitTestCase
 
   def test_posting_image_via_url
     setup_image_dirs
-    url = "http://mushroomobserver.org/images/thumb/459340.jpg"
+    url = "https://mushroomobserver.org/images/thumb/459340.jpg"
     stub_request(:any, url).
       to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
     params = {
@@ -4250,7 +4250,7 @@ class Api2Test < UnitTestCase
     }
     params[:api_key] = @api_key.key if method != :get
     api = API2.execute(params)
-    others = api.errors.reject { |e| e.class.name == "API2::HelpMessage" }
+    others = api.errors.reject { |e| e.instance_of?(API2::HelpMessage) }
     assert_equal(1, api.errors.length, others.map(&:to_s))
     if fail
       assert_equal("API2::NoMethodForAction", api.errors.first.class.name)

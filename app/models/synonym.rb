@@ -25,29 +25,32 @@
 #  None.
 #
 class Synonym < AbstractModel
-  has_many :names
+  has_many :names, dependent: :nullify
 
   # Nightly cronjob to ensure that no synonym records accidentally got deleted.
   # This actually happened to Fungi itself(!)  Not sure how it happened, and
   # obviously I'd prefer to fix the cause.  But meanwhile, might as well keep
   # the site working...
+
   def self.make_sure_all_referenced_synonyms_exist
-    msgs = []
     references = Name.select(:synonym_id).where.not(synonym: nil).distinct.
                  order(:synonym_id).pluck(:synonym_id)
     records = Synonym.all.order(id: :asc).pluck(:id)
     unused  = records - references
     missing = references - records
+
+    Synonym.where(id: unused).delete_all
+    Synonym.insert_all(missing.map { |m| Hash[id: m] }) if missing.present?
+
+    changed_synonyms_msgs(unused, missing)
+  end
+
+  private_class_method def self.changed_synonyms_msgs(unused, missing)
+    msgs = []
     if unused.any?
-      Synonym.where(id: unused).delete_all
       msgs << "Deleting #{unused.count} unused synonyms: #{unused.inspect}"
     end
     if missing.any?
-      # For mass_insert when setting the id, need to set `primary_key: true`
-      # Also, id in hash apparently needs a string (to check exists already?)
-      # but stores an integer. The above not necessary with Rails 6 insert_all
-      missing = missing.map { |m| Hash[id: m.to_s] }
-      Synonym.mass_insert(missing, primary_key: true)
       msgs << "Restoring #{missing.count} missing synonyms: #{missing.inspect}"
     end
     msgs

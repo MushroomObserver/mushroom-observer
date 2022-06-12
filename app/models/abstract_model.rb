@@ -131,17 +131,6 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
-  # Add limit to a SQL query, then pass it to find_by_sql.
-  #
-  #   sql = "SELECT id FROM names WHERE user_id = 123"
-  #   names = Name.find_by_sql_with_limit(sql, 20, 10)
-  #
-  def self.find_by_sql_with_limit(sql, offset, limit)
-    sql = sanitize_sql(sql)
-    add_limit!(sql, limit: limit, offset: offset)
-    find_by_sql(sql)
-  end
-
   # Wrap a normal SQL query in a <tt>COUNT(*)</tt> query, then pass it to
   # count_by_sql.
   #
@@ -427,11 +416,11 @@ class AbstractModel < ApplicationRecord
   # Return the URL of the "show_<object>" action
   #
   #   # normalized controller
-  #   Article.index_action => "http://mushroomobserver.org/article/12"
+  #   Article.index_action => "https://mushroomobserver.org/article/12"
   #
   #   # unnormalized controller
-  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
-  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
+  #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
   # Note that show_controller has a leading forward slash
   def self.show_url(id)
@@ -502,7 +491,7 @@ class AbstractModel < ApplicationRecord
   #   name.eol_url => "http://eol.org/blah/blah/blah"
   #
   def eol_url
-    triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
+    triple = Triple.find_by(subject: show_url, predicate: eol_predicate)
     triple&.object
   end
 
@@ -546,8 +535,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "edit_<object>" action
   #
-  #   Name.edit_url(12) => "http://mushroomobserver.org/name/edit_name/12"
-  #   name.edit_url     => "http://mushroomobserver.org/name/edit_name/12"
+  #   Name.edit_url(12) => "https://mushroomobserver.org/name/edit_name/12"
+  #   name.edit_url     => "https://mushroomobserver.org/name/edit_name/12"
   #
   def self.edit_url(id)
     "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
@@ -600,8 +589,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the URL of the "destroy_<object>" action
   #
-  #   Name.destroy_url(12) => "http://mushroomobserver.org/name/destroy_name/12"
-  #   name.destroy_url     => "http://mushroomobserver.org/name/destroy_name/12"
+  #   Name.destroy_url(12) => "https://mushroomobserver.org/name/destroy_name/12"
+  #   name.destroy_url     => "https://mushroomobserver.org/name/destroy_name/12"
   #
   def self.destroy_url(id)
     "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"

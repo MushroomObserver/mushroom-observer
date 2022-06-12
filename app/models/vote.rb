@@ -234,7 +234,7 @@ class Vote < AbstractModel
   # Find label of closest value in a given enumerated lists.
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
-    for pair in list
+    list.each do |pair|
       next unless pair[1] != 0
       if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
         return last_pair[0]
@@ -265,7 +265,7 @@ class Vote < AbstractModel
 
   def self.translate_menu(menu)
     result = []
-    for k, v in menu
+    menu.each do |k, v|
       result << [(k.is_a?(Symbol) ? k.l : k.to_s), v]
     end
     result

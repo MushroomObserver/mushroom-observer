@@ -66,10 +66,10 @@ def parse_options
                 User.safe_find(user_id)
               end
   @old_name = Name.safe_find(old_name_id) ||
-              Name.find_by_search_name(old_name_id) ||
+              Name.find_by(search_name: old_name_id) ||
               Name.where(text_name: old_name_id).to_a
   @new_name = Name.safe_find(new_name_id) ||
-              Name.find_by_search_name(new_name_id) ||
+              Name.find_by(search_name: new_name_id) ||
               Name.where(text_name: new_name_id).to_a
 
   if @old_name.is_a?(Array) && @old_name.count > 1

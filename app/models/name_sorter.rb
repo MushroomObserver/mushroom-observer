@@ -77,23 +77,14 @@
 ################################################################################
 #
 class NameSorter
-  attr_accessor :approved_deprecated_names
-  attr_accessor :approved_synonyms
-  attr_accessor :chosen_names
+  attr_accessor :approved_deprecated_names, :approved_synonyms, :chosen_names
 
-  attr_reader :has_new_synonyms
-  attr_reader :has_unapproved_deprecated_names
-  attr_reader :synonym_data
-  attr_reader :all_names
-
-  attr_reader :deprecated_name_strs
-  attr_reader :deprecated_names
-  attr_reader :multiple_line_strs
-  attr_reader :multiple_names
-  attr_reader :single_line_strs
-  attr_reader :single_names
-  attr_reader :new_line_strs
-  attr_reader :new_name_strs
+  attr_reader :has_new_synonyms, :has_unapproved_deprecated_names,
+              :synonym_data, :all_names,
+              :deprecated_name_strs, :deprecated_names,
+              :multiple_line_strs, :multiple_names,
+              :single_line_strs, :single_names,
+              :new_line_strs, :new_name_strs
 
   def initialize
     @approved_deprecated_names = [] # Array of String's
@@ -143,8 +134,8 @@ class NameSorter
   def append_approved_synonyms(synonyms)
     return unless synonyms # Allow for nil
 
-    synonyms = synonyms.split("/") if synonyms.class == String
-    if synonyms.class == Array
+    synonyms = synonyms.split("/") if synonyms.instance_of?(String)
+    if synonyms.instance_of?(Array)
       synonyms.each { |id| push_synonym(id.to_i) }
     else
       raise(
@@ -168,9 +159,9 @@ class NameSorter
   def add_approved_deprecated_names(new_names)
     return unless new_names
 
-    if new_names.class == String
+    if new_names.instance_of?(String)
       new_names.split("\n").each { |n| @approved_deprecated_names += n.split }
-    elsif new_names.class == Array
+    elsif new_names.instance_of?(Array)
       @approved_deprecated_names += new_names
     end
   end

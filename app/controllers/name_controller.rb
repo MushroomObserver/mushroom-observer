@@ -277,7 +277,7 @@ class NameController < ApplicationController
         end
       end
     else
-      # Note: if show_selected_name is called with a block
+      # NOTE: if show_selected_name is called with a block
       # it will *not* get passed to show_index_of_objects.
       show_index_of_objects(query, args)
     end
@@ -1113,8 +1113,7 @@ class NameController < ApplicationController
 
     flavor = Notification.flavors[:name]
     @notification = Notification.
-                    find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
-                                                          @user.id)
+                    find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
     if request.method != "POST"
       initialize_tracking_form
     else

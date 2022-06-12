@@ -2,16 +2,8 @@
 
 class Pivotal
   class Story
-    attr_accessor :id
-    attr_accessor :type
-    attr_accessor :time
-    attr_accessor :state
-    attr_accessor :user
-    attr_accessor :name
-    attr_accessor :description
-    attr_accessor :labels
-    attr_accessor :comments
-    attr_accessor :votes
+    attr_accessor :id, :type, :time, :state, :user, :name, :description,
+                  :labels, :comments, :votes
 
     LABEL_VALUE = {
       "critical" => 4,
@@ -93,20 +85,20 @@ class Pivotal
 
     def activity
       @activity ||= begin
-        result = "none"
-        if @comments.any?
-          comment = @comments.last
-          time = Time.zone.parse(comment.time)
-          if time > 1.day.ago
-            result = "day"
-          elsif time > 1.week.ago
-            result = "week"
-          elsif time > 1.month.ago
-            result = "month"
-          end
-        end
-        result
-      end
+                      result = "none"
+                      if @comments.any?
+                        comment = @comments.last
+                        time = Time.zone.parse(comment.time)
+                        if time > 1.day.ago
+                          result = "day"
+                        elsif time > 1.week.ago
+                          result = "week"
+                        elsif time > 1.month.ago
+                          result = "month"
+                        end
+                      end
+                      result
+                    end
     end
 
     def story_order
@@ -145,7 +137,7 @@ class Pivotal
     def user_vote(user)
       if user
         user_id = user.id
-        for vote in votes
+        votes.each do |vote|
           return vote.value if vote.id == user_id
         end
       end

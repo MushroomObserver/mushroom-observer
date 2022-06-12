@@ -65,7 +65,7 @@ require("mimemagic")
 #
 #       # Supply any extra header info you may have.
 #       image.content_type = 'image/jpeg'
-#       image.md5sum = request.header[...]
+#       image.upload_md5sum = request.header[...]
 #
 #       # Validate and save record.
 #       image.save
@@ -540,7 +540,7 @@ class Image < AbstractModel
   end
 
   def upload_from_url(url)
-    upload = API::UploadFromURL.new(url)
+    upload = API2::UploadFromURL.new(url)
     self.image         = upload.content
     self.upload_length = upload.content_length
     self.upload_type   = upload.content_type
@@ -823,7 +823,7 @@ class Image < AbstractModel
     save_changes = !changed?
 
     # Modify image_votes table first.
-    vote = image_votes.find_by_user_id(user_id)
+    vote = image_votes.find_by(user_id: user_id)
     if (value = self.class.validate_vote(value))
       if vote
         vote.value = value
@@ -973,8 +973,7 @@ class Image < AbstractModel
            pluck(:id, Image[:when].year, :license_id)
     return unless data.any?
 
-    # The gem `mass_insert` anticipates Rails 6 method `insert_all`, same args
-    CopyrightChange.mass_insert(copyright_change_new_rows(data, old_name, user))
+    CopyrightChange.insert_all(copyright_change_new_rows(data, old_name, user))
 
     Image.where(user_id: user.id, copyright_holder: old_name).
       update_all(copyright_holder: new_name)

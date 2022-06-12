@@ -289,10 +289,12 @@ class AmateurTest < IntegrationTestCase
     I18n.locale = "el"
     mary.save
 
-    data = TranslationString.translations("el")
-    data[:test_tag1] = "test_tag1 value"
-    data[:test_tag2] = "test_tag2 value"
-    data[:test_flash_redirection_title] = "Testing Flash Redirection"
+    TranslationString.store_localizations(
+      :el,
+      { test_tag1: "test_tag1 value",
+        test_tag2: "test_tag2 value",
+        test_flash_redirection_title: "Testing Flash Redirection" }
+    )
 
     session.run_test
   end

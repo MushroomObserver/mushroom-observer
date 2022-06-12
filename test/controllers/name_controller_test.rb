@@ -20,8 +20,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def empty_notes
-    NameDescription.all_note_fields.each_with_object({}) do |field, result|
-      result[field] = ""
+    NameDescription.all_note_fields.index_with do |_field|
+      ""
     end
   end
 
@@ -2073,7 +2073,7 @@ class NameControllerTest < FunctionalTestCase
     new_versions = new_name.versions.size
     old_obs = old_name.namings[0].observation
     new_obs = new_name.namings.
-              select { |n| n.observation.name == new_name }[0].observation
+              find { |n| n.observation.name == new_name }.observation
 
     params = {
       id: old_name.id,
