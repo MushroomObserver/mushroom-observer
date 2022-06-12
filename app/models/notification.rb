@@ -55,7 +55,7 @@ class Notification < AbstractModel
   #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
-    return nil unless (template = note_template) && flavor == :name
+    return nil unless (template = note_template) && flavor == "name"
 
     tracker  = user
     observer = args[:user]
