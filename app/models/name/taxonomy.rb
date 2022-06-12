@@ -382,7 +382,7 @@ module Name::Taxonomy
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if ["Genus", :Species].include?(rank)
+    return genus_or_species_is_ancestor? if ["Genus", "Species"].include?(rank)
 
     false
   end
