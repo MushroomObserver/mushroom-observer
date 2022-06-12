@@ -245,7 +245,7 @@ class Description < AbstractModel
   # Return an Array of source type Strings, e.g. "public", "project", etc.
   def self.all_source_types
     ALL_SOURCE_TYPES
-    # NOTE: Why not keep this simple and just load them in order of the enums?
+    # NOTE: Or, just load them in order of the enums
     # source_types.map do |name, _integer|
     #   name
     # end
