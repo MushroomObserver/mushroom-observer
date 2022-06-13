@@ -440,7 +440,7 @@ class String
   # String is well-formatted HTML with properly-nested tags.
   def truncate_html(max)
     result = ""
-    str = "" + self
+    str = self.to_s
     opens = []
     while str != ""
       # Self-closing tag.

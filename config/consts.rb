@@ -83,10 +83,10 @@ MushroomObserver::Application.configure do
   config.email_queue_delay  = 5
 
   # Default email addresses.
-  config.news_email_address = "news@" + config.domain
-  config.noreply_email_address = "no-reply@" + config.domain
-  config.accounts_email_address = "webmaster@" + config.domain
-  config.webmaster_email_address = "webmaster@" + config.domain
+  config.news_email_address = "news@#{config.domain}"
+  config.noreply_email_address = "no-reply@#{config.domain}"
+  config.accounts_email_address = "webmaster@#{config.domain}"
+  config.webmaster_email_address = "webmaster@#{config.domain}"
   config.donation_business = "UQ23P3G6FBYKN"
 
   # File where the list of most commonly used names lives.
