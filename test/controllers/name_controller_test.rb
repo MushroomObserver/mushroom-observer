@@ -3142,7 +3142,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: "list_rss_logs")
     assert(approved_name = Name.find_by(search_name: new_name_str))
     assert_not(approved_name.deprecated)
-    assert_equal("Species", Name.ranks.key(approved_name.rank))
+    assert_equal("Species", approved_name.rank)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
@@ -5111,5 +5111,23 @@ class NameControllerTest < FunctionalTestCase
                  @controller.group_name(user_groups(:rolf_only)))
     assert_equal("article writers",
                  @controller.group_name(user_groups(:article_writers)))
+  end
+
+  def test_versioning_rank
+    login("mary")
+    name = Name.create!(
+      text_name: "Ganoderma applanatum",
+      search_name: "Ganoderma applanatum",
+      sort_name: "Ganoderma applanatum",
+      display_name: "__Ganoderma applanatum__",
+      author: "",
+      rank: "Species",
+      deprecated: true,
+      correct_spelling: nil,
+      citation: "",
+      notes: ""
+    )
+    name.revert_to(1)
+    assert_equal("Species", name.rank)
   end
 end
