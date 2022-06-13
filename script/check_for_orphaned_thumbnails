@@ -6,9 +6,9 @@ run_mysql "SELECT id, thumb_image_id, 'thumbnail image doesnt exist' \
            FROM observations WHERE \
            thumb_image_id IS NOT NULL AND \
            thumb_image_id NOT IN \
-           (SELECT DISTINCT image_id FROM image_observations)" | grep -v thumb
+           (SELECT DISTINCT image_id FROM observation_images)" | grep -v thumb
 
 run_mysql "UPDATE observations SET thumb_image_id = NULL WHERE \
            thumb_image_id IS NOT NULL AND \
            thumb_image_id NOT IN \
-           (SELECT DISTINCT image_id FROM image_observations)"
+           (SELECT DISTINCT image_id FROM observation_images)"

@@ -65,7 +65,7 @@ module Query
           users: :user_id,
           licenses: :license_id
         },
-        image_observations: {
+        observation_images: {
           images: :image_id,
           observations: :observation_id
         },

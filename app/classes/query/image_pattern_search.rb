@@ -9,7 +9,7 @@ class Query::ImagePatternSearch < Query::ImageBase
 
   def initialize_flavor
     add_search_condition(search_fields, params[:pattern])
-    add_join(:image_observations, :observations)
+    add_join(:observation_images, :observations)
     add_join(:observations, :locations!)
     add_join(:observations, :names)
     super

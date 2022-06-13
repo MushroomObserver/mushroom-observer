@@ -12,7 +12,7 @@ class Query::ImageAdvancedSearch < Query::ImageBase
   def initialize_flavor
     return if handle_content_search!
 
-    add_join(:image_observations, :observations)
+    add_join(:observation_images, :observations)
     initialize_advanced_search
     super
   end
@@ -36,8 +36,8 @@ class Query::ImageAdvancedSearch < Query::ImageBase
     ids = Query.lookup(:Observation, flavor, params2).result_ids(args2)
     ids = clean_id_set(ids)
     args2 = args.dup
-    extend_join(args2) << :image_observations
-    extend_where(args2) << "image_observations.observation_id IN (#{ids})"
+    extend_join(args2) << :observation_images
+    extend_where(args2) << "observation_images.observation_id IN (#{ids})"
     model.connection.select_rows(query(args2))
   end
 

@@ -165,7 +165,7 @@ module Report
     def add_image_ids!(rows, col)
       vals = Image.connection.select_rows(%(
         SELECT io.observation_id, io.image_id
-        FROM image_observations io
+        FROM observation_images io
         JOIN (#{plain_query}) AS ids ON ids.id = io.observation_id
       ))
       add_column!(rows, vals, col)

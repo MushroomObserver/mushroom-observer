@@ -1002,11 +1002,11 @@ class NameController < ApplicationController
     image_data = Name.connection.select_all(%(
       SELECT name_id, image_id, observation_id, images.user_id,
              images.license_id, images.created_at
-      FROM observations, image_observations, images
+      FROM observations, observation_images, images
       WHERE observations.name_id IN (#{name_ids})
       AND observations.vote_cache >= 2.4
-      AND observations.id = image_observations.observation_id
-      AND image_observations.image_id = images.id
+      AND observations.id = observation_images.observation_id
+      AND observation_images.image_id = images.id
       AND images.vote_cache >= 2
       AND images.ok_for_export
       ORDER BY observations.vote_cache
