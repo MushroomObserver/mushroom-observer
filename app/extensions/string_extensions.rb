@@ -440,11 +440,8 @@ class String
   # String is well-formatted HTML with properly-nested tags.
   def truncate_html(max)
     result = ""
-    # Disable cop because interpolation and/or removing redundant self
-    #  str = to_str
-    # somehow throws "can't modify frozen String" error when one of the
-    # str.sub! statements executes
-    str = "" + self # rubocop:disable Style/StringConcatenation
+    # make str mutable because it will be modified in place with sub!
+    str = String.new(self)
     opens = []
     while str != ""
       # Self-closing tag.
