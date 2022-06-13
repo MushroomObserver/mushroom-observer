@@ -114,9 +114,9 @@ class ImageTest < UnitTestCase
   def do_truncate_test(img, var, len)
     exes = "x" * (len - 1)
     assert_truncated_right(img, var, exes, exes)
-    assert_truncated_right(img, var, exes + "a", exes + "a")
-    assert_truncated_right(img, var, exes + "å", exes + "å")
-    assert_truncated_right(img, var, exes + "aå", "x" * (len - 3) + "...")
+    assert_truncated_right(img, var, "#{exes}a", "#{exes}a")
+    assert_truncated_right(img, var, "#{exes}å", "#{exes}å")
+    assert_truncated_right(img, var, "#{exes}aå", "#{"x" * (len - 3)}...")
   end
 
   def assert_truncated_right(img, var, set, get)

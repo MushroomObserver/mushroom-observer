@@ -534,41 +534,41 @@ module ControllerExtensions
       if arg.is_a?(Array)
         if arg.length == 1
           if arg[0].is_a?(Hash)
-            msg += "Expected redirect to <#{url_for(arg[0])}>" + got
+            msg += "Expected redirect to <#{url_for(arg[0])}>#{got}"
             assert_redirected_to(url_for(arg[0]), msg)
           else
             controller = @controller.controller_name
-            msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
+            msg += "Expected redirect to <#{controller}/#{arg[0]}#{got}>"
             # assert_redirected_to({action: arg[0]}, msg)
             assert_redirected_to(%r{/#{controller}/#{arg[0]}}, msg)
           end
         else
-          msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
+          msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>#{got}"
           # assert_redirected_to({ controller: arg[0], action: arg[1] }, msg)
           assert_redirected_to(%r{/#{arg[0]}/#{arg[1]}}, msg)
         end
       elsif arg.is_a?(Hash)
         url = @controller.url_for(arg).sub(/^http:..test.host./, "")
-        msg += "Expected redirect to <#{url}>" + got
+        msg += "Expected redirect to <#{url}#{got}>"
         # assert_redirect_match(arg, @response, @controller, msg)
         assert_redirected_to(arg, msg)
       elsif arg.is_a?(String) && arg.match(%r{^\w+://})
-        msg += "Expected redirect to <#{arg}>" + got
+        msg += "Expected redirect to <#{arg}>#{got}"
         assert_equal(arg, @response.redirect_url, msg)
       elsif arg.is_a?(String)
         controller = @controller.controller_name
-        msg += "Expected it to render <#{controller}/#{arg}>" + got
+        msg += "Expected it to render <#{controller}/#{arg}#{got}>"
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <observer/list_rss_logs>" + got
+        msg += "Expected redirect to <observer/list_rss_logs>#{got}"
         assert_redirected_to({ controller: "observer",
                                action: "list_rss_logs" }, msg)
       elsif arg == :login
-        msg += "Expected redirect to <account/login>" + got
+        msg += "Expected redirect to <account/login>#{got}"
         assert_redirected_to({ controller: "account", action: "login" }, msg)
       elsif arg == :welcome
-        msg += "Expected redirect to <account/welcome>" + got
+        msg += "Expected redirect to <account/welcome>#{got}"
         assert_redirected_to({ controller: "account", action: "login" }, msg)
       else
         raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")

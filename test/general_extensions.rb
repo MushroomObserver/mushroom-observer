@@ -253,7 +253,7 @@ module GeneralExtensions
     return pass if obj.save
 
     msg2 = obj.errors.full_messages.join("; ")
-    msg2 = msg + "\n" + msg2 if msg
+    msg2 = "#{msg}\n#{msg2}" if msg
     flunk(msg2)
   end
 
@@ -424,7 +424,7 @@ module GeneralExtensions
     return unless exp.has_elements?
 
     exp.elements.each do |child|
-      dump_xml(child, indent + "  ")
+      dump_xml(child, "#{indent}  ")
     end
   end
 
@@ -467,15 +467,15 @@ module GeneralExtensions
         break
       elsif !msg
         # Write out expected (old) and received (new) files for debugging.
-        File.open(filename + ".old", "w:#{encoding}") do |fh|
+        File.open("#{filename}.old", "w:#{encoding}") do |fh|
           fh.write(template)
         end
-        File.open(filename + ".new", "w:#{encoding}") do |fh|
+        File.open("#{filename}.new", "w:#{encoding}") do |fh|
           fh.write(str)
         end
-        msg = "File #{filename} wrong:\n" +
-              `diff #{filename}.old #{filename}.new`
-        File.delete(filename + ".old") if File.exist?(filename + ".old")
+        msg = "File #{filename} wrong:\n" \
+              "#{`diff #{filename}.old #{filename}.new`}"
+        File.delete("#{filename}.old") if File.exist?("#{filename}.old")
       end
     end
 
@@ -484,7 +484,7 @@ module GeneralExtensions
     # Clean out old files from previous failure(s).
     files.each do |file|
       filename = Array(file).first
-      new_filename = filename + ".new"
+      new_filename = "#{filename}.new"
       File.delete(new_filename) if File.exist?(new_filename)
     end
     pass
