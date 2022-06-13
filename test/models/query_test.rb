@@ -492,7 +492,7 @@ class QueryTest < UnitTestCase
 
     query = Query.lookup(:Image, :all, by: :name)
 
-    assert_equal([:images, :image_observations, :names, :observations],
+    assert_equal([:image_observations, :images, :names, :observations],
                  query.tables_used)
     assert_equal(true, query.uses_table?(:images))
     assert_equal(true, query.uses_table?(:image_observations))
