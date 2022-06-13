@@ -38,11 +38,11 @@ module Query
       unless is_a?(Query::ImageWithObservations)
         add_owner_and_time_stamp_conditions("images")
         add_date_condition("images.when", params[:date])
-        add_join(:images_observations) if params[:has_observation]
+        add_join(:image_observations) if params[:has_observation]
         initialize_notes_parameters
       end
       initialize_association_parameters
-      initialize_name_parameters(:images_observations, :observations)
+      initialize_name_parameters(:image_observations, :observations)
       initialize_image_parameters
       initialize_vote_parameters
     end
@@ -55,17 +55,17 @@ module Query
     end
 
     def initialize_association_parameters
-      add_id_condition("images_observations.observation_id",
-                       params[:observations], :images_observations)
+      add_id_condition("image_observations.observation_id",
+                       params[:observations], :image_observations)
       add_where_condition("observations", params[:locations],
-                          :images_observations, :observations)
+                          :image_observations, :observations)
       add_id_condition("images_projects.project_id",
                        lookup_projects_by_name(params[:projects]),
                        :images_projects)
       add_id_condition(
         "observations_species_lists.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
-        :images_observations, :observations, :observations_species_lists
+        :image_observations, :observations, :observations_species_lists
       )
       add_id_condition("images.license_id", params[:license])
     end
@@ -88,7 +88,7 @@ module Query
                             params[:has_votes])
       add_range_condition("images.vote_cache", params[:quality])
       add_range_condition("observations.vote_cache", params[:confidence],
-                          :images_observations, :observations)
+                          :image_observations, :observations)
     end
 
     def default_order

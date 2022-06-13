@@ -23,14 +23,14 @@ module Report
       def tables
         @tables ||= {
           images: Image.arel_table,
-          images_observations: Arel::Table.new(:images_observations),
+          image_observations: Arel::Table.new(:image_observations),
           users: User.arel_table,
           licenses: License.arel_table
         }
       end
 
       def add_joins
-        join_table(:images_observations, :image_id, attribute(:images, :id))
+        join_table(:image_observations, :image_id, attribute(:images, :id))
         join_table(:users, :id, attribute(:images, :user_id))
         join_table(:licenses, :id, attribute(:images, :license_id))
       end
@@ -43,7 +43,7 @@ module Report
 
       def add_project
         query.project(attribute(:images, :id),
-                      attribute(:images_observations,
+                      attribute(:image_observations,
                                 :observation_id).as("obs_id"),
                       attribute(:images, :when),
                       attribute(:users, :name),
@@ -57,7 +57,7 @@ module Report
       end
 
       def formatted_rows
-        obs_attr = tables[:images_observations][:observation_id]
+        obs_attr = tables[:image_observations][:observation_id]
         query.where(obs_attr.in(observations.ids))
         rows = ActiveRecord::Base.connection.exec_query(query.to_sql)
         sort_after(rows.map { |row| format_image_row(row) })

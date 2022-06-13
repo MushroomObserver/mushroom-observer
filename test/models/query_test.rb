@@ -385,7 +385,7 @@ class QueryTest < UnitTestCase
     # Joins should include these:
     #   names => observations => locations
     #   names => observations => comments
-    #   names => observations => images_observations => images
+    #   names => observations => image_observations => images
     #   names => users (as reviewer)
     sql = query.query(
       join: [
@@ -393,7 +393,7 @@ class QueryTest < UnitTestCase
           observations: [
             :locations,
             :comments,
-            { images_observations: :images }
+            { image_observations: :images }
           ]
         },
         :'users.reviewer'
@@ -404,8 +404,8 @@ class QueryTest < UnitTestCase
     assert_match(/observations.location_id = locations.id/, sql)
     assert_match(/comments.target_id = observations.id/, sql)
     assert_match(/comments.target_type = (['"])Observation\1/, sql)
-    assert_match(/images_observations.observation_id = observations.id/, sql)
-    assert_match(/images_observations.image_id = images.id/, sql)
+    assert_match(/image_observations.observation_id = observations.id/, sql)
+    assert_match(/image_observations.image_id = images.id/, sql)
   end
 
   def test_reverse_order
@@ -492,10 +492,10 @@ class QueryTest < UnitTestCase
 
     query = Query.lookup(:Image, :all, by: :name)
 
-    assert_equal([:images, :images_observations, :names, :observations],
+    assert_equal([:images, :image_observations, :names, :observations],
                  query.tables_used)
     assert_equal(true, query.uses_table?(:images))
-    assert_equal(true, query.uses_table?(:images_observations))
+    assert_equal(true, query.uses_table?(:image_observations))
     assert_equal(true, query.uses_table?(:names))
     assert_equal(true, query.uses_table?(:observations))
     assert_equal(false, query.uses_table?(:comments))
@@ -1806,7 +1806,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_of_name
-    assert_query(Image.joins(:images_observations, :observations).
+    assert_query(Image.joins(:image_observations, :observations).
                        where(observations: { name: names(:fungi) }),
                  :Image, :with_observations, names: [names(:fungi).id])
     assert_query([images(:connected_coprinus_comatus_image).id],

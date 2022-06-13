@@ -966,7 +966,7 @@ class SpeciesListController < ApplicationController
   def checklist_from_image_query(query)
     query.select_rows(
       select: "DISTINCT names.display_name, names.id",
-      join: { images_observations: { observations: :names } },
+      join: { image_observations: { observations: :names } },
       limit: 1000
     )
   end

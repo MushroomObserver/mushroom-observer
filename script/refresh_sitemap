@@ -190,7 +190,7 @@ def get_new_comments(last_update)
 end
 
 def get_new_images(last_update)
-  io = Arel::Table.new(:images_observations)
+  io = Arel::Table.new(:image_observations)
   Image.joins(Image.arel_table.join(io).on(Image[:id].eq(io[:image_id]).
               and(Image[:updated_at].gteq(last_update))).join_sources).
     pluck(io[:observation_id], Image[:updated_at])

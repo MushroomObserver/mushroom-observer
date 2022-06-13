@@ -13,7 +13,7 @@ class Query::ImageWithObservationsInSpeciesList < Query::ImageWithObservations
     spl = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = spl.format_name
     where << "observations_species_lists.species_list_id = '#{spl.id}'"
-    add_join(:images_observations, :observations)
+    add_join(:image_observations, :observations)
     add_join(:observations, :observations_species_lists)
     super
   end
