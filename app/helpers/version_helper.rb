@@ -80,7 +80,7 @@ module VersionHelper
 
       # Version number (and name if available).
       link = "#{:VERSION.t} #{ver.version}"
-      link += " " + ver.format_name.t if ver.respond_to?(:format_name)
+      link += " #{ver.format_name.t}" if ver.respond_to?(:format_name)
       if ver.version != obj.version
         link = if @merge_source_id
                  link_with_query(link, controller: obj.show_controller,

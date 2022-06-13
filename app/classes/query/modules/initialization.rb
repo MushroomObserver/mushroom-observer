@@ -46,7 +46,7 @@ module Query
       # Combine args into one parenthesized condition by ANDing them.
       def and_clause(*args)
         if args.length > 1
-          "(" + args.join(" AND ") + ")"
+          "(#{args.join(" AND ")})"
         else
           args.first
         end
@@ -55,7 +55,7 @@ module Query
       # Combine args into one parenthesized condition by ORing them.
       def or_clause(*args)
         if args.length > 1
-          "(" + args.join(" OR ") + ")"
+          "(#{args.join(" OR ")})"
         else
           args.first
         end
