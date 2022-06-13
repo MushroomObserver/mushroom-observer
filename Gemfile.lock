@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/MushroomObserver/acts_as_versioned/
-  revision: 57b2b4bfc9050c4ae5cef414a18d8ff475f97bfa
+  revision: 96b7ac929497a0306f81bc8be5fb0d141e687409
   specs:
     cure_acts_as_versioned (0.6.5)
       activerecord (>= 3.0.9)
