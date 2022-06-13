@@ -42,8 +42,6 @@ AllCops:
     - app/controllers/api_controller.rb
     - app/helpers/api_helper.rb
     - "app/views/api/**/*"
-    - test/controllers/api_controller_test.rb
-    - test/models/api_test.rb
     - "db/**/*"
     - "log/**/*"
     - public/design_test/jquery-1.5.2.min.js
