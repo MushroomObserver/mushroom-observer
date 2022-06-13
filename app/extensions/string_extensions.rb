@@ -440,7 +440,11 @@ class String
   # String is well-formatted HTML with properly-nested tags.
   def truncate_html(max)
     result = ""
-    str = to_s
+    # Disable cop because concatenation creates unfrozen string, whereas
+    # interpolation creates a frozen string
+    # A frozen string throws "can't modify frozen String" error when one of the
+    # str.sub! statements executes
+    str = "" + self # rubocop:disable Style/StringConcatenation
     opens = []
     while str != ""
       # Self-closing tag.
