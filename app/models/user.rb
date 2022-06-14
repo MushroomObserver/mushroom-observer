@@ -280,11 +280,10 @@ class User < AbstractModel
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
   has_many :user_group_users, dependent: :destroy
-  has_many :user_groups, through: "user_group_users"
+  has_many :user_groups, through: :user_group_users
 
   has_many :herbarium_curators, dependent: :destroy
-  has_many :curated_herbaria, through: :herbarium_curators,
-                              class_name: "Herbarium", source: :herbarium
+  has_many :curated_herbaria, through: :herbarium_curators, source: :herbarium
 
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",
