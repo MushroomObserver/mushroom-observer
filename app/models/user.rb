@@ -616,8 +616,8 @@ class User < AbstractModel
 
   def species_lists_in_users_projects
     project_ids = projects_member.map(&:id)
-    psl.project(ProjectSpeciesList[:species_list_id]).
-      where(ProjectSpeciesList[:project_id].in(project_ids)).uniq
+    ProjectSpeciesList.where(project_id: project_ids).distinct.
+      pluck(:species_list_id)
   end
 
   ##############################################################################
