@@ -24,7 +24,7 @@ module Query
 
       def serialize_value(val)
         case val
-        when Array      then "@" + val.map { |v| serialize_value(v) }.join(",")
+        when Array      then "@#{val.map { |v| serialize_value(v) }.join(",")}"
         when String     then "$#{serialize_string(val)}"
         when Symbol     then ":#{serialize_string(val.to_s)}"
         when Integer    then "##{val}"
