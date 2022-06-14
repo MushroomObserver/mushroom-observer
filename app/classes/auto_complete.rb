@@ -100,7 +100,7 @@ class AutoCompleteByWord < AutoComplete
         return used + part if matches.length <= limit
       end
       if n < words.length
-        used += word + " "
+        used += "#{word} "
         regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i
         matches.select! { |m| m.match(regex) }
         return used if matches.length <= limit

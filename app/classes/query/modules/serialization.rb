@@ -19,7 +19,7 @@ module Query
       end
 
       def serialize_key_value(key, val)
-        key.to_s + "=" + serialize_value(val)
+        "#{key}=#{serialize_value(val)}"
       end
 
       def serialize_value(val)
