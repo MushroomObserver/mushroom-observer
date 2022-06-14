@@ -98,15 +98,19 @@ class NameDescription < Description
   has_many :name_description_admins, dependent: :destroy
   has_many :admin_groups, through: :name_description_admins,
                           source: :user_group
+
   has_many :name_description_writers, dependent: :destroy
   has_many :writer_groups, through: :name_description_writers,
                            source: :user_group
+
   has_many :name_description_readers, dependent: :destroy
   has_many :reader_groups, join_table: :name_description_readers,
                            source: :user_group
+
   has_many :name_description_authors, dependent: :destroy
   has_many :authors, through: :name_description_authors,
                      source: :user
+
   has_many :name_description_editors, dependent: :destroy
   has_many :editors, through: :name_description_editors,
                      source: :user

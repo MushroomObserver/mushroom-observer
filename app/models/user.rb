@@ -288,12 +288,15 @@ class User < AbstractModel
   has_many :name_description_authors, dependent: :destroy
   has_many :authored_names, through: :name_description_authors,
                             source: :name_description
+
   has_many :name_description_editors, dependent: :destroy
   has_many :edited_names, through: :name_description_editors,
                           source: :name_description
+
   has_many :location_description_authors, dependent: :destroy
   has_many :authored_locations, through: :location_description_authors,
                                 source: :location_description
+
   has_many :location_description_editors, dependent: :destroy
   has_many :edited_locations, through: :location_description_editors,
                               source: :location_description

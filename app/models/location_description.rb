@@ -75,15 +75,19 @@ class LocationDescription < Description
   has_many :location_description_admins, dependent: :destroy
   has_many :admin_groups, through: :location_description_admins,
                           source: :user_group
+
   has_many :location_description_writers, dependent: :destroy
   has_many :writer_groups, through: :location_description_writers,
                            source: :user_group
+
   has_many :location_description_readers, dependent: :destroy
   has_many :reader_groups, join_table: :location_description_readers,
                            source: :user_group
+
   has_many :location_description_authors, dependent: :destroy
   has_many :authors, through: :location_description_authors,
                      source: :user
+
   has_many :location_description_editors, dependent: :destroy
   has_many :editors, through: :location_description_editors,
                      source: :user
