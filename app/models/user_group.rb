@@ -48,19 +48,19 @@ class UserGroup < AbstractModel
   has_many :locations_admin, through: :location_description_admins,
                              source: :location_description
   has_many :location_description_writers, dependent: :destroy
-  has_many :locations_writer, through: :location_description_writers
+  has_many :locations_writer, through: :location_description_writers,
                               source: :location_description
   has_many :location_description_readers, dependent: :destroy
-  has_many :locations_reader, through: :location_description_readers
+  has_many :locations_reader, through: :location_description_readers,
                               source: :location_description
   has_many :name_description_admins, dependent: :destroy
-  has_many :names_admin, through: :name_description_admins
+  has_many :names_admin, through: :name_description_admins,
                          source: :name_description
   has_many :name_description_writers, dependent: :destroy
-  has_many :names_writer, through: :name_description_writers
+  has_many :names_writer, through: :name_description_writers,
                           source: :name_description
   has_many :name_description_readers, dependent: :destroy
-  has_many :names_reader, through: :name_description_readers
+  has_many :names_reader, through: :name_description_readers,
                           source: :name_description
 
   has_one :project
