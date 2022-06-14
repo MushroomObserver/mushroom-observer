@@ -67,12 +67,12 @@ class SiteData
 
   # List of the categories.  This might be the order they appear in show_user.
   ALL_FIELDS = [
-    :name_descriptions_authors,
-    :name_descriptions_editors,
+    :name_description_authors,
+    :name_description_editors,
     :names,
     :names_versions,
-    :location_descriptions_authors,
-    :location_descriptions_editors,
+    :location_description_authors,
+    :location_description_editors,
     :locations,
     :locations_versions,
     :images,
