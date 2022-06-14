@@ -280,24 +280,23 @@ class User < AbstractModel
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
   has_many :user_group_users, dependent: :destroy
-  has_many :user_groups, through: "user_group_users"
+  has_many :user_groups, through: :user_group_users
 
   has_many :herbarium_curators, dependent: :destroy
-  has_many :curated_herbaria, through: :herbarium_curators,
-                              class_name: "Herbarium", source: :herbarium
+  has_many :curated_herbaria, through: :herbarium_curators, source: :herbarium
 
-  has_and_belongs_to_many :authored_names,
-                          class_name: "NameDescription",
-                          join_table: "name_description_authors"
-  has_and_belongs_to_many :edited_names,
-                          class_name: "NameDescription",
-                          join_table: "name_description_editors"
-  has_and_belongs_to_many :authored_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_description_authors"
-  has_and_belongs_to_many :edited_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_description_editors"
+  has_many :name_description_authors, dependent: :destroy
+  has_many :authored_names, through: :name_description_authors,
+                            source: :name_description
+  has_many :name_description_editors, dependent: :destroy
+  has_many :edited_names, through: :name_description_editors,
+                          source: :name_description
+  has_many :location_description_authors, dependent: :destroy
+  has_many :authored_locations, through: :location_description_authors,
+                                source: :location_description
+  has_many :location_description_editors, dependent: :destroy
+  has_many :edited_locations, through: :location_description_editors,
+                              source: :location_description
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
