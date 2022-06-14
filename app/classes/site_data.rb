@@ -60,7 +60,7 @@ class SiteData
   #
   #  The only exception is species_list_entries, which does a simple join:
   #
-  #    SELECT COUNT(*) FROM species_lists s, observations_species_lists os
+  #    SELECT COUNT(*) FROM species_lists s, species_list_observations os
   #      WHERE user_id = 123 AND s.id = os.species_list_id
   #
   ##############################################################################
@@ -123,7 +123,7 @@ class SiteData
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
     sequenced_observations: "sequences",
-    species_list_entries: "observations_species_lists",
+    species_list_entries: "species_list_observations",
     contributing_users: "users"
   }.freeze
 

@@ -485,7 +485,7 @@ class SpeciesListController < ApplicationController
     # large species_lists, such as "Neotropical Fungi".
     # species_list.observation_ids += ids
     Observation.connection.insert(%(
-      INSERT INTO observations_species_lists
+      INSERT INTO species_list_observations
         (observation_id, species_list_id)
       VALUES
         #{ids.map { |id| "(#{id},#{species_list.id})" }.join(",")}

@@ -59,13 +59,13 @@ module Query
                        params[:observations], :observation_images)
       add_where_condition("observations", params[:locations],
                           :observation_images, :observations)
-      add_id_condition("images_projects.project_id",
+      add_id_condition("project_images.project_id",
                        lookup_projects_by_name(params[:projects]),
-                       :images_projects)
+                       :project_images)
       add_id_condition(
-        "observations_species_lists.species_list_id",
+        "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
-        :observation_images, :observations, :observations_species_lists
+        :observation_images, :observations, :species_list_observations
       )
       add_id_condition("images.license_id", params[:license])
     end

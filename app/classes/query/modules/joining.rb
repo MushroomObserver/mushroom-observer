@@ -15,7 +15,7 @@ module Query
         collection_numbers: {
           users: :user_id
         },
-        collection_numbers_observations: {
+        observation_collection_numbers: {
           collection_numbers: :collection_number_id,
           observations: :observation_id
         },
@@ -45,7 +45,7 @@ module Query
           rss_logs: :rss_log_id,
           users: :user_id
         },
-        glossary_terms_images: {
+        glossary_term_images: {
           images: :image_id,
           glossary_terms: :glossary_term_id
         },
@@ -53,7 +53,7 @@ module Query
           locations: :location_id,
           users: :personal_user_id
         },
-        herbaria_curators: {
+        herbarium_curators: {
           herbaria: :herbarium_id,
           users: :user_id
         },
@@ -69,7 +69,7 @@ module Query
           images: :image_id,
           observations: :observation_id
         },
-        images_projects: {
+        project_images: {
           images: :image_id,
           projects: :project_id
         },
@@ -172,15 +172,15 @@ module Query
           "images.thumb_image": :thumb_image_id,
           "image_votes.thumb_image": [:thumb_image_id, :image_id]
         },
-        observations_projects: {
+        project_observations: {
           observations: :observation_id,
           projects: :project_id
         },
-        observations_species_lists: {
+        species_list_observations: {
           observations: :observation_id,
           species_lists: :species_list_id
         },
-        herbarium_records_observations: {
+        observation_herbarium_records: {
           observations: :observation_id,
           herbarium_records: :herbarium_record_id
         },
@@ -190,7 +190,7 @@ module Query
           user_groups: :user_group_id,
           "user_groups.admin_group": :admin_group_id
         },
-        projects_species_lists: {
+        project_species_lists: {
           projects: :project_id,
           species_lists: :species_list_id
         },
@@ -216,7 +216,7 @@ module Query
           herbaria: :herbarium_id,
           users: :user_id
         },
-        user_groups_users: {
+        user_group_users: {
           user_groups: :user_group_id,
           users: :user_id
         },

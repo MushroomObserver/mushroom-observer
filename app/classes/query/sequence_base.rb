@@ -100,31 +100,31 @@ module Query
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
-        :observations, :herbarium_records_observations, :herbarium_records
+        :observations, :observation_herbarium_records, :herbarium_records
       )
     end
 
     def initialize_herbarium_records_parameter
       add_id_condition(
-        "herbarium_records_observations.herbarium_record_id",
+        "observation_herbarium_records.herbarium_record_id",
         lookup_herbarium_records_by_name(params[:herbarium_records]),
-        :observations, :herbarium_records_observations
+        :observations, :observation_herbarium_records
       )
     end
 
     def initialize_projects_parameter
       add_id_condition(
-        "observations_projects.project_id",
+        "project_observations.project_id",
         lookup_projects_by_name(params[:projects]),
-        :observations, :observations_projects
+        :observations, :project_observations
       )
     end
 
     def initialize_species_lists_parameter
       add_id_condition(
-        "observations_species_lists.species_list_id",
+        "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
-        :observations, :observations_species_lists
+        :observations, :species_list_observations
       )
     end
 

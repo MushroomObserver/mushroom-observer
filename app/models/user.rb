@@ -853,9 +853,9 @@ class User < AbstractModel
     return unless obs_ids.any?
 
     [
-      [:collection_numbers_observations, :observation_id],
+      [:observation_collection_numbers, :observation_id],
       [:comments,                        :target_id, :target_type],
-      [:herbarium_records_observations,  :observation_id],
+      [:observation_herbarium_records,  :observation_id],
       [:observation_images,             :observation_id],
       [:interests,                       :target_id, :target_type],
       [:namings,                         :observation_id],
@@ -893,7 +893,7 @@ class User < AbstractModel
       [:glossary_terms,                 :user_id],
       [:glossary_terms_versions,        :user_id],
       [:herbaria,                       :personal_user_id],
-      [:herbaria_curators,              :user_id],
+      [:herbarium_curators,              :user_id],
       [:herbarium_records,              :user_id],
       [:images,                         :user_id],
       [:image_votes,                    :user_id],
@@ -909,7 +909,7 @@ class User < AbstractModel
       [:queued_emails,                  :to_user_id],
       [:sequences,                      :user_id],
       [:species_lists,                  :user_id],
-      [:user_groups_users,              :user_id],
+      [:user_group_users,              :user_id],
       [:users,                          :id]
     ].each do |table, col|
       table = Arel::Table.new(table)
