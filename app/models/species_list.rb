@@ -125,23 +125,7 @@ class SpeciesList < AbstractModel
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
 
-    # Nimmo Note: afaik, we cannot yet use AR delete_all here because the
-    # species_list_observations table is not backed by a model
-    # (i.e., it's has_and_belongs_to_many vs. has_many_through)
-    # Conversion to HMT is possible but not super-simple.
-    # SpeciesList.connection.delete(%(
-    #   DELETE FROM species_list_observations
-    #   WHERE species_list_id = #{id}
-    # ))
-    delete_manager = arel_delete_species_list_observations(id)
-    # puts(delete_manager.to_sql)
-    SpeciesList.connection.delete(delete_manager.to_sql)
-  end
-
-  def arel_delete_species_list_observations(id)
-    Arel::DeleteManager.new.
-      from(SpeciesListObservation).
-      where(SpeciesListObservation[:species_list_id].eq(id))
+    SpeciesListObservation.where(species_list_id: id).delete_all
   end
 
   ##############################################################################

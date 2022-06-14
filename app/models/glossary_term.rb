@@ -11,6 +11,8 @@ class GlossaryTerm < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
+  # FIXME: I just removed the scope -> { order(vote_cache: :desc) } from this
+  # association because I couldn't get HMT syntax right - Nimmo 20220613
   has_many :glossary_term_images, dependent: :destroy
   has_many :images, through: :glossary_term_images
 
