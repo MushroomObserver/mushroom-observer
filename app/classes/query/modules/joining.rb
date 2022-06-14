@@ -83,26 +83,26 @@ module Query
           locations: :location_id,
           users: :user_id
         },
-        location_descriptions_admins: {
+        location_description_admins: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
-        location_descriptions_authors: {
+        location_description_authors: {
           location_descriptions: :location_description_id,
           users: :user_id
         },
-        location_descriptions_editors: {
+        location_description_editors: {
           location_descriptions: :location_description_id,
           users: :user_id
         },
-        location_descriptions_readers: {
+        location_description_readers: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
         location_descriptions_versions: {
           location_descriptions: :location_description_id
         },
-        location_descriptions_writers: {
+        location_description_writers: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
@@ -119,26 +119,26 @@ module Query
           names: :name_id,
           users: :user_id
         },
-        name_descriptions_admins: {
+        name_description_admins: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
-        name_descriptions_authors: {
+        name_description_authors: {
           name_descriptions: :name_description_id,
           users: :user_id
         },
-        name_descriptions_editors: {
+        name_description_editors: {
           name_descriptions: :name_description_id,
           users: :user_id
         },
-        name_descriptions_readers: {
+        name_description_readers: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
         name_descriptions_versions: {
           name_descriptions: :name_description_id
         },
-        name_descriptions_writers: {
+        name_description_writers: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },

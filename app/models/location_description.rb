@@ -72,21 +72,21 @@ class LocationDescription < Description
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :admin_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_admins"
-  has_and_belongs_to_many :writer_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_writers"
-  has_and_belongs_to_many :reader_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_readers"
-  has_and_belongs_to_many :authors,
-                          class_name: "User",
-                          join_table: "location_descriptions_authors"
-  has_and_belongs_to_many :editors,
-                          class_name: "User",
-                          join_table: "location_descriptions_editors"
+  has_many :location_description_admins
+  has_many :admin_groups, source: :user_group,
+                          through: :location_description_admins
+  has_many :location_description_writers
+  has_many :writer_groups, source: :user_group,
+                           through: :location_description_writers
+  has_many :location_description_readers
+  has_many :reader_groups, source: :user_group,
+                           join_table: :location_description_readers
+  has_many :location_description_authors
+  has_many :authors, source: :user,
+                     through: :location_description_authors
+  has_many :location_description_editors
+  ha_many :editors, source: :user,
+                    through: :location_description_editors
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 

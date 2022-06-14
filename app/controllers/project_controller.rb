@@ -119,7 +119,7 @@ class ProjectController < ApplicationController
     @is_admin = @project.is_admin?(@user)
     @drafts = NameDescription.
               joins(:admin_groups).
-              where("name_descriptions_admins.user_group_id":
+              where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
   end

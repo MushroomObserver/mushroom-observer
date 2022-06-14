@@ -288,16 +288,16 @@ class User < AbstractModel
 
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",
-                          join_table: "name_descriptions_authors"
+                          join_table: "name_description_authors"
   has_and_belongs_to_many :edited_names,
                           class_name: "NameDescription",
-                          join_table: "name_descriptions_editors"
+                          join_table: "name_description_editors"
   has_and_belongs_to_many :authored_locations,
                           class_name: "LocationDescription",
-                          join_table: "location_descriptions_authors"
+                          join_table: "location_description_authors"
   has_and_belongs_to_many :edited_locations,
                           class_name: "LocationDescription",
-                          join_table: "location_descriptions_editors"
+                          join_table: "location_description_editors"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -831,12 +831,12 @@ class User < AbstractModel
 
     group_id = group.id
     [
-      [:location_descriptions_admins,  :user_group_id],
-      [:location_descriptions_readers, :user_group_id],
-      [:location_descriptions_writers, :user_group_id],
-      [:name_descriptions_admins,      :user_group_id],
-      [:name_descriptions_readers,     :user_group_id],
-      [:name_descriptions_writers,     :user_group_id],
+      [:location_description_admins,  :user_group_id],
+      [:location_description_readers, :user_group_id],
+      [:location_description_writers, :user_group_id],
+      [:name_description_admins,      :user_group_id],
+      [:name_description_readers,     :user_group_id],
+      [:name_description_writers,     :user_group_id],
       [:user_groups,                   :id]
     ].each do |table, col|
       table = Arel::Table.new(table)
@@ -898,10 +898,10 @@ class User < AbstractModel
       [:images,                         :user_id],
       [:image_votes,                    :user_id],
       [:interests,                      :user_id],
-      [:location_descriptions_authors,  :user_id],
-      [:location_descriptions_editors,  :user_id],
-      [:name_descriptions_authors,      :user_id],
-      [:name_descriptions_editors,      :user_id],
+      [:location_description_authors,  :user_id],
+      [:location_description_editors,  :user_id],
+      [:name_description_authors,      :user_id],
+      [:name_description_editors,      :user_id],
       [:notifications,                  :user_id],
       [:observations,                   :user_id],
       [:publications,                   :user_id],
