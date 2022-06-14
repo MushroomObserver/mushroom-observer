@@ -190,19 +190,12 @@ def get_new_comments(last_update)
 end
 
 def get_new_images(last_update)
-  # NOTE: `pluck` on Arel join where one table is not backed by a model throws
-  # undefined method `type_for_attribute' for nil:NilClass (NoMethodError)
-  # https://github.com/rails/rails/pull/39264
-  # https://github.com/rails/rails/issues/36042
-  #
-  Image.where(updated_at: last_update..).joins(:observation_images).
-    pluck(ObservationImage[:observation_id], Image[:updated_at])
-
-  # Name.connection.select_rows(%(
-  #   SELECT io.observation_id, i.updated_at
-  #   FROM images i, observation_images io
-  #   WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
-  # ))
+  Image.where(updated_at: last_update..).
+    includes(:observation_images).each do |img|
+      img.observation_images.each {
+        |obs_img| result << [obs_img.observation_id, img.updated_at]
+      }
+    end
 end
 
 def map_one_object_type(params, comments, last_update)

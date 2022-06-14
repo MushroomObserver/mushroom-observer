@@ -23,7 +23,7 @@ module Report
       def tables
         @tables ||= {
           images: Image.arel_table,
-          observation_images: Arel::Table.new(:observation_images),
+          observation_images: ObservationImage.arel_table,
           users: User.arel_table,
           licenses: License.arel_table
         }
