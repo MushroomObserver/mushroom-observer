@@ -61,7 +61,7 @@ module PivotalHelper
   end
 
   def pivotal_comment(comment, num)
-    content_tag(:div, class: "ListLine" + (num & 1).to_s) do
+    content_tag(:div, class: "ListLine#{num & 1}") do
       content_tag(:p) do
         result = :CREATED.t + ": " + comment.time.to_s + safe_br
         if comment.user

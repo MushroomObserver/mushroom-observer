@@ -25,10 +25,10 @@ module Query
       def serialize_value(val)
         case val
         when Array      then "@" + val.map { |v| serialize_value(v) }.join(",")
-        when String     then "$" + serialize_string(val)
-        when Symbol     then ":" + serialize_string(val.to_s)
-        when Integer    then "#" + val.to_s
-        when Float      then "#" + val.to_s
+        when String     then "$#{serialize_string(val)}"
+        when Symbol     then ":#{serialize_string(val.to_s)}"
+        when Integer    then "##{val}"
+        when Float      then "##{val}"
         when TrueClass  then "1"
         when FalseClass then "0"
         when NilClass   then "-"
