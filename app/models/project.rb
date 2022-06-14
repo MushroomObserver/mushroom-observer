@@ -50,9 +50,14 @@ class Project < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :images
-  has_and_belongs_to_many :observations
-  has_and_belongs_to_many :species_lists
+  has_many :project_images, dependent: :destroy
+  has_many :images, through: :project_images
+
+  has_many :project_observations, dependent: :destroy
+  has_many :observations, through: :project_observations
+
+  has_many :project_species_lists, dependent: :destroy
+  has_many :species_lists, through: :project_species_lists
 
   before_destroy :orphan_drafts
 

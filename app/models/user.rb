@@ -279,9 +279,9 @@ class User < AbstractModel
                                         foreign_key: "reviewer_id"
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
-  has_and_belongs_to_many :user_groups,
-                          class_name: "UserGroup",
-                          join_table: "user_groups_users"
+  has_many :user_group_users, dependent: :destroy
+  has_many :user_groups, through: "user_group_users"
+
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",
                           join_table: "name_descriptions_authors"

@@ -87,9 +87,13 @@ class SpeciesList < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :observations, after_add: :add_obs_callback,
-                                         before_remove: :remove_obs_callback
+  has_many :project_species_lists, dependent: :destroy
+  has_many :projects, through: :project_species_lists
+
+  has_many :species_list_observations, dependent: :destroy
+  has_many :observations, through: :species_list_observations,
+                          after_add: :add_obs_callback,
+                          before_remove: :remove_obs_callback
 
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
