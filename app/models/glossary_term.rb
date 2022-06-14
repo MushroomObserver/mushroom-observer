@@ -12,8 +12,8 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
 
   has_many :glossary_term_images, dependent: :destroy
-  has_many :images, through: :glossary_term_images,
-                    -> { order(vote_cache: :desc) }
+  has_many :images, through: :glossary_term_images
+                    # -> { order(vote_cache: :desc) }
 
   validates :name, presence: {
     message: proc { :glossary_error_name_blank.t }
