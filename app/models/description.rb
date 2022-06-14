@@ -401,7 +401,11 @@ class Description < AbstractModel
   def group_user_ids(table)
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
-      self.class.connection.select_values(select_group_user_ids(table).to_sql)
+      table.to_s.classify.constantize.
+        joins(user_group: :users).
+        where("#{type_tag}_id" => id).
+        order(user_id: :asc).distinct.
+        pluck(:user_id)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
@@ -409,25 +413,11 @@ class Description < AbstractModel
   def group_ids(table)
     @group_ids ||= {}
     @group_ids[table] ||=
-      self.class.connection.select_values(select_group_ids(table).to_sql)
+      table.to_s.classify.constantize.
+        where("#{type_tag}_id" => id).
+        order(user_group_id: :asc).distinct.
+        pluck(:user_group_id)
   end
-
-  private
-
-  def select_group_user_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    table.join(UserGroupUser.arel_table).on(table[:"#{type_tag}_id"].eq(id).
-        and(table[:user_group_id].eq(UserGroupUser[:user_group_id]))).distinct.
-      project(UserGroupUser[:user_id]).order(UserGroupUser[:user_id].asc)
-  end
-
-  def select_group_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
-      project(table[:user_group_id]).order(table[:user_group_id].asc)
-  end
-
-  public
 
   ##############################################################################
   #
