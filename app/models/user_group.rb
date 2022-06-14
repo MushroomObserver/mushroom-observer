@@ -42,29 +42,34 @@
 
 class UserGroup < AbstractModel
   has_many :user_group_users, dependent: :destroy
-  has_many :users, through: "user_group_users"
+  has_many :users, through: :user_group_users
 
   has_many :location_description_admins, dependent: :destroy
-  has_many :locations_admin, through: :location_description_admins,
-                             source: :location_description
+  has_many :locations_admined, through: :location_description_admins,
+                               source: :location_description
+
   has_many :location_description_writers, dependent: :destroy
-  has_many :locations_writer, through: :location_description_writers,
-                              source: :location_description
+  has_many :locations_written, through: :location_description_writers,
+                               source: :location_description
+
   has_many :location_description_readers, dependent: :destroy
-  has_many :locations_reader, through: :location_description_readers,
-                              source: :location_description
+  has_many :locations_read, through: :location_description_readers,
+                            source: :location_description
+
   has_many :name_description_admins, dependent: :destroy
-  has_many :names_admin, through: :name_description_admins,
-                         source: :name_description
+  has_many :names_admined, through: :name_description_admins,
+                           source: :name_description
+
   has_many :name_description_writers, dependent: :destroy
-  has_many :names_writer, through: :name_description_writers,
-                          source: :name_description
+  has_many :names_written, through: :name_description_writers,
+                           source: :name_description
+
   has_many :name_description_readers, dependent: :destroy
-  has_many :names_reader, through: :name_description_readers,
-                          source: :name_description
+  has_many :names_read, through: :name_description_readers,
+                        source: :name_description
 
   has_one :project
-  has_one :admin_project, class_name: "Project", foreign_key: "admin_group_id"
+  has_one :admin_project, class_name: "Project", foreign_key: :admin_group_id
 
   # Returns +name+ for debugging.
   def text_name
