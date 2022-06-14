@@ -192,9 +192,9 @@ end
 def get_new_images(last_update)
   Image.where(updated_at: last_update..).
     includes(:observation_images).each do |img|
-      img.observation_images.each {
-        |obs_img| result << [obs_img.observation_id, img.updated_at]
-      }
+      img.observation_images.each do |obs_img|
+         result << [obs_img.observation_id, img.updated_at]
+      end
     end
 end
 
