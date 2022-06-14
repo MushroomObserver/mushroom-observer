@@ -284,7 +284,7 @@ class User < AbstractModel
 
   has_many :herbarium_curators, dependent: :destroy
   has_many :curated_herbaria, through: :herbarium_curators,
-                              class_name: "Herbarium"
+                              class_name: "Herbarium", source: :herbarium
 
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",

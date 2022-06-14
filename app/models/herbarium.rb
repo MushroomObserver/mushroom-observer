@@ -46,7 +46,8 @@ class Herbarium < AbstractModel
   belongs_to :location
 
   has_many :herbarium_curators, dependent: :destroy
-  has_many :curators, through: :herbarium_curators, class_name: "User"
+  has_many :curators, through: :herbarium_curators, class_name: "User",
+                      source: :user
 
   # If this is a user's personal herbarium (there should only be one?) then
   # personal_user_id is set to mark whose personal herbarium it is.
