@@ -73,20 +73,20 @@ class LocationDescription < Description
   has_many :interests, as: :target, dependent: :destroy
 
   has_many :location_description_admins
-  has_many :admin_groups, source: :user_group,
-                          through: :location_description_admins
+  has_many :admin_groups, through: :location_description_admins,
+                          class_name: "UserGroup", source: :user_group
   has_many :location_description_writers
-  has_many :writer_groups, source: :user_group,
-                           through: :location_description_writers
+  has_many :writer_groups, through: :location_description_writers,
+                           class_name: "UserGroup", source: :user_group
   has_many :location_description_readers
-  has_many :reader_groups, source: :user_group,
-                           join_table: :location_description_readers
+  has_many :reader_groups, join_table: :location_description_readers,
+                           class_name: "UserGroup", source: :user_group
   has_many :location_description_authors
-  has_many :authors, source: :user,
-                     through: :location_description_authors
+  has_many :authors, through: :location_description_authors,
+                     class_name: "User", source: :user
   has_many :location_description_editors
-  ha_many :editors, source: :user,
-                    through: :location_description_editors
+  has_many :editors, through: :location_description_editors,
+                     class_name: "User", source: :user
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 

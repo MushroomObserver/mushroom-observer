@@ -96,20 +96,20 @@ class NameDescription < Description
   has_many :interests, as: :target, dependent: :destroy
 
   has_many :name_description_admins
-  has_many :admin_groups, source: :user_group,
-                          through: :name_description_admins
+  has_many :admin_groups, through: :name_description_admins,
+                          class_name: "UserGroup", source: :user_group
   has_many :name_description_writers
-  has_many :writer_groups, source: :user_group,
-                           through: :name_description_writers
+  has_many :writer_groups, through: :name_description_writers,
+                           class_name: "UserGroup", source: :user_group
   has_many :name_description_readers
-  has_many :reader_groups, source: :user_group,
-                           join_table: :name_description_readers
+  has_many :reader_groups, join_table: :name_description_readers,
+                           class_name: "UserGroup", source: :user_group
   has_many :name_description_authors
-  has_many :authors, source: :user,
-                     through: :name_description_authors
+  has_many :authors, through: :name_description_authors,
+                     class_name: "User", source: :user
   has_many :name_description_editors
-  ha_many :editors, source: :user,
-                    through: :name_description_editors
+  has_many :editors, through: :name_description_editors,
+                     class_name: "User", source: :user
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
