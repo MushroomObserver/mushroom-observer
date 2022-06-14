@@ -402,7 +402,7 @@ class Description < AbstractModel
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
       table.to_s.classify.constantize.
-        joins(user_group: :users).
+        joins(user_group: :user_group_users).
         where("#{type_tag}_id" => id).
         order(user_id: :asc).distinct.
         pluck(:user_id)
