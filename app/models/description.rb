@@ -427,7 +427,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name}_authors.singularize".to_sym
+    "#{table_name.singularize}_authors".to_sym
   end
 
   # Wrapper around class method of same name
@@ -437,7 +437,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name}_editors.singularize".to_sym
+    "#{table_name.singularize}_editors".to_sym
   end
 
   # Wrapper around class method of same name
