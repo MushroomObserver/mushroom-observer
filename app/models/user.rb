@@ -282,6 +282,10 @@ class User < AbstractModel
   has_many :user_group_users, dependent: :destroy
   has_many :user_groups, through: "user_group_users"
 
+  has_many :herbarium_curators, dependent: :destroy
+  has_many :curated_herbaria, through: :herbarium_curators,
+                              class_name: "Herbarium"
+
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",
                           join_table: "name_descriptions_authors"
@@ -294,9 +298,6 @@ class User < AbstractModel
   has_and_belongs_to_many :edited_locations,
                           class_name: "LocationDescription",
                           join_table: "location_descriptions_editors"
-  has_and_belongs_to_many :curated_herbaria,
-                          class_name: "Herbarium",
-                          join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -533,11 +534,10 @@ class User < AbstractModel
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
     # Note: ActiveRecord joins: through is slower; produces two extra joins
-    ugu = Arel::Table.new(:user_groups_users)
-
-    select_manager = Project.arel_table.join(ugu).
-                     on(Project[:admin_group_id].eq(ugu[:user_group_id]).
-                        and(ugu[:user_id].eq(id)))
+    select_manager = Project.arel_table.join(UserGroupUser.arel_table).
+                     on(Project[:admin_group_id].eq(
+                       UserGroupUser[:user_group_id]
+                     ).and(UserGroupUser[:user_id].eq(id)))
 
     @projects_admin ||= Project.joins(*select_manager.join_sources)
   end
@@ -616,9 +616,8 @@ class User < AbstractModel
 
   def species_lists_in_users_projects
     project_ids = projects_member.map(&:id)
-    psl = Arel::Table.new(:projects_species_lists)
-    psl.project(psl[:species_list_id]).
-      where(psl[:project_id].in(project_ids)).uniq
+    psl.project(ProjectSpeciesList[:species_list_id]).
+      where(ProjectSpeciesList[:project_id].in(project_ids)).uniq
   end
 
   ##############################################################################

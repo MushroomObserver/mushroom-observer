@@ -139,10 +139,9 @@ class SpeciesList < AbstractModel
   end
 
   def arel_delete_observations_species_lists(id)
-    osl = Arel::Table.new(:observations_species_lists)
     Arel::DeleteManager.new.
-      from(osl).
-      where(osl[:species_list_id].eq(id))
+      from(SpeciesListObservation).
+      where(SpeciesListObservation[:species_list_id].eq(id))
   end
 
   ##############################################################################
