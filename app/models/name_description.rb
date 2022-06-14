@@ -104,7 +104,7 @@ class NameDescription < Description
                            source: :user_group
 
   has_many :name_description_readers, dependent: :destroy
-  has_many :reader_groups, join_table: :name_description_readers,
+  has_many :reader_groups, through: :name_description_readers,
                            source: :user_group
 
   has_many :name_description_authors, dependent: :destroy

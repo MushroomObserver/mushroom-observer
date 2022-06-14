@@ -81,7 +81,7 @@ class LocationDescription < Description
                            source: :user_group
 
   has_many :location_description_readers, dependent: :destroy
-  has_many :reader_groups, join_table: :location_description_readers,
+  has_many :reader_groups, through: :location_description_readers,
                            source: :user_group
 
   has_many :location_description_authors, dependent: :destroy
