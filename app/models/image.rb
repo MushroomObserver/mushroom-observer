@@ -223,8 +223,13 @@ class Image < AbstractModel
 
   has_many :observation_images, dependent: :destroy
   has_many :observations, through: :observation_images
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :glossary_terms
+
+  has_many :project_images, dependent: :destroy
+  has_many :projects, through: :project_images
+
+  has_many :glossary_term_images, dependent: :destroy
+  has_many :glossary_terms, through: :glossary_term_images
+
   has_many :thumb_clients, class_name: "Observation",
                            foreign_key: "thumb_image_id"
   has_many :image_votes

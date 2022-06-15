@@ -87,9 +87,13 @@ class SpeciesList < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :observations, after_add: :add_obs_callback,
-                                         before_remove: :remove_obs_callback
+  has_many :project_species_lists, dependent: :destroy
+  has_many :projects, through: :project_species_lists
+
+  has_many :species_list_observations, dependent: :destroy
+  has_many :observations, through: :species_list_observations,
+                          after_add: :add_obs_callback,
+                          before_remove: :remove_obs_callback
 
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
@@ -121,24 +125,7 @@ class SpeciesList < AbstractModel
     # all of the observations (and not just their ids).  Note also that we
     # would still have to update the user's contribution anyway.
 
-    # Nimmo Note: afaik, we cannot yet use AR delete_all here because the
-    # observations_species_lists table is not backed by a model
-    # (i.e., it's has_and_belongs_to_many vs. has_many_through)
-    # Conversion to HMT is possible but not super-simple.
-    # SpeciesList.connection.delete(%(
-    #   DELETE FROM observations_species_lists
-    #   WHERE species_list_id = #{id}
-    # ))
-    delete_manager = arel_delete_observations_species_lists(id)
-    # puts(delete_manager.to_sql)
-    SpeciesList.connection.delete(delete_manager.to_sql)
-  end
-
-  def arel_delete_observations_species_lists(id)
-    osl = Arel::Table.new(:observations_species_lists)
-    Arel::DeleteManager.new.
-      from(osl).
-      where(osl[:species_list_id].eq(id))
+    SpeciesListObservation.where(species_list_id: id).delete_all
   end
 
   ##############################################################################

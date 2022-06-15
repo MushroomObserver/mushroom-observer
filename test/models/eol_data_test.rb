@@ -42,7 +42,7 @@ class EolDataTest < UnitTestCase
   def test_glossary_term_query
     obj = EolData.new
     name_count = obj.name_count
-    Name.connection.delete("DELETE FROM glossary_terms_images")
+    Name.connection.delete("DELETE FROM glossary_term_images")
     obj = EolData.new
     assert_equal(name_count, obj.name_count)
   end

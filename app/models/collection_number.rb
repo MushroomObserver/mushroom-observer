@@ -51,7 +51,8 @@
 #  None.
 #
 class CollectionNumber < AbstractModel
-  has_and_belongs_to_many :observations
+  has_many :observation_collection_numbers, dependent: :destroy
+  has_many :observations, through: :observation_collection_numbers
   belongs_to :user
 
   before_update :log_update

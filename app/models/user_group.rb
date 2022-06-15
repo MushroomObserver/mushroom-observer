@@ -41,7 +41,9 @@
 ################################################################################
 
 class UserGroup < AbstractModel
-  has_and_belongs_to_many :users
+  has_many :user_group_users, dependent: :destroy
+  has_many :users, through: "user_group_users"
+
   has_one :project
   has_one :admin_project, class_name: "Project", foreign_key: "admin_group_id"
 

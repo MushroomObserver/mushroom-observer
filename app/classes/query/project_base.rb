@@ -29,9 +29,9 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_boolean_parameters
-    add_join(:images_projects) if params[:has_images]
-    add_join(:observations_projects) if params[:has_observations]
-    add_join(:projects_species_lists) if params[:has_species_lists]
+    add_join(:project_images) if params[:has_images]
+    add_join(:project_observations) if params[:has_observations]
+    add_join(:project_species_lists) if params[:has_species_lists]
     add_join(:comments) if params[:has_comments]
     add_boolean_condition(
       "LENGTH(COALESCE(projects.summary,'')) > 0",

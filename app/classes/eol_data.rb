@@ -182,9 +182,9 @@ class EolData
 
   GLOSSARY_TERM_CONDITIONS = %(
     FROM images, observation_images, observations, names, glossary_terms
-    LEFT OUTER JOIN glossary_terms_images
-    ON glossary_terms.id = glossary_terms_images.glossary_term_id
-    WHERE ((images.id = glossary_terms_images.image_id)
+    LEFT OUTER JOIN glossary_term_images
+    ON glossary_terms.id = glossary_term_images.glossary_term_id
+    WHERE ((images.id = glossary_term_images.image_id)
            OR (glossary_terms.thumb_image_id = images.id))
     AND observation_images.image_id = images.id
     AND observation_images.observation_id = observations.id

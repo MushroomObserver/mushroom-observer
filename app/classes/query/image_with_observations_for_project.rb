@@ -12,9 +12,9 @@ class Query::ImageWithObservationsForProject < Query::ImageWithObservations
   def initialize_flavor
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    where << "observations_projects.project_id = '#{project.id}'"
+    where << "project_observations.project_id = '#{project.id}'"
     add_join(:observation_images, :observations)
-    add_join(:observations, :observations_projects)
+    add_join(:observations, :project_observations)
     super
   end
 

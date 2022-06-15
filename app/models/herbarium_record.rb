@@ -45,7 +45,9 @@
 class HerbariumRecord < AbstractModel
   belongs_to :herbarium
   belongs_to :user
-  has_and_belongs_to_many :observations
+
+  has_many :observation_herbarium_records, dependent: :destroy
+  has_many :observations, through: :observation_herbarium_records
 
   # Used to allow herbarium name to be entered as text in forms.
   attr_accessor :herbarium_name
