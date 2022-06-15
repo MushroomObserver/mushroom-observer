@@ -398,6 +398,7 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, "Amanita Subg. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg Vaginatae")
     assert_name_match_author_optional(pat, '"Amanita subg. Vaginatae"')
+    assert_name_match_author_optional(pat, "Amanita subgen. Vaginatae")
   end
 
   def test_section_pat

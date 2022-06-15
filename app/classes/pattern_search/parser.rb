@@ -6,10 +6,10 @@ module PatternSearch
 
     VAL_REGEX = /
       "([^\\"]+|\\.)*" | '([^\\']+|\\.)*' | ([^\s\\,]+|\\.)+
-    /x.freeze
+    /x
     TERM_REGEX = /
       ^(\S+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)
-    /x.freeze
+    /x
 
     def initialize(string)
       self.incoming_string = string
