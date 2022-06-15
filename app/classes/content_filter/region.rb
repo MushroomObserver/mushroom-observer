@@ -20,9 +20,9 @@ class ContentFilter
     def make_regexp(query, val)
       if Location.understood_continent?(val)
         vals = Location.countries_in_continent(val).join("|")
-        "REGEXP " + query.escape(", (#{vals})$")
+        "REGEXP #{query.escape(", (#{vals})$")}"
       else
-        "LIKE " + query.escape("%, #{val}")
+        "LIKE #{query.escape("%, #{val}")}"
       end
     end
   end
