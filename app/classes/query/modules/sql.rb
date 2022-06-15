@@ -59,7 +59,7 @@ module Query::Modules::Sql
       if x.match(/^\(.*\)$/) || !x.match(/ or /i)
         x
       else
-        "(" + x + ")"
+        "(#{x})"
       end
     end
     ands.join(" AND ")

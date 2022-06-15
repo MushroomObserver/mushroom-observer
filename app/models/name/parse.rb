@@ -253,7 +253,7 @@ class Name < AbstractModel
       rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
-      author2 = author.blank? ? "" : " " + author
+      author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
       parent_name =
         Name.ranks_below_genus.include?(rank) ? name.sub(LAST_PART, "") : nil
@@ -282,7 +282,7 @@ class Name < AbstractModel
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
-      author2 = author.blank? ? "" : " " + author
+      author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
       parent_name = name.sub(LAST_PART, "")
       display_name = format_autonym(name, author, rank, deprecated)

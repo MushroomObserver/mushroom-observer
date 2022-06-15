@@ -32,7 +32,7 @@ class AjaxController
 
   def render_errors(errors, args)
     name = args[:original_name].to_s
-    errors += "\n" + :runtime_no_upload_image.t(name: name)
+    errors += "\n#{:runtime_no_upload_image.t(name: name)}"
     logger.error("UPLOAD_FAILED: #{errors.inspect}")
     render(plain: errors.strip_html, status: :internal_server_error)
   end

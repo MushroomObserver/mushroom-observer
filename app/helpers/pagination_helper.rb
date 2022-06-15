@@ -124,7 +124,7 @@ module PaginationHelper
     url = reload_with_args(params)
     if args[:anchor]
       url.sub!(/#.*/, "")
-      url += "#" + args[:anchor]
+      url += "##{args[:anchor]}"
     end
     content_tag(:li, link_to(label, url))
   end
