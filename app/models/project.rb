@@ -169,17 +169,16 @@ class Project < AbstractModel
   # NOTE: Arel is definitely more efficient than AR for this join.
   # rubocop:disable Metrics/AbcSize
   def arel_select_leave_these_img_ids(obs, imgs)
-    io = Arel::Table.new(:images_observations)
     op = Arel::Table.new(:observations_projects)
     img_ids = imgs.map(&:id)
 
-    io.join(op).on(
-      io[:image_id].in(img_ids).and(
-        io[:observation_id].not_eq(obs.id).and(
-          io[:observation_id].eq(op[:observation_id])
+    ObservationImage.arel_table.join(op).on(
+      ObservationImage[:image_id].in(img_ids).and(
+        ObservationImage[:observation_id].not_eq(obs.id).and(
+          ObservationImage[:observation_id].eq(op[:observation_id])
         ).and(op[:project_id].eq(id))
       )
-    ).project(io[:image_id])
+    ).project(ObservationImage[:image_id])
   end
   # rubocop:enable Metrics/AbcSize
 

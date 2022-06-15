@@ -158,7 +158,8 @@ class Observation < AbstractModel
   # consensus several times and send bogus emails!!
   has_many :namings
 
-  has_and_belongs_to_many :images
+  has_many :observation_images, dependent: :destroy
+  has_many :images, through: :observation_images
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
                                           before_remove: :remove_spl_callback

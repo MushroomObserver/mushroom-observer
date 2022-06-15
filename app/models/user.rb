@@ -857,7 +857,7 @@ class User < AbstractModel
       [:collection_numbers_observations, :observation_id],
       [:comments,                        :target_id, :target_type],
       [:herbarium_records_observations,  :observation_id],
-      [:images_observations,             :observation_id],
+      [:observation_images,              :observation_id],
       [:interests,                       :target_id, :target_type],
       [:namings,                         :observation_id],
       [:rss_logs,                        :observation_id],

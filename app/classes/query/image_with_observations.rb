@@ -26,7 +26,7 @@ module Query
     end
 
     def initialize_flavor
-      add_join(:images_observations, :observations)
+      add_join(:observation_images, :observations)
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
       initialize_association_parameters
@@ -46,7 +46,7 @@ module Query
       add_id_condition(
         "observations_projects.project_id",
         lookup_projects_by_name(params[:projects]),
-        :images_observations, :observations, :observations_projects
+        :observation_images, :observations, :observations_projects
       )
     end
 

@@ -221,7 +221,8 @@ class Image < AbstractModel
   require "fileutils"
   require "net/http"
 
-  has_and_belongs_to_many :observations
+  has_many :observation_images, dependent: :destroy
+  has_many :observations, through: :observation_images
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :glossary_terms
   has_many :thumb_clients, class_name: "Observation",

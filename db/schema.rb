@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_28_202651) do
+ActiveRecord::Schema.define(version: 2022_06_13_151300) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -174,12 +174,6 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
-  end
-
-  create_table "images_observations", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "image_id", default: 0, null: false
-    t.integer "observation_id", default: 0, null: false
-    t.index ["observation_id"], name: "index_images_observations_on_observation_id"
   end
 
   create_table "images_projects", id: false, charset: "utf8mb3", force: :cascade do |t|
@@ -453,6 +447,13 @@ ActiveRecord::Schema.define(version: 2022_01_28_202651) do
     t.text "note_template"
     t.datetime "updated_at"
     t.boolean "require_specimen", default: false, null: false
+  end
+
+  create_table "observation_images", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "image_id", default: 0, null: false
+    t.integer "observation_id", default: 0, null: false
+    t.integer "rank", default: 0, null: false
+    t.index ["observation_id"], name: "index_observation_images_on_observation_id"
   end
 
   create_table "observation_views", charset: "utf8mb3", force: :cascade do |t|
