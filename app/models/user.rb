@@ -839,7 +839,7 @@ class User < AbstractModel
       [:name_description_admins,      :user_group_id],
       [:name_description_readers,     :user_group_id],
       [:name_description_writers,     :user_group_id],
-      [:user_groups,                   :id]
+      [:user_groups,                  :id]
     ].each do |table, col|
       table = Arel::Table.new(table)
       delete_manager = Arel::DeleteManager.new.
@@ -900,10 +900,10 @@ class User < AbstractModel
       [:images,                         :user_id],
       [:image_votes,                    :user_id],
       [:interests,                      :user_id],
-      [:location_description_authors,  :user_id],
-      [:location_description_editors,  :user_id],
-      [:name_description_authors,      :user_id],
-      [:name_description_editors,      :user_id],
+      [:location_description_authors,   :user_id],
+      [:location_description_editors,   :user_id],
+      [:name_description_authors,       :user_id],
+      [:name_description_editors,       :user_id],
       [:notifications,                  :user_id],
       [:observations,                   :user_id],
       [:publications,                   :user_id],
