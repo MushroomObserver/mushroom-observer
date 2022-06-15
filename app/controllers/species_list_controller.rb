@@ -487,11 +487,6 @@ class SpeciesListController < ApplicationController
     SpeciesListObservation.insert_all(
       ids.map { |id| { observation_id: id, species_list_id: species_list.id } }
     )
-      INSERT INTO species_list_observations
-        (observation_id, species_list_id)
-      VALUES
-        #{ids.map { |id| "(#{id},#{species_list.id})" }.join(",")}
-    ))
     flash_notice(:species_list_add_remove_add_success.t(num: ids.length))
   end
 
