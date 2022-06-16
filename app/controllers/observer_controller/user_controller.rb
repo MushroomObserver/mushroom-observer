@@ -84,7 +84,7 @@ module ObserverController::UserController
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
-    @users = User.order("contribution desc, name, login")
+    @users = User.by_contribution
   end
 
   # show_user.rhtml

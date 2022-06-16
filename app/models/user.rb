@@ -330,6 +330,10 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
+  scope :by_contribution, -> {
+    order(contribution: :desc, name: :asc, login: :asc)
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation
