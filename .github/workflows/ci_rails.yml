@@ -81,4 +81,4 @@ jobs:
     # https://github.com/devmasx/brakeman-linter-action
     - name: Brakeman report
       run: |
-        bundle exec brakeman -o brakeman.html > tmp/brakeman.html || exit 0
+        bundle exec brakeman -o brakeman.html > brakeman.html || exit 0
