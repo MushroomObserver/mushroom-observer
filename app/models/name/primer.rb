@@ -43,20 +43,24 @@ module Name::Primer
         ORDER BY name_counts.count DESC, names.sort_name ASC
         LIMIT 100
       ))
-      # name_counts = Name.left_outer_joins(:name_descriptions).
-      #                 select(Name[:observations].count,
-      #                   NameDescription[:name_id]).
-      #                 group(:name_id)
+      Name.joins(:observations).group(:name_id).
+                      select(Arel.star.count, :name_id)
 
-      # data = Name.joins(name_counts).
-      #         where(Name[:id] == name_counts[:name_id]).
-      #         where(Name[:rank] == Name.ranks[:Species]).
-      #         where(name_counts[:count] > 1).
-      #         where(NameDescription[:name_id] == nil).
-      #         where(Name[:updated_at] > 1.week.ago).
-      #         select(Name[:id], name_counts[:count]).
-      #         order(name_counts[:count].desc, Name[:sort_name].asc).
-      #         take(100)
+
+      counts = Name.left_outer_joins(:descriptions).
+                select(Name[:observations].count, NameDescription[:name_id]).
+                order(Name[:observations].count).
+                group(:name_id)
+
+      data = Name.joins(name_counts).
+              where(Name[:id] == name_counts[:name_id]).
+              where(Name[:rank] == Name.ranks[:Species]).
+              where(name_counts[:count] > 1).
+              where(NameDescription[:name_id] == nil).
+              where(Name[:updated_at] > 1.week.ago).
+              select(Name[:id], name_counts[:count]).
+              order(name_counts[:count].desc, Name[:sort_name].asc).
+              take(100)
       #
       # pp data
 
