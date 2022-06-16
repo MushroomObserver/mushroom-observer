@@ -26,7 +26,7 @@ module Name::Primer
 
     # For NameController#needed_descriptions
     # Returns a list of the most popular 100 names that don't have descriptions.
-    def needed_descriptions
+    def descriptions_needed
       names = Name.where(description: nil).joins(:observations).
               group(:name_id).order(Arel.star.count.desc).limit(100).
               pluck(:id)

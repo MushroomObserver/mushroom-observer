@@ -167,7 +167,7 @@ class NameController < ApplicationController
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def needed_descriptions
     @help = :needed_descriptions_help
-    query = Name.needed_descriptions
+    query = Name.descriptions_needed
     show_selected_names(query, num_per_page: 100)
   end
 
