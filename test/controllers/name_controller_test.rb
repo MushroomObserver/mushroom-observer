@@ -976,7 +976,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_create_name_unauthored_authored
-    # Prove user can't create authored non-"Group" Name if unauthored one exists.
+    # Prove user can't create authored non-"Group" Name
+    # if unauthored one exists.
     old_name_count = Name.count
     name = names(:strobilurus_diminutivus_no_author)
     params = {
@@ -999,8 +1000,8 @@ class NameControllerTest < FunctionalTestCase
     expect = user.contribution
     assert_equal(expect, user.reload.contribution)
 
-    # And vice versa
-    # Prove user can't create unauthored non-"Group" Name if authored one exists.
+    # And vice versa. Prove user can't create unauthored non-"Group" Name
+    # if authored one exists.
     name = names(:coprinus_comatus)
     author = name.author
     params = {
@@ -2782,8 +2783,8 @@ class NameControllerTest < FunctionalTestCase
   # Another one found in the wild, probably already fixed.
   def test_update_name_merge_authored_with_old_style_unauthored
     login("rolf")
-    # Obsolete intrageneric Name, "Genus" with rank & author in the author field.
-    # (NameController no longer allows this.)
+    # Obsolete intrageneric Name, "Genus" with rank & author in the author
+    # field. (NameController no longer allows this.)
     old_style_name = Name.create!(
       text_name: "Amanita",
       search_name: "Amanita (sect. Vaginatae)",
@@ -3142,7 +3143,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: "list_rss_logs")
     assert(approved_name = Name.find_by(search_name: new_name_str))
     assert_not(approved_name.deprecated)
-    assert_equal("Species", Name.ranks.key(approved_name.rank))
+    assert_equal("Species", approved_name.rank)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)

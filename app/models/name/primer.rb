@@ -31,7 +31,8 @@ module Name::Primer
               group(:name_id).order(Arel.star.count.desc).limit(100).
               pluck(:id)
 
-      Query.lookup(:Name, :in_set, ids: names,
+      Query.lookup(:Name, :in_set,
+                   ids: names,
                    title: :needed_descriptions_title.l)
     end
 

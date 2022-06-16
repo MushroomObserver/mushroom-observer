@@ -278,12 +278,22 @@ class Name < AbstractModel
   require "fileutils"
 
   # modules with instance methods and maybe class methods
-  include Validation, Taxonomy, Synonymy, Resolve,
-          PropagateGenericClassifications, Primer, Notify, Spelling, Merge,
-          Lifeform, Format, Change
+  include Validation
+  include Taxonomy
+  include Synonymy
+  include Resolve
+  include PropagateGenericClassifications
+  include Primer
+  include Notify
+  include Spelling
+  include Merge
+  include Lifeform
+  include Format
+  include Change
 
   # modules with class methods only
-  extend Parse, Create
+  extend Parse
+  extend Create
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
