@@ -1583,13 +1583,13 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_1
     do_validate_classification_test(
-      "Species", "Kingdom: Fungi", "Kingdom: _Fungi_"
+      :Species, "Kingdom: Fungi", "Kingdom: _Fungi_"
     )
   end
 
   def test_validate_classification_2
     do_validate_classification_test(
-      "Species",
+      :Species,
       %(Kingdom: Fungi\r
         Phylum: Basidiomycota\r
         Class: Basidiomycetes\r
@@ -1604,14 +1604,14 @@ class NameTest < UnitTestCase
   end
 
   def test_validate_classification_3
-    do_validate_classification_test("Species", %(Kingdom: Fungi\r
+    do_validate_classification_test(:Species, %(Kingdom: Fungi\r
       \r
       Family: Amanitaceae),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_4
-    do_validate_classification_test("Species", %(Kingdom: _Fungi_\r
+    do_validate_classification_test(:Species, %(Kingdom: _Fungi_\r
       Family: _Amanitaceae_),
                                     "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
@@ -1630,7 +1630,7 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_8
     do_validate_classification_test(
-      "Species", "Family: Amanitaceae", "Family: _Amanitaceae_"
+      :Species, "Family: Amanitaceae", "Family: _Amanitaceae_"
     )
   end
 
@@ -2074,7 +2074,7 @@ class NameTest < UnitTestCase
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
     desc.reload
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
@@ -2111,12 +2111,12 @@ class NameTest < UnitTestCase
     # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
     # The point is to update the review date if Dick *were*, or reset the
     # status to unreviewed in the present case that he *isn't*.)
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     desc.save
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(:unreviewed, desc.review_status)
+    assert_equal("unreviewed", desc.review_status)
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)

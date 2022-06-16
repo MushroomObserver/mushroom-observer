@@ -44,7 +44,7 @@ module Name::Taxonomy
         end
       end
       descriptions.each do |d|
-        return true if d.review_status == :vetted &&
+        return true if d.review_status == "vetted" &&
                        d.ok_for_export && d.public
       end
     end
@@ -382,7 +382,7 @@ module Name::Taxonomy
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if ["Genus", "Species"].include?(rank)
+    return genus_or_species_is_ancestor? if [:Genus, :Species].include?(rank)
 
     false
   end
@@ -556,7 +556,7 @@ module Name::Taxonomy
         text.split(/\r?\n/).each do |line|
           match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
           if match
-            line_rank = match[1].downcase.capitalize
+            line_rank = match[1].downcase.capitalize.to_sym
             if (alt_rank = alt_ranks[line_rank])
               line_rank = alt_rank
             end
