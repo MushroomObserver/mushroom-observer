@@ -44,7 +44,8 @@ module Name::Taxonomy
         end
       end
       descriptions.each do |d|
-        return true if d.review_status == :vetted && d.ok_for_export && d.public
+        return true if d.review_status == "vetted" &&
+                       d.ok_for_export && d.public
       end
     end
     false

@@ -953,7 +953,7 @@ class NameController < ApplicationController
   # Show the data getting sent to EOL
   def eol_preview
     @timer_start = Time.current
-    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
+    eol_data(NameDescription.review_statuses.values_at("unvetted", "vetted"))
     @timer_end = Time.current
   end
 
@@ -1145,7 +1145,7 @@ class NameController < ApplicationController
       note_template = params[:notification][:note_template]
       note_template = nil if note_template.blank?
       if @notification.nil?
-        @notification = Notification.new(flavor: :name,
+        @notification = Notification.new(flavor: "name",
                                          user: @user,
                                          obj_id: name_id,
                                          note_template: note_template)

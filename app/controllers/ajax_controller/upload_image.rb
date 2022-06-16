@@ -68,7 +68,7 @@ module AjaxController::UploadImage
   end
 
   def image_original_name(args)
-    return nil if @user.keep_filenames == :toss
+    return nil if @user.keep_filenames == "toss"
 
     args[:original_name].to_s
   end

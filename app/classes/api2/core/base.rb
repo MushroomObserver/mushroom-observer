@@ -276,12 +276,12 @@ module API2::Base
 
   def clear_user
     User.current = self.user = nil
-    User.current_location_format = :postal
+    User.current_location_format = "postal"
   end
 
   def login_user(key)
     User.current = self.user = key.user
-    User.current_location_format = :postal
+    User.current_location_format = "postal"
     # (that overrides user pref in order to make it more consistent for apps)
     key.touch!
     self.api_key = key

@@ -2074,7 +2074,7 @@ class NameTest < UnitTestCase
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
     desc.reload
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
@@ -2111,12 +2111,12 @@ class NameTest < UnitTestCase
     # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
     # The point is to update the review date if Dick *were*, or reset the
     # status to unreviewed in the present case that he *isn't*.)
-    desc.update_review_status(:inaccurate)
+    desc.update_review_status("inaccurate")
     desc.save
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(:unreviewed, desc.review_status)
+    assert_equal("unreviewed", desc.review_status)
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
@@ -2210,8 +2210,8 @@ class NameTest < UnitTestCase
   end
 
   def test_hiding_authors
-    dick.hide_authors = :above_species
-    mary.hide_authors = :none
+    dick.hide_authors = "above_species"
+    mary.hide_authors = "none"
 
     name = names(:agaricus_campestris)
     User.current = mary

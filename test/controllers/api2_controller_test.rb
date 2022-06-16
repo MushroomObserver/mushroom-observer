@@ -271,7 +271,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     proj = rolf.projects_member.first
@@ -430,7 +430,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_vote_anonymity
     obs = observations(:coprinus_comatus_obs)
-    rolf.update!(votes_anonymous: :yes)
+    rolf.update!(votes_anonymous: "yes")
     rolfs_key = api_keys(:rolfs_api_key)
     marys_key = api_keys(:marys_api_key)
     rolfs_vote = obs.votes.find_by(user: rolf)

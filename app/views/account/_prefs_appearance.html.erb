@@ -6,14 +6,14 @@
 <div class="form-group push-down form-inline">
   <%= label_tag(:user_hide_authors, :prefs_hide_authors.t + ":") %>
   <%= form.select(:hide_authors,
-                  [[:prefs_hide_authors_none.l, :none],
-                   [:prefs_hide_authors_above_species.l, :above_species]],
+                  [[:prefs_hide_authors_none.l, "none"],
+                   [:prefs_hide_authors_above_species.l, "above_species"]],
                   class: "form-control") %><br/>
 
   <%= label_tag(:user_location_format, :prefs_location_format.t + ":") %>
   <%= form.select(:location_format,
-                  [[:prefs_location_format_postal.l, :postal],
-                   [:prefs_location_format_scientific.l, :scientific]],
+                  [[:prefs_location_format_postal.l, "postal"],
+                   [:prefs_location_format_scientific.l, "scientific"]],
                   class: "form-control") %><br/>
 
   <%= label_tag(:user_theme, :prefs_theme.t + ":") %>

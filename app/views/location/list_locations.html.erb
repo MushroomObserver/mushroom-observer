@@ -50,7 +50,7 @@
       <%= paginate_block(@undef_pages) do %>
         <div class="list-group">
           <% @undef_data.each do |location, count|
-            if @undef_location_format == :scientific
+            if @undef_location_format == "scientific"
               location = Location.reverse_name(location)
             end %>
             <div class="list-group-item">

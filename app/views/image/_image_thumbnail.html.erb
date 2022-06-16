@@ -22,7 +22,7 @@
       img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
                           data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
-      <%= 
+      <%=
         lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
         show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
         show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
@@ -35,7 +35,7 @@
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
         <% end %>
         <% if original && image && !image.original_name.blank? &&
-              (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+              (check_permission(image) || image.user && image.user.keep_filenames == "keep_and_show") %>
           <center>
             <span><%= image.original_name %></span>
           </center>

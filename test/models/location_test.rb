@@ -413,13 +413,13 @@ class LocationTest < UnitTestCase
     loc = Location.first
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     loc.update_attribute(:display_name, "One, Two, Three")
     assert_equal("One, Two, Three", loc.name)
     assert_equal("Three, Two, One", loc.scientific_name)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     loc.update_attribute(:display_name, "Un, Deux, Trois")
     assert_equal("Trois, Deux, Un", loc.name)
     assert_equal("Un, Deux, Trois", loc.scientific_name)

@@ -10,7 +10,7 @@ module Name::Format
   def display_name
     str = self[:display_name]
     if User.current &&
-       User.current.hide_authors == :above_species &&
+       User.current.hide_authors == "above_species" &&
        Name.ranks_above_species.include?(rank)
       str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end

@@ -509,7 +509,7 @@ class QueryTest < UnitTestCase
       Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id, roy.id]) -
         query.result_ids
     )
-    assert_equal(roy.location_format, :scientific)
+    assert_equal(roy.location_format, "scientific")
     assert_equal(
       Set.new,
       Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results
@@ -3198,12 +3198,12 @@ class QueryTest < UnitTestCase
     elgin_co = locations(:elgin_co)
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     assert_query([albion, elgin_co], :Location, :in_set,
                  ids: [albion.id, elgin_co.id], by: :name)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     assert_query([elgin_co, albion], :Location, :in_set,
                  ids: [albion.id, elgin_co.id], by: :name)
 
@@ -3213,12 +3213,12 @@ class QueryTest < UnitTestCase
     obs2.update(location: elgin_co)
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     assert_query([obs1, obs2], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     assert_query([obs2, obs1], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
   end

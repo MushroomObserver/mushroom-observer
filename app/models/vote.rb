@@ -222,7 +222,7 @@ class Vote < AbstractModel
   # This is the first step: abstracting it as a method on Vote instance.
   # Now we are free to change the implementation later.
   def anonymous?
-    (user.votes_anonymous == :yes) ||
+    (user.votes_anonymous == "yes") ||
       (user.votes_anonymous == :old &&
        updated_at <= Time.zone.parse(MO.vote_cutoff))
   end

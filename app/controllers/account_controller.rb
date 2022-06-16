@@ -350,7 +350,7 @@ class AccountController < ApplicationController
       when :string  then update_pref(pref, val.to_s)
       when :integer then update_pref(pref, val.to_i)
       when :boolean then update_pref(pref, val == "1")
-      when :enum    then update_pref(pref, val || User.enum_default_value(pref))
+      when :enum    then update_pref(pref, val)
       when :content_filter then update_content_filter(pref, val)
       end
     end
