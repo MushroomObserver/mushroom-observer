@@ -33,7 +33,7 @@
 #  note_status::          Return some basic stats on notes fields.
 #
 #  ==== Source Info
-#  source_type::          Category of source, e.g. :public, :project, :user.
+#  source_type::          Category of source, e.g. "public", "project", "user".
 #  source_name::          Source identifier (e.g., Project title).
 #  source_object::        Return reference to object representing source.
 #  belongs_to_project?::  Does this Description belong to a given Project?

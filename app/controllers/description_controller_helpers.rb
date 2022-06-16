@@ -426,7 +426,7 @@ module DescriptionControllerHelpers
     if params[:project].present?
       project = Project.find(params[:project])
       if @user.in_group?(project.user_group)
-        desc.source_type  = :project
+        desc.source_type  = "project"
         desc.source_name  = project.title
         desc.project      = project
         desc.public       = false
@@ -443,7 +443,7 @@ module DescriptionControllerHelpers
       clone = find_description(params[:clone])
       if in_admin_mode? || clone.is_reader?(@user)
         desc.all_notes = clone.all_notes
-        desc.source_type  = :user
+        desc.source_type  = "user"
         desc.source_name  = ""
         desc.project_id   = nil
         desc.public       = false
@@ -546,7 +546,8 @@ module DescriptionControllerHelpers
       unless root ||
              ((admin || author) &&
                # originally was
-               # (desc.source_type != :project && desc.source_type != :project))
+               # (desc.source_type != "project" &&
+               #  desc.source_type != "project"))
                # see https://www.pivotaltracker.com/story/show/174566300
                desc.source_type != "project")
         params.delete(:source_name)
@@ -596,7 +597,7 @@ module DescriptionControllerHelpers
     new_writers << UserGroup.one_user(desc.user) if old_write && !new_write
 
     # ...except in the case of projects.
-    if (desc.source_type == :project) &&
+    if (desc.source_type == "project") &&
        (project = desc.project)
       if old_read && !new_read
         # Add project members to readers.
