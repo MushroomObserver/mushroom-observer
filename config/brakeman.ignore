@@ -1,6 +1,26 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "681ca47f4db7740255860f5ec0363d27025626ea08ef772b118ed5bfb4792135",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/description.rb",
+      "line": 408,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "table.to_s.classify.constantize.joins(:user_group => :user_group_users).where(\"#{type_tag}_id\" => id)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Description",
+        "method": "group_user_ids"
+      },
+      "user_input": "type_tag",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "Command Injection",
       "warning_code": 14,
       "fingerprint": "707f76fbf1433a3c3e2bb17f47366eef235bc1973f5d82c7539efcec1db82bac",
@@ -39,8 +59,28 @@
       "user_input": "Image.find(@id).original_url",
       "confidence": "High",
       "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "dd5044f522b1b5ab980da2941a14bcb54700f5ec4f307a699a6415e12b8a6f79",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/description.rb",
+      "line": 419,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "table.to_s.classify.constantize.where(\"#{type_tag}_id\" => id)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Description",
+        "method": "group_ids"
+      },
+      "user_input": "type_tag",
+      "confidence": "Weak",
+      "note": ""
     }
   ],
-  "updated": "2019-03-03 01:01:00 +0000",
-  "brakeman_version": "4.4.0"
+  "updated": "2022-06-16 03:48:11 +0000",
+  "brakeman_version": "5.2.3"
 }
