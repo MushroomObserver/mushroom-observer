@@ -396,6 +396,8 @@ class Description < AbstractModel
     @group_users[table] ||= User.where(id: group_user_ids(table)).to_a
   end
 
+  private
+
   # Do minimal query to enumerate the users in a list of groups.  Return as an
   # Array of ids.  Caches result.
   def group_user_ids(table)
@@ -418,6 +420,8 @@ class Description < AbstractModel
         order(user_group_id: :asc).distinct.
         pluck(:user_group_id)
   end
+
+  public
 
   ##############################################################################
   #
