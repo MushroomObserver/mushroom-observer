@@ -29,8 +29,16 @@
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
-  include Vote, UploadImage, Primers, Pivotal, OldTranslation, ExternalLink,
-          Export, EXIF, AutoComplete, APIKey
+  include Vote
+  include UploadImage
+  include Primers
+  include Pivotal
+  include OldTranslation
+  include ExternalLink
+  include Export
+  include EXIF
+  include AutoComplete
+  include APIKey
 
   disable_filters
   around_action :catch_ajax_errors

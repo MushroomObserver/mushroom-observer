@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# NOTE: Use `Name extend Parse`: these are all class methods
+# NOTE: Use `class Name extend Parse`: these are all class methods
 module Name::Parse
-
   # RankMatcher:: Lighweight class used to get ranks from text strings
   # Use:
   #   XXX_MATCHERS = [RankMatcher.new(:Rank1, /regexp1/),
@@ -50,14 +49,14 @@ module Name::Parse
     RankMatcher.new(:Subgenus,   / subg\. /),
     RankMatcher.new(:Species,    / /),
     RankMatcher.new(:Family,     /^\S+aceae$/),
-    RankMatcher.new(:Family,     /^\S+ineae$/),    # :Suborder
+    RankMatcher.new(:Family,     /^\S+ineae$/), # :Suborder
     RankMatcher.new(:Order,      /^\S+ales$/),
-    RankMatcher.new(:Order,      /^\S+mycetidae$/),# :Subclass
+    RankMatcher.new(:Order,      /^\S+mycetidae$/), # :Subclass
     RankMatcher.new(:Class,      /^\S+mycetes$/),
     RankMatcher.new(:Class,      /^\S+mycotina$/), # :Subphylum
     RankMatcher.new(:Phylum,     /^\S+mycota$/),
     RankMatcher.new(:Phylum,     /^Fossil-/),
-    RankMatcher.new(:Genus,      //)               # match anything else
+    RankMatcher.new(:Genus,      //) # match anything else
   ].freeze
 
   # Matcher abbreviation to rank
@@ -235,9 +234,7 @@ module Name::Parse
 
   # Guess rank of +text_name+.
   def guess_rank(text_name)
-    TEXT_NAME_MATCHERS.find {
-      |matcher| matcher.match?(text_name)
-    }.rank
+    TEXT_NAME_MATCHERS.find { |m| m.match?(text_name) }.rank
   end
 
   def parse_author(str)

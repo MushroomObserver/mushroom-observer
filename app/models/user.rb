@@ -221,7 +221,7 @@ class User < AbstractModel
          full_size: 6
        },
        _prefix: true,
-        _default: "medium"
+       _default: "medium"
 
   enum votes_anonymous:
        {
@@ -335,7 +335,7 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
-  scope :by_contribution, -> {
+  scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
   }
 

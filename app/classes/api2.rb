@@ -116,7 +116,11 @@
 class API2
   API_VERSION = 2.0
 
-  include Helpers, Uploads, Results, Parameters, Base
+  include Helpers
+  include Uploads
+  include Results
+  include Parameters
+  include Base
 
   def self.version
     API_VERSION

@@ -57,8 +57,10 @@
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 class NameController < ApplicationController
-  include DescriptionControllerHelpers, ShowNameDescription, Classification,
-          CreateAndEditName
+  include DescriptionControllerHelpers
+  include ShowNameDescription
+  include Classification
+  include CreateAndEditName
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
@@ -974,14 +976,14 @@ class NameController < ApplicationController
 
     # Get corresponding images.
     image_data = Observation.joins(:images).
-                   where(name_id: name_ids).
-                   where(Observation[:vote_cache] >= 2.4).
-                   where(Image[:vote_cache] >= 2).
-                   where(Image[:ok_for_export] == true).
-                   order(Observation[:vote_cache]).
-                   select(Observation[:name_id], ObservationImage[:image_id],
-                          ObservationImage[:observation_id], Image[:user_id],
-                          Image[:license_id], Image[:created_at]).to_a
+                 where(name_id: name_ids).
+                 where(Observation[:vote_cache] >= 2.4).
+                 where(Image[:vote_cache] >= 2).
+                 where(Image[:ok_for_export] == true).
+                 order(Observation[:vote_cache]).
+                 select(Observation[:name_id], ObservationImage[:image_id],
+                        ObservationImage[:observation_id], Image[:user_id],
+                        Image[:license_id], Image[:created_at]).to_a
 
     # Fill in @image_data, @users, and @licenses.
     image_data.each do |row|

@@ -42,7 +42,7 @@ class Notification < AbstractModel
        },
        _suffix: :flavor
 
-        # List of all available flavors (strings).
+  # List of all available flavors (strings).
   def self.all_flavors
     ["name"]
   end

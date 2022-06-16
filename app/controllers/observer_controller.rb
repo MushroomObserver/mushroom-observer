@@ -9,12 +9,21 @@ class ObserverController < ApplicationController
   require "set"
 
   # These will mostly form the new ObservationController:
-  include Other, Suggestions, SiteStats, Indexes, CreateAndEditObservation,
-          ShowObservation
+  include Other
+  include Suggestions
+  include SiteStats
+  include Indexes
+  include CreateAndEditObservation
+  include ShowObservation
 
   # These all belong in new controllers:
-  include UserController, SearchController, RssLogController, MarkupController,
-          InfoController, EmailController, AuthorController
+  include UserController
+  include SearchController
+  include RssLogController
+  include MarkupController
+  include InfoController
+  include EmailController
+  include AuthorController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
