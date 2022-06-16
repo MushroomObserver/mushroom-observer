@@ -20,11 +20,11 @@
 
   <% if reviewer? %>
     <%= indent + link_with_query(:review_unvetted.t, action: :set_review_status,
-          value: "unvetted", id: desc.id) %><br/>
+          value: :unvetted, id: desc.id) %><br/>
     <%= indent + link_with_query(:review_vetted.t, action: :set_review_status,
-          value: "vetted", id: desc.id) %><br/>
+          value: :vetted, id: desc.id) %><br/>
     <%= indent + link_with_query(:review_inaccurate.t, action: :set_review_status,
-          value: "inaccurate", id: desc.id) %><br/>
+          value: :inaccurate, id: desc.id) %><br/>
   <% end %><br/>
 <% end %>
 

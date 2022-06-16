@@ -139,10 +139,10 @@
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
 #  all_ranks::               Ranks: all
-#  ranks_above_genus::       Ranks: above :Genus.
-#  ranks_below_genus::       Ranks: below :Genus.
-#  ranks_above_species::     Ranks: above :Species.
-#  ranks_below_species::     Ranks: below :Species.
+#  ranks_above_genus::       Ranks: above "Genus".
+#  ranks_below_genus::       Ranks: below "Genus".
+#  ranks_above_species::     Ranks: above "Species".
+#  ranks_below_species::     Ranks: below "Species".
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
@@ -287,27 +287,25 @@ class Name < AbstractModel
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:rank,
-          {
-            Form: 1,
-            Variety: 2,
-            Subspecies: 3,
-            Species: 4,
-            Stirps: 5,
-            Subsection: 6,
-            Section: 7,
-            Subgenus: 8,
-            Genus: 9,
-            Family: 10,
-            Order: 11,
-            Class: 12,
-            Phylum: 13,
-            Kingdom: 14,
-            Domain: 15,
-            Group: 16 # used for both "group" and "clade"
-          },
-          source: :rank,
-          accessor: :whiny)
+  enum rank:
+       {
+         Form: 1,
+         Variety: 2,
+         Subspecies: 3,
+         Species: 4,
+         Stirps: 5,
+         Subsection: 6,
+         Section: 7,
+         Subgenus: 8,
+         Genus: 9,
+         Family: 10,
+         Order: 11,
+         Class: 12,
+         Phylum: 13,
+         Kingdom: 14,
+         Domain: 15,
+         Group: 16 # used for both "group" and "clade"
+       }
 
   belongs_to :correct_spelling, class_name: "Name",
                                 foreign_key: "correct_spelling_id"

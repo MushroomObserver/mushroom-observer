@@ -70,21 +70,22 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  enum review_status:
-        {
-          unreviewed: 1,
-          unvetted: 2,
-          vetted: 3,
-          inaccurate: 4
-        }
-  enum source_type:
-        {
-          public: 1,
-          foreign: 2,
-          project: 3,
-          source: 4,
-          user: 5
-        }, _suffix: :source
+  as_enum(:review_status,
+          { unreviewed: 1,
+            unvetted: 2,
+            vetted: 3,
+            inaccurate: 4 },
+          source: :review_status,
+          accessor: :whiny)
+  as_enum(:source_type,
+          { public: 1,
+            foreign: 2,
+            project: 3,
+            source: 4,
+            user: 5 },
+          source: :source_type,
+          accessor: :whiny)
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -185,11 +186,11 @@ class NameDescription < Description
   #
   ##############################################################################
 
+  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
+
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses
-    review_statuses.map do |name, _integer|
-      name
-    end
+    ALL_REVIEW_STATUSES
   end
 
   # Update the review status.  Saves the changes if there are no substantive

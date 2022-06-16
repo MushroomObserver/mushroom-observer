@@ -1980,7 +1980,7 @@ class API2Test < UnitTestCase
 
     @name           = "Anzia ornata"
     @author         = "(Zahlbr.) Asahina"
-    @rank           = :Species
+    @rank           = "Species"
     @deprecated     = false
     @citation       = "Jap. Bot. 13: 219-226"
     @classification = "Kingdom: _Fungi_\r\nFamily: _Parmeliaceae_"
@@ -2101,7 +2101,7 @@ class API2Test < UnitTestCase
                                  set_rank: "species"))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
-    assert_equal(:Species, agaricus.rank)
+    assert_equal("Species", agaricus.rank)
     parent = Name.where(text_name: "Agaricus").to_a
     assert_not_empty(parent)
     assert_not_equal(agaricus.id, parent[0].id)
