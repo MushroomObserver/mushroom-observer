@@ -58,12 +58,11 @@ module Name::Primer
       #         order(name_counts[:count].desc, Name[:sort_name].asc).
       #         take(100)
       #
-      pp data
+      # pp data
 
       Query.lookup(:Name, :in_set,
         ids: data.map(&:first),
         title: :needed_descriptions_title.l)
-
     end
 
     private
