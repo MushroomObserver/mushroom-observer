@@ -39,35 +39,35 @@ module Name::Parse
 
   # Match text_name to rank
   TEXT_NAME_MATCHERS = [
-    RankMatcher.new(:Group,      / (group|clade|complex)$/),
-    RankMatcher.new(:Form,       / f\. /),
-    RankMatcher.new(:Variety,    / var\. /),
-    RankMatcher.new(:Subspecies, / subsp\. /),
-    RankMatcher.new(:Stirps,     / stirps /),
-    RankMatcher.new(:Subsection, / subsect\. /),
-    RankMatcher.new(:Section,    / sect\. /),
-    RankMatcher.new(:Subgenus,   / subg\. /),
-    RankMatcher.new(:Species,    / /),
-    RankMatcher.new(:Family,     /^\S+aceae$/),
-    RankMatcher.new(:Family,     /^\S+ineae$/), # :Suborder
-    RankMatcher.new(:Order,      /^\S+ales$/),
-    RankMatcher.new(:Order,      /^\S+mycetidae$/), # :Subclass
-    RankMatcher.new(:Class,      /^\S+mycetes$/),
-    RankMatcher.new(:Class,      /^\S+mycotina$/), # :Subphylum
-    RankMatcher.new(:Phylum,     /^\S+mycota$/),
-    RankMatcher.new(:Phylum,     /^Fossil-/),
-    RankMatcher.new(:Genus,      //) # match anything else
+    RankMatcher.new("Group",      / (group|clade|complex)$/),
+    RankMatcher.new("Form",       / f\. /),
+    RankMatcher.new("Variety",    / var\. /),
+    RankMatcher.new("Subspecies", / subsp\. /),
+    RankMatcher.new("Stirps",     / stirps /),
+    RankMatcher.new("Subsection", / subsect\. /),
+    RankMatcher.new("Section",    / sect\. /),
+    RankMatcher.new("Subgenus",   / subg\. /),
+    RankMatcher.new("Species",    / /),
+    RankMatcher.new("Family",     /^\S+aceae$/),
+    RankMatcher.new("Family",     /^\S+ineae$/), # :Suborder
+    RankMatcher.new("Order",      /^\S+ales$/),
+    RankMatcher.new("Order",      /^\S+mycetidae$/), # :Subclass
+    RankMatcher.new("Class",      /^\S+mycetes$/),
+    RankMatcher.new("Class",      /^\S+mycotina$/), # :Subphylum
+    RankMatcher.new("Phylum",     /^\S+mycota$/),
+    RankMatcher.new("Phylum",     /^Fossil-/),
+    RankMatcher.new("Genus",      //) # match anything else
   ].freeze
 
   # Matcher abbreviation to rank
   RANK_FROM_ABBREV_MATCHERS = [
-    RankMatcher.new(:Subgenus,   SUBG_ABBR),
-    RankMatcher.new(:Section,    SECT_ABBR),
-    RankMatcher.new(:Subsection, SUBSECT_ABBR),
-    RankMatcher.new(:Stirps,     STIRPS_ABBR),
-    RankMatcher.new(:Subspecies, SSP_ABBR),
-    RankMatcher.new(:Variety,    VAR_ABBR),
-    RankMatcher.new(:Form,       F_ABBR),
+    RankMatcher.new("Subgenus",   SUBG_ABBR),
+    RankMatcher.new("Section",    SECT_ABBR),
+    RankMatcher.new("Subsection", SUBSECT_ABBR),
+    RankMatcher.new("Stirps",     STIRPS_ABBR),
+    RankMatcher.new("Subspecies", SSP_ABBR),
+    RankMatcher.new("Variety",    VAR_ABBR),
+    RankMatcher.new("Form",       F_ABBR),
     RankMatcher.new(nil,         //) # match anything else
   ].freeze
 
