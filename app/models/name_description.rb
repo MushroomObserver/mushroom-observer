@@ -20,7 +20,7 @@
 #    version of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
-#  review_status::    (-) :vetted, :unvetted, :inaccurate, :unreviewed.
+#  review_status::    (-) "vetted", "unvetted", "inaccurate", "unreviewed".
 #  last_review::      (-) Last time it was reviewed.
 #  reviewer::         (-) User that reviewed it.
 #  ok_for_export::    (-) Boolean: is this ready for export to EOL?

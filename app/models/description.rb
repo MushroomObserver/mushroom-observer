@@ -33,7 +33,7 @@
 #  note_status::          Return some basic stats on notes fields.
 #
 #  ==== Source Info
-#  source_type::          Category of source, e.g. :public, :project, :user.
+#  source_type::          Category of source, e.g. "public", "project", "user".
 #  source_name::          Source identifier (e.g., Project title).
 #  source_object::        Return reference to object representing source.
 #  belongs_to_project?::  Does this Description belong to a given Project?
@@ -235,14 +235,14 @@ class Description < AbstractModel
 
   # Note, this is the order they will be listed in show_name.
   ALL_SOURCE_TYPES = [
-    :public,    # Public ones created by any user.
-    :foreign,   # Foreign "public" description(s) written on another server.
-    :source,    # Derived from another source, e.g. another website or book.
-    :project,   # Draft created for a project.
-    :user       # Created by an individual user.
+    "public",    # Public ones created by any user.
+    "foreign",   # Foreign "public" description(s) written on another server.
+    "source",    # Derived from another source, e.g. another website or book.
+    "project",   # Draft created for a project.
+    "user"       # Created by an individual user.
   ].freeze
 
-  # Return an Array of source type Symbols, e.g. :public, :project, etc.
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
   def self.all_source_types
     ALL_SOURCE_TYPES
   end
@@ -253,15 +253,15 @@ class Description < AbstractModel
   def source_object
     case source_type
     # (this may eventually be replaced with source_id)
-    when :project then project
-    when :source then nil # (haven't created "Source" model yet)
-    when :user then user
+    when "project" then project
+    when "source" then nil # (haven't created "Source" model yet)
+    when "user" then user
     end
   end
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == :project) &&
+    (source_type == "project") &&
       (project_id == project.id)
   end
 

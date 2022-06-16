@@ -9,7 +9,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by(text_name: "Strobilurus diminutivus")
     assert_equal([], @name.descriptions)
     @description_data = {
-      source_type: :public,
+      source_type: "public",
       source_name: nil,
       readable: true,
       writable: true,
@@ -297,7 +297,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       form.assert_enabled("source_type")
       form.assert_enabled("source_name")
       # (have to be enabled because user could switch to :source or :user,
-      # instead must use javascript to disable these when :public)
+      # instead must use javascript to disable these when "public")
       form.assert_enabled("public_write")
       form.assert_enabled("public")
     end

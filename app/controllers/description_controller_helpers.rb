@@ -247,7 +247,7 @@ module DescriptionControllerHelpers
     # I've temporarily decided to always just turn it into a public desc.
     # User can then merge by hand if public desc already exists.
     else
-      draft.source_type = :public
+      draft.source_type = "public"
       draft.source_name = ""
       draft.project     = nil
       draft.admin_groups.clear
@@ -279,7 +279,7 @@ module DescriptionControllerHelpers
       done = true
 
     # These types have fixed permissions.
-    elsif [:public, :foreign].include?(@description.source_type) &&
+    elsif ["public", "foreign"].include?(@description.source_type) &&
           !in_admin_mode?
       flash_error(:runtime_description_permissions_fixed.t)
       done = true
@@ -426,7 +426,7 @@ module DescriptionControllerHelpers
     if params[:project].present?
       project = Project.find(params[:project])
       if @user.in_group?(project.user_group)
-        desc.source_type  = :project
+        desc.source_type  = "project"
         desc.source_name  = project.title
         desc.project      = project
         desc.public       = false
@@ -443,7 +443,7 @@ module DescriptionControllerHelpers
       clone = find_description(params[:clone])
       if in_admin_mode? || clone.is_reader?(@user)
         desc.all_notes = clone.all_notes
-        desc.source_type  = :user
+        desc.source_type  = "user"
         desc.source_name  = ""
         desc.project_id   = nil
         desc.public       = false
@@ -453,9 +453,9 @@ module DescriptionControllerHelpers
         redirect_to(action: "show_name", id: desc.parent_id)
       end
 
-    # Otherwise default to :public description.
+    # Otherwise default to "public" description.
     else
-      desc.source_type  = :public
+      desc.source_type  = "public"
       desc.source_name  = ""
       desc.project_id   = nil
       desc.public       = true
@@ -471,7 +471,7 @@ module DescriptionControllerHelpers
     case desc.source_type
 
     # Creating standard "public" description.
-    when :public
+    when "public"
       flash_warning(:runtime_description_public_read_wrong.t)  unless read
       flash_warning(:runtime_description_public_write_wrong.t) unless write
       desc.reader_groups << UserGroup.all_users
@@ -481,7 +481,7 @@ module DescriptionControllerHelpers
       desc.save
 
     # Creating draft for project.
-    when :project
+    when "project"
       project = desc.project
       if read
         desc.reader_groups << UserGroup.all_users
@@ -499,7 +499,7 @@ module DescriptionControllerHelpers
       desc.admin_groups << UserGroup.one_user(@user)
 
     # Creating personal description, or entering one from a specific source.
-    when :source, :user
+    when "source", "user"
       desc.reader_groups << if read
                               UserGroup.all_users
                             else
@@ -546,9 +546,10 @@ module DescriptionControllerHelpers
       unless root ||
              ((admin || author) &&
                # originally was
-               # (desc.source_type != :project && desc.source_type != :project))
+               # (desc.source_type != "project" &&
+               #  desc.source_type != "project"))
                # see https://www.pivotaltracker.com/story/show/174566300
-               desc.source_type != :project)
+               desc.source_type != "project")
         params.delete(:source_name)
       end
       params.delete(:license_id) unless root || admin || author
@@ -569,12 +570,12 @@ module DescriptionControllerHelpers
 
     # Ensure these special types don't change,
     case desc.source_type
-    when :public
+    when "public"
       flash_warning(:runtime_description_public_read_wrong.t)  unless new_read
       flash_warning(:runtime_description_public_write_wrong.t) unless new_write
       new_read  = true
       new_write = true
-    when :foreign
+    when "foreign"
       flash_warning(:runtime_description_foreign_read_wrong.t)  unless new_read
       flash_warning(:runtime_description_foreign_write_wrong.t) if new_write
       new_read  = true
@@ -596,7 +597,7 @@ module DescriptionControllerHelpers
     new_writers << UserGroup.one_user(desc.user) if old_write && !new_write
 
     # ...except in the case of projects.
-    if (desc.source_type == :project) &&
+    if (desc.source_type == "project") &&
        (project = desc.project)
       if old_read && !new_read
         # Add project members to readers.
