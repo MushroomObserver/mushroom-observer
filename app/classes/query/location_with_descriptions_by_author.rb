@@ -9,7 +9,7 @@ class Query::LocationWithDescriptionsByAuthor < Query::LocationBase
   end
 
   def initialize_flavor
-    glue_table = :location_descriptions_authors
+    glue_table = :location_description_authors
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     add_join(:location_descriptions, glue_table)

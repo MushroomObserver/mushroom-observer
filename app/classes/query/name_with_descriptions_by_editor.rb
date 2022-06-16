@@ -9,7 +9,7 @@ class Query::NameWithDescriptionsByEditor < Query::NameBase
   end
 
   def initialize_flavor
-    glue_table = :name_descriptions_editors
+    glue_table = :name_description_editors
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     add_join(:name_descriptions, glue_table)

@@ -285,18 +285,21 @@ class User < AbstractModel
   has_many :herbarium_curators, dependent: :destroy
   has_many :curated_herbaria, through: :herbarium_curators, source: :herbarium
 
-  has_and_belongs_to_many :authored_names,
-                          class_name: "NameDescription",
-                          join_table: "name_descriptions_authors"
-  has_and_belongs_to_many :edited_names,
-                          class_name: "NameDescription",
-                          join_table: "name_descriptions_editors"
-  has_and_belongs_to_many :authored_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_descriptions_authors"
-  has_and_belongs_to_many :edited_locations,
-                          class_name: "LocationDescription",
-                          join_table: "location_descriptions_editors"
+  has_many :name_description_authors, dependent: :destroy
+  has_many :authored_names, through: :name_description_authors,
+                            source: :name_description
+
+  has_many :name_description_editors, dependent: :destroy
+  has_many :edited_names, through: :name_description_editors,
+                          source: :name_description
+
+  has_many :location_description_authors, dependent: :destroy
+  has_many :authored_locations, through: :location_description_authors,
+                                source: :location_description
+
+  has_many :location_description_editors, dependent: :destroy
+  has_many :edited_locations, through: :location_description_editors,
+                              source: :location_description
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -792,36 +795,44 @@ class User < AbstractModel
     delete_own_records(id)
   end
 
+  PUBLIC_REFERENCES = [
+    [:herbaria,                       :personal_user_id],
+    [:location_descriptions,          :user_id],
+    [:location_descriptions_versions, :user_id],
+    [:locations,                      :user_id],
+    [:locations_versions,             :user_id],
+    [:name_descriptions,              :user_id],
+    [:name_descriptions,              :reviewer_id],
+    [:name_descriptions_versions,     :user_id],
+    [:names,                          :user_id],
+    [:names_versions,                 :user_id],
+    # Leave projects, because they're intertwined with descriptions too much.
+    [:projects,                       :user_id],
+    # Leave votes and namings, because I don't want to recalc consensuses.
+    [:namings,                        :user_id],
+    [:projects,                       :user_id],
+    [:translation_strings,            :user_id],
+    [:translation_strings_versions,   :user_id],
+    [:votes,                          :user_id]
+  ].freeze
+
   # Blank out any references in public records.
   private_class_method def self.blank_out_public_references(id)
-    [
-      [:herbaria,                       :personal_user_id],
-      [:location_descriptions,          :user_id],
-      [:location_descriptions_versions, :user_id],
-      [:locations,                      :user_id],
-      [:locations_versions,             :user_id],
-      [:name_descriptions,              :user_id],
-      [:name_descriptions,              :reviewer_id],
-      [:name_descriptions_versions,     :user_id],
-      [:names,                          :user_id],
-      [:names_versions,                 :user_id],
-      # Leave projects, because they're intertwined with descriptions too much.
-      [:projects,                       :user_id],
-      # Leave votes and namings, because I don't want to recalc consensuses.
-      [:namings,                        :user_id],
-      [:projects,                       :user_id],
-      [:translation_strings,            :user_id],
-      [:translation_strings_versions,   :user_id],
-      [:votes,                          :user_id]
-    ].each do |table, col|
-      table = Arel::Table.new(table)
-      update_manager = Arel::UpdateManager.new.
-                       table(table).
-                       set([[table[col], 0]]).
-                       where(table[col].eq(id))
-      User.connection.update(update_manager.to_sql)
+    PUBLIC_REFERENCES.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": id).update_all("#{col}": 0)
     end
   end
+
+  ONE_USER_GROUP_REFERENCES = [
+    [:location_description_admins,  :user_group_id],
+    [:location_description_readers, :user_group_id],
+    [:location_description_writers, :user_group_id],
+    [:name_description_admins,      :user_group_id],
+    [:name_description_readers,     :user_group_id],
+    [:name_description_writers,     :user_group_id],
+    [:user_groups,                  :id]
+  ].freeze
 
   # Delete references to their one-user group.
   private_class_method def self.delete_one_user_group_references(id)
@@ -829,39 +840,31 @@ class User < AbstractModel
     return unless group
 
     group_id = group.id
-    [
-      [:location_descriptions_admins,  :user_group_id],
-      [:location_descriptions_readers, :user_group_id],
-      [:location_descriptions_writers, :user_group_id],
-      [:name_descriptions_admins,      :user_group_id],
-      [:name_descriptions_readers,     :user_group_id],
-      [:name_descriptions_writers,     :user_group_id],
-      [:user_groups,                   :id]
-    ].each do |table, col|
-      table = Arel::Table.new(table)
-      delete_manager = Arel::DeleteManager.new.
-                       from(table).
-                       where(table[col].eq(group_id))
-      User.connection.delete(delete_manager.to_sql)
+
+    ONE_USER_GROUP_REFERENCES.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": group_id).delete_all
     end
   end
+
+  OBSERVATIONS_ATTACHMENTS = [
+    [:observation_collection_numbers, :observation_id],
+    [:comments,                       :target_id, :target_type],
+    [:observation_herbarium_records,  :observation_id],
+    [:observation_images,             :observation_id],
+    [:interests,                      :target_id, :target_type],
+    [:namings,                        :observation_id],
+    [:rss_logs,                       :observation_id],
+    [:sequences,                      :observation_id],
+    [:votes,                          :observation_id]
+  ].freeze
 
   # Delete their observations' attachments.
   private_class_method def self.delete_observations_attachments(id)
     obs_ids = Observation.where(user_id: id).pluck(:id)
     return unless obs_ids.any?
 
-    [
-      [:observation_collection_numbers, :observation_id],
-      [:comments,                       :target_id, :target_type],
-      [:observation_herbarium_records,  :observation_id],
-      [:observation_images,             :observation_id],
-      [:interests,                      :target_id, :target_type],
-      [:namings,                        :observation_id],
-      [:rss_logs,                       :observation_id],
-      [:sequences,                      :observation_id],
-      [:votes,                          :observation_id]
-    ].each do |table, id_col, type_col|
+    OBSERVATIONS_ATTACHMENTS.each do |table, id_col, type_col|
       delete_obs_attachments_from_one_table(
         obs_ids, table, id_col, type_col
       )
@@ -871,54 +874,60 @@ class User < AbstractModel
   private_class_method def self.delete_obs_attachments_from_one_table(
     obs_ids, table, id_col, type_col
   )
-    table = Arel::Table.new(table)
-    conds = table[id_col].in(obs_ids)
-    conds = conds.and(table[type_col].eq("Observation")) if type_col
-    delete_manager = Arel::DeleteManager.new.from(table).where(conds)
-    User.connection.delete(delete_manager.to_sql)
+    model = get_model_for_table(table)
+    model = model.where("#{type_col}": "Observation") if type_col
+    model.where("#{id_col}": obs_ids).delete_all
   end
 
+  OWN_RECORDS = [
+    [:api_keys,                       :user_id],
+    [:articles,                       :user_id],
+    [:collection_numbers,             :user_id],
+    [:comments,                       :user_id],
+    [:copyright_changes,              :user_id],
+    [:donations,                      :user_id],
+    [:external_links,                 :user_id],
+    [:glossary_terms,                 :user_id],
+    [:glossary_terms_versions,        :user_id],
+    [:herbaria,                       :personal_user_id],
+    [:herbarium_curators,             :user_id],
+    [:herbarium_records,              :user_id],
+    [:images,                         :user_id],
+    [:image_votes,                    :user_id],
+    [:interests,                      :user_id],
+    [:location_description_authors,   :user_id],
+    [:location_description_editors,   :user_id],
+    [:name_description_authors,       :user_id],
+    [:name_description_editors,       :user_id],
+    [:notifications,                  :user_id],
+    [:observations,                   :user_id],
+    [:publications,                   :user_id],
+    [:queued_emails,                  :user_id],
+    [:queued_emails,                  :to_user_id],
+    [:sequences,                      :user_id],
+    [:species_lists,                  :user_id],
+    [:user_group_users,               :user_id],
+    [:users,                          :id]
+  ].freeze
+
   # Delete records they own, culminating in the user record itself.
-  # rubocop:disable Metrics/MethodLength
   private_class_method def self.delete_own_records(id)
-    [
-      [:api_keys,                       :user_id],
-      [:articles,                       :user_id],
-      [:collection_numbers,             :user_id],
-      [:comments,                       :user_id],
-      [:copyright_changes,              :user_id],
-      [:donations,                      :user_id],
-      [:external_links,                 :user_id],
-      [:glossary_terms,                 :user_id],
-      [:glossary_terms_versions,        :user_id],
-      [:herbaria,                       :personal_user_id],
-      [:herbarium_curators,             :user_id],
-      [:herbarium_records,              :user_id],
-      [:images,                         :user_id],
-      [:image_votes,                    :user_id],
-      [:interests,                      :user_id],
-      [:location_descriptions_authors,  :user_id],
-      [:location_descriptions_editors,  :user_id],
-      [:name_descriptions_authors,      :user_id],
-      [:name_descriptions_editors,      :user_id],
-      [:notifications,                  :user_id],
-      [:observations,                   :user_id],
-      [:publications,                   :user_id],
-      [:queued_emails,                  :user_id],
-      [:queued_emails,                  :to_user_id],
-      [:sequences,                      :user_id],
-      [:species_lists,                  :user_id],
-      [:user_group_users,               :user_id],
-      [:users,                          :id]
-    ].each do |table, col|
-      table = Arel::Table.new(table)
-      delete_manager = Arel::DeleteManager.new.
-                       from(table).
-                       where(table[col].eq(id))
-      User.connection.delete(delete_manager.to_sql)
+    OWN_RECORDS.each do |table, col|
+      model = get_model_for_table(table)
+      model.where("#{col}": id).delete_all
     end
   end
-  # rubocop:enable Metrics/MethodLength
+
+  # Derive the model from the table name. Versions are namespaced
+  private_class_method def self.get_model_for_table(table)
+    table_name = table.to_s
+    if table_name.end_with?("versions")
+      parent_table_name = table_name.delete_suffix("_versions")
+      parent_table_name.singularize.camelize.constantize::Version
+    else
+      table_name.singularize.camelize.constantize
+    end
+  end
 
   def remove_image(image)
     return unless self.image == image
