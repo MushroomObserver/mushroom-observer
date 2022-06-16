@@ -140,8 +140,8 @@ class NameSorter
     else
       raise(
         TypeError.new(
-          "Only Arrays can be appended to a NameSorter synonym list not %s" %
-            synonyms.class
+          "Only Arrays can be appended to a NameSorter synonym list " \
+          "not #{synonyms.class}"
         )
       )
     end
@@ -279,8 +279,10 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        raise TypeError.new(
-          "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
+        raise(
+          TypeError.new(
+            "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
+          )
         )
       end
     end

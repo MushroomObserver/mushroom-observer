@@ -372,7 +372,7 @@ class String
 
   # This should safely match anything that could possibly be interpreted as
   # an HTML tag.
-  HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}.freeze
+  HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}
 
   ### Textile-related methods ###
 
@@ -440,23 +440,24 @@ class String
   # String is well-formatted HTML with properly-nested tags.
   def truncate_html(max)
     result = ""
-    str = "" + self
+    # make str mutable because it will be modified in place with sub!
+    str = String.new(self)
     opens = []
     while str != ""
       # Self-closing tag.
       if str.sub!(%r{^<(\w+)[^<>]*/ *>}, "")
-        result += $&
+        result += Regexp.last_match(0)
       # Opening tag.
       elsif str.sub!(/^<(\w+)[^<>]*>/, "")
-        result += $&
+        result += Regexp.last_match(0)
         opens << Regexp.last_match(1)
       # Closing tag -- just assume tags are nested properly.
       elsif str.sub!(%r{^< */ *(\w+)[^<>]*>}, "")
-        result += $&
+        result += Regexp.last_match(0)
         opens.pop
       # Normal text.
       elsif str.sub!(/^[^<>]+/, "")
-        part = $&
+        part = Regexp.last_match(0)
         if part.length > max
           result += part[0, max - 1].to_s + "..."
           break

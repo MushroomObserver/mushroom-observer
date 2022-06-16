@@ -7,7 +7,7 @@
 </p>
 
 <% odd_or_even = 0
-for n in @data.names
+@data.names.each do |n|
   id = n.id
   display_name = n.display_name
   odd_or_even = 1 - odd_or_even %>

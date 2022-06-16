@@ -2,6 +2,10 @@
 
 ruby(File.read(".ruby-version").strip)
 
+# In Ruby, 3.0, the SortedSet class has been extracted from the set library.
+# You must use the sorted_set gem or other alternatives
+gem("sorted_set")
+
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
@@ -79,7 +83,7 @@ gem("jbuilder")
 gem("bcrypt", "~> 3.1.7")
 
 # Use unicorn as the app server
-gem("unicorn", "5.4.1")
+gem("unicorn")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
@@ -104,7 +108,7 @@ gem("xmlrpc")
 
 # Simple versioning
 # Use our own fork, which stores enum attrs as integers in the db
-gem("cure_acts_as_versioned", ">= 0.6.5",
+gem("mo_acts_as_versioned", ">= 0.6.6",
     git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
 # In Rails 4.0, use simple_enum to replace enum_column3
@@ -124,7 +128,23 @@ gem("mail")
 gem("mimemagic")
 
 # for creating zip files
-gem("rubyzip")
+# RubyZip 3.0 is coming!
+# **********************
+
+# The public API of some Rubyzip classes has been modernized to use named
+# parameters for optional arguments. Please check your usage of the
+# following classes:
+#   * `Zip::File`
+#   * `Zip::Entry`
+#   * `Zip::InputStream`
+#   * `Zip::OutputStream`
+
+# Please ensure that your Gemfiles and .gemspecs are suitably restrictive
+# to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
+# See https://github.com/rubyzip/rubyzip for details. The Changelog also
+# lists other enhancements and bugfixes that have been implemented since
+# version 2.3.0.
+gem("rubyzip", "~> 2.3.0")
 
 # to handle frontend requests from different port, e.g. dev GraphQL client
 gem("rack-cors")

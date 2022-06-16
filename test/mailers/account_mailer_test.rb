@@ -4,7 +4,7 @@ require("test_helper")
 require("account_mailer")
 
 class AccountMailerTest < UnitTestCase
-  FIXTURES_PATH = File.dirname(__FILE__) + "/../account_mailer"
+  FIXTURES_PATH = "#{File.dirname(__FILE__)}/../account_mailer".freeze
 
   def setup
     I18n.locale = "en"

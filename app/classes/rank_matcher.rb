@@ -47,15 +47,15 @@ TEXT_NAME_MATCHERS = [
 
 # All abbrevisations for a given rank
 # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
-SUBG_ABBR    = / subgenus | subg\.?                      /xi.freeze
-SECT_ABBR    = / section | sect\.?                       /xi.freeze
-SUBSECT_ABBR = / subsection | subsect\.?                 /xi.freeze
-STIRPS_ABBR  = / stirps                                  /xi.freeze
-SP_ABBR      = / species | sp\.?                         /xi.freeze
-SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi.freeze
-VAR_ABBR     = / variety | var\.? | v\.?                 /xi.freeze
-F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi.freeze
-GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi.freeze
+SUBG_ABBR    = / subgenus | subgen\.? | subg\.?                      /xi
+SECT_ABBR    = / section | sect\.?                       /xi
+SUBSECT_ABBR = / subsection | subsect\.?                 /xi
+STIRPS_ABBR  = / stirps                                  /xi
+SP_ABBR      = / species | sp\.?                         /xi
+SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi
+VAR_ABBR     = / variety | var\.? | v\.?                 /xi
+F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
+GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
 
 # Matcher abbreviation to rank
 RANK_FROM_ABBREV_MATCHERS = [

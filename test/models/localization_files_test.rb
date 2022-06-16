@@ -5,15 +5,15 @@ require("test_helper")
 class LocalizationFilesTest < UnitTestCase
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)
-    msg = "Missing #{type} translations:\n" +
-          missing.map(&:inspect).sort.join("\n") + "\n"
+    msg = "Missing #{type} translations:\n" \
+          "#{missing.map(&:inspect).sort.join("\n")}\n"
     assert_empty(missing, msg)
   end
 
   ##############################################################################
 
   def test_localization_files_exist
-    Language.all.each { |lang| assert File.exist?(lang.localization_file) }
+    Language.all.each { |lang| assert(File.exist?(lang.localization_file)) }
   end
 
   def test_syntax_of_official_export_file
@@ -22,8 +22,11 @@ class LocalizationFilesTest < UnitTestCase
     Language.clear_verbose_messages
     lang.check_export_syntax
     errors += Language.verbose_messages
-    assert_empty(errors, "Bad syntax in language export files:\n" +
-                         errors.join("\n"))
+    assert_empty(
+      errors,
+      "Bad syntax in language export files:\n" \
+      "#{errors.join("\n")}"
+    )
   end
 
   # Make sure all "[:tag]" refs inside the translations exist.
@@ -45,8 +48,11 @@ class LocalizationFilesTest < UnitTestCase
         end
       end
     end
-    assert_true(errors.empty?, "Found #{errors.length} undefined tag " \
-      "reference(s) in language files:\n" + errors.join(""))
+    assert_empty(
+      errors,
+      "Found #{errors.length} undefined tag reference(s) in language files:\n" \
+      "#{errors.join("")}"
+    )
   end
 
   def test_find_missing_tags_and_duplicate_method_defs
@@ -60,10 +66,12 @@ class LocalizationFilesTest < UnitTestCase
     assert_true(missing_tags.empty?,
                 "Found #{missing_tags.length} undefined tag reference(s) " \
                 "in source files:\n #{missing_tags.join("")}")
-    assert_true(duplicate_function_defs.empty?,
-                "Found #{duplicate_function_defs.length} duplicate method " \
-                "definition(s) in source files:\n" +
-                duplicate_function_defs.join(""))
+    assert_true(
+      duplicate_function_defs.empty?,
+      "Found #{duplicate_function_defs.length} duplicate method " \
+      "definition(s) in source files:\n" \
+      "#{duplicate_function_defs.join("")}"
+    )
   end
 
   def i18n_keys

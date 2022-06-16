@@ -52,10 +52,11 @@ xml.response(
             xml.license(@data.license_url(desc.license_id))
             xml.dcterms(:rightsHolder, @data.authors(desc.id))
             xml.audience("General public")
-
             # The following mapping assumes that this is being read in English
-            xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
-                        "form_names_#{f}".to_sym.l.delete(" "))
+            xml.subject(
+              "http://rs.tdwg.org/ontology/voc/SPMInfoItems#" \
+              "#{"form_names_#{f}".to_sym.l.delete(" ")}"
+            )
 
             xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
             # xml.reviewStatus(desc.review_status)
@@ -63,8 +64,8 @@ xml.response(
         end
       end
       @data.images(taxon.id).each do |image|
-        # for image_id, obs_id, user_id,
-        #     license_id, created in @image_data[taxon.id]
+        # @image_data[taxon.id].each do
+        #   |image_id, obs_id, user_id, license_id, created|
         user = @data.rights_holder(image)
         xml.dataObject do
           xml.dc(:identifier, "Image-#{image.id}")

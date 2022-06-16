@@ -2,12 +2,12 @@
 
 module PaginationHelper
   # Letters used as text in pagination links
-  LETTERS = ("A".."Z").freeze
+  LETTERS = ("A".."Z")
 
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= paginate_block(@pages) do %>
-  #     <% for object in @objects %>
+  #     <% @objects.each do |object| %>
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
@@ -124,7 +124,7 @@ module PaginationHelper
     url = reload_with_args(params)
     if args[:anchor]
       url.sub!(/#.*/, "")
-      url += "#" + args[:anchor]
+      url += "##{args[:anchor]}"
     end
     content_tag(:li, link_to(label, url))
   end

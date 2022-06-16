@@ -8,6 +8,7 @@ class API
     end
 
     def get
+      must_authenticate!
       self.query = build_query
       done_parsing_parameters!
     end

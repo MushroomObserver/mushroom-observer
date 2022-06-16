@@ -42,7 +42,6 @@ AllCops:
     - app/controllers/api_controller.rb
     - app/helpers/api_helper.rb
     - "app/views/api/**/*"
-    - test/models/api_test.rb
     - "db/**/*"
     - "log/**/*"
     - public/design_test/jquery-1.5.2.min.js
@@ -206,6 +205,12 @@ Style/PercentLiteralDelimiters:
 # I can't figure out how to get exploded to work with API.
 Style/RaiseArgs:
   EnforcedStyle: compact
+
+# Added to facilitiate temporarily switching Mode
+# default mode: aggressive (unsafe)
+# https://docs.rubocop.org/rubocop/1.29/cops_style.html#safety-44
+Style/StringConcatenation:
+  Mode: aggressive
 
 # Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:

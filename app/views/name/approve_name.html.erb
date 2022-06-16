@@ -13,7 +13,7 @@
   <% if @approved_names %>
     <p><%= check_box(:deprecate, :others, checked: "checked") %>
     <label for="deprecate_others"><%= :name_approve_deprecate.t %>:</label><br/><br/>
-    <% for n in @approved_names %>
+    <% @approved_names.each do |n| %>
       <%= n.display_name.t %><br/>
     <% end %></p>
   <% end %>

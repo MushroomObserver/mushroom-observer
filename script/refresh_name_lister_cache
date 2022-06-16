@@ -23,7 +23,7 @@ require("string_extensions")
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
 def escape(str)
-  str.to_s.gsub('\\', '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").
+  str.to_s.gsub("\\", '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").
     gsub(/["']/) { |m| "\\#{m}" }
 end
 
@@ -77,7 +77,7 @@ valid = {}
 species.each do |rec|
   n, a, d, s = rec.values_at("n", "a", "d", "s")
   need_author = occurs[n] > 1
-  n += "|" + a if a.present? && need_author
+  n += "|#{a}" if a.present? && need_author
   if s.to_i.positive? && d.to_i != 1
     l = valid[s] ||= []
     l.push(n) unless l.include?(n)
@@ -91,7 +91,7 @@ end
 species = species.map do |rec|
   n, a, d, s = rec.values_at("n", "a", "d", "s")
   need_author = occurs[n] > 1
-  n += "|" + a if a.present? && need_author
+  n += "|#{a}" if a.present? && need_author
   n += "*" if d.to_i != 1
   d.to_i == 1 && valid[s] ? ([n] + valid[s].map { |x| "= #{x}" }) : n
 end.flatten

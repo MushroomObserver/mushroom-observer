@@ -14,12 +14,12 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_send_email_exception
-    raises_exception = -> { raise RuntimeError.new }
+    raises_exception = -> { raise(RuntimeError.new) }
     email = QueuedEmail::NameChange.new(user: rolf, to_user: mary)
     email.stub(:deliver_email, raises_exception) do
       original_stderr = $stderr.clone
       $stderr.reopen(File.new("/dev/null", "w"))
-      assert_not email.send_email
+      assert_not(email.send_email)
       $stderr.reopen(original_stderr)
     end
   end
