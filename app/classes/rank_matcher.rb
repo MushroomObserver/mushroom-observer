@@ -47,7 +47,7 @@ TEXT_NAME_MATCHERS = [
 
 # All abbrevisations for a given rank
 # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
-SUBG_ABBR    = / subgenus | subgen\.? | subg\.?                      /xi
+SUBG_ABBR    = / subgenus | subgen\.? | subg\.?          /xi
 SECT_ABBR    = / section | sect\.?                       /xi
 SUBSECT_ABBR = / subsection | subsect\.?                 /xi
 STIRPS_ABBR  = / stirps                                  /xi
