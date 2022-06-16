@@ -141,8 +141,8 @@
 #  all_ranks::               Ranks: all
 #  ranks_above_genus::       Ranks: above "Genus".
 #  ranks_below_genus::       Ranks: below "Genus".
-#  ranks_above_species::     Ranks: above :Species.
-#  ranks_below_species::     Ranks: below :Species.
+#  ranks_above_species::     Ranks: above "Species".
+#  ranks_below_species::     Ranks: below "Species".
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
