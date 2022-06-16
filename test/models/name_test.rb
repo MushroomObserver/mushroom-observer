@@ -290,7 +290,7 @@ class NameTest < UnitTestCase
   end
 
   def test_upper_word_pats
-    pat = /^#{Name::UPPER_WORD}$/
+    pat = /^#{::Name::Parse::UPPER_WORD}$/
     assert_no_match(pat, "")
     assert_no_match(pat, "A")
     assert_no_match(pat, "A-")
@@ -310,7 +310,7 @@ class NameTest < UnitTestCase
   end
 
   def test_lower_word_pats
-    pat = /^#{Name::LOWER_WORD}$/
+    pat = /^#{::Name::Parse::LOWER_WORD}$/
     assert_no_match(pat, "")
     assert_no_match(pat, "a")
     assert_no_match(pat, "a-")
@@ -336,7 +336,7 @@ class NameTest < UnitTestCase
 
   def test_author_pat
     @pat = "AUTHOR_PAT"
-    pat = Name::AUTHOR_PAT
+    pat = ::Name::Parse::AUTHOR_PAT
     assert_no_match(pat, "")
     assert_no_match(pat, "fails")
     assert_no_match(pat, "Amanita spuh.")
@@ -381,7 +381,7 @@ class NameTest < UnitTestCase
 
   def test_genus_or_up_pat
     @pat = "GENUS_OR_UP_PAT"
-    pat = Name::GENUS_OR_UP_PAT
+    pat = ::Name::Parse::GENUS_OR_UP_PAT
     assert_name_match_author_optional(pat, "Amanita")
     assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
     assert_name_match_author_optional(pat, '"Amanita"')
@@ -393,7 +393,7 @@ class NameTest < UnitTestCase
 
   def test_subgenus_pat
     @pat = "SUBGENUS_PAT"
-    pat = Name::SUBGENUS_PAT
+    pat = ::Name::Parse::SUBGENUS_PAT
     assert_name_match_author_optional(pat, "Amanita subgenus Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Subg. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg Vaginatae")
@@ -403,7 +403,7 @@ class NameTest < UnitTestCase
 
   def test_section_pat
     @pat = "SECTION_PAT"
-    pat = Name::SECTION_PAT
+    pat = ::Name::Parse::SECTION_PAT
     assert_name_match_author_optional(pat, "Amanita section Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Sect. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita sect Vaginatae")
@@ -414,7 +414,7 @@ class NameTest < UnitTestCase
 
   def test_subsection_pat
     @pat = "SUBSECTION_PAT"
-    pat = Name::SUBSECTION_PAT
+    pat = ::Name::Parse::SUBSECTION_PAT
     assert_name_match_author_optional(pat, "Amanita subsection Vaginatae")
     assert_name_match_author_optional(pat, "Amanita SubSect. Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subsect Vaginatae")
@@ -426,7 +426,7 @@ class NameTest < UnitTestCase
 
   def test_stirps_pat
     @pat = "STIRPS_PAT"
-    pat = Name::STIRPS_PAT
+    pat = ::Name::Parse::STIRPS_PAT
     assert_name_match_author_optional(pat, "Amanita stirps Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Stirps Vaginatae")
     assert_name_match_author_optional(
@@ -441,7 +441,7 @@ class NameTest < UnitTestCase
 
   def test_species_pat
     @pat = "SPECIES_PAT"
-    pat = Name::SPECIES_PAT
+    pat = ::Name::Parse::SPECIES_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata")
     assert_name_match_author_optional(pat, 'Amanita "vaginata"')
     assert_name_match_author_optional(pat, "Amanita vag-inata")
@@ -452,7 +452,7 @@ class NameTest < UnitTestCase
 
   def test_subspecies_pat
     @pat = "SUBSPECIES_PAT"
-    pat = Name::SUBSPECIES_PAT
+    pat = ::Name::Parse::SUBSPECIES_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata subspecies grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata subsp grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata Subsp grisea")
@@ -469,7 +469,7 @@ class NameTest < UnitTestCase
 
   def test_variety_pat
     @pat = "VARIETY_PAT"
-    pat = Name::VARIETY_PAT
+    pat = ::Name::Parse::VARIETY_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata variety grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata var grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata v grisea")
@@ -488,7 +488,7 @@ class NameTest < UnitTestCase
 
   def test_form_pat
     @pat = "FORM_PAT"
-    pat = Name::FORM_PAT
+    pat = ::Name::Parse::FORM_PAT
     assert_name_match_author_optional(pat, "Amanita vaginata forma grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata form grisea")
     assert_name_match_author_optional(pat, "Amanita vaginata f grisea")
@@ -511,7 +511,7 @@ class NameTest < UnitTestCase
 
   def test_group_pat
     @pat = "GROUP_PAT"
-    pat = Name::GROUP_PAT
+    pat = ::Name::Parse::GROUP_PAT
     assert_name_match(pat, "Amanita group", "Amanita")
     assert_name_match(pat, "Amanita Group", "Amanita")
     assert_name_match(pat, "Amanita Gr", "Amanita")

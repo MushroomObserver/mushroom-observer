@@ -2,6 +2,219 @@
 
 # NOTE: Use `Name extend Parse`: these are all class methods
 module Name::Parse
+
+  # RankMatcher:: Lighweight class used to get ranks from text strings
+  # Use:
+  #   XXX_MATCHERS = [RankMatcher.new(:Rank1, /regexp1/),
+  #                   ...
+  #                   RankMatcher.new(:Rankn, /regexpn/)]
+  #
+  #   def self.guess_rank(text_name)
+  #     TEXT_NAME_MATCHERS.find { |matcher| matcher.match?(text_name) }.rank
+  #   end
+  #
+  class RankMatcher
+    attr_reader :pattern, :rank
+
+    def initialize(rank, pattern)
+      @rank = rank
+      @pattern = pattern
+    end
+
+    def match?(str)
+      str.match?(@pattern)
+    end
+  end
+
+  # All abbrevisations for a given rank
+  # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
+  SUBG_ABBR    = / subgenus | subgen\.? | subg\.?          /xi
+  SECT_ABBR    = / section | sect\.?                       /xi
+  SUBSECT_ABBR = / subsection | subsect\.?                 /xi
+  STIRPS_ABBR  = / stirps                                  /xi
+  SP_ABBR      = / species | sp\.?                         /xi
+  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi
+  VAR_ABBR     = / variety | var\.? | v\.?                 /xi
+  F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
+
+  # Match text_name to rank
+  TEXT_NAME_MATCHERS = [
+    RankMatcher.new(:Group,      / (group|clade|complex)$/),
+    RankMatcher.new(:Form,       / f\. /),
+    RankMatcher.new(:Variety,    / var\. /),
+    RankMatcher.new(:Subspecies, / subsp\. /),
+    RankMatcher.new(:Stirps,     / stirps /),
+    RankMatcher.new(:Subsection, / subsect\. /),
+    RankMatcher.new(:Section,    / sect\. /),
+    RankMatcher.new(:Subgenus,   / subg\. /),
+    RankMatcher.new(:Species,    / /),
+    RankMatcher.new(:Family,     /^\S+aceae$/),
+    RankMatcher.new(:Family,     /^\S+ineae$/),    # :Suborder
+    RankMatcher.new(:Order,      /^\S+ales$/),
+    RankMatcher.new(:Order,      /^\S+mycetidae$/),# :Subclass
+    RankMatcher.new(:Class,      /^\S+mycetes$/),
+    RankMatcher.new(:Class,      /^\S+mycotina$/), # :Subphylum
+    RankMatcher.new(:Phylum,     /^\S+mycota$/),
+    RankMatcher.new(:Phylum,     /^Fossil-/),
+    RankMatcher.new(:Genus,      //)               # match anything else
+  ].freeze
+
+  # Matcher abbreviation to rank
+  RANK_FROM_ABBREV_MATCHERS = [
+    RankMatcher.new(:Subgenus,   SUBG_ABBR),
+    RankMatcher.new(:Section,    SECT_ABBR),
+    RankMatcher.new(:Subsection, SUBSECT_ABBR),
+    RankMatcher.new(:Stirps,     STIRPS_ABBR),
+    RankMatcher.new(:Subspecies, SSP_ABBR),
+    RankMatcher.new(:Variety,    VAR_ABBR),
+    RankMatcher.new(:Form,       F_ABBR),
+    RankMatcher.new(nil,         //) # match anything else
+  ].freeze
+
+  AUCT_ABBR    = / auct\.? /xi
+  INED_ABBR    = / in\s?ed\.? /xi
+  NOM_ABBR     = / nomen | nom\.? /xi
+  COMB_ABBR    = / combinatio | comb\.? /xi
+  SENSU_ABBR   = / sensu?\.? /xi
+  NOV_ABBR     = / nova | novum | nov\.? /xi
+  PROV_ABBR    = / provisional | prov\.? /xi
+  CRYPT_ABBR   = / crypt\.? \s temp\.? /xi
+
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
+                      #{STIRPS_ABBR} /x
+  ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
+  ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
+                      #{GROUP_ABBR} /x
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
+                          #{COMB_ABBR} | #{SENSU_ABBR} | #{CRYPT_ABBR} )
+                      (?:\s|$) /x
+
+  UPPER_WORD = /
+                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+  /x
+  LOWER_WORD = /
+    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
+    /x
+  BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
+  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
+                           sp\.\s\S*\d\S* /x
+
+  # Matches the last epithet in a (standardized) name,
+  # including preceding abbreviation if there is one.
+  LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
+
+  AUTHOR_START = /
+    #{ANY_AUTHOR_ABBR} |
+    van\s | d[eu]\s |
+    [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
+    "[^a-z\s]
+  /x
+
+  # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
+  #   AUTHOR_PAT ensures "sp", "ssp", etc., aren't included in author.
+  #   AUTHOR_PAT removes the author first thing.
+  # Then the other parsers have a much easier job.
+  AUTHOR_PAT =
+    /^
+      ( "?
+        #{UPPER_WORD}
+        (?:
+            # >= 1 of (rank Epithet)
+            \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+          |
+            \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+          |
+            "? \s #{SP_ABBR}
+        )?
+      )
+      ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
+    $/x
+
+  # Disable cop to allow alignment and easier comparison of regexps
+  # rubocop:disable Layout/LineLength
+
+  # Taxa without authors (for use by GROUP PAT)
+  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
+  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+  # rubocop:enable Layout/LineLength
+
+  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
+  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x
+  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x
+  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
+  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
+  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
+  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
+  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
+  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
+
+  GROUP_PAT       = /^(?<taxon>
+                        #{GENUS_OR_UP_TAXON} |
+                        #{SUBGENUS_TAXON}    |
+                        #{SECTION_TAXON}     |
+                        #{SUBSECTION_TAXON}  |
+                        #{STIRPS_TAXON}      |
+                        #{SPECIES_TAXON}     |
+                        (?: "? #{UPPER_WORD} # infra-species taxa
+                          (?: \s #{LOWER_WORD}
+                            (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                          )? "?
+                        )
+                      )
+                      (
+                        ( # group, optionally followed by author
+                          \s #{GROUP_ABBR} (\s (#{AUTHOR_START}.*))?
+                        )
+                        | # or
+                        ( # author followed by group
+                          ( \s (#{AUTHOR_START}.*)) \s #{GROUP_ABBR}
+                        )
+                      )
+                    $/x
+
+  # group or clade part of name, with
+  # <group_wd> capture group capturing the stripped group or clade abbr
+  GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
+
+  # matches to ranks that are included in the name proper
+  # subspecies is not included because it's the catchall default
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i
+
+  # convert rank start_match to standard form of rank
+  # subspecies is not included because it's the catchall default
+  STANDARD_SECONDARY_RANKS = {
+    f: "f.",
+    sect: "sect.",
+    stirps: "stirps",
+    subg: "subg.",
+    subsect: "subsect.",
+    v: "var."
+  }.freeze
+
   class RankMessedUp < ::StandardError
   end
 
@@ -22,20 +235,22 @@ module Name::Parse
 
   # Guess rank of +text_name+.
   def guess_rank(text_name)
-    Name::TEXT_NAME_MATCHERS.find { |matcher| matcher.match?(text_name) }.rank
+    TEXT_NAME_MATCHERS.find {
+      |matcher| matcher.match?(text_name)
+    }.rank
   end
 
   def parse_author(str)
     str = clean_incoming_string(str)
     results = [str, nil]
-    if (match = Name::AUTHOR_PAT.match(str))
+    if (match = AUTHOR_PAT.match(str))
       results = [match[1].strip, match[2].strip]
     end
     results
   end
 
   def parse_group(str, deprecated = false)
-    return unless Name::GROUP_PAT.match(str)
+    return unless GROUP_PAT.match(str)
 
     result = parse_name(str_without_group(str),
                         rank: :Group, deprecated: deprecated)
@@ -66,7 +281,7 @@ module Name::Parse
   end
 
   def str_without_group(str)
-    str.sub(Name::GROUP_CHUNK, "")
+    str.sub(GROUP_CHUNK, "")
   end
 
   def standardized_group_abbr(str)
@@ -76,12 +291,12 @@ module Name::Parse
 
   # sripped group_abbr
   def group_wd(str)
-    Name::GROUP_CHUNK.match(str)[:group_wd]
+    GROUP_CHUNK.match(str)[:group_wd]
   end
 
   def parse_genus_or_up(str, deprecated = false, rank = :Genus)
     results = nil
-    if (match = Name::GENUS_OR_UP_PAT.match(str))
+    if (match = GENUS_OR_UP_PAT.match(str))
       name = match[1]
       author = match[2]
       rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
@@ -90,7 +305,7 @@ module Name::Parse
       author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
       parent_name = if Name.ranks_below_genus.include?(rank)
-                      name.sub(Name::LAST_PART, "")
+                      name.sub(LAST_PART, "")
                     end
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
@@ -119,7 +334,7 @@ module Name::Parse
       author = standardize_author(author)
       author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
-      parent_name = name.sub(Name::LAST_PART, "")
+      parent_name = name.sub(LAST_PART, "")
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         text_name: text_name,
@@ -137,39 +352,39 @@ module Name::Parse
   end
 
   def parse_subgenus(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subgenus, Name::SUBGENUS_PAT)
+    parse_below_genus(str, deprecated, :Subgenus, SUBGENUS_PAT)
   end
 
   def parse_section(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Section, Name::SECTION_PAT)
+    parse_below_genus(str, deprecated, :Section, SECTION_PAT)
   end
 
   def parse_subsection(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subsection, Name::SUBSECTION_PAT)
+    parse_below_genus(str, deprecated, :Subsection, SUBSECTION_PAT)
   end
 
   def parse_stirps(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Stirps, Name::STIRPS_PAT)
+    parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
   end
 
   def parse_species(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Species, Name::SPECIES_PAT)
+    parse_below_genus(str, deprecated, :Species, SPECIES_PAT)
   end
 
   def parse_subspecies(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subspecies, Name::SUBSPECIES_PAT)
+    parse_below_genus(str, deprecated, :Subspecies, SUBSPECIES_PAT)
   end
 
   def parse_variety(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Variety, Name::VARIETY_PAT)
+    parse_below_genus(str, deprecated, :Variety, VARIETY_PAT)
   end
 
   def parse_form(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Form, Name::FORM_PAT)
+    parse_below_genus(str, deprecated, :Form, FORM_PAT)
   end
 
   def parse_rank_abbreviation(str)
-    Name::RANK_FROM_ABBREV_MATCHERS.find { |matcher| matcher.match?(str) }.rank
+    RANK_FROM_ABBREV_MATCHERS.find { |matcher| matcher.match?(str) }.rank
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
@@ -191,7 +406,7 @@ module Name::Parse
   def fix_autonym(name, author, rank)
     last_word = name.split(" ").last.gsub(/[()]/, "")
     if (match = author.to_s.match(
-      /^(.*?)(( (#{Name::ANY_SUBG_ABBR}|#{Name::ANY_SSP_ABBR}) #{last_word})+)$/
+      /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
     ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
@@ -259,9 +474,9 @@ module Name::Parse
     i = words.length - 2
     while i.positive?
       words[i] = if (match_start_of_rank =
-                       Name::RANK_START_MATCHER.match(words[i]))
+                       RANK_START_MATCHER.match(words[i]))
                    start_of_rank = match_start_of_rank[0]
-                   Name::STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
+                   STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
                  else
                    "subsp."
                  end
@@ -272,14 +487,14 @@ module Name::Parse
 
   def standardize_author(str)
     str = str.to_s.
-          sub(/^ ?#{Name::AUCT_ABBR}/,  "auct. ").
-          sub(/^ ?#{Name::INED_ABBR}/,  "ined. ").
-          sub(/^ ?#{Name::NOM_ABBR}/,   "nom. ").
-          sub(/^ ?#{Name::COMB_ABBR}/,  "comb. ").
-          sub(/^ ?#{Name::SENSU_ABBR}/, "sensu ").
+          sub(/^ ?#{AUCT_ABBR}/,  "auct. ").
+          sub(/^ ?#{INED_ABBR}/,  "ined. ").
+          sub(/^ ?#{NOM_ABBR}/,   "nom. ").
+          sub(/^ ?#{COMB_ABBR}/,  "comb. ").
+          sub(/^ ?#{SENSU_ABBR}/, "sensu ").
           # Having fixed comb. & nom., standardize their suffixes
-          sub(/(?<=comb. |nom. ) ?#{Name::NOV_ABBR}/,  "nov. ").
-          sub(/(?<=comb. |nom. ) ?#{Name::PROV_ABBR}/, "prov. ").
+          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
+          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
           strip_squeeze
     squeeze_author(str)
   end
