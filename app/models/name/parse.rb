@@ -3,7 +3,7 @@
 # NOTE: Use `Name extend Parse`: these are all class methods
 module Name::Parse
 
-  # Lighweight class used to get ranks from text strings
+  # RankMatcher:: Lighweight class used to get ranks from text strings
   # Use:
   #   XXX_MATCHERS = [RankMatcher.new(:Rank1, /regexp1/),
   #                   ...
