@@ -484,12 +484,9 @@ class SpeciesListController < ApplicationController
     # This is apparently extremely inefficient.  Danny says it times out for
     # large species_lists, such as "Neotropical Fungi".
     # species_list.observation_ids += ids
-    Observation.connection.insert(%(
-      INSERT INTO species_list_observations
-        (observation_id, species_list_id)
-      VALUES
-        #{ids.map { |id| "(#{id},#{species_list.id})" }.join(",")}
-    ))
+    SpeciesListObservation.insert_all(
+      ids.map { |id| { observation_id: id, species_list_id: species_list.id } }
+    )
     flash_notice(:species_list_add_remove_add_success.t(num: ids.length))
   end
 
