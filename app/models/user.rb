@@ -795,7 +795,7 @@ class User < AbstractModel
     delete_own_records(id)
   end
 
-  PUBLIC_REFERENCES =     [
+  PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
     [:location_descriptions_versions, :user_id],
@@ -921,11 +921,11 @@ class User < AbstractModel
   # Derive the model from the table name. Versions are namespaced
   private_class_method def self.get_model_for_table(table)
     table_name = table.to_s
-    unless table_name.end_with?("versions")
-      return table_name.singularize.camelize.constantize
-    else
+    if table_name.end_with?("versions")
       parent_table_name = table_name.delete_suffix("_versions")
       return parent_table_name.singularize.camelize.constantize::Version
+    else
+      return table_name.singularize.camelize.constantize
     end
   end
 
