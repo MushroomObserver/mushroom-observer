@@ -537,15 +537,7 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    # For join tables with no model, need to create an Arel::Table object
-    # so we can use Arel methods on it, eg access columns
-    # Note: ActiveRecord joins: through is slower; produces two extra joins
-    select_manager = Project.arel_table.join(UserGroupUser.arel_table).
-                     on(Project[:admin_group_id].eq(
-                       UserGroupUser[:user_group_id]
-                     ).and(UserGroupUser[:user_id].eq(id)))
-
-    @projects_admin ||= Project.joins(*select_manager.join_sources)
+    Project.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
