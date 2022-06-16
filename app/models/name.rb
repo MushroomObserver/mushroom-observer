@@ -285,6 +285,146 @@ class Name < AbstractModel
   # modules with class methods only
   extend Parse, Create
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:rank,
+          {
+            Form: 1,
+            Variety: 2,
+            Subspecies: 3,
+            Species: 4,
+            Stirps: 5,
+            Subsection: 6,
+            Section: 7,
+            Subgenus: 8,
+            Genus: 9,
+            Family: 10,
+            Order: 11,
+            Class: 12,
+            Phylum: 13,
+            Kingdom: 14,
+            Domain: 15,
+            Group: 16 # used for both "group" and "clade"
+          },
+          source: :rank,
+          accessor: :whiny)
+
+  belongs_to :correct_spelling, class_name: "Name",
+                                foreign_key: "correct_spelling_id"
+  belongs_to :description, class_name: "NameDescription",
+                           inverse_of: :name # (main one)
+  belongs_to :rss_log
+  belongs_to :synonym
+
+  belongs_to :user
+
+  has_many :misspellings, class_name: "Name",
+                          foreign_key: "correct_spelling_id"
+  has_many :descriptions, -> { order(num_views: :desc) },
+           class_name: "NameDescription",
+           inverse_of: :name
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
+  has_many :namings
+  has_many :observations
+
+  acts_as_versioned(
+    table_name: "names_versions",
+    if_changed: %w[
+      rank
+      text_name
+      search_name
+      sort_name
+      display_name
+      author
+      citation
+      deprecated
+      correct_spelling
+      notes
+      lifeform
+      icn_id
+    ]
+  )
+  non_versioned_columns.push(
+    "created_at",
+    "updated_at",
+    "num_views",
+    "last_view",
+    "ok_for_export",
+    "rss_log_id",
+    # "accepted_name_id",
+    "synonym_id",
+    "description_id",
+    "classification", # (versioned in the default desc)
+    "locked"
+  )
+
+  before_create :inherit_stuff
+  before_update :update_observation_cache
+  after_update :notify_users
+
+  validates :icn_id, numericality: { allow_nil: true,
+                                     only_integer: true,
+                                     greater_than_or_equal_to: 1 }
+  validate :icn_id_registrable
+  validate :icn_id_unique
+  validate :validate_lifeform
+  validate :check_user, :check_text_name, :check_author
+
+  # Notify webmaster that a new name was created.
+  after_create do |name|
+    user    = User.current || User.admin
+    subject = "#{user.login} created #{name.real_text_name}"
+    content = "#{MO.http_domain}/name/show_name/#{name.id}"
+    WebmasterEmail.build(user.email, content, subject)
+  end
+
+  # Used by name/_form_name.rhtml
+  attr_accessor :misspelling
+
+  # (Create should not be logged at all.  Update is already logged with more
+  # sphistication than the autologger allows.  Merge will already log the
+  # destruction as a merge and orphan the log.
+  self.autolog_events = [:destroyed]
+
+  # Callbacks whenever new version is created.
+  versioned_class.before_save do |ver|
+    ver.user_id = User.current_id || 0
+    if (ver.version != 1) &&
+       Name::Version.where(name_id: ver.name_id,
+                           user_id: ver.user_id).none?
+      SiteData.update_contribution(:add, :names_versions)
+    end
+  end
+
+  scope :with_rank,
+        ->(rank) { where(rank: Name.ranks[rank]) if rank }
+
+  scope :not_deprecated, -> { where(deprecated: false) }
+
+  ### Module Name::Spelling
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
+  # For a glitch discovered in the wild:
+  scope :with_self_referential_misspelling, lambda {
+    where(Name[:correct_spelling_id].eq(Name[:id]))
+  }
+
+  ### Module Name::Taxonomy
+  scope :with_classification_like,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+        }
+
+  scope :with_name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+
+  scope :with_rank_below,
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+
   ### RANK MATCHER CONSTANTS
 
   # Match text_name to rank
@@ -478,145 +618,7 @@ class Name < AbstractModel
     v: "var."
   }.freeze
 
-  # enum definitions for use by simple_enum gem
-  # Do not change the integer associated with a value
-  as_enum(:rank,
-          {
-            Form: 1,
-            Variety: 2,
-            Subspecies: 3,
-            Species: 4,
-            Stirps: 5,
-            Subsection: 6,
-            Section: 7,
-            Subgenus: 8,
-            Genus: 9,
-            Family: 10,
-            Order: 11,
-            Class: 12,
-            Phylum: 13,
-            Kingdom: 14,
-            Domain: 15,
-            Group: 16 # used for both "group" and "clade"
-          },
-          source: :rank,
-          accessor: :whiny)
-
-  belongs_to :correct_spelling, class_name: "Name",
-                                foreign_key: "correct_spelling_id"
-  belongs_to :description, class_name: "NameDescription",
-                           inverse_of: :name # (main one)
-  belongs_to :rss_log
-  belongs_to :synonym
-
-  belongs_to :user
-
-  has_many :misspellings, class_name: "Name",
-                          foreign_key: "correct_spelling_id"
-  has_many :descriptions, -> { order(num_views: :desc) },
-           class_name: "NameDescription",
-           inverse_of: :name
-  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
-  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
-  has_many :namings
-  has_many :observations
-
-  acts_as_versioned(
-    table_name: "names_versions",
-    if_changed: %w[
-      rank
-      text_name
-      search_name
-      sort_name
-      display_name
-      author
-      citation
-      deprecated
-      correct_spelling
-      notes
-      lifeform
-      icn_id
-    ]
-  )
-  non_versioned_columns.push(
-    "created_at",
-    "updated_at",
-    "num_views",
-    "last_view",
-    "ok_for_export",
-    "rss_log_id",
-    # "accepted_name_id",
-    "synonym_id",
-    "description_id",
-    "classification", # (versioned in the default desc)
-    "locked"
-  )
-
-  before_create :inherit_stuff
-  before_update :update_observation_cache
-  after_update :notify_users
-
-  validates :icn_id, numericality: { allow_nil: true,
-                                     only_integer: true,
-                                     greater_than_or_equal_to: 1 }
-  validate :icn_id_registrable
-  validate :icn_id_unique
-  validate :validate_lifeform
-  validate :check_user, :check_text_name, :check_author
-
-  # Notify webmaster that a new name was created.
-  after_create do |name|
-    user    = User.current || User.admin
-    subject = "#{user.login} created #{name.real_text_name}"
-    content = "#{MO.http_domain}/name/show_name/#{name.id}"
-    WebmasterEmail.build(user.email, content, subject)
-  end
-
-  # Used by name/_form_name.rhtml
-  attr_accessor :misspelling
-
-  # (Create should not be logged at all.  Update is already logged with more
-  # sphistication than the autologger allows.  Merge will already log the
-  # destruction as a merge and orphan the log.
-  self.autolog_events = [:destroyed]
-
-  # Callbacks whenever new version is created.
-  versioned_class.before_save do |ver|
-    ver.user_id = User.current_id || 0
-    if (ver.version != 1) &&
-       Name::Version.where(name_id: ver.name_id,
-                           user_id: ver.user_id).none?
-      SiteData.update_contribution(:add, :names_versions)
-    end
-  end
-
-  scope :with_rank,
-        ->(rank) { where(rank: Name.ranks[rank]) if rank }
-
-  scope :not_deprecated, -> { where(deprecated: false) }
-
-  ### Module Name::Spelling
-  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
-
-  # For a glitch discovered in the wild:
-  scope :with_self_referential_misspelling, lambda {
-    where(Name[:correct_spelling_id].eq(Name[:id]))
-  }
-
-  ### Module Name::Taxonomy
-  scope :with_classification_like,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
-        }
-
-  scope :with_name_like,
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
-
-  scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+  ##############################################################################
 
   def <=>(other)
     sort_name <=> other.sort_name

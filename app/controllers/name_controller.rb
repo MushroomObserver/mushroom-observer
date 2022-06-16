@@ -164,6 +164,7 @@ class NameController < ApplicationController
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE: all this extra info and help will be lost if user re-sorts.
   def needed_descriptions
     @help = :needed_descriptions_help
     query = Name.needed_descriptions
@@ -404,9 +405,8 @@ class NameController < ApplicationController
 
     # Old correct spellings could have gotten merged with something else
     # and no longer exist.
-    @correct_spelling = Name.connection.select_value(%(
-      SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
-    ))
+    @correct_spelling = Name.where(id: @name.correct_spelling_id).
+                        pluck(:display_name)
   end
 
   # Show past version of NameDescription.  Accessible only from
@@ -938,15 +938,6 @@ class NameController < ApplicationController
     @timer_end = Time.current
   end
 
-  def eol_description_conditions(review_status_list)
-    # name descriptions that are exportable.
-    rsl = review_status_list.join("', '")
-    "review_status IN ('#{rsl}') AND " \
-                 "gen_desc IS NOT NULL AND " \
-                 "ok_for_export = 1 AND " \
-                 "public = 1"
-  end
-
   # Gather data for EOL feed.
   def eol_data(review_status_list)
     @names      = []
@@ -956,19 +947,19 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    descs = NameDescription.where(
-      eol_description_conditions(review_status_list)
-    )
+    descs = NameDescription.
+            where(review_status: review_status_list).
+            where(NameDescription[:gen_desc].not_blank).
+            where(ok_for_export: true).
+            where(public: true)
 
     # Fill in @descs, @users, @authors, @licenses.
     descs.each do |desc|
       name_id = desc.name_id.to_i
       @descs[name_id] ||= []
       @descs[name_id] << desc
-      authors = Name.connection.select_values(%(
-        SELECT user_id FROM name_description_authors
-        WHERE name_description_id = #{desc.id}
-      )).map(&:to_i)
+      authors = NameDescriptionAuthor.where(name_description_id: desc.id).
+                pluck(:user_id)
       authors = [desc.user_id] if authors.empty?
       authors.each do |author|
         @users[author.to_i] ||= User.find(author).legal_name
@@ -982,26 +973,14 @@ class NameController < ApplicationController
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
-    image_data = Name.connection.select_all(%(
-      SELECT name_id, image_id, observation_id, images.user_id,
-             images.license_id, images.created_at
-      FROM observations, observation_images, images
-      WHERE observations.name_id IN (#{name_ids})
-      AND observations.vote_cache >= 2.4
-      AND observations.id = observation_images.observation_id
-      AND observation_images.image_id = images.id
-      AND images.vote_cache >= 2
-      AND images.ok_for_export
-      ORDER BY observations.vote_cache
-    ))
-    image_data = image_data.to_a
+    image_data = Name.images_for_observations_of_names(name_ids)
 
     # Fill in @image_data, @users, and @licenses.
     image_data.each do |row|
       name_id    = row["name_id"].to_i
       user_id    = row["user_id"].to_i
       license_id = row["license_id"].to_i
-      image_datum = row.values_at("image_id", "observation_id", "user_id",
+      image_datum = row.values_at("image_id", "id", "user_id",
                                   "license_id", "created_at")
       @image_data[name_id] ||= []
       @image_data[name_id].push(image_datum)
