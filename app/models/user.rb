@@ -795,7 +795,7 @@ class User < AbstractModel
     delete_own_records(id)
   end
 
-  PUBLIC_REFERENCES =     [
+  PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
     [:location_descriptions_versions, :user_id],
@@ -814,7 +814,7 @@ class User < AbstractModel
     [:translation_strings,            :user_id],
     [:translation_strings_versions,   :user_id],
     [:votes,                          :user_id]
-  ]
+  ].freeze
 
   # Blank out any references in public records.
   private_class_method def self.blank_out_public_references(id)
@@ -832,7 +832,7 @@ class User < AbstractModel
     [:name_description_readers,     :user_group_id],
     [:name_description_writers,     :user_group_id],
     [:user_groups,                  :id]
-  ]
+  ].freeze
 
   # Delete references to their one-user group.
   private_class_method def self.delete_one_user_group_references(id)
@@ -857,7 +857,7 @@ class User < AbstractModel
     [:rss_logs,                       :observation_id],
     [:sequences,                      :observation_id],
     [:votes,                          :observation_id]
-  ]
+  ].freeze
 
   # Delete their observations' attachments.
   private_class_method def self.delete_observations_attachments(id)
@@ -908,7 +908,7 @@ class User < AbstractModel
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
     [:users,                          :id]
-  ]
+  ].freeze
 
   # Delete records they own, culminating in the user record itself.
   private_class_method def self.delete_own_records(id)
@@ -921,11 +921,11 @@ class User < AbstractModel
   # Derive the model from the table name. Versions are namespaced
   private_class_method def self.get_model_for_table(table)
     table_name = table.to_s
-    unless table_name.end_with?("versions")
-      return table_name.singularize.camelize.constantize
-    else
+    if table_name.end_with?("versions")
       parent_table_name = table_name.delete_suffix("_versions")
-      return parent_table_name.singularize.camelize.constantize::Version
+      parent_table_name.singularize.camelize.constantize::Version
+    else
+      table_name.singularize.camelize.constantize
     end
   end
 
