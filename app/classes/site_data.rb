@@ -60,19 +60,19 @@ class SiteData
   #
   #  The only exception is species_list_entries, which does a simple join:
   #
-  #    SELECT COUNT(*) FROM species_lists s, observations_species_lists os
+  #    SELECT COUNT(*) FROM species_lists s, species_list_observations os
   #      WHERE user_id = 123 AND s.id = os.species_list_id
   #
   ##############################################################################
 
   # List of the categories.  This might be the order they appear in show_user.
   ALL_FIELDS = [
-    :name_descriptions_authors,
-    :name_descriptions_editors,
+    :name_description_authors,
+    :name_description_editors,
     :names,
     :names_versions,
-    :location_descriptions_authors,
-    :location_descriptions_editors,
+    :location_description_authors,
+    :location_description_editors,
     :locations,
     :locations_versions,
     :images,
@@ -97,12 +97,12 @@ class SiteData
     comments: 1,
     contributing_users: 0,
     images: 10,
-    location_descriptions_authors: 50,
-    location_descriptions_editors: 5,
+    location_description_authors: 50,
+    location_description_editors: 5,
     locations: 10,
     locations_versions: 5,
-    name_descriptions_authors: 100,
-    name_descriptions_editors: 10,
+    name_description_authors: 100,
+    name_description_editors: 10,
     names: 10,
     names_versions: 10,
     namings: 1,
@@ -123,7 +123,7 @@ class SiteData
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
     sequenced_observations: "sequences",
-    species_list_entries: "observations_species_lists",
+    species_list_entries: "species_list_observations",
     contributing_users: "users"
   }.freeze
 

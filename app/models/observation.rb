@@ -158,13 +158,24 @@ class Observation < AbstractModel
   # consensus several times and send bogus emails!!
   has_many :namings
 
-  has_and_belongs_to_many :images
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
-                                          before_remove: :remove_spl_callback
-  has_and_belongs_to_many :collection_numbers
-  has_and_belongs_to_many :herbarium_records
-  has_many :observation_views
+  has_many :observation_images, dependent: :destroy
+  has_many :images, through: :observation_images
+
+  has_many :project_observations, dependent: :destroy
+  has_many :projects, through: :project_observations
+
+  has_many :species_list_observations, dependent: :destroy
+  has_many :species_lists, through: :species_list_observations,
+                           after_add: :add_spl_callback,
+                           before_remove: :remove_spl_callback
+
+  has_many :observation_collection_numbers, dependent: :destroy
+  has_many :collection_numbers, through: :observation_collection_numbers
+
+  has_many :observation_herbarium_records, dependent: :destroy
+  has_many :herbarium_records, through: :observation_herbarium_records
+
+  has_many :observation_views, dependent: :destroy
   has_many :viewers, class_name: "User",
                      through: :observation_views,
                      source: :user

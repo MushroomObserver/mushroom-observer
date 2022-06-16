@@ -53,7 +53,7 @@ class NameParse
   attr_reader :line_str, :name, :rank, :search_name, :comment,
               :synonym, :synonym_rank, :synonym_search_name, :synonym_comment
 
-  COMMENT_PAT = /^\s* ([^\[\]]*) \s+ \[(.*)\] \s*$/x.freeze
+  COMMENT_PAT = /^\s* ([^\[\]]*) \s+ \[(.*)\] \s*$/x
 
   # spl_line can be either:
   #   <name>

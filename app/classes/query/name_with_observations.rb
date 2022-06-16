@@ -42,14 +42,14 @@ module Query
 
     def initialize_association_parameters
       add_id_condition(
-        "observations_projects.project_id",
+        "project_observations.project_id",
         lookup_projects_by_name(params[:projects]),
-        :observations, :observations_projects
+        :observations, :project_observations
       )
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
-        :observations, :herbarium_records_observations, :herbarium_records
+        :observations, :observation_herbarium_records, :herbarium_records
       )
     end
 

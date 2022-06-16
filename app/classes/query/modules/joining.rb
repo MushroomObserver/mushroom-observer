@@ -15,7 +15,7 @@ module Query
         collection_numbers: {
           users: :user_id
         },
-        collection_numbers_observations: {
+        observation_collection_numbers: {
           collection_numbers: :collection_number_id,
           observations: :observation_id
         },
@@ -45,7 +45,7 @@ module Query
           rss_logs: :rss_log_id,
           users: :user_id
         },
-        glossary_terms_images: {
+        glossary_term_images: {
           images: :image_id,
           glossary_terms: :glossary_term_id
         },
@@ -53,7 +53,7 @@ module Query
           locations: :location_id,
           users: :personal_user_id
         },
-        herbaria_curators: {
+        herbarium_curators: {
           herbaria: :herbarium_id,
           users: :user_id
         },
@@ -65,11 +65,11 @@ module Query
           users: :user_id,
           licenses: :license_id
         },
-        images_observations: {
+        observation_images: {
           images: :image_id,
           observations: :observation_id
         },
-        images_projects: {
+        project_images: {
           images: :image_id,
           projects: :project_id
         },
@@ -83,26 +83,26 @@ module Query
           locations: :location_id,
           users: :user_id
         },
-        location_descriptions_admins: {
+        location_description_admins: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
-        location_descriptions_authors: {
+        location_description_authors: {
           location_descriptions: :location_description_id,
           users: :user_id
         },
-        location_descriptions_editors: {
+        location_description_editors: {
           location_descriptions: :location_description_id,
           users: :user_id
         },
-        location_descriptions_readers: {
+        location_description_readers: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
         location_descriptions_versions: {
           location_descriptions: :location_description_id
         },
-        location_descriptions_writers: {
+        location_description_writers: {
           location_descriptions: :location_description_id,
           user_groups: :user_group_id
         },
@@ -119,26 +119,26 @@ module Query
           names: :name_id,
           users: :user_id
         },
-        name_descriptions_admins: {
+        name_description_admins: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
-        name_descriptions_authors: {
+        name_description_authors: {
           name_descriptions: :name_description_id,
           users: :user_id
         },
-        name_descriptions_editors: {
+        name_description_editors: {
           name_descriptions: :name_description_id,
           users: :user_id
         },
-        name_descriptions_readers: {
+        name_description_readers: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
         name_descriptions_versions: {
           name_descriptions: :name_description_id
         },
-        name_descriptions_writers: {
+        name_description_writers: {
           name_descriptions: :name_description_id,
           user_groups: :user_group_id
         },
@@ -172,15 +172,15 @@ module Query
           "images.thumb_image": :thumb_image_id,
           "image_votes.thumb_image": [:thumb_image_id, :image_id]
         },
-        observations_projects: {
+        project_observations: {
           observations: :observation_id,
           projects: :project_id
         },
-        observations_species_lists: {
+        species_list_observations: {
           observations: :observation_id,
           species_lists: :species_list_id
         },
-        herbarium_records_observations: {
+        observation_herbarium_records: {
           observations: :observation_id,
           herbarium_records: :herbarium_record_id
         },
@@ -190,7 +190,7 @@ module Query
           user_groups: :user_group_id,
           "user_groups.admin_group": :admin_group_id
         },
-        projects_species_lists: {
+        project_species_lists: {
           projects: :project_id,
           species_lists: :species_list_id
         },
@@ -216,7 +216,7 @@ module Query
           herbaria: :herbarium_id,
           users: :user_id
         },
-        user_groups_users: {
+        user_group_users: {
           user_groups: :user_group_id,
           users: :user_id
         },

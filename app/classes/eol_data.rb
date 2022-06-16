@@ -139,7 +139,7 @@ class EolData
     )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
-  )
+  ).freeze
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -163,11 +163,11 @@ class EolData
     )
   end
 
-  IMAGE_CONDITIONS = %(FROM observations, images_observations, images, names
+  IMAGE_CONDITIONS = %(FROM observations, observation_images, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
-    AND observations.id = images_observations.observation_id
-    AND images_observations.image_id = images.id
+    AND observations.id = observation_images.observation_id
+    AND observation_images.image_id = images.id
     AND images.vote_cache >= 2
     AND images.ok_for_export
     AND names.ok_for_export
@@ -175,19 +175,19 @@ class EolData
     AND names.`rank` IN (#{Name.ranks.values_at(
       :Form, :Variety, :Subspecies, :Species, :Genus
     ).join(",")})
-  )
+  ).freeze
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
   GLOSSARY_TERM_CONDITIONS = %(
-    FROM images, images_observations, observations, names, glossary_terms
-    LEFT OUTER JOIN glossary_terms_images
-    ON glossary_terms.id = glossary_terms_images.glossary_term_id
-    WHERE ((images.id = glossary_terms_images.image_id)
+    FROM images, observation_images, observations, names, glossary_terms
+    LEFT OUTER JOIN glossary_term_images
+    ON glossary_terms.id = glossary_term_images.glossary_term_id
+    WHERE ((images.id = glossary_term_images.image_id)
            OR (glossary_terms.thumb_image_id = images.id))
-    AND images_observations.image_id = images.id
-    AND images_observations.observation_id = observations.id
+    AND observation_images.image_id = images.id
+    AND observation_images.observation_id = observations.id
     AND observations.name_id = names.id
     AND images.vote_cache >= 2
     AND observations.vote_cache >= 2.4
@@ -262,7 +262,7 @@ class EolData
 
   def description_id_to_authors
     data = Name.connection.select_rows(%(
-      SELECT name_description_id, user_id FROM name_descriptions_authors
+      SELECT name_description_id, user_id FROM name_description_authors
     ))
     pairs = data.map do |name_description_id, user_id|
       [name_description_id.to_i, @user_id_to_legal_name[user_id.to_i]]

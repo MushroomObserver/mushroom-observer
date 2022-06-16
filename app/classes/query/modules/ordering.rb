@@ -34,7 +34,7 @@ module Query::Modules::Ordering
 
     when "name"
       if model == Image
-        add_join(:images_observations, :observations)
+        add_join(:observation_images, :observations)
         add_join(:observations, :names)
         self.group = "images.id"
         "MIN(names.sort_name) ASC, images.when DESC"
@@ -92,7 +92,7 @@ module Query::Modules::Ordering
 
     when "confidence"
       if model == Image
-        add_join(:images_observations, :observations)
+        add_join(:observation_images, :observations)
         "observations.vote_cache DESC"
       elsif model == Observation
         "observations.vote_cache DESC"

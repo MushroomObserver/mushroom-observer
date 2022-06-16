@@ -11,7 +11,7 @@ class Query::LocationWithObservationsInSpeciesList <
   end
 
   def initialize_flavor
-    glue_table = :observations_species_lists
+    glue_table = :species_list_observations
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
     add_join(:observations, glue_table)
