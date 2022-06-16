@@ -87,7 +87,7 @@ module Name::Parse
       rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
-      author2 = author.blank? ? "" : " " + author
+      author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
       parent_name = if Name.ranks_below_genus.include?(rank)
                       name.sub(Name::LAST_PART, "")
@@ -117,7 +117,7 @@ module Name::Parse
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
-      author2 = author.blank? ? "" : " " + author
+      author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
       parent_name = name.sub(Name::LAST_PART, "")
       display_name = format_autonym(name, author, rank, deprecated)

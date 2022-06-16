@@ -108,9 +108,9 @@ class Observation
 
     def taxon_identifier(naming, name_id)
       if naming.name.synonym_id
-        "s" + naming.name.synonym_id.to_s
+        "s#{naming.name.synonym_id}"
       else
-        "n" + name_id.to_s
+        "n#{name_id}"
       end
     end
 

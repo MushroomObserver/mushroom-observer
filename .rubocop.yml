@@ -206,6 +206,12 @@ Style/PercentLiteralDelimiters:
 Style/RaiseArgs:
   EnforcedStyle: compact
 
+# Added to facilitiate temporarily switching Mode
+# default mode: aggressive (unsafe)
+# https://docs.rubocop.org/rubocop/1.29/cops_style.html#safety-44
+Style/StringConcatenation:
+  Mode: aggressive
+
 # Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
   EnforcedStyle: double_quotes

@@ -279,9 +279,12 @@ class User < AbstractModel
                                         foreign_key: "reviewer_id"
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
-  has_and_belongs_to_many :user_groups,
-                          class_name: "UserGroup",
-                          join_table: "user_groups_users"
+  has_many :user_group_users, dependent: :destroy
+  has_many :user_groups, through: :user_group_users
+
+  has_many :herbarium_curators, dependent: :destroy
+  has_many :curated_herbaria, through: :herbarium_curators, source: :herbarium
+
   has_and_belongs_to_many :authored_names,
                           class_name: "NameDescription",
                           join_table: "name_descriptions_authors"
@@ -294,9 +297,6 @@ class User < AbstractModel
   has_and_belongs_to_many :edited_locations,
                           class_name: "LocationDescription",
                           join_table: "location_descriptions_editors"
-  has_and_belongs_to_many :curated_herbaria,
-                          class_name: "Herbarium",
-                          join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -533,11 +533,10 @@ class User < AbstractModel
     # For join tables with no model, need to create an Arel::Table object
     # so we can use Arel methods on it, eg access columns
     # Note: ActiveRecord joins: through is slower; produces two extra joins
-    ugu = Arel::Table.new(:user_groups_users)
-
-    select_manager = Project.arel_table.join(ugu).
-                     on(Project[:admin_group_id].eq(ugu[:user_group_id]).
-                        and(ugu[:user_id].eq(id)))
+    select_manager = Project.arel_table.join(UserGroupUser.arel_table).
+                     on(Project[:admin_group_id].eq(
+                       UserGroupUser[:user_group_id]
+                     ).and(UserGroupUser[:user_id].eq(id)))
 
     @projects_admin ||= Project.joins(*select_manager.join_sources)
   end
@@ -616,9 +615,8 @@ class User < AbstractModel
 
   def species_lists_in_users_projects
     project_ids = projects_member.map(&:id)
-    psl = Arel::Table.new(:projects_species_lists)
-    psl.project(psl[:species_list_id]).
-      where(psl[:project_id].in(project_ids)).uniq
+    ProjectSpeciesList.where(project_id: project_ids).distinct.
+      pluck(:species_list_id)
   end
 
   ##############################################################################
@@ -854,15 +852,15 @@ class User < AbstractModel
     return unless obs_ids.any?
 
     [
-      [:collection_numbers_observations, :observation_id],
-      [:comments,                        :target_id, :target_type],
-      [:herbarium_records_observations,  :observation_id],
-      [:images_observations,             :observation_id],
-      [:interests,                       :target_id, :target_type],
-      [:namings,                         :observation_id],
-      [:rss_logs,                        :observation_id],
-      [:sequences,                       :observation_id],
-      [:votes,                           :observation_id]
+      [:observation_collection_numbers, :observation_id],
+      [:comments,                       :target_id, :target_type],
+      [:observation_herbarium_records,  :observation_id],
+      [:observation_images,             :observation_id],
+      [:interests,                      :target_id, :target_type],
+      [:namings,                        :observation_id],
+      [:rss_logs,                       :observation_id],
+      [:sequences,                      :observation_id],
+      [:votes,                          :observation_id]
     ].each do |table, id_col, type_col|
       delete_obs_attachments_from_one_table(
         obs_ids, table, id_col, type_col
@@ -894,7 +892,7 @@ class User < AbstractModel
       [:glossary_terms,                 :user_id],
       [:glossary_terms_versions,        :user_id],
       [:herbaria,                       :personal_user_id],
-      [:herbaria_curators,              :user_id],
+      [:herbarium_curators,             :user_id],
       [:herbarium_records,              :user_id],
       [:images,                         :user_id],
       [:image_votes,                    :user_id],
@@ -910,7 +908,7 @@ class User < AbstractModel
       [:queued_emails,                  :to_user_id],
       [:sequences,                      :user_id],
       [:species_lists,                  :user_id],
-      [:user_groups_users,              :user_id],
+      [:user_group_users,               :user_id],
       [:users,                          :id]
     ].each do |table, col|
       table = Arel::Table.new(table)

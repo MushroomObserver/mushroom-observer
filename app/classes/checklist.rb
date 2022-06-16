@@ -49,7 +49,7 @@ class Checklist
 
     def query
       super(
-        tables: ["observations_projects op"],
+        tables: ["project_observations op"],
         conditions: ["op.observation_id = o.id",
                      "op.project_id = #{@project.id}"]
       )
@@ -66,7 +66,7 @@ class Checklist
 
     def query
       super(
-        tables: ["observations_species_lists os"],
+        tables: ["species_list_observations os"],
         conditions: ["os.observation_id = o.id",
                      "os.species_list_id = #{@list.id}"]
       )
