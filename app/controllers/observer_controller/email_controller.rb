@@ -2,7 +2,7 @@
 
 # TODO: move this into a new EmailController
 # Send emails directly to webmaster and users via the application
-class ObserverController
+module ObserverController::EmailController
   def email_features
     if in_admin_mode?
       @users = User.where("email_general_feature=1 && verified is not null")

@@ -74,7 +74,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_activate_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = nil
     key.user = katrina
@@ -98,7 +98,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_edit_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = Time.zone.now
     key.user = katrina

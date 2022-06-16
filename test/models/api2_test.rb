@@ -19,7 +19,7 @@ class Hash
   end
 end
 
-class Api2Test < UnitTestCase
+class API2Test < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
     super
@@ -113,7 +113,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_last_api_key_correct
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -429,7 +429,7 @@ class Api2Test < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: ApiKey Requests
+  #  :section: APIKey Requests
   # ----------------------------
 
   def test_getting_api_keys
@@ -456,7 +456,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -477,7 +477,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -501,7 +501,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -4094,7 +4094,7 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       location: "Anywhere"
     }
-    ApiKey.update(@api_key.id, verified: nil)
+    APIKey.update(@api_key.id, verified: nil)
     assert_api_fail(params)
     @api_key.verify!
     assert_api_pass(params)

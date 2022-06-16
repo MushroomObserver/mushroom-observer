@@ -17,7 +17,7 @@
 #
 #  == Actions
 #
-#  api_key::          Activate and edit ApiKey's.
+#  api_key::          Activate and edit APIKey's.
 #  auto_complete::    Return list of strings matching a given string.
 #  create_image_object::  Uploads image without observation yet.
 #  exif::             Get EXIF header info of an image.
@@ -29,16 +29,8 @@
 #  vote::             Change vote on proposed name or image.
 #
 class AjaxController < ApplicationController
-  require_dependency "ajax_controller/api_key"
-  require_dependency "ajax_controller/auto_complete"
-  require_dependency "ajax_controller/exif"
-  require_dependency "ajax_controller/export"
-  require_dependency "ajax_controller/external_link"
-  require_dependency "ajax_controller/old_translation"
-  require_dependency "ajax_controller/pivotal"
-  require_dependency "ajax_controller/primers"
-  require_dependency "ajax_controller/upload_image"
-  require_dependency "ajax_controller/vote"
+  include Vote, UploadImage, Primers, Pivotal, OldTranslation, ExternalLink,
+          Export, EXIF, AutoComplete, APIKey
 
   disable_filters
   around_action :catch_ajax_errors

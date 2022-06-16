@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ApiKeyAll < Query::ApiKeyBase
+class Query::APIKeyAll < Query::APIKeyBase
   def initialize_flavor
     add_sort_order_to_title
     super

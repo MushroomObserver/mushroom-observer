@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # miscellaneous helpers for parameter parsing, location validation
-class API2
+module API2::Helpers
   def parse_names_parameters
     args = {
       names: parse_array(:name, :name, as: :verbatim),
@@ -33,7 +33,7 @@ class API2
       Location.check_for_bad_chars(name)
     return if citations.none?
 
-    raise(DubiousLocationName.new(citations))
+    raise(API2::DubiousLocationName.new(citations))
   end
 
   def parse_bounding_box!
@@ -44,7 +44,7 @@ class API2
     return if no_edges(n, s, e, w)
     return [n, s, e, w] if all_edges(n, s, e, w)
 
-    raise(NeedAllFourEdges.new)
+    raise(API2::NeedAllFourEdges.new)
   end
 
   #########

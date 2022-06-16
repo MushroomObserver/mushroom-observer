@@ -79,11 +79,11 @@ Layout/LineLength:
   Max: 80
 
 Metrics/AbcSize:
-# Can we try relaxing this one?  Even short simple methods sometimes exceed
-# 15 or 16.  Simplifying them further just forces us to make tons of tiny
-# trivial methods with really cumbersome names, without actually making
-# the code any better.
-# Max: 15
+  # Can we try relaxing this one?  Even short simple methods sometimes exceed
+  # 15 or 16.  Simplifying them further just forces us to make tons of tiny
+  # trivial methods with really cumbersome names, without actually making
+  # the code any better.
+  # Max: 15
   Max: 20
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -95,8 +95,8 @@ Metrics/BlockLength:
     - "test//**/*"
 
 Metrics/ClassLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 100
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -108,16 +108,16 @@ Metrics/CyclomaticComplexity:
     - "test//**/*"
 
 Metrics/MethodLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 10
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 10
   Max: 30
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
 
 Metrics/ModuleLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 100
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -196,11 +196,11 @@ Style/MethodCallWithArgsParentheses:
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
     default: "()"
-    '%i':    "[]"
-    '%I':    "[]"
-    '%r':    "{}"
-    '%w':    "[]"
-    '%W':    "[]"
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
 
 # I can't figure out how to get exploded to work with API.
 Style/RaiseArgs:

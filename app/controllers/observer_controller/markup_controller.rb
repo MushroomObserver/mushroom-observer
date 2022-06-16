@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
-class ObserverController
+module ObserverController::MarkupController
   def lookup_comment # :nologin
     lookup_general(Comment)
   end

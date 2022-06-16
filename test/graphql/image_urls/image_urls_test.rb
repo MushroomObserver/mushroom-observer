@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-class Mutations::ImageUrlsTest < ActionDispatch::IntegrationTest
-  # Tests the ImageUrls interface, implemented by several Types::Models
+class Mutations::ImageURLsTest < ActionDispatch::IntegrationTest
+  # Tests the ImageURLs interface, implemented by several Types::Models
 
   def test_get_user_thumbnail_urls
     query_string = <<-GRAPHQL

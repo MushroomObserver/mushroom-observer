@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Image
-  class Url
+  class URL
     SUBDIRECTORIES = {
       full_size: "orig",
       huge: "1280",

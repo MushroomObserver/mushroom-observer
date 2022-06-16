@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
-  class << self
+module Name::PropagateGenericClassifications
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
+  module ClassMethods
     # This is used only by script/refresh_caches.  I have placed it here in
     # order to make it easily accessible to unit testing.  As a separate file,
     # it should never be loaded by the web server, so it's safe from causing

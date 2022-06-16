@@ -3,7 +3,7 @@
 require("test_helper")
 require("rexml/document")
 
-class Api2ControllerTest < FunctionalTestCase
+class API2ControllerTest < FunctionalTestCase
   def assert_api_failed
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
@@ -352,7 +352,7 @@ class Api2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
@@ -365,7 +365,7 @@ class Api2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)

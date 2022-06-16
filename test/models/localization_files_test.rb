@@ -152,14 +152,15 @@ class LocalizationFilesTest < UnitTestCase
 
   def test_api_error_translations
     tags = []
-    file = "#{::Rails.root}/app/classes/api2/errors.rb"
-    File.open(file, "r:utf-8") do |fh|
-      fh.each_line do |line|
-        next unless line.match(/^\s*class (\w+) < /) &&
-                    %w[Error ObjectError BadParameterValue].
-                    exclude?(Regexp.last_match(1))
+    Dir.glob("#{::Rails.root}/app/classes/api2/error/*.rb").each do |file|
+      File.open(file, "r:utf-8") do |fh|
+        fh.each_line do |line|
+          next unless line.match(/^\s*class (\w+) < /) &&
+                      %w[Error ObjectError BadParameterValue].
+                      exclude?(Regexp.last_match(1))
 
-        tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
+          tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
+        end
       end
     end
     Dir.glob("#{::Rails.root}/app/classes/api2/parsers/*.rb").each do |file|

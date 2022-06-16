@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # API2
-class API2
+module API2::Uploads
   def prepare_upload
     uploads = [upload_from_url, upload_from_file, upload_from_http]
     uploads.reject!(&:nil?)
-    raise(TooManyUploads.new) if uploads.length > 1
+    raise(API2::TooManyUploads.new) if uploads.length > 1
 
     uploads.first
   end
@@ -33,8 +33,8 @@ class API2
 
   # Class holding info about an upload
   class Upload
-    attr_accessor :data, :length, :content_type, :checksum, :content,
-                  :content_length, :content_md5
+    attr_accessor :data, :length, :content_type, :checksum,
+                  :content, :content_length, :content_md5
 
     def initialize(args = {})
       @data         = args[:data]

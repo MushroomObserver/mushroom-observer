@@ -4,7 +4,7 @@ require("zip")
 
 module Report
   # Provides rendering ability for ZIP-type reports.
-  class ZipReport < Report::Base
+  class ZipReport < Base
     attr_accessor :content # List of (name, stream) pairs
 
     self.default_encoding = "UTF-8"

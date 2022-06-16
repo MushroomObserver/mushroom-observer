@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
+# TODO: move this into a new UserController
 # see observer_controller.rb
-class ObserverController
+module ObserverController::UserController
   # User index, restricted to admins.
   def index_user
     if in_admin_mode? || find_query(:User)

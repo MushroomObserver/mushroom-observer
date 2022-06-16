@@ -57,11 +57,8 @@
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 class NameController < ApplicationController
-  require_dependency "name_controller/create_and_edit_name"
-  require_dependency "name_controller/classification"
-  require_dependency "name_controller/show_name_description"
-
-  include DescriptionControllerHelpers
+  include DescriptionControllerHelpers, ShowNameDescription, Classification,
+          CreateAndEditName
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
@@ -107,6 +104,11 @@ class NameController < ApplicationController
     :show_name_description,
     :show_past_name,
     :show_past_name_description
+  ]
+
+  before_action :disable_link_prefetching, except: [
+    :create_name,
+    :edit_name
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 

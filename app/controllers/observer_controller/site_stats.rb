@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
-class ObserverController
+module ObserverController::SiteStats
   def show_site_stats
     store_location
     @site_data = SiteData.new.get_site_data

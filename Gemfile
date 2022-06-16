@@ -257,9 +257,6 @@ gem("graphql-batch")
 #
 
 group :test, :development do
-  # Use byebug as debugging gem
-  gem("byebug")
-
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
   # Until current changes are released, need to use this Github version:

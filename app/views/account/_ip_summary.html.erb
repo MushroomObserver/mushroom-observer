@@ -21,7 +21,7 @@
              bot<br/>
         <% end %>
         <% if api_key_str = @stats[ip][:api_key]
-          api_key = ApiKey.find_by_key(api_key_str) %>
+          api_key = APIKey.find_by_key(api_key_str) %>
           API key: <%= api_key_str %> (<%= api_key ? user_link(api_key.user) :
                                                      "bogus!" %>)<br/>
         <% end %>

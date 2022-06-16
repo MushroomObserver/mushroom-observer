@@ -10,7 +10,7 @@
 #  NOTE: Each partial is in pairs: a JSON version and an XML version.
 #  Please ensure they stay identical.
 #
-module Api2InlineHelper
+module API2InlineHelper
   def json_api_key(api_key)
     strip_hash(id: api_key.id,
                key: api_key.key.to_s,

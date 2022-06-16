@@ -9,21 +9,12 @@ class ObserverController < ApplicationController
   require "set"
 
   # These will mostly form the new ObservationController:
-  require_dependency "observer_controller/show_observation"
-  require_dependency "observer_controller/create_and_edit_observation"
-  require_dependency "observer_controller/indexes"
-  require_dependency "observer_controller/site_stats"
-  require_dependency "observer_controller/suggestions"
-  require_dependency "observer_controller/other"
+  include Other, Suggestions, SiteStats, Indexes, CreateAndEditObservation,
+          ShowObservation
 
   # These all belong in new controllers:
-  require_dependency "observer_controller/author_controller"
-  require_dependency "observer_controller/email_controller"
-  require_dependency "observer_controller/info_controller"
-  require_dependency "observer_controller/markup_controller"
-  require_dependency "observer_controller/rss_log_controller"
-  require_dependency "observer_controller/search_controller"
-  require_dependency "observer_controller/user_controller"
+  include UserController, SearchController, RssLogController, MarkupController,
+          InfoController, EmailController, AuthorController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter

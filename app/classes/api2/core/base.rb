@@ -26,8 +26,8 @@
 #
 #    method           Method: :get, :post, :patch, :delete
 #    action           "Action": :comment, :name, :observation, etc.
-#    user             User whose ApiKey was passed in for authentication.
-#    api_key          ApiKey passed in for authentication.
+#    user             User whose APIKey was passed in for authentication.
+#    api_key          APIKey passed in for authentication.
 #
 #    params           Validated hash of parameters you passed in.
 #    expected_params  Hash of parameters API tried to parse.  This is a full
@@ -119,7 +119,7 @@
 #  parameters "declaration" (that is, the expected syntax and limits).  The
 #  result is that the client can autodiscover all the available parameters (via
 #  the special "help" pseudoparameter).  Errors are raised as exceptions which
-#  must be caught by the client (or Api2Controller).
+#  must be caught by the client (or API2Controller).
 #
 #  There are four standard parsing methods:
 #
@@ -213,41 +213,36 @@
 #  +localization_files_test.rb+ will automatically search through all the
 #  parsers looking for missing error message.
 #
-class API2
-  API_VERSION = 2.0
-
-  def self.version
-    API_VERSION
+module API2::Base
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
-  attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
+  module ClassMethods
+    # Initialize and process a request.
+    def execute(params)
+      api = instantiate_subclass(params)
+      api.handle_version
+      api.authenticate_user
+      api.process_request
+      api
+    rescue API2::Error => e
+      api ||= new(params)
+      api.errors << e
+      e.fatal = true
+      api
+    end
 
-  # Give other modules ability to do additional initialization.
-  class_attribute :initializers
-  self.initializers = []
-
-  # Initialize and process a request.
-  def self.execute(params)
-    api = instantiate_subclass(params)
-    api.handle_version
-    api.authenticate_user
-    api.process_request
-    api
-  rescue API2::Error => e
-    api ||= new(params)
-    api.errors << e
-    e.fatal = true
-    api
-  end
-
-  # :stopdoc:
-  def self.instantiate_subclass(params)
-    action = params[:action].to_s
-    subclass = "API2::#{action.camelize}API"
-    subclass = subclass.constantize
-    subclass.new(params)
-  rescue StandardError
-    raise(BadAction.new(action))
+    # :stopdoc:
+    def instantiate_subclass(params)
+      action = params[:action].to_s
+      subclass = "API2::#{action.camelize}API"
+      subclass = subclass.constantize
+      subclass.new(params)
+    rescue StandardError
+      raise(API2::BadAction.new(action))
+    end
   end
 
   def initialize(params = {})
@@ -262,7 +257,7 @@ class API2
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
-      raise(BadVersion.new(version))
+      raise(API2::BadVersion.new(version))
     else
       self.version = version.to_f
     end
@@ -271,10 +266,10 @@ class API2
   def authenticate_user
     clear_user && return unless (key_str = parse(:string, :api_key))
 
-    key = ApiKey.find_by(key: key_str)
-    raise(BadApiKey.new(key_str))        unless key
-    raise(ApiKeyNotVerified.new(key))    unless key.verified
-    raise(UserNotVerified.new(key.user)) unless key.user.verified
+    key = APIKey.find_by(key: key_str)
+    raise(API2::BadAPIKey.new(key_str))        unless key
+    raise(API2::APIKeyNotVerified.new(key))    unless key.verified
+    raise(API2::UserNotVerified.new(key.user)) unless key.user.verified
 
     login_user(key)
   end
@@ -295,17 +290,17 @@ class API2
   def process_request
     tmp_method  = parse(:string, :method)
     self.method = tmp_method.downcase.to_sym
-    raise(MissingMethod.new)     unless method
-    raise(BadMethod.new(method)) unless respond_to?(method)
+    raise(API2::MissingMethod.new)     unless method
+    raise(API2::BadMethod.new(method)) unless respond_to?(method)
 
     send(method)
   end
 
   def abort_if_any_errors!
-    raise(AbortDueToErrors.new) if errors.any?
+    raise(API2::AbortDueToErrors.new) if errors.any?
   end
 
   def must_authenticate!
-    raise(MustAuthenticate.new) unless user
+    raise(API2::MustAuthenticate.new) unless user
   end
 end
