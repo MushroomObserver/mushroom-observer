@@ -402,10 +402,10 @@ class Description < AbstractModel
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
       table.to_s.classify.constantize.
-        joins(user_group: :user_group_users).
-        where("#{type_tag}_id" => id).
-        order(user_id: :asc).distinct.
-        pluck(:user_id)
+      joins(user_group: :user_group_users).
+      where("#{type_tag}_id" => id).
+      order(user_id: :asc).distinct.
+      pluck(:user_id)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
@@ -414,9 +414,9 @@ class Description < AbstractModel
     @group_ids ||= {}
     @group_ids[table] ||=
       table.to_s.classify.constantize.
-        where("#{type_tag}_id" => id).
-        order(user_group_id: :asc).distinct.
-        pluck(:user_group_id)
+      where("#{type_tag}_id" => id).
+      order(user_group_id: :asc).distinct.
+      pluck(:user_group_id)
   end
 
   ##############################################################################
