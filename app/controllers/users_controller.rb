@@ -1,8 +1,15 @@
 # frozen_string_literal: true
 
-# TODO: move this into a new UserController
-# see observer_controller.rb
-module ObserverController::UserController
+class UsersController < ApplicationController
+  # These need to be moved into the files where they are actually used.
+  require "find"
+  require "set"
+
+  before_action :login_required
+  before_action :disable_link_prefetching, except: [
+    :show_user
+  ]
+
   # User index, restricted to admins.
   def index_user
     if in_admin_mode? || find_query(:User)

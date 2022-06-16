@@ -349,7 +349,7 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    "/users"
   end
 
   # Find admin's record.

@@ -292,8 +292,6 @@ ACTIONS = {
     ask_webmaster_question: {},
     author_request: {},
     change_banner: {},
-    change_user_bonuses: {},
-    checklist: {},
     commercial_inquiry: {},
     create_observation: {},
     destroy_observation: {},
@@ -306,16 +304,13 @@ ACTIONS = {
     hide_thumbnail_map: {},
     how_to_help: {},
     how_to_use: {},
-    ilist_users: {},
     index: {},
     index_observation: {},
     index_rss_log: {},
-    index_user: {},
     intro: {},
     letter_to_community: {},
     list_observations: {},
     list_rss_logs: {},
-    list_users: {},
     lookup_accepted_name: {},
     lookup_comment: {},
     lookup_image: {},
@@ -330,7 +325,6 @@ ACTIONS = {
     news: {},
     next_observation: {},
     next_rss_log: {},
-    next_user: {},
     observation_search: {},
     observations_at_location: {},
     observations_at_where: {},
@@ -343,7 +337,6 @@ ACTIONS = {
     pattern_search: {},
     prev_observation: {},
     prev_rss_log: {},
-    prev_user: {},
     print_labels: {},
     recalc: {},
     review_authors: {},
@@ -356,7 +349,6 @@ ACTIONS = {
     show_observation: {},
     show_rss_log: {},
     show_site_stats: {},
-    show_user: {},
     suggestions: {},
     test_flash_redirection: {},
     textile: {},
@@ -365,9 +357,6 @@ ACTIONS = {
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    user_search: {},
-    users_by_contribution: {},
-    users_by_name: {},
     w3c_tests: {},
     wrapup_2011: {}
   },
@@ -455,6 +444,18 @@ ACTIONS = {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
+  },
+  users: {
+    change_user_bonuses: {},
+    checklist: {},
+    index_user: {},
+    list_users: {},
+    next_user: {},
+    prev_user: {},
+    show_user: {},
+    user_search: {},
+    users_by_contribution: {},
+    users_by_name: {}
   },
   vote: {
     cast_vote: {},
@@ -734,6 +735,8 @@ MushroomObserver::Application.routes.draw do
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
+
+  # ----- Users: refactor -------------------------------------------
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

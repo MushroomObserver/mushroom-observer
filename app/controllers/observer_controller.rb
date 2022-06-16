@@ -17,7 +17,7 @@ class ObserverController < ApplicationController
   include ShowObservation
 
   # These all belong in new controllers:
-  include UserController
+  # include UserController
   include SearchController
   include RssLogController
   include MarkupController
@@ -120,8 +120,8 @@ class ObserverController < ApplicationController
     :create_observation,
     :edit_observation,
     :show_obs,
-    :show_observation,
-    :show_user
+    :show_observation #,
+    # :show_user
   ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter
