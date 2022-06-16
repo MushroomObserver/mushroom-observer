@@ -11,8 +11,8 @@ class Query::NameDescriptionByEditor < Query::NameDescriptionBase
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    add_join(:name_descriptions_editors)
-    where << "name_descriptions_editors.user_id = '#{user.id}'"
+    add_join(:name_description_editors)
+    where << "name_description_editors.user_id = '#{user.id}'"
     super
   end
 

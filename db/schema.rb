@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_14_004020) do
+ActiveRecord::Schema.define(version: 2022_06_14_184435) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -190,6 +190,31 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.datetime "updated_at"
   end
 
+  create_table "location_description_admins", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "location_description_authors", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "location_description_editors", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "location_description_readers", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "location_description_writers", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
   create_table "location_descriptions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
@@ -213,26 +238,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.integer "project_id"
   end
 
-  create_table "location_descriptions_admins", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "location_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
-  end
-
-  create_table "location_descriptions_authors", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "location_description_id", default: 0, null: false
-    t.integer "user_id", default: 0, null: false
-  end
-
-  create_table "location_descriptions_editors", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "location_description_id", default: 0, null: false
-    t.integer "user_id", default: 0, null: false
-  end
-
-  create_table "location_descriptions_readers", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "location_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
-  end
-
   create_table "location_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "location_description_id"
     t.integer "version"
@@ -245,11 +250,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.text "species"
     t.text "notes"
     t.text "refs"
-  end
-
-  create_table "location_descriptions_writers", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "location_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
   end
 
   create_table "locations", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -290,6 +290,31 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.string "scientific_name", limit: 1024
   end
 
+  create_table "name_description_admins", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "name_description_authors", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "name_description_editors", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "name_description_readers", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "name_description_writers", charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
   create_table "name_descriptions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.datetime "created_at"
@@ -320,26 +345,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.integer "project_id"
   end
 
-  create_table "name_descriptions_admins", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "name_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
-  end
-
-  create_table "name_descriptions_authors", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "name_description_id", default: 0, null: false
-    t.integer "user_id", default: 0, null: false
-  end
-
-  create_table "name_descriptions_editors", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "name_description_id", default: 0, null: false
-    t.integer "user_id", default: 0, null: false
-  end
-
-  create_table "name_descriptions_readers", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "name_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
-  end
-
   create_table "name_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_description_id"
     t.integer "version"
@@ -356,11 +361,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_004020) do
     t.text "notes"
     t.text "refs"
     t.text "classification"
-  end
-
-  create_table "name_descriptions_writers", id: false, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "name_description_id", default: 0, null: false
-    t.integer "user_group_id", default: 0, null: false
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|

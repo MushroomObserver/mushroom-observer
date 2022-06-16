@@ -262,7 +262,7 @@ class EolData
 
   def description_id_to_authors
     data = Name.connection.select_rows(%(
-      SELECT name_description_id, user_id FROM name_descriptions_authors
+      SELECT name_description_id, user_id FROM name_description_authors
     ))
     pairs = data.map do |name_description_id, user_id|
       [name_description_id.to_i, @user_id_to_legal_name[user_id.to_i]]

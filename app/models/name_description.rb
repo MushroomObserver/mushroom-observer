@@ -95,21 +95,25 @@ class NameDescription < Description
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :admin_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_admins"
-  has_and_belongs_to_many :writer_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_writers"
-  has_and_belongs_to_many :reader_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_readers"
-  has_and_belongs_to_many :authors,
-                          class_name: "User",
-                          join_table: "name_descriptions_authors"
-  has_and_belongs_to_many :editors,
-                          class_name: "User",
-                          join_table: "name_descriptions_editors"
+  has_many :name_description_admins, dependent: :destroy
+  has_many :admin_groups, through: :name_description_admins,
+                          source: :user_group
+
+  has_many :name_description_writers, dependent: :destroy
+  has_many :writer_groups, through: :name_description_writers,
+                           source: :user_group
+
+  has_many :name_description_readers, dependent: :destroy
+  has_many :reader_groups, through: :name_description_readers,
+                           source: :user_group
+
+  has_many :name_description_authors, dependent: :destroy
+  has_many :authors, through: :name_description_authors,
+                     source: :user
+
+  has_many :name_description_editors, dependent: :destroy
+  has_many :editors, through: :name_description_editors,
+                     source: :user
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses

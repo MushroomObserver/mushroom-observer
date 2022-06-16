@@ -985,7 +985,7 @@ class NameController < ApplicationController
       @descs[name_id] ||= []
       @descs[name_id] << desc
       authors = Name.connection.select_values(%(
-        SELECT user_id FROM name_descriptions_authors
+        SELECT user_id FROM name_description_authors
         WHERE name_description_id = #{desc.id}
       )).map(&:to_i)
       authors = [desc.user_id] if authors.empty?

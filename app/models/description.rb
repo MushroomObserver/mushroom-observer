@@ -273,7 +273,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name}_admins".to_sym
+    "#{table_name.singularize}_admins".to_sym
   end
 
   # Wrapper around class method of same name
@@ -283,7 +283,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name}_writers".to_sym
+    "#{table_name.singularize}_writers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -293,7 +293,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name}_readers".to_sym
+    "#{table_name.singularize}_readers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -401,7 +401,11 @@ class Description < AbstractModel
   def group_user_ids(table)
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
-      self.class.connection.select_values(select_group_user_ids(table).to_sql)
+      table.to_s.classify.constantize.
+        joins(user_group: :user_group_users).
+        where("#{type_tag}_id" => id).
+        order(user_id: :asc).distinct.
+        pluck(:user_id)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
@@ -409,25 +413,11 @@ class Description < AbstractModel
   def group_ids(table)
     @group_ids ||= {}
     @group_ids[table] ||=
-      self.class.connection.select_values(select_group_ids(table).to_sql)
+      table.to_s.classify.constantize.
+        where("#{type_tag}_id" => id).
+        order(user_group_id: :asc).distinct.
+        pluck(:user_group_id)
   end
-
-  private
-
-  def select_group_user_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    table.join(UserGroupUser.arel_table).on(table[:"#{type_tag}_id"].eq(id).
-        and(table[:user_group_id].eq(UserGroupUser[:user_group_id]))).distinct.
-      project(UserGroupUser[:user_id]).order(UserGroupUser[:user_id].asc)
-  end
-
-  def select_group_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
-      project(table[:user_group_id]).order(table[:user_group_id].asc)
-  end
-
-  public
 
   ##############################################################################
   #
@@ -437,7 +427,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name}_authors".to_sym
+    "#{table_name.singularize}_authors".to_sym
   end
 
   # Wrapper around class method of same name
@@ -447,7 +437,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name}_editors".to_sym
+    "#{table_name.singularize}_editors".to_sym
   end
 
   # Wrapper around class method of same name
