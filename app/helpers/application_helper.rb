@@ -105,7 +105,7 @@ module ApplicationHelper
 
   # link to previous object in query results
   def link_prev(object)
-    path = if CONVERTED_CONTROLLERS.include? object.type_tag
+    path = if REFACTORED_CONTROLLERS.include? object.type_tag
              send("#{object.type_tag.to_s}_path", object.id, flow: "prev")
            else
              { controller: object.show_controller,
