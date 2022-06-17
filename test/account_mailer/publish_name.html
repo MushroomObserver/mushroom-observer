@@ -14,7 +14,7 @@ Subject: [MO] Name Published
 <div class="textile"><p>Here are some handy links:</p></div>
 <ul type=none>
 <li>Show this name: <a href="https://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>">https://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %></a></li>
-<li>Send email to the publisher: <a href="https://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>">https://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %></a></li>
+<li>Send email to the publisher: <a href="https://mushroomobserver.org/user?id=<%= ActiveRecord::FixtureSet.identify(:mary) %>">https://mushroomobserver.org/user?id=<%= ActiveRecord::FixtureSet.identify(:mary) %></a></li>
 <li>Latest changes at Mushroom Observer: <a href="https://mushroomobserver.org">https://mushroomobserver.org</a></li>
 </ul>
 <br/>

@@ -352,6 +352,11 @@ class User < AbstractModel
     "/users"
   end
 
+  # Override the default show_action
+  def self.show_action
+    "show"
+  end
+
   # Find admin's record.
   def self.admin
     User.first

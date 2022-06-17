@@ -633,7 +633,7 @@ class ImageController < ApplicationController
           @user.update(image: image)
           flash_notice(:runtime_image_changed_your_image.t(id: image.id))
         end
-        redirect_to(controller: "observer", action: "show_user",
+        redirect_to(controller: "users", action: "show",
                     id: @user.id)
         done = true
       end

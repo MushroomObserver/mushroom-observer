@@ -15,7 +15,7 @@ Image count: 1
 Here are some handy links:
 
 Show this observation: https://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>
-Show observer's profile: https://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
+Show observer's profile: https://mushroomobserver.org/user?id=<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Disable tracking for this name: https://mushroomobserver.org/name/email_tracking/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
 Review your notifications: https://mushroomobserver.org/interest/list_interests
 Latest changes at Mushroom Observer: https://mushroomobserver.org

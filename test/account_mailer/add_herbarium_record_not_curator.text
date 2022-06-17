@@ -11,4 +11,4 @@ Here are some handy links:
 
 Show this fungarium record: https://mushroomobserver.org/herbarium_record/show_herbarium_record/<%= ActiveRecord::FixtureSet.identify(:interesting_unknown) %>
 Show this fungarium: https://mushroomobserver.org/herbaria/show/<%= ActiveRecord::FixtureSet.identify(:nybg_herbarium) %>
-Show user's profile: https://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>
+Show user's profile: https://mushroomobserver.org/user?id=<%= ActiveRecord::FixtureSet.identify(:mary) %>

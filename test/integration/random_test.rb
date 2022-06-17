@@ -34,19 +34,19 @@ class RandomTest < IntegrationTestCase
     assert_template("observer/how_to_help")
     assert_no_link_exists("/account/login")
     assert_link_exists("/account/logout_user")
-    assert_link_exists("/observer/show_user/#{rolf.id}")
+    assert_link_exists("/user?id=#{rolf.id}")
 
     click(label: "Logout")
     assert_template("account/logout_user")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
-    assert_no_link_exists("/observer/show_user/#{rolf.id}")
+    assert_no_link_exists("/user?id=#{rolf.id}")
 
     click(label: "Introduction")
     assert_template("observer/intro")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
-    assert_no_link_exists("/observer/show_user/#{rolf.id}")
+    assert_no_link_exists("/user?id=#{rolf.id}")
   end
 
   test "sessions" do

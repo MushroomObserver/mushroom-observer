@@ -14,7 +14,7 @@ and this is why...
 Here are some handy links:
 
 Make sender an author: https://mushroomobserver.org/observer/review_authors/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=name_description&add=<%= ActiveRecord::FixtureSet.identify(:katrina) %>
-Show user's profile: https://mushroomobserver.org/observer/show_user/484233936
+Show user's profile: https://mushroomobserver.org/user?id=484233936
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

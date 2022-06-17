@@ -599,8 +599,8 @@ class LocationController < ApplicationController
           if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
-            redirect_to(controller: :observer,
-                        action: :show_user,
+            redirect_to(controller: :users,
+                        action: :show,
                         id: @set_user)
           end
         else

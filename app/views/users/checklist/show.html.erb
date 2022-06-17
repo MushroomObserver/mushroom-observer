@@ -4,8 +4,8 @@
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
-      link_to(:show_object.t(type: :profile), controller: :observer,
-              action: :show_user, id: @show_user.id),
+      link_to(:show_object.t(type: :profile), controller: :users,
+              action: :show, id: @show_user.id),
       link_to(:show_objects.t(type: :observation),
               controller: :observer, action: :observations_by_user,
               id: @show_user.id),

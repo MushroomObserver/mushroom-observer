@@ -53,7 +53,6 @@ class ObserverController < ApplicationController
   #   :advanced_search,
   #   :advanced_search_form,
   #   :ask_webmaster_question,
-  #   :checklist,
   #   :download_observations,
   #   :hide_thumbnail_map,
   #   :how_to_help,
@@ -61,7 +60,6 @@ class ObserverController < ApplicationController
   #   :index,
   #   :index_observation,
   #   :index_rss_log,
-  #   :index_user,
   #   :intro,
   #   :list_observations,
   #   :list_rss_logs,
@@ -79,7 +77,6 @@ class ObserverController < ApplicationController
   #   :news,
   #   :next_observation,
   #   :next_rss_log,
-  #   :next_user,
   #   :observation_search,
   #   :observations_by_name,
   #   :observations_of_look_alikes,
@@ -92,7 +89,6 @@ class ObserverController < ApplicationController
   #   :pattern_search,
   #   :prev_observation,
   #   :prev_rss_log,
-  #   :prev_user,
   #   :print_labels,
   #   :rss,
   #   :search_bar_help,
@@ -100,7 +96,6 @@ class ObserverController < ApplicationController
   #   :show_observation,
   #   :show_rss_log,
   #   :show_site_stats,
-  #   :show_user,
   #   :test,
   #   :textile,
   #   :textile_sandbox,
@@ -110,8 +105,6 @@ class ObserverController < ApplicationController
   #   :turn_javascript_nil,
   #   :turn_javascript_off,
   #   :turn_javascript_on,
-  #   :user_search,
-  #   :users_by_contribution,
   #   :w3c_tests,
   #   :wrapup_2011
   # ]
@@ -121,7 +114,6 @@ class ObserverController < ApplicationController
     :edit_observation,
     :show_obs,
     :show_observation #,
-    # :show_user
   ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter

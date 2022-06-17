@@ -115,10 +115,10 @@ module ObjectLinkHelper
   def user_link(user, name = nil)
     if user.is_a?(Integer)
       name ||= "#{:USER.t} ##{user}"
-      link_to(name, "#{observer_show_user_path}/#{user}")
+      link_to(name, "#{user_path}/#{user}")
     elsif user
       name ||= user.unique_text_name
-      link_to(name, "#{observer_show_user_path}/#{user.id}")
+      link_to(name, "#{user_path}/#{user.id}")
     else
       "?"
     end

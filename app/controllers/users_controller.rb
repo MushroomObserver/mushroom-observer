@@ -42,7 +42,7 @@ class UsersController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
-      redirect_to(action: "show_user", id: user.id)
+      redirect_to(action: "show", id: user.id)
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
       show_selected_users(query)

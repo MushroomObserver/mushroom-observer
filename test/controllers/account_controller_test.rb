@@ -142,13 +142,13 @@ class AccountControllerTest < FunctionalTestCase
   def test_anon_user_verify
     get(:verify)
 
-    assert_redirected_to(observer_index_user_path)
+    assert_redirected_to(users_path)
   end
 
   def test_anon_user_send_verify
     get(:send_verify)
 
-    assert_redirected_to(observer_index_user_path)
+    assert_redirected_to(users_path)
   end
 
   def test_anon_user_welcome
