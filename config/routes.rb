@@ -756,6 +756,11 @@ MushroomObserver::Application.routes.draw do
   get("/observer/list_users", to: redirect(path: "users"))
   get("/observer/users_by_contribution", to: redirect(path: "users"))
 
+  get("/observer/change_user_bonuses",
+    to: redirect(path: "user/bonus"))
+  get("/observer/checklist",
+    to: redirect(path: "user/checklist"))
+
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   ACTIONS[:ajax].each_key do |action|
