@@ -11,7 +11,7 @@ class UsersController < ApplicationController
   ]
 
   # User index, restricted to admins.
-  def index_user
+  def index
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -21,9 +21,11 @@ class UsersController < ApplicationController
     end
   end
 
+  alias index_user index
+
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
-  alias list_users index_user
+  alias list_users index
 
   # User index, restricted to admins.
   def users_by_name
@@ -52,7 +54,7 @@ class UsersController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: "list_users",
+      action: "index",
       include: :user_groups,
       matrix: !in_admin_mode?
     }.merge(args)
@@ -94,8 +96,14 @@ class UsersController < ApplicationController
     @users = User.by_contribution
   end
 
-  # show_user.rhtml
-  def show_user
+  # show.rhtml
+  def show
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
@@ -114,15 +122,7 @@ class UsersController < ApplicationController
     @observations = @query.results(limit: 6, include: image_includes)
   end
 
-  # Go to next user: redirects to show_user.
-  def next_user
-    redirect_to_next_object(:next, User, params[:id].to_s)
-  end
-
-  # Go to previous user: redirects to show_user.
-  def prev_user
-    redirect_to_next_object(:prev, User, params[:id].to_s)
-  end
+  alias show_user show
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
@@ -193,11 +193,11 @@ class UsersController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          redirect_to(action: "show_user", id: @user2.id)
+          redirect_to(action: "show", id: @user2.id)
         end
       end
     else
-      redirect_to(action: "show_user", id: @user2.id)
+      redirect_to(action: "show", id: @user2.id)
     end
   end
 end
