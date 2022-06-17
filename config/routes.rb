@@ -736,7 +736,25 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  # ----- Users: refactor -------------------------------------------
+  # ----- Users: standard actions -------------------------------------------
+  namespace :users do
+    resources :checklist, only: [:new, :create]
+    resources :change_bonuses, only: [:create, :destroy], id: /\d+/
+  end
+  resources :users, id: /\d+/
+  # Users: standard redirects of Observer legacy actions
+  # redirect_legacy_actions(
+  #   old_controller: "observer", new_controller: "users",
+  #   actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
+  # )
+  # Users: non-standard redirects of legacy Observer actions
+  # Rails routes currently accept only template tokens
+  # rubocop:disable Style/FormatStringToken
+  get("/observer/show_user", to: redirect(path: "user"))
+  get("/observer/user_search", to: redirect(path: "users"))
+  get("/observer/index_user", to: redirect(path: "users"))
+  get("/observer/list_users", to: redirect(path: "users"))
+  get("/observer/users_by_contribution", to: redirect(path: "users"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

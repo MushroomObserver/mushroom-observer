@@ -7,7 +7,7 @@ class UsersController < ApplicationController
 
   before_action :login_required
   before_action :disable_link_prefetching, except: [
-    :show_user
+    :show
   ]
 
   # User index, restricted to admins.
