@@ -27,32 +27,30 @@
 
   tabs = [
     link_to(:show_user_contributors.t, controller: :users,
-            action: :users_by_contribution)
+            action: :by_contribution)
   ]
   if @show_user == @user
     tabs += [
       link_to(:show_user_your_observations.t, links[:observations]),
       link_to(:show_user_comments_for_you.t, links[:comments_for]),
-      link_to(:show_user_your_notifications.t, controller: :interest,
-                    action: :list_interests),
-      link_to(:show_user_edit_profile.t, controller: :account,
-                     action: :profile),
-      link_to(:app_preferences.t, controller: :account, action: :prefs),
+      link_to(:show_user_your_notifications.t, interest_list_interests_path),
+      link_to(:show_user_edit_profile.t, account_profile_path),
+      link_to(:app_preferences.t, account_prefs_path),
       link_to(:app_life_list.t, links[:life_list])
     ]
   else
     tabs += [
       link_to(:show_user_observations_by.t(name: name), links[:observations]),
       link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
-      link_to(:show_user_email_to.t(name: name), controller: :observer,
-                          action: :ask_user_question, id: id)
+      link_to(:show_user_email_to.t(name: name),
+              observer_ask_user_question_path(id: id))
     ]
   end
   if in_admin_mode?
     tabs += [
       link_to(:change_user_bonuses.t, user_bonus_path(@show_user.id)),
-      link_to(:DESTROY.t, {controller: :account, action: :destroy_user,
-              id: @show_user.id}, data: {confirm: :are_you_sure.l})
+      link_to(:DESTROY.t, account_destroy_user_path(id: @show_user.id),
+              data: {confirm: :are_you_sure.l})
     ]
   end
   @tabsets = {

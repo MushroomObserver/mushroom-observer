@@ -84,9 +84,7 @@
             <%= link_to_coerced_query(@query, Name) %> |
             <%= link_to_coerced_query(@query, Image) %> |
             <%= link_to(:app_checklist.t,
-                        { checklist_path(
-                          species_list_id: @species_list.id
-                          ) }) %> |
+                        checklist_path(species_list_id: @species_list.id)) %> |
             <%= link_to(:show_object.t(type: :map),
                         add_query_param({ controller: "observer",
                                           action: "map_observations" },
