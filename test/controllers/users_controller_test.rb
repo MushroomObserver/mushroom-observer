@@ -61,7 +61,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_id
     login
     user = users(:rolf)
-    get(:user_search, params: { pattern: user.id })
+    get(:index, params: { pattern: user.id })
     assert_redirected_to(user_path(user.id))
   end
 
@@ -69,7 +69,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_name
     login
     user = users(:uniquely_named_user)
-    get(:user_search, params: { pattern: user.name })
+    get(:index, params: { pattern: user.name })
     assert_redirected_to(user_path(user.id))
   end
 
@@ -77,7 +77,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_multiple_hits
     login
     pattern = "Roy"
-    get(:user_search, params: { pattern: pattern })
+    get(:index, params: { pattern: pattern })
     # matcher includes optional quotation mark (?.)
     assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
                  "Wrong page displayed")
@@ -90,7 +90,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_user_search_unmatched
     login
     unmatched_pattern = "NonexistentUserContent"
-    get_without_clearing_flash(:user_search,
+    get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
     assert_template(:list_users)
 
