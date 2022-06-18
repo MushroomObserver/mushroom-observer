@@ -740,7 +740,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Users: standard actions -------------------------------------------
   resources :users do
-    resources :bonuses, only: [:new, :edit, :create, :destroy], id: /\d+/
+    resources :bonuses, only: [:edit, :update], id: /\d+/
   end
   resources :users, id: /\d+/
   # Users: standard redirects of Observer legacy actions

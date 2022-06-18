@@ -8,12 +8,12 @@ module Users
 
     # Old MO Action (method)                  New "Normalized" Action (method)
     # ----------------------------            --------------------------------
-    # observer_change_user_bonuses (get)      Users::Bonus#new (get)
-    # observer_change_user_bonuses (post)     Users::Bonus#create (post)
+    # observer_change_user_bonuses (get)      Users::Bonus#edit (get)
+    # observer_change_user_bonuses (post)     Users::Bonus#update (post)
 
     # Admin util linked from show page that lets admin add or change bonuses
     # for a given user.
-    def new
+    def edit
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
       redirect_to(user_path(@user2.id)) unless in_admin_mode?
@@ -28,7 +28,7 @@ module Users
       end
     end
 
-    def create
+    def update
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
       redirect_to(user_path(@user2.id)) unless in_admin_mode?
