@@ -127,7 +127,7 @@ class UsersControllerTest < FunctionalTestCase
              where("observations.user_id = #{user.id}
                     AND names.`rank` = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { id: user.id })
+    get(users_checklist_path(user_id: user.id))
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
 
@@ -143,7 +143,7 @@ class UsersControllerTest < FunctionalTestCase
                         = #{list.id}
                     AND names.`rank` = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { species_list_id: list.id })
+    get(users_checklist_path(species_list_id: list.id))
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -158,7 +158,7 @@ class UsersControllerTest < FunctionalTestCase
              where("project_observations.project_id = #{project.id}
                     AND names.`rank` = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { project_id: project.id })
+    get(users_checklist_path(project_id: project.id))
     assert_match(/Checklist for #{project.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -170,7 +170,7 @@ class UsersControllerTest < FunctionalTestCase
     login
     expect = Name.joins(:observations).with_rank(:Species).distinct
 
-    get(:checklist)
+    get(users_checklist_path)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
                  "Wrong page")
 
