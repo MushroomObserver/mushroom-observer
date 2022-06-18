@@ -3104,7 +3104,7 @@
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
 
-  # user/bonus
+  # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
