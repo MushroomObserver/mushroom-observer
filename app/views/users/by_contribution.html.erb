@@ -28,7 +28,8 @@
                   <td></td>
                   <td>
                     <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
-                    <%= link_to(:Observations.t, action: :observations_by_user, id: user.id) %>
+                    <%= link_to(:Observations.t, controller: :observer,
+                                action: :observations_by_user, id: user.id) %>
                   </td>
                 </tr>
               </table>

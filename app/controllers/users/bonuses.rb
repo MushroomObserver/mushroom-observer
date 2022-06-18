@@ -16,7 +16,7 @@ module Users
     def new
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
-      redirect_to(action: "show", id: @user2.id) unless in_admin_mode?
+      redirect_to(user_path(@user2.id)) unless in_admin_mode?
 
       # Reformat bonuses as string for editing, one entry per line.
       @val = ""
@@ -31,7 +31,7 @@ module Users
     def create
       return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
 
-      redirect_to(action: "show", id: @user2.id) unless in_admin_mode?
+      redirect_to(user_path(@user2.id)) unless in_admin_mode?
 
       # Parse new set of values.
       @val = params[:val]
