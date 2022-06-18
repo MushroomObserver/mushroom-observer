@@ -3634,20 +3634,16 @@ class ObserverControllerTest < FunctionalTestCase
     login
     sl_id = species_lists(:first_species_list).id
     get(:lookup_species_list, params: { id: sl_id })
-    assert_redirected_to(
-      species_list_show_species_list_path(id: sl_id)
-    )
+    assert_redirected_to(controller: :species_list,
+                         action: :show_species_list, id: sl_id)
     get(:lookup_species_list, params: { id: "Mysteries" })
-    assert_redirected_to(
-      species_list_show_species_list_path(
-        id: species_lists(:unknown_species_list).id
-      )
-    )
+    assert_redirected_to(controller: :species_list,
+      action: :show_species_list, id: species_lists(:unknown_species_list).id)
     get(:lookup_species_list, params: { id: "species list" })
-    assert_redirected_to(species_list_index_species_list_path)
+    assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_flash_warning
     get(:lookup_species_list, params: { id: "Flibbertygibbets" })
-    assert_redirected_to(species_list_index_species_list_path)
+    assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_flash_error
   end
 
@@ -3658,7 +3654,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_user, params: { id: "mary" })
     assert_redirected_to(user_path(mary.id))
     get(:lookup_user, params: { id: "Einstein" })
-    assert_redirected_to(observer_index_rss_log_path)
+    assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
     # This caused router to crash in the wild.
     assert_recognizes({ controller: "observer", action: "lookup_user",
