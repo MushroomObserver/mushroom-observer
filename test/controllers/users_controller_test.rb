@@ -143,7 +143,7 @@ class UsersControllerTest < FunctionalTestCase
   #   ---------------
 
   # Prove that user_index is restricted to admins
-  def test_index_user
+  def test_index
     login("rolf")
     get(:index)
     assert_redirected_to(:root)

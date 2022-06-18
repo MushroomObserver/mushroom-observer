@@ -19,7 +19,7 @@ class UsersController < ApplicationController
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
       flash_error(:runtime_search_has_expired.t)
-      redirect_to(observer_list_rss_logs_path)
+      redirect_to("/")
     end
   end
 
@@ -35,7 +35,7 @@ class UsersController < ApplicationController
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      redirect_to(observer_list_rss_logs_path)
+      redirect_to("/")
     end
   end
 
