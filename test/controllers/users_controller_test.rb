@@ -92,7 +92,7 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
-    assert_template(:list_users)
+    assert_template(:index)
 
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")

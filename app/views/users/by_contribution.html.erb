@@ -28,8 +28,10 @@
                   <td></td>
                   <td>
                     <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
-                    <%= link_to(:Observations.t, controller: :observer,
-                                action: :observations_by_user, id: user.id) %>
+                    <%= link_to(
+                          :Observations.t,
+                          observer_observations_by_user_path(id: user.id)
+                        ) %>
                   </td>
                 </tr>
               </table>
@@ -37,8 +39,7 @@
 
             <div class="col-xs-5">
               <%= if user.image_id
-                    thumbnail(user.image_id,
-                              link: { action: :show, id: user.id },
+                    thumbnail(user.image_id, link: user_path(user.id),
                               votes: false, size: :thumbnail)
                   end
               %>
