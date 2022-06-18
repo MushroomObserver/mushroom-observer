@@ -57,7 +57,7 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select("a[href^='/user?id=#{mary.id}']", minimum: 3)
+    assert_select("a[href^='/users/#{mary.id}']", minimum: 3)
     click(label: "Mary Newbie")
     assert_template("users/show")
 

@@ -3611,23 +3611,25 @@ class ObserverControllerTest < FunctionalTestCase
     login
     get(:lookup_observation,
         params: { id: observations(:minimal_unknown_obs).id })
-    assert_redirected_to(controller: :observer, action: :show_observation,
-                         id: observations(:minimal_unknown_obs).id)
+    assert_redirected_to(observer_show_observation_path(
+      id: observations(:minimal_unknown_obs).id
+    ))
   end
 
   def test_lookup_project
     login
     p_id = projects(:eol_project).id
     get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(controller: :project, action: :show_project, id: p_id)
+    assert_redirected_to(project_show_project_path(id: p_id))
     get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(controller: :project, action: :show_project,
-                         id: projects(:bolete_project).id)
+    assert_redirected_to(
+      project_show_project_path(id: projects(:bolete_project).id)
+    )
     get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(controller: :project, action: :index_project)
+    assert_redirected_to(project_index_project_path)
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
-    assert_redirected_to(%r{/project/index_project})
+    assert_redirected_to(project_index_project_path)
     assert_flash_warning
   end
 
@@ -3635,16 +3637,20 @@ class ObserverControllerTest < FunctionalTestCase
     login
     sl_id = species_lists(:first_species_list).id
     get(:lookup_species_list, params: { id: sl_id })
-    assert_redirected_to(controller: :species_list, action: :show_species_list,
-                         id: sl_id)
+    assert_redirected_to(
+      species_list_show_species_list_path(id: sl_id)
+    )
     get(:lookup_species_list, params: { id: "Mysteries" })
-    assert_redirected_to(controller: :species_list, action: :show_species_list,
-                         id: species_lists(:unknown_species_list).id)
+    assert_redirected_to(
+      species_list_show_species_list_path(
+        id: species_lists(:unknown_species_list).id
+      )
+    )
     get(:lookup_species_list, params: { id: "species list" })
-    assert_redirected_to(%r{/species_list/index_species_list})
+    assert_redirected_to(species_list_index_species_list_path)
     assert_flash_warning
     get(:lookup_species_list, params: { id: "Flibbertygibbets" })
-    assert_redirected_to(controller: :species_list, action: :index_species_list)
+    assert_redirected_to(species_list_index_species_list_path)
     assert_flash_error
   end
 
@@ -3655,7 +3661,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_user, params: { id: "mary" })
     assert_redirected_to(user_path(mary.id))
     get(:lookup_user, params: { id: "Einstein" })
-    assert_redirected_to(controller: :observer, action: :index_rss_log)
+    assert_redirected_to(observer_index_rss_log_path)
     assert_flash_error
     # This caused router to crash in the wild.
     assert_recognizes({ controller: "observer", action: "lookup_user",

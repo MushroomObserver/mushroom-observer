@@ -17,7 +17,7 @@ class UsersController < ApplicationController
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
       flash_error(:runtime_search_has_expired.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to(observer_list_rss_logs_path)
     end
   end
 
@@ -33,7 +33,7 @@ class UsersController < ApplicationController
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to(observer_list_rss_logs_path)
     end
   end
 
@@ -42,7 +42,7 @@ class UsersController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
-      redirect_to(action: "show", id: user.id)
+      redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
       show_selected_users(query)

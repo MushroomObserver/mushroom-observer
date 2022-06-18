@@ -115,43 +115,28 @@ class UsersControllerTest < FunctionalTestCase
     assert_match(/Contribution/, sorting_links.text)
   end
 
-  # FIXME: check herbaria controller
   def test_show_next
-    # users sorted in default order
-    users_alpha = User.order(:name)
-
-    # NOTE: Alternatively, do we want to test the query also, like this?
-    # query = Query.lookup_and_save(:User, :all)
-    # assert_operator(query.num_results, :>, 1)
-    # number4 = query.results[3]
-    # number5 = query.results[4]
-    # q = query.record.id.alphabetize
+    query = Query.lookup_and_save(:User, :all)
+    assert_operator(query.num_results, :>, 1)
+    number8 = query.results[7]
+    number9 = query.results[8]
+    q = query.record.id.alphabetize
 
     login
-    # NOTE: if so, then add param q:q to the following two statements
-    # get(:show, params: { id: number4.id, q: q, flow: "prev" })
-    get(:show, params: { id: users_alpha.fourth.id, flow: "next" })
-    assert_redirected_to(user_path(users_alpha.fifth.id),
-                         params: @controller.query_params(QueryRecord.last))
+    get(:show, params: { id: number8.id, q: q, flow: "next" })
+    assert_redirected_to(user_path(number9.id, q: q))
   end
 
   def test_show_prev
-    # users sorted in default order
-    users_alpha = User.order(:name)
-
-    # NOTE: Alternatively, do we want to test the query also, like this?
-    # query = Query.lookup_and_save(:User, :all)
-    # assert_operator(query.num_results, :>, 1)
-    # number3 = query.results[2]
-    # number4 = query.results[3]
-    # q = query.record.id.alphabetize
+    query = Query.lookup_and_save(:User, :all)
+    assert_operator(query.num_results, :>, 1)
+    number8 = query.results[7]
+    number7 = query.results[6]
+    q = query.record.id.alphabetize
 
     login
-    # NOTE: if so, then add param q:q to the following two statements
-    # get(:show, params: { id: number4.id, q: q, flow: "prev" })
-    get(:show, params: { id: users_alpha.fourth.id, flow: "prev" })
-    assert_redirected_to(user_path(users_alpha.third.id),
-                         params: @controller.query_params(QueryRecord.last))
+    get(:show, params: { id: number8.id, q: q, flow: "prev" })
+    assert_redirected_to(user_path(number7.id, q: q))
   end
   #   ---------------
   #    admin actions
