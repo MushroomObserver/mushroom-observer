@@ -29,8 +29,8 @@ class UsersControllerTest < FunctionalTestCase
 
   def test_show_user_no_id
     login
-    get_with_dump(:show_user)
-    assert_redirected_to(action: :index_user)
+    get_with_dump(:show)
+    assert_redirected_to(action: :index)
   end
 
   # def test_some_admin_pages
@@ -253,7 +253,7 @@ class UsersControllerTest < FunctionalTestCase
     # redirects to target user's page
     login("rolf")
     get(:change_user_bonuses, params: { id: user.id })
-    assert_redirected_to(action: :show_user, id: user.id)
+    assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
     # leaving bonuses and contributions unchanged.

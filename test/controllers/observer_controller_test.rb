@@ -1467,7 +1467,7 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:ask_user_question, params)
-    assert_redirected_to(action: :show_user, id: user.id)
+    assert_redirected_to(user_path(user.id))
     assert_flash_text(:runtime_ask_user_question_success.t)
   end
 
@@ -3651,9 +3651,9 @@ class ObserverControllerTest < FunctionalTestCase
   def test_lookup_user
     login
     get(:lookup_user, params: { id: rolf.id })
-    assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
+    assert_redirected_to(user_path(rolf.id))
     get(:lookup_user, params: { id: "mary" })
-    assert_redirected_to(controller: :observer, action: :show_user, id: mary.id)
+    assert_redirected_to(user_path(mary.id))
     get(:lookup_user, params: { id: "Einstein" })
     assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
