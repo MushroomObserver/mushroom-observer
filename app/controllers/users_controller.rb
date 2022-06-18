@@ -27,7 +27,7 @@ class UsersController < ApplicationController
   alias list_users index
 
   # User index, restricted to admins.
-  def users_by_name
+  def by_name
     if in_admin_mode?
       query = create_query(:User, :all, by: :name)
       show_selected_users(query)
@@ -89,8 +89,8 @@ class UsersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  # users_by_contribution.rhtml
-  def users_by_contribution
+  # by_contribution.rhtml
+  def by_contribution
     SiteData.new
     @users = User.by_contribution
   end

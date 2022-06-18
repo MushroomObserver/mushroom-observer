@@ -12,7 +12,7 @@ module ObserverController::EmailController
                                             params[:feature_email][:content])
         end
         flash_notice(:send_feature_email_success.t)
-        redirect_to(action: "users_by_name")
+        redirect_to(controller: "users", action: "by_name")
       end
     else
       flash_error(:permission_denied.t)

@@ -445,18 +445,18 @@ ACTIONS = {
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
   },
-  # users: {
-  #   change_user_bonuses: {},
-  #   checklist: {},
-  #   index_user: {},
-  #   list_users: {},
-  #   next_user: {},
-  #   prev_user: {},
-  #   show_user: {},
-  #   user_search: {},
-  #   users_by_contribution: {},
-  #   users_by_name: {}
-  # },
+  users: {
+    # change_user_bonuses: {},
+    # checklist: {},
+    # index_user: {},
+    # list_users: {},
+    # next_user: {},
+    # prev_user: {},
+    # show_user: {},
+    # user_search: {},
+    by_contribution: {},
+    by_name: {}
+  },
   vote: {
     cast_vote: {},
     cast_votes: {},
@@ -739,7 +739,7 @@ MushroomObserver::Application.routes.draw do
   # ----- Users: standard actions -------------------------------------------
   namespace :users do
     resources :checklist, only: [:new, :create]
-    resources :change_bonuses, only: [:create, :destroy], id: /\d+/
+    resources :bonus, only: [:create, :destroy], id: /\d+/
   end
   resources :users, id: /\d+/
   # Users: standard redirects of Observer legacy actions

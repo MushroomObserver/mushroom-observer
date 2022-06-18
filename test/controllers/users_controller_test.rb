@@ -33,6 +33,25 @@ class UsersControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_user)
   end
 
+  # def test_some_admin_pages
+  #   [
+  #     [:users_by_name,  "list_users", {}],
+  #   ].each do |page, response, params|
+  #     logout
+  #     get(page, params: params)
+  #     assert_redirected_to(controller: :account, action: :login)
+
+  #     login("rolf")
+  #     get(page, params: params)
+  #     assert_redirected_to(action: :list_rss_logs)
+  #     assert_flash_text(/denied|only.*admin/i)
+
+  #     make_admin("rolf")
+  #     get_with_dump(page, params)
+  #     assert_template(response) # 1
+  #   end
+  # end
+
   #   -------------
   #    user_search
   #   -------------

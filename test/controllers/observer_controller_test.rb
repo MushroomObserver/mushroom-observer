@@ -1397,7 +1397,6 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_some_admin_pages
     [
-      [:users_by_name,  "list_users", {}],
       [:email_features, "email_features", {}]
     ].each do |page, response, params|
       logout
@@ -1430,7 +1429,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     make_admin("rolf")
     post_with_dump(page, params)
-    assert_redirected_to(controller: :observer, action: :users_by_name)
+    assert_redirected_to(controller: :users, action: :by_name)
   end
 
   def test_send_commercial_inquiry
