@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   require "find"
   require "set"
 
-  before_action :login_required, except [ :by_contribution ]
+  before_action :login_required
   before_action :disable_link_prefetching, except: [
     :show,
     :by_contribution
@@ -40,10 +40,11 @@ class UsersController < ApplicationController
     end
   end
 
-    # by_contribution.rhtml
+  # by_contribution.rhtml
   def by_contribution
     SiteData.new
     @users = User.by_contribution
+    render(template: "users/by_contribution")
   end
 
   # show.rhtml

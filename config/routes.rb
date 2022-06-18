@@ -726,10 +726,20 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
+  # ----- Users: nonstandard actions ----------------------------------------
+  # These routes must go before resources, or it will try to match
+  # "by_contribution" to a user
+  get("/users/by_contribution", to: "users#by_contribution")
+  get("/users/by_name", to: "users#by_name")
+
   # ----- Users: standard actions -------------------------------------------
   resources :users do
     resources :bonuses, only: [:edit, :update], id: /\d+/
   end
+  # namespace :users do
+  #   get :by_contribution, action: :by_contribution, as: :by_contribution
+  #   get :by_name, action: :by_name, as: :by_name
+  # end
   resources :users, id: /\d+/
   # Users: standard redirects of Observer legacy actions
   # redirect_legacy_actions(
@@ -739,8 +749,6 @@ MushroomObserver::Application.routes.draw do
   # Users: non-standard redirects of legacy Observer actions
   # Rails routes currently accept only template tokens
   # rubocop:disable Style/FormatStringToken
-  get("/users/by_contribution", to: "users#by_contribution")
-  get("/users/by_name", to: "users#by_name")
   get("/observer/user_search", to: redirect(path: "users"))
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
