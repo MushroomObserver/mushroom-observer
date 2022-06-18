@@ -29,11 +29,11 @@ class UsersControllerTest < FunctionalTestCase
 
   # FIXME: With default resources, Rails won't even route someone
   # to the show action unless there's an id. Test superfluous?
-  def test_show_user_no_id
-    login
-    get_with_dump(:show)
-    assert_redirected_to(users_path)
-  end
+  # def test_show_user_no_id
+  #   login
+  #   get_with_dump(:show)
+  #   assert_redirected_to(users_path)
+  # end
 
   # def test_some_admin_pages
   #   [
@@ -95,7 +95,7 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
-    assert_template(:index)
+    assert_template("users/index")
 
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
@@ -164,7 +164,7 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(user_bonuses_path(id: user.id))
+    get(edit_user_bonus_path(id: user.id))
     assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
@@ -183,7 +183,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_equal(old_contribution + 20, user.contribution)
 
     # Prove that admin can get bonuses
-    get(user_bonuses_path(id: user.id))
+    get(edit_user_bonus_path(id: user.id))
     assert_response(:success)
   end
 end

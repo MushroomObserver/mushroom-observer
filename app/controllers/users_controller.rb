@@ -53,11 +53,9 @@ class UsersController < ApplicationController
 
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, User, id)
+      redirect_to_next_object(:next, User, id) and return
     when "prev"
-      redirect_to_next_object(:prev, User, id)
-    else
-      @show_user = find_or_goto_index(User, id)
+      redirect_to_next_object(:prev, User, id) and return
     end
     # FIXME: Rails won't route anything to the show action unless there's an id!
     return unless @show_user
