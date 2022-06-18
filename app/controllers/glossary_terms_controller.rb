@@ -20,7 +20,7 @@ class GlossaryTermsController < ApplicationController
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
-    @objects = @glossary_term.images
+    @objects = @glossary_term.images.order(vote_cache: :desc)
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------

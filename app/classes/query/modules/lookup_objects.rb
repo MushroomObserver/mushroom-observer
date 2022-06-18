@@ -42,7 +42,7 @@ module Query
         return [] if project_ids.empty?
 
         SpeciesList.connection.select_values(%(
-          SELECT DISTINCT species_list_id FROM projects_species_lists
+          SELECT DISTINCT species_list_id FROM project_species_lists
           WHERE project_id IN (#{project_ids.join(",")})
         ))
       end

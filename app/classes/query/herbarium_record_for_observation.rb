@@ -10,8 +10,8 @@ class Query::HerbariumRecordForObservation < Query::HerbariumRecordBase
   def initialize_flavor
     obs = find_cached_parameter_instance(Observation, :observation)
     title_args[:observation] = obs.unique_format_name
-    where << "herbarium_records_observations.observation_id = '#{obs.id}'"
-    add_join(:herbarium_records_observations)
+    where << "observation_herbarium_records.observation_id = '#{obs.id}'"
+    add_join(:observation_herbarium_records)
     super
   end
 end

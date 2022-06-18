@@ -4089,8 +4089,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_checklist_for_species_list
     login
     list = species_lists(:one_genus_three_species_list)
-    expect = Name.joins(observations: :observations_species_lists).
-             where("observations_species_lists.species_list_id
+    expect = Name.joins(observations: :species_list_observations).
+             where("species_list_observations.species_list_id
                         = #{list.id}
                     AND names.`rank` = #{Name.ranks[:Species]}").distinct
 
@@ -4105,8 +4105,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_checklist_for_project
     login
     project = projects(:one_genus_two_species_project)
-    expect = Name.joins(observations: :observations_projects).
-             where("observations_projects.project_id = #{project.id}
+    expect = Name.joins(observations: :project_observations).
+             where("project_observations.project_id = #{project.id}
                     AND names.`rank` = #{Name.ranks[:Species]}").distinct
 
     get(:checklist, params: { project_id: project.id })

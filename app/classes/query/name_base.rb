@@ -121,9 +121,9 @@ module Query
       add_id_condition("observations.id", params[:observations], :observations)
       add_where_condition("observations", params[:locations], :observations)
       add_id_condition(
-        "observations_species_lists.species_list_id",
+        "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
-        :observations, :observations_species_lists
+        :observations, :species_list_observations
       )
     end
 

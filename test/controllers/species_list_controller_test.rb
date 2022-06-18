@@ -1842,7 +1842,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_post_add_remove_double_observations
     spl = species_lists(:unknown_species_list)
     old_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
+      SELECT observation_id FROM species_list_observations
       WHERE species_list_id = #{spl.id}
       ORDER BY observation_id ASC
     ))
@@ -1859,7 +1859,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_flash_success
     new_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
+      SELECT observation_id FROM species_list_observations
       WHERE species_list_id = #{spl.id}
       ORDER BY observation_id ASC
     ))
