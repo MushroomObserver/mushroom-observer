@@ -3158,7 +3158,7 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
 
-  # users/users_by_name
+  # users/by_name
   users_by_name_title: Users by Name
   users_by_name_created_at: Created
   users_by_name_groups: Groups

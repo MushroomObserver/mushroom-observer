@@ -1428,7 +1428,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     make_admin("rolf")
     post_with_dump(page, params)
-    assert_redirected_to(controller: :users, action: :by_name)
+    assert_redirected_to(users_by_name_path)
   end
 
   def test_send_commercial_inquiry
