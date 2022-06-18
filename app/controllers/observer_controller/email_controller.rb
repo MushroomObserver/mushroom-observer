@@ -38,7 +38,7 @@ module ObserverController::EmailController
     content = params[:email][:content]
     UserEmail.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
-    redirect_to(controller: "users", action: "show", id: @target.id)
+    redirect_to(user_path(@target.id))
   end
 
   def ask_observation_question
