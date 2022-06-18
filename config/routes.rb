@@ -751,11 +751,11 @@ MushroomObserver::Application.routes.draw do
   # Users: non-standard redirects of legacy Observer actions
   # Rails routes currently accept only template tokens
   # rubocop:disable Style/FormatStringToken
-  get("/observer/show_user", to: redirect(path: "user"))
   get("/observer/user_search", to: redirect(path: "users"))
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
   get("/observer/users_by_contribution", to: redirect(path: "users"))
+  get("/observer/show_user", to: redirect(path: "user"))
 
   get("/observer/change_user_bonuses",
     to: redirect(path: "users/bonuses"))

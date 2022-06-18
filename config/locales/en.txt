@@ -2310,7 +2310,7 @@
   form_sequence_valid_deposit: "[:deposit] requires both [:archive] and [:accession]"
   form_sequence_bases_or_deposit_required: bases and/or deposit required
 
-  # users/users_by_contribution
+  # users/by_contribution
   users_by_contribution_title: List of Contributors
   users_by_contribution_2a: "[:images]"
   users_by_contribution_2b: "[:name]"

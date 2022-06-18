@@ -12,6 +12,8 @@ class UsersController < ApplicationController
 
   # User index, restricted to admins.
   def index
+    return patterned_index if params[:pattern].present?
+
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -37,8 +39,47 @@ class UsersController < ApplicationController
     end
   end
 
+    # by_contribution.rhtml
+  def by_contribution
+    SiteData.new
+    @users = User.by_contribution
+  end
+
+  # show.rhtml
+  def show
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, User, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, User, params[:id].to_s)
+    else
+      @user = find_or_goto_index(User, params[:id])
+    end
+
+    store_location
+    id = params[:id].to_s
+    @show_user = find_or_goto_index(User, id)
+    return unless @show_user
+
+    @user_data = SiteData.new.get_user_data(id)
+    @life_list = Checklist::ForUser.new(@show_user)
+    @query = Query.lookup(:Observation, :by_user,
+                          user: @show_user, by: :owners_thumbnail_quality)
+    image_includes = { thumb_image: [:image_votes, :license, :user] }
+    @observations = @query.results(limit: 6, include: image_includes)
+    return unless @observations.length < 6
+
+    @query = Query.lookup(:Observation, :by_user,
+                          user: @show_user, by: :thumbnail_quality)
+    @observations = @query.results(limit: 6, include: image_includes)
+  end
+
+  alias show_user show
+
+  private
+
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def user_search
+  def patterned_index
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
@@ -88,41 +129,4 @@ class UsersController < ApplicationController
 
     show_index_of_objects(query, args)
   end
-
-  # by_contribution.rhtml
-  def by_contribution
-    SiteData.new
-    @users = User.by_contribution
-  end
-
-  # show.rhtml
-  def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, User, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, User, params[:id].to_s)
-    else
-      @user = find_or_goto_index(User, params[:id])
-    end
-
-    store_location
-    id = params[:id].to_s
-    @show_user = find_or_goto_index(User, id)
-    return unless @show_user
-
-    @user_data = SiteData.new.get_user_data(id)
-    @life_list = Checklist::ForUser.new(@show_user)
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :owners_thumbnail_quality)
-    image_includes = { thumb_image: [:image_votes, :license, :user] }
-    @observations = @query.results(limit: 6, include: image_includes)
-    return unless @observations.length < 6
-
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :thumbnail_quality)
-    @observations = @query.results(limit: 6, include: image_includes)
-  end
-
-  alias show_user show
 end

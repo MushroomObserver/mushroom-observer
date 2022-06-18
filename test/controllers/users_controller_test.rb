@@ -14,8 +14,8 @@ class UsersControllerTest < FunctionalTestCase
 
   def test_page_loads
     login
-    get_with_dump(:users_by_contribution)
-    assert_template(:users_by_contribution)
+    get_with_dump(:by_contribution)
+    assert_template("users/by_contribution")
 
     get_with_dump(:show, id: rolf.id)
     assert_template(:show)
@@ -23,14 +23,14 @@ class UsersControllerTest < FunctionalTestCase
 
   def test_page_load_user_by_contribution
     login
-    get_with_dump(:users_by_contribution)
-    assert_template(:users_by_contribution)
+    get_with_dump(:by_contribution)
+    assert_template("users/by_contribution")
   end
 
   def test_show_user_no_id
     login
     get_with_dump(:show)
-    assert_redirected_to(action: :index)
+    assert_redirected_to(users_path)
   end
 
   # def test_some_admin_pages
