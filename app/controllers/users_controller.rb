@@ -5,9 +5,10 @@ class UsersController < ApplicationController
   require "find"
   require "set"
 
-  before_action :login_required
+  before_action :login_required, except [ :by_contribution ]
   before_action :disable_link_prefetching, except: [
-    :show
+    :show,
+    :by_contribution
   ]
 
   # User index, restricted to admins.
