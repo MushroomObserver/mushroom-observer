@@ -56,7 +56,7 @@
           (<%= link_to(:SHOW.t, controller: :observer,
                        action: :observations_for_project, id: @project.id) %> |
           <%= link_to(:app_checklist.t,
-                      users_checklist_path(project_id: @project.id)) %>)
+                      checklist_path(project_id: @project.id)) %>)
         <% else %>
           <%= :NONE.t %>
         <% end %>

@@ -2654,7 +2654,7 @@
   # observer/license_updater
   bulk_license_link: Bulk License Updater
 
-  # users/checklist
+  # checklists
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_title: Checklist for [project]

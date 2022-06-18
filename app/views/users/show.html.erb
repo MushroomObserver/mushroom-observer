@@ -20,7 +20,7 @@
     [ :names_versions, :name, :names_by_editor ],
     [ :observations, :observer, :observations_by_user ],
     [ :species_lists, :species_list, :species_lists_by_user ],
-    [ :life_list, :users, :checklist ]
+    [ :life_list, :checklists, :show ]
   ].each do |key, controller, action|
     links[key] = url_for(controller: controller, action: action, id: id)
   end

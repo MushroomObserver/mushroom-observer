@@ -62,7 +62,7 @@ class UsersControllerTest < FunctionalTestCase
     login
     user = users(:rolf)
     get(:user_search, params: { pattern: user.id })
-    assert_redirected_to(action: "show_user", id: user.id)
+    assert_redirected_to(user_path(user.id))
   end
 
   # When a non-id pattern matches only one user, show that user.
@@ -70,7 +70,7 @@ class UsersControllerTest < FunctionalTestCase
     login
     user = users(:uniquely_named_user)
     get(:user_search, params: { pattern: user.name })
-    assert_redirected_to(%r{/show_user/#{user.id}})
+    assert_redirected_to(user_path(user.id))
   end
 
   # When pattern matches multiple users, list them.
@@ -113,82 +113,6 @@ class UsersControllerTest < FunctionalTestCase
   def prove_sorting_links_include_contribution
     sorting_links = css_select("#sorts")
     assert_match(/Contribution/, sorting_links.text)
-  end
-
-  #   -----------
-  #    checklist
-  #   -----------
-
-  # Prove that Life List goes to correct page which has correct content
-  def test_checklist_for_user
-    login
-    user = users(:rolf)
-    expect = Name.joins(observations: :user).
-             where("observations.user_id = #{user.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(users_checklist_path(user_id: user.id))
-    assert_match(/Checklist for #{user.name}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Species List checklist goes to correct page with correct content
-  def test_checklist_for_species_list
-    login
-    list = species_lists(:one_genus_three_species_list)
-    expect = Name.joins(observations: :species_list_observations).
-             where("species_list_observations.species_list_id
-                        = #{list.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(users_checklist_path(species_list_id: list.id))
-    assert_match(/Checklist for #{list.title}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Project checklist goes to correct page with correct content
-  def test_checklist_for_project
-    login
-    project = projects(:one_genus_two_species_project)
-    expect = Name.joins(observations: :project_observations).
-             where("project_observations.project_id = #{project.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(users_checklist_path(project_id: project.id))
-    assert_match(/Checklist for #{project.title}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Site checklist goes to correct page with correct content
-  def test_checklist_for_site
-    login
-    expect = Name.joins(:observations).with_rank(:Species).distinct
-
-    get(users_checklist_path)
-    assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  def prove_checklist_content(expect)
-    # Get expected names not included in the displayed checklist links.
-    missing_names = (
-      expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
-
-        missing << taxon.text_name
-      end
-    )
-
-    assert_select(".checklist a", count: expect.size)
-    assert(missing_names.empty?, "Species List missing #{missing_names}")
   end
 
   # FIXME: check herbaria controller
