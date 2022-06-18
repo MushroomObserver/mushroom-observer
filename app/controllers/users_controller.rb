@@ -99,9 +99,12 @@ class UsersController < ApplicationController
   def show
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+      redirect_to_next_object(:next, User, params[:id].to_s)
     when "prev"
-      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+      redirect_to_next_object(:prev, User, params[:id].to_s)
+    else
+      @user = find_or_goto_index(User, params[:id])
+    end
 
     store_location
     id = params[:id].to_s
