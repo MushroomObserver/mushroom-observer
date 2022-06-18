@@ -625,8 +625,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "34", type: :user } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :user_search,
-                         pattern: "34")
+    assert_redirected_to(users_path(pattern: "34"))
 
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
@@ -3619,16 +3618,15 @@ class ObserverControllerTest < FunctionalTestCase
     login
     p_id = projects(:eol_project).id
     get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(project_show_project_path(id: p_id))
+    assert_redirected_to(controller: :project, action: :show_project, id: p_id)
     get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(
-      project_show_project_path(id: projects(:bolete_project).id)
-    )
+    assert_redirected_to(controller: :project, action: :show_project,
+                         id: projects(:bolete_project).id)
     get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(project_index_project_path)
+    assert_redirected_to(controller: :project, action: :index_project)
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
-    assert_redirected_to(project_index_project_path)
+    assert_redirected_to(controller: :project, action: :index_project)
     assert_flash_warning
   end
 
