@@ -3538,6 +3538,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_error
     get(:lookup_location, params: { id: "California" })
     # assert_redirected_to(controller: :location, action: :index_location)
+    # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/location/index_location})
     assert_flash_warning
   end
@@ -3557,6 +3558,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
 
     get(:lookup_name, params: { id: names(:coprinus_comatus).id })
+    # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
 
     get(:lookup_name, params: { id: "Agaricus campestris" })
@@ -3572,6 +3574,7 @@ class ObserverControllerTest < FunctionalTestCase
                          id: names(:amanita_baccata_borealis).id)
 
     get(:lookup_name, params: { id: "Amanita baccata" })
+    # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/name/index_name})
     assert_flash_warning
 
@@ -3596,6 +3599,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_name, params: { id: "Verpab" })
     assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
                                                              match: "Verpab"))
+    # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/name/index_name})
 
     # Prove that lookup_name adds flash message when it hits an error,
@@ -3626,7 +3630,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :project, action: :index_project)
     assert_flash_error
     get(:lookup_project, params: { id: "project" })
-    assert_redirected_to(controller: :project, action: :index_project)
+    # Must test against regex because passed query param borks path match
+    assert_redirected_to(%r{/project/index_project})
     assert_flash_warning
   end
 
@@ -3640,7 +3645,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :species_list,
       action: :show_species_list, id: species_lists(:unknown_species_list).id)
     get(:lookup_species_list, params: { id: "species list" })
-    assert_redirected_to(controller: :species_list, action: :index_species_list)
+    # Must test against regex because passed query param borks path match
+    assert_redirected_to(%r{/species_list/index_species_list})
     assert_flash_warning
     get(:lookup_species_list, params: { id: "Flibbertygibbets" })
     assert_redirected_to(controller: :species_list, action: :index_species_list)

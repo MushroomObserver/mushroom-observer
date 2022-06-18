@@ -47,18 +47,19 @@ class UsersController < ApplicationController
 
   # show.rhtml
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, User, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, User, params[:id].to_s)
-    else
-      @user = find_or_goto_index(User, params[:id])
-    end
-
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, User, id)
+    when "prev"
+      redirect_to_next_object(:prev, User, id)
+    else
+      @show_user = find_or_goto_index(User, id)
+    end
+    # FIXME: Rails won't route anything to the show action unless there's an id!
     return unless @show_user
 
     @user_data = SiteData.new.get_user_data(id)

@@ -27,6 +27,8 @@ class UsersControllerTest < FunctionalTestCase
     assert_template("users/by_contribution")
   end
 
+  # FIXME: With default resources, Rails won't even route someone
+  # to the show action unless there's an id. Test superfluous?
   def test_show_user_no_id
     login
     get_with_dump(:show)
@@ -70,7 +72,8 @@ class UsersControllerTest < FunctionalTestCase
     login
     user = users(:uniquely_named_user)
     get(:index, params: { pattern: user.name })
-    assert_redirected_to(user_path(user.id))
+    # Must test against regex because passed query param borks path match
+    assert_redirected_to(%r{#{user_path(user.id)}})
   end
 
   # When pattern matches multiple users, list them.
