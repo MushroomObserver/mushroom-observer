@@ -1,6 +1,6 @@
 module Users
   # Controls viewing and modifying users by admins.
-  class BonusController < ApplicationController
+  class BonusesController < ApplicationController
     # filters
     before_action :login_required
     before_action :pass_query_params

@@ -739,7 +739,7 @@ MushroomObserver::Application.routes.draw do
   # ----- Users: standard actions -------------------------------------------
   namespace :users do
     resources :checklist, only: [:new, :create]
-    resources :bonus, only: [:create, :destroy], id: /\d+/
+    resources :bonuses, only: [:new, :create, :destroy], id: /\d+/
   end
   resources :users, id: /\d+/
   # Users: standard redirects of Observer legacy actions
@@ -757,9 +757,9 @@ MushroomObserver::Application.routes.draw do
   get("/observer/users_by_contribution", to: redirect(path: "users"))
 
   get("/observer/change_user_bonuses",
-    to: redirect(path: "user/bonus"))
+    to: redirect(path: "users/bonuses"))
   get("/observer/checklist",
-    to: redirect(path: "user/checklist"))
+    to: redirect(path: "users/checklist"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
