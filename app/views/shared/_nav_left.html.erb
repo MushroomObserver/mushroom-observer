@@ -54,7 +54,7 @@
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_your_interests.t, interest_list_interests_path,
                 { class: "list-group-item visible-xs" }) %>
-    <%= link_to(:app_your_summary.t, "#{user_path}/#{@user.id}",
+    <%= link_to(:app_your_summary.t, user_path(@user.id),
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_preferences.t, account_prefs_path,
                 { class: "list-group-item visible-xs" }) %>
