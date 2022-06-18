@@ -50,8 +50,7 @@
   end
   if in_admin_mode?
     tabs += [
-      link_to(:change_user_bonuses.t, controller: :users,
-              action: :change_user_bonuses, id: @show_user.id),
+      link_to(:change_user_bonuses.t, user_bonus_path(@show_user.id)),
       link_to(:DESTROY.t, {controller: :account, action: :destroy_user,
               id: @show_user.id}, data: {confirm: :are_you_sure.l})
     ]

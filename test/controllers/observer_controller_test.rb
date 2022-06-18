@@ -257,7 +257,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_observations_by_unknown_user
     login
     get(:observations_by_user, params: { id: 1e6 })
-    assert_redirected_to(action: :index_user)
+    assert_redirected_to(users_path)
   end
 
   def test_observations_by_known_user

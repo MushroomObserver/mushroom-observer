@@ -236,11 +236,11 @@ class UsersControllerTest < FunctionalTestCase
   # Prove that user_index is restricted to admins
   def test_index_user
     login("rolf")
-    get(:index_user)
+    get(:index)
     assert_redirected_to(:root)
 
     make_admin
-    get(:index_user)
+    get(:index)
     assert_response(:success)
   end
 
@@ -252,26 +252,26 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(:change_user_bonuses, params: { id: user.id })
+    get(:bonus, params: { id: user.id })
     assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
     # leaving bonuses and contributions unchanged.
     make_admin
-    post(:change_user_bonuses, params: { id: user.id, val: "wong format 7" })
+    post(:bonus, params: { id: user.id, val: "wong format 7" })
     assert_flash_error
     user.reload
     assert_empty(user.bonuses)
     assert_equal(old_contribution, user.contribution)
 
     # Prove that admin can change bonuses
-    post(:change_user_bonuses, params: { id: user.id, val: bonus })
+    post(:bonus, params: { id: user.id, val: bonus })
     user.reload
     assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
     assert_equal(old_contribution + 20, user.contribution)
 
     # Prove that admin can get bonuses
-    get(:change_user_bonuses, params: { id: user.id })
+    get(:bonus, params: { id: user.id })
     assert_response(:success)
   end
 end
