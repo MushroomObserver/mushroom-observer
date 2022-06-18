@@ -79,6 +79,9 @@ jobs:
         path-to-lcov: ./coverage/lcov/lcov.info
 
     # https://github.com/devmasx/brakeman-linter-action
+    - name: brakeman report
+      run: |
+        bundle exec brakeman -f json > brakeman.json || exit 0
     - name: Brakeman
       uses: devmasx/brakeman-linter-action@v1.0.0
       env:
