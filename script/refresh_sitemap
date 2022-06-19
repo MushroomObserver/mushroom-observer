@@ -44,6 +44,7 @@ SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml".freeze
 INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html".freeze
 CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 
+# Values: [ table_name, comments.target_type, show_URL ]
 OBJECT_TYPES = [
   ["observations",
    "Observation",
@@ -74,6 +75,7 @@ OBJECT_TYPES = [
    "location/show_location_description/ID"]
 ].freeze
 
+# Values: [ title, URL, update_frequency ]
 STATIC_PAGES = [
   ["home page",    "observer/list_rss_logs", "hourly"],
   ["introduction", "observer/intro",         "weekly"],
@@ -90,9 +92,10 @@ OTHER_ALLOWED_PATHS = [
   "/name/eol"
 ].freeze
 
-LOCALES = Language.where(beta: [false, nil]).order(order: :asc).pluck(:locale)
+LOCALES = Language.where(beta: [false, nil]).order(order: :asc).
+            map { |lang| lang.locale }
 
-# Control behavior of crowlers that follow robots.txt rules
+# Control behavior of crawlers that follow robots.txt rules
 # For documentation, see:
 # https://developers.google.com/search/docs/advanced/robots/robots_txt
 # http://www.robotstxt.org
@@ -123,7 +126,7 @@ ROBOTS_HEADER = <<~"TXT".freeze
   Disallow: /
 
   # Whitelisted crawlers
-  # All are assume to use wildcards in their robots.txt parser
+  # All are assumed to use wildcards in their robots.txt parser
   User-agent: bingbot
   User-agent: CCBot
   User-agent: GoogleBot
@@ -185,8 +188,9 @@ def update_sitemap_files
 end
 
 def get_new_comments(last_update)
-  Comment.where(updated_at: last_update..).
-    pluck(:target_type, :target_id, :updated_at)
+  Comment.where(updated_at: last_update..).map do |comment|
+    [comment.target_type, comment.target_id, comment.updated_at]
+  end
 end
 
 def get_new_images(last_update)
@@ -205,7 +209,7 @@ def map_one_object_type(params, comments, last_update)
   times = read_old_files(table)
   update_times_of_new_objects(times, table, last_update)
   if type == "Observation"
-    update_times_of_objects_with_new_images(times, last_update)
+    update_times_of_observations_with_new_images(times, last_update)
   end
   update_times_of_objects_with_new_comments(times, comments, type)
   write_new_files(times, table, path)
@@ -213,13 +217,12 @@ end
 
 def update_times_of_new_objects(times, table, last_update)
   model = table.classify.constantize
-  model.where(updated_at: last_update..).pluck(:id, :updated_at).each do
-    |id, time|
-    times[id.to_i] = parse_mysql_time(time)
+  model.where(updated_at: last_update..).each do |obj|
+    times[obj.id] = parse_mysql_time(obj.updated_at)
   end
 end
 
-def update_times_of_objects_with_new_images(times, last_update)
+def update_times_of_observations_with_new_images(times, last_update)
   get_new_images(last_update).each do |id, time|
     id = id.to_i
     time = parse_mysql_time(time)
@@ -352,6 +355,7 @@ def formatted_last_update
   begin
     format_time(File.mtime(file))
   rescue StandardError
+    $stderr.puts("Sitemap file doesn't exist! (#{file})")
     format_time(100.years.ago)
   end
 end
