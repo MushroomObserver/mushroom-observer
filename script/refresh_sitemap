@@ -190,12 +190,14 @@ def get_new_comments(last_update)
 end
 
 def get_new_images(last_update)
+  result = []
   Image.where(updated_at: last_update..).
     includes(:observation_images).each do |img|
       img.observation_images.each do |obs_img|
         result << [obs_img.observation_id, img.updated_at]
       end
     end
+  result
 end
 
 def map_one_object_type(params, comments, last_update)
