@@ -21,20 +21,6 @@ class UsersControllerTest < FunctionalTestCase
     assert_template(:show)
   end
 
-  def test_page_load_user_by_contribution
-    login
-    get_with_dump(:by_contribution)
-    assert_template("users/by_contribution")
-  end
-
-  # FIXME: With default resources, Rails won't even route someone
-  # to the show action unless there's an id. Test superfluous?
-  # def test_show_user_no_id
-  #   login
-  #   get_with_dump(:show)
-  #   assert_redirected_to(users_path)
-  # end
-
   # def test_some_admin_pages
   #   [
   #     [:users_by_name,  "list_users", {}],
@@ -141,6 +127,7 @@ class UsersControllerTest < FunctionalTestCase
     get(:show, params: { id: number8.id, q: q, flow: "prev" })
     assert_redirected_to(user_path(number7.id, q: q))
   end
+
   #   ---------------
   #    admin actions
   #   ---------------
@@ -156,7 +143,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_change_user_bonuses
+  def test_change_bonuses
     user = users(:mary)
     old_contribution = mary.contribution
     bonus = "7 lucky \n 13 unlucky"
@@ -164,26 +151,26 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(user_bonus_path(user.id))
+    get(:edit, params: { id: user.id })
     assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
     # leaving bonuses and contributions unchanged.
     make_admin
-    post(edit_user_bonus_path(id: user.id, val: "wong format 7"))
+    post(:update, params: { id: user.id, val: "wong format 7" })
     assert_flash_error
     user.reload
     assert_empty(user.bonuses)
     assert_equal(old_contribution, user.contribution)
 
     # Prove that admin can change bonuses
-    post(edit_user_bonus_path(id: user.id, val: bonus))
+    post(:update, params: { id: user.id, val: bonus })
     user.reload
     assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
     assert_equal(old_contribution + 20, user.contribution)
 
     # Prove that admin can get bonuses
-    get(edit_user_bonus_path(id: user.id))
+    get(:edit, params: { id: user.id })
     assert_response(:success)
   end
 end
