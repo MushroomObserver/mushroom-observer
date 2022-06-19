@@ -12,7 +12,7 @@ class ChecklistsControllerTest < FunctionalTestCase
              where(Observation[:user_id] == user.id).
              where(Name[:rank] == Name.ranks[:Species]).distinct
 
-    get(checklist_path(user_id: user.id))
+    get(:show, params: { user_id: user.id })
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
 
@@ -27,7 +27,7 @@ class ChecklistsControllerTest < FunctionalTestCase
              where(SpeciesListObservation[:species_list_id] == list.id).
              where(Name[:rank] == Name.ranks[:Species]).distinct
 
-    get(checklist_path(species_list_id: list.id))
+    get(:show, params: { species_list_id: list.id })
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -42,7 +42,7 @@ class ChecklistsControllerTest < FunctionalTestCase
              where(ProjectObservation[:project_id] == project.id).
              where(Name[:rank] == Name.ranks[:Species]).distinct
 
-    get(checklist_path(project_id: project.id))
+    get(:show, params: { project_id: project.id })
     assert_match(/Checklist for #{project.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -52,9 +52,9 @@ class ChecklistsControllerTest < FunctionalTestCase
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     login
-    expect = Name.joins(:observations).with_rank(:Species).distinct
+    expect = Name.joins(:observations).with_rank("Species").distinct
 
-    get(checklist_path)
+    get(:show)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
                  "Wrong page")
 
