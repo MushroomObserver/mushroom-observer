@@ -355,7 +355,11 @@ def formatted_last_update
     format_time(File.mtime(file))
   rescue StandardError
     warn("Sitemap file doesn't exist! (#{file})")
-    format_time(100.years.ago)
+    exit(1)
+    # This takes *forever*.  I'd rather be forced to do this by hand.
+    # It shouldn't ever happen.  If it does, there might be something
+    # more important wrong.
+    # format_time(100.years.ago)
   end
 end
 
