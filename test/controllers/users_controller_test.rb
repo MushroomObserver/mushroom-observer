@@ -164,7 +164,7 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(edit_user_bonus_path(user.id))
+    get(user_bonus_path(user.id))
     assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
