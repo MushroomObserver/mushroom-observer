@@ -26,8 +26,7 @@
   end
 
   tabs = [
-    link_to(:show_user_contributors.t, controller: :users,
-            action: :by_contribution)
+    link_to(:show_user_contributors.t, users_by_contribution_path)
   ]
   if @show_user == @user
     tabs += [
@@ -137,7 +136,8 @@
         <% if @observations %>
           <% @observations.values_at(0, 2, 4).reject(&:nil?).each do |obs| %>
             <%= thumbnail(obs.thumb_image,
-                          link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
+                          link: {controller: obs.show_controller,
+                                 action: obs.show_action, id: obs.id},
                           votes: true) %>
           <% end %>
         <% end %>
@@ -195,7 +195,8 @@
         <% if @observations %>
           <% @observations.values_at(1, 3, 5).reject(&:nil?).each do |obs| %>
             <%= thumbnail(obs.thumb_image,
-                          link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
+                          link: {controller: obs.show_controller,
+                                 action: obs.show_action, id: obs.id},
                           votes: true) %>
           <% end %>
         <% end %>
