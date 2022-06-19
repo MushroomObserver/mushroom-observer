@@ -6,10 +6,7 @@ class UsersController < ApplicationController
   require "set"
 
   before_action :login_required
-  before_action :disable_link_prefetching, except: [
-    :show,
-    :by_contribution
-  ]
+  before_action :disable_link_prefetching
 
   # User index, restricted to admins.
   def index

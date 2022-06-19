@@ -62,7 +62,7 @@ module Users
         @user2.bonuses      = bonuses
         @user2.contribution = contrib
         @user2.save
-        redirect_to(action: "show", id: @user2.id)
+        redirect_to(user_path(@user2.id))
       end
     end
   end
