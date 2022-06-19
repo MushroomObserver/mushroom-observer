@@ -823,22 +823,6 @@ class AccountController < ApplicationController
   # This is used to test the autologin feature.
   def test_autologin; end
 
-  # This is used to test the flash error mechanism in the unit tests.
-  def test_flash
-    notice   = params[:notice]
-    warning  = params[:warning]
-    error    = params[:error]
-    redirect = params[:redirect]
-    flash_notice(notice)   if notice
-    flash_warning(warning) if warning
-    flash_error(error)     if error
-    if redirect
-      redirect_to(redirect)
-    else
-      render(plain: "", layout: true)
-    end
-  end
-
   ##############################################################################
 
   private

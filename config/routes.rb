@@ -65,7 +65,6 @@ ACTIONS = {
     signup: {},
     switch_users: {},
     test_autologin: {},
-    test_flash: {},
     turn_admin_off: {},
     turn_admin_on: {},
     verify: {},
