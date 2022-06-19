@@ -43,7 +43,7 @@
 module GM
   GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js"
   GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
-  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
+  GMAPS_API_KEYS = YAML.load_file("#{::Rails.root}/#{GMAPS_CONFIG_FILE}")
 
   # represent a GoogleMaps map object
   class GMap
@@ -190,8 +190,8 @@ module GM
           raise("Unexpected option \"#{key}\" for GMap#div.")
         end
       end
-      height = height.to_s + "px" if height.is_a?(Integer)
-      width = width.to_s + "px" if width.is_a?(Integer)
+      height = "#{height}px" if height.is_a?(Integer)
+      width = "#{width}px" if width.is_a?(Integer)
       "<div id='#{name}' style='width:#{width};height:#{height}'></div>"
     end
 
@@ -231,7 +231,7 @@ module GM
 
     def overlays_code
       result = +"" # create mutable string
-      overlays.each { |obj| result += obj.create_and_initialize_code + ";\n" }
+      overlays.each { |obj| result += "#{obj.create_and_initialize_code};\n" }
       result.sub!(/\n\Z/, "")
       result
     end

@@ -240,7 +240,7 @@ class Textile < String
   # This will be sent to lookup_name.
   def expand_genus_abbreviation(str)
     str.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-      (n = @@name_lookup[Regexp.last_match(1)]) ? n + " " : x
+      (n = @@name_lookup[Regexp.last_match(1)]) ? "#{n} " : x
     end
   end
 
@@ -373,9 +373,9 @@ class Textile < String
     return url unless truncate_link_label?(url)
 
     if url =~ %r{^(\w+://[^/]+)(.*?)$}
-      Regexp.last_match(1) + "/..."
+      "#{Regexp.last_match(1)}/..."
     else
-      url[0..URL_TRUNCATION_LENGTH] + "..."
+      "#{url[0..URL_TRUNCATION_LENGTH]}..."
     end
   end
 
