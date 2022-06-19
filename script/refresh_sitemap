@@ -92,8 +92,7 @@ OTHER_ALLOWED_PATHS = [
   "/name/eol"
 ].freeze
 
-LOCALES = Language.where(beta: [false, nil]).order(order: :asc).
-            map { |lang| lang.locale }
+LOCALES = Language.where(beta: [false, nil]).order(order: :asc).map(&:locale)
 
 # Control behavior of crawlers that follow robots.txt rules
 # For documentation, see:
@@ -355,7 +354,7 @@ def formatted_last_update
   begin
     format_time(File.mtime(file))
   rescue StandardError
-    $stderr.puts("Sitemap file doesn't exist! (#{file})")
+    warn("Sitemap file doesn't exist! (#{file})")
     format_time(100.years.ago)
   end
 end
