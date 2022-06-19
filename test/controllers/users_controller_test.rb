@@ -99,7 +99,7 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
+    assert_equal(css_select("title").text, "Mushroom Observer: Index",
                  "metadata <title> tag incorrect")
     assert_empty(css_select("#sorts"),
                  "There should be no sort links")
@@ -164,7 +164,7 @@ class UsersControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(edit_user_bonus_path(id: user.id))
+    get(edit_user_bonus_path(user.id))
     assert_redirected_to(user_path(user.id))
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
