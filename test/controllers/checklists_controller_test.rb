@@ -3,11 +3,7 @@
 require("test_helper")
 
 # Controller tests for checklists
-class ChecklistsControllerTest
-  #   -----------
-  #    checklist
-  #   -----------
-
+class ChecklistsControllerTest < FunctionalTestCase
   # Prove that Life List goes to correct page which has correct content
   def test_checklist_for_user
     login
