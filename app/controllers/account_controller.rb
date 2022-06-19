@@ -39,7 +39,6 @@
 #
 #  ==== Testing
 #  test_autologin::     <tt>(L V .)</tt>
-#  test_flash::         <tt>(. . .)</tt>
 #
 ################################################################################
 class AccountController < ApplicationController
@@ -50,7 +49,6 @@ class AccountController < ApplicationController
     :reverify,
     :send_verify,
     :signup,
-    :test_flash,
     :verify,
     :welcome
   ]
