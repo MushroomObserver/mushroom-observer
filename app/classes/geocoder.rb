@@ -11,7 +11,7 @@ class Geocoder < BlankSlate
   attr_reader :north, :south, :east, :west, :valid
 
   GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
-  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
+  GMAPS_API_KEYS = YAML.load_file("#{::Rails.root}/#{GMAPS_CONFIG_FILE}")
 
   def initialize(place_name)
     @place_name = place_name
@@ -67,7 +67,7 @@ class Geocoder < BlankSlate
   end
 
   def ajax_response
-    [north, south, east, west].join("\n") + "\n"
+    "#{[north, south, east, west].join("\n")}\n"
   end
 
   def request_url(place_name)

@@ -64,7 +64,11 @@ checks:
 plugins:
 # check Rails apps for security vulnerabilities
   brakeman:
-    enabled: true
+    # Do not use Codeclimate's version of Brakeman as of 2022-06-18
+    # It is dated and throws many false positives
+    # Instead run brakeman locally or in CI rely on Github action plugin
+    # https://github.com/devmasx/brakeman-linter-action
+    enabled: false
 
 # helps find security vulnerabilities in Ruby dependencies
   bundler-audit:
