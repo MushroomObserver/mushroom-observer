@@ -731,22 +731,10 @@ MushroomObserver::Application.routes.draw do
   # "by_contribution" to a user
   get("/users/by_contribution", to: "users#by_contribution")
   get("/users/by_name", to: "users#by_name")
-  # get("/users(/:id)/bonuses", to: "users#edit_bonuses")
-  # post("/users(/:id)/bonuses", to: "users#update_bonuses")
 
   # ----- Users: standard actions -------------------------------------------
-  # resources :users do
-  #   member do
-  #     get 'bonuses', to: "users#edit_bonuses"
-  #     post 'bonuses', to: "users#update_bonuses"
-  #     patch 'bonuses', to: "users#update_bonuses"
-  #   end
-  # end
-  # namespace :users do
-  #   get :by_contribution, action: :by_contribution, as: :by_contribution
-  #   get :by_name, action: :by_name, as: :by_name
-  # end
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
+
   # Users: standard redirects of Observer legacy actions
   # redirect_legacy_actions(
   #   old_controller: "observer", new_controller: "users",
@@ -765,7 +753,7 @@ MushroomObserver::Application.routes.draw do
   get("/observer/show_user", to: redirect(path: "user"))
 
   get("/observer/change_user_bonuses",
-    to: redirect(path: "users/bonuses"))
+    to: redirect(path: "users#edit"))
   get("/observer/checklist",
     to: redirect(path: "checklists#show"))
 
