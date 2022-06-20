@@ -91,34 +91,10 @@ class UsersController < ApplicationController
 
     # Parse new set of values.
     @val = params[:val]
-    line_num = 0
-    errors = false
-    bonuses = []
-    @val.split("\n").each do |line|
-      line_num += 1
-      if (match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/))
-        bonuses.push([match[1].to_i, match[2].to_s])
-      else
-        flash_error("Syntax error on line #{line_num}.")
-        errors = true
-      end
-    end
-    # Success: update user's contribution.
-    return if errors
+    bonuses = calculate_bonuses
+    return if bonuses.nil?
 
-    contrib = @user2.contribution.to_i
-    # Subtract old bonuses.
-    @user2.bonuses&.each_key do |points|
-      contrib -= points
-    end
-    # Add new bonuses
-    bonuses.each do |(points, _reason)|
-      contrib += points
-    end
-    # Update database.
-    @user2.bonuses      = bonuses
-    @user2.contribution = contrib
-    @user2.save
+    update_user_contribution(bonuses)
     redirect_to(user_path(@user2.id))
   end
 
@@ -187,5 +163,36 @@ class UsersController < ApplicationController
     @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                   by: :thumbnail_quality)
     @observations = @query.results(limit: 6, include: image_includes)
+  end
+
+  def calculate_bonuses
+    line_num = 0
+    bonuses = []
+    @val.split("\n").each do |line|
+      line_num += 1
+      if (match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/))
+        bonuses.push([match[1].to_i, match[2].to_s])
+      else
+        flash_error("Syntax error on line #{line_num}.")
+        return nil
+      end
+    end
+    bonuses
+  end
+
+  def update_user_contribution(bonuses)
+    contrib = @user2.contribution.to_i
+    # Subtract old bonuses.
+    @user2.bonuses&.each_key do |points|
+      contrib -= points
+    end
+    # Add new bonuses
+    bonuses.each do |(points, _reason)|
+      contrib += points
+    end
+    # Update database.
+    @user2.bonuses      = bonuses
+    @user2.contribution = contrib
+    @user2.save
   end
 end
