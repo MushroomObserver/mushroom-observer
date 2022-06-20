@@ -647,12 +647,12 @@ class AccountController < ApplicationController
 
   def turn_admin_on
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(controller: :rss_logs, action: :index)
+    redirect_back_or_default("/")
   end
 
   def turn_admin_off
     session[:admin] = nil
-    redirect_back_or_default(controller: :rss_logs, action: :index)
+    redirect_back_or_default("/")
   end
 
   def switch_users
@@ -661,10 +661,10 @@ class AccountController < ApplicationController
     flash_error("Couldn't find \"#{@id}\".  Play again?") \
       if new_user.blank? && @id.present?
     if !@user&.admin && session[:real_user_id].blank?
-      redirect_back_or_default(controller: :rss_logs, action: :index)
+      redirect_back_or_default("/")
     elsif new_user.present?
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :rss_logs, action: :index)
+      redirect_back_or_default("/")
     end
   end
 
@@ -782,7 +782,7 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(controller: :rss_logs, action: :index)
+    redirect_back_or_default("/")
   end
 
   def can_add_user_to_group?(user, group)
