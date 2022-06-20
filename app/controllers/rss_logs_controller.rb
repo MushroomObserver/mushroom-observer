@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class RssLogsController < ApplicationController
+  # Uncertain these are necessary, can delete if not.
+  require "find"
+  require "set"
+
   before_action :login_required, except: [
     :index_rss_log,
     :list_rss_logs,

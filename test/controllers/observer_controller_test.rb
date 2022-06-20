@@ -553,11 +553,11 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :google } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
 
     params = { search: { pattern: "", type: :observation } }
     get_with_dump(:pattern_search, params)
@@ -754,7 +754,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
-                       response: { controller: :observer,
+                       response: { controller: :rss_logs,
                                    action: :list_rss_logs })
   end
 
@@ -1327,7 +1327,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       login("rolf")
       get(page, params: params)
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
@@ -1346,7 +1346,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login("rolf")
     post(page, params: params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
@@ -3577,7 +3577,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_user, params: { id: "mary" })
     assert_redirected_to(controller: :observer, action: :show_user, id: mary.id)
     get(:lookup_user, params: { id: "Einstein" })
-    assert_redirected_to(controller: :observer, action: :index_rss_log)
+    assert_redirected_to(controller: :rss_logs, action: :index_rss_log)
     assert_flash_error
     # This caused router to crash in the wild.
     assert_recognizes({ controller: "observer", action: "lookup_user",
@@ -3614,7 +3614,7 @@ class ObserverControllerTest < FunctionalTestCase
       login("rolf")
       get(:change_banner)
       assert_flash_error
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
 
       make_admin("rolf")
       get(:change_banner)
@@ -3624,7 +3624,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       post(:change_banner, params: { val: "new banner" })
       assert_no_flash
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
       assert_equal("new banner", :app_banner_box.l)
 
       strs = TranslationString.where(tag: :app_banner_box)

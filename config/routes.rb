@@ -306,14 +306,11 @@ ACTIONS = {
     how_to_help: {},
     how_to_use: {},
     ilist_users: {},
-    index: {},
     index_observation: {},
-    index_rss_log: {},
     index_user: {},
     intro: {},
     letter_to_community: {},
     list_observations: {},
-    list_rss_logs: {},
     list_users: {},
     lookup_accepted_name: {},
     lookup_comment: {},
@@ -328,7 +325,6 @@ ACTIONS = {
     map_observations: {},
     news: {},
     next_observation: {},
-    next_rss_log: {},
     next_user: {},
     observation_search: {},
     observations_at_location: {},
@@ -341,19 +337,16 @@ ACTIONS = {
     observations_of_related_taxa: {},
     pattern_search: {},
     prev_observation: {},
-    prev_rss_log: {},
     prev_user: {},
     print_labels: {},
     recalc: {},
     review_authors: {},
-    rss: {},
     search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    show_rss_log: {},
     show_site_stats: {},
     show_user: {},
     suggestions: {},
@@ -733,6 +726,16 @@ MushroomObserver::Application.routes.draw do
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
+
+  # ----- RssLogs: standard actions -------------------------------------------
+  resources :rss_logs, only: [:show, :index]
+  # index: {},
+  # index_rss_log: {},
+  # list_rss_logs: {},
+  # next_rss_log: {},
+  # prev_rss_log: {},
+  # rss: {},
+  # show_rss_log: {},
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

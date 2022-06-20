@@ -16,7 +16,7 @@ module ObserverController::EmailController
       end
     else
       flash_error(:permission_denied.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to(action: :list_rss_logs)
     end
   end
 
@@ -124,7 +124,7 @@ module ObserverController::EmailController
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to(action: :list_rss_logs)
     end
   end
 

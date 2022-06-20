@@ -38,7 +38,7 @@ class MatrixBoxPresenter
                              id: target.id)
       else
         view.link_with_query(name,
-                             controller: :observer,
+                             controller: :rss_logs,
                              action: :show_rss_log,
                              id: rss_log.id)
       end
