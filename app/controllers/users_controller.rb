@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# display infornation about, and edit, users
 class UsersController < ApplicationController
   # These need to be moved into the files where they are actually used.
   require "find"
@@ -80,13 +81,15 @@ class UsersController < ApplicationController
     redirect_to(user_path(@user2.id)) unless in_admin_mode?
 
     # Reformat bonuses as string for editing, one entry per line.
-    @val = ""
-    if @user2.bonuses
-      vals = @user2.bonuses.map do |points, reason|
-        format("%-6d %s", points, reason.gsub(/\s+/, " "))
-      end
-      @val = vals.join("\n")
-    end
+    @val = if @user2.bonuses
+             vals = @user2.bonuses.map do |points, reason|
+               format("%<points>-6d %<reason>s",
+                      points: points, reason: reason.gsub(/\s+/, " "))
+             end
+             vals.join("\n")
+           else
+             ""
+           end
   end
 
   def update
@@ -109,22 +112,22 @@ class UsersController < ApplicationController
       end
     end
     # Success: update user's contribution.
-    unless errors
-      contrib = @user2.contribution.to_i
-      # Subtract old bonuses.
-      @user2.bonuses&.each_key do |points|
-        contrib -= points
-      end
-      # Add new bonuses
-      bonuses.each do |(points, _reason)|
-        contrib += points
-      end
-      # Update database.
-      @user2.bonuses      = bonuses
-      @user2.contribution = contrib
-      @user2.save
-      redirect_to(user_path(@user2.id))
+    return if errors
+
+    contrib = @user2.contribution.to_i
+    # Subtract old bonuses.
+    @user2.bonuses&.each_key do |points|
+      contrib -= points
     end
+    # Add new bonuses
+    bonuses.each do |(points, _reason)|
+      contrib += points
+    end
+    # Update database.
+    @user2.bonuses      = bonuses
+    @user2.contribution = contrib
+    @user2.save
+    redirect_to(user_path(@user2.id))
   end
 
   private
