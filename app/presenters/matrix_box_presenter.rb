@@ -39,7 +39,7 @@ class MatrixBoxPresenter
       else
         view.link_with_query(name,
                              controller: :rss_logs,
-                             action: :show_rss_log,
+                             action: :show,
                              id: rss_log.id)
       end
     self.where = view.location_link(target.place_name, target.location) \

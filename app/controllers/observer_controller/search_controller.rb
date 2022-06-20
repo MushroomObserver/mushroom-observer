@@ -46,7 +46,7 @@ module ObserverController::SearchController
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(action: :list_rss_logs)
+      redirect_back_or_default("/")
       return
     end
 
@@ -55,7 +55,7 @@ module ObserverController::SearchController
 
   def site_google_search(pattern)
     if pattern.blank?
-      redirect_to(action: :list_rss_logs)
+      redirect_to("/")
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")

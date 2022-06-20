@@ -44,7 +44,7 @@ class RssLogsController < ApplicationController
       redirect_to_next_object(:next, RssLog, params[:id].to_s)
     when "prev"
       redirect_to_next_object(:prev, RssLog, params[:id].to_s)
-    else
+    end
     pass_query_params
     store_location
     @rss_log = find_or_goto_index(RssLog, params["id"])
@@ -62,7 +62,7 @@ class RssLogsController < ApplicationController
 
   private
 
-  # Show selected search results as a matrix with "list_rss_logs" template.
+  # Show selected search results as a matrix with "index" template.
   def show_selected_rss_logs(query, args = {})
     store_query_in_session(query)
     query_params_set(query)

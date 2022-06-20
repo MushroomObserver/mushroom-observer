@@ -1041,7 +1041,7 @@ class NameController < ApplicationController
     if sorter.only_single_names
       sorter.create_new_synonyms
       flash_notice(:name_bulk_success.t)
-      redirect_to(controller: :rss_logs, action: :list_rss_logs)
+      redirect_to("/")
     else
       if sorter.new_name_strs != []
         # This error message is no longer necessary.

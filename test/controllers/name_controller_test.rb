@@ -3045,7 +3045,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert(new_name = Name.find_by(text_name: new_name_str))
     assert_equal(new_name_str, new_name.text_name)
     assert_equal("**__#{new_name_str}__**", new_name.display_name)
@@ -3072,7 +3072,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert_not(approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
@@ -3096,7 +3096,7 @@ class NameControllerTest < FunctionalTestCase
     } }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert_not(approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
     assert(synonym_name2.reload.deprecated)
@@ -3117,7 +3117,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert_not(approved_name.reload.deprecated)
     assert(synonym_name = Name.find_by(search_name: new_synonym_str))
     assert(synonym_name.deprecated)
@@ -3140,7 +3140,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert(approved_name = Name.find_by(search_name: new_name_str))
     assert_not(approved_name.deprecated)
     assert_equal("Species", approved_name.rank)
@@ -3166,7 +3166,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_name_edit, params: params)
-    assert_redirected_to(controller: :rss_logs, action: "list_rss_logs")
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert(Name.find_by(text_name: new_name_str))
   end
 

@@ -540,11 +540,11 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :google } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :index)
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :index)
 
     params = { search: { pattern: "", type: :observation } }
     get_with_dump(:pattern_search, params)
@@ -742,7 +742,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: { controller: :rss_logs,
-                                   action: :list_rss_logs })
+                                   action: :index })
   end
 
   def test_send_webmaster_question_need_address
@@ -1307,7 +1307,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       login("rolf")
       get(page, params: params)
-      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :index)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
@@ -1326,7 +1326,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login("rolf")
     post(page, params: params)
-    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :index)
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
@@ -3600,7 +3600,7 @@ class ObserverControllerTest < FunctionalTestCase
       login("rolf")
       get(:change_banner)
       assert_flash_error
-      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :index)
 
       make_admin("rolf")
       get(:change_banner)
@@ -3610,7 +3610,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       post(:change_banner, params: { val: "new banner" })
       assert_no_flash
-      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :index)
       assert_equal("new banner", :app_banner_box.l)
 
       strs = TranslationString.where(tag: :app_banner_box)

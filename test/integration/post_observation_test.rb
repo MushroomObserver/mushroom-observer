@@ -243,7 +243,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_exists_deleted_item_log
     found = false
-    assert_select("a[href*=show_rss_log]") do |elems|
+    assert_select("a[href*=rss_logs]") do |elems|
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
     assert(found,

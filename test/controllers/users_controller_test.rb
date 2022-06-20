@@ -31,7 +31,7 @@ class UsersControllerTest < FunctionalTestCase
 
   #     login("rolf")
   #     get(page, params: params)
-  #     assert_redirected_to(action: :list_rss_logs)
+  #     assert_redirected_to(action: :index)
   #     assert_flash_text(/denied|only.*admin/i)
 
   #     make_admin("rolf")

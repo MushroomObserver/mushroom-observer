@@ -8,7 +8,7 @@ class LurkerTest < IntegrationTestCase
     login
     # Start at index.
     get("/")
-    assert_template("rss_logs/list_rss_logs")
+    assert_template("rss_logs/index")
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)

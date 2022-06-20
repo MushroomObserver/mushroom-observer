@@ -57,7 +57,7 @@ module ObserverController::Other
   def change_banner
     if !in_admin_mode?
       flash_error(:permission_denied.t)
-      redirect_to(action: :list_rss_logs)
+      redirect_to("/")
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
@@ -79,7 +79,7 @@ module ObserverController::Other
         str.language.update_localization_file
         str.language.update_export_file
       end
-      redirect_to(action: :list_rss_logs)
+      redirect_to("/")
     else
       @val = :app_banner_box.l.to_s
     end

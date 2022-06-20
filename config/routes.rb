@@ -307,10 +307,6 @@ ACTIONS = {
     intro: {},
     letter_to_community: {},
     list_observations: {},
-    index_observation: {},
-    intro: {},
-    letter_to_community: {},
-    list_observations: {},
     lookup_accepted_name: {},
     lookup_comment: {},
     lookup_image: {},
@@ -640,8 +636,8 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page is /observer/list_rss_logs.
-  root "rss_logs#list_rss_logs"
+  # Default page is /rss_logs
+  root "rss_logs#index"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/
@@ -722,18 +718,18 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
+  # ----- RssLogs: nonstandard actions ----------------------------------------
+  # These routes must go before resources, or it will try to match
+  # "rss" to an rss_log
+  get("/rss_logs/rss", to: "rss_logs#rss")
+
   # ----- RssLogs: standard actions -------------------------------------------
   resources :rss_logs, only: [:show, :index]
   get("/observer/index", to: redirect(path: "rss_logs"))
-  get("/observer/list_rss_logs", to: redirect(path: "rss_logs?flavor=all"))
-
-  # index: {},
-  # index_rss_log: {},
-  # list_rss_logs: {},
-  # next_rss_log: {},
-  # prev_rss_log: {},
-  # rss: {},
-  # show_rss_log: {},
+  get("/observer/list_rss_logs", to: redirect(path: "rss_logs"))
+  get("/observer/index_rss_logs", to: redirect(path: "rss_logs"))
+  post("/observer/index_rss_logs", to: redirect(path: "rss_logs"))
+  get("/observer/rss", to: redirect(path: "rss_logs#rss"))
 
   # ----- Users: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match

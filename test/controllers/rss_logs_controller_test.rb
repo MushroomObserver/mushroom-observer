@@ -4,17 +4,17 @@ class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get_with_dump(:index)
-    assert_template(:list_rss_logs, partial: :_rss_log)
+    assert_template(:index, partial: :_rss_log)
     assert_link_in_html(:app_intro.t, controller: :observer, action: :intro)
 
-    get_with_dump(:list_rss_logs)
-    assert_template(:list_rss_logs, partial: :_rss_log)
+    get_with_dump(:index)
+    assert_template(:index, partial: :_rss_log)
 
     get_with_dump(:rss)
     assert_template(:rss)
 
-    get_with_dump(:show_rss_log, id: rss_logs(:observation_rss_log).id)
-    assert_template(:show_rss_log)
+    get_with_dump(:show, id: rss_logs(:observation_rss_log).id)
+    assert_template(:show)
   end
 
   def test_rss_with_article_in_feed
@@ -91,12 +91,12 @@ class RssLogsControllerTest < FunctionalTestCase
     # which includes a query after the id, but assert_redirected_to treats
     # the query as part of the id.
     assert_response(:redirect)
-    assert_match(rss_log_path(logs.second.id)},
+    assert_match(rss_log_path(logs.second.id),
                  @response.header["Location"], "Redirected to wrong page")
 
     get(:show, params: { flow: "prev", id: logs.second })
     assert_response(:redirect)
-    assert_match(rss_log_path(logs.first.id)},
+    assert_match(rss_log_path(logs.first.id),
                  @response.header["Location"], "Redirected to wrong page")
   end
 

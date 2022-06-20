@@ -22,7 +22,7 @@ class NPlusOneTest < IntegrationTestCase
     get("/name/list_names")
     get("/image/list_images")
     get("/observer/list_observations")
-    get("/rss_logs/list_rss_logs")
+    get("/rss_logs/index")
     get("/project/list_projects")
     get("/publications")
     get("/sequence/list_sequences")

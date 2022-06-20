@@ -568,10 +568,10 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to(controller: :rss_logs, action: :list_rss_logs)
+        redirect_to("/")
       end
     else
-      redirect_to(controller: :rss_logs, action: :list_rss_logs)
+      redirect_to("/")
     end
   end
 
