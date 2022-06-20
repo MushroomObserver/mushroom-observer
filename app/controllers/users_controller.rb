@@ -98,6 +98,8 @@ class UsersController < ApplicationController
     redirect_to(user_path(@user2.id))
   end
 
+  #############################################################################
+
   private
 
   # Display list of User's whose name, notes, etc. match a string pattern.
