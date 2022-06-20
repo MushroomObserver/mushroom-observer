@@ -87,10 +87,14 @@ module ApplicationHelper
     link_to(*link)
   end
 
+  REFACTORED_CONTROLLERS = [
+    :herbarium
+  ].freeze
+
   # link to next object in query results
   def link_next(object)
-    path = if object.type_tag == :herbarium
-             herbarium_path(object.id, flow: "next")
+    path = if REFACTORED_CONTROLLERS.include?(object.type_tag)
+             send("#{object.type_tag}_path", object.id, flow: "next")
            else
              { controller: object.show_controller,
                action: object.next_action, id: object.id }
@@ -100,8 +104,8 @@ module ApplicationHelper
 
   # link to previous object in query results
   def link_prev(object)
-    path = if object.type_tag == :herbarium
-             herbarium_path(object.id, flow: "prev")
+    path = if REFACTORED_CONTROLLERS.include?(object.type_tag)
+             send("#{object.type_tag}_path", object.id, flow: "prev")
            else
              { controller: object.show_controller,
                action: object.prev_action, id: object.id }
