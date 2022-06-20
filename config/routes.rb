@@ -641,7 +641,7 @@ MushroomObserver::Application.routes.draw do
   #   end
 
   # Default page is /observer/list_rss_logs.
-  root "observer#list_rss_logs"
+  root "rss_logs#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/
@@ -724,6 +724,9 @@ MushroomObserver::Application.routes.draw do
 
   # ----- RssLogs: standard actions -------------------------------------------
   resources :rss_logs, only: [:show, :index]
+  get("/observer/index", to: redirect(path: "rss_logs"))
+  get("/observer/list_rss_logs", to: redirect(path: "rss_logs?flavor=all"))
+
   # index: {},
   # index_rss_log: {},
   # list_rss_logs: {},
@@ -731,6 +734,7 @@ MushroomObserver::Application.routes.draw do
   # prev_rss_log: {},
   # rss: {},
   # show_rss_log: {},
+
   # ----- Users: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
   # "by_contribution" to a user

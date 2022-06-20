@@ -89,7 +89,8 @@ module ApplicationHelper
 
   REFACTORED_CONTROLLERS_WITH_FLOW = [
     :herbarium,
-    :user
+    :user,
+    :rss_log
   ].freeze
 
   # link to next object in query results
