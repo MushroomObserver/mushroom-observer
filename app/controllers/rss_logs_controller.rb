@@ -88,6 +88,12 @@ class RssLogsController < ApplicationController
 
   # Show a single RssLog.
   def show_rss_log
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, RssLog, params[:id].to_s)
+    when "prev"
+      redirect_to_next_object(:prev, RssLog, params[:id].to_s)
+    else
     pass_query_params
     store_location
     @rss_log = find_or_goto_index(RssLog, params["id"])
