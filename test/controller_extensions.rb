@@ -561,9 +561,8 @@ module ControllerExtensions
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <rss_logs>#{got}"
-        assert_redirected_to({ controller: :rss_logs,
-                               action: :index }, msg)
+        msg += "Expected redirect to <root>#{got}"
+        assert_redirected_to("/", msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>#{got}"
         assert_redirected_to({ controller: "account", action: "login" }, msg)

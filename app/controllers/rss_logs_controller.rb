@@ -14,25 +14,30 @@ class RssLogsController < ApplicationController
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
-  # Displays matrix of selected RssLog's (based on current Query).
+  # Displays matrix of selected RssLog's (based on current Query, if exists).
   def index
-    # TBD: What is the difference between these?
-    # POST requests with param show_type: come from the checkboxes in the tabset
+    # POST requests with param `show_#{type}``: potentially show multiple types
+    # of objects. These requests come from the checkboxes in tabset
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
-    # GET requests with param type: come from the tabs in the tabset
+    # GET requests with param `type``: show a single type of object
+    # These come from simple links: the tabs in tabset
     elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
     # Unfiltered
-    else
+    elsif params[:q].present?
       query = find_query(:RssLog)
       query ||= create_query(:RssLog, :all,
                              type: @user ? @user.default_rss_type : "all")
+    # Fresh version of the index, no existing query
+    else
+      query = create_query(:RssLog, :all,
+                            type: @user ? @user.default_rss_type : "all")
     end
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
