@@ -62,7 +62,7 @@ class UsersController < ApplicationController
 
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
-    instance_vars_for_thumbnails!
+    instance_vars_for_thumbnails_in_summary!
   end
 
   alias show_user show
@@ -176,7 +176,8 @@ class UsersController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  def instance_vars_for_thumbnails!
+  # set @observations whose thumbnails will display in user summary
+  def instance_vars_for_thumbnails_in_summary!
     @query = Query.lookup(:Observation, :by_user, user: @show_user,
                                                   by: :owners_thumbnail_quality)
     image_includes = { thumb_image: [:image_votes, :license, :user] }
