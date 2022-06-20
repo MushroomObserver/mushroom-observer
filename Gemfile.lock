@@ -74,6 +74,7 @@ GEM
     bullet (7.0.2)
       activesupport (>= 3.0.0)
       uniform_notifier (~> 1.11)
+    byebug (11.1.3)
     capybara (3.36.0)
       addressable
       matrix
@@ -274,6 +275,7 @@ DEPENDENCIES
   browser
   bullet
   bundler
+  byebug
   capybara
   coffee-rails
   date (>= 3.2.1)
