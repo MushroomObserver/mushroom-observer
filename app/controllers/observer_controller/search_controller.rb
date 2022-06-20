@@ -10,7 +10,7 @@ module ObserverController::SearchController
   #   location/location_search
   #   name/name_search
   #   observer/observation_search
-  #   observer/user_search
+  #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
   def pattern_search
@@ -22,11 +22,18 @@ module ObserverController::SearchController
     session[:search_type] = type
 
     case type
-    when :observation, :user
+    when :observation
       ctrlr = :observer
     when :comment, :image, :location, :name, :project, :species_list,
       :herbarium_record
       ctrlr = type
+    when :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: users_path(pattern: pattern),
+        index_path: users_path
+      )
+      return
     when :herbarium
       redirect_to_search_or_index(
         pattern: pattern,

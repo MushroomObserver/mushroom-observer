@@ -447,7 +447,7 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_to(controller: "observer", action: "show_user", id: @user.id)
+        redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -458,7 +458,7 @@ class AccountController < ApplicationController
                       where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
-          redirect_to(controller: "observer", action: "show_user", id: @user.id)
+          redirect_to(user_path(@user.id))
         end
       end
     end
@@ -469,7 +469,7 @@ class AccountController < ApplicationController
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
-    redirect_to(controller: "observer", action: "show_user", id: @user.id)
+    redirect_to(user_path(@user.id))
   end
 
   def no_email_comments_owner
