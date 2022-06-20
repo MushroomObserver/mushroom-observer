@@ -17,7 +17,6 @@ class ObserverController < ApplicationController
   include ShowObservation
 
   # These all belong in new controllers:
-  # include UserController
   include SearchController
   include RssLogController
   include MarkupController
