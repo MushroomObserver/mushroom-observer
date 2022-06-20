@@ -62,15 +62,7 @@ class UsersController < ApplicationController
 
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :owners_thumbnail_quality)
-    image_includes = { thumb_image: [:image_votes, :license, :user] }
-    @observations = @query.results(limit: 6, include: image_includes)
-    return unless @observations.length < 6
-
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :thumbnail_quality)
-    @observations = @query.results(limit: 6, include: image_includes)
+    instance_vars_for_thumbnails!
   end
 
   alias show_user show
@@ -182,5 +174,17 @@ class UsersController < ApplicationController
                      end
 
     show_index_of_objects(query, args)
+  end
+
+  def instance_vars_for_thumbnails!
+    @query = Query.lookup(:Observation, :by_user, user: @show_user,
+                                                  by: :owners_thumbnail_quality)
+    image_includes = { thumb_image: [:image_votes, :license, :user] }
+    @observations = @query.results(limit: 6, include: image_includes)
+    return unless @observations.length < 6
+
+    @query = Query.lookup(:Observation, :by_user, user: @show_user,
+                                                  by: :thumbnail_quality)
+    @observations = @query.results(limit: 6, include: image_includes)
   end
 end
