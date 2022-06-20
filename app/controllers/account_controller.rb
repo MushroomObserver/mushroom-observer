@@ -192,7 +192,7 @@ class AccountController < ApplicationController
        (new_user = User.safe_find(session[:real_user_id])) &&
        new_user.admin
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :rss_logs, action: :index)
+      redirect_back_or_default("/")
     else
       @user = nil
       User.current = nil
