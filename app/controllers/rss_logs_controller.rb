@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
-# TODO: move this into new RssLogController
-module ObserverController::RssLogController
+class RssLogsController < ApplicationController
+  before_action :login_required, except: [
+    :index_rss_log,
+    :list_rss_logs,
+    :next_rss_log,
+    :prev_rss_log,
+    :rss,
+    :show_rss_log
+  ]
+  before_action :disable_link_prefetching
+
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   def index

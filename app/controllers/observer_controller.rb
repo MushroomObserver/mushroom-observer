@@ -19,7 +19,6 @@ class ObserverController < ApplicationController
   # These all belong in new controllers:
   include UserController
   include SearchController
-  include RssLogController
   include MarkupController
   include InfoController
   include EmailController
@@ -32,18 +31,12 @@ class ObserverController < ApplicationController
     :ask_webmaster_question,
     :how_to_help,
     :how_to_use,
-    :index_rss_log,
     :intro,
-    :list_rss_logs,
     :lookup_observation,
     :next_observation,
-    :next_rss_log,
     :prev_observation,
-    :prev_rss_log,
-    :rss,
     :show_obs,
     :show_observation,
-    :show_rss_log,
     :test,
     :turn_javascript_nil,
     :turn_javascript_off,
