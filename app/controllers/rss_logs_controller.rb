@@ -16,15 +16,19 @@ class RssLogsController < ApplicationController
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query).
   def index
+    # TBD: What is the difference between these?
+    # POST requests with param show_type: come from the checkboxes in the tabset
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
+    # GET requests with param type: come from the tabs in the tabset
     elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
+    # Unfiltered
     else
       query = find_query(:RssLog)
       query ||= create_query(:RssLog, :all,
@@ -49,7 +53,7 @@ class RssLogsController < ApplicationController
   # This is the site's rss feed.
   def rss
     @logs = RssLog.includes(:name, :species_list, observation: :name).
-            where("datediff(now(), updated_at) <= 31").
+            where(updated_at: ..31.days.ago).
             order(updated_at: :desc).
             limit(100)
 
@@ -75,7 +79,7 @@ class RssLogsController < ApplicationController
     }
 
     args = {
-      action: "index",
+      action: :index,
       matrix: true,
       include: includes
     }.merge(args)
@@ -90,7 +94,7 @@ class RssLogsController < ApplicationController
         @user.save_without_our_callbacks
       elsif @user.default_rss_type.to_s.split.sort != @types
         @links << [:rss_make_default.t,
-                   add_query_param(action: "index", make_default: 1)]
+                   add_query_param(action: :index, make_default: 1)]
       end
     end
 
