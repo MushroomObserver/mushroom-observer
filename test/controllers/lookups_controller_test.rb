@@ -113,7 +113,7 @@ class LookupsControllerTest < FunctionalTestCase
 
     # Prove that lookup_name adds flash message when it hits an error,
     # stubbing a method called by lookup_name in order to provoke an error.
-    ObserverController.any_instance.stubs(:fix_name_matches).
+    LookupsController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
     get(:lookup_name, params: { id: names(:fungi).text_name })
     assert_flash_text("RuntimeError")
