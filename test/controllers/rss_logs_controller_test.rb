@@ -4,11 +4,11 @@ class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get_with_dump(:index)
-    assert_template(:index, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
     assert_link_in_html(:app_intro.t, controller: :observer, action: :intro)
 
     get_with_dump(:index)
-    assert_template(:index, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get_with_dump(:rss)
     assert_template(:rss)

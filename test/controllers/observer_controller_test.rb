@@ -191,26 +191,26 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
 
     get_with_dump(:list_observations)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     # Test again, this time specifying page number via an observation id.
     get(:list_observations,
         params: { id: observations(:agaricus_campestris_obs).id })
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_for_project,
         params: { id: projects(:bolete_project).id })
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get_with_dump(:news)
     assert_template(:news)
 
     get_with_dump(:observations_by_name)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_of_name,
         params: { name: names(:boletus_edulis).text_name })
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_of_look_alikes,
         params: { name: names(:tremella_mesenterica).text_name })
@@ -221,7 +221,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations)
 
     get_with_dump(:observations_by_user, id: rolf.id)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     # get_with_dump(:login)
     # assert_redirected_to(controller: :account, action: :login)
@@ -690,7 +690,7 @@ class ObserverControllerTest < FunctionalTestCase
     login
     params = { place_name: "Burbank" }
     get_with_dump(:observations_at_where, params)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
   end
 
   def test_observations_of_name
