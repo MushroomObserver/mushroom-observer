@@ -1063,6 +1063,29 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "create_name")
   end
 
+  def test_create_name_bad_author_punctuation
+    text_name = "Inocybe magnifolia"
+    name = Name.find_by(text_name: text_name)
+    punct = "!"
+    assert_nil(name)
+    params = {
+      name: {
+        text_name: text_name,
+        author: "Matheny, Aime & T.W. Henkel,",
+        rank: :Species
+      }
+    }
+    login("rolf")
+
+    assert_no_difference(
+      "Name.count",
+      "A Name should not be created when Author ends wtih #{punct}"
+    ) do
+      post(:create_name, params: params)
+    end
+    assert_flash_error(:name_error_field_end.l)
+  end
+
   def test_create_name_author_limit
     # Prove author :limit is number of characters, not bytes
     text_name = "Max-size-author"
