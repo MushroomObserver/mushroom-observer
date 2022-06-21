@@ -653,8 +653,8 @@ MushroomObserver::Application.routes.draw do
   get("info/news", to: "info#news")
   get("info/search_bar_help", to: "info#search_bar_help")
   get("info/site_stats", to: "info#site_stats")
-  get("info/textile", to: "info#textile")
-  get("info/textile_sandbox", to: "info#textile_sandbox")
+  match("info/textile", to: "info#textile", via: [:get, :post])
+  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
   get("info/w3c_tests", to: "info#w3c_tests")
 
