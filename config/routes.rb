@@ -646,6 +646,7 @@ MushroomObserver::Application.routes.draw do
   )
 
   # ----- Info: no resources, just pages --------------------------------------
+  match("info/change_banner", to: "info#change_banner", via: [:get, :post])
   get("info/how_to_help", to: "info#how_to_help")
   get("info/how_to_use", to: "info#how_to_use")
   get("info/intro", to: "info#intro")
@@ -655,7 +656,9 @@ MushroomObserver::Application.routes.draw do
   get("info/textile", to: "info#textile")
   get("info/textile_sandbox", to: "info#textile_sandbox")
   get("info/translators_note", to: "info#translators_note")
+  get("info/w3c_tests", to: "info#w3c_tests")
 
+  # get("observer/change_banner", to: redirect(path: "info#change_banner"))
   get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
   get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
   get("observer/intro", to: redirect(path: "info#intro"))
@@ -665,6 +668,7 @@ MushroomObserver::Application.routes.draw do
   get("observer/textile", to: redirect(path: "info#textile_sandbox"))
   get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
   get("observer/translators_note", to: redirect(path: "info#translators_note"))
+  # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do

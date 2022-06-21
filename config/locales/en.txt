@@ -3087,7 +3087,7 @@
   request_subject: Subject
   request_success: Delivered email.
 
-  # observer/change_banner
+  # info/change_banner
   change_banner_title: Change Site Banner
 
   # project/change_member_status
