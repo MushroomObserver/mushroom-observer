@@ -589,7 +589,7 @@ module ControllerExtensions
 
   def assert_action_partials(action, partials)
     partials.each do |p|
-      assert_template("#{action}/#{p}")
+      assert_template(action, partial: p)
     end
   end
 
