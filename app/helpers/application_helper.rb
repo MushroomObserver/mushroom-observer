@@ -96,7 +96,7 @@ module ApplicationHelper
   # link to next object in query results
   def link_next(object)
     path = if REFACTORED_CONTROLLERS_WITH_FLOW.include?(object.type_tag)
-             if object.type_tag == "rss_log"
+             if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "next")
              else
                send("#{object.type_tag}_path", object.id, flow: "next")
@@ -111,7 +111,7 @@ module ApplicationHelper
   # link to previous object in query results
   def link_prev(object)
     path = if REFACTORED_CONTROLLERS_WITH_FLOW.include?(object.type_tag)
-             if object.type_tag == "rss_log"
+             if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "prev")
              else
                send("#{object.type_tag}_path", object.id, flow: "prev")
