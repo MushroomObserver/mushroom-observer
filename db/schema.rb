@@ -39,6 +39,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.string "number"
   end
 
+  create_table "collection_numbers_observations", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "collection_number_id"
+    t.integer "observation_id"
+  end
+
   create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
     t.integer "user_id"
@@ -101,6 +106,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.datetime "updated_at"
   end
 
+  create_table "glossary_terms_images", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "image_id"
+    t.integer "glossary_term_id"
+  end
+
   create_table "glossary_terms_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "glossary_term_id"
     t.integer "version"
@@ -122,6 +132,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.integer "personal_user_id"
   end
 
+  create_table "herbaria_curators", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "user_id", default: 0, null: false
+    t.integer "herbarium_id", default: 0, null: false
+  end
+
   create_table "herbarium_curators", charset: "utf8mb3", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "herbarium_id", default: 0, null: false
@@ -135,6 +150,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.integer "user_id", null: false
     t.string "initial_det", limit: 221, null: false
     t.string "accession_number", limit: 80, null: false
+  end
+
+  create_table "herbarium_records_observations", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "observation_id", default: 0, null: false
+    t.integer "herbarium_record_id", default: 0, null: false
   end
 
   create_table "image_votes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -164,6 +184,17 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
+  end
+
+  create_table "images_observations", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "image_id", default: 0, null: false
+    t.integer "observation_id", default: 0, null: false
+    t.index ["observation_id"], name: "index_images_observations_on_observation_id"
+  end
+
+  create_table "images_projects", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "image_id", null: false
+    t.integer "project_id", null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -238,6 +269,26 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.integer "project_id"
   end
 
+  create_table "location_descriptions_admins", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "location_descriptions_authors", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "location_descriptions_editors", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "location_descriptions_readers", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
   create_table "location_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "location_description_id"
     t.integer "version"
@@ -250,6 +301,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.text "species"
     t.text "notes"
     t.text "refs"
+  end
+
+  create_table "location_descriptions_writers", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "location_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
   end
 
   create_table "locations", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -345,6 +401,26 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.integer "project_id"
   end
 
+  create_table "name_descriptions_admins", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
+  create_table "name_descriptions_authors", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "name_descriptions_editors", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_id", default: 0, null: false
+  end
+
+  create_table "name_descriptions_readers", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
+  end
+
   create_table "name_descriptions_versions", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "name_description_id"
     t.integer "version"
@@ -361,6 +437,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.text "notes"
     t.text "refs"
     t.text "classification"
+  end
+
+  create_table "name_descriptions_writers", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "name_description_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
   end
 
   create_table "names", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -482,6 +563,16 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.boolean "gps_hidden", default: false, null: false
   end
 
+  create_table "observations_projects", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "observation_id", null: false
+    t.integer "project_id", null: false
+  end
+
+  create_table "observations_species_lists", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "observation_id", default: 0, null: false
+    t.integer "species_list_id", default: 0, null: false
+  end
+
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
@@ -506,6 +597,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "rss_log_id"
+  end
+
+  create_table "projects_species_lists", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "species_list_id", null: false
   end
 
   create_table "publications", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -629,6 +725,11 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean "meta", default: false
+  end
+
+  create_table "user_groups_users", id: false, charset: "utf8mb3", force: :cascade do |t|
+    t.integer "user_id", default: 0, null: false
+    t.integer "user_group_id", default: 0, null: false
   end
 
   create_table "users", id: :integer, charset: "utf8mb3", force: :cascade do |t|
