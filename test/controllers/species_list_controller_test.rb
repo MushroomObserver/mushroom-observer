@@ -39,16 +39,18 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
   end
 
-  # Controller specific asserts
-  MODIFY_PARTIALS = %w[_form_list_feedback _textilize_help _form_species_lists].
-                    freeze
-
   def assert_create_species_list
-    assert_action_partials("create_species_list", MODIFY_PARTIALS)
+    assert_template("create_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_edit_species_list
-    assert_action_partials("edit_species_list", MODIFY_PARTIALS)
+    assert_template("edit_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_project_checks(project_states)

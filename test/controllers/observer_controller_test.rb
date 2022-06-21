@@ -805,14 +805,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def assert_show_observation
-    assert_action_partials("show_observation",
-                           ["_show_name_info",
-                            "_show_observation",
-                            "_show_lists",
-                            "naming/_show",
-                            "_show_comments",
-                            "_show_thumbnail_map",
-                            "_show_images"])
+    assert_template("observer/show_observation")
+    assert_template("observer/_show_name_info")
+    assert_template("observer/_show_observation")
+    assert_template("naming/_show")
+    assert_template("comment/_show_comments")
+    assert_template("observer/_show_thumbnail_map")
+    assert_template("observer/_show_images")
   end
 
   def test_show_observation

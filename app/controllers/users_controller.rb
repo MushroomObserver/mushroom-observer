@@ -56,7 +56,8 @@ class UsersController < ApplicationController
     when "prev"
       redirect_to_next_object(:prev, User, id) and return
     end
-    # FIXME: Rails won't route anything to the show action unless there's an id!
+    # NOTE: Using resource routes, Rails won't route anything to this show
+    # action unless there's an id param, so this may be superfluous.
     return unless @show_user
 
     @user_data = SiteData.new.get_user_data(id)

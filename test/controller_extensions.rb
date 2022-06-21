@@ -575,24 +575,6 @@ module ControllerExtensions
     end
   end
 
-  def assert_action(action, partials)
-    if partials
-      if partials.is_a?(Array)
-        assert_action_partials(action, partials)
-      else
-        assert_redirected_to(action: action, partial: partials)
-      end
-    else
-      assert_redirected_to(action: action)
-    end
-  end
-
-  def assert_action_partials(action, partials)
-    partials.each do |p|
-      assert_template(action, partial: p)
-    end
-  end
-
   def assert_redirect_match(partial, response, controller, _msg)
     mismatches = find_mismatches(partial, response.redirect_url)
     if mismatches[:controller].to_s == controller.controller_name.to_s

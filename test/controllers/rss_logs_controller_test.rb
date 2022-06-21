@@ -40,9 +40,6 @@ class RssLogsControllerTest < FunctionalTestCase
     params = {}
     RssLog.all_types.each { |type| params["show_#{type}"] = "1" }
     post(:index, params: params)
-    # FIXME: assert_template now ignores `partial` param (always).
-    # What's this intended to check?
-    # assert_template(:index, partial: rss_logs(:observation_rss_log).id)
     assert_template(:index)
   end
 
