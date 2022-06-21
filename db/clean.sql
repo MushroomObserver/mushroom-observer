@@ -13,19 +13,19 @@ update observations set `lat` = null, `long` = null where `gps_hidden` = true;
 
 # delete from interests;
 
-delete from t using location_descriptions_admins as t
+delete from t using location_description_admins as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
-delete from t using location_descriptions_authors as t
+delete from t using location_description_authors as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
-delete from t using location_descriptions_editors as t
+delete from t using location_description_editors as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
-delete from t using location_descriptions_readers as t
+delete from t using location_description_readers as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
@@ -33,25 +33,25 @@ delete from t using location_descriptions_versions as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
-delete from t using location_descriptions_writers as t
+delete from t using location_description_writers as t
  inner join location_descriptions as ld on ld.id = t.location_description_id
  where ld.public = false;
 
 delete from location_descriptions where public = false;
 
-delete from t using name_descriptions_admins as t
+delete from t using name_description_admins as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
-delete from t using name_descriptions_authors as t
+delete from t using name_description_authors as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
-delete from t using name_descriptions_editors as t
+delete from t using name_description_editors as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
-delete from t using name_descriptions_readers as t
+delete from t using name_description_readers as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
@@ -59,7 +59,7 @@ delete from t using name_descriptions_versions as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
-delete from t using name_descriptions_writers as t
+delete from t using name_description_writers as t
  inner join name_descriptions as ld on ld.id = t.name_description_id
  where ld.public = false;
 
