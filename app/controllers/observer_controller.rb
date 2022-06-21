@@ -15,14 +15,10 @@ class ObserverController < ApplicationController
   include CreateAndEditObservation
   include ShowObservation
 
-  # These all belong in new controllers:
-  include MarkupController
-
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
 
   before_action :login_required, except: [
-    :lookup_observation,
     :next_observation,
     :prev_observation,
     :show_obs,
@@ -34,20 +30,10 @@ class ObserverController < ApplicationController
   ]
   # except: [
   #   :advanced_search,
-  #   :advanced_search_form,
   #   :download_observations,
   #   :hide_thumbnail_map,
   #   :index_observation,
   #   :list_observations,
-  #   :lookup_accepted_name,
-  #   :lookup_comment,
-  #   :lookup_image,
-  #   :lookup_location,
-  #   :lookup_name,
-  #   :lookup_observation,
-  #   :lookup_project,
-  #   :lookup_species_list,
-  #   :lookup_user,
   #   :map_observation,
   #   :map_observations,
   #   :next_observation,
@@ -60,7 +46,6 @@ class ObserverController < ApplicationController
   #   :observations_for_project,
   #   :observations_at_where,
   #   :observations_at_location,
-  #   :pattern_search,
   #   :prev_observation,
   #   :print_labels,
   #   :show_obs,
@@ -71,7 +56,6 @@ class ObserverController < ApplicationController
   #   :turn_javascript_nil,
   #   :turn_javascript_off,
   #   :turn_javascript_on,
-  #   :w3c_tests,
   # ]
 
   before_action :disable_link_prefetching, except: [

@@ -294,15 +294,6 @@ ACTIONS = {
     hide_thumbnail_map: {},
     index_observation: {},
     list_observations: {},
-    lookup_accepted_name: {},
-    lookup_comment: {},
-    lookup_image: {},
-    lookup_location: {},
-    lookup_name: {},
-    lookup_observation: {},
-    lookup_project: {},
-    lookup_species_list: {},
-    lookup_user: {},
     map_observation: {},
     map_observations: {},
     next_observation: {},
@@ -506,16 +497,6 @@ end
 # ----------------------------
 #  Helpers.
 # ----------------------------
-
-# Array of "lookup_xxx" actions: these are all entry points mostly for
-# external sites.  For example, it lets an external site link directly to
-# the name page for "Amanita muscaria" without knowing the name_id of that
-# name.
-def lookup_xxx_id_actions
-  ACTIONS[:observer].keys.select do |action|
-    action.to_s.start_with?("lookup_")
-  end
-end
 
 # Get an array of API endpoints for all versions of API.
 def api_endpoints
@@ -845,10 +826,26 @@ MushroomObserver::Application.routes.draw do
     patch("#{controller}/#{action}", controller: controller, action: action)
   end
 
+  # Array of "lookup_xxx" actions: these are all entry points mostly for
+  # external sites.  For example, it lets an external site link directly to
+  # the name page for "Amanita muscaria" without knowing the name_id of that
+  # name.
+  LOOKUP_ACTIONS = %w[
+    lookup_accepted_name
+    lookup_comment
+    lookup_image
+    lookup_location
+    lookup_name
+    lookup_observation
+    lookup_project
+    lookup_species_list
+    lookup_user
+  ]
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  lookup_xxx_id_actions.each do |action|
-    get("observer/#{action}/:id",
-        controller: "observer", action: action, id: /.*/)
+  LOOKUP_ACTIONS.each do |action|
+    match("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/,
+          via: [:get, :post])
+    get("/observer/#{action}", to: redirect(path: "lookups##{action}"))
   end
 
   # declare routes for the actions in the ACTIONS hash
