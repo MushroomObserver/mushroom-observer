@@ -91,12 +91,12 @@ class RssLogsControllerTest < FunctionalTestCase
     # which includes a query after the id, but assert_redirected_to treats
     # the query as part of the id.
     assert_response(:redirect)
-    assert_match(rss_log_path(logs.second.id),
+    assert_match(activity_log_path(logs.second.id),
                  @response.header["Location"], "Redirected to wrong page")
 
     get(:show, params: { flow: "prev", id: logs.second })
     assert_response(:redirect)
-    assert_match(rss_log_path(logs.first.id),
+    assert_match(activity_log_path(logs.first.id),
                  @response.header["Location"], "Redirected to wrong page")
   end
 
