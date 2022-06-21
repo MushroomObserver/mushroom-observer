@@ -18,7 +18,6 @@ class ObserverController < ApplicationController
   # These all belong in new controllers:
   include SearchController
   include MarkupController
-  include AuthorController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter

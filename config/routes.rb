@@ -635,6 +635,16 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
+  # ----- Authors: no resources, just forms ------------------------------------
+  match("authors/author_request(/:id)",
+        to: "authors#author_request", via: [:get, :post], id: /\d+/,
+        as: "authors_author_request")
+  match("authors/review_authors(/:id)",
+        to: "authors#review_authors", via: [:get, :post], id: /\d+/,
+        as: "authors_review_authors")
+  get("observer/author_request", to: redirect(path: "authors#author_request"))
+  get("observer/review_authors", to: redirect(path: "authors#review_authors"))
+
   # ----- Email: no resources, just forms --------------------------------------
   match("emails/ask_observation_question(/:id)",
         to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
