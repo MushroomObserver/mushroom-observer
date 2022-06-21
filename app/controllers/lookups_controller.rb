@@ -1,7 +1,14 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::MarkupController
+class LookupsController < ApplicationController
+  # These need to be moved into the files where they are actually used.
+  require "find"
+  require "set"
+
+  before_action :login_required, except: [
+    :lookup_observation,
+  ]
+
   def lookup_comment # :nologin
     lookup_general(Comment)
   end
