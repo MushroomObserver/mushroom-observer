@@ -714,7 +714,7 @@ class AccountController < ApplicationController
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
     else
-      redirect_back_or_default("/observer/how_to_help")
+      redirect_back_or_default("/info/how_to_help")
     end
   end
 

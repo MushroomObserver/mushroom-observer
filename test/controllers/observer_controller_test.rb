@@ -178,18 +178,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:ask_webmaster_question)
     assert_form_action(action: :ask_webmaster_question)
 
-    get_with_dump(:how_to_help)
-    assert_template(:how_to_help)
-
-    get_with_dump(:how_to_use)
-    assert_template(:how_to_use)
-
-    get_with_dump(:intro)
-    assert_template(:intro)
-
-    get(:search_bar_help)
-    assert_response(:success)
-
     get_with_dump(:list_observations)
     assert_template("shared/_matrix_box")
 
@@ -201,9 +189,6 @@ class ObserverControllerTest < FunctionalTestCase
     get(:observations_for_project,
         params: { id: projects(:bolete_project).id })
     assert_template("shared/_matrix_box")
-
-    get_with_dump(:news)
-    assert_template(:news)
 
     get_with_dump(:observations_by_name)
     assert_template("shared/_matrix_box")
@@ -225,12 +210,6 @@ class ObserverControllerTest < FunctionalTestCase
 
     # get_with_dump(:login)
     # assert_redirected_to(controller: :account, action: :login)
-
-    get_with_dump(:textile)
-    assert_template(:textile_sandbox)
-
-    get_with_dump(:textile_sandbox)
-    assert_template(:textile_sandbox)
   end
 
   def test_observations_by_unknown_user
@@ -3806,51 +3785,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_select("div#labels td", query.num_results)
   end
 
-  def test_normal_permissions
-    login
-    get(:intro)
-    assert_equal(200, @response.status)
-    get(:textile)
-    assert_equal(200, @response.status)
-  end
-
-  def test_whitelisted_robot_permissions
-    @request.user_agent =
-      "Mozilla/5.0 (compatible; Googlebot/2.1; " \
-      "+http://www.google.com/bot.html)"
-    get(:intro) # authorized robots and anonymous users are allowed here
-    assert_equal(200, @response.status)
-    get(:textile)
-    assert_equal(403, @response.status)
-  end
-
-  def test_unauthorized_robot_permissions
-    @request.user_agent =
-      "Mozilla/5.0 (compatible; Baiduspider/2.0; "\
-      "+http://www.baidu.com/search/spider.html)"
-    get(:intro) # only authorized robots and anonymous users are allowed here
-    assert_equal(403, @response.status)
-  end
-
   def test_anon_user_ask_webmaster_question
     get(:ask_webmaster_question)
 
     assert_response(:success)
     assert_head_title(:ask_webmaster_title.l)
-  end
-
-  def test_anon_user_how_to_use
-    get(:how_to_use)
-
-    assert_response(:success)
-    assert_head_title(:how_title.l)
-  end
-
-  def test_anon_user_intro
-    get(:intro)
-
-    assert_response(:success)
-    assert_head_title(:intro_title.l)
   end
 
   def test_external_sites_user_can_add_links_to

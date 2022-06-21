@@ -1743,12 +1743,12 @@
   name_map_about: "[:show_name]"
   name_map_no_maps: No observations of [name] have mappable location information.
 
-  # observer/news
+  # info/news
   news_title: "Latest Release: April 17, 2017"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
   news_content: "[:news_content_pr_306]\n\n[:news_content_pr_301]\n\n[:news_content_pr_294]\n\n[:news_content_pr_291]\n\n[:news_content_pr_293]\n\n[:news_content_pr_276]\n\n[:news_content_pr_261]\n\n[:news_content_pr_258]\n\n[:news_content_pr_256]\n\n[:news_content_pr_249]\n\n[:news_content_pr_248]\n\n[:news_content_pr_247]\n\n[:news_content_pr_246]\n\n[:news_content_commit_efa11ea]\n\n[:news_content_pr_241]\n\n[:news_content_pr_240]\n\n[:news_content_pr_238]\n\n[:news_content_commit_22deee6]\n\n[:news_content_commit_33639d5]\n\n[:news_content_commit_96e27e9]\n\n[:news_content_pr_236]\n\n[:news_content_pr_235]\n\n[:news_content_pr_233]\n\n[:news_content_pr_232]\n\n[:news_content_pr_231]\n\n[:news_content_pr_230]\n\n[:news_content_pr_226]\n\n[:news_content_pr_224]\n\n[:news_content_pr_223]\n\n[:news_content_pr_221]\n\n[:news_content_pr_220]\n\n[:news_content_pr_219]\n\n[:news_content_pr_217]\n\n[:news_content_pr_216]\n\n[:news_content_pr_215]\n\n[:news_content_pr_213]\n\n[:news_content_pr_212]\n\n[:news_content_pr_208]"
 
-  # observer/news individual updates
+  # info/news individual updates
   news_content_pr_306: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/306\" target=\"_new\">PR #306</a> (April 17, 2017) Allow removal of author from Name; allow Group or Clade authored/unauthored Name pairs."
   news_content_pr_301: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/301\" target=\"_new\">PR #301</a> (April 1, 2017) Add google map inset to observation form to help users enter good lat/long and elevation for observatons."
   news_content_pr_294: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/294\" target=\"_new\">PR #294</a> (March 19, 2017) Add support for clade names. These are just like group names, but use “clade” instead of “group”. Clarify and expand instructions on the Create Name and Edit Name pages."
@@ -1914,7 +1914,7 @@
   reverify_link: Reverify
   reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
-  # observer/rss
+  # rss_logs/rss
   rss_description: List of changes to [:app_title] as they happen.
   rss_log_of_deleted_item: Deleted Item
   rss_log_title: Activity Log
@@ -2908,7 +2908,7 @@
   pivotal_label_specimen: "[:specimens]"
   pivotal_label_voting: voting
 
-  # observer/textile
+  # info/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
   sandbox_link4: The RedCloth manual
@@ -2985,7 +2985,7 @@
   Hygrocybe: Hygrocybe
   BlackOnWhite: Black on White
 
-  # observer/translators_note
+  # info/translators_note
   translators_note: "Please help us make this website available around the world!  It's easy.\n\nThere are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you.  We've organized it so someone with limited time can concentrate on the most important text.  Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n\nThere are several ways to get started.  You can pick up a copy of the entire \"translation file\":[repo] and start translating it into any language you wish.  \"Send us an email\":/observer/ask_webmaster_question to learn more about this approach.\n\nIt's even easier to work on existing translations.  Just look for \"[:app_edit_translations]\" at the bottom of any page.  You can see immediately how your changes look in the context of the page.  If your language is not available, \"send us an email\":/observer/ask_webmaster_question and we can create a \"beta\" version for you to work on.\n\nYou will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users."
   translators_note_title: Translator's Note
 
@@ -3298,7 +3298,7 @@
 
   # HELP PAGES
 
-  # observer/intro
+  # info/intro
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/observer/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
@@ -3306,7 +3306,7 @@
   intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
 
-  # observer/how_to_help
+  # info/how_to_help
   how_help_title: How to Help Make [:app_title] Better
   how_help_intro: This page provides a list of skills that we could really use some help with. If you're interested in helping out just "send an email":/observer/ask_webmaster_question and let us know what you want to do.
   how_help_contributors: "h4. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/observer/how_to_use#describing_species or \"defining locations\":/observer/how_to_use#defining_locations."
@@ -3316,7 +3316,7 @@
   how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
   how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, after some time consuming false starts, we are now in the process of creating a new non-profit focused solely on Mushroom Observer. This is just getting going so let us know if you want to get involved or have any business related advice."
 
-  # observer/how_to_use
+  # info/how_to_use
   how_title: How to Use [:app_title]
   how_common_tasks: Common Tasks
   how_glossary: Concepts Glossary

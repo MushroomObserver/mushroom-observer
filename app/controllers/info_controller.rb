@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
-# TODO: move this into a new InfoController
 # Display canned informations about site
-module ObserverController::InfoController
+class InfoController < ApplicationController
+
+  before_action :login_required, except: [
+    :how_to_help,
+    :how_to_use,
+    :intro
+  ]
+
   # Intro to site.
   def intro
     store_location

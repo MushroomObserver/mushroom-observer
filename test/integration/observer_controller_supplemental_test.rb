@@ -21,7 +21,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
   # MO displays what the entered text looks like.
   def test_post_textile
     login
-    visit("/observer/textile_sandbox")
+    visit("/info/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)
