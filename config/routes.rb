@@ -646,19 +646,19 @@ MushroomObserver::Application.routes.draw do
         as: "emails_name_change_request")
 
   get("observer/ask_observation_question",
-      to: redirect(path: "info#ask_observation_question"))
+      to: redirect(path: "emails#ask_observation_question"))
   get("observer/ask_user_question",
-      to: redirect(path: "info#ask_user_question"))
+      to: redirect(path: "emails#ask_user_question"))
   get("observer/ask_webmaster_question",
-      to: redirect(path: "info#ask_webmaster_question"))
+      to: redirect(path: "emails#ask_webmaster_question"))
   get("observer/commercial_inquiry",
-      to: redirect(path: "info#commercial_inquiry"))
+      to: redirect(path: "emails#commercial_inquiry"))
   get("observer/email_features",
-      to: redirect(path: "info#features"))
+      to: redirect(path: "emails#features"))
   get("observer/email_merge_request",
-      to: redirect(path: "info#merge_request"))
+      to: redirect(path: "emails#merge_request"))
   get("observer/email_name_change_request",
-      to: redirect(path: "info#name_change_request"))
+      to: redirect(path: "emails#name_change_request"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
   match("info/change_banner", to: "info#change_banner", via: [:get, :post])
