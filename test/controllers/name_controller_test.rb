@@ -3958,7 +3958,7 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     post(:deprecate_name, params: params)
     assert_template(:deprecate_name)
-    assert_template("name/_form_name_feedback")
+    assert_template("shared/_form_name_feedback")
     # Fail since name can't be disambiguated
 
     assert_not(old_name.reload.deprecated)
@@ -4024,7 +4024,7 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     post(:deprecate_name, params: params)
     assert_template(:deprecate_name)
-    assert_template("name/_form_name_feedback")
+    assert_template("shared/_form_name_feedback")
     # Fail since new name is not approved
 
     assert_not(old_name.reload.deprecated)
