@@ -16,7 +16,8 @@
         <% @observations[0,3].each do |obs| %>
           <div class="col-xs-12 pad-bottom">
             <%= thumbnail(obs.thumb_image,
-                          link: { action: :show_observation, id: obs.id},
+                          link: { controller: :observer,
+                                  action: :show_observation, id: obs.id},
                           votes: true) %><br/><br/>
 
           </div>
@@ -66,7 +67,8 @@
         <div class="col-xs-12">
           <% @observations[3,3].each do |obs| %>
             <%= thumbnail(obs.thumb_image,
-                          link: { action: :show_observation, id: obs.id },
+                          link: { controller: :observer,
+                                  action: :show_observation, id: obs.id },
                           votes: true) %><br/><br/>
           <% end %>
         </div>

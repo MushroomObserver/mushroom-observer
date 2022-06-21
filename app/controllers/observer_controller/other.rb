@@ -47,44 +47,6 @@ module ObserverController::Other
     redirect_to("/")
   end
 
-  # Simple list of all the files in public/html that are linked to the W3C
-  # validator to make testing easy.
-  def w3c_tests
-    render(layout: false)
-  end
-
-  # Update banner across all translations.
-  def change_banner
-    if !in_admin_mode?
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    elsif request.method == "POST"
-      @val = params[:val].to_s.strip
-      @val = "X" if @val.blank?
-      time = Time.zone.now
-      Language.all.each do |lang|
-        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-          str.update!(
-            text: @val,
-            updated_at: (str.language.official ? time : time - 1.minute)
-          )
-        else
-          str = lang.translation_strings.create!(
-            tag: "app_banner_box",
-            text: @val,
-            updated_at: time - 1.minute
-          )
-        end
-        str.update_localization
-        str.language.update_localization_file
-        str.language.update_export_file
-      end
-      redirect_to("/")
-    else
-      @val = :app_banner_box.l.to_s
-    end
-  end
-
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
   def set_export_status

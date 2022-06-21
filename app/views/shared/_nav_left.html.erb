@@ -1,8 +1,8 @@
 <div class="list-group list-group-compact">
 
-  <%= link_to(:app_intro.t, observer_intro_path,
+  <%= link_to(:app_intro.t, info_intro_path,
               { class: "list-group-item" }) %>
-  <%= link_to(:app_how_to_use.t, observer_how_to_use_path,
+  <%= link_to(:app_how_to_use.t, info_how_to_use_path,
               { class: "list-group-item" }) %>
   <%= link_to(:app_privacy_policy.t, policy_privacy_path,
               { class: "list-group-item" }) %>
@@ -17,7 +17,7 @@
                 { class: "list-group-item list-group-item-danger indent" }) %>
     <%= link_to(:app_users.t, users_by_name_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
-    <%= link_to(:change_banner_title.t, observer_change_banner_path,
+    <%= link_to(:change_banner_title.t, info_change_banner_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
     <%= link_to(:app_email_all_users.t, observer_email_features_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
@@ -122,7 +122,7 @@
   <div class="list-group-item disabled bold">
     <%= :app_more.t %>
   </div>
-  <%= link_to(:app_how_to_help.t, observer_how_to_help_path,
+  <%= link_to(:app_how_to_help.t, info_how_to_help_path,
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_feature_tracker.t, pivotal_index_path,
               { class: "list-group-item indent" }) %>
@@ -130,9 +130,9 @@
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_contributors.t, users_by_contribution_path,
               { class: "list-group-item indent" }) %>
-  <%= link_to(:app_site_stats.t, observer_show_site_stats_path,
+  <%= link_to(:app_site_stats.t, info_site_stats_path,
               { class: "list-group-item indent" }) %>
-  <%= link_to(:translators_note_title.t, observer_translators_note_path,
+  <%= link_to(:translators_note_title.t, info_translators_note_path,
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_publications.t, publications_path,
               { class: "list-group-item indent" }) %>

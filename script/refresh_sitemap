@@ -75,10 +75,10 @@ OBJECT_TYPES = [
 ].freeze
 
 STATIC_PAGES = [
-  ["home page",    "activity_logs/index",    "hourly"],
-  ["introduction", "observer/intro",         "weekly"],
-  ["how to use",   "observer/how_to_use",    "weekly"],
-  ["how to help",  "observer/how_to_help",   "weekly"]
+  ["home page",    "activity_logs/index", "hourly"],
+  ["introduction", "info/intro",          "weekly"],
+  ["how to use",   "info/how_to_use",     "weekly"],
+  ["how to help",  "info/how_to_help",    "weekly"]
 ].freeze
 
 # These are aliases for pages allowed above.

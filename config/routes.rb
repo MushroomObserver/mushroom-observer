@@ -290,7 +290,6 @@ ACTIONS = {
     ask_user_question: {},
     ask_webmaster_question: {},
     author_request: {},
-    change_banner: {},
     commercial_inquiry: {},
     create_observation: {},
     destroy_observation: {},
@@ -301,11 +300,7 @@ ACTIONS = {
     email_name_change_request: {},
     guess: {},
     hide_thumbnail_map: {},
-    how_to_help: {},
-    how_to_use: {},
     index_observation: {},
-    intro: {},
-    letter_to_community: {},
     list_observations: {},
     lookup_accepted_name: {},
     lookup_comment: {},
@@ -318,7 +313,6 @@ ACTIONS = {
     lookup_user: {},
     map_observation: {},
     map_observations: {},
-    news: {},
     next_observation: {},
     observation_search: {},
     observations_at_location: {},
@@ -334,23 +328,16 @@ ACTIONS = {
     print_labels: {},
     recalc: {},
     review_authors: {},
-    search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    show_site_stats: {},
     suggestions: {},
     test_flash_redirection: {},
-    textile: {},
-    textile_sandbox: {},
-    translators_note: {},
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    w3c_tests: {},
-    wrapup_2011: {}
   },
   pivotal: {
     index: {}
@@ -654,6 +641,31 @@ MushroomObserver::Application.routes.draw do
     old_controller: "glossary", new_controller: "glossary_terms",
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
+
+  # ----- Info: no resources, just pages --------------------------------------
+  match("info/change_banner", to: "info#change_banner", via: [:get, :post])
+  get("info/how_to_help", to: "info#how_to_help")
+  get("info/how_to_use", to: "info#how_to_use")
+  get("info/intro", to: "info#intro")
+  get("info/news", to: "info#news")
+  get("info/search_bar_help", to: "info#search_bar_help")
+  get("info/site_stats", to: "info#site_stats")
+  match("info/textile", to: "info#textile", via: [:get, :post])
+  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
+  get("info/translators_note", to: "info#translators_note")
+  get("info/w3c_tests", to: "info#w3c_tests")
+
+  # get("observer/change_banner", to: redirect(path: "info#change_banner"))
+  get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
+  get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
+  get("observer/intro", to: redirect(path: "info#intro"))
+  get("observer/news", to: redirect(path: "info#news"))
+  get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
+  get("observer/show_site_stats", to: "info#site_stats")
+  get("observer/textile", to: redirect(path: "info#textile_sandbox"))
+  get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
+  get("observer/translators_note", to: redirect(path: "info#translators_note"))
+  # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
