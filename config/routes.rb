@@ -789,8 +789,8 @@ MushroomObserver::Application.routes.draw do
   get("/observer/rss", to: redirect(path: "activity_logs#rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
-  get("searches/pattern_search(/:id)",
-        to: "searches#pattern_search", id: /\d+/,
+  match("searches/pattern_search(/:id)",
+        to: "searches#pattern_search", via: [:get, :post], id: /\d+/,
         as: "searches_pattern_search")
   match("searches/advanced_search_form(/:id)",
         to: "searches#advanced_search_form", via: [:get, :post], id: /\d+/,
