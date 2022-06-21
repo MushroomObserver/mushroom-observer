@@ -16,20 +16,20 @@ class RssLogsController < ApplicationController
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
   def index
-    # POST requests with param `show_#{type}``: potentially show multiple types
-    # of objects. These requests come from the checkboxes in tabset
+    # POST requests with param `type` potentially show an array of types
+    # of objects. The array comes from the checkboxes in tabset
     if request.method == "POST"
-      types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
+      types = RssLog.all_types.intersection(params[:type])
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
-    # GET requests with param `type``: show a single type of object
+    # GET requests with param `type` show a single type of object
     # These come from simple links: the tabs in tabset
     elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
-    # Unfiltered
+    # Previously saved query, incorporating type and other params
     elsif params[:q].present?
       query = find_query(:RssLog)
       query ||= create_query(:RssLog, :all,
