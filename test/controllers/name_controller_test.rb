@@ -1844,7 +1844,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
 
     assert_redirected_to(
-      { controller: :observer, action: :email_name_change_request,
+      { controller: :emails, action: :name_change_request,
         name_id: name.id, new_name_with_icn_id: "Superboletus [#]" },
       "User should be unable to change text_name of Name with dependents"
     )
@@ -1908,7 +1908,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params: params)
 
     assert_redirected_to(
-      /#{observer_email_name_change_request_path}/,
+      /#{emails_name_change_request_path}/,
       "User should be unable to change an approved synonym of a Naming"
     )
   end
@@ -1995,7 +1995,7 @@ class NameControllerTest < FunctionalTestCase
 
     post(:edit_name, params: params)
     assert_redirected_to(
-      { controller: :observer, action: :email_name_change_request,
+      { controller: :emails, action: :name_change_request,
         params: {
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [##{name.icn_id + 1}]"
@@ -2095,7 +2095,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     post(:edit_name, params: params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :emails, action: :merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(Name.find(old_name.id))
     assert(new_name.reload)
@@ -2215,7 +2215,7 @@ class NameControllerTest < FunctionalTestCase
 
     login("rolf")
     post(:edit_name, params: params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :emails, action: :merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
 
     # Try again as an admin.
@@ -2597,7 +2597,7 @@ class NameControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     post(:edit_name, params: params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :emails, action: :merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(old_name.reload)
     assert(new_name.reload)
