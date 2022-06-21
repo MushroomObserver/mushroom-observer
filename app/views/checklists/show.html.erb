@@ -46,7 +46,7 @@
     @title = :checklist_for_site_title.t
     tabs = [
       link_to(:app_contributors.t, users_by_contribution_path),
-      link_to(:app_site_stats.t, observer_show_site_stats_path)
+      link_to(:app_site_stats.t, info_site_stats_path)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
   end

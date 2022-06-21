@@ -11,7 +11,6 @@ class ObserverController < ApplicationController
   # These will mostly form the new ObservationController:
   include Other
   include Suggestions
-  include SiteStats
   include Indexes
   include CreateAndEditObservation
   include ShowObservation
@@ -71,7 +70,6 @@ class ObserverController < ApplicationController
   #   :print_labels,
   #   :show_obs,
   #   :show_observation,
-  #   :show_site_stats,
   #   :test,
   #   :throw_error,
   #   :throw_mobile_error,

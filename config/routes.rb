@@ -335,7 +335,6 @@ ACTIONS = {
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    show_site_stats: {},
     suggestions: {},
     test_flash_redirection: {},
     turn_javascript_nil: {},
@@ -652,6 +651,7 @@ MushroomObserver::Application.routes.draw do
   get("info/intro", to: "info#intro")
   get("info/news", to: "info#news")
   get("info/search_bar_help", to: "info#search_bar_help")
+  get("info/site_stats", to: "info#site_stats")
   get("info/textile", to: "info#textile")
   get("info/textile_sandbox", to: "info#textile_sandbox")
   get("info/translators_note", to: "info#translators_note")
@@ -661,6 +661,7 @@ MushroomObserver::Application.routes.draw do
   get("observer/intro", to: redirect(path: "info#intro"))
   get("observer/news", to: redirect(path: "info#news"))
   get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
+  get("observer/show_site_stats", to: "info#site_stats")
   get("observer/textile", to: redirect(path: "info#textile_sandbox"))
   get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
   get("observer/translators_note", to: redirect(path: "info#translators_note"))

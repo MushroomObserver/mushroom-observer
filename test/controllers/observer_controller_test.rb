@@ -3813,17 +3813,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 
-  def test_site_stats
-    login
-    get(:show_site_stats)
-
-    assert_select("title").text.include?(:show_site_stats_title.l)
-    assert_select("#title", { text: :show_site_stats_title.l },
-                  "Displayed title should be #{:show_site_stats_title.l}")
-    assert(/#{:site_stats_contributing_users.l}/ =~ @response.body,
-           "Page is missing #{:site_stats_contributing_users.l}")
-  end
-
   def test_suggestions
     obs = observations(:detailed_unknown_obs)
     name1 = names(:coprinus_comatus)
