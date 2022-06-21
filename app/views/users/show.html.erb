@@ -42,7 +42,7 @@
       link_to(:show_user_observations_by.t(name: name), links[:observations]),
       link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
       link_to(:show_user_email_to.t(name: name),
-              observer_ask_user_question_path(id: id))
+              emails_ask_user_question_path(id: id))
     ]
   end
   if in_admin_mode?

@@ -9,7 +9,7 @@
               controller: :observer, action: :observations_by_user,
               id: @show_user.id),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
-              controller: :observer, action: :ask_user_question,
+              controller: :emails, action: :ask_user_question,
               id: @show_user.id)
     ]
     @tabsets = { right: draw_tab_set(tabs) }

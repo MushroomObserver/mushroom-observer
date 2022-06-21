@@ -658,8 +658,8 @@ class LocationController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(controller: :observer,
-                          action: :email_merge_request,
+      redirect_with_query(controller: :emails,
+                          action: :merge_request,
                           type: :Location,
                           old_id: @location.id,
                           new_id: merge.id)

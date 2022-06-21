@@ -18,14 +18,12 @@ class ObserverController < ApplicationController
   # These all belong in new controllers:
   include SearchController
   include MarkupController
-  include EmailController
   include AuthorController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
 
   before_action :login_required, except: [
-    :ask_webmaster_question,
     :lookup_observation,
     :next_observation,
     :prev_observation,
@@ -39,7 +37,6 @@ class ObserverController < ApplicationController
   # except: [
   #   :advanced_search,
   #   :advanced_search_form,
-  #   :ask_webmaster_question,
   #   :download_observations,
   #   :hide_thumbnail_map,
   #   :index_observation,

@@ -286,18 +286,11 @@ ACTIONS = {
   observer: {
     advanced_search: {},
     advanced_search_form: {},
-    ask_observation_question: {},
-    ask_user_question: {},
-    ask_webmaster_question: {},
     author_request: {},
-    commercial_inquiry: {},
     create_observation: {},
     destroy_observation: {},
     download_observations: {},
     edit_observation: {},
-    email_features: {},
-    email_merge_request: {},
-    email_name_change_request: {},
     guess: {},
     hide_thumbnail_map: {},
     index_observation: {},
@@ -642,7 +635,45 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
-  # ----- Info: no resources, just pages --------------------------------------
+  # ----- Email: no resources, just forms --------------------------------------
+  match("emails/ask_observation_question(/:id)",
+        to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
+        as: "emails_ask_observation_question")
+  match("emails/ask_user_question(/:id)",
+        to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
+        as: "emails_ask_user_question")
+  match("emails/ask_webmaster_question(/:id)",
+        to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
+        as: "emails_ask_webmaster_question")
+  match("emails/commercial_inquiry(/:id)",
+        to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
+        as: "emails_commercial_inquiry")
+  match("emails/features(/:id)",
+        to: "emails#features", via: [:get, :post], id: /\d+/,
+        as: "emails_features")
+  match("emails/merge_request(/:id)",
+        to: "emails#merge_request", via: [:get, :post], id: /\d+/,
+        as: "emails_merge_request")
+  match("emails/name_change_request(/:id)",
+        to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
+        as: "emails_name_change_request")
+
+  get("observer/ask_observation_question",
+      to: redirect(path: "info#ask_observation_question"))
+  get("observer/ask_user_question",
+      to: redirect(path: "info#ask_user_question"))
+  get("observer/ask_webmaster_question",
+      to: redirect(path: "info#ask_webmaster_question"))
+  get("observer/commercial_inquiry",
+      to: redirect(path: "info#commercial_inquiry"))
+  get("observer/email_features",
+      to: redirect(path: "info#features"))
+  get("observer/email_merge_request",
+      to: redirect(path: "info#merge_request"))
+  get("observer/email_name_change_request",
+      to: redirect(path: "info#name_change_request"))
+
+  # ----- Info: no resources, just forms and pages ----------------------------
   match("info/change_banner", to: "info#change_banner", via: [:get, :post])
   get("info/how_to_help", to: "info#how_to_help")
   get("info/how_to_use", to: "info#how_to_use")

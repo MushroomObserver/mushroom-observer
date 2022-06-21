@@ -1299,17 +1299,17 @@
 
   # MOST POPULAR PAGES
 
-  # observer/ask_observation_question
+  # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
   ask_observation_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this observation as well as your email address.
 
-  # observer/ask_user_question
+  # emails/ask_user_question
   ask_user_question_title: Email Message for [user]
   ask_user_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will include your email address as the 'Reply To' address.
   ask_user_question_message: "[:Message]"
   ask_user_question_subject: "[:Subject]"
 
-  # observer/ask_webmaster_question
+  # emails/ask_webmaster_question
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
@@ -1336,7 +1336,7 @@
   comment_show_edit: "[:EDIT]"
   comment_show_destroy: "[:DESTROY]"
 
-  # observer/commercial_inquiry
+  # emails/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
   commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
@@ -1416,7 +1416,7 @@
   email_merge_request_help: By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types].
   email_merge_request_success: Your request has been sent.  Thank you!
 
-  # observer/email_name_change_request
+  # observer/name_change_request
   email_name_change_request_title: Send Name Change Request
   email_name_change_request_help: "Changing this Name will indirectly affect other Names that depend on this Name. For instance, another Name may: include this Name as part of its Classification; or have this Name as an approved synonym. If you really want to change this Name, please explain why. This will send a request to the admins, and if we agree with you, we will make the change."
   new_name: New Name
