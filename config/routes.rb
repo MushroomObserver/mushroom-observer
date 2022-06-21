@@ -285,7 +285,6 @@ ACTIONS = {
   },
   observer: {
     advanced_search: {},
-    advanced_search_form: {},
     author_request: {},
     create_observation: {},
     destroy_observation: {},
@@ -316,7 +315,6 @@ ACTIONS = {
     observations_of_look_alikes: {},
     observations_of_name: {},
     observations_of_related_taxa: {},
-    pattern_search: {},
     prev_observation: {},
     print_labels: {},
     recalc: {},
@@ -789,6 +787,19 @@ MushroomObserver::Application.routes.draw do
   get("/observer/show_rss_log(/:id)",
       to: redirect(path: "activity_logs", params: { :id=>/\d+/ }))
   get("/observer/rss", to: redirect(path: "activity_logs#rss"))
+
+  # ----- Searches: nonstandard actions --------------------------------------
+  get("searches/pattern_search(/:id)",
+        to: "searches#pattern_search", id: /\d+/,
+        as: "searches_pattern_search")
+  match("searches/advanced_search_form(/:id)",
+        to: "searches#advanced_search_form", via: [:get, :post], id: /\d+/,
+        as: "searches_advanced_search_form")
+
+  get("/observer/pattern_search",
+      to: redirect(path: "searches#pattern_search"))
+  get("/observer/advanced_search_form",
+      to: redirect(path: "searches#advanced_search_form"))
 
   # ----- Users: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
