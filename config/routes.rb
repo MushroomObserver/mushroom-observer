@@ -652,7 +652,7 @@ MushroomObserver::Application.routes.draw do
   resources :articles, id: /\d+/
   redirect_legacy_actions(old_controller: "article")
 
-  get 'checklist', to: 'checklists#show'
+  get "checklist", to: "checklists#show"
 
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
