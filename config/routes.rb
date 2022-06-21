@@ -841,8 +841,7 @@ MushroomObserver::Application.routes.draw do
   ]
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
-    match("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/,
-          via: [:get, :post])
+    get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
     get("/observer/#{action}", to: redirect(path: "lookups##{action}"))
   end
 
