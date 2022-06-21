@@ -1215,7 +1215,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(citation, name.citation, "Failed strip leading comma, space")
   end
 
-
   # ----------------------------
   #  Edit name -- without merge
   # ----------------------------

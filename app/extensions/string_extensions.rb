@@ -520,8 +520,8 @@ class String
 
   # Strip leading and trailing whitespace and some punctuation chars
   def strip_bad_chars_at_ends
-    gsub(/\A[\s\,;-]+/, "").
-      gsub(/[\s\,;-]+\Z/, "")
+    gsub(/\A[\s,;-]+/, "").
+      gsub(/[\s,;-]+\Z/, "")
   end
 
   # Generate a string of random characters of length +len+.  By default it
