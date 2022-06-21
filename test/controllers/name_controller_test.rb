@@ -1194,6 +1194,28 @@ class NameControllerTest < FunctionalTestCase
     assert(Name.find_by(text_name: "Pleurotus"))
   end
 
+  def test_create_name_clear_bordering_bad_chars
+    text_name = "Amanita velosa"
+    assert_not(Name.find_by(text_name: text_name))
+    author = "(Peck) Lloyd"
+    citation = "??Mycol. Writ.?? (Cincinnati) 1(7): 9, 15 (1898)"
+    params = {
+      name: {
+        text_name: text_name,
+        author: "#{author},",
+        rank: :Species,
+        citation: ", #{citation}"
+      }
+    }
+
+    post_requires_login(:create_name, params)
+
+    assert(name = Name.find_by(text_name: text_name))
+    assert_equal(author, name.author, "Failed to strip trailing comma")
+    assert_equal(citation, name.citation, "Failed strip leading comma, space")
+  end
+
+
   # ----------------------------
   #  Edit name -- without merge
   # ----------------------------

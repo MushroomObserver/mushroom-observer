@@ -463,7 +463,7 @@ class Name < AbstractModel
           sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
           sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
           strip_squeeze
-    squeeze_author(str)
+    squeeze_author(str).strip_bad_chars_at_ends
   end
 
   # Squeeze "A. H. Smith" into "A.H. Smith".

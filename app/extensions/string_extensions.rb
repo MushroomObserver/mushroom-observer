@@ -518,6 +518,12 @@ class String
     strip.squeeze(" ")
   end
 
+  # Strip leading and trailing whitespace and some punctuation chars
+  def strip_bad_chars_at_ends
+    gsub(/\A[\s\,;-]+/, "").
+      gsub(/[\s\,;-]+\Z/, "")
+  end
+
   # Generate a string of random characters of length +len+.  By default it
   # chooses from among the lowercase letters and digits, however you can give
   # it an arbitrary set of characters to choose from.  (And they don't have to

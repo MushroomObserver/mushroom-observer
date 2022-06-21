@@ -95,7 +95,8 @@ class NameController
   def set_unparsed_attrs
     set_locked_if_admin
     set_icn_id_if_unlocked_or_admin
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
+    @name.citation = params[:name][:citation].to_s.
+                     strip_squeeze.strip_bad_chars_at_ends
     @name.notes    = params[:name][:notes].to_s.strip
   end
 
