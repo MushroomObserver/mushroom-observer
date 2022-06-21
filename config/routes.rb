@@ -285,7 +285,6 @@ ACTIONS = {
   },
   observer: {
     advanced_search: {},
-    author_request: {},
     create_observation: {},
     destroy_observation: {},
     download_observations: {},
@@ -309,7 +308,6 @@ ACTIONS = {
     prev_observation: {},
     print_labels: {},
     recalc: {},
-    review_authors: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
@@ -615,14 +613,14 @@ MushroomObserver::Application.routes.draw do
   )
 
   # ----- Authors: no resources, just forms ------------------------------------
-  match("authors/author_request(/:id)",
-        to: "authors#author_request", via: [:get, :post], id: /\d+/,
-        as: "authors_author_request")
-  match("authors/review_authors(/:id)",
-        to: "authors#review_authors", via: [:get, :post], id: /\d+/,
-        as: "authors_review_authors")
-  get("observer/author_request", to: redirect(path: "authors#author_request"))
-  get("observer/review_authors", to: redirect(path: "authors#review_authors"))
+  match("authors/email_request(/:id)",
+        to: "authors#email_request", via: [:get, :post], id: /\d+/,
+        as: "authors_email_request")
+  match("authors/review(/:id)",
+        to: "authors#review", via: [:get, :post], id: /\d+/,
+        as: "authors_review")
+  get("observer/author_request", to: redirect(path: "authors#email_request"))
+  get("observer/review_authors", to: redirect(path: "authors#review"))
 
   # ----- Email: no resources, just forms --------------------------------------
   match("emails/ask_observation_question(/:id)",

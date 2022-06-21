@@ -5,7 +5,7 @@ class AuthorsController < ApplicationController
 
   # Form to compose email for the authors/reviewers.  Linked from show_<object>.
   # TODO: Use queued_email mechanism.
-  def author_request
+  def email_request
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id].to_s)
     return unless request.method == "POST"
@@ -32,7 +32,7 @@ class AuthorsController < ApplicationController
   # Failure:
   #   Renders show_name.
   #   Outputs: @name, @authors, @users
-  def review_authors
+  def review
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id].to_s)
     @authors = @object.authors

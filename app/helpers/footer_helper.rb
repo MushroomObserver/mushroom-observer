@@ -29,13 +29,13 @@ module FooterHelper
         authors += safe_nbsp
         authors += link_with_query("(#{:review_authors_review_authors.t})",
                                    controller: :authors,
-                                   action: :review_authors,
+                                   action: :review,
                                    id: obj.id, type: type)
       elsif !is_author
         authors += safe_nbsp
         authors += link_with_query("(#{:show_name_author_request.t})",
                                    controller: :authors,
-                                   action: :author_request,
+                                   action: :email_request,
                                    id: obj.id, type: type)
       end
 

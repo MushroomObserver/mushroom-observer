@@ -1,7 +1,7 @@
 <% @title = :author_request_title.t(title: @object.format_name) %>
 
 <div class="max-width-text">
-  <%= form_tag(add_query_param(action: :author_request, id: @object.id,
+  <%= form_tag(add_query_param(action: :email_request, id: @object.id,
                                type: @object.type_tag)) do %>
     <%= :author_request_note.tp %>
 

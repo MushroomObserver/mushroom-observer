@@ -82,15 +82,18 @@ class LookupsController < ApplicationController
           end
         when "Location"
           pattern = "%#{id}%"
-          conditions = ["name LIKE ? OR scientific_name LIKE ?",
-                        pattern, pattern]
-          matches = Location.limit(100).where(conditions)
+          matches = Location.limit(100).
+                    where(Location[:name].matches(pattern).
+                      or(Location[:scientific_name].matches(pattern)))
         when "Project"
           pattern = "%#{id}%"
-          matches = Project.limit(100).where("title LIKE ?", pattern)
+          matches = Project.limit(100).
+                    where(Project[:title].matches(pattern))
+
         when "SpeciesList"
           pattern = "%#{id}%"
-          matches = SpeciesList.limit(100).where("title LIKE ?", pattern)
+          matches = SpeciesList.limit(100).
+                    where(SpeciesList[:title].matches(pattern))
         when "User"
           matches = User.where(login: id)
           matches = User.where(name: id) if matches.empty?
