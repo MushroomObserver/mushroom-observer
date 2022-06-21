@@ -1507,6 +1507,8 @@
   form_names_refs_help: Each line is considered a separate reference, but no other formatting is enforced.
   name_error_unregistrable: The [rank] '[name]' is not eligible for an ICN identifier.
   name_error_icn_id_in_use: An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'.
+  name_error_field_start: "'[field] must not start with '[start]'."
+  name_error_field_end: "[field] must not end with '[end]'."
 
   # observer/_form_naming
   form_naming_confidence: Confidence
@@ -4229,4 +4231,3 @@
   system_status_gc: GC
   system_status_textile_name_size: Textile name cache size
   system_status_title: Server Status
-
