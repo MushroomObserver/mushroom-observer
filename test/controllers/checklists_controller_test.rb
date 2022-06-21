@@ -8,8 +8,8 @@ class ChecklistsControllerTest < FunctionalTestCase
   def test_checklist_for_user
     login
     user = users(:rolf)
-    expect = Name.joins(observations: :user).
-             where(Observation[:user_id] == user.id).
+    expect = Name.joins(:observations).
+             where({ observations: { user_id: user.id } }).
              with_rank("Species").distinct
 
     get(:show, params: { user_id: user.id })
@@ -24,7 +24,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     login
     list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :species_list_observations).
-             where(SpeciesListObservation[:species_list_id] == list.id).
+             where({ species_list_observations: { species_list_id: list.id } }).
              with_rank("Species").distinct
 
     get(:show, params: { species_list_id: list.id })
@@ -39,7 +39,8 @@ class ChecklistsControllerTest < FunctionalTestCase
     login
     project = projects(:one_genus_two_species_project)
     expect = Name.joins(observations: :project_observations).
-             where(ProjectObservation[:project_id] == project.id).
+             where({ observations: { project_observations:
+                      { project_id: project.id } } }).
              with_rank("Species").distinct
 
     get(:show, params: { project_id: project.id })

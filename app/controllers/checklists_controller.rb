@@ -16,20 +16,34 @@ class ChecklistsController < ApplicationController
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
-    if user_id.present?
-      if (@show_user = find_or_goto_index(User, user_id))
-        @data = Checklist::ForUser.new(@show_user)
-      end
+
+    @data = if user_id.present?
+      user_checklist(user_id)
     elsif proj_id.present?
-      if (@project = find_or_goto_index(Project, proj_id))
-        @data = Checklist::ForProject.new(@project)
-      end
+      project_checklist(proj_id)
     elsif list_id.present?
-      if (@species_list = find_or_goto_index(SpeciesList, list_id))
-        @data = Checklist::ForSpeciesList.new(@species_list)
-      end
+      species_list_checklist(list_id)
     else
-      @data = Checklist::ForSite.new
+      Checklist::ForSite.new
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def user_checklist(user_id)
+    return unless (@show_user = find_or_goto_index(User, user_id))
+    Checklist::ForUser.new(@show_user)
+  end
+
+  def project_checklist(proj_id)
+    return unless (@project = find_or_goto_index(Project, proj_id))
+    Checklist::ForProject.new(@project)
+  end
+
+  def species_list_checklist(list_id)
+    return unless (@species_list = find_or_goto_index(SpeciesList, list_id))
+    Checklist::ForSpeciesList.new(@species_list)
   end
 end
