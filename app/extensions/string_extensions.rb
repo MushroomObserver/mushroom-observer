@@ -438,7 +438,8 @@ class String
   # tags.  If greater than +max+, truncates to <tt>max - 1</tt> and adds "..."
   # to the end (inside any formatting tags open at that point).  Assumes the
   # String is well-formatted HTML with properly-nested tags.
-  def truncate_html(max)
+  # Disable cop because no easy way to improve
+  def truncate_html(max) # rubocop:disable Metrics/AbcSize
     result = ""
     # make str mutable because it will be modified in place with sub!
     str = String.new(self)
@@ -599,7 +600,8 @@ class String
 
   # This definition copied from Rails::Generators, Which is based directly on
   # the Text gem implementation.
-  def levenshtein_distance(str1, str2)
+  # Disable cop because no easy way to improve
+  def levenshtein_distance(str1, str2) # rubocop:disable Metrics/AbcSize
     s = str1
     t = str2
     n = s.length
