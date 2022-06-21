@@ -290,7 +290,6 @@ ACTIONS = {
     ask_user_question: {},
     ask_webmaster_question: {},
     author_request: {},
-    change_banner: {},
     commercial_inquiry: {},
     create_observation: {},
     destroy_observation: {},
@@ -314,7 +313,6 @@ ACTIONS = {
     lookup_user: {},
     map_observation: {},
     map_observations: {},
-    news: {},
     next_observation: {},
     observation_search: {},
     observations_at_location: {},
@@ -340,7 +338,6 @@ ACTIONS = {
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    w3c_tests: {},
   },
   pivotal: {
     index: {}
