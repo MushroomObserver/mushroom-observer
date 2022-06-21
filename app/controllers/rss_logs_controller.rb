@@ -19,7 +19,8 @@ class RssLogsController < ApplicationController
     # POST requests with param `type` potentially show an array of types
     # of objects. The array comes from the checkboxes in tabset
     if request.method == "POST"
-      types = RssLog.all_types.intersection(params[:type])
+      types = Array(params[:type])
+      types = RssLog.all_types.intersection(types)
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
