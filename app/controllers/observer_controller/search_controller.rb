@@ -10,7 +10,7 @@ module ObserverController::SearchController
   #   location/location_search
   #   name/name_search
   #   observer/observation_search
-  #   observer/user_search
+  #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
   def pattern_search
@@ -22,11 +22,18 @@ module ObserverController::SearchController
     session[:search_type] = type
 
     case type
-    when :observation, :user
+    when :observation
       ctrlr = :observer
     when :comment, :image, :location, :name, :project, :species_list,
       :herbarium_record
       ctrlr = type
+    when :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: users_path(pattern: pattern),
+        index_path: users_path
+      )
+      return
     when :herbarium
       redirect_to_search_or_index(
         pattern: pattern,
@@ -39,7 +46,7 @@ module ObserverController::SearchController
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(action: :list_rss_logs)
+      redirect_back_or_default("/")
       return
     end
 
@@ -48,7 +55,7 @@ module ObserverController::SearchController
 
   def site_google_search(pattern)
     if pattern.blank?
-      redirect_to(action: :list_rss_logs)
+      redirect_to("/")
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")

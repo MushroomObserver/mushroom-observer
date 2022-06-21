@@ -1265,7 +1265,7 @@ class QueryTest < UnitTestCase
     # between controllers while browsing the results, but still worth testing
     # this old mechanism, just in case.)
 
-    # This is the default query for list_rss_logs.
+    # This is the default query for index.
     q1 = Query.lookup_and_save(:RssLog)
 
     # Click through to an item (User is expected to fail).

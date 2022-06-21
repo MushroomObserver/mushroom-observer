@@ -17,9 +17,7 @@ class ObserverController < ApplicationController
   include ShowObservation
 
   # These all belong in new controllers:
-  include UserController
   include SearchController
-  include RssLogController
   include MarkupController
   include InfoController
   include EmailController
@@ -32,18 +30,12 @@ class ObserverController < ApplicationController
     :ask_webmaster_question,
     :how_to_help,
     :how_to_use,
-    :index_rss_log,
     :intro,
-    :list_rss_logs,
     :lookup_observation,
     :next_observation,
-    :next_rss_log,
     :prev_observation,
-    :prev_rss_log,
-    :rss,
     :show_obs,
     :show_observation,
-    :show_rss_log,
     :test,
     :turn_javascript_nil,
     :turn_javascript_off,
@@ -53,18 +45,13 @@ class ObserverController < ApplicationController
   #   :advanced_search,
   #   :advanced_search_form,
   #   :ask_webmaster_question,
-  #   :checklist,
   #   :download_observations,
   #   :hide_thumbnail_map,
   #   :how_to_help,
   #   :how_to_use,
-  #   :index,
   #   :index_observation,
-  #   :index_rss_log,
-  #   :index_user,
   #   :intro,
   #   :list_observations,
-  #   :list_rss_logs,
   #   :lookup_accepted_name,
   #   :lookup_comment,
   #   :lookup_image,
@@ -78,8 +65,6 @@ class ObserverController < ApplicationController
   #   :map_observations,
   #   :news,
   #   :next_observation,
-  #   :next_rss_log,
-  #   :next_user,
   #   :observation_search,
   #   :observations_by_name,
   #   :observations_of_look_alikes,
@@ -91,16 +76,11 @@ class ObserverController < ApplicationController
   #   :observations_at_location,
   #   :pattern_search,
   #   :prev_observation,
-  #   :prev_rss_log,
-  #   :prev_user,
   #   :print_labels,
-  #   :rss,
   #   :search_bar_help,
   #   :show_obs,
   #   :show_observation,
-  #   :show_rss_log,
   #   :show_site_stats,
-  #   :show_user,
   #   :test,
   #   :textile,
   #   :textile_sandbox,
@@ -110,8 +90,6 @@ class ObserverController < ApplicationController
   #   :turn_javascript_nil,
   #   :turn_javascript_off,
   #   :turn_javascript_on,
-  #   :user_search,
-  #   :users_by_contribution,
   #   :w3c_tests,
   #   :wrapup_2011
   # ]
@@ -120,8 +98,7 @@ class ObserverController < ApplicationController
     :create_observation,
     :edit_observation,
     :show_obs,
-    :show_observation,
-    :show_user
+    :show_observation #,
   ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter

@@ -95,9 +95,12 @@ module ObserverController::MarkupController
 
     if matches.empty? && suggestions.empty?
       flash_error(:runtime_object_no_match.t(match: id, type: type))
-      action = model == User ? :index_rss_log : model.index_action
-      redirect_to(controller: model.show_controller,
-                  action: action)
+      if model == User
+        redirect_to("/") # (no public index for users)
+      else
+        redirect_to(controller: model.show_controller,
+                    action: model.index_action)
+      end
     elsif matches.length == 1 || suggestions.length == 1
       obj = matches.first || suggestions.first
       if suggestions.any?

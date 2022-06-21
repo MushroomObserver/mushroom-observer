@@ -12,11 +12,11 @@ module ObserverController::EmailController
                                             params[:feature_email][:content])
         end
         flash_notice(:send_feature_email_success.t)
-        redirect_to(action: "users_by_name")
+        redirect_to(users_by_name_path)
       end
     else
       flash_error(:permission_denied.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to("/")
     end
   end
 
@@ -38,7 +38,7 @@ module ObserverController::EmailController
     content = params[:email][:content]
     UserEmail.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
-    redirect_to(action: "show_user", id: @target.id)
+    redirect_to(user_path(@target.id))
   end
 
   def ask_observation_question
@@ -124,7 +124,7 @@ module ObserverController::EmailController
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to("/")
     end
   end
 

@@ -28,4 +28,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("EXIF")
   inflect.acronym("CSV")
   inflect.acronym("TSV")
+  inflect.irregular("bonus", "bonuses")
 end

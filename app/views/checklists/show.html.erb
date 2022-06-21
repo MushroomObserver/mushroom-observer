@@ -4,8 +4,7 @@
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
-      link_to(:show_object.t(type: :profile), controller: :observer,
-              action: :show_user, id: @show_user.id),
+      link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
       link_to(:show_objects.t(type: :observation),
               controller: :observer, action: :observations_by_user,
               id: @show_user.id),
@@ -46,16 +45,14 @@
   else
     @title = :checklist_for_site_title.t
     tabs = [
-      link_to(:app_contributors.t, controller: :observer,
-              action: :users_by_contribution),
-      link_to(:app_site_stats.t, controller: :observer,
-              action: :show_site_stats)
+      link_to(:app_contributors.t, users_by_contribution_path),
+      link_to(:app_site_stats.t, observer_show_site_stats_path)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
   end
 %>
 
-<center>
+<div class="text-center">
   <%= :checklist_summary.t(species: @data.num_species, genera: @data.num_genera) %>
   <br/>
   <br/>
@@ -83,4 +80,4 @@
       </tr>
     <% end %>
   </table>
-</center>
+</div>

@@ -201,7 +201,7 @@ class ApplicationController < ActionController::Base
     return true if @user&.successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
     false
   end
 

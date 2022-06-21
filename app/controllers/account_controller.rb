@@ -192,7 +192,7 @@ class AccountController < ApplicationController
        (new_user = User.safe_find(session[:real_user_id])) &&
        new_user.admin
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     else
       @user = nil
       User.current = nil
@@ -447,7 +447,7 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_to(controller: "observer", action: "show_user", id: @user.id)
+        redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -458,7 +458,7 @@ class AccountController < ApplicationController
                       where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
-          redirect_to(controller: "observer", action: "show_user", id: @user.id)
+          redirect_to(user_path(@user.id))
         end
       end
     end
@@ -469,7 +469,7 @@ class AccountController < ApplicationController
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
-    redirect_to(controller: "observer", action: "show_user", id: @user.id)
+    redirect_to(user_path(@user.id))
   end
 
   def no_email_comments_owner
@@ -568,10 +568,10 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to(controller: :observer, action: :list_rss_logs)
+        redirect_to("/")
       end
     else
-      redirect_to(controller: :observer, action: :list_rss_logs)
+      redirect_to("/")
     end
   end
 
@@ -647,12 +647,12 @@ class AccountController < ApplicationController
 
   def turn_admin_on
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
   end
 
   def turn_admin_off
     session[:admin] = nil
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
   end
 
   def switch_users
@@ -661,10 +661,10 @@ class AccountController < ApplicationController
     flash_error("Couldn't find \"#{@id}\".  Play again?") \
       if new_user.blank? && @id.present?
     if !@user&.admin && session[:real_user_id].blank?
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     elsif new_user.present?
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     end
   end
 
@@ -782,7 +782,7 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default("/")
   end
 
   def can_add_user_to_group?(user, group)

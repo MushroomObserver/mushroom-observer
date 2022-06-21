@@ -603,12 +603,11 @@ class NamingControllerTest < FunctionalTestCase
   end
 
   def assert_edit
-    assert_action("edit", %w[
-                    _show_observation
-                    _form_name_feedback
-                    _form
-                    _show_images
-                  ])
+    assert_template("naming/edit")
+    assert_template("observer/_show_observation")
+    assert_template("shared/_form_name_feedback")
+    assert_template("naming/_form")
+    assert_template("observer/_show_images")
   end
 
   def test_automatic_author_bug

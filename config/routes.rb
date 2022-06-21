@@ -291,8 +291,6 @@ ACTIONS = {
     ask_webmaster_question: {},
     author_request: {},
     change_banner: {},
-    change_user_bonuses: {},
-    checklist: {},
     commercial_inquiry: {},
     create_observation: {},
     destroy_observation: {},
@@ -305,16 +303,10 @@ ACTIONS = {
     hide_thumbnail_map: {},
     how_to_help: {},
     how_to_use: {},
-    ilist_users: {},
-    index: {},
     index_observation: {},
-    index_rss_log: {},
-    index_user: {},
     intro: {},
     letter_to_community: {},
     list_observations: {},
-    list_rss_logs: {},
-    list_users: {},
     lookup_accepted_name: {},
     lookup_comment: {},
     lookup_image: {},
@@ -328,8 +320,6 @@ ACTIONS = {
     map_observations: {},
     news: {},
     next_observation: {},
-    next_rss_log: {},
-    next_user: {},
     observation_search: {},
     observations_at_location: {},
     observations_at_where: {},
@@ -341,21 +331,16 @@ ACTIONS = {
     observations_of_related_taxa: {},
     pattern_search: {},
     prev_observation: {},
-    prev_rss_log: {},
-    prev_user: {},
     print_labels: {},
     recalc: {},
     review_authors: {},
-    rss: {},
     search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    show_rss_log: {},
     show_site_stats: {},
-    show_user: {},
     suggestions: {},
     test_flash_redirection: {},
     textile: {},
@@ -364,9 +349,6 @@ ACTIONS = {
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
-    user_search: {},
-    users_by_contribution: {},
-    users_by_name: {},
     w3c_tests: {},
     wrapup_2011: {}
   },
@@ -654,14 +636,16 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page is /observer/list_rss_logs.
-  root "observer#list_rss_logs"
+  # Default page is /rss_logs
+  root "rss_logs#index"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/
 
   resources :articles, id: /\d+/
   redirect_legacy_actions(old_controller: "article")
+
+  get "checklist", to: "checklists#show"
 
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
@@ -733,6 +717,56 @@ MushroomObserver::Application.routes.draw do
 
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
+
+  # ----- RssLogs: nonstandard actions ----------------------------------------
+  # These routes must go before resources, or it will try to match
+  # "rss" to an rss_log
+  get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
+  match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
+        via: ["get", "post"])
+  # post("/activity_logs", to: "rss_logs#index", as: "activity_logs")
+  get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
+
+  # ----- RssLogs: standard actions -------------------------------------------
+  # resources :rss_logs, only: [:show, :index]
+  get("/observer/index", to: redirect(path: "activity_logs"))
+  get("/observer/list_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/show_rss_log(/:id)",
+      to: redirect(path: "activity_logs", params: { :id=>/\d+/ }))
+  get("/observer/rss", to: redirect(path: "activity_logs#rss"))
+
+  # ----- Users: nonstandard actions ----------------------------------------
+  # These routes must go before resources, or it will try to match
+  # "by_contribution" to a user
+  get("/users/by_contribution", to: "users#by_contribution")
+  get("/users/by_name", to: "users#by_name")
+
+  # ----- Users: standard actions -------------------------------------------
+  resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
+
+  # Users: standard redirects of Observer legacy actions
+  # redirect_legacy_actions(
+  #   old_controller: "observer", new_controller: "users",
+  #   actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
+  # )
+  # Users: non-standard redirects of legacy Observer actions
+  # Rails routes currently accept only template tokens
+  # rubocop:disable Style/FormatStringToken
+  get("/observer/user_search", to: redirect(path: "users"))
+  get("/observer/index_user", to: redirect(path: "users"))
+  get("/observer/list_users", to: redirect(path: "users"))
+  get("/observer/users_by_contribution",
+      to: redirect(path: "users/by_contribution"))
+  get("/observer/users_by_name",
+      to: redirect(path: "users/by_name"))
+  get("/observer/show_user", to: redirect(path: "user"))
+
+  get("/observer/change_user_bonuses",
+    to: redirect(path: "users#edit"))
+  get("/observer/checklist",
+    to: redirect(path: "checklists#show"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
