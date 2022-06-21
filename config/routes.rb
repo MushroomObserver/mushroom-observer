@@ -721,15 +721,21 @@ MushroomObserver::Application.routes.draw do
   # ----- RssLogs: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
   # "rss" to an rss_log
-  get("/rss_logs/rss", to: "rss_logs#rss")
+  get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
+  match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
+        via: ["get", "post"])
+  # post("/activity_logs", to: "rss_logs#index", as: "activity_logs")
+  get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions -------------------------------------------
-  resources :rss_logs, only: [:show, :index]
-  get("/observer/index", to: redirect(path: "rss_logs"))
-  get("/observer/list_rss_logs", to: redirect(path: "rss_logs"))
-  get("/observer/index_rss_logs", to: redirect(path: "rss_logs"))
-  post("/observer/index_rss_logs", to: redirect(path: "rss_logs"))
-  get("/observer/rss", to: redirect(path: "rss_logs#rss"))
+  # resources :rss_logs, only: [:show, :index]
+  get("/observer/index", to: redirect(path: "activity_logs"))
+  get("/observer/list_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/show_rss_log(/:id)",
+      to: redirect(path: "activity_logs", params: { :id=>/\d+/ }))
+  get("/observer/rss", to: redirect(path: "activity_logs#rss"))
 
   # ----- Users: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
