@@ -219,9 +219,9 @@ class ObserverController
     unless locations.empty?
       # Eager-load corresponding locations.
       @locations = Location.
-                     where(id: locations.keys.sort).
-                     pluck(:id, :name, :north, :south, :east, :west).
-                     map do |id, *the_rest|
+                   where(id: locations.keys.sort).
+                   pluck(:id, :name, :north, :south, :east, :west).
+                   map do |id, *the_rest|
         locations[id] = MinimalMapLocation.new(id, *the_rest)
       end
       @observations.each do |obs|
