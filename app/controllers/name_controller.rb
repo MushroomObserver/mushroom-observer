@@ -162,28 +162,10 @@ class NameController < ApplicationController
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE!! -- all this extra info and help will be lost if user re-sorts.
   def needed_descriptions
-    # NOTE!! -- all this extra info and help will be lost if user re-sorts.
-    data = Name.connection.select_rows(%(
-      SELECT names.id, name_counts.count
-      FROM names LEFT OUTER JOIN name_descriptions
-        ON names.id = name_descriptions.name_id,
-           (SELECT count(*) AS count, name_id
-            FROM observations group by name_id) AS name_counts
-      WHERE names.id = name_counts.name_id
-        # include "to_i" to avoid Brakeman "SQL injection" false positive.
-        # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
-        AND names.`rank` = #{Name.ranks[:Species].to_i}
-        AND name_counts.count > 1
-        AND name_descriptions.name_id IS NULL
-        AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
-      ORDER BY name_counts.count DESC, names.sort_name ASC
-      LIMIT 100
-    ))
     @help = :needed_descriptions_help
-    query = create_query(:Name, :in_set,
-                         ids: data.map(&:first),
-                         title: :needed_descriptions_title.l)
+    query = Name.descriptions_needed
     show_selected_names(query, num_per_page: 100)
   end
 

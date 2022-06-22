@@ -19,6 +19,18 @@ class Name < AbstractModel
     []
   end
 
+  # For NameController#needed_descriptions
+  # Returns a list of the most popular 100 names that don't have descriptions.
+  def descriptions_needed
+    names = Name.where(description: nil).joins(:observations).
+            group(:name_id).order(Arel.star.count.desc).limit(100).
+            pluck(:id)
+
+    Query.lookup(:Name, :in_set,
+                  ids: names,
+                  title: :needed_descriptions_title.l)
+  end
+
   # private class methods
   class << self
     private
