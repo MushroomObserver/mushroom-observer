@@ -27,8 +27,8 @@ class Name < AbstractModel
             pluck(:id)
 
     Query.lookup(:Name, :in_set,
-                  ids: names,
-                  title: :needed_descriptions_title.l)
+                 ids: names,
+                 title: :needed_descriptions_title.l)
   end
 
   # private class methods
