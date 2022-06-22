@@ -2,51 +2,6 @@
 
 # TODO: where does this stuff belong?
 module ObserverController::Other
-  def test_flash_redirection
-    tags = params[:tags].to_s.split(",")
-    if tags.any?
-      flash_notice(tags.pop.to_sym.t)
-      redirect_to(
-        controller: :observer,
-        action: :test_flash_redirection,
-        tags: tags.join(",")
-      )
-    else
-      # (sleight of hand to prevent localization_file_text from complaining
-      # about missing test_flash_redirection_title tag)
-      @title = "test_flash_redirection_title".to_sym.t
-      # debugger
-      render(layout: "application", html: "")
-    end
-  end
-
-  # Force javascript on.
-  def turn_javascript_on
-    session[:js_override] = :on
-    flash_notice(:turn_javascript_on_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
-  end
-
-  # Force javascript off.
-  def turn_javascript_off
-    session[:js_override] = :off
-    flash_notice(:turn_javascript_off_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
-  end
-
-  # Enable auto-detection.
-  def turn_javascript_nil
-    session[:js_override] = nil
-    flash_notice(:turn_javascript_nil_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
-  end
-
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
   def set_export_status

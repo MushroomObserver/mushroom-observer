@@ -22,11 +22,7 @@ class ObserverController < ApplicationController
     :next_observation,
     :prev_observation,
     :show_obs,
-    :show_observation,
-    :test,
-    :turn_javascript_nil,
-    :turn_javascript_off,
-    :turn_javascript_on
+    :show_observation
   ]
   # except: [
   #   :advanced_search,
@@ -50,7 +46,6 @@ class ObserverController < ApplicationController
   #   :print_labels,
   #   :show_obs,
   #   :show_observation,
-  #   :test,
   #   :throw_error,
   #   :throw_mobile_error,
   #   :turn_javascript_nil,

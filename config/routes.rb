@@ -313,11 +313,7 @@ ACTIONS = {
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    suggestions: {},
-    test_flash_redirection: {},
-    turn_javascript_nil: {},
-    turn_javascript_off: {},
-    turn_javascript_on: {},
+    suggestions: {}
   },
   pivotal: {
     index: {}
@@ -335,15 +331,6 @@ ACTIONS = {
     prev_project: {},
     project_search: {},
     show_project: {}
-  },
-  publications: {
-    create: {},
-    destroy: {},
-    edit: {},
-    index: {},
-    new: {},
-    show: {},
-    update: {}
   },
   sequence: {
     create_sequence: {},
@@ -612,6 +599,13 @@ MushroomObserver::Application.routes.draw do
     actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
   )
 
+  # ----- Admin: no resources, just actions ------------------------------------
+  match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
+  match("admin/test_flash_redirection",
+        to: "admin#test_flash_redirection", via: [:get, :post])
+  get("admin/w3c_tests", to: "admin#w3c_tests")
+  # no legacy reroutes, these should not be public
+
   # ----- Authors: no resources, just forms ------------------------------------
   match("authors/email_request(/:id)",
         to: "authors#email_request", via: [:get, :post], id: /\d+/,
@@ -659,31 +653,6 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "emails#merge_request"))
   get("observer/email_name_change_request",
       to: redirect(path: "emails#name_change_request"))
-
-  # ----- Info: no resources, just forms and pages ----------------------------
-  match("info/change_banner", to: "info#change_banner", via: [:get, :post])
-  get("info/how_to_help", to: "info#how_to_help")
-  get("info/how_to_use", to: "info#how_to_use")
-  get("info/intro", to: "info#intro")
-  get("info/news", to: "info#news")
-  get("info/search_bar_help", to: "info#search_bar_help")
-  get("info/site_stats", to: "info#site_stats")
-  match("info/textile", to: "info#textile", via: [:get, :post])
-  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
-  get("info/translators_note", to: "info#translators_note")
-  get("info/w3c_tests", to: "info#w3c_tests")
-
-  # get("observer/change_banner", to: redirect(path: "info#change_banner"))
-  get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
-  get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
-  get("observer/intro", to: redirect(path: "info#intro"))
-  get("observer/news", to: redirect(path: "info#news"))
-  get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
-  get("observer/show_site_stats", to: "info#site_stats")
-  get("observer/textile", to: redirect(path: "info#textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
-  get("observer/translators_note", to: redirect(path: "info#translators_note"))
-  # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -745,7 +714,35 @@ MushroomObserver::Application.routes.draw do
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
 
-  get "publications/:id/destroy" => "publications#destroy"
+  # ----- Info: no resources, just forms and pages ----------------------------
+  get("info/how_to_help", to: "info#how_to_help")
+  get("info/how_to_use", to: "info#how_to_use")
+  get("info/intro", to: "info#intro")
+  get("info/news", to: "info#news")
+  get("info/search_bar_help", to: "info#search_bar_help")
+  get("info/site_stats", to: "info#site_stats")
+  match("info/textile", to: "info#textile", via: [:get, :post])
+  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
+  get("info/translators_note", to: "info#translators_note")
+
+  # get("observer/change_banner", to: redirect(path: "info#change_banner"))
+  get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
+  get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
+  get("observer/intro", to: redirect(path: "info#intro"))
+  get("observer/news", to: redirect(path: "info#news"))
+  get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
+  get("observer/show_site_stats", to: "info#site_stats")
+  get("observer/textile", to: redirect(path: "info#textile_sandbox"))
+  get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
+  get("observer/translators_note", to: redirect(path: "info#translators_note"))
+  # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
+
+  # ----- Javascript: utility actions  ----------------------------
+  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+
+  # ----- Publications: standard actions  ----------------------------
   resources :publications
 
   # ----- RssLogs: nonstandard actions ----------------------------------------
@@ -757,7 +754,7 @@ MushroomObserver::Application.routes.draw do
   # post("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
-  # ----- RssLogs: standard actions -------------------------------------------
+  # ----- RssLogs: standard actions with aliases ------------------------------
   # resources :rss_logs, only: [:show, :index]
   get("/observer/index", to: redirect(path: "activity_logs"))
   get("/observer/list_rss_logs", to: redirect(path: "activity_logs"))
@@ -842,7 +839,7 @@ MushroomObserver::Application.routes.draw do
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
     get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
-    get("/observer/#{action}", to: redirect(path: "lookups##{action}"))
+    get("/observer/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
   end
 
   # declare routes for the actions in the ACTIONS hash
