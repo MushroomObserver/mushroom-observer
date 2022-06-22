@@ -464,8 +464,9 @@ class Name < AbstractModel
   def citation_start
     # Should not end with punctuation
     # other than quotes, period, close paren, close bracket
+    # question mark (used for Textile italics)
     return unless (
-      start = %r{\A[\s!#%&)*+,\-./:;<=>?@\[\]^_{|}~]+}.match(citation)
+      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^_{|}~]+}.match(citation)
     )
 
     errors.add(:base,
