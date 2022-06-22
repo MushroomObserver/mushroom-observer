@@ -57,17 +57,17 @@
     <% if @user %>
       <div id="observation_collection_numbers">
         <%= render(partial: "observer/collection_numbers",
-                  locals: { observation: observation }) %>
+                  locals: { observation: observation }, cached: true) %>
       </div>
 
       <div id="observation_herbarium_records">
         <%= render(partial: "observer/herbarium_records",
-                  locals: { observation: observation }) %>
+                  locals: { observation: observation }, cached: true) %>
       </div>
 
       <div id="observation_sequences">
         <%= render(partial: "observer/sequences",
-                  locals: { observation: observation }) %>
+                  locals: { observation: observation }, cached: true) %>
       </div>
     <% end %>
   </div>

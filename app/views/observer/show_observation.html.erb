@@ -16,7 +16,7 @@
     <div class="list-group">
       <div class="list-group-item">
         <%= render(partial: "show_observation",
-                   locals: { observation: @observation }) %>
+                   locals: { observation: @observation }, cached: true) %>
       </div>
     </div>
   </div>
@@ -25,32 +25,37 @@
       <div class="list-group">
         <div class="list-group-item name-section small">
           <%= render(partial: "show_name_info",
-                     locals: { observation: @observation }) %>
+                     locals: { observation: @observation }, cached: true) %>
         </div>
       </div>
       <% if show_lists %>
-        <%= render(partial: "show_lists", locals: {observation: @observation}) %>
+        <%= render(partial: "show_lists",
+                   locals: {observation: @observation}, cached: true) %>
       <% end %>
       <% if show_links %>
-        <%= render(partial: "show_links", locals: {observation: @observation}) %>
+        <%= render(partial: "show_links",
+                   locals: {observation: @observation}, cached: true) %>
       <% end %>
     <% end %>
     <% if show_map %>
       <div class="hidden-xs">
         <%= render(partial: "show_thumbnail_map",
-                   locals: { observation: @observation }) %>
+                   locals: { observation: @observation }, cached: true) %>
       </div>
     <% end %>
-    <%= render(partial: "show_images", locals: { observation: @observation }) %>
+    <%= render(partial: "show_images",
+               locals: { observation: @observation }, cached: true) %>
   </div>
   <div class="col-md-8 pull-left-sm">
     <% if @user %>
       <div id="naming_partial">
-        <%= render(partial: "naming/show", locals: { observation: @observation }) %>
+        <%= render(partial: "naming/show",
+                   locals: { observation: @observation }, cached: true) %>
       </div>
     <% end %>
     <%= render(partial: "comment/show_comments",
-               locals: { object: @observation, controls: true, limit: nil }) %>
+               locals: { object: @observation, controls: true, limit: nil },
+               cached: true) %>
   </div>
 </div>
 <%= show_object_footer(@observation) %>

@@ -99,7 +99,7 @@
         <img id="logo-trim" alt="MO Logo" src="/logo-trim.png"/>
       </a>
       <div id="navigation">
-        <%= render(partial: "/shared/nav_left") %>
+        <%= render(partial: "/shared/nav_left", cached: true) %>
       </div>
     </div>
     <!--/NAVIGATION-->
@@ -125,7 +125,7 @@
 
       <!--SEARCH_BAR-->
       <div id="search_bar_row" class="row hidden-xs hidden-print">
-        <%= render(partial: "/shared/search_bar") %>
+        <%= render(partial: "/shared/search_bar", cached: true) %>
       </div>
       <!--/SEARCH_BAR-->
 
@@ -158,7 +158,7 @@
           </div>
         <% end %>
 
-        <%= render(partial: "/shared/title_and_tab_sets") %>
+        <%= render(partial: "/shared/title_and_tab_sets", cached: true) %>
 
         <!--MAIN_PAGE_CONTENT-->
         <div class="col-xs-12">
@@ -167,7 +167,7 @@
         <!--/MAIN_PAGE_CONTENT-->
 
         <div class="col-xs-12 hidden-print">
-          <%= render(partial: "/shared/translator_credit") %>
+          <%= render(partial: "/shared/translator_credit", cached: true) %>
         </div>
       </div>
 

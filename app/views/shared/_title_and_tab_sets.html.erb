@@ -15,7 +15,7 @@
     <%= content_tag(:div, class: "hidden-print") do
           if @tabsets[:pager_for]
             render(partial: "/shared/prev_next_pager",
-              locals: { object: @tabsets[:pager_for] })
+              locals: { object: @tabsets[:pager_for] }, cached: true)
           end
         end %>
 

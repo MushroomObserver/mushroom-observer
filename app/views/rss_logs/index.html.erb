@@ -6,7 +6,7 @@
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  @full_width_tab_set = render(partial: "rss_log_tabset")
+  @full_width_tab_set = render(partial: "rss_log_tabset", cached: true)
   flash_error(@error) if @error && @objects.empty?
 %>
 
@@ -14,7 +14,8 @@
   <%= render(partial: "shared/matrix_box",
              layout: "shared/matrix_table",
              collection: @objects,
-             as: :object, cached: true) %>
+             as: :object,
+             cached: true) %>
   <div style="clear:left"></div>
 <% end %>
 
