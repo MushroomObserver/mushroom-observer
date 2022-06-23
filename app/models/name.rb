@@ -376,6 +376,9 @@ class Name < AbstractModel
   validate :icn_id_registrable
   validate :icn_id_unique
 
+  validate :author_ending
+  validate :citation_start
+
   # Notify webmaster that a new name was created.
   after_create do |name|
     user    = User.current || User.admin
@@ -448,5 +451,28 @@ class Name < AbstractModel
 
   def other_names_with_same_icn_id
     Name.where(icn_id: icn_id).where.not(id: id)
+  end
+
+  def author_ending
+    # Should not end with punctuation
+    # other than quotes, period, close paren, close bracket
+    return unless (
+      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
+    )
+
+    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
+  end
+
+  def citation_start
+    # Should not start with punctuation other than:
+    # quotes, period, close paren, close bracket
+    # question mark (used for Textile italics)
+    # underscore (previously used for Textile italics)
+    return unless (
+      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
+    )
+
+    errors.add(:base,
+               :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
