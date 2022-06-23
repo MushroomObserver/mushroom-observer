@@ -462,7 +462,7 @@ class Name < AbstractModel
   end
 
   def citation_start
-    # Should not end with punctuation other than:
+    # Should not start with punctuation other than:
     # quotes, period, close paren, close bracket
     # question mark (used for Textile italics)
     # underscore (previously used for Textile italics)
