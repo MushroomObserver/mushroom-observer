@@ -123,7 +123,7 @@ class EmailsControllerTest < FunctionalTestCase
 
     make_admin("rolf")
     post_with_dump(page, params)
-    assert_redirected_to(users_by_name_path)
+    assert_redirected_to(users_path(by: "name"))
   end
 
   def test_send_commercial_inquiry

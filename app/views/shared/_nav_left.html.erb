@@ -15,7 +15,7 @@
                 { class: "list-group-item list-group-item-danger indent" }) %>
     <%= link_to(:app_switch_users.t, account_switch_users_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
-    <%= link_to(:app_users.t, users_by_name_path,
+    <%= link_to(:app_users.t, users_path(by: "name"),
                 { class: "list-group-item list-group-item-danger indent" }) %>
     <%= link_to(:change_banner_title.t, admin_change_banner_path,
                 { class: "list-group-item list-group-item-danger indent" }) %>
@@ -128,7 +128,7 @@
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_send_a_comment.t, emails_ask_webmaster_question_path,
               { class: "list-group-item indent" }) %>
-  <%= link_to(:app_contributors.t, users_by_contribution_path,
+  <%= link_to(:app_contributors.t, contributors_path,
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_site_stats.t, info_site_stats_path,
               { class: "list-group-item indent" }) %>

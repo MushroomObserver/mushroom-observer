@@ -591,6 +591,9 @@ MushroomObserver::Application.routes.draw do
 
   get "checklist", to: "checklists#show"
 
+  # ----- Contributors: standard actions --------------------------------------
+  resources :contributors, only: [:index]
+
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
   end
@@ -777,12 +780,6 @@ MushroomObserver::Application.routes.draw do
   get("/observer/advanced_search_form",
       to: redirect(path: "searches#advanced_search_form"))
 
-  # ----- Users: nonstandard actions ----------------------------------------
-  # These routes must go before resources, or it will try to match
-  # "by_contribution" to a user
-  get("/users/by_contribution", to: "users#by_contribution")
-  get("/users/by_name", to: "users#by_name")
-
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
 
@@ -798,9 +795,9 @@ MushroomObserver::Application.routes.draw do
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
   get("/observer/users_by_contribution",
-      to: redirect(path: "users/by_contribution"))
+      to: redirect(path: "contributors"))
   get("/observer/users_by_name",
-      to: redirect(path: "users/by_name"))
+      to: redirect(path: "users", params: { by: "name" }))
   get("/observer/show_user", to: redirect(path: "user"))
 
   get("/observer/change_user_bonuses",

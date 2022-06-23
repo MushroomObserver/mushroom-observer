@@ -14,9 +14,6 @@ class UsersControllerTest < FunctionalTestCase
 
   def test_page_loads
     login
-    get_with_dump(:by_contribution)
-    assert_template("users/by_contribution")
-
     get_with_dump(:show, id: rolf.id)
     assert_template(:show)
   end

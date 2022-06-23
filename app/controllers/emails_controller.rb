@@ -16,7 +16,7 @@ class EmailsController < ApplicationController
                                             params[:feature_email][:content])
         end
         flash_notice(:send_feature_email_success.t)
-        redirect_to(users_by_name_path)
+        redirect_to(users_path(by: "name"))
       end
     else
       flash_error(:permission_denied.t)

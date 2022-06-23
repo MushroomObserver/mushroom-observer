@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# display infornation about, and edit, users
+# display information about, and edit, users
 class UsersController < ApplicationController
   # These need to be moved into the files where they are actually used.
   require "find"
@@ -9,7 +9,7 @@ class UsersController < ApplicationController
   before_action :login_required
   before_action :disable_link_prefetching
 
-  # User index, restricted to admins.
+  # User index
   def index
     return patterned_index if params[:pattern].present?
 
@@ -26,24 +26,6 @@ class UsersController < ApplicationController
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
   alias list_users index
-
-  # User index, restricted to admins.
-  def by_name
-    if in_admin_mode?
-      query = create_query(:User, :all, by: :name)
-      show_selected_users(query)
-    else
-      flash_error(:permission_denied.t)
-      redirect_to("/")
-    end
-  end
-
-  # by_contribution.rhtml
-  def by_contribution
-    SiteData.new
-    @users = User.by_contribution
-    render(template: "users/by_contribution")
-  end
 
   # show.rhtml
   def show
@@ -106,8 +88,7 @@ class UsersController < ApplicationController
   # Display list of User's whose name, notes, etc. match a string pattern.
   def patterned_index
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (user = User.safe_find(pattern))
+    if pattern.match(/^\d+$/) && (user = User.safe_find(pattern))
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
