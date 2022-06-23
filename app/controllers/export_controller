@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# TODO: where does this stuff belong?
-module ObserverController::Other
-  # Callback to let reviewers change the export status of a Name from the
-  # show_name page.
+######### Exports
+class ExportController < ApplicationController
+  # Callback (no view) to let reviewers change the export status of an
+  # Image, Name, Location or Description from the show pages.
   def set_export_status
     pass_query_params
     id    = params[:id].to_s

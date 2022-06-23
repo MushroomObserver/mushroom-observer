@@ -308,7 +308,6 @@ ACTIONS = {
     prev_observation: {},
     print_labels: {},
     recalc: {},
-    set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
@@ -593,6 +592,8 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
+
+  get "export", to: "export#set_export_status"
 
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
