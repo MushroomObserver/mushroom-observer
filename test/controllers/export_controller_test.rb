@@ -2,13 +2,8 @@
 
 require("test_helper")
 
-# Controller tests for info pages
+# Controller tests for setting export state of various objects
 class ExportControllerTest < FunctionalTestCase
-  def setup
-    @controller = ::ExportController.new
-    super
-  end
-
   # Test setting export status of names and descriptions.
   def test_set_export_status
     name = names(:petigera)
