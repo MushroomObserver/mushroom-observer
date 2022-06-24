@@ -783,18 +783,17 @@ class ImageController < ApplicationController
   # Add license change records with a single insert to the db.
   # Otherwise updating would take too long for many (e.g. thousands) of images
   def update_licenses_history(images_to_update, old_holder, old_license_id)
-    data = images_to_update.pluck(:id, :when)
-    values = data.each_with_object([]) do |datum, vals|
-      vals << { user_id: @user.id.to_s,
-                updated_at: Time.current,
-                target_type: "Image",
-                target_id: datum.first.to_s,
-                year: datum.second.year.to_s,
-                name: old_holder,
-                license_id: old_license_id }
-    end
-
-    CopyrightChange.insert_all(values)
+    CopyrightChange.insert_all(
+      images_to_update.map do |image|
+        { user_id: @user.id.to_s,
+          updated_at: Time.current,
+          target_type: "Image",
+          target_id: image.id.to_s,
+          year: image.when.year,
+          name: old_holder,
+          license_id: old_license_id }
+      end
+    )
   end
 
   public # end private methods used by license updater #########################
