@@ -252,8 +252,9 @@ gem("graphql-batch")
 #
 
 group :test, :development do
-  # Use byebug as debugging gem
-  gem("byebug")
+  # https://github.com/ruby/debug
+  # NOTE: Remove this upon upgrade to Ruby 3.1. (It's included with Ruby 3.1)
+  gem "debug", ">= 1.0.0"
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
