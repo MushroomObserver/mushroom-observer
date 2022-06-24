@@ -593,7 +593,8 @@ MushroomObserver::Application.routes.draw do
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
-  get "export", to: "export#set_export_status"
+  match("export/set_export_status(/:id)", to: "export#set_export_status",
+        id: /\d+/, as: "set_export_status", via: [:get, :post])
 
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
