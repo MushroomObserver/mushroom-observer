@@ -2,6 +2,8 @@
 
 ######### Exports
 class ExportController < ApplicationController
+  before_action :login_required
+
   # Callback (no view) to let reviewers change the export status of an
   # Image, Name, Location or Description from the show pages.
   def set_export_status
