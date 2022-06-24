@@ -653,7 +653,7 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Export: no resources ------------------------------------
   get("export/set_export_status(/:id)", to: "export#set_export_status",
-      id: /\d+/, as: "export_set_export_status") #, via: [:get, :post])
+      id: /\d+/, as: "export_set_export_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
