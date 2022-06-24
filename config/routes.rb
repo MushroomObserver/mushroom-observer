@@ -740,7 +740,6 @@ MushroomObserver::Application.routes.draw do
   get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
 
-  # get("observer/change_banner", to: redirect(path: "info#change_banner"))
   get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
   get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
   get("observer/intro", to: redirect(path: "info#intro"))
@@ -750,7 +749,6 @@ MushroomObserver::Application.routes.draw do
   get("observer/textile", to: redirect(path: "info#textile_sandbox"))
   get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
   get("observer/translators_note", to: redirect(path: "info#translators_note"))
-  # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications
@@ -761,7 +759,6 @@ MushroomObserver::Application.routes.draw do
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
         via: ["get", "post"])
-  # post("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
