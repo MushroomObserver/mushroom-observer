@@ -652,10 +652,6 @@ MushroomObserver::Application.routes.draw do
   get("observer/email_name_change_request",
       to: redirect(path: "emails#name_change_request"))
 
-  # ----- Export: no resources ------------------------------------
-  get("export/set_export_status(/:id)", to: "export#set_export_status",
-      id: /\d+/, as: "export_set_export_status") #, via: [:get, :post])
-
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
@@ -760,7 +756,6 @@ MushroomObserver::Application.routes.draw do
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
         via: ["get", "post"])
-  # post("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
