@@ -585,31 +585,16 @@ MushroomObserver::Application.routes.draw do
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/
 
-  resources :articles, id: /\d+/
-  redirect_legacy_actions(old_controller: "article")
-
-  get "checklist", to: "checklists#show"
-
-  # ----- Contributors: standard actions --------------------------------------
-  resources :contributors, only: [:index]
-
-  match("export/set_export_status(/:id)", to: "export#set_export_status",
-        id: /\d+/, as: "set_export_status", via: [:get, :post])
-
-  resources :glossary_terms, id: /\d+/ do
-    get "show_past", on: :member
-  end
-  redirect_legacy_actions(
-    old_controller: "glossary", new_controller: "glossary_terms",
-    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
-  )
-
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
   match("admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
   get("admin/w3c_tests", to: "admin#w3c_tests")
   # no legacy reroutes, these should not be public
+
+  # ----- Articles: standard actions --------------------------------------
+  resources :articles, id: /\d+/
+  redirect_legacy_actions(old_controller: "article")
 
   # ----- Authors: no resources, just forms ------------------------------------
   match("authors/email_request(/:id)",
@@ -621,7 +606,14 @@ MushroomObserver::Application.routes.draw do
   get("observer/author_request", to: redirect(path: "authors#email_request"))
   get("observer/review_authors", to: redirect(path: "authors#review"))
 
-  # ----- Email: no resources, just forms --------------------------------------
+  # ----- Checklist: just the show --------------------------------------
+  get "checklist", to: "checklists#show"
+  get("/observer/checklist", to: redirect(path: "checklists#show"))
+
+  # ----- Contributors: standard actions --------------------------------------
+  resources :contributors, only: [:index]
+
+  # ----- Emails: no resources, just forms -------------------------------------
   match("emails/ask_observation_question(/:id)",
         to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_observation_question")
@@ -658,6 +650,19 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "emails#merge_request"))
   get("observer/email_name_change_request",
       to: redirect(path: "emails#name_change_request"))
+
+  # ----- Export: no resources ------------------------------------
+  get("export/set_export_status(/:id)", to: "export#set_export_status",
+      id: /\d+/, as: "export_set_export_status") #, via: [:get, :post])
+
+  # ----- Glossary Terms: standard actions ------------------------------------
+  resources :glossary_terms, id: /\d+/ do
+    get "show_past", on: :member
+  end
+  redirect_legacy_actions(
+    old_controller: "glossary", new_controller: "glossary_terms",
+    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+  )
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -730,6 +735,11 @@ MushroomObserver::Application.routes.draw do
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
 
+  # ----- Javascript: utility actions  ----------------------------
+  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+
   # get("observer/change_banner", to: redirect(path: "info#change_banner"))
   get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
   get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
@@ -741,11 +751,6 @@ MushroomObserver::Application.routes.draw do
   get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
   get("observer/translators_note", to: redirect(path: "info#translators_note"))
   # get("observer/w3c_tests", to: redirect(path: "info#w3c_tests"))
-
-  # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications
@@ -804,8 +809,6 @@ MushroomObserver::Application.routes.draw do
 
   get("/observer/change_user_bonuses",
     to: redirect(path: "users#edit"))
-  get("/observer/checklist",
-    to: redirect(path: "checklists#show"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

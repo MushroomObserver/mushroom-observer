@@ -6,7 +6,7 @@ require("test_helper")
 class ExportControllerTest < FunctionalTestCase
   def setup
     @controller = ::ExportController.new
-  #   super
+    super
   end
 
   # Test setting export status of names and descriptions.
