@@ -785,10 +785,10 @@ class ImageController < ApplicationController
   def update_licenses_history(images_to_update, old_holder, old_license_id)
     CopyrightChange.insert_all(
       images_to_update.map do |image|
-        { user_id: @user.id.to_s,
+        { user_id: @user.id,
           updated_at: Time.current,
           target_type: "Image",
-          target_id: image.id.to_s,
+          target_id: image.id,
           year: image.when.year,
           name: old_holder,
           license_id: old_license_id }
