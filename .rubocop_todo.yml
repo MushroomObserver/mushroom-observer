@@ -418,7 +418,6 @@ Style/FormatStringToken:
     - 'app/controllers/observer_controller/user_controller.rb'
     - 'app/models/species_list.rb'
     - 'lib/tasks/email.rake'
-    - 'script/monitor_top'
     - 'script/slowest_pages'
     - 'test/models/collapsible_map_test.rb'
 
