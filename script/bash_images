@@ -112,19 +112,23 @@ function copy_file_to_server {
 # Read a directory on a server.
 #   read_directory "cdmr" "thumb" > cdmr.files
 function read_server_directory {
+  FIND=gfind
+  if ! which $FIND >& /dev/null; then
+    FIND=find;
+  fi
   server=$1
   subdir=$2
   case ${image_server_data[$server,type]} in
   "file")
     path=${image_server_data[$server,path]}
-    gfind -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
+    $FIND -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
       die "Failed to list $path/$subdir on $server server."
     ;;
   "ssh")
     wait_for "(ssh|rsync)"
     host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
     path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
-    ssh $host gfind -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
+    ssh $host $FIND -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
       die "Failed to list $host:$path/$subdir on $server server."
     ;;
   *)
