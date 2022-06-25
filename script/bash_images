@@ -117,14 +117,14 @@ function read_server_directory {
   case ${image_server_data[$server,type]} in
   "file")
     path=${image_server_data[$server,path]}
-    find -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
+    gfind -L $path/$subdir -maxdepth 1 -type f -printf '%f\t%s\n' || \
       die "Failed to list $path/$subdir on $server server."
     ;;
   "ssh")
     wait_for "(ssh|rsync)"
     host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
     path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
-    ssh $host find -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
+    ssh $host gfind -L $path/$subdir -maxdepth 1 -type f -printf '%f\\t%s\\n' || \
       die "Failed to list $host:$path/$subdir on $server server."
     ;;
   *)
