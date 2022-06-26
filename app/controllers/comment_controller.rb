@@ -104,7 +104,7 @@ class CommentController < ApplicationController
             rescue StandardError
               nil
             end
-    if !model || !model.acts_like?(:model)
+    if !model
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(action: :list_comments)
