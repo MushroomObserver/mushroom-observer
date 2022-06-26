@@ -100,8 +100,7 @@ class CommentController < ApplicationController
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_target
     model = begin
-              Comment.all_types.
-                      select {|model| model.name == params[:type]}.first
+              Comment.all_types.find { |m| m.name == params[:type] }
             rescue StandardError
               nil
             end
