@@ -99,11 +99,7 @@ class CommentController < ApplicationController
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_target
-    model = begin
-              Comment.all_types.find { |m| m.name == params[:type] }
-            rescue StandardError
-              nil
-            end
+    model = safe_model_from_param_type
     if !model
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
@@ -320,5 +316,13 @@ class CommentController < ApplicationController
     redirect_with_query(controller: target.show_controller,
                         action: target.show_action, id: target.id)
     false
+  end
+
+  def safe_model_from_param_type
+    begin
+      Comment.all_types.find { |m| m.name == params[:type] }
+    rescue StandardError
+      nil
+    end
   end
 end
