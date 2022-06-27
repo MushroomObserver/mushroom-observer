@@ -67,6 +67,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_invalid.t(type: '"type"',
                       value: params[:type].to_s))
   end
+
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:add_comment, id: obs_id, type: "Observation")
