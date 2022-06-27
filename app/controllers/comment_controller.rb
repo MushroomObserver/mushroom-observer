@@ -320,7 +320,5 @@ class CommentController < ApplicationController
 
   def safe_model_from_param_type
     Comment.all_types.find { |m| m.name == params[:type] }
-  rescue StandardError
-    nil
   end
 end
