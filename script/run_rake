@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /var/web/mushroom-observer
+
 ruby_version=$(cat /var/web/mushroom-observer/.ruby-version)
 source /usr/local/rvm/environments/ruby-$ruby_version
 
