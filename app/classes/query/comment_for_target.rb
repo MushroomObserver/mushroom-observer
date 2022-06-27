@@ -17,7 +17,7 @@ class Query::CommentForTarget < Query::CommentBase
   end
 
   def target_instance
-    type = params[:type].to_s.constantize
+    type = Comment.all_types.find { |model| model.name == params[:type] }
     unless type.reflect_on_association(:comments)
       raise("The model #{params[:type].inspect} does not support comments!")
     end
