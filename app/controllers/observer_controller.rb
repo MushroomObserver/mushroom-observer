@@ -9,7 +9,6 @@ class ObserverController < ApplicationController
   require "set"
 
   # These will mostly form the new ObservationController:
-  include Other
   include Suggestions
   include Indexes
   include CreateAndEditObservation

@@ -308,7 +308,6 @@ ACTIONS = {
     prev_observation: {},
     print_labels: {},
     recalc: {},
-    set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
@@ -651,6 +650,10 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "emails#merge_request"))
   get("observer/email_name_change_request",
       to: redirect(path: "emails#name_change_request"))
+
+  # ----- Export: no resources ------------------------------------
+  get("export/set_export_status(/:id)", to: "export#set_export_status",
+      id: /\d+/, as: "export_set_export_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
