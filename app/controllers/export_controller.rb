@@ -2,9 +2,6 @@
 
 ######### Exports
 class ExportController < ApplicationController
-  EXPORTABLE_MODELS = [Image, Location, LocationDescription, NameDescription,
-                       Name].freeze
-
   before_action :login_required
 
   # Callback (no view) to let reviewers change the export status of an
@@ -14,12 +11,13 @@ class ExportController < ApplicationController
     id    = params[:id].to_s
     type  = params[:type].to_s
     value = params[:value].to_s
-    model_class = EXPORTABLE_MODELS.find { |m| m.name.downcase == type }
-
+    model_class = type.camelize.safe_constantize
     if !reviewer?
       flash_error(:runtime_admin_only.t)
       redirect_back_or_default("/")
-    elsif !model_class
+    elsif !model_class ||
+          !model_class.respond_to?(:column_names) ||
+          model_class.column_names.exclude?("ok_for_export")
       flash_error(:runtime_invalid.t(type: '"type"', value: type))
       redirect_back_or_default("/")
     elsif !value.match(/^[01]$/)
