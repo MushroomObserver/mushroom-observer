@@ -30,6 +30,44 @@ class CommentControllerTest < FunctionalTestCase
                          params: @controller.query_params(QueryRecord.last))
   end
 
+  def test_show_comments_for_target_with_comments
+    target = observations(:minimal_unknown_obs)
+    params = { type: target.class.name, id: target.id }
+    comments = Comment.where(target_type: target.class.name, target: target)
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_select("div[class *='list-group comment']", count: comments.size)
+  end
+
+  def test_show_comments_for_valid_target_without_comments
+    target = names(:conocybe_filaris)
+    params = { type: target.class.name, id: target.id }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+  end
+
+  def test_show_comments_for_invalid_target_type
+    target = api_keys(:rolfs_api_key)
+    params = { type: target.class.name, id: target.id }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                      value: params[:type].to_s))
+  end
+
+  def test_show_comments_for_non_model
+    params = { type: "Hacker", id: 666 }
+
+    login
+    get(:show_comments_for_target, params: params)
+    assert_flash_text(:runtime_invalid.t(type: '"type"',
+                      value: params[:type].to_s))
+  end
+
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:add_comment, id: obs_id, type: "Observation")

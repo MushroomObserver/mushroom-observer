@@ -1069,6 +1069,52 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "create_name")
   end
 
+  def test_create_name_author_trailing_comma
+    text_name = "Inocybe magnifolia"
+    name = Name.find_by(text_name: text_name)
+    punct = "!"
+    assert_nil(name)
+    params = {
+      name: {
+        text_name: text_name,
+        author: "Matheny, Aime & T.W. Henkel,",
+        rank: :Species
+      }
+    }
+    login("rolf")
+
+    assert_no_difference(
+      "Name.count",
+      "A Name should not be created when Author ends with #{punct}"
+    ) do
+      post(:create_name, params: params)
+    end
+    assert_flash_error(:name_error_field_end.l)
+  end
+
+  def test_create_name_citation_leading_commma
+    text_name = "Coprinopsis nivea"
+    name = Name.find_by(text_name: text_name)
+    assert_nil(name)
+    params = {
+      name: {
+        text_name: text_name,
+        author: "(Pers.) Redhead, Vilgalys & Moncalvo",
+        citation: ", in Redhead, Taxon 50(1): 229 (2001)",
+        rank: :Species
+      }
+    }
+    login("rolf")
+
+    assert_no_difference(
+      "Name.count",
+      "A Name should not be created when Citation starts with ','"
+    ) do
+      post(:create_name, params: params)
+    end
+    assert_flash_error(:name_error_field_start.l)
+  end
+
   def test_create_name_author_limit
     # Prove author :limit is number of characters, not bytes
     text_name = "Max-size-author"

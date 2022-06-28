@@ -745,6 +745,9 @@ class API2Test < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     assert_api_pass(params.merge(target: "observation ##{obs.id}"))
     assert_api_results(obs.comments.sort_by(&:id))
+
+    # APIKeys don't have comments
+    assert_api_fail(params.merge(type: APIKey.name))
   end
 
   def test_posting_comments

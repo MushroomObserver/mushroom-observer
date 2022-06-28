@@ -779,27 +779,20 @@ class ImageController < ApplicationController
       row[:old_holder] != row[:new_holder]
   end
 
-  # Add license change records with raw SQL in order to use a single INSERT.
+  # Add license change records with a single insert to the db.
   # Otherwise updating would take too long for many (e.g. thousands) of images
   def update_licenses_history(images_to_update, old_holder, old_license_id)
-    data = images_to_update.pluck(:id, :when)
-
-    # Prevent SQL injection
-    safe_old_holder = Image.connection.quote(old_holder)
-    safe_old_license_id = old_license_id.to_i
-    values = data.map do |img_id, img_when|
-      "(#{@user.id}, NOW(), 'Image', #{img_id}, #{img_when.year}, "\
-      "#{safe_old_holder}, #{safe_old_license_id})"
-    end.join(",\n")
-
-    # brakeman generates what appears to be a false positive SQL injection
-    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, updated_at, target_type, target_id, year, name, license_id)
-      VALUES
-        #{values}
-    ))
+    CopyrightChange.insert_all(
+      images_to_update.map do |image|
+        { user_id: @user.id,
+          updated_at: Time.current,
+          target_type: "Image",
+          target_id: image.id,
+          year: image.when.year,
+          name: old_holder,
+          license_id: old_license_id }
+      end
+    )
   end
 
   public # end private methods used by license updater #########################

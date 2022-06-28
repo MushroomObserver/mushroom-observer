@@ -379,6 +379,9 @@ class Name < AbstractModel
   validate :validate_lifeform
   validate :check_user, :check_text_name, :check_author
 
+  validate :author_ending
+  validate :citation_start
+
   # Notify webmaster that a new name was created.
   after_create do |name|
     user    = User.current || User.admin
@@ -455,8 +458,9 @@ class Name < AbstractModel
   def icn_id_registrable
     return if icn_id.blank? || registrable?
 
-    errors.add(:base, :name_error_unregistrable.t,
-               rank: rank.to_s, name: real_search_name)
+    errors.add(:base, :name_error_unregistrable.t(
+                        rank: rank.to_s, name: real_search_name
+                      ))
   end
 
   # Require icn_id to be unique
@@ -466,11 +470,35 @@ class Name < AbstractModel
     return if icn_id.nil?
     return if (conflicting_name = other_names_with_same_icn_id.first).blank?
 
-    errors.add(:base, :name_error_icn_id_in_use.t,
-               number: icn_id, name: conflicting_name.real_search_name)
+    errors.add(:base, :name_error_icn_id_in_use.t(
+                        number: icn_id, name: conflicting_name.real_search_name
+                      ))
   end
 
   def other_names_with_same_icn_id
     Name.where(icn_id: icn_id).where.not(id: id)
+  end
+
+  def author_ending
+    # Should not end with punctuation
+    # other than quotes, period, close paren, close bracket
+    return unless (
+      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
+    )
+
+    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
+  end
+
+  def citation_start
+    # Should not start with punctuation other than:
+    # quotes, period, close paren, close bracket
+    # question mark (used for Textile italics)
+    # underscore (previously used for Textile italics)
+    return unless (
+      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
+    )
+
+    errors.add(:base,
+               :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
