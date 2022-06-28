@@ -145,6 +145,12 @@ class Comment < AbstractModel
     target.log(:log_comment_destroyed, summary: summary, touch: false)
   end
 
+  # Return model if params[:type] is the name of a commentable model
+  # Else nil
+  def self.safe_model_from_name(name)
+    all_types.find { |m| m.name == name }
+  end
+
   ############################################################################
 
   protected
