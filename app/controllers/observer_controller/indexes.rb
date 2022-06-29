@@ -247,8 +247,8 @@ module ObserverController::Indexes
       #   locations[id] = MinimalMapLocation.new(id, *the_rest)
       # end
       Location.where(id: locations.keys).map do |loc|
-        locations[id] = MinimalMapLocation.new(
-          id, loc.name, loc.north, loc.south, loc.east, loc.west
+        locations[loc.id] = MinimalMapLocation.new(
+          loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
         )
       end
 
