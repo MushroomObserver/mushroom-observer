@@ -238,13 +238,20 @@ module ObserverController::Indexes
       end
 
     unless locations.empty?
+      # NIMMO NOTE: Benchmark these two:
       # Eager-load corresponding locations.
-      @locations = Location.
-                   where(id: locations.keys.sort).
-                   pluck(:id, :name, :north, :south, :east, :west).
-                   map do |id, *the_rest|
-        locations[id] = MinimalMapLocation.new(id, *the_rest)
+      # @locations = Location.
+      #              where(id: locations.keys.sort).
+      #              pluck(:id, :name, :north, :south, :east, :west).
+      #              map do |id, *the_rest|
+      #   locations[id] = MinimalMapLocation.new(id, *the_rest)
+      # end
+      Location.where(id: locations.keys).map do |loc|
+        locations[id] = MinimalMapLocation.new(
+          id, loc.name, loc.north, loc.south, loc.east, loc.west
+        )
       end
+
       @observations.each do |obs|
         obs.location = locations[obs.location_id] if obs.location_id
       end
