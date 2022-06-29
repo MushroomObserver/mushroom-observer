@@ -222,20 +222,17 @@ module ObserverController::Indexes
 
     # Get matching observations.
     locations = {}
-    columns = %w[id lat long gps_hidden location_id].map do |x|
-      "observations.#{x}"
+    @observations = Observation.select(
+                      :id, :lat, :long, :gps_hidden, :location_id
+                    ).where(
+                      Observation[:lat].not_blank.
+                      or(Observation[:location_id].not_blank)
+                    )
+    @observations.map do |obs|
+      locations[obs.location_id] = nil if obs.location_id.present?
+      obs.lat = obs.long = nil if obs.gps_hidden == 1
+      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location_id)
     end
-    args = {
-      select: columns.join(", "),
-      where: "observations.lat IS NOT NULL OR " \
-             "observations.location_id IS NOT NULL"
-    }
-    @observations = \
-      @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
-        locations[loc_id.to_i] = nil if loc_id.present?
-        lat = long = nil if gps_hidden == 1
-        MinimalMapObservation.new(id, lat, long, loc_id)
-      end
 
     unless locations.empty?
       # NIMMO NOTE: Benchmark these two:
