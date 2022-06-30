@@ -382,7 +382,7 @@ module Name::Taxonomy
   def correctly_spelled_ancestor_of_proposed_name?
     return false if correct_spelling.present?
     return above_genus_is_ancestor? unless at_or_below_genus?
-    return genus_or_species_is_ancestor? if %w[Genus Species].include?(rank)
+    return genus_or_species_is_ancestor? if ["Genus", "Species"].include?(rank)
 
     false
   end
@@ -408,26 +408,26 @@ module Name::Taxonomy
     end
 
     def ranks_above_genus
-      %w[Family Order Class Phylum Kingdom Domain Group]
+      ["Family", "Order", "Class", "Phylum", "Kingdom", "Domain", "Group"]
     end
 
     def ranks_between_kingdom_and_genus
-      %w[Phylum Subphylum Class Subclass Order Suborder
-       Family]
+      ["Phylum", "Subphylum", "Class", "Subclass", "Order", "Suborder",
+       "Family"]
     end
 
     def ranks_above_species
-      %w[Stirps Subsection Section Subgenus Genus
-       Family Order Class Phylum Kingdom Domain]
+      ["Stirps", "Subsection", "Section", "Subgenus", "Genus",
+       "Family", "Order", "Class", "Phylum", "Kingdom", "Domain"]
     end
 
     def ranks_below_genus
-      %w[Form Variety Subspecies Species
-       Stirps Subsection Section Subgenus]
+      ["Form", "Variety", "Subspecies", "Species",
+       "Stirps", "Subsection", "Section", "Subgenus"]
     end
 
     def ranks_below_species
-      %w[Form Variety Subspecies]
+      ["Form", "Variety", "Subspecies"]
     end
 
     def rank_index(rank)

@@ -380,9 +380,9 @@ class PatternSearchTest < UnitTestCase
     x.vals = ["compleX"]
     assert_equal(["Group"], x.parse_rank_range)
     x.vals = ["order-genus"]
-    assert_equal(%w[Order Genus], x.parse_rank_range)
+    assert_equal(["Order", "Genus"], x.parse_rank_range)
     x.vals = ["GENUS-ORDER"]
-    assert_equal(%w[Genus Order], x.parse_rank_range)
+    assert_equal(["Genus", "Order"], x.parse_rank_range)
   end
 
   def test_parser

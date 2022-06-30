@@ -1536,7 +1536,7 @@ class NameTest < UnitTestCase
   # -----------------------------
 
   def test_parse_classification_1
-    do_parse_classification_test("Kingdom: Fungi", [%w[Kingdom Fungi]])
+    do_parse_classification_test("Kingdom: Fungi", [["Kingdom", "Fungi"]])
   end
 
   def test_parse_classification_2
@@ -1545,30 +1545,30 @@ class NameTest < UnitTestCase
       Class: Basidiomycetes\r
       Order: Agaricales\r
       Family: Amanitaceae),
-                                 [%w[Kingdom Fungi],
-                                  %w[Phylum Basidiomycota],
-                                  %w[Class Basidiomycetes],
-                                  %w[Order Agaricales],
-                                  %w[Family Amanitaceae]])
+                                 [["Kingdom", "Fungi"],
+                                  ["Phylum", "Basidiomycota"],
+                                  ["Class", "Basidiomycetes"],
+                                  ["Order", "Agaricales"],
+                                  ["Family", "Amanitaceae"]])
   end
 
   def test_parse_classification_3
     do_parse_classification_test(%(Kingdom: Fungi\r
       \r
       Family: Amanitaceae),
-                                 [%w[Kingdom Fungi],
-                                  %w[Family Amanitaceae]])
+                                 [["Kingdom", "Fungi"],
+                                  ["Family", "Amanitaceae"]])
   end
 
   def test_parse_classification_4
     do_parse_classification_test(%(Kingdom: _Fungi_\r
       Family: _Amanitaceae_),
-                                 [%w[Kingdom Fungi],
-                                  %w[Family Amanitaceae]])
+                                 [["Kingdom", "Fungi"],
+                                  ["Family", "Amanitaceae"]])
   end
 
   def test_parse_classification_5
-    do_parse_classification_test("Queendom: Fungi", [%w[Queendom Fungi]])
+    do_parse_classification_test("Queendom: Fungi", [["Queendom", "Fungi"]])
   end
 
   def test_parse_classification_6

@@ -279,7 +279,7 @@ module DescriptionControllerHelpers
       done = true
 
     # These types have fixed permissions.
-    elsif %w[public foreign].include?(@description.source_type) &&
+    elsif ["public", "foreign"].include?(@description.source_type) &&
           !in_admin_mode?
       flash_error(:runtime_description_permissions_fixed.t)
       done = true
