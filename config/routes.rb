@@ -454,6 +454,22 @@ LEGACY_CRUD_ACTIONS = [
   :create, :edit, :destroy, :controller, :index, :list, :show
 ].freeze
 
+# Array of "lookup_xxx" actions: these are all entry points mostly for
+# external sites.  For example, it lets an external site link directly to
+# the name page for "Amanita muscaria" without knowing the name_id of that
+# name.
+LOOKUP_ACTIONS = %w[
+  lookup_accepted_name
+  lookup_comment
+  lookup_image
+  lookup_location
+  lookup_name
+  lookup_observation
+  lookup_project
+  lookup_species_list
+  lookup_user
+].freeze
+
 # redirect legacy MO actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
@@ -826,21 +842,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     patch("#{controller}/#{action}", controller: controller, action: action)
   end
 
-  # Array of "lookup_xxx" actions: these are all entry points mostly for
-  # external sites.  For example, it lets an external site link directly to
-  # the name page for "Amanita muscaria" without knowing the name_id of that
-  # name.
-  LOOKUP_ACTIONS = %w[
-    lookup_accepted_name
-    lookup_comment
-    lookup_image
-    lookup_location
-    lookup_name
-    lookup_observation
-    lookup_project
-    lookup_species_list
-    lookup_user
-  ].freeze
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
     get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
