@@ -512,7 +512,9 @@ end
 #  This is where our routes are actually established.
 # -----------------------------------------------------
 
-MushroomObserver::Application.routes.draw do
+# Disable cop until there's time to reexamine block length
+# Maybe we could define methods for logical chunks of this.
+MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
