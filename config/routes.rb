@@ -758,7 +758,7 @@ MushroomObserver::Application.routes.draw do
   # "rss" to an rss_log
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
-        via: ["get", "post"])
+        via: %w[get post])
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
