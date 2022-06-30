@@ -379,8 +379,12 @@ ACTIONS = {
     letter: {},
     review_donations: {},
     thanks: {},
+    # Disable cop for legacy routes.
+    # The routes are to very old pages that we might get rid of.
+    # rubocop:todo Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
+    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -654,7 +658,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect(path: "emails#name_change_request"))
 
   # ----- Export: no resources ------------------------------------
-  get("export/set_export_status(/:id)", to: "export#set_export_status",
+  get("export/set_export_status(/:id)",
+      to: "export#set_export_status",
       id: /\d+/, as: "export_set_export_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
@@ -760,7 +765,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # "rss" to an rss_log
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
-        via: %w[get post])
+                          via: %w[get post])
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
@@ -796,7 +801,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # )
   # Users: non-standard redirects of legacy Observer actions
   # Rails routes currently accept only template tokens
-  # rubocop:disable Style/FormatStringToken
   get("/observer/user_search", to: redirect(path: "users"))
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
@@ -807,7 +811,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/show_user", to: redirect(path: "user"))
 
   get("/observer/change_user_bonuses",
-    to: redirect(path: "users#edit"))
+      to: redirect(path: "users#edit"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
