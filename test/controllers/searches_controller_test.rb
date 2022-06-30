@@ -66,7 +66,7 @@ class SearchesControllerTest < FunctionalTestCase
     login
     params = { search: { pattern: "12", type: :observation } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :observation_search,
+    assert_redirected_to(controller: :observations, action: :observation_search,
                          pattern: "12")
 
     params = { search: { pattern: "34", type: :image } }
@@ -117,7 +117,7 @@ class SearchesControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :observation } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_observations)
+    assert_redirected_to(controller: :observations, action: :list_observations)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.

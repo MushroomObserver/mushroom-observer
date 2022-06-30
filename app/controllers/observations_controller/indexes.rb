@@ -97,7 +97,7 @@ module ObservationsController::Indexes
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(controller: :observer, action: :show_observation,
+      redirect_to(controller: :observations, action: :show_observation,
                   id: observation.id)
     else
       search = PatternSearch::Observation.new(pattern)
@@ -105,7 +105,7 @@ module ObservationsController::Indexes
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(controller: :observer, action: :list_observations)
+        render(controller: :observations, action: :list_observations)
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
@@ -138,7 +138,8 @@ module ObservationsController::Indexes
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
     @links ||= []
-    args = {  controller: :observer, action: :list_observations, matrix: true,
+    args = {  controller: :observations,
+              action: :list_observations, matrix: true,
               include: [:name, :location, :user, :rss_log,
                         { thumb_image: :image_votes }] }.merge(args)
 
@@ -171,7 +172,8 @@ module ObservationsController::Indexes
 
     link = [
       :show_object.t(type: :map),
-      add_query_param({ controller: :observer, action: :map_observations },
+      add_query_param({ controller: :observations,
+                        action: :map_observations },
                       query)
     ]
     @links << link
@@ -191,7 +193,7 @@ module ObservationsController::Indexes
     @links << [
       :list_observations_download_as_csv.t,
       add_query_param(
-        { controller: :observer, action: :download_observations },
+        { controller: :observations, action: :download_observations },
         query
       )
     ]

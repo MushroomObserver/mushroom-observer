@@ -4,11 +4,11 @@ require("test_helper")
 
 class PostObservationTest < IntegrationTestCase
   LOGIN_PAGE = "account/login"
-  SHOW_OBSERVATION_PAGE = "observer/show_observation"
-  CREATE_OBSERVATION_PAGE = "observer/create_observation"
-  EDIT_OBSERVATION_PAGE = "observer/edit_observation"
+  SHOW_OBSERVATION_PAGE = "observations/show_observation"
+  CREATE_OBSERVATION_PAGE = "observations/create_observation"
+  EDIT_OBSERVATION_PAGE = "observations/edit_observation"
   CREATE_LOCATION_PAGE = "location/create_location"
-  OBSERVATION_INDEX_PAGE = "observer/list_observations"
+  OBSERVATION_INDEX_PAGE = "observations/list_observations"
 
   PASADENA_EXTENTS = {
     north: 34.251905,

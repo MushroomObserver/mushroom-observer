@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ObserverControllerTest < FunctionalTestCase
+class ObservationsControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
     params[:observation] = sample_obs_fields.merge(params[:observation] || {})
     params[:vote] = { value: "3" }.merge(params[:vote] || {})
@@ -607,13 +607,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def assert_show_observation
-    assert_template("observer/show_observation")
-    assert_template("observer/_show_name_info")
-    assert_template("observer/_show_observation")
+    assert_template("observations/show_observation")
+    assert_template("observations/_show_name_info")
+    assert_template("observations/_show_observation")
     assert_template("naming/_show")
     assert_template("comment/_show_comments")
-    assert_template("observer/_show_thumbnail_map")
-    assert_template("observer/_show_images")
+    assert_template("observations/_show_thumbnail_map")
+    assert_template("observations/_show_images")
   end
 
   def test_show_observation
@@ -1863,7 +1863,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = '"One"'
     params[:approved_name] = '"One"'
     post(:create_observation, params: params)
-    # assert_template(controller: :observer, action: expected_page)
+    # assert_template(controller: :observations, action: expected_page)
     assert_redirected_to(/#{expected_page}/)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
@@ -2007,7 +2007,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     params = { id: obs.id.to_s }
     requires_user(:edit_observation,
-                  [{ controller: :observer, action: :show_observation }],
+                  [{ controller: :observations, action: :show_observation }],
                   params)
 
     assert_form_action(action: :edit_observation, id: obs.id.to_s)
@@ -2051,7 +2051,8 @@ class ObserverControllerTest < FunctionalTestCase
       log_change: { checked: "1" }
     }
     post_requires_user(:edit_observation,
-                       [{ controller: :observer, action: :show_observation }],
+                       [{ controller: :observations,
+                          action: :show_observation }],
                        params,
                        "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
@@ -2089,7 +2090,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(
       :edit_observation,
-      [{ controller: :observer, action: :show_observation }],
+      [{ controller: :observations, action: :show_observation }],
       params,
       "mary"
     )
@@ -2121,7 +2122,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(
       :edit_observation,
-      [{ controller: :observer, action: :show_observation }],
+      [{ controller: :observations, action: :show_observation }],
       params,
       "mary"
     )

@@ -2,8 +2,9 @@
   @title = :species_list_add_remove_title.t
 
   tabs = [
-    link_with_query(:species_list_add_remove_cancel.t, controller: :observer,
-                     action: :list_observations)
+    link_with_query(:species_list_add_remove_cancel.t,
+                    controller: :observations,
+                    action: :list_observations)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

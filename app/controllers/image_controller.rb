@@ -121,7 +121,7 @@ class ImageController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observer, action: :advanced_search)
+    redirect_to(controller: :observations, action: :advanced_search)
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -300,7 +300,7 @@ class ImageController < ApplicationController
     return unless @observation
 
     if !check_permission!(@observation)
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :observations,
                           action: :show_observation, id: @observation.id)
     elsif request.method != "POST"
       @image = Image.new
@@ -314,7 +314,7 @@ class ImageController < ApplicationController
       init_project_vars_for_add_or_edit(@observation)
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :observations,
                           action: :show_observation, id: @observation.id)
     else
       args = params[:image]
@@ -323,7 +323,7 @@ class ImageController < ApplicationController
         process_image(args, params[:upload]["image#{i}"])
         i += 1
       end
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :observations,
                           action: :show_observation, id: @observation.id)
     end
   end
@@ -534,7 +534,7 @@ class ImageController < ApplicationController
       @image.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :observations,
                           action: :show_observation, id: @observation.id)
   end
 
@@ -602,7 +602,7 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) &&
        !check_permission!(@observation)
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :observations,
                           action: :show_observation, id: @observation.id)
       done = true
 
@@ -621,7 +621,7 @@ class ImageController < ApplicationController
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
-        redirect_with_query(controller: :observer,
+        redirect_with_query(controller: :observations,
                             action: :show_observation, id: @observation.id)
         done = true
 

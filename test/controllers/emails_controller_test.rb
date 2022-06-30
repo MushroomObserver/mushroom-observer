@@ -147,7 +147,7 @@ class EmailsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:ask_observation_question, params)
-    assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show_observation)
     assert_flash_text(:runtime_ask_observation_question_success.t)
   end
 

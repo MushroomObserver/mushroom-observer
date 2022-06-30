@@ -54,7 +54,7 @@ class EmailsController < ApplicationController
     question = params[:question][:content]
     ObservationEmail.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(controller: :observer, action: :show_observation,
+    redirect_with_query(controller: :observations, action: :show_observation,
                         id: @observation.id)
   end
 

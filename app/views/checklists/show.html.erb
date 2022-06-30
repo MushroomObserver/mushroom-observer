@@ -1,12 +1,12 @@
 <%
-  name_link = {controller: :observer, action: :observations_of_name}
+  name_link = { controller: :observations, action: :observations_of_name }
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
       link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
       link_to(:show_objects.t(type: :observation),
-              controller: :observer, action: :observations_by_user,
+              controller: :observations, action: :observations_by_user,
               id: @show_user.id),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
               controller: :emails, action: :ask_user_question,

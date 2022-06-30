@@ -172,7 +172,7 @@ instance methods.  These correspond directly to the URL of the request:
 
   https://mushroomobserver.org/controller/action
 
-Note that the default controller is "observer" and the "id" parameter is
+Note that the default controller is "observations" and the "id" parameter is
 shortened to a bare integer:
 
   https://mushroomobserver.org/42                Show observation #42.
@@ -269,7 +269,7 @@ An example makes it plentifully clear:
   <h1>Observation #<%= @observation.id %></h1>
 
   <% if @user == @observation.user %>
-    <a href="/observer/edit/<%= @observation.id %>">Edit Observations</a>
+    <a href="/observations/edit/<%= @observation.id %>">Edit Observations</a>
   <% end %>
 
   Name: <%= @observation.name %><br/>

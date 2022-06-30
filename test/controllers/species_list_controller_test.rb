@@ -1192,7 +1192,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                                   species_list: spl)
     query_params = @controller.query_params(query)
     get(:print_labels, params: { id: spl.id })
-    assert_redirected_to(query_params.merge(controller: :observer,
+    assert_redirected_to(query_params.merge(controller: :observations,
                                             action: :print_labels))
   end
 
@@ -1204,7 +1204,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     get(:download, params: { id: spl.id })
 
-    args = { controller: :observer, action: :print_labels }
+    args = { controller: :observations, action: :print_labels }
     url = url_for(@controller.add_query_param(args, query))
     assert_select("form[action='#{url}']")
 
@@ -1212,7 +1212,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                     id: spl.id })
     assert_select("form[action='#{url}']")
 
-    args = { controller: :observer, action: :download_observations }
+    args = { controller: :observations, action: :download_observations }
     url = url_for(@controller.add_query_param(args, query))
     assert_select("form[action='#{url}']")
   end

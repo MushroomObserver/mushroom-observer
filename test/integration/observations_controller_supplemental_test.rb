@@ -6,8 +6,8 @@
 
 require("test_helper")
 
-# Tests which supplement controller/observer_controller_test.rb
-class ObserverControllerSupplementalTest < IntegrationTestCase
+# Tests which supplement controller/observations_controller_test.rb
+class ObservationsControllerSupplementalTest < IntegrationTestCase
   def login(user = users(:zero_user))
     visit("/account/login")
     fill_in("User name or Email address:", with: user.login)
@@ -77,7 +77,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("/observer/edit_observation/#{observation.id}")
+    visit("/observations/edit_observation/#{observation.id}")
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
@@ -96,7 +96,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("/observer/edit_observation/#{observation.id}")
+    visit("/observations/edit_observation/#{observation.id}")
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 

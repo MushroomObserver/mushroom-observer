@@ -50,7 +50,7 @@
                 comment_show_comments_by_user_path(id: @user.id),
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_your_observations.t,
-                observer_observations_by_user_path(id: @user.id),
+                observations_observations_by_user_path(id: @user.id),
                 { class: "list-group-item visible-xs" }) %>
     <%= link_to(:app_your_interests.t, interest_list_interests_path,
                 { class: "list-group-item visible-xs" }) %>
@@ -70,12 +70,12 @@
   <div class="list-group-item disabled bold">
     <%= :app_observations_left.t %>
   </div>
-  <%= link_to(:app_create_observation.t, observer_create_observation_path,
+  <%= link_to(:app_create_observation.t, observations_create_observation_path,
               { class: "list-group-item indent" }) %>
   <%= link_to(:app_your_observations.t,
-              observer_observations_by_user_path(id: @user.id),
+              observations_observations_by_user_path(id: @user.id),
               { class: "list-group-item indent" }) if @user %>
-  <%= link_to(:app_sort_by_date_obs.t, observer_list_observations_path,
+  <%= link_to(:app_sort_by_date_obs.t, observations_list_observations_path,
               { class: "list-group-item indent" }) %>
 
   <div class="list-group-item disabled bold">

@@ -283,7 +283,7 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observer: {
+  observations: {
     advanced_search: {},
     create_observation: {},
     destroy_observation: {},
@@ -583,7 +583,7 @@ MushroomObserver::Application.routes.draw do
   root "rss_logs#index"
 
   # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  get ":id" => "observations#show_observation", id: /\d+/
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
