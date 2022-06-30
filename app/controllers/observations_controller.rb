@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 
-# The original MO controller and hence a real mess!
-# The Clitocybe of controllers.
-#
-class ObserverController < ApplicationController
+class ObservationsController < ApplicationController
   # These need to be moved into the files where they are actually used.
   require "find"
   require "set"
 
-  # These will mostly form the new ObservationController:
   include Suggestions
   include Indexes
   include CreateAndEditObservation
@@ -23,34 +19,6 @@ class ObserverController < ApplicationController
     :show_obs,
     :show_observation
   ]
-  # except: [
-  #   :advanced_search,
-  #   :download_observations,
-  #   :hide_thumbnail_map,
-  #   :index_observation,
-  #   :list_observations,
-  #   :map_observation,
-  #   :map_observations,
-  #   :next_observation,
-  #   :observation_search,
-  #   :observations_by_name,
-  #   :observations_of_look_alikes,
-  #   :observations_of_name,
-  #   :observations_of_related_taxa,
-  #   :observations_by_user,
-  #   :observations_for_project,
-  #   :observations_at_where,
-  #   :observations_at_location,
-  #   :prev_observation,
-  #   :print_labels,
-  #   :show_obs,
-  #   :show_observation,
-  #   :throw_error,
-  #   :throw_mobile_error,
-  #   :turn_javascript_nil,
-  #   :turn_javascript_off,
-  #   :turn_javascript_on,
-  # ]
 
   before_action :disable_link_prefetching, except: [
     :create_observation,

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::ShowObservation
+# see observations_controller.rb
+module ObservationsController::ShowObservation
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:

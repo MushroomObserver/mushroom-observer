@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::Indexes
+# see observations_controller.rb
+module ObservationsController::Indexes
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
@@ -97,14 +97,15 @@ module ObserverController::Indexes
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(action: "show_observation", id: observation.id)
+      redirect_to(controller: :observer, action: :show_observation,
+                  id: observation.id)
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(action: :list_observations)
+        render(controller: :observer, action: :list_observations)
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
@@ -137,7 +138,7 @@ module ObserverController::Indexes
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
     @links ||= []
-    args = {  action: "list_observations", matrix: true,
+    args = {  controller: :observer, action: :list_observations, matrix: true,
               include: [:name, :location, :user, :rss_log,
                         { thumb_image: :image_votes }] }.merge(args)
 
@@ -145,13 +146,13 @@ module ObserverController::Indexes
     # undefined location.
     if query.flavor == :at_where
       @links << [:list_observations_location_define.l,
-                 { controller: "location", action: "create_location",
+                 { controller: :location, action: :create_location,
                    where: query.params[:user_where] }]
       @links << [:list_observations_location_merge.l,
-                 { controller: "location", action: "list_merge_options",
+                 { controller: :location, action: :list_merge_options,
                    where: query.params[:user_where] }]
       @links << [:list_observations_location_all.l,
-                 { controller: "location", action: "list_locations" }]
+                 { controller: :location, action: :list_locations }]
     end
 
     # Add some alternate sorting criteria.
@@ -170,7 +171,7 @@ module ObserverController::Indexes
 
     link = [
       :show_object.t(type: :map),
-      add_query_param({ controller: "observer", action: "map_observations" },
+      add_query_param({ controller: :observer, action: :map_observations },
                       query)
     ]
     @links << link
@@ -182,7 +183,7 @@ module ObserverController::Indexes
     @links << [
       :list_observations_add_to_list.t,
       add_query_param(
-        { controller: "species_list", action: "add_remove_observations" },
+        { controller: :species_list, action: :add_remove_observations },
         query
       )
     ]
@@ -190,7 +191,7 @@ module ObserverController::Indexes
     @links << [
       :list_observations_download_as_csv.t,
       add_query_param(
-        { controller: "observer", action: "download_observations" },
+        { controller: :observer, action: :download_observations },
         query
       )
     ]

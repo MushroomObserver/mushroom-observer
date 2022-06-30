@@ -76,8 +76,8 @@
           <div class="list-group-item default">
             <%= :species_list_show_members.t %>:
             <%= link_to(:species_list_show_regular_index.t,
-                        add_query_param({ controller: "observer",
-                                          action: "index_observation" },
+                        add_query_param({ controller: :observer,
+                                          action: :index_observation },
                                          @query),
                         { help: :species_list_show_regular_index_help.t }) %> |
             <%= link_to_coerced_query(@query, Location) %> |
@@ -86,8 +86,8 @@
             <%= link_to(:app_checklist.t,
                         checklist_path(species_list_id: @species_list.id)) %> |
             <%= link_to(:show_object.t(type: :map),
-                        add_query_param({ controller: "observer",
-                                          action: "map_observations" },
+                        add_query_param({ controller: :observer,
+                                          action: :map_observations },
                                         @query)) %>
           </div>
 

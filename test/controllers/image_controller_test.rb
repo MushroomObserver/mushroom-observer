@@ -297,7 +297,7 @@ class ImageControllerTest < FunctionalTestCase
                        id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
     get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observer, action: :show_observation)
   end
 
   # Test reusing an image by id number.
@@ -426,7 +426,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post(:remove_images, params: params)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observer, action: :show_observation)
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
@@ -555,7 +555,7 @@ class ImageControllerTest < FunctionalTestCase
 
     login(owner)
     get_with_dump(:reuse_image, params)
-    # assert_template(controller: "observer", action: "show_observation")
+    # assert_template(controller: :observer, action: :show_observation)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
     assert(obs.reload.images.member?(image))

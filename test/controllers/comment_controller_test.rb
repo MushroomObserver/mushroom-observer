@@ -133,7 +133,7 @@ class CommentControllerTest < FunctionalTestCase
                type: "Observation",
                comment: { summary: "A Summary", comment: "Some text." } }
     post_requires_login(:add_comment, params)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observer, action: :show_observation)
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
