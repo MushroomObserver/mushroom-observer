@@ -89,7 +89,7 @@ module ApplicationHelper
 
   # link to next object in query results
   def link_next(object)
-    path = if object.class.controller_normalized?(object.class.name)
+    path = if object.class.controller_normalized?
              if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "next")
              else
@@ -104,7 +104,7 @@ module ApplicationHelper
 
   # link to previous object in query results
   def link_prev(object)
-    path = if object.class.controller_normalized?(object.class.name)
+    path = if object.class.controller_normalized?
              if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "prev")
              else
