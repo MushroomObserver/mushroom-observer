@@ -1,6 +1,7 @@
 <%
-  # NOTE: action was `observations_of_name`, needs a `name` param regardless
-  name_link = { controller: :observations, action: :index, name: @name.id }
+  # NOTE: action was `observations_of_name`. Whether before or after refactor,
+  # this action needed a `name` param but there's none here. Reverting to index
+  name_link = { controller: :observations, action: :index }
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)

@@ -5,7 +5,8 @@ require("test_helper")
 class PostObservationTest < IntegrationTestCase
   LOGIN_TEMPLATE = "account/login"
   SHOW_OBSERVATION_TEMPLATE = "observations/show"
-  CREATE_OBSERVATION_TEMPLATE = "observations/new"
+  NEW_OBSERVATION_TEMPLATE = "observations/new"
+  CREATE_OBSERVATION_TEMPLATE = "observations"
   EDIT_OBSERVATION_TEMPLATE = "observations/edit"
   CREATE_LOCATION_TEMPLATE = "location/create_location"
   OBSERVATION_INDEX_TEMPLATE = "observations/index"
@@ -34,16 +35,16 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def open_create_observation_form
-    get("/observations/new")
+    get(new_observation_path)
     assert_template(LOGIN_TEMPLATE)
     login!(katrina)
-    assert_template(CREATE_OBSERVATION_TEMPLATE)
+    assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_form_has_correct_values(create_observation_form_defaults)
   end
 
   def submit_observation_form_with_errors
     submit_form_with_changes(create_observation_form_first_changes)
-    assert_template(CREATE_OBSERVATION_TEMPLATE)
+    assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_has_location_warning(/Unknown country/)
     assert_form_has_correct_values(
       create_observation_form_values_after_first_changes
@@ -55,14 +56,14 @@ class PostObservationTest < IntegrationTestCase
       submit_form_with_changes(create_observation_form_second_changes)
     end
     assert_flash_for_create_observation
-    assert_template(CREATE_LOCATION_TEMPLATE)
+    assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_new_observation_is_correct(expected_values_after_create)
     assert_form_has_correct_values(create_location_form_defaults)
   end
 
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes)
-    assert_template(CREATE_LOCATION_TEMPLATE)
+    assert_template(NEW_OBSERVATION_TEMPLATE)
     assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes

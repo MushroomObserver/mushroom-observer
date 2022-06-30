@@ -757,7 +757,7 @@ MushroomObserver::Application.routes.draw do
         to: "observations#map", via: [:get, :post], id: /\d+/,
         as: "map_observations")
   match("observations/suggestions(/:id)",
-        to: "observations#map", via: [:get, :post], id: /\d+/,
+        to: "observations#suggestions", via: [:get, :post], id: /\d+/,
         as: "suggest_observations")
   match("observations/download(/:id)",
         to: "observations#download", via: [:get, :post], id: /\d+/,
