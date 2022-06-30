@@ -133,7 +133,7 @@ class SiteData
   FIELD_QUERIES = {
     contributing_users:
       User.
-        where("contribution > 0"),
+        where(User[:contribution].gt(0)),
     observations_with_voucher:
       Observation.
         where(specimen: true).
