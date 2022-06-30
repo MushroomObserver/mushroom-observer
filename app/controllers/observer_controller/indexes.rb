@@ -222,27 +222,46 @@ module ObserverController::Indexes
 
     # Get matching observations.
     locations = {}
-    @observations = Observation.select(
-                      :id, :lat, :long, :gps_hidden, :location_id
-                    ).where(
-                      Observation[:lat].not_blank.
-                      or(Observation[:location_id].not_blank)
-                    )
-    @observations.map do |obs|
-      locations[obs.location_id] = nil if obs.location_id.present?
-      obs.lat = obs.long = nil if obs.gps_hidden == 1
-      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location_id)
+
+    columns = %w[id lat long gps_hidden location_id].map do |x|
+      "observations.#{x}"
     end
+    args = {
+      select: columns.join(", "),
+      where: "observations.lat IS NOT NULL OR " \
+             "observations.location_id IS NOT NULL"
+    }
+    @observations = \
+      @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
+        locations[loc_id.to_i] = nil if loc_id.present?
+        lat = long = nil if gps_hidden == 1
+        MinimalMapObservation.new(id, lat, long, loc_id)
+      end
+
+    # # NOTE: why doesn't this work?
+    # args = {
+    #   # Because this is a select statement, not a value to select.
+    #   select: Observation.arel_table.
+    #           project(:id, :lat, :long, :gps_hidden, :location_id).to_sql,
+    #   where: Observation[:lat].not_blank.
+    #          or(Observation[:location_id].not_blank).to_sql
+    # }
+    # @observations = @query.find_by_sql(args).map do |obs|
+    #   locations[obs.location_id] = nil if obs.location_id.present?
+    #   obs.lat = obs.long = nil if obs.gps_hidden == 1
+    #   MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location_id)
+    # end
+    # pp @observations.inspect
 
     unless locations.empty?
-      # NIMMO NOTE: Benchmark these two:
       # Eager-load corresponding locations.
-      # @locations = Location.
-      #              where(id: locations.keys.sort).
-      #              pluck(:id, :name, :north, :south, :east, :west).
-      #              map do |id, *the_rest|
-      #   locations[id] = MinimalMapLocation.new(id, *the_rest)
-      # end
+      # NIMMO NOTE: Benchmark these two:
+      # 1:
+      # Location.where(id: locations.keys).
+      #   pluck(:id, :name, :north, :south, :east, :west).map do |id, *the_rest|
+      #     locations[id] = MinimalMapLocation.new(id, *the_rest)
+      #   end
+      # 2:
       Location.where(id: locations.keys).map do |loc|
         locations[loc.id] = MinimalMapLocation.new(
           loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
