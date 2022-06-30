@@ -768,7 +768,7 @@ MushroomObserver::Application.routes.draw do
   get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
   post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
   get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "activity_logs", params: { :id=>/\d+/ }))
+      to: redirect(path: "activity_logs", params: { id: /\d+/ }))
   get("/observer/rss", to: redirect(path: "activity_logs#rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
