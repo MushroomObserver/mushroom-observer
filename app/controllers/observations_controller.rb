@@ -5,12 +5,12 @@ class ObservationsController < ApplicationController
   require "find"
   require "set"
 
-  include Suggestions
   include Index
+  include Show
+  include CreateAndUpdate
+  include Suggestions
   include Map
   include Download
-  include CreateAndUpdate
-  include Show
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter

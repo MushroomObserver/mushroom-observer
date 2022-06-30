@@ -317,6 +317,7 @@ module ObservationsController::CreateAndUpdate
     # Make sure user owns this observation!
     if !check_permission!(@observation)
       redirect_with_query(action: :show, id: @observation.id)
+    end
 
     # Initialize form.
     @images      = []

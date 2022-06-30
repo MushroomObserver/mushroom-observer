@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see observations_controller.rb
-module ObservationsController::Indexes
+module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   def index
     query = \
