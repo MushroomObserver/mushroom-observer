@@ -23,7 +23,7 @@ class VoteController < ApplicationController
     observation = naming.observation
     observation.change_vote(naming, params[:value])
     redirect_with_query(controller: :observations,
-                        action: :show_observation,
+                        action: :show,
                         id: observation.id)
   end
 
@@ -46,7 +46,7 @@ class VoteController < ApplicationController
       end
     end
     redirect_with_query(controller: :observations,
-                        action: :show_observation,
+                        action: :show,
                         id: observation.id)
   end
 

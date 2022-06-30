@@ -301,7 +301,7 @@ class ImageController < ApplicationController
 
     if !check_permission!(@observation)
       redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+                          action: :show, id: @observation.id)
     elsif request.method != "POST"
       @image = Image.new
       @image.license = @user.license
@@ -315,7 +315,7 @@ class ImageController < ApplicationController
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
       redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+                          action: :show, id: @observation.id)
     else
       args = params[:image]
       i = 1
@@ -324,7 +324,7 @@ class ImageController < ApplicationController
         i += 1
       end
       redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+                          action: :show, id: @observation.id)
     end
   end
 
@@ -535,7 +535,7 @@ class ImageController < ApplicationController
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
       redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+                          action: :show, id: @observation.id)
   end
 
   def serve_reuse_form(params)
@@ -603,7 +603,7 @@ class ImageController < ApplicationController
     if (@mode == :observation) &&
        !check_permission!(@observation)
       redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+                          action: :show, id: @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -622,7 +622,7 @@ class ImageController < ApplicationController
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
         redirect_with_query(controller: :observations,
-                            action: :show_observation, id: @observation.id)
+                            action: :show, id: @observation.id)
         done = true
 
       else

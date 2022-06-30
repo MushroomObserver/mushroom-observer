@@ -84,7 +84,7 @@ class MatrixBoxPresenter
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
     self.what  = view.link_with_query(name, controller: :observations,
-                                            action: :show_observation,
+                                            action: :show,
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
                                     observation.location)
@@ -97,7 +97,7 @@ class MatrixBoxPresenter
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
                      link: { controller: :observations,
-                             action: :show_observation,
+                             action: :show,
                              id: observation.id })
   end
 

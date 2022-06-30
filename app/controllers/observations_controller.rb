@@ -8,7 +8,7 @@ class ObservationsController < ApplicationController
   include Suggestions
   include Indexes
   include CreateAndEditObservation
-  include ShowObservation
+  include Show
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
@@ -17,14 +17,14 @@ class ObservationsController < ApplicationController
     :next_observation,
     :prev_observation,
     :show_obs,
-    :show_observation
+    :show
   ]
 
   before_action :disable_link_prefetching, except: [
     :create_observation,
     :edit_observation,
     :show_obs,
-    :show_observation #,
+    :show #,
   ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter

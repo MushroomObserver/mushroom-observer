@@ -9,7 +9,7 @@ module ObservationsController::Indexes
   end
 
   # Displays matrix of all Observation's, sorted by date.
-  def list_observations
+  def index
     query = create_query(:Observation, :all, by: :date)
     show_selected_observations(query)
   end
@@ -97,7 +97,7 @@ module ObservationsController::Indexes
   def observation_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
-      redirect_to(controller: :observations, action: :show_observation,
+      redirect_to(controller: :observations, action: :show,
                   id: observation.id)
     else
       search = PatternSearch::Observation.new(pattern)
@@ -105,7 +105,7 @@ module ObservationsController::Indexes
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(controller: :observations, action: :list_observations)
+        render(controller: :observations, action: :index)
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
@@ -134,14 +134,14 @@ module ObservationsController::Indexes
     redirect_to(searches_advanced_search_form_path)
   end
 
-  # Show selected search results as a matrix with "list_observations" template.
+  # Show selected search results as a matrix with "index" template.
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
     @links ||= []
-    args = {  controller: :observations,
-              action: :list_observations, matrix: true,
-              include: [:name, :location, :user, :rss_log,
-                        { thumb_image: :image_votes }] }.merge(args)
+    args = { controller: :observations,
+             action: :index, matrix: true,
+             include: [:name, :location, :user, :rss_log,
+                       { thumb_image: :image_votes }] }.merge(args)
 
     # Add some extra links to the index user is sent to if they click on an
     # undefined location.

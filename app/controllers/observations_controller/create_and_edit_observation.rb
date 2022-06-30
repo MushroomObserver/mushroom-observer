@@ -317,7 +317,7 @@ module ObservationsController::CreateAndEditObservation
 
     # Make sure user owns this observation!
     if !check_permission!(@observation)
-      redirect_with_query(action: :show_observation, id: @observation.id)
+      redirect_with_query(action: :show, id: @observation.id)
 
       # Initialize form.
     elsif request.method != "POST"
@@ -382,7 +382,7 @@ module ObservationsController::CreateAndEditObservation
                             where: @observation.place_name,
                             set_observation: @observation.id)
       else
-        redirect_with_query(action: :show_observation, id: @observation.id)
+        redirect_with_query(action: :show, id: @observation.id)
       end
     end
   end
@@ -420,20 +420,20 @@ module ObservationsController::CreateAndEditObservation
 
     if !check_permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
-      redirect_to(add_query_param({ action: "show_observation", id: obs_id },
+      redirect_to(add_query_param({ action: :show, id: obs_id },
                                   this_state))
     elsif !@observation.destroy
       flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
-      redirect_to(add_query_param({ action: "show_observation", id: obs_id },
+      redirect_to(add_query_param({ action: :show, id: obs_id },
                                   this_state))
     else
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if next_state
-        redirect_to(add_query_param({ action: "show_observation",
+        redirect_to(add_query_param({ action: :show,
                                       id: next_state.current_id },
                                     next_state))
       else
-        redirect_to(action: "list_observations")
+        redirect_to(action: :index)
       end
     end
   end
@@ -736,7 +736,7 @@ module ObservationsController::CreateAndEditObservation
     else
       session[:hide_thumbnail_maps] = true
     end
-    redirect_with_query(action: :show_observation, id: id)
+    redirect_with_query(action: :show, id: id)
   end
 
   def strip_images!

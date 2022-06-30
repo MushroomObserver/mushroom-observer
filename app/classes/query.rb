@@ -160,7 +160,7 @@
 #    link_to("Next",
 #      add_query_param({action: :next_image, id: image.id}, query))
 #    link_to("Back",
-#      add_query_param({action: :show_observation, id: image.id, query))
+#      add_query_param({action: :show, id: image.id, query))
 #
 #    # And this is how prev and next work:
 #    query = find_or_create_query(:Image, current: params[:id].to_s)

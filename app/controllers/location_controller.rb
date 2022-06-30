@@ -584,7 +584,7 @@ class LocationController < ApplicationController
         end
         if @set_observation
           redirect_to(controller: :observations,
-                      action: :show_observation,
+                      action: :show,
                       id: @set_observation)
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,

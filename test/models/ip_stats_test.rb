@@ -120,16 +120,16 @@ class IpStatsTest < UnitTestCase
 
     User.current = nil
     IpStats.log_stats(ip: ip1, time: 15.seconds.ago,
-                      controller: :observations, action: :show_observation)
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 12.seconds.ago,
-                      controller: :observations, action: :show_observation)
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 9.seconds.ago,
-                      controller: :observations, action: :show_observation)
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 6.seconds.ago,
-                      controller: :observations, action: :show_observation)
+                      controller: :observations, action: :show)
     User.current = rolf
     IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
-                      controller: :observations, action: :show_observation)
+                      controller: :observations, action: :show)
 
     stats = IpStats.read_stats(do_activity: true)
     assert_equal([ip1, ip2], stats.keys.sort)

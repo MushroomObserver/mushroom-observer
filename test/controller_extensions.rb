@@ -197,7 +197,7 @@ module ControllerExtensions
   #   # redirected to "show_observation"), and that it redirects to
   #   # "show_observation" when it succeeds (last argument).
   #   post_requires_user(:edit_observation, {notes: 'new notes'},
-  #     :show_observation, [:show_observation])
+  #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
   #   post_requires_user(:action, params,
@@ -421,7 +421,7 @@ module ControllerExtensions
   # rendered template is correct.
   #
   # method::        HTTP request method.  Defaults to "GET".
-  # action::        Action/page requested, e.g., :show_observation.
+  # action::        Action/page requested, e.g., :show.
   # params::        Hash of parameters to pass in.  Defaults to {}.
   # user::          User name.  Defaults to "rolf" (user #1, a reviewer).
   # password::      Password.  Defaults to "testpassword".

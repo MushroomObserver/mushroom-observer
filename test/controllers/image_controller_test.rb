@@ -297,7 +297,7 @@ class ImageControllerTest < FunctionalTestCase
                        id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
     get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
   end
 
   # Test reusing an image by id number.
@@ -308,7 +308,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_not(obs.images.member?(image))
     requires_login(:reuse_image, mode: "observation", obs_id: obs.id,
                                  img_id: image.id)
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
@@ -413,7 +413,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post_requires_login(:remove_images, params, "mary")
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
     assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
     assert_not(obs.images.member?(remove))
@@ -426,7 +426,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post(:remove_images, params: params)
-    assert_redirected_to(controller: :observations, action: :show_observation)
+    assert_redirected_to(controller: :observations, action: :show)
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
@@ -491,7 +491,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     requires_user(
       :remove_images,
-      { controller: :observations, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show, id: obs.id },
       params
     )
     assert_form_action(action: "remove_images", id: obs.id)
@@ -517,7 +517,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary", "testpassword")
     send(:get, :reuse_image, params: params)
     # assert_redirected_to(%r{/#{obs.id}$})
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
 
     login("rolf", "testpassword")
@@ -548,15 +548,15 @@ class ImageControllerTest < FunctionalTestCase
     owner = obs.user.login
     assert_not_equal("mary", owner)
     requires_login(:reuse_image, params, "mary")
-    # assert_template(controller: :observations, action: :show_observation)
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    # assert_template(controller: :observations, action: :show)
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
     assert_not(obs.reload.images.member?(image))
 
     login(owner)
     get_with_dump(:reuse_image, params)
-    # assert_template(controller: :observations, action: :show_observation)
-    assert_redirected_to(controller: :observations, action: :show_observation,
+    # assert_template(controller: :observations, action: :show)
+    assert_redirected_to(controller: :observations, action: :show,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
