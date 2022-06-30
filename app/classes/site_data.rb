@@ -144,11 +144,11 @@ class SiteData
   FIELD_QUERIES = {
     contributing_users:
       User.
-        where(User[:contribution].gt(0)),
+        where(contribution: 1..),
     observations_with_voucher:
       Observation.
         where(specimen: true).
-        where("LENGTH(observations.notes) >= 10").
+        where(Observation[:notes].length >= 10).
         where.not(thumb_image_id: nil),
     observations_without_voucher:
       Observation.
