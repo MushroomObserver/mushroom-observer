@@ -87,15 +87,9 @@ module ApplicationHelper
     link_to(*link)
   end
 
-  REFACTORED_CONTROLLERS_WITH_FLOW = [
-    :herbarium,
-    :user,
-    :rss_log
-  ].freeze
-
   # link to next object in query results
   def link_next(object)
-    path = if REFACTORED_CONTROLLERS_WITH_FLOW.include?(object.type_tag)
+    path = if object.class.controller_normalized?(object.class.name)
              if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "next")
              else
@@ -110,7 +104,7 @@ module ApplicationHelper
 
   # link to previous object in query results
   def link_prev(object)
-    path = if REFACTORED_CONTROLLERS_WITH_FLOW.include?(object.type_tag)
+    path = if object.class.controller_normalized?(object.class.name)
              if object.type_tag == :rss_log
                send("activity_log_path", object.id, flow: "prev")
              else
