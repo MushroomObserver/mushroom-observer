@@ -343,7 +343,7 @@ class AbstractModel < ApplicationRecord
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
   def self.controller_normalized?
-    class_defined?("::#{self.name.pluralize}Controller")
+    class_defined?("#{self.name.pluralize}Controller")
   end
 
   # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
