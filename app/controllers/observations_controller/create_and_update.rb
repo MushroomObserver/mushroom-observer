@@ -74,7 +74,7 @@ module ObservationsController::CreateAndUpdate
     end
   end
 
-  def create(params)
+  def create
     rough_cut(params)
     success = true
     success = false unless validate_name(params)
