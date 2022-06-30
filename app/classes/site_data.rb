@@ -127,7 +127,18 @@ class SiteData
     contributing_users: "users"
   }.freeze
 
-  # Non-default queries for stats for the entire site
+  # Additional conditions to use for each category.
+  FIELD_CONDITIONS = {
+    observations_with_voucher:
+      "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
+    observations_without_voucher:
+      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
+      "AND thumb_image_id IS NOT NULL )",
+    users: "`verified` IS NOT NULL",
+    contributing_users: "contribution > 0"
+  }.freeze
+
+  # Non-default unified queries for stats for the entire site
   # rubocop:disable Layout/MultilineMethodCallIndentation
   # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
   FIELD_QUERIES = {
