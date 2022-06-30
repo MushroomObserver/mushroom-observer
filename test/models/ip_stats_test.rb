@@ -144,6 +144,6 @@ class IpStatsTest < UnitTestCase
     assert_operator(stats[ip2][:activity][0][0], :>=, 2.seconds.ago.to_s)
     assert_operator(stats[ip2][:activity][0][1], :>=, 2.seconds)
     assert_equal("observations", stats[ip2][:activity][0][2])
-    assert_equal("create_observation", stats[ip2][:activity][0][3])
+    assert_equal("show", stats[ip2][:activity][0][3])
   end
 end

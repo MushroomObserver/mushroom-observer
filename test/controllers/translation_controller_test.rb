@@ -27,7 +27,7 @@ class TranslationControllerTest < FunctionalTestCase
       "\n",
       "# MAIN PAGES\n",
       "\n",
-      "# observer/index\n",
+      "# observations/index\n",
       "index_title: Main Index\n",
       "# you don't see this every day\n",
       "index_error: An unusual error occurred\n",
