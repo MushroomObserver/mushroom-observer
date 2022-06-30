@@ -19,7 +19,7 @@ module ObjectLinkHelper
     content_tag(:span, result, class: "Data")
   end
 
-  # Wrap location name in link to show_location / observations_at_where.
+  # Wrap location name in link to show_location / observations/index.
   #
   #   Where: <%= location_link(obs.where, obs.location) %>
   #
@@ -33,7 +33,7 @@ module ObjectLinkHelper
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
       link_to(link_string, controller: :observations,
-                           action: :observations_at_where, where: where)
+                           action: :index, where: where)
     end
   end
 

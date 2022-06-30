@@ -1212,7 +1212,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                     id: spl.id })
     assert_select("form[action='#{url}']")
 
-    args = { controller: :observations, action: :download_observations }
+    args = { controller: :observations, action: :download }
     url = url_for(@controller.add_query_param(args, query))
     assert_select("form[action='#{url}']")
   end

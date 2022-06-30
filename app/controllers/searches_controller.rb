@@ -8,7 +8,7 @@ class SearchesController < ApplicationController
   #   image/image_search
   #   location/location_search
   #   name/name_search
-  #   observer/observation_search
+  #   observer/index
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
@@ -21,18 +21,6 @@ class SearchesController < ApplicationController
     session[:search_type] = type
 
     case type
-    when :observation
-      ctrlr = :observer
-    when :comment, :image, :location, :name, :project, :species_list,
-      :herbarium_record
-      ctrlr = type
-    when :user
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: users_path(pattern: pattern),
-        index_path: users_path
-      )
-      return
     when :herbarium
       redirect_to_search_or_index(
         pattern: pattern,
@@ -40,6 +28,23 @@ class SearchesController < ApplicationController
         index_path: herbaria_path(flavor: :all)
       )
       return
+    when :observation
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: observations_path(pattern: pattern),
+        index_path: observations_path
+      )
+      return
+    when :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: users_path(pattern: pattern),
+        index_path: users_path
+      )
+      return
+    when :comment, :image, :location, :name, :project, :species_list,
+      :herbarium_record
+      ctrlr = type
     when :google
       site_google_search(pattern)
       return
@@ -79,9 +84,16 @@ class SearchesController < ApplicationController
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
     query = create_query(model, :advanced_search, query_params)
-    redirect_to(add_query_param({ controller: model.show_controller,
-                                  action: :advanced_search },
-                                query))
+
+    if model.controller_normalized?
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :index,
+                                    advanced_search: "1" }))
+    else
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :advanced_search },
+                                  query))
+    end
   end
 
   def add_filled_in_text_fields(query_params)

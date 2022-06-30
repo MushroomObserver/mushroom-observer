@@ -1275,7 +1275,7 @@ class ApplicationController < ActionController::Base
 
   def query_and_next_object_rss_log_increment(object, method)
     # Special exception for prev/next in RssLog query: If go to "next" in
-    # show_observation, for example, inside an RssLog query, go to the next
+    # observations/show, for example, inside an RssLog query, go to the next
     # object, even if it's not an observation. If...
     #             ... q param is an RssLog query
     return unless (query = current_query_is_rss_log) &&
@@ -1748,7 +1748,7 @@ class ApplicationController < ActionController::Base
   #
   # The old policy was to disable this feature for a few obviously dangerous
   # actions.  I've changed it now to only _enable_ it for common (and safe)
-  # actions like show_observation, post_comment, etc.  Each controller is now
+  # actions like observations/show, post_comment, etc.  Each controller is now
   # responsible for explicitly listing the actions which accept it.
   # -JPH 20100123
   #

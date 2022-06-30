@@ -159,9 +159,9 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation").
-  #   post_requires_user(:edit_obs, :show_obs, notes: 'new notes')
-  #   post_requires_user(:edit_obs, [:observer, :show_obs],
+  #   # redirected to "observations/show").
+  #   post_requires_user(:update, :show, notes: 'new notes')
+  #   post_requires_user(:update, [:observations, :show],
   #                      notes: 'new notes')
   #
   def post_requires_user(*args)
@@ -194,9 +194,9 @@ module ControllerExtensions
   #   requires_user(:review_authors, {id: 1}, :show_location)
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation"), and that it redirects to
-  #   # "show_observation" when it succeeds (last argument).
-  #   post_requires_user(:edit_observation, {notes: 'new notes'},
+  #   # redirected to "observations/show"), and that it redirects to
+  #   # "observations/show" when it succeeds (last argument).
+  #   post_requires_user(:update, {notes: 'new notes'},
   #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
@@ -487,8 +487,8 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response( {controller: observer, action: show_observation, id: 1 })
-  #   assert_response( {action: show_observation, id: 1 })
+  #   assert_response({ controller: :observations, action: :show, id: 1 })
+  #   assert_response({ action: :show, id: 1 })
   #
   #   # Expect a redirection to site index.
   #   assert_response(controller: :rss_logs, action: :index)

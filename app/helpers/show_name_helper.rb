@@ -40,8 +40,7 @@ module ShowNameHelper
   #   query = Query.lookup(:Observation, :all, names: name.id, by: :confidence,
   #                        include_synonyms: true)
   #   link_to_obss_of(query, :obss_of_taxon.t)
-  #   => <a href="/observations/index_observation?q=Q">This Taxon, any name</a>
-  #      (19)
+  #   => <a href="/observations?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count
     return nil if count.zero?
@@ -50,7 +49,7 @@ module ShowNameHelper
     link_to(
       title,
       add_query_param(
-        { controller: :observations, action: :index_observation }, query
+        { controller: :observations, action: :index }, query
       )
     ) + " (#{count})"
   end

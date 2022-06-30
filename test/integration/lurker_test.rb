@@ -12,7 +12,7 @@ class LurkerTest < IntegrationTestCase
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
 
     # Click on prev/next
     click(label: "Next »", in: :title)

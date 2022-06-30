@@ -283,37 +283,37 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observations: {
-    advanced_search: {},
-    create_observation: {},
-    destroy_observation: {},
-    download_observations: {},
-    edit_observation: {},
-    guess: {},
-    hide_thumbnail_map: {},
-    index_observation: {},
-    list_observations: {},
-    map_observation: {},
-    map_observations: {},
-    next_observation: {},
-    observation_search: {},
-    observations_at_location: {},
-    observations_at_where: {},
-    observations_by_name: {},
-    observations_by_user: {},
-    observations_for_project: {},
-    observations_of_look_alikes: {},
-    observations_of_name: {},
-    observations_of_related_taxa: {},
-    prev_observation: {},
-    print_labels: {},
-    recalc: {},
-    show_location_observations: {},
-    show_notifications: {},
-    show_obs: {},
-    show_observation: {},
-    suggestions: {}
-  },
+  # observations: {
+  #   advanced_search: {},
+  #   create_observation: {},
+  #   destroy_observation: {},
+  #   download_observations: {},
+  #   edit_observation: {},
+  #   guess: {},
+  #   hide_thumbnail_map: {},
+  #   index_observation: {},
+  #   list_observations: {},
+  #   map_observation: {},
+  #   map_observations: {},
+  #   next_observation: {},
+  #   observation_search: {},
+  #   observations_at_location: {},
+  #   observations_at_where: {},
+  #   observations_by_name: {},
+  #   observations_by_user: {},
+  #   observations_for_project: {},
+  #   observations_of_look_alikes: {},
+  #   observations_of_name: {},
+  #   observations_of_related_taxa: {},
+  #   prev_observation: {},
+  #   print_labels: {},
+  #   recalc: {},
+  #   show_location_observations: {},
+  #   show_notifications: {},
+  #   show_obs: {},
+  #   show_observation: {},
+  #   suggestions: {}
+  # },
   pivotal: {
     index: {}
   },
@@ -582,8 +582,8 @@ MushroomObserver::Application.routes.draw do
   # Default page is /rss_logs
   root "rss_logs#index"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observations#show_observation", id: /\d+/
+  # Route /123 to /observations/123.
+  get ":id" => "observations#show", id: /\d+/
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
@@ -735,11 +735,6 @@ MushroomObserver::Application.routes.draw do
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
 
-  # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
-
   get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
   get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
   get("observer/intro", to: redirect(path: "info#intro"))
@@ -750,6 +745,27 @@ MushroomObserver::Application.routes.draw do
   get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
   get("observer/translators_note", to: redirect(path: "info#translators_note"))
 
+  # ----- Javascript: utility actions  ----------------------------
+  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  # ----- Observations: standard actions  ----------------------------
+  resources :observations
+  match("observations/map(/:id)",
+        to: "observations#map", via: [:get, :post], id: /\d+/,
+        as: "map_observations")
+  match("observations/suggestions(/:id)",
+        to: "observations#map", via: [:get, :post], id: /\d+/,
+        as: "suggest_observations")
+  match("observations/download(/:id)",
+        to: "observations#download", via: [:get, :post], id: /\d+/,
+        as: "download_observations")
+  match("observations/print_labels(/:id)",
+        to: "observations#print_labels", via: [:get, :post], id: /\d+/,
+        as: "print_observation_labels")
+
   # ----- Publications: standard actions  ----------------------------
   resources :publications
 
@@ -758,7 +774,7 @@ MushroomObserver::Application.routes.draw do
   # "rss" to an rss_log
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
-        via: ["get", "post"])
+        via: [:get, :post])
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------

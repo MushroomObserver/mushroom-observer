@@ -16,11 +16,11 @@
     content_tag(:div, str, class: "name-section", style: "margin:1em")
 
   when "NameDescription"
-    render(partial: "name/name_description", object: object, locals: {review: false})
+    render(partial: "name/name_description", object: object, locals: { review: false })
 
   when "Observation"
     render(partial: "observations/show_observation",
-           locals: {observation: object})
+           locals: { observation: object })
 
   when "Project"
     render(partial: "project/project", object: object)
@@ -34,4 +34,4 @@
 end %>
 
 <%= render(partial: "show_comments",
-           locals: {object: object, controls: false, limit: 10}) %>
+           locals: { object: object, controls: false, limit: 10 }) %>

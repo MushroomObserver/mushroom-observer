@@ -1,13 +1,14 @@
 <%
-  name_link = { controller: :observations, action: :observations_of_name }
+  # NOTE: action was `observations_of_name`, needs a `name` param regardless
+  name_link = { controller: :observations, action: :index, name: @name.id }
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
       link_to(:show_object.t(type: :profile), user_path(@show_user.id)),
       link_to(:show_objects.t(type: :observation),
-              controller: :observations, action: :observations_by_user,
-              id: @show_user.id),
+              controller: :observations, action: :index,
+              user: @show_user.id),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
               controller: :emails, action: :ask_user_question,
               id: @show_user.id)
@@ -18,10 +19,10 @@
   elsif @project
     @title = :checklist_for_project_title.t(project: @project.title)
     tabs = [
-      link_to(:show_object.t(type: :project), controller: :project,
-              action: :show_project, id: @project.id),
-      link_to(:list_objects.t(type: :project), controller: :project,
-              action: :list_projects)
+      link_to(:show_object.t(type: :project),
+              controller: :project, action: :show_project, id: @project.id),
+      link_to(:list_objects.t(type: :project),
+              controller: :project, action: :list_projects)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
     name_link[:project_id] = @project.id
@@ -29,8 +30,9 @@
   elsif @species_list
     @title = :checklist_for_species_list_title.t(list: @species_list.title)
     tabs = [
-      link_to(:show_object.t(type: :project), controller: :species_list,
-              action: :show_species_list, id: @species_list.id)
+      link_to(:show_object.t(type: :project),
+              controller: :species_list, action: :show_species_list,
+              id: @species_list.id)
     ]
     if check_permission(@species_list)
       tabs += [

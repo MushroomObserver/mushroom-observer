@@ -5,7 +5,7 @@ module ObservationsController::Show
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
-  #   show_observation
+  #   observations/show
   #   _show_observation
   #   _show_images
   #   _show_namings
@@ -143,6 +143,6 @@ module ObservationsController::Show
       MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
                                 obs.location)
     ]
-    render(action: :map_observations)
+    render(action: :map)
   end
 end

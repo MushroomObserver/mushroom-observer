@@ -1,0 +1,45 @@
+# frozen_string_literal: true
+
+# see observations_controller.rb
+module ObservationsController::Map
+  # Map results of a search or index.
+  def map
+    @query = find_or_create_query(:Observation)
+    apply_content_filters(@query)
+    @title = :map_locations_title.t(locations: @query.title)
+    @query = restrict_query_to_box(@query)
+    @timer_start = Time.current
+
+    # Get matching observations.
+    locations = {}
+    columns = %w[id lat long gps_hidden location_id].map do |x|
+      "observations.#{x}"
+    end
+    args = {
+      select: columns.join(", "),
+      where: "observations.lat IS NOT NULL OR " \
+             "observations.location_id IS NOT NULL"
+    }
+    @observations = \
+      @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
+        locations[loc_id.to_i] = nil if loc_id.present?
+        lat = long = nil if gps_hidden == 1
+        MinimalMapObservation.new(id, lat, long, loc_id)
+      end
+
+    unless locations.empty?
+      # Eager-load corresponding locations.
+      @locations = Location.
+                   where(id: locations.keys.sort).
+                   pluck(:id, :name, :north, :south, :east, :west).
+                   map do |id, *the_rest|
+        locations[id] = MinimalMapLocation.new(id, *the_rest)
+      end
+      @observations.each do |obs|
+        obs.location = locations[obs.location_id] if obs.location_id
+      end
+    end
+    @num_results = @observations.count
+    @timer_end = Time.current
+  end
+end

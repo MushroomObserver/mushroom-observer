@@ -8,10 +8,10 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag({action: :create_observation, approved_name: @what, approved_where: @place_name},
+<%= form_tag({action: :create, approved_name: @what, approved_where: @place_name},
              {multipart: true, name: "observation_form"}) do %>
   <%= render(partial: "form_observations", locals: {
-        action: :create_observation,
+        action: :create,
         logging_optional: false,
         include_naming: true,
         include_images: true,

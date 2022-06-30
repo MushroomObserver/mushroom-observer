@@ -129,7 +129,7 @@ class AmateurTest < IntegrationTestCase
 
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
-    # (Make sure there is a tab to go back to show_observation.)
+    # (Make sure there is a tab to go back to observations/show.)
     assert_select("div#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
@@ -142,7 +142,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message)
       form.submit
     end
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
 
     com = Comment.last
@@ -165,7 +165,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message2)
       form.submit
     end
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
 
     com.reload
@@ -184,7 +184,7 @@ class AmateurTest < IntegrationTestCase
 
     # I grow weary of this comment.
     click(label: /destroy/i, href: /destroy_comment/)
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
@@ -262,18 +262,18 @@ class AmateurTest < IntegrationTestCase
 
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
 
     login("dick")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 1)
 
     click(label: "Hide thumbnail map.")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
 
     get("/#{observations(:detailed_unknown_obs).id}")
-    assert_template("observations/show_observation")
+    assert_template("observations/show")
     assert_select("div.thumbnail-map", 0)
   end
 
@@ -325,7 +325,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit("Update Votes")
       end
-      # assert_template("observations/show_observation")
+      # assert_template("observations/show")
       assert_match(/call it that/i, response.body)
     end
 
@@ -342,7 +342,7 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       click(label: /login/i)
       assert_template("account/login")
       open_form do |form|
@@ -359,7 +359,7 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/create")
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
-      # (Make sure there is a tab to go back to show_observation.)
+      # (Make sure there is a tab to go back to observations/show.)
       assert_select("div#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
@@ -396,7 +396,7 @@ class AmateurTest < IntegrationTestCase
         form.select(/vote/, /call it that/i)
         form.submit
       end
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       assert_flash_text(/success/i)
       assert_objs_equal(obs, assigns(:observation))
 
@@ -429,7 +429,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_value", /call it that/i)
         form.submit
       end
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
 
       obs.reload
@@ -466,7 +466,7 @@ class AmateurTest < IntegrationTestCase
 
     def successful_delete(obs, naming, text_name, original_name)
       click(label: /destroy/i, href: %r{naming/destroy})
-      assert_template("observations/show_observation")
+      assert_template("observations/show")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
 

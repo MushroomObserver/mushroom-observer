@@ -26,7 +26,7 @@
                   :list_observation_observations.t + " " +
                   link_to(
                     name.display_name.t, controller: :observations,
-                    action: :observation_search, pattern: name.text_name
+                    action: :index, pattern: name.text_name
                   ) + " (#{count})"
                 end %>
           </div>

@@ -475,7 +475,7 @@ class NamingControllerTest < FunctionalTestCase
     }
     login("dick")
     post(:create, params: params)
-    assert_redirected_to(controller: :observations, action: "show_observation",
+    assert_redirected_to(controller: :observations, action: :show,
                          id: observations(:coprinus_comatus_obs).id)
     # Dick is getting points for the naming, vote, and name change.
     assert_equal(12 + 10, dick.reload.contribution)

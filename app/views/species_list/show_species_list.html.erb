@@ -77,7 +77,7 @@
             <%= :species_list_show_members.t %>:
             <%= link_to(:species_list_show_regular_index.t,
                         add_query_param({ controller: :observations,
-                                          action: :index_observation },
+                                          action: :index },
                                          @query),
                         { help: :species_list_show_regular_index_help.t }) %> |
             <%= link_to_coerced_query(@query, Location) %> |
@@ -87,7 +87,7 @@
                         checklist_path(species_list_id: @species_list.id)) %> |
             <%= link_to(:show_object.t(type: :map),
                         add_query_param({ controller: :observations,
-                                          action: :map_observations },
+                                          action: :map },
                                         @query)) %>
           </div>
 

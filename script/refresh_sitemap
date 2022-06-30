@@ -48,7 +48,7 @@ CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observations/show_observation/ID"],
+   "observations/ID"],
   ["names",
    "Name",
    "name/show_name/ID"],

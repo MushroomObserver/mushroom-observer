@@ -283,7 +283,7 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Form for uploading and adding images to an observation.
-  # Linked from: show_observation, reuse_image,
+  # Linked from: observations/show, reuse_image,
   #   naming/create, and naming/edit (via _show_images partial)
   # Inputs: params[:id] (observation)
   #   params[:upload][:image1-4]
@@ -293,7 +293,7 @@ class ImageController < ApplicationController
   #   params[:image][:notes]
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def add_image
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
@@ -514,9 +514,9 @@ class ImageController < ApplicationController
   end
 
   # Callback to remove a single image from an observation.
-  # Linked from: observer/edit_observation
+  # Linked from: observations/edit
   # Inputs: params[:image_id], params[:observation_id]
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_image
     pass_query_params
     @image = find_or_goto_index(Image, params[:image_id])
@@ -577,7 +577,7 @@ class ImageController < ApplicationController
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: observer/show_observation and account/profile
+  # Linked from: observations/show and account/profile
   # Inputs:
   #   params[:mode]       "observation" or "profile"
   #   params[:obs_id]     (observation)
@@ -653,12 +653,12 @@ class ImageController < ApplicationController
   end
 
   # Form used to remove one or more images from an observation (not destroy!)
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs:
   #   params[:id]                  (observation)
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_images
     remove_images_from_object(Observation, params)
   end

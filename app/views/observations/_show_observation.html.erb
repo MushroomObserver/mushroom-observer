@@ -24,7 +24,7 @@
                   "#{observation.display_alt.t} " \
                   "[#{:click_for_map.t}]".html_safe,
             controller: :observations,
-            action: :map_observation, id: observation.id)
+            action: :map, id: observation.id)
         elsif observation.lat
           hidden + " ".html_safe + observation.display_alt.t
         else
