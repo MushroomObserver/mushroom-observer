@@ -18,7 +18,7 @@
 #  load_user_data::          Populates @user_data.
 #  load_field_counts::       Populates a single column in @user_data.
 #  calc_metric::             Calculates contribution score of a single user.
-#  get_field_count::         Looks up total number of entries in a given table.
+#  field_count::             Looks up total number of entries in a given table.
 #
 #  == Internal Data Structure
 #
@@ -255,7 +255,7 @@ class SiteData
   #
   def get_site_data
     ALL_FIELDS.each_with_object({}) do |field, site_data|
-      site_data[field] = get_field_count(field)
+      site_data[field] = field_count(field)
     end
   end
 
@@ -321,7 +321,7 @@ class SiteData
 
   # Do a query for the number of records in a given category for the entire
   # site. This is not cached. Most of these should be inexpensive queries.
-  def get_field_count(field)
+  def field_count(field)
     return 0 if /^(\w+)s_versions/.match?(field.to_s)
 
     # constantize is safe here because `field` is not user input
