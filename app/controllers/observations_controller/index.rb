@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # see observations_controller.rb
+# NOTE: Why are all the :id params converted .to_s here?
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   def index
@@ -29,7 +30,8 @@ module ObservationsController::Index
         create_query(:Observation, :all, by: :date)
       end
     if params[:id].present?
-      show_selected_observations(query, id: params[:id], always_index: true)
+      show_selected_observations(query, id: params[:id].to_s,
+                                 always_index: true)
     elsif params[:where].present? || params[:project].present?
       show_selected_observations(query, always_index: true)
     else
