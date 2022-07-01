@@ -172,7 +172,7 @@ class LurkerTest < IntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     click(label: "Observations at this Location", in: :right_tabs)
-    assert_template("observations/list_observations")
+    assert_template("observations/index")
     save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
 
     observations = @controller.instance_variable_get("@objects")
@@ -222,7 +222,7 @@ class LurkerTest < IntegrationTestCase
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
-    click(label: "Index", href: /index/, in: :title)
+    click(label: "Index", href: /#{observations_path}/, in: :title)
     results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(query_params, parse_query_params(results.first.value))
     assert_equal(save_results.map(&:value),
