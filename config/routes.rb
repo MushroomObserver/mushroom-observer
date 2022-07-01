@@ -765,6 +765,9 @@ MushroomObserver::Application.routes.draw do
   match("observations/print_labels(/:id)",
         to: "observations#print_labels", via: [:get, :post], id: /\d+/,
         as: "print_observation_labels")
+  match("observations/recalc(/:id)",
+        to: "observations#recalc", via: [:get, :post], id: /\d+/,
+        as: "recalc_observation_consensus")
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications

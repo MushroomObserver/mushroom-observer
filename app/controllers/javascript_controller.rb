@@ -44,6 +44,6 @@ class JavascriptController < ApplicationController
     else
       session[:hide_thumbnail_maps] = true
     end
-    redirect_with_query(action: :show, id: id)
+    redirect_with_query(observation_path(id: id))
   end
 end
