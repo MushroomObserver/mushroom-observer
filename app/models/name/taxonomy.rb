@@ -412,18 +412,16 @@ module Name::Taxonomy
     end
 
     def ranks_between_kingdom_and_genus
-      %w[Phylum Subphylum Class Subclass Order Suborder
-       Family]
+      %w[Phylum Subphylum Class Subclass Order Suborder Family]
     end
 
     def ranks_above_species
       %w[Stirps Subsection Section Subgenus Genus
-       Family Order Class Phylum Kingdom Domain]
+         Family Order Class Phylum Kingdom Domain]
     end
 
     def ranks_below_genus
-      %w[Form Variety Subspecies Species
-       Stirps Subsection Section Subgenus]
+      %w[Form Variety Subspecies Species Stirps Subsection Section Subgenus]
     end
 
     def ranks_below_species
