@@ -18,14 +18,14 @@ class ChecklistsController < ApplicationController
     list_id = params[:species_list_id]
 
     @data = if user_id.present?
-      user_checklist(user_id)
-    elsif proj_id.present?
-      project_checklist(proj_id)
-    elsif list_id.present?
-      species_list_checklist(list_id)
-    else
-      Checklist::ForSite.new
-    end
+              user_checklist(user_id)
+            elsif proj_id.present?
+              project_checklist(proj_id)
+            elsif list_id.present?
+              species_list_checklist(list_id)
+            else
+              Checklist::ForSite.new
+            end
   end
 
   ##############################################################################
