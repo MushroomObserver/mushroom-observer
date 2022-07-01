@@ -18,7 +18,7 @@
 #  load_user_data::          Populates @user_data.
 #  load_field_counts::       Populates a single column in @user_data.
 #  calc_metric::             Calculates contribution score of a single user.
-#  get_field_count::         Looks up total number of entries in a given table.
+#  field_count::             Looks up total number of entries in a given table.
 #
 #  == Internal Data Structure
 #
@@ -50,11 +50,11 @@ class SiteData
   #  FIELD_TABLES::     Table to query.
   #  FIELD_CONDITIONS:: Additional conditions.
   #
-  #  The basic query for stats for the entire site is:
+  #  The default query for stats for the entire site is:
   #
   #    SELECT COUNT(*) FROM table
   #
-  #  The basic query for stats for a single user is:
+  #  The default query for stats for a single user is:
   #
   #    SELECT COUNT(*) FROM table WHERE user_id = 123
   #
@@ -127,10 +127,6 @@ class SiteData
     contributing_users: "users"
   }.freeze
 
-  FIELD_COUNTS = {
-    sequenced_observations: "SELECT COUNT(DISTINCT observation_id) "
-  }.freeze
-
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
     observations_with_voucher:
@@ -141,6 +137,34 @@ class SiteData
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
   }.freeze
+
+  # Non-default unified queries for stats for the entire site
+  # rubocop:disable Layout/MultilineMethodCallIndentation
+  # Rubocop 1.30.0 wants to allgn "where" with the open brace on the next line.
+  FIELD_QUERIES = {
+    contributing_users:
+      User.
+        where(contribution: 1..),
+    observations_with_voucher:
+      Observation.
+        where(specimen: true).
+        where(Observation[:notes].length >= 10).
+        where.not(thumb_image_id: nil),
+    observations_without_voucher:
+      Observation.
+        where(specimen: false).
+        where("LENGTH(observations.notes) >= 10").
+        where.not(thumb_image_id: nil),
+    sequenced_observations:
+      Sequence.
+        select(:observation_id).distinct,
+    species_list_entries:
+      SpeciesListObservation,
+    users:
+      User.
+        where.not(verified: nil)
+  }.freeze
+  # rubocop:enable Layout/MultilineMethodCallIndentation
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
@@ -242,7 +266,7 @@ class SiteData
   #
   def get_site_data
     ALL_FIELDS.each_with_object({}) do |field, site_data|
-      site_data[field] = get_field_count(field)
+      site_data[field] = field_count(field)
     end
   end
 
@@ -307,36 +331,17 @@ class SiteData
   end
 
   # Do a query for the number of records in a given category for the entire
-  # site.  This is not cached.  Most of these should be inexpensive queries.
-  #
-  #   count = get_field_count(:images)
-  #   # SELECT COUNT(*) FROM `images`
-  #
-  #   count = get_field_count(:users)
-  #   # SELECT COUNT(*) FROM `users` WHERE `verified` IS NOT NULL
-  #
-  def get_field_count(field)
-    table = FIELD_TABLES[field] || field.to_s
-    query = []
-    query << (FIELD_COUNTS[field] || "SELECT COUNT(*) ")
-    query << "FROM `#{table}`"
-    if (cond = FIELD_CONDITIONS[field])
-      query << "WHERE #{cond}"
-    end
-    if /^(\w+)s_versions/.match?(field.to_s)
-      # Does this actually make sense??
-      # parent = $1
-      # query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"
-      0
-    else
-      query = query.join("\n")
-      User.connection.select_value(query).to_i
-    end
+  # site. This is not cached. Most of these should be inexpensive queries.
+  def field_count(field)
+    return 0 if /^(\w+)s_versions/.match?(field.to_s)
+
+    # constantize is safe here because `field` is not user input
+    FIELD_QUERIES[field]&.count || field.to_s.classify.constantize.count
   end
 
   # Do a query to get the number of records in a given category broken down
   # by User.  This is cached in @user_data.  Gets for a single User, or if
-  # none passed in, gets stats for every User.
+  # none passed in, gets stats for eve`ry User.
   #
   #   # Get number of images for current user.
   #   load_field_counts(:images, User.current.id)
