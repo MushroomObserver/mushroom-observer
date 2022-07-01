@@ -2,7 +2,6 @@
 
 # Send emails directly to webmaster and users via the application
 class EmailsController < ApplicationController
-
   before_action :login_required, except: [
     :ask_webmaster_question
   ]

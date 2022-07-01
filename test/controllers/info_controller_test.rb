@@ -4,7 +4,6 @@ require("test_helper")
 
 # Controller tests for info pages
 class InfoControllerTest < FunctionalTestCase
-
   def test_page_loads
     login
     get_with_dump(:how_to_help)

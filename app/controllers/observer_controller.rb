@@ -56,7 +56,7 @@ class ObserverController < ApplicationController
     :create_observation,
     :edit_observation,
     :show_obs,
-    :show_observation #,
+    :show_observation
   ]
 
   # rubocop:enable Rails/LexicallyScopedActionFilter

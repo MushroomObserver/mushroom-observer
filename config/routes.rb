@@ -379,8 +379,12 @@ ACTIONS = {
     letter: {},
     review_donations: {},
     thanks: {},
+    # Disable cop for legacy routes.
+    # The routes are to very old pages that we might get rid of.
+    # rubocop:todo Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
+    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -450,6 +454,22 @@ LEGACY_CRUD_ACTIONS = [
   :create, :edit, :destroy, :controller, :index, :list, :show
 ].freeze
 
+# Array of "lookup_xxx" actions: these are all entry points mostly for
+# external sites.  For example, it lets an external site link directly to
+# the name page for "Amanita muscaria" without knowing the name_id of that
+# name.
+LOOKUP_ACTIONS = %w[
+  lookup_accepted_name
+  lookup_comment
+  lookup_image
+  lookup_location
+  lookup_name
+  lookup_observation
+  lookup_project
+  lookup_species_list
+  lookup_user
+].freeze
+
 # redirect legacy MO actions to equivalent actions in the
 # equivalent normalized controller
 # Examples:
@@ -512,7 +532,9 @@ end
 #  This is where our routes are actually established.
 # -----------------------------------------------------
 
-MushroomObserver::Application.routes.draw do
+# Disable cop until there's time to reexamine block length
+# Maybe we could define methods for logical chunks of this.
+MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
@@ -652,7 +674,8 @@ MushroomObserver::Application.routes.draw do
       to: redirect(path: "emails#name_change_request"))
 
   # ----- Export: no resources ------------------------------------
-  get("export/set_export_status(/:id)", to: "export#set_export_status",
+  get("export/set_export_status(/:id)",
+      to: "export#set_export_status",
       id: /\d+/, as: "export_set_export_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
@@ -758,7 +781,7 @@ MushroomObserver::Application.routes.draw do
   # "rss" to an rss_log
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
-        via: ["get", "post"])
+                          via: %w[get post])
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
@@ -768,7 +791,7 @@ MushroomObserver::Application.routes.draw do
   get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
   post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
   get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "activity_logs", params: { :id=>/\d+/ }))
+      to: redirect(path: "activity_logs", params: { id: /\d+/ }))
   get("/observer/rss", to: redirect(path: "activity_logs#rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
@@ -794,7 +817,6 @@ MushroomObserver::Application.routes.draw do
   # )
   # Users: non-standard redirects of legacy Observer actions
   # Rails routes currently accept only template tokens
-  # rubocop:disable Style/FormatStringToken
   get("/observer/user_search", to: redirect(path: "users"))
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
@@ -805,7 +827,7 @@ MushroomObserver::Application.routes.draw do
   get("/observer/show_user", to: redirect(path: "user"))
 
   get("/observer/change_user_bonuses",
-    to: redirect(path: "users#edit"))
+      to: redirect(path: "users#edit"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
@@ -820,21 +842,6 @@ MushroomObserver::Application.routes.draw do
     patch("#{controller}/#{action}", controller: controller, action: action)
   end
 
-  # Array of "lookup_xxx" actions: these are all entry points mostly for
-  # external sites.  For example, it lets an external site link directly to
-  # the name page for "Amanita muscaria" without knowing the name_id of that
-  # name.
-  LOOKUP_ACTIONS = %w[
-    lookup_accepted_name
-    lookup_comment
-    lookup_image
-    lookup_location
-    lookup_name
-    lookup_observation
-    lookup_project
-    lookup_species_list
-    lookup_user
-  ]
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
     get("lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)

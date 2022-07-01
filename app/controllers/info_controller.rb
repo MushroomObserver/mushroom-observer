@@ -2,7 +2,6 @@
 
 # Display canned informations about site
 class InfoController < ApplicationController
-
   before_action :login_required, except: [
     :how_to_help,
     :how_to_use,

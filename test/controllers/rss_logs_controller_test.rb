@@ -99,5 +99,4 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(activity_log_path(logs.first.id),
                  @response.header["Location"], "Redirected to wrong page")
   end
-
 end

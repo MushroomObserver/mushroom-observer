@@ -4,7 +4,7 @@ require("test_helper")
 
 # Controller tests for info pages
 class AdminControllerTest < FunctionalTestCase
-    # Prove w3c_tests renders html, with all content within the <body>
+  # Prove w3c_tests renders html, with all content within the <body>
   # (and therefore without MO's layout).
   def test_w3c_tests
     login

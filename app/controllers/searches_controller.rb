@@ -27,18 +27,14 @@ class SearchesController < ApplicationController
       :herbarium_record
       ctrlr = type
     when :user
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: users_path(pattern: pattern),
-        index_path: users_path
-      )
+      redirect_to_search_or_index(pattern: pattern,
+                                  search_path: users_path(pattern: pattern),
+                                  index_path: users_path)
       return
     when :herbarium
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: herbaria_path(pattern: pattern),
-        index_path: herbaria_path(flavor: :all)
-      )
+      redirect_to_search_or_index(pattern: pattern,
+                                  search_path: herbaria_path(pattern: pattern),
+                                  index_path: herbaria_path(flavor: :all))
       return
     when :google
       site_google_search(pattern)
