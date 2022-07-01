@@ -1389,8 +1389,8 @@ class ApplicationController < ActionController::Base
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
-    letter_arg   = args[:letter_arg] || :letter
-    number_arg   = args[:number_arg] || :page
+    letter_arg   = args[:letters] || :letter
+    number_arg   = args[:numbers] || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include] || nil
     type         = query.model.type_tag

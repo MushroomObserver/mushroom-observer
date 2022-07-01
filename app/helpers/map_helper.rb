@@ -153,8 +153,13 @@ module MapHelper
       controller: type.to_s.sub("observation", "observations")
     )
     params = params.merge(mapset_box_params(set))
-    [link_to(:show_all.t, params.merge(action: "index_#{type}")),
-     link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
+    if type.to_s.classify.constantize.controller_normalized?
+      [link_to(:show_all.t, params.merge(action: :index)),
+        link_to(:map_all.t, params.merge(action: :map))]
+    else
+      [link_to(:show_all.t, params.merge(action: "index_#{type}")),
+      link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
+    end
   end
 
   def mapset_observation_link(obs, args)

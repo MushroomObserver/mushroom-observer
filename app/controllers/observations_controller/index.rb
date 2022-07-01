@@ -28,7 +28,11 @@ module ObservationsController::Index
       else
         create_query(:Observation, :all, by: :date)
       end
-    show_selected_observations(query, id: params[:id].to_s, always_index: true)
+    if params[:id].present?
+      show_selected_observations(query, id: params[:id], always_index: true)
+    else
+      show_selected_observations(query)
+    end
   end
 
   # Displays matrix of selected Observations (based on current Query).
@@ -162,7 +166,7 @@ module ObservationsController::Index
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
 
-    define_index_links(query)
+    @links = define_index_links(query)
     args = define_index_args(query, args)
 
     # Restrict to subset within a geographical region (used by map
@@ -220,18 +224,19 @@ module ObservationsController::Index
     @links << [
       :list_observations_download_as_csv.t,
       add_query_param(
-        { controller: :observations, action: :download_observations },
+        { controller: :observations, action: :download },
         query
       )
     ]
+    @links
   end
 
   def define_index_args(query, args)
     args = { controller: :observations,
-          action: :index,
-          matrix: true,
-          include: [:name, :location, :user, :rss_log,
-                    { thumb_image: :image_votes }] }.merge(args)
+             action: :index,
+             matrix: true,
+             include: [:name, :location, :user, :rss_log,
+                       { thumb_image: :image_votes }] }.merge(args)
 
     # Add some alternate sorting criteria.
     links = [
@@ -256,5 +261,6 @@ module ObservationsController::Index
           (query.params[:by] == "reverse_name")
       args[:letters] = "names.sort_name"
     end
+    args
   end
 end
