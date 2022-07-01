@@ -1713,7 +1713,7 @@ class NameTest < UnitTestCase
                             names(:basidiomycetes),
                             names(:basidiomycota),
                             names(:fungi)],
-                            names(:agaricus_campestris).all_parents)
+                           names(:agaricus_campestris).all_parents)
     assert_name_list_equal(
       [names(:agaricus)], names(:agaricus_campestris).parents
     )
