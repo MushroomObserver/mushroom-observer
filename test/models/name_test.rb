@@ -1536,39 +1536,39 @@ class NameTest < UnitTestCase
   # -----------------------------
 
   def test_parse_classification_1
-    do_parse_classification_test("Kingdom: Fungi", [["Kingdom", "Fungi"]])
+    do_parse_classification_test("Kingdom: Fungi", [%w[Kingdom Fungi]])
   end
 
   def test_parse_classification_2
     do_parse_classification_test(%(Kingdom: Fungi\r
-      Phylum: Basidiomycota\r
-      Class: Basidiomycetes\r
-      Order: Agaricales\r
-      Family: Amanitaceae),
-                                 [["Kingdom", "Fungi"],
-                                  ["Phylum", "Basidiomycota"],
-                                  ["Class", "Basidiomycetes"],
-                                  ["Order", "Agaricales"],
-                                  ["Family", "Amanitaceae"]])
+                                   Phylum: Basidiomycota\r
+                                   Class: Basidiomycetes\r
+                                   Order: Agaricales\r
+                                   Family: Amanitaceae),
+                                 [%w[Kingdom Fungi],
+                                  %w[Phylum Basidiomycota],
+                                  %w[Class Basidiomycetes],
+                                  %w[Order Agaricales],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_3
     do_parse_classification_test(%(Kingdom: Fungi\r
-      \r
-      Family: Amanitaceae),
-                                 [["Kingdom", "Fungi"],
-                                  ["Family", "Amanitaceae"]])
+                                   \r
+                                   Family: Amanitaceae),
+                                 [%w[Kingdom Fungi],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_4
     do_parse_classification_test(%(Kingdom: _Fungi_\r
-      Family: _Amanitaceae_),
-                                 [["Kingdom", "Fungi"],
-                                  ["Family", "Amanitaceae"]])
+                                   Family: _Amanitaceae_),
+                                 [%w[Kingdom Fungi],
+                                  %w[Family Amanitaceae]])
   end
 
   def test_parse_classification_5
-    do_parse_classification_test("Queendom: Fungi", [["Queendom", "Fungi"]])
+    do_parse_classification_test("Queendom: Fungi", [%w[Queendom Fungi]])
   end
 
   def test_parse_classification_6
@@ -1713,7 +1713,7 @@ class NameTest < UnitTestCase
                             names(:basidiomycetes),
                             names(:basidiomycota),
                             names(:fungi)],
-                           names(:agaricus_campestris).all_parents)
+                            names(:agaricus_campestris).all_parents)
     assert_name_list_equal(
       [names(:agaricus)], names(:agaricus_campestris).parents
     )
