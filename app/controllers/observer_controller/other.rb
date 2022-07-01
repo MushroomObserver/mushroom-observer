@@ -3,7 +3,7 @@
 # TODO: where does this stuff belong?
 module ObserverController::Other
   EXPORTABLE_MODELS = [Image, Location, LocationDescription, NameDescription,
-                         Name].freeze
+                       Name].freeze
 
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
