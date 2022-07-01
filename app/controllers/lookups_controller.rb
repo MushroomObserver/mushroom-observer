@@ -6,7 +6,7 @@ class LookupsController < ApplicationController
   require "set"
 
   before_action :login_required, except: [
-    :lookup_observation,
+    :lookup_observation
   ]
 
   def lookup_comment # :nologin
