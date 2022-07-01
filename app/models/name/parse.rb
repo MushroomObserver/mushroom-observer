@@ -68,7 +68,7 @@ module Name::Parse
     RankMatcher.new("Subspecies", SSP_ABBR),
     RankMatcher.new("Variety",    VAR_ABBR),
     RankMatcher.new("Form",       F_ABBR),
-    RankMatcher.new(nil,         //) # match anything else
+    RankMatcher.new(nil,          //) # match anything else
   ].freeze
 
   AUCT_ABBR    = / auct\.? /xi
