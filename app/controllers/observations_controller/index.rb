@@ -30,6 +30,8 @@ module ObservationsController::Index
       end
     if params[:id].present?
       show_selected_observations(query, id: params[:id], always_index: true)
+    elsif params[:where].present? || params[:project].present?
+      show_selected_observations(query, always_index: true)
     else
       show_selected_observations(query)
     end
@@ -43,7 +45,7 @@ module ObservationsController::Index
     # )
   end
 
-  # Questionable!
+  # Of questionable utility?
   # Displays matrix of all Observations, alphabetically.
   def observations_by_name
     query = create_query(:Observation, :all, by: :name)
