@@ -34,16 +34,19 @@ class ChecklistsController < ApplicationController
 
   def user_checklist(user_id)
     return unless (@show_user = find_or_goto_index(User, user_id))
+
     Checklist::ForUser.new(@show_user)
   end
 
   def project_checklist(proj_id)
     return unless (@project = find_or_goto_index(Project, proj_id))
+
     Checklist::ForProject.new(@project)
   end
 
   def species_list_checklist(list_id)
     return unless (@species_list = find_or_goto_index(SpeciesList, list_id))
+
     Checklist::ForSpeciesList.new(@species_list)
   end
 end
