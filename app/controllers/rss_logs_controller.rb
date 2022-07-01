@@ -38,7 +38,7 @@ class RssLogsController < ApplicationController
     # Fresh version of the index, no existing query
     else
       query = create_query(:RssLog, :all,
-                            type: @user ? @user.default_rss_type : "all")
+                           type: @user ? @user.default_rss_type : "all")
     end
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
