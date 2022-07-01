@@ -132,5 +132,4 @@ class AuthorsControllerTest < FunctionalTestCase
     assert_template(:review)
     assert_user_list_equal([rolf], desc.reload.authors)
   end
-
 end

@@ -151,8 +151,10 @@ class LookupsControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :species_list,
                          action: :show_species_list, id: sl_id)
     get(:lookup_species_list, params: { id: "Mysteries" })
-    assert_redirected_to(controller: :species_list,
-      action: :show_species_list, id: species_lists(:unknown_species_list).id)
+    assert_redirected_to(
+      controller: :species_list,
+      action: :show_species_list, id: species_lists(:unknown_species_list).id
+    )
     get(:lookup_species_list, params: { id: "species list" })
     # Must test against regex because passed query param borks path match
     assert_redirected_to(%r{/species_list/index_species_list})

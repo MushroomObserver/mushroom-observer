@@ -56,7 +56,7 @@ class CommentControllerTest < FunctionalTestCase
     login
     get(:show_comments_for_target, params: params)
     assert_flash_text(:runtime_invalid.t(type: '"type"',
-                      value: params[:type].to_s))
+                                         value: params[:type].to_s))
   end
 
   def test_show_comments_for_non_model
@@ -65,7 +65,7 @@ class CommentControllerTest < FunctionalTestCase
     login
     get(:show_comments_for_target, params: params)
     assert_flash_text(:runtime_invalid.t(type: '"type"',
-                      value: params[:type].to_s))
+                                         value: params[:type].to_s))
   end
 
   def test_add_comment

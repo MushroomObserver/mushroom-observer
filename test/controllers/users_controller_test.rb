@@ -56,7 +56,7 @@ class UsersControllerTest < FunctionalTestCase
     user = users(:uniquely_named_user)
     get(:index, params: { pattern: user.name })
     # Must test against regex because passed query param borks path match
-    assert_redirected_to(%r{#{user_path(user.id)}})
+    assert_redirected_to(/#{user_path(user.id)}/)
   end
 
   # When pattern matches multiple users, list them.

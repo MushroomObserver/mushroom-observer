@@ -6,22 +6,22 @@ class LookupsController < ApplicationController
   require "set"
 
   before_action :login_required, except: [
-    :lookup_observation,
+    :lookup_observation
   ]
 
-  def lookup_comment # :nologin
+  def lookup_comment
     lookup_general(Comment)
   end
 
-  def lookup_image # :nologin
+  def lookup_image
     lookup_general(Image)
   end
 
-  def lookup_location # :nologin
+  def lookup_location
     lookup_general(Location)
   end
 
-  def lookup_name # :nologin
+  def lookup_name
     lookup_general(Name)
   end
 
@@ -30,23 +30,23 @@ class LookupsController < ApplicationController
   # used with a name ID.  It can actually return a deprecated name if you give
   # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it
   # because it should never be called that way in the first place. -JPH 1/2017
-  def lookup_accepted_name # :nologin
+  def lookup_accepted_name
     lookup_general(Name, true)
   end
 
-  def lookup_observation # :nologin
+  def lookup_observation
     lookup_general(Observation)
   end
 
-  def lookup_project # :nologin
+  def lookup_project
     lookup_general(Project)
   end
 
-  def lookup_species_list # :nologin
+  def lookup_species_list
     lookup_general(SpeciesList)
   end
 
-  def lookup_user # :nologin
+  def lookup_user
     lookup_general(User)
   end
 
