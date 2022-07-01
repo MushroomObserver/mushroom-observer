@@ -24,9 +24,9 @@ module ObservationsController::Show
     store_location
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, Observation, id) and return
+      redirect_to_next_object(:next, Observation, params[:id]) and return
     when "prev"
-      redirect_to_next_object(:prev, Observation, id) and return
+      redirect_to_next_object(:prev, Observation, params[:id]) and return
     end
 
     check_if_user_wants_to_make_their_votes_public
