@@ -75,6 +75,12 @@ module ObservationsController::CreateAndUpdate
   end
 
   def create
+    @observation = create_observation_object(params[:observation])
+
+    # NOTE: I believe we need to set these again, in case they are not defined
+    @licenses = License.current_names_and_ids(@user.license)
+    @new_image = init_image(Time.zone.now)
+
     rough_cut(params)
     success = true
     success = false unless validate_name(params)
@@ -100,7 +106,6 @@ module ObservationsController::CreateAndUpdate
   end
 
   def rough_cut(params)
-    @observation = create_observation_object(params[:observation])
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct(params[:naming], @observation)
     @vote = Vote.construct(params[:vote], @naming)
@@ -327,6 +332,13 @@ module ObservationsController::CreateAndUpdate
   end
 
   def update
+    return unless @observation = \
+      find_or_goto_index(Observation, params[:id].to_s)
+
+    # NOTE: I believe we need to set these again, in case they are not defined
+    # @licenses = License.current_names_and_ids(@user.license)
+    # @new_image = init_image(Time.zone.now)
+
     any_errors = false
     update_whitelisted_observation_attributes
     @observation.notes = notes_to_sym_and_compact
