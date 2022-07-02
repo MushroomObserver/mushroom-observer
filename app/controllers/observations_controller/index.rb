@@ -29,7 +29,10 @@ module ObservationsController::Index
       else
         create_query(:Observation, :all, by: :date)
       end
-    if params[:id].present?
+    # Catch searches first; they may have the other params below
+    if params[:pattern].present? || params[:advanced_search].present?
+      show_selected_observations(query)
+    elsif params[:id].present?
       show_selected_observations(query, id: params[:id].to_s,
                                  always_index: true)
     elsif params[:where].present? || params[:project].present?
@@ -129,18 +132,18 @@ module ObservationsController::Index
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
       redirect_to(controller: :observations, action: :show,
-                  id: observation.id)
+                  id: observation.id) and return
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(controller: :observations, action: :index)
+        render(controller: :observations, action: :index) and return
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
         # show_selected_observations(search.query)
-        search.query
+        query = search.query
       end
     end
   end
@@ -163,7 +166,7 @@ module ObservationsController::Index
     # show_selected_observations(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(searches_advanced_search_form_path)
+    redirect_to(searches_advanced_search_form_path) and return
   end
 
   # Show selected search results as a matrix with "index" template.

@@ -411,7 +411,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # Prove that if advanced_search provokes exception,
   # it returns to advanced search form.
   def test_advanced_search_error
-    ObserverController.any_instance.stubs(:show_selected_observations).
+    ObservationsController.any_instance.stubs(:show_selected_observations).
       raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
     login

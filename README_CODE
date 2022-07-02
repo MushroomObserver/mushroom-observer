@@ -151,10 +151,10 @@ Migration Cheatsheet:: http://garrettsnider.backpackit.com/pub/367902
 
 == Controllers
 
-There are only a few controllers (in <tt>app/controllers</tt>), roughly one for
+There are quite a few controllers (in <tt>app/controllers</tt>), roughly one for
 each of the major data types:
 
-ObserverController::    Deals with Observation's, Naming's, Vote's, and everything else.
+ObservationsController::Deals with Observation's.
 AccountController::     Deals with User's.
 NameController::        Deals with Name's and NameDescription's.
 LocationController::    Deals with Location's and LocationDescription's.
