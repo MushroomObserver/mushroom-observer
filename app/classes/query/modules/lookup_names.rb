@@ -139,23 +139,30 @@ module Query
       end
 
       def add_immediate_subtaxa(min_names)
-        higher_names = genera_and_up(min_names)
-        lower_names = genera_and_down(min_names)
-        unless higher_names.empty?
-          regex = escape(": _(#{higher_names.join("|")})_$")
-          min_names += Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP #{regex}
-            AND text_name NOT LIKE "% %"
-          ))
-        end
-        regex = escape("^(#{lower_names.join("|")}) " \
-                       "[^[:blank:]]+( [^[:blank:]]+)?$")
-        min_names += Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP #{regex}
-        ))
+        min_names = immediate_add_higher_names(min_names)
+        min_names = immediate_add_lower_names(min_names)
         min_names.uniq
+      end
+
+      def immediate_add_higher_names(min_names)
+        higher_names = genera_and_up(min_names)
+        return min_names if higher_names.empty?
+
+        regex = /: _(#{higher_names.join("|")})_$/
+        min_names + Name.
+                    where(Name[:classification] =~ regex).
+                    where.not(Name[:text_name].matches("% %")).
+                    pluck(*minimal_name_columns_array)
+      end
+
+      def immediate_add_lower_names(min_names)
+        lower_names = genera_and_down(min_names)
+        return min_names if lower_names.empty?
+
+        regex = /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
+        min_names + Name.
+                    where(Name[:text_name] =~ regex).
+                    pluck(*minimal_name_columns_array)
       end
 
       def genera_and_up(min_names)
