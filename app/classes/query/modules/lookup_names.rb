@@ -109,24 +109,33 @@ module Query
 
         min_names.reject { |min_name| min_name[2] } +
           Name.where(synonym_id: clean_id_set(ids).split(",")).
-          pluck(*minimal_name_columns.split(", ").map(&:to_sym))
+          pluck(*minimal_name_columns_array)
       end
 
       def add_subtaxa(min_names)
+        min_names += add_higher_names(min_names)
+        min_names += add_lower_names(min_names)
+        min_names.uniq
+      end
+
+      def add_higher_names(min_names)
         higher_names = genera_and_up(min_names)
+        return "" if higher_names.empty?
+
+        regex = /: _(#{higher_names.join("|")})_/
+        Name.
+          where(Name[:classification] =~ regex).
+          pluck(*minimal_name_columns_array)
+      end
+
+      def add_lower_names(min_names)
         lower_names = genera_and_down(min_names)
-        unless higher_names.empty?
-          regex = /: _(#{higher_names.join("|")})_/
-          min_names += Name.
-                       where(Name[:classification] =~ regex).
-                       pluck(*minimal_name_columns.split(", ").map(&:to_sym))
-        end
+        return "" if lower_names.empty?
 
         regex = /^(#{lower_names.join("|")}) /
-        min_names += Name.
-                     where(Name[:text_name] =~ regex).
-                     pluck(*minimal_name_columns.split(", ").map(&:to_sym))
-        min_names.uniq
+        Name.
+          where(Name[:text_name] =~ regex).
+          pluck(*minimal_name_columns_array)
       end
 
       def add_immediate_subtaxa(min_names)
@@ -189,6 +198,10 @@ module Query
 
       def minimal_name_columns
         "id, correct_spelling_id, synonym_id, text_name"
+      end
+
+      def minimal_name_columns_array
+        minimal_name_columns.split(", ").map(&:to_sym)
       end
     end
   end
