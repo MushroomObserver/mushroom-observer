@@ -8,11 +8,11 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(add_query_param(action: :edit, id: @observation,
+<%= form_tag(add_query_param(action: :update, id: @observation,
                              approved_name: @what, approved_where: @place_name),
-             {multipart: true, name: "observation_form"}) do %>
+             {multipart: true, method: :put, name: "observation_form"}) do %>
   <%= render(partial: "form_observations", locals: {
-        action: "edit",
+        action: :update,
         logging_optional: true,
         include_naming: false,
         include_images: true,
