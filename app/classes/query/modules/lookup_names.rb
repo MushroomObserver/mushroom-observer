@@ -123,9 +123,9 @@ module Query
         return min_names if higher_names.empty?
 
         regex = /: _(#{higher_names.join("|")})_/
-        min_names += Name.
-          where(Name[:classification] =~ regex).
-          pluck(*minimal_name_columns_array)
+        min_names + Name.
+                    where(Name[:classification] =~ regex).
+                    pluck(*minimal_name_columns_array)
       end
 
       def add_lower_names(min_names)
@@ -133,9 +133,9 @@ module Query
         return min_names if lower_names.empty?
 
         regex = /^(#{lower_names.join("|")}) /
-        min_names += Name.
-          where(Name[:text_name] =~ regex).
-          pluck(*minimal_name_columns_array)
+        min_names + Name.
+                    where(Name[:text_name] =~ regex).
+                    pluck(*minimal_name_columns_array)
       end
 
       def add_immediate_subtaxa(min_names)
