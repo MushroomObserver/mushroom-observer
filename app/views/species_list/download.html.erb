@@ -37,7 +37,7 @@
 </form>
 
 <%= form_tag(add_query_param({ controller: :observations,
-                               action: :download_observations }, @query)) %>
+                               action: :download }, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
 
   <p><%= :download_observations_format.t %>:</p>
