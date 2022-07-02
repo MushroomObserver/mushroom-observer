@@ -114,7 +114,7 @@
 #  ok_for_export::    (-) Mark names like "Candy canes" so they don't go to EOL.
 #
 #  ==== Definition of Taxon
-#  rank::             (V) :Species, :Genus, :Order, etc.
+#  rank::             (V) "Species", "Genus", "Order", etc.
 #  icn_id             (V) numerical identifier issued by an
 #                         ICN-recognized registration repository
 #  text_name::        (V) "Xanthoparmelia" coloradoensis
@@ -139,10 +139,10 @@
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
 #  all_ranks::               Ranks: all
-#  ranks_above_genus::       Ranks: above :Genus.
-#  ranks_below_genus::       Ranks: below :Genus.
-#  ranks_above_species::     Ranks: above :Species.
-#  ranks_below_species::     Ranks: below :Species.
+#  ranks_above_genus::       Ranks: above "Genus".
+#  ranks_below_genus::       Ranks: below "Genus".
+#  ranks_above_species::     Ranks: above "Species".
+#  ranks_below_species::     Ranks: below "Species".
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
@@ -272,49 +272,50 @@
 #                              NameDescription.
 #  notify_users::            After save: notify interested User's of changes.
 #
-################################################################################
+###############################################################################
 class Name < AbstractModel
   require "acts_as_versioned"
   require "fileutils"
 
-  require_dependency "name/change"
-  require_dependency "name/create"
-  require_dependency "name/format"
-  require_dependency "name/lifeform"
-  require_dependency "name/merge"
-  require_dependency "name/spelling"
-  require_dependency "name/notify"
-  require_dependency "name/parse"
-  require_dependency "name/primer"
-  require_dependency "name/propagate_generic_classifications"
-  require_dependency "name/resolve"
-  require_dependency "name/synonymy"
-  require_dependency "name/taxonomy"
-  require_dependency "name/validation"
+  # modules with instance methods and maybe class methods
+  include Validation
+  include Taxonomy
+  include Synonymy
+  include Resolve
+  include PropagateGenericClassifications
+  include Primer
+  include Notify
+  include Spelling
+  include Merge
+  include Lifeform
+  include Format
+  include Change
+
+  # modules with class methods only
+  extend Parse
+  extend Create
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:rank,
-          {
-            Form: 1,
-            Variety: 2,
-            Subspecies: 3,
-            Species: 4,
-            Stirps: 5,
-            Subsection: 6,
-            Section: 7,
-            Subgenus: 8,
-            Genus: 9,
-            Family: 10,
-            Order: 11,
-            Class: 12,
-            Phylum: 13,
-            Kingdom: 14,
-            Domain: 15,
-            Group: 16 # used for both "group" and "clade"
-          },
-          source: :rank,
-          accessor: :whiny)
+  enum rank:
+        {
+          Form: 1,
+          Variety: 2,
+          Subspecies: 3,
+          Species: 4,
+          Stirps: 5,
+          Subsection: 6,
+          Section: 7,
+          Subgenus: 8,
+          Genus: 9,
+          Family: 10,
+          Order: 11,
+          Class: 12,
+          Phylum: 13,
+          Kingdom: 14,
+          Domain: 15,
+          Group: 16 # used for both "group" and "clade"
+        }
 
   belongs_to :correct_spelling, class_name: "Name",
                                 foreign_key: "correct_spelling_id"
@@ -375,6 +376,8 @@ class Name < AbstractModel
                                      greater_than_or_equal_to: 1 }
   validate :icn_id_registrable
   validate :icn_id_unique
+  validate :validate_lifeform
+  validate :check_user, :check_text_name, :check_author
 
   validate :author_ending
   validate :citation_start
@@ -409,6 +412,29 @@ class Name < AbstractModel
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
 
   scope :not_deprecated, -> { where(deprecated: false) }
+
+  ### Module Name::Spelling
+  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
+
+  # For a glitch discovered in the wild:
+  scope :with_self_referential_misspelling, lambda {
+    where(Name[:correct_spelling_id].eq(Name[:id]))
+  }
+
+  ### Module Name::Taxonomy
+  scope :with_classification_like,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+        }
+
+  scope :with_name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+
+  scope :with_rank_below,
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
 
   def <=>(other)
     sort_name <=> other.sort_name

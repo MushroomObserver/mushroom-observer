@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class Query::ApiKeyBase < Query::Base
+class Query::APIKeyBase < Query::Base
   def model
-    ApiKey
+    APIKey
   end
 
   def parameter_declarations

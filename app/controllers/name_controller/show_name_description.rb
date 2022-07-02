@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
+module NameController::ShowNameDescription
   def show_name_description
     store_location
     pass_query_params

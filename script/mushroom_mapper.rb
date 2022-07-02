@@ -103,7 +103,7 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
+Name.with_correct_spelling.not_deprecated.with_rank("Genus").
   pluck(:id, :text_name, :classification).each do |id, genus, classification|
   kingdom =
     classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
@@ -139,7 +139,7 @@ end
 # Build table of species in each genus.
 genus_to_species = {}
 Name.with_correct_spelling.not_deprecated.
-  with_rank(:Species).order(sort_name: :asc).
+  with_rank("Species").order(sort_name: :asc).
   pluck(:text_name).each do |species|
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []

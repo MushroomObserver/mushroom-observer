@@ -19,7 +19,7 @@ class Hash
   end
 end
 
-class Api2Test < UnitTestCase
+class API2Test < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
     super
@@ -113,7 +113,7 @@ class Api2Test < UnitTestCase
   end
 
   def assert_last_api_key_correct
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -429,7 +429,7 @@ class Api2Test < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: ApiKey Requests
+  #  :section: APIKey Requests
   # ----------------------------
 
   def test_getting_api_keys
@@ -456,7 +456,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -477,7 +477,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
@@ -501,7 +501,7 @@ class Api2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_obj_list_equal([APIKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -745,6 +745,9 @@ class Api2Test < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     assert_api_pass(params.merge(target: "observation ##{obs.id}"))
     assert_api_results(obs.comments.sort_by(&:id))
+
+    # APIKeys don't have comments
+    assert_api_fail(params.merge(type: APIKey.name))
   end
 
   def test_posting_comments
@@ -1395,7 +1398,7 @@ class Api2Test < UnitTestCase
       upload_file: "#{::Rails.root}/test/images/sticky.jpg",
       original_name: "strip_this"
     }
-    assert_equal(:toss, @user.keep_filenames)
+    assert_equal("toss", @user.keep_filenames)
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
         api = API2.execute(params)
@@ -1408,7 +1411,7 @@ class Api2Test < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     @user   = rolf
     @proj   = projects(:eol_project)
@@ -1476,7 +1479,7 @@ class Api2Test < UnitTestCase
   end
 
   def test_patching_images
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     rolfs_img = images(:rolf_profile_image)
     marys_img = images(:in_situ_image)
@@ -1840,7 +1843,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.id))
     assert_api_results(names)
 
-    names = Name.with_rank(:Variety).reject(&:correct_spelling_id)
+    names = Name.with_rank("Variety").reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
@@ -1955,7 +1958,7 @@ class Api2Test < UnitTestCase
   def test_creating_names
     @name           = "Parmeliaceae"
     @author         = ""
-    @rank           = :Family
+    @rank           = "Family"
     @deprecated     = true
     @citation       = ""
     @classification = ""
@@ -1980,7 +1983,7 @@ class Api2Test < UnitTestCase
 
     @name           = "Anzia ornata"
     @author         = "(Zahlbr.) Asahina"
-    @rank           = :Species
+    @rank           = "Species"
     @deprecated     = false
     @citation       = "Jap. Bot. 13: 219-226"
     @classification = "Kingdom: _Fungi_\r\nFamily: _Parmeliaceae_"
@@ -2075,7 +2078,7 @@ class Api2Test < UnitTestCase
     agaricus.reload
     assert_equal("new notes", agaricus.notes)
     assert_equal("new citation", agaricus.citation)
-    assert_equal(Name.validate_classification(:Genus, new_classification),
+    assert_equal(Name.validate_classification("Genus", new_classification),
                  agaricus.classification)
   end
 
@@ -2093,7 +2096,7 @@ class Api2Test < UnitTestCase
     assert_api_pass(params.merge(set_author: "L."))
     assert_equal("Suciraga L.", agaricus.reload.search_name)
     assert_api_pass(params.merge(set_rank: "order"))
-    assert_equal(:Order, agaricus.reload.rank)
+    assert_equal("Order", agaricus.reload.rank)
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(set_name: "Agaricus bitorquis",
@@ -2101,7 +2104,7 @@ class Api2Test < UnitTestCase
                                  set_rank: "species"))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
-    assert_equal(:Species, agaricus.rank)
+    assert_equal("Species", agaricus.rank)
     parent = Name.where(text_name: "Agaricus").to_a
     assert_not_empty(parent)
     assert_not_equal(agaricus.id, parent[0].id)
@@ -2519,7 +2522,7 @@ class Api2Test < UnitTestCase
       action: :observation,
       api_key: @api_key.key
     }
-    assert_equal(:postal, rolf.location_format)
+    assert_equal("postal", rolf.location_format)
 
     params[:location] = "New Place, California, USA"
     api = API2.execute(params)
@@ -2539,8 +2542,8 @@ class Api2Test < UnitTestCase
     # is supposed to make it more consistent for apps.  It would be a real
     # problem because apps don't have access to the user's prefs, so they have
     # no way of knowing how to pass in locations on the behalf of the user.
-    User.update(rolf.id, location_format: :scientific)
-    assert_equal(:scientific, rolf.reload.location_format)
+    User.update(rolf.id, location_format: "scientific")
+    assert_equal("scientific", rolf.reload.location_format)
 
     # params[:location] = "USA, California, Somewhere Else"
     params[:location] = "Somewhere Else, California, USA"
@@ -4094,7 +4097,7 @@ class Api2Test < UnitTestCase
       api_key: @api_key.key,
       location: "Anywhere"
     }
-    ApiKey.update(@api_key.id, verified: nil)
+    APIKey.update(@api_key.id, verified: nil)
     assert_api_fail(params)
     @api_key.verify!
     assert_api_pass(params)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: move this into a new AuthorController
-class ObserverController
+module ObserverController::AuthorController
   # Form to compose email for the authors/reviewers.  Linked from show_<object>.
   # TODO: Use queued_email mechanism.
   def author_request

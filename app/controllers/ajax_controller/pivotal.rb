@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::Pivotal
   # Deal with Pivotal stories.  Renders updated story, vote controls, etc.
   # type::  Type of request: 'story', 'vote', 'comment'
   # id::    ID of story.

@@ -300,11 +300,11 @@ class Observation < AbstractModel
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to :postal).
+  # Also applies the location_format of the current user (defaults to "postal").
   def place_name
     if location
       location.display_name
-    elsif User.current_location_format == :scientific
+    elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else
       where
@@ -316,7 +316,7 @@ class Observation < AbstractModel
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
     place_name = place_name.strip_squeeze
-    where = if User.current_location_format == :scientific
+    where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else
               place_name

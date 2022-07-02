@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see observer_controller.rb
-class ObserverController
+module ObserverController::Indexes
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])

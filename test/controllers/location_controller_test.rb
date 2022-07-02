@@ -610,8 +610,8 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_update_location_with_scientific_names
-    rolf.update(location_format: :scientific)
-    rolf.reload
+    rolf.location_format = "scientific"
+    rolf.save
     login("rolf")
     loc = locations(:burbank)
     normal_name = loc.name
@@ -825,7 +825,7 @@ class LocationControllerTest < FunctionalTestCase
       notes: "new observation"
     )
     assert_nil(obs.location)
-    assert_equal(:scientific, roy.location_format)
+    assert_equal("scientific", roy.location_format)
     params = {
       where: where,
       location: albion.id
@@ -901,7 +901,7 @@ class LocationControllerTest < FunctionalTestCase
     }
 
     login("rolf")
-    assert_equal(:postal, rolf.location_format)
+    assert_equal("postal", rolf.location_format)
     postal_name = "Missoula, Montana, USA"
     scientific_name = "USA, Montana, Missoula"
     params[:location][:display_name] = postal_name
@@ -913,7 +913,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(scientific_name, loc.scientific_name)
 
     login("roy")
-    assert_equal(:scientific, roy.location_format)
+    assert_equal("scientific", roy.location_format)
     postal_name = "Santa Fe, New Mexico, USA"
     scientific_name = "USA, New Mexico, Santa Fe"
     params[:location][:display_name] = scientific_name

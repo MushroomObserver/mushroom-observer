@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
-# portion of Name dealing for formatting of Names for display
-class Name < AbstractModel
-  ##### Display of names #######################################################
+module Name::Format
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+
+  ##### Display of names ######################################################
   def display_name
     str = self[:display_name]
     if User.current &&
-       User.current.hide_authors == :above_species &&
+       User.current.hide_authors == "above_species" &&
        Name.ranks_above_species.include?(rank)
       str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
@@ -37,7 +41,7 @@ class Name < AbstractModel
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
   def display_name_brief_authors
-    if rank == :Group
+    if rank == "Group"
       # Xxx yyy group author
       display_name.sub(/ #{Regexp.quote(author)}$/, " #{brief_author}")
     else
@@ -53,7 +57,7 @@ class Name < AbstractModel
   # This depends on display_name having markup around name proper
   # Otherwise, it might delete author if that were part of the name proper
   def display_name_without_authors
-    if rank == :Group
+    if rank == "Group"
       # Remove author and preceding space at end
       display_name.sub(/ #{Regexp.quote(author)}$/, "")
     else
@@ -75,56 +79,6 @@ class Name < AbstractModel
     Name.display_to_real_search(self)
   end
 
-  def self.display_to_real_text(name)
-    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
-      gsub(/__\*?\*? [^_*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-      # (this part should be unnecessary)
-      # Because "group" was removed by the 1st gsub above,
-      # tack it back on (if it was part of display_name)
-      gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
-      concat(group_suffix(name))
-  end
-
-  def self.display_to_real_search(name)
-    name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-  end
-
-  def self.group_suffix(name)
-    GROUP_CHUNK.match(name.display_name).to_s
-  end
-
-  # Make sure display names are in boldface for accepted names, and not in
-  # boldface for deprecated names.
-  def self.make_sure_names_are_bolded_correctly
-    msgs = ""
-    needs_fixing = Name.where(deprecated: true).
-                   where(Name[:display_name].matches("%*%")).
-                   or(Name.not_deprecated.
-                      where(Name[:display_name].does_not_match("%*%")))
-    needs_fixing.each do |name|
-      name.change_deprecated(name.deprecated)
-      name.save
-      msgs += "The name #{name.search_name.inspect} " \
-              "should #{name.deprecated && "not "}have been in boldface."
-    end
-    msgs
-  end
-
-  ##### Names treated specially ################################################
-
-  # Array of strings that mean "unknown" in the local language:
-  #
-  #   "unknown", ""
-  #
-  def self.names_for_unknown
-    ["unknown", :unknown.l, ""]
-  end
-
-  # Get an instance of the Name that means "unknown".
-  def self.unknown
-    Name.find_by(text_name: "Fungi")
-  end
-
   # Is this the "unknown" name?
   def unknown?
     text_name == "Fungi"
@@ -138,7 +92,7 @@ class Name < AbstractModel
     text_name == "Imageless"
   end
 
-  ##### Miscellaneous ##########################################################
+  ##### Miscellaneous #########################################################
 
   # Info to include about each name in merge requests.
   def merge_info
@@ -154,7 +108,7 @@ class Name < AbstractModel
       Notification.where(flavor: Notification.flavors[:name], obj_id: id).count
   end
 
-  ##############################################################################
+  #############################################################################
 
   private
 
@@ -163,5 +117,58 @@ class Name < AbstractModel
   def brief_author
     author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
       sub(/,.*/, " et al.") # then shorten any remaining > 2 authors
+  end
+
+  module ClassMethods
+    def display_to_real_text(name)
+      name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
+        gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/x,
+             ' \1 ').
+        # (this part should be unnecessary)
+        # Because "group" was removed by the 1st gsub above,
+        # tack it back on (if it was part of display_name)
+        gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
+        concat(group_suffix(name))
+    end
+
+    def display_to_real_search(name)
+      name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+    end
+
+    def group_suffix(name)
+      Name::Parse::GROUP_CHUNK.match(name.display_name).to_s
+    end
+
+    # Make sure display names are in boldface for accepted names, and not in
+    # boldface for deprecated names.
+    def make_sure_names_are_bolded_correctly
+      msgs = ""
+      needs_fixing = Name.where(deprecated: true).
+                     where(Name[:display_name].matches("%*%")).
+                     or(Name.not_deprecated.
+                        where(Name[:display_name].does_not_match("%*%")))
+      needs_fixing.each do |name|
+        name.change_deprecated(name.deprecated)
+        name.save
+        msgs += "The name #{name.search_name.inspect} " \
+                "should #{name.deprecated && "not "}have been in boldface."
+      end
+      msgs
+    end
+
+    ##### Names treated specially #############################################
+
+    # Array of strings that mean "unknown" in the local language:
+    #
+    #   "unknown", ""
+    #
+    def names_for_unknown
+      ["unknown", :unknown.l, ""]
+    end
+
+    # Get an instance of the Name that means "unknown".
+    def unknown
+      Name.find_by(text_name: "Fungi")
+    end
   end
 end

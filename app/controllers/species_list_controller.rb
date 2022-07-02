@@ -276,7 +276,7 @@ class SpeciesListController < ApplicationController
       text_name = name.real_text_name
       author    = name.author
       node = name.deprecated ? doc : doc.bold
-      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
+      if %w[Genus Species Subspecies Variety Form].include?(rank)
         node = node.italic
       end
       node << text_name

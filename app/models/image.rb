@@ -330,7 +330,7 @@ class Image < AbstractModel
   end
 
   def image_url(size)
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: transferred,
@@ -339,7 +339,7 @@ class Image < AbstractModel
   end
 
   def self.image_url(size, id, args = {})
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
@@ -632,7 +632,7 @@ class Image < AbstractModel
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     return unless name.present? && User.current &&
-                  User.current.keep_filenames != :toss
+                  User.current.keep_filenames != "toss"
 
     self.original_name = name
   end

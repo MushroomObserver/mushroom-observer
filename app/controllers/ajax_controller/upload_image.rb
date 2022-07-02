@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::UploadImage
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
   def multi_image_template
@@ -68,7 +68,7 @@ class AjaxController
   end
 
   def image_original_name(args)
-    return nil if @user.keep_filenames == :toss
+    return nil if @user.keep_filenames == "toss"
 
     args[:original_name].to_s
   end

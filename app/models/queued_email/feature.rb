@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Feature Email
-
 class QueuedEmail::Feature < QueuedEmail
   def content
     get_note

@@ -6,8 +6,6 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
-#  enum_default_value   Default value (as a Symbol) of an enum attribute
-#                       Ex: User.enum_default_value(:image_size) => :medium
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
@@ -84,16 +82,6 @@ class AbstractModel < ApplicationRecord
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def type_tag
     self.class.name.underscore.to_sym
-  end
-
-  # Default value (as a symbol) for an enum attribute
-  def self.enum_default_value(attr)
-    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
-  end
-
-  # number (or nil) that is the default value for attr
-  def self.default_cardinal(attr)
-    column_defaults[attr.to_s]
   end
 
   ##############################################################################

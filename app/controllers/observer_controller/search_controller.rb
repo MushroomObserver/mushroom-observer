@@ -2,7 +2,7 @@
 
 # TODO: move this into a new SearchController
 # searches defined by the url query string
-class ObserverController
+module ObserverController::SearchController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comment/image_search
@@ -55,6 +55,8 @@ class ObserverController
     end
   end
 
+  ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
+
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
   #   image/advanced_search
@@ -65,7 +67,8 @@ class ObserverController
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
 
-    model = params[:search][:model].to_s.camelize.constantize
+    model = ADVANCED_SEARCHABLE_MODELS.
+            find { |m| m.name.downcase == params[:search][:model] }
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)

@@ -32,7 +32,12 @@ module MushroomObserver
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     # Custom directories with classes and modules you want to be autoloadable.
+    config.autoloader = :zeitwerk
     config.autoload_paths += %W[
+      #{config.root}/app/classes
+      #{config.root}/app/extensions
+    ]
+    config.eager_load_paths += %W[
       #{config.root}/app/classes
       #{config.root}/app/extensions
     ]
@@ -76,4 +81,4 @@ module MushroomObserver
 end
 
 MO = MushroomObserver::Application.config
-require(File.expand_path("consts.rb", __dir__))
+require_relative("consts")

@@ -106,9 +106,9 @@ class ObserverControllerTest < FunctionalTestCase
     user = users(:small_thumbnail_user)
     login(user.name)
     get(:show_observation,
-        params: { set_thumbnail_size: :thumbnail })
+        params: { set_thumbnail_size: "thumbnail" })
     user.reload
-    assert_equal(:thumbnail, user.thumbnail_size)
+    assert_equal("thumbnail", user.thumbnail_size)
   end
 
   def test_show_observation_hidden_gps
@@ -974,11 +974,11 @@ class ObserverControllerTest < FunctionalTestCase
 
     get_with_dump(:show_observation, id: obs.id, go_private: 1)
     user.reload
-    assert_equal(:yes, user.votes_anonymous)
+    assert_equal("yes", user.votes_anonymous)
 
     get_with_dump(:show_observation, id: obs.id, go_public: 1)
     user.reload
-    assert_equal(:no, user.votes_anonymous)
+    assert_equal("no", user.votes_anonymous)
   end
 
   def test_show_owner_id
@@ -1754,34 +1754,34 @@ class ObserverControllerTest < FunctionalTestCase
     login("mary")
     obs_id = observations(:agaricus_campestris_obs).id
 
-    rolf.keep_filenames = :toss
+    rolf.keep_filenames = "toss"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_false(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_but_hide
+    rolf.keep_filenames = "keep_but_hide"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_false(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_and_show
+    rolf.keep_filenames = "keep_and_show"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
     login("rolf") # owner
 
-    rolf.keep_filenames = :toss
+    rolf.keep_filenames = "toss"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_but_hide
+    rolf.keep_filenames = "keep_but_hide"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
-    rolf.keep_filenames = :keep_and_show
+    rolf.keep_filenames = "keep_and_show"
     rolf.save
     get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
@@ -1802,7 +1802,7 @@ class ObserverControllerTest < FunctionalTestCase
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_herbarium_id, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
-    users(:rolf).update(location_format: :scientific)
+    users(:rolf).update(location_format: "scientific")
     get(:create_observation)
     assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
@@ -2226,7 +2226,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
-    assert_equal(:Class, name.rank)
+    assert_equal("Class", name.rank)
   end
 
   def test_create_observation_creating_family
@@ -2263,7 +2263,7 @@ class ObserverControllerTest < FunctionalTestCase
       "Wrong image id"
     )
     assert_equal("Acarosporaceae", name.text_name)
-    assert_equal(:Family, name.rank)
+    assert_equal("Family", name.rank)
   end
 
   def test_create_observation_creating_group
@@ -2276,7 +2276,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
-    assert_equal(:Group, name.rank)
+    assert_equal("Group", name.rank)
   end
 
   def test_prevent_creation_of_species_under_deprecated_genus

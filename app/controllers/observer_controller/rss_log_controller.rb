@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # TODO: move this into new RssLogController
-class ObserverController
+module ObserverController::RssLogController
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   def index

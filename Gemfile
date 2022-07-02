@@ -111,11 +111,6 @@ gem("xmlrpc")
 gem("mo_acts_as_versioned", ">= 0.6.6",
     git: "https://github.com/MushroomObserver/acts_as_versioned/")
 
-# In Rails 4.0, use simple_enum to replace enum_column3
-# In the future, replace simple_enum with Rails native enums
-# https://www.pivotaltracker.com/story/show/90595194
-gem("simple_enum")
-
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
@@ -257,8 +252,9 @@ gem("graphql-batch")
 #
 
 group :test, :development do
-  # Use byebug as debugging gem
-  gem("byebug")
+  # https://github.com/ruby/debug
+  # NOTE: Remove this upon upgrade to Ruby 3.1. (It's included with Ruby 3.1)
+  gem "debug", ">= 1.0.0"
 
   # GraphiQL for GraphQL development
   # Makes an IDE available to test graphql queries at '/graphiql/'
