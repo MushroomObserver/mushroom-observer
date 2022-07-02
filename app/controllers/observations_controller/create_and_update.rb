@@ -336,8 +336,8 @@ module ObservationsController::CreateAndUpdate
       find_or_goto_index(Observation, params[:id].to_s)
 
     # NOTE: I believe we need to set these again, in case they are not defined
-    # @licenses = License.current_names_and_ids(@user.license)
-    # @new_image = init_image(Time.zone.now)
+    @licenses = License.current_names_and_ids(@user.license)
+    @new_image = init_image(Time.zone.now)
 
     any_errors = false
     update_whitelisted_observation_attributes

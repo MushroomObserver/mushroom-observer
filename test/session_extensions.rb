@@ -105,6 +105,8 @@ module SessionExtensions
     end
   end
 
+  # FIXME: Need "put" and "patch" methods too?
+
   # Call the original +get+.
   def get_without_redirecting(action, **args)
     @doing_with_error_checking = true

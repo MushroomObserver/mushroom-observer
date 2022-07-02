@@ -127,13 +127,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
 
-  def test_show_obs
-    obs = observations(:fungi_obs)
-    login
-    get(:show,
-        params: { id: obs.id })
-    assert_redirected_to(action: :show, id: obs.id)
-  end
+  # NOTE: This tests a deleted route, test should be deleted too.
+  # def test_show_obs
+  #   obs = observations(:fungi_obs)
+  #   login
+  #   get(:show, params: { id: obs.id })
+  #   assert_redirected_to(action: :show, id: obs.id)
+  # end
 
   def test_show_obs_view_stats
     obs = observations(:minimal_unknown_obs)
@@ -2015,12 +2015,12 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # ----------------------------------------------------------------
-  #  Test edit_observation, both "get" and "post".
+  #  Test :edit and :update (note :update uses method: :put)
   # ----------------------------------------------------------------
 
   # (Sorry, these used to all be edit/update_observation, now they're
   # confused because of the naming stuff.)
-  def test_edit_observation_get
+  def test_edit_observation_form
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
     params = { id: obs.id.to_s }
@@ -2028,7 +2028,7 @@ class ObservationsControllerTest < FunctionalTestCase
                   [{ controller: :observations, action: :show }],
                   params)
 
-    assert_form_action(action: :edit, id: obs.id.to_s)
+    assert_form_action(action: :update, id: obs.id.to_s)
 
     # image notes field must be textarea -- not just text -- because text
     # is inline and would drops any newlines in the image notes
@@ -2036,7 +2036,8 @@ class ObservationsControllerTest < FunctionalTestCase
                   count: 1)
   end
 
-  def test_edit_observation
+  def test_update_observation
+    debug
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
@@ -2068,14 +2069,12 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:update,
-                       [{ controller: :observations,
-                          action: :show }],
+    put_requires_user(:update,
+                       [{ controller: :observations, action: :show }],
                        params,
                        "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(/#{ url_for(controller: :location,
-                                     action: :create_location) }/)
+    assert_redirected_to(/#{ location_create_location_path }/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -2746,7 +2745,7 @@ class ObservationsControllerTest < FunctionalTestCase
     get(:edit, params: { id: @obs1.id })
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
     spl_start_length = @spl1.observations.length
-    post(
+    put(
       :update,
       params: {
         id: @obs1.id,
@@ -2756,7 +2755,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
     assert_equal(spl_start_length, @spl1.reload.observations.length)
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
-    post(
+    put(
       :update,
       params: {
         id: @obs1.id,

@@ -145,6 +145,14 @@ module ControllerExtensions
     either_requires_either(:post, page, nil, *args)
   end
 
+  def put_requires_login(page, *args)
+    either_requires_either(:put, page, nil, *args)
+  end
+
+  def patch_requires_login(page, *args)
+    either_requires_either(:patch, page, nil, *args)
+  end
+
   # Send GET request to a page that should require a specific user.
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
@@ -166,6 +174,14 @@ module ControllerExtensions
   #
   def post_requires_user(*args)
     either_requires_either(:post, *args)
+  end
+
+  def put_requires_user(*args)
+    either_requires_either(:put, *args)
+  end
+
+  def patch_requires_user(*args)
+    either_requires_either(:patch, *args)
   end
 
   # Helper used by the blah_requires_blah methods.
