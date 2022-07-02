@@ -12,10 +12,10 @@ module ObservationsController::Index
         advanced_search
       elsif params[:look_alikes].present? && params[:name].present?
         observations_of_look_alikes
+      elsif params[:related_taxa].present? && params[:name].present?
+        observations_of_related_taxa
       elsif params[:name].present?
         observations_of_name
-      elsif params[:related_taxa].present?
-        observations_of_related_taxa
       elsif params[:user].present?
         observations_by_user
       elsif params[:location].present?
