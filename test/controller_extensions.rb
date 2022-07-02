@@ -127,6 +127,16 @@ module ControllerExtensions
     html_dump(page, @response.body, params)
   end
 
+  def put_with_dump(page, params = {})
+    put(page, params: params)
+    html_dump(page, @response.body, params)
+  end
+
+  def patch_with_dump(page, params = {})
+    patch(page, params: params)
+    html_dump(page, @response.body, params)
+  end
+
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.

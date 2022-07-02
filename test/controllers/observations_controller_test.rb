@@ -2037,7 +2037,6 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_update_observation
-    debug
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
@@ -2069,10 +2068,12 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    put_requires_user(:update,
-                       [{ controller: :observations, action: :show }],
-                       params,
-                       "mary")
+    put_requires_user(
+      :update,
+      [{ controller: :observations, action: :show }],
+      params,
+      "mary"
+    )
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(/#{ location_create_location_path }/)
     assert_equal(10, rolf.reload.contribution)
@@ -2091,7 +2092,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(licenses(:ccwiki30), img.license)
   end
 
-  def test_edit_observation_no_logging
+  def test_update_observation_no_logging
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
@@ -2105,7 +2106,7 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       log_change: { checked: "0" }
     }
-    post_requires_user(
+    put_requires_user(
       :update,
       [{ controller: :observations, action: :show }],
       params,
@@ -2119,7 +2120,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(updated_at, obs.rss_log.updated_at)
   end
 
-  def test_edit_observation_bad_place_name
+  def test_update_observation_bad_place_name
     obs = observations(:detailed_unknown_obs)
     new_where = "test_update_observation"
     new_notes = { other: "blather blather blather" }
@@ -2137,7 +2138,7 @@ class ObservationsControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(
+    put_requires_user(
       :update,
       [{ controller: :observations, action: :show }],
       params,
@@ -2146,7 +2147,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success) # Which really means failure
   end
 
-  def test_edit_observation_with_another_users_image
+  def test_update_observation_with_another_users_image
     img1 = images(:in_situ_image)
     img2 = images(:turned_over_image)
     img3 = images(:commercial_inquiry_image)
@@ -2182,7 +2183,7 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:update, params: params)
+    put(:update, params: params)
     assert_redirected_to(action: :show)
     assert_flash_success
     assert_equal(old_img1_notes, img1.reload.notes)
@@ -2190,7 +2191,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_equal(old_img3_notes, img3.reload.notes)
   end
 
-  def test_edit_observation_with_non_image
+  def test_update_observation_with_non_image
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
       Rails.root.join("test/fixtures/projects.yml").to_s, "text/plain"
@@ -2214,7 +2215,7 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:update, params: params)
+    put(:update, params: params)
 
     # 200 :success means means failure!
     assert_response(
@@ -2224,7 +2225,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_edit_observation_strip_images
+  def test_update_observation_strip_images
     login("mary")
     obs = observations(:detailed_unknown_obs)
 
@@ -2242,7 +2243,7 @@ class ObservationsControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(
+    put(
       :update,
       params: {
         id: obs.id,
@@ -2288,7 +2289,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # Prove that create_observation renders note fields with template keys first,
   # in the order listed in the template
-  def test_create_observation_with_notes_template_get
+  def test_new_observation_with_notes_template
     user = users(:notes_templater)
     login(user.login)
     get(:new)
@@ -2300,7 +2301,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
   # Prove that notes are saved with template keys first, in the order listed in
   # the template, then Other, but without blank fields
-  def test_create_observation_with_notes_template_post
+  def test_create_observation_with_notes_template
     user = users(:notes_templater)
     params = { observation: sample_obs_fields }
     # Use defined Location to avoid issues with reloading Observation
@@ -2330,7 +2331,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # Prove that edit_observation has correct note fields and content:
   # Template fields first, in template order; then orphaned fields in order
   # in which they appear in observation, then Other
-  def test_edit_observation_with_notes_template_get
+  def test_edit_observation_with_notes_template
     obs    = observations(:templater_noteless_obs)
     user   = obs.user
     params = {
@@ -2369,7 +2370,7 @@ class ObservationsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_observation_with_notes_template_post
+  def test_update_observation_with_notes_template
     # Prove notes_template works when editing Observation without notes
     obs = observations(:templater_noteless_obs)
     user = obs.user
@@ -2383,7 +2384,7 @@ class ObservationsControllerTest < FunctionalTestCase
       observation: { notes: notes }
     }
     login(user.login)
-    post(:update, params: params)
+    put(:update, params: params)
 
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(notes, obs.reload.notes)
@@ -2621,7 +2622,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
 
-  def test_project_checkboxes_in_edit_observation
+  def test_project_checkboxes_in_update_observation
     init_for_project_checkbox_tests
 
     login("rolf")
@@ -2629,7 +2630,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:redirect)
     get(:edit, params: { id: @obs2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(
+    put(
       :update,
       params: {
         id: @obs2.id,
@@ -2638,11 +2639,13 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:update,
-         params: {
-           id: @obs2.id,
-           project: { "id_#{@proj1.id}" => "1" }
-         })
+    put(
+      :update,
+      params: {
+        id: @obs2.id,
+        project: { "id_#{@proj1.id}" => "1" }
+      }
+    )
     assert_response(:redirect)
     assert_obj_list_equal([@proj1], @obs2.reload.projects)
     assert_obj_list_equal([@proj1], @img2.reload.projects)
@@ -2652,7 +2655,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     get(:edit, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(
+    put(
       :update,
       params: {
         id: @obs1.id,
@@ -2664,7 +2667,7 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
-    post(
+    put(
       :update,
       params: {
         id: @obs1.id,
@@ -2730,11 +2733,13 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
 
     # Make sure it remember state of checks if submit fails.
-    post(:create,
-         params: {
-           name: { name: "Screwy Name" }, # (ensures it will fail)
-           list: { "id_#{@spl2.id}" => "0" }
-         })
+    post(
+      :create,
+      params: {
+        name: { name: "Screwy Name" }, # (ensures it will fail)
+        list: { "id_#{@spl2.id}" => "0" }
+      }
+    )
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
   end
 

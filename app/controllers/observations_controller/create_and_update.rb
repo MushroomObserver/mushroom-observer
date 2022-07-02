@@ -313,16 +313,16 @@ module ObservationsController::CreateAndUpdate
   #
   def edit
     pass_query_params
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
-
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(@observation.when)
+    return unless @observation = \
+      find_or_goto_index(Observation, params[:id].to_s)
 
     # Make sure user owns this observation!
     if !check_permission!(@observation)
-      redirect_with_query(action: :show, id: @observation.id)
+      redirect_with_query(action: :show, id: @observation.id) and return
     end
+
+    @licenses = License.current_names_and_ids(@user.license)
+    @new_image = init_image(@observation.when)
 
     # Initialize form.
     @images      = []
@@ -332,10 +332,15 @@ module ObservationsController::CreateAndUpdate
   end
 
   def update
+    pass_query_params
     return unless @observation = \
       find_or_goto_index(Observation, params[:id].to_s)
 
-    # NOTE: I believe we need to set these again, in case they are not defined
+    # Make sure user owns this observation!
+    if !check_permission!(@observation)
+      redirect_with_query(action: :show, id: @observation.id) and return
+    end
+
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.zone.now)
 
