@@ -5,12 +5,15 @@
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   def index
+    # Note: searches execute show_selected_observations with possible redirect
+    if params[:advanced_search].present?
+      advanced_search and return
+    elsif params[:pattern].present?
+      observation_search and return
+    end
+
     query = \
-      if params[:pattern].present?
-        observation_search
-      elsif params[:advanced_search].present?
-        advanced_search
-      elsif params[:look_alikes].present? && params[:name].present?
+      if params[:look_alikes].present? && params[:name].present?
         observations_of_look_alikes
       elsif params[:related_taxa].present? && params[:name].present?
         observations_of_related_taxa
@@ -29,10 +32,10 @@ module ObservationsController::Index
       else
         create_query(:Observation, :all, by: :date)
       end
-    # Catch searches first; they may have the other params below
-    if params[:pattern].present? || params[:advanced_search].present?
-      show_selected_observations(query)
-    elsif params[:id].present?
+    # Catch pattern search first; this may have the other params below
+    # if params[:pattern].present?
+    #   show_selected_observations(query)
+    if params[:id].present?
       show_selected_observations(query, id: params[:id].to_s,
                                  always_index: true)
     elsif params[:where].present? || params[:project].present?
@@ -132,18 +135,17 @@ module ObservationsController::Index
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
       redirect_to(controller: :observations, action: :show,
-                  id: observation.id) and return
+                  id: observation.id)
     else
       search = PatternSearch::Observation.new(pattern)
       if search.errors.any?
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(controller: :observations, action: :index) and return
+        render(controller: :observations, action: :index)
       else
         @suggest_alternate_spellings = search.query.params[:pattern]
-        # show_selected_observations(search.query)
-        query = search.query
+        show_selected_observations(search.query)
       end
     end
   end
@@ -163,10 +165,10 @@ module ObservationsController::Index
 
       query = find_query(:Observation)
     end
-    # show_selected_observations(query)
+    show_selected_observations(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(searches_advanced_search_form_path) and return
+    redirect_to(searches_advanced_search_form_path)
   end
 
   # Show selected search results as a matrix with "index" template.

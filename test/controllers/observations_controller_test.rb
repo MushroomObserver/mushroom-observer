@@ -105,8 +105,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_observation_change_thumbnail_size
     user = users(:small_thumbnail_user)
     login(user.name)
-    get(:show,
-        params: { set_thumbnail_size: "thumbnail" })
+    get(:show, params: { set_thumbnail_size: "thumbnail" })
     user.reload
     assert_equal("thumbnail", user.thumbnail_size)
   end
@@ -2743,7 +2742,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
   end
 
-  def test_list_checkboxes_in_edit_observation
+  def test_list_checkboxes_in_update_observation
     init_for_list_checkbox_tests
 
     login("rolf")
