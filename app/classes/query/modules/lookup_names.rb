@@ -113,27 +113,27 @@ module Query
       end
 
       def add_subtaxa(min_names)
-        min_names += add_higher_names(min_names)
-        min_names += add_lower_names(min_names)
+        min_names = add_higher_names(min_names)
+        min_names = add_lower_names(min_names)
         min_names.uniq
       end
 
       def add_higher_names(min_names)
         higher_names = genera_and_up(min_names)
-        return "" if higher_names.empty?
+        return min_names if higher_names.empty?
 
         regex = /: _(#{higher_names.join("|")})_/
-        Name.
+        min_names += Name.
           where(Name[:classification] =~ regex).
           pluck(*minimal_name_columns_array)
       end
 
       def add_lower_names(min_names)
         lower_names = genera_and_down(min_names)
-        return "" if lower_names.empty?
+        return min_names if lower_names.empty?
 
         regex = /^(#{lower_names.join("|")}) /
-        Name.
+        min_names += Name.
           where(Name[:text_name] =~ regex).
           pluck(*minimal_name_columns_array)
       end
