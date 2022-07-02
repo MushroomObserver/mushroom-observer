@@ -108,7 +108,7 @@ module Query
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +
-          Name.where(synonym_id: clean_id_set(ids)).
+          Name.where(synonym_id: clean_id_set(ids).split(",")).
           pluck(*minimal_name_columns.split(", ").map(&:to_sym))
       end
 
