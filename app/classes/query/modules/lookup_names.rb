@@ -108,10 +108,8 @@ module Query
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +
-          Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE synonym_id IN (#{clean_id_set(ids)})
-          ))
+          Name.where(synonym_id: clean_id_set(ids)).
+          pluck(*minimal_name_columns.split(", ").map(&:to_sym))
       end
 
       def add_subtaxa(min_names)
