@@ -1299,17 +1299,17 @@
 
   # MOST POPULAR PAGES
 
-  # observer/ask_observation_question
+  # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
   ask_observation_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this observation as well as your email address.
 
-  # observer/ask_user_question
+  # emails/ask_user_question
   ask_user_question_title: Email Message for [user]
   ask_user_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will include your email address as the 'Reply To' address.
   ask_user_question_message: "[:Message]"
   ask_user_question_subject: "[:Subject]"
 
-  # observer/ask_webmaster_question
+  # emails/ask_webmaster_question
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
@@ -1336,7 +1336,7 @@
   comment_show_edit: "[:EDIT]"
   comment_show_destroy: "[:DESTROY]"
 
-  # observer/commercial_inquiry
+  # emails/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
   commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
@@ -1416,7 +1416,7 @@
   email_merge_request_help: By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types].
   email_merge_request_success: Your request has been sent.  Thank you!
 
-  # observer/email_name_change_request
+  # emails/name_change_request
   email_name_change_request_title: Send Name Change Request
   email_name_change_request_help: "Changing this Name will indirectly affect other Names that depend on this Name. For instance, another Name may: include this Name as part of its Classification; or have this Name as an approved synonym. If you really want to change this Name, please explain why. This will send a request to the admins, and if we agree with you, we will make the change."
   new_name: New Name
@@ -1745,12 +1745,12 @@
   name_map_about: "[:show_name]"
   name_map_no_maps: No observations of [name] have mappable location information.
 
-  # observer/news
+  # info/news
   news_title: "Latest Release: April 17, 2017"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
   news_content: "[:news_content_pr_306]\n\n[:news_content_pr_301]\n\n[:news_content_pr_294]\n\n[:news_content_pr_291]\n\n[:news_content_pr_293]\n\n[:news_content_pr_276]\n\n[:news_content_pr_261]\n\n[:news_content_pr_258]\n\n[:news_content_pr_256]\n\n[:news_content_pr_249]\n\n[:news_content_pr_248]\n\n[:news_content_pr_247]\n\n[:news_content_pr_246]\n\n[:news_content_commit_efa11ea]\n\n[:news_content_pr_241]\n\n[:news_content_pr_240]\n\n[:news_content_pr_238]\n\n[:news_content_commit_22deee6]\n\n[:news_content_commit_33639d5]\n\n[:news_content_commit_96e27e9]\n\n[:news_content_pr_236]\n\n[:news_content_pr_235]\n\n[:news_content_pr_233]\n\n[:news_content_pr_232]\n\n[:news_content_pr_231]\n\n[:news_content_pr_230]\n\n[:news_content_pr_226]\n\n[:news_content_pr_224]\n\n[:news_content_pr_223]\n\n[:news_content_pr_221]\n\n[:news_content_pr_220]\n\n[:news_content_pr_219]\n\n[:news_content_pr_217]\n\n[:news_content_pr_216]\n\n[:news_content_pr_215]\n\n[:news_content_pr_213]\n\n[:news_content_pr_212]\n\n[:news_content_pr_208]"
 
-  # observer/news individual updates
+  # info/news individual updates
   news_content_pr_306: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/306\" target=\"_new\">PR #306</a> (April 17, 2017) Allow removal of author from Name; allow Group or Clade authored/unauthored Name pairs."
   news_content_pr_301: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/301\" target=\"_new\">PR #301</a> (April 1, 2017) Add google map inset to observation form to help users enter good lat/long and elevation for observatons."
   news_content_pr_294: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/294\" target=\"_new\">PR #294</a> (March 19, 2017) Add support for clade names. These are just like group names, but use “clade” instead of “group”. Clarify and expand instructions on the Create Name and Edit Name pages."
@@ -1916,7 +1916,7 @@
   reverify_link: Reverify
   reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
-  # observer/rss
+  # rss_logs/rss
   rss_description: List of changes to [:app_title] as they happen.
   rss_log_of_deleted_item: Deleted Item
   rss_log_title: Activity Log
@@ -2170,7 +2170,7 @@
   # observer/show_rss_log
   show_rss_log_title: Log for [title]
 
-  # observer/show_site_stats
+  # info/site_stats
   show_site_stats_title: Site Statistics
 
   # observer/_show_votes
@@ -2189,7 +2189,7 @@
   show_votes_gone_public: Thank you!  Your preferences have been updated.  Other users can now see your votes.
   show_votes_gone_private: Your preferences have been updated.  Other users can no longer see your votes.
 
-  # observer/show_user
+  # users/show
   show_user_title: Contribution Summary for [user]
   show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]
@@ -2312,7 +2312,7 @@
   form_sequence_valid_deposit: "[:deposit] requires both [:archive] and [:accession]"
   form_sequence_bases_or_deposit_required: bases and/or deposit required
 
-  # observer/users_by_contribution
+  # users/by_contribution
   users_by_contribution_title: List of Contributors
   users_by_contribution_2a: "[:images]"
   users_by_contribution_2b: "[:name]"
@@ -2589,7 +2589,7 @@
 
   # support/wrapup_2012
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
-  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/users/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a>\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
   ##############################################################################
 
@@ -2620,7 +2620,7 @@
   adjust_permissions_all_users: All Users
   adjust_permissions_site_admin: site admin
 
-  # observer/advanced_search
+  # searches/advanced_search
   advanced_search_at_least_one: Please provide at least one search parameter
   advanced_search_caveat: "Advanced search has somewhat limited options because of performance issues that result in timeouts.  Please \"email the webmaster\":/observer/ask_webmaster_question if you experience timeouts or if there are particular types of searches you would like to have added.\n\nHints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use \"OR\" (all caps) to tell it to match one of several possible strings, e.g. \"Xanthoria OR Xanthomendoza\".  Use a star as a wildcard, e.g. \"Wells Gray*Canada\" will match \"Wells Gray, Canada\", \"Wells Gray Park, Canada\", and \"Wells Gray Provincial Park, Canada\".  (See notes under 'Content', too.)"
   advanced_search_content: Content
@@ -2656,7 +2656,7 @@
   # observer/license_updater
   bulk_license_link: Bulk License Updater
 
-  # observer/checklist
+  # checklists
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_project_title: Checklist for [project]
@@ -2910,7 +2910,7 @@
   pivotal_label_specimen: "[:specimens]"
   pivotal_label_voting: voting
 
-  # observer/textile
+  # info/textile
   sandbox_enter: Enter Textile you wish to test here
   sandbox_header: This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.
   sandbox_link4: The RedCloth manual
@@ -2987,7 +2987,7 @@
   Hygrocybe: Hygrocybe
   BlackOnWhite: Black on White
 
-  # observer/translators_note
+  # info/translators_note
   translators_note: "Please help us make this website available around the world!  It's easy.\n\nThere are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you.  We've organized it so someone with limited time can concentrate on the most important text.  Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n\nThere are several ways to get started.  You can pick up a copy of the entire \"translation file\":[repo] and start translating it into any language you wish.  \"Send us an email\":/observer/ask_webmaster_question to learn more about this approach.\n\nIt's even easier to work on existing translations.  Just look for \"[:app_edit_translations]\" at the bottom of any page.  You can see immediately how your changes look in the context of the page.  If your language is not available, \"send us an email\":/observer/ask_webmaster_question and we can create a \"beta\" version for you to work on.\n\nYou will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users."
   translators_note_title: Translator's Note
 
@@ -3089,7 +3089,7 @@
   request_subject: Subject
   request_success: Delivered email.
 
-  # observer/change_banner
+  # info/change_banner
   change_banner_title: Change Site Banner
 
   # project/change_member_status
@@ -3106,7 +3106,7 @@
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
 
-  # observer/change_user_bonuses
+  # users/bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
@@ -3160,7 +3160,7 @@
   show_project_title: "Project: [title]"
   show_project_user_group: User Group
 
-  # observer/users_by_name
+  # users/by_name
   users_by_name_title: Users by Name
   users_by_name_created_at: Created
   users_by_name_groups: Groups
@@ -3300,7 +3300,7 @@
 
   # HELP PAGES
 
-  # observer/intro
+  # info/intro
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/observer/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
@@ -3308,7 +3308,7 @@
   intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
 
-  # observer/how_to_help
+  # info/how_to_help
   how_help_title: How to Help Make [:app_title] Better
   how_help_intro: This page provides a list of skills that we could really use some help with. If you're interested in helping out just "send an email":/observer/ask_webmaster_question and let us know what you want to do.
   how_help_contributors: "h4. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/observer/how_to_use#describing_species or \"defining locations\":/observer/how_to_use#defining_locations."
@@ -3318,7 +3318,7 @@
   how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
   how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, after some time consuming false starts, we are now in the process of creating a new non-profit focused solely on Mushroom Observer. This is just getting going so let us know if you want to get involved or have any business related advice."
 
-  # observer/how_to_use
+  # info/how_to_use
   how_title: How to Use [:app_title]
   how_common_tasks: Common Tasks
   how_glossary: Concepts Glossary

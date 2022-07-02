@@ -3,7 +3,7 @@ Last Revised: May 25, 2012
 = MushroomObserver
 
 The following is an overview of the code for the Mushroom Observer website for
-prospective developers.  See https://mushroomobserver.org/observer/intro for an
+prospective developers.  See https://mushroomobserver.org/info/intro for an
 introduction to the website itself.
 
 
@@ -52,13 +52,13 @@ test
 For more information: (Note that most of these no longer discuss Rails 2.1,
 but you should be able to find the docs for this version by digging a bit.)
 
-Ruby Documentation:: http://www.ruby-doc.org/core/
-Ruby Quick Ref:: http://www.zenspider.com/Languages/Ruby/QuickRef.html
-Rails Documentation:: http://api.rubyonrails.org/
-Rdoc Documentation:: http://rdoc.sourceforge.net/doc/index.html
-Rails Plugin Wiki:: http://wiki.rubyonrails.org/rails/pages/Plugins
-Rails Plugin Directory:: http://agilewebdevelopment.com/plugins
-MVC Architecture:: http://en.wikipedia.org/wiki/Model-view-controller
+Ruby Documentation:: https://www.ruby-doc.org/core/
+Ruby Quick Ref:: https://www.zenspider.com/Languages/Ruby/QuickRef.html
+Rails Documentation:: https://api.rubyonrails.org/
+Rdoc Documentation:: https://rdoc.sourceforge.net/doc/index.html
+Rails Plugin Wiki:: https://wiki.rubyonrails.org/rails/pages/Plugins
+Rails Plugin Directory:: https://agilewebdevelopment.com/plugins
+MVC Architecture:: https://en.wikipedia.org/wiki/Model-view-controller
 
 
 
@@ -175,8 +175,8 @@ instance methods.  These correspond directly to the URL of the request:
 Note that the default controller is "observer" and the "id" parameter is
 shortened to a bare integer:
 
-  http://mo.org/42                      Show observation #42.
-  http://mo.org/observer/show_user/252  Show summary for user #3.
+  https://mushroomobserver.org/42                Show observation #42.
+  https://mushroomobserver.org/users/252         Show summary for user #252.
 
 Controller methods -- that is, actions -- have access to quite a number of
 helpers and data.  Here are just a few, see ActionController for more:
@@ -316,8 +316,8 @@ that take a block.  See +boxify+ in helpers/html_helper.rb.  Simplified:
 
 For more information:
 
-ActionPack Docs:: http://api.rubyonrails.org/files/vendor/rails/actionpack/README.html
-ActionView Docs:: http://api.rubyonrails.org/classes/ActionView/Base.html
+ActionPack Docs:: https://api.rubyonrails.org/files/vendor/rails/actionpack/README.html
+ActionView Docs:: https://api.rubyonrails.org/classes/ActionView/Base.html
 
 
 
@@ -344,7 +344,7 @@ app/helpers/other_helper.rb
 
 For more information:
 
-Understanding Helpers:: http://wiki.rubyonrails.org/rails/pages/UnderstandingHelpers
+Understanding Helpers:: https://wiki.rubyonrails.org/rails/pages/UnderstandingHelpers
 
 
 
@@ -377,5 +377,5 @@ test/other_extensions.rb::        Utilities available to all tests.
 
 For more information:
 
-Cheatsheet:: http://nubyonrails.com/articles/ruby-rails-test-rails-cheat-sheet
-Longwinded Intro:: http://www.nullislove.com/2007/11/10/testing-in-rails-introduction/
+Cheatsheet:: https://nubyonrails.com/articles/ruby-rails-test-rails-cheat-sheet
+Longwinded Intro:: https://www.nullislove.com/2007/11/10/testing-in-rails-introduction/

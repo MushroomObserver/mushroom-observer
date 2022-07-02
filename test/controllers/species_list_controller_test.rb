@@ -39,16 +39,18 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
   end
 
-  # Controller specific asserts
-  MODIFY_PARTIALS = %w[_form_list_feedback _textilize_help _form_species_lists].
-                    freeze
-
   def assert_create_species_list
-    assert_action_partials("create_species_list", MODIFY_PARTIALS)
+    assert_template("create_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_edit_species_list
-    assert_action_partials("edit_species_list", MODIFY_PARTIALS)
+    assert_template("edit_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_project_checks(project_states)
@@ -111,12 +113,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     # Show same list with non-owner logged in.
     login("mary")
     get(:show_species_list, params: { id: sl_id })
-    assert_template(:show_species_list, partial: "_show_comments")
+    assert_template(:show_species_list)
+    assert_template("comment/_show_comments")
 
     # Show non-empty list with owner logged in.
     get(:show_species_list,
         params: { id: species_lists(:unknown_species_list).id })
-    assert_template(:show_species_list, partial: "_show_comments")
+    assert_template(:show_species_list)
+    assert_template("comment/_show_comments")
   end
 
   def test_show_species_lists_attached_to_projects

@@ -112,6 +112,27 @@ module ObserverController::Indexes
     end
   end
 
+  # Displays matrix of advanced search results.
+  def advanced_search
+    if params[:name] || params[:location] || params[:user] || params[:content]
+      search = {}
+      search[:name] = params[:name] if params[:name].present?
+      search[:location] = params[:location] if params[:location].present?
+      search[:user] = params[:user] if params[:user].present?
+      search[:content] = params[:content] if params[:content].present?
+      search[:search_location_notes] = params[:search_location_notes].present?
+      query = create_query(:Observation, :advanced_search, search)
+    else
+      return if handle_advanced_search_invalid_q_param?
+
+      query = find_query(:Observation)
+    end
+    show_selected_observations(query)
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
+    redirect_to(searches_advanced_search_form_path)
+  end
+
   # Show selected search results as a matrix with "list_observations" template.
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
@@ -218,11 +239,11 @@ module ObserverController::Indexes
 
     unless locations.empty?
       # Eager-load corresponding locations.
-      @locations = Location.connection.select_rows(%(
-        SELECT id, name, north, south, east, west FROM locations
-        WHERE id IN (#{locations.keys.sort.map(&:to_s).join(",")})
-      )).map do |id, *the_rest|
-        locations[id.to_i] = MinimalMapLocation.new(id, *the_rest)
+      @locations = Location.
+                   where(id: locations.keys.sort).
+                   pluck(:id, :name, :north, :south, :east, :west).
+                   map do |id, *the_rest|
+        locations[id] = MinimalMapLocation.new(id, *the_rest)
       end
       @observations.each do |obs|
         obs.location = locations[obs.location_id] if obs.location_id

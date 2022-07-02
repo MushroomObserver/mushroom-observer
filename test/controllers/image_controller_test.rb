@@ -288,7 +288,7 @@ class ImageControllerTest < FunctionalTestCase
     get(:advanced_search, params: { q: "xxxxx" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(observer_advanced_search_form_path)
+    assert_redirected_to(searches_advanced_search_form_path)
   end
 
   def test_add_image
@@ -705,8 +705,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :observer, action: :show_user,
-                         id: rolf.id)
+    assert_redirected_to(user_path(rolf.id))
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
   end
@@ -716,8 +715,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     post_requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :observer, action: :show_user,
-                         id: rolf.id)
+    assert_redirected_to(user_path(rolf.id))
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
   end

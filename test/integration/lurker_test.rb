@@ -8,7 +8,7 @@ class LurkerTest < IntegrationTestCase
     login
     # Start at index.
     get("/")
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_logs/index")
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)
@@ -57,9 +57,9 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select("a[href^='/observer/show_user/#{mary.id}']", minimum: 3)
+    assert_select("a[href^='/users/#{mary.id}']", minimum: 3)
     click(label: "Mary Newbie")
-    assert_template("observer/show_user")
+    assert_template("users/show")
 
     # Check out location.
     get("/#{obs}")

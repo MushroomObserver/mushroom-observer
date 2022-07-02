@@ -110,7 +110,7 @@ module NameController::CreateAndEditName
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
       redirect_with_query(
-        controller: :observer, action: :email_name_change_request,
+        controller: :emails, action: :name_change_request,
         params: {
           name_id: @name.id,
           # Auricularia Bull. [#17132]
@@ -311,7 +311,7 @@ module NameController::CreateAndEditName
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(controller: :observer, action: :email_merge_request,
+      redirect_with_query(controller: :emails, action: :merge_request,
                           type: :Name, old_id: @name.id, new_id: new_name.id)
     end
   end
