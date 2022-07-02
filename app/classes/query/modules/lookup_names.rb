@@ -116,17 +116,16 @@ module Query
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
         unless higher_names.empty?
-          regex = escape(": _(#{higher_names.join("|")})_")
-          min_names += Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP #{regex}
-          ))
+          regex = /: _(#{higher_names.join("|")})_/
+          min_names += Name.
+                       where(Name[:classification] =~ regex).
+                       pluck(*minimal_name_columns.split(", ").map(&:to_sym))
         end
-        regex = escape("^(#{lower_names.join("|")}) ")
-        min_names += Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP #{regex}
-        ))
+
+        regex = /^(#{lower_names.join("|")}) /
+        min_names += Name.
+                     where(Name[:text_name] =~ regex).
+                     pluck(*minimal_name_columns.split(", ").map(&:to_sym))
         min_names.uniq
       end
 
