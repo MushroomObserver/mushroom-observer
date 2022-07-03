@@ -115,45 +115,82 @@ module Query
       def add_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
-        lower_names_regex = /^(#{lower_names.join("|")}) /
 
         if higher_names.empty?
-          # The min_names_themselves
-          Name.where(id: min_names.map(&:first)).
-            # + lower names
-            or(Name.where(Name[:text_name] =~ lower_names_regex)).
-            distinct.
-            pluck(*minimal_name_columns_array)
+          include_lower_taxa(
+            names: min_names,
+            lower_names_regex: /^(#{lower_names.join("|")}) /
+          )
         else
-          higher_names_regex = /: _(#{higher_names.join("|")})_/
-          # The min_names_themselves
-          Name.where(id: min_names.map(&:first)).
-            # + higher names
-            or(Name.where(Name[:classification] =~ higher_names_regex)).
-            # + lower names
-            or(Name.where(Name[:text_name] =~ lower_names_regex)).
-            distinct.
-            pluck(*minimal_name_columns_array)
+          include_higher_and_lower_taxa(
+            names: min_names,
+            lower_names_regex: /^(#{lower_names.join("|")}) /,
+            higher_names_matcher: /: _(#{higher_names.join("|")})_/
+          )
         end
+      end
+
+      def include_lower_taxa(names:, lower_names_regex:)
+        # The names_themselves
+        Name.where(id: names.map(&:first)).
+          # + lower names
+          or(Name.where(Name[:text_name] =~ lower_names_regex)).
+          distinct.
+          pluck(*minimal_name_columns_array)
+      end
+
+      def include_higher_and_lower_taxa(names:, lower_names_regex:,
+                                        higher_names_matcher:)
+        # The names_themselves
+        Name.where(id: names.map(&:first)).
+          # + higher names
+          or(Name.where(Name[:classification] =~ higher_names_matcher)).
+          # + lower names
+          or(Name.where(Name[:text_name] =~ lower_names_regex)).
+          distinct.
+          pluck(*minimal_name_columns_array)
       end
 
       def add_immediate_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
 
-        unless higher_names.empty?
-          regex = /: _(#{higher_names.join("|")})_$/
-          min_names += Name.
-                       where(Name[:classification] =~ regex).
-                       where.not(Name[:text_name].matches("% %")).
-                       pluck(*minimal_name_columns_array)
+        if higher_names.empty?
+          include_immediate_lower_taxa(
+            names: min_names,
+            lower_names_regex:
+              /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
+          )
+        else
+          include_immediate_higher_and_lower_taxa(
+            names: min_names,
+            lower_names_regex:
+              /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/,
+            higher_names_matcher: /: _(#{higher_names.join("|")})_$/
+          )
         end
+      end
 
-        min_names += matching_lower_names(
-          /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
-        )
+      def include_immediate_lower_taxa(names:, lower_names_regex:)
+        # The names_themselves
+        Name.where(id: names.map(&:first)).
+          # + lower names
+          or(Name.where(Name[:text_name] =~ lower_names_regex)).
+          distinct.
+          pluck(*minimal_name_columns_array)
+      end
 
-        min_names.uniq
+      def include_immediate_higher_and_lower_taxa(names:, lower_names_regex:,
+                                                  higher_names_matcher:)
+        # The names_themselves
+        Name.where(id: names.map(&:first)).
+          # + higher names
+          or(Name.where(Name[:classification] =~ higher_names_matcher).
+                  where.not(Name[:text_name].matches("% %"))).
+          # + lower names
+          or(Name.where(Name[:text_name] =~ lower_names_regex)).
+          distinct.
+          pluck(*minimal_name_columns_array)
       end
 
       def matching_lower_names(lower_names_regex)
