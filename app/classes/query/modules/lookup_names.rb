@@ -113,19 +113,19 @@ module Query
       end
 
       def add_subtaxa(min_names)
-        min_names = add_higher_names(min_names)
-        min_names = add_lower_names(min_names)
-        min_names.uniq
-      end
-
-      def add_higher_names(min_names)
         higher_names = genera_and_up(min_names)
-        return min_names if higher_names.empty?
+        lower_names = genera_and_down(min_names)
 
-        regex = /: _(#{higher_names.join("|")})_/
-        min_names + Name.
-                    where(Name[:classification] =~ regex).
-                    pluck(*minimal_name_columns_array)
+        unless higher_names.empty?
+          regex = /: _(#{higher_names.join("|")})_/
+          min_names += Name.
+                       where(Name[:classification] =~ regex).
+                       pluck(*minimal_name_columns_array)
+        end
+
+        min_names += matching_lower_names(/^(#{lower_names.join("|")}) /)
+
+        min_names.uniq
       end
 
       def add_lower_names(min_names)
@@ -139,30 +139,35 @@ module Query
       end
 
       def add_immediate_subtaxa(min_names)
-        min_names = immediate_add_higher_names(min_names)
-        min_names = immediate_add_lower_names(min_names)
+        higher_names = genera_and_up(min_names)
+        lower_names = genera_and_down(min_names)
+
+        unless higher_names.empty?
+          regex = /: _(#{higher_names.join("|")})_$/
+          min_names += Name.
+                       where(Name[:classification] =~ regex).
+                       where.not(Name[:text_name].matches("% %")).
+                       pluck(*minimal_name_columns_array)
+        end
+
+        min_names += matching_lower_names(
+          /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
+        )
+
         min_names.uniq
       end
 
-      def immediate_add_higher_names(min_names)
-        higher_names = genera_and_up(min_names)
-        return min_names if higher_names.empty?
-
-        regex = /: _(#{higher_names.join("|")})_$/
-        min_names + Name.
-                    where(Name[:classification] =~ regex).
-                    where.not(Name[:text_name].matches("% %")).
-                    pluck(*minimal_name_columns_array)
+      def matching_higher_names(regex)
+        Name.
+          where(Name[:classification] =~ regex).
+          where.not(Name[:text_name].matches("% %")).
+          pluck(*minimal_name_columns_array)
       end
 
-      def immediate_add_lower_names(min_names)
-        lower_names = genera_and_down(min_names)
-        return min_names if lower_names.empty?
-
-        regex = /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
-        min_names + Name.
-                    where(Name[:text_name] =~ regex).
-                    pluck(*minimal_name_columns_array)
+      def matching_lower_names(regex)
+        Name.
+          where(Name[:text_name] =~ regex).
+          pluck(*minimal_name_columns_array)
       end
 
       def genera_and_up(min_names)
