@@ -128,16 +128,6 @@ module Query
         min_names.uniq
       end
 
-      def add_lower_names(min_names)
-        lower_names = genera_and_down(min_names)
-        return min_names if lower_names.empty?
-
-        regex = /^(#{lower_names.join("|")}) /
-        min_names + Name.
-                    where(Name[:text_name] =~ regex).
-                    pluck(*minimal_name_columns_array)
-      end
-
       def add_immediate_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
@@ -155,13 +145,6 @@ module Query
         )
 
         min_names.uniq
-      end
-
-      def matching_higher_names(regex)
-        Name.
-          where(Name[:classification] =~ regex).
-          where.not(Name[:text_name].matches("% %")).
-          pluck(*minimal_name_columns_array)
       end
 
       def matching_lower_names(regex)
