@@ -115,17 +115,26 @@ module Query
       def add_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
+        lower_names_regex = /^(#{lower_names.join("|")}) /
 
-        unless higher_names.empty?
-          regex = /: _(#{higher_names.join("|")})_/
-          min_names += Name.
-                       where(Name[:classification] =~ regex).
-                       pluck(*minimal_name_columns_array)
+        if higher_names.empty?
+          # The min_names_themselves
+          Name.where(id: min_names.map(&:first)).
+            # + lower names
+            or(Name.where(Name[:text_name] =~ lower_names_regex)).
+            distinct.
+            pluck(*minimal_name_columns_array)
+        else
+          higher_names_regex = /: _(#{higher_names.join("|")})_/
+          # The min_names_themselves
+          Name.where(id: min_names.map(&:first)).
+            # + higher names
+            or(Name.where(Name[:classification] =~ higher_names_regex)).
+            # + lower names
+            or(Name.where(Name[:text_name] =~ lower_names_regex)).
+            distinct.
+            pluck(*minimal_name_columns_array)
         end
-
-        min_names += matching_lower_names(/^(#{lower_names.join("|")}) /)
-
-        min_names.uniq
       end
 
       def add_immediate_subtaxa(min_names)
@@ -147,9 +156,9 @@ module Query
         min_names.uniq
       end
 
-      def matching_lower_names(regex)
+      def matching_lower_names(lower_names_regex)
         Name.
-          where(Name[:text_name] =~ regex).
+          where(Name[:text_name] =~ lower_names_regex).
           pluck(*minimal_name_columns_array)
       end
 
