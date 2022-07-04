@@ -21,7 +21,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
   # MO displays what the entered text looks like.
   def test_post_textile
     login
-    visit("/observer/textile_sandbox")
+    visit("/info/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)
@@ -126,7 +126,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
       fill_in("en:mo.login_user:", with: sender.login)
       fill_in("en:mo.login_password:", with: "testpassword")
       click_button("en:mo.login_login")
-      visit("/observer/ask_user_question/#{receiver.id}")
+      visit("/emails/ask_user_question/#{receiver.id}")
       fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
       fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
       click_button("fr:mo.SEND")

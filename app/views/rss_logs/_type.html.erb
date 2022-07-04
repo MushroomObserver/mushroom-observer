@@ -2,6 +2,6 @@
 <% checked = @types.include?(type) || @types == ['all'] %>
 <span class="btn btn-xs <%= "active" if @types == [type] %>"
       data-toggle="checkbox" class="rss_log_tab">
-  <%= check_box_tag("show_#{type}", "1", checked, class: "rss_log_tab") %>
+  <%= check_box_tag("type[]", "#{type}", checked, class: "rss_log_tab") %>
   <%= tab_for_type(type) %>
 </span>

@@ -22,7 +22,7 @@
     <%= :review_authors_authors.t %><br/>
     <% @authors.each do |u| %>
       <%= user_link(u) %>
-      | <%= link_to(:review_authors_remove_author.t, {action: :review_authors,
+      | <%= link_to(:review_authors_remove_author.t, {action: :review,
                                                       id: @object.id, type: type, remove: u.id},
                     { data: { confirm: :are_you_sure.l } }) %>
       <br/>
@@ -34,7 +34,7 @@
     <% @users.each do |u|
       unless @authors.member?(u) %>
         <%= user_link(u) %>
-        | <%= link_to(:review_authors_add_author.t, action: :review_authors,
+        | <%= link_to(:review_authors_add_author.t, action: :review,
                       id: @object.id, type: type, add: u.id) %>
         <br/>
       <% end %>

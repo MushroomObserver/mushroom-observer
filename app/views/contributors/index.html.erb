@@ -2,7 +2,7 @@
   @title = :users_by_contribution_title.t
 
   tabs = [
-    link_with_query(:app_site_stats.t, action: :show_site_stats)
+    link_with_query(:app_site_stats.t, info_site_stats_path)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
@@ -10,42 +10,8 @@
 <div class="row">
   <div class="col-md-6">
     <div class="list-group">
-      <% @users.select { |u| u.contribution > 1 }.each_with_index do |user, index| %>
-        <div class="list-group-item">
-          <div class="row">
-
-            <div class="col-sm-7">
-              <table style="width: 100%">
-                <tr>
-                  <td style="vertical-align: middle" class="col-sm-2">
-                    <strong><%= index+1 %></strong>
-                  </td>
-                  <td>
-                    <h4><%= user_link(user.id, user.legal_name) %></h4>
-                  </td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td>
-                    <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
-                    <%= link_to(:Observations.t, action: :observations_by_user, id: user.id) %>
-                  </td>
-                </tr>
-              </table>
-            </div>
-
-            <div class="col-xs-5">
-              <%= if user.image_id
-                    thumbnail(user.image_id,
-                              link: { action: :show_user, id: user.id },
-                              votes: false, size: :thumbnail)
-                  end
-              %>
-            </div>
-
-          </div>
-        </div>
-      <% end %>
+      <%= render(partial: "contributor",
+                 collection: @users, as: :user) %>
     </div>
   </div>
 

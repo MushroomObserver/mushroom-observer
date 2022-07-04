@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# TODO: move this into a new SearchController
 # searches defined by the url query string
-module ObserverController::SearchController
+class SearchesController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comment/image_search
@@ -10,7 +9,7 @@ module ObserverController::SearchController
   #   location/location_search
   #   name/name_search
   #   observer/observation_search
-  #   observer/user_search
+  #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
   def pattern_search
@@ -22,24 +21,27 @@ module ObserverController::SearchController
     session[:search_type] = type
 
     case type
-    when :observation, :user
+    when :observation
       ctrlr = :observer
     when :comment, :image, :location, :name, :project, :species_list,
       :herbarium_record
       ctrlr = type
+    when :user
+      redirect_to_search_or_index(pattern: pattern,
+                                  search_path: users_path(pattern: pattern),
+                                  index_path: users_path)
+      return
     when :herbarium
-      redirect_to_search_or_index(
-        pattern: pattern,
-        search_path: herbaria_path(pattern: pattern),
-        index_path: herbaria_path(flavor: :all)
-      )
+      redirect_to_search_or_index(pattern: pattern,
+                                  search_path: herbaria_path(pattern: pattern),
+                                  index_path: herbaria_path(flavor: :all))
       return
     when :google
       site_google_search(pattern)
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(action: :list_rss_logs)
+      redirect_back_or_default("/")
       return
     end
 
@@ -48,7 +50,7 @@ module ObserverController::SearchController
 
   def site_google_search(pattern)
     if pattern.blank?
-      redirect_to(action: :list_rss_logs)
+      redirect_to("/")
     else
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")
@@ -62,7 +64,7 @@ module ObserverController::SearchController
   #   image/advanced_search
   #   location/advanced_search
   #   name/advanced_search
-  #   observer/advanced_search
+  #   searches/advanced_search
   def advanced_search_form
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
@@ -94,27 +96,6 @@ module ObserverController::SearchController
     ContentFilter.by_model(model).each do |fltr|
       query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
     end
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search
-    if params[:name] || params[:location] || params[:user] || params[:content]
-      search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
-      query = create_query(:Observation, :advanced_search, search)
-    else
-      return if handle_advanced_search_invalid_q_param?
-
-      query = find_query(:Observation)
-    end
-    show_selected_observations(query)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
   ##############################################################################

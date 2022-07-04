@@ -77,17 +77,17 @@ OBJECT_TYPES = [
 
 # Values: [ title, URL, update_frequency ]
 STATIC_PAGES = [
-  ["home page",    "observer/list_rss_logs", "hourly"],
-  ["introduction", "observer/intro",         "weekly"],
-  ["how to use",   "observer/how_to_use",    "weekly"],
-  ["how to help",  "observer/how_to_help",   "weekly"]
+  ["home page",    "activity_logs/index", "hourly"],
+  ["introduction", "info/intro",          "weekly"],
+  ["how to use",   "info/how_to_use",     "weekly"],
+  ["how to help",  "info/how_to_help",    "weekly"]
 ].freeze
 
 # These are aliases for pages allowed above.
 OTHER_ALLOWED_PATHS = [
   # "/observer/index", (would allow too many indexes we don't want to allow)
-  "/observer/lookup_observation",
-  "/observer/lookup_name",
+  "/lookups/lookup_observation",
+  "/lookups/lookup_name",
   "/observer/show_name",
   "/name/eol"
 ].freeze

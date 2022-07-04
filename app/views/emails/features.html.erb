@@ -1,7 +1,7 @@
 <% @title = "Email Features" %>
 
 <div class="max-width-text">
-  <%= form_tag(action: :email_features) do %>
+  <%= form_tag(action: :features) do %>
     <p>Sending to <%= @users.length %> users.</p>
 
     <%= label_tag(:feature_email_content, "Feature Email:") %>

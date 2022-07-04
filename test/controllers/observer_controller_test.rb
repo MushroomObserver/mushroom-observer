@@ -174,50 +174,24 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_page_loads
     login
-    get_with_dump(:index)
-    assert_template(:list_rss_logs, partial: :_rss_log)
-    assert_link_in_html(:app_intro.t, controller: :observer, action: :intro)
-
-    get_with_dump(:ask_webmaster_question)
-    assert_template(:ask_webmaster_question)
-    assert_form_action(action: :ask_webmaster_question)
-
-    get_with_dump(:how_to_help)
-    assert_template(:how_to_help)
-
-    get_with_dump(:how_to_use)
-    assert_template(:how_to_use)
-
-    get_with_dump(:intro)
-    assert_template(:intro)
-
-    get(:search_bar_help)
-    assert_response(:success)
-
     get_with_dump(:list_observations)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     # Test again, this time specifying page number via an observation id.
     get(:list_observations,
         params: { id: observations(:agaricus_campestris_obs).id })
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_for_project,
         params: { id: projects(:bolete_project).id })
-    assert_template(:list_observations, partial: :_rss_log)
-
-    get_with_dump(:list_rss_logs)
-    assert_template(:list_rss_logs, partial: :_rss_log)
-
-    get_with_dump(:news)
-    assert_template(:news)
+    assert_template("shared/_matrix_box")
 
     get_with_dump(:observations_by_name)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_of_name,
         params: { name: names(:boletus_edulis).text_name })
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     get(:observations_of_look_alikes,
         params: { name: names(:tremella_mesenterica).text_name })
@@ -227,49 +201,17 @@ class ObserverControllerTest < FunctionalTestCase
         params: { name: names(:tremella_mesenterica).text_name })
     assert_template(:list_observations)
 
-    get_with_dump(:rss)
-    assert_template(:rss)
-
-    get_with_dump(:show_rss_log, id: rss_logs(:observation_rss_log).id)
-    assert_template(:show_rss_log)
-
-    get_with_dump(:users_by_contribution)
-    assert_template(:users_by_contribution)
-
-    get_with_dump(:show_user, id: rolf.id)
-    assert_template(:show_user)
-
     get_with_dump(:observations_by_user, id: rolf.id)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
 
     # get_with_dump(:login)
     # assert_redirected_to(controller: :account, action: :login)
-
-    get_with_dump(:textile)
-    assert_template(:textile_sandbox)
-
-    get_with_dump(:textile_sandbox)
-    assert_template(:textile_sandbox)
-  end
-
-  def test_rss_with_article_in_feed
-    login("rolf")
-    article = Article.create!(title: "Really _Neat_ Feature!",
-                              body: "Does stuff.")
-    assert_equal("Really Neat Feature!", article.text_name)
-    get(:rss)
-  end
-
-  def test_page_load_user_by_contribution
-    login
-    get_with_dump(:users_by_contribution)
-    assert_template(:users_by_contribution)
   end
 
   def test_observations_by_unknown_user
     login
     get(:observations_by_user, params: { id: 1e6 })
-    assert_redirected_to(action: :index_user)
+    assert_redirected_to(users_path)
   end
 
   def test_observations_by_known_user
@@ -293,82 +235,6 @@ class ObserverControllerTest < FunctionalTestCase
       Image.url(:small, obs.thumb_image_id), @response.body,
       "Observation thumbnail should display although this is not an rss_log"
     )
-  end
-
-  def test_altering_types_shown_by_rss_log_index
-    login
-    # Show none.
-    post(:index_rss_log)
-    assert_template(:list_rss_logs)
-
-    # Show one.
-    post(:index_rss_log,
-         params: { show_observations: observations(:minimal_unknown_obs).to_s })
-    assert_template(:list_rss_logs)
-
-    # Show all.
-    params = {}
-    RssLog.all_types.each { |type| params["show_#{type}"] = "1" }
-    post(:index_rss_log, params: params)
-    assert_template(:list_rss_logs, partial: rss_logs(:observation_rss_log).id)
-  end
-
-  def test_get_index_rss_log
-    # With params[:type], it should display only that type
-    expect = rss_logs(:glossary_term_rss_log)
-    login
-    get(:index_rss_log,
-        params: { type: :glossary_term })
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
-    assert_no_match(/#{rss_logs(:observation_rss_log).observation.name}/,
-                    css_select(".rss-what").text)
-
-    # Without params[:type], it should display all logs
-    get(:index_rss_log)
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
-    assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
-                 css_select(".rss-what").text)
-  end
-
-  def test_user_default_rss_log
-    # Prove that MO offers to make non-default log the user's default.
-    login("rolf")
-    get(:index_rss_log, params: { type: :glossary_term })
-    link_text = @controller.instance_variable_get("@links").flatten.first
-    assert_equal(:rss_make_default.l, link_text)
-
-    # Prove that user can change his default rss log type.
-    get(:index_rss_log, params: { type: :glossary_term, make_default: 1 })
-    assert_equal("glossary_term", rolf.reload.default_rss_type)
-  end
-
-  # Prove that user content_filter works on rss_log
-  def test_rss_log_with_content_filter
-    login(users(:vouchered_only_user).name)
-    get(:index_rss_log, params: { type: :observation })
-    results = @controller.instance_variable_get("@objects")
-
-    assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
-    assert(results.include?(rss_logs(:observation_rss_log)))
-  end
-
-  def test_next_and_prev_rss_log
-    # First 2 log entries
-    logs = RssLog.order(updated_at: :desc).limit(2)
-
-    login
-    get(:next_rss_log, params: { id: logs.first })
-    # assert_redirected_to does not work here because #next redirects to a url
-    # which includes a query after the id, but assert_redirected_to treats
-    # the query as part of the id.
-    assert_response(:redirect)
-    assert_match(%r{/show_rss_log/#{logs.second.id}},
-                 @response.header["Location"], "Redirected to wrong page")
-
-    get(:prev_rss_log, params: { id: logs.second })
-    assert_response(:redirect)
-    assert_match(%r{/show_rss_log/#{logs.first.id}},
-                 @response.header["Location"], "Redirected to wrong page")
   end
 
   def test_prev_and_next_observation
@@ -457,28 +323,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_text(/can.*t find.*results.*index/i)
   end
 
-  def test_advanced_search_form
-    login
-    [Name, Image, Observation].each do |model|
-      post(
-        "advanced_search_form",
-        params: {
-          search: {
-            name: "Don't know",
-            user: "myself",
-            model: model.name.underscore,
-            content: "Long pink stem and small pink cap",
-            location: "Eastern Oklahoma"
-          },
-          commit: "Search"
-        }
-      )
-      assert_response(:redirect)
-      assert_match(%r{#{model.show_controller}/advanced_search},
-                   redirect_to_url)
-    end
-  end
-
   def test_advanced_search
     query = Query.lookup_and_save(:Observation, :advanced_search,
                                   name: "Don't know",
@@ -555,42 +399,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(3, results.length)
   end
 
-  def test_advanced_search_content_filters
-    login
-    # Make sure all the right buttons and fields are present.
-    get(:advanced_search_form)
-    assert_select("input[type=radio]#content_filter_has_images_yes")
-    assert_select("input[type=radio]#content_filter_has_images_no")
-    assert_select("input[type=radio]#content_filter_has_images_")
-    assert_select("input[type=radio]#content_filter_has_specimen_yes")
-    assert_select("input[type=radio]#content_filter_has_specimen_no")
-    assert_select("input[type=radio]#content_filter_has_specimen_")
-    assert_select("input[type=radio]#content_filter_lichen_yes")
-    assert_select("input[type=radio]#content_filter_lichen_no")
-    assert_select("input[type=radio]#content_filter_lichen_")
-    assert_select("input[type=text]#content_filter_region")
-    assert_select("input[type=text]#content_filter_clade")
-
-    params = {
-      search: {
-        model: "observation",
-        user: "rolf"
-      },
-      content_filter_has_images: "",
-      content_filter_has_specimen: "yes",
-      content_filter_lichen: "no",
-      content_filter_region: "California",
-      content_filter_clade: ""
-    }
-    post(:advanced_search_form, params: params)
-    query = QueryRecord.last.query
-    assert_equal("", query.params[:has_images])
-    assert_true(query.params[:has_specimen])
-    assert_false(query.params[:lichen])
-    assert_equal(["California"], query.params[:region])
-    assert_equal("", query.params[:clade])
-  end
-
   # Prove that if advanced_search provokes exception,
   # it returns to advanced search form.
   def test_advanced_search_error
@@ -599,72 +407,7 @@ class ObserverControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
     login
     get(:advanced_search, params: @controller.query_params(query))
-    assert_redirected_to(action: "advanced_search_form")
-  end
-
-  def test_pattern_search
-    login
-    params = { search: { pattern: "12", type: :observation } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :observation_search,
-                         pattern: "12")
-
-    params = { search: { pattern: "34", type: :image } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :image, action: :image_search,
-                         pattern: "34")
-
-    params = { search: { pattern: "56", type: :name } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :name, action: :name_search,
-                         pattern: "56")
-
-    params = { search: { pattern: "78", type: :location } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :location, action: :location_search,
-                         pattern: "78")
-
-    params = { search: { pattern: "90", type: :comment } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :comment, action: :comment_search,
-                         pattern: "90")
-
-    params = { search: { pattern: "12", type: :species_list } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :species_list,
-                         action: :species_list_search,
-                         pattern: "12")
-
-    params = { search: { pattern: "34", type: :user } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :user_search,
-                         pattern: "34")
-
-    stub_request(:any, /google.com/)
-    pattern =  "hexiexiva"
-    params = { search: { pattern: pattern, type: :google } }
-    target =
-      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(target)
-
-    params = { search: { pattern: "", type: :google } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
-
-    params = { search: { pattern: "x", type: :nonexistent_type } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
-
-    params = { search: { pattern: "", type: :observation } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_observations)
-
-    # Make sure this redirects to the index that lists all herbaria,
-    # rather than the index that lists query results.
-    params = { search: { pattern: "", type: :herbarium } }
-    get(:pattern_search, params: params)
-    assert_redirected_to(herbaria_path(flavor: :all))
+    assert_redirected_to(searches_advanced_search_form_path)
   end
 
   def test_observation_search_help
@@ -800,7 +543,7 @@ class ObserverControllerTest < FunctionalTestCase
     login
     params = { place_name: "Burbank" }
     get_with_dump(:observations_at_where, params)
-    assert_template(:list_observations, partial: :_rss_log)
+    assert_template("shared/_matrix_box")
   end
 
   def test_observations_of_name
@@ -849,58 +592,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal(observations_in_region, results)
   end
 
-  def test_send_webmaster_question
-    ask_webmaster_test("rolf@mushroomobserver.org",
-                       response: { controller: :observer,
-                                   action: :list_rss_logs })
-  end
-
-  def test_send_webmaster_question_need_address
-    ask_webmaster_test("", flash: :runtime_ask_webmaster_need_address.t)
-  end
-
-  def test_send_webmaster_question_spammer
-    ask_webmaster_test("spammer", flash: :runtime_ask_webmaster_need_address.t)
-  end
-
-  def test_send_webmaster_question_need_content
-    ask_webmaster_test("bogus@email.com",
-                       content: "",
-                       flash: :runtime_ask_webmaster_need_content.t)
-  end
-
-  def test_send_webmaster_question_antispam
-    disable_unsafe_html_filter
-    ask_webmaster_test("bogus@email.com",
-                       content: "Buy <a href='http://junk'>Me!</a>",
-                       flash: :runtime_ask_webmaster_antispam.t)
-    ask_webmaster_test("okay_user@email.com",
-                       content: "iwxobjUzvkhmaCt",
-                       flash: :runtime_ask_webmaster_antispam.t)
-  end
-
-  def test_send_webmaster_question_antispam_logged_in
-    disable_unsafe_html_filter
-    user = users(:rolf)
-    login(user.login)
-    ask_webmaster_test(user.email,
-                       content: "https://",
-                       response: :redirect,
-                       flash: :runtime_delivered_message.t)
-  end
-
-  def ask_webmaster_test(email, args)
-    response = args[:response] || :success
-    flash = args[:flash]
-    post(:ask_webmaster_question,
-         params: {
-           user: { email: email },
-           question: { content: (args[:content] || "Some content") }
-         })
-    assert_response(response)
-    assert_flash_text(flash) if flash
-  end
-
   def test_show_observation_num_views
     login
     obs = observations(:coprinus_comatus_obs)
@@ -916,14 +607,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def assert_show_observation
-    assert_action_partials("show_observation",
-                           ["_show_name_info",
-                            "_show_observation",
-                            "_show_lists",
-                            "naming/_show",
-                            "_show_comments",
-                            "_show_thumbnail_map",
-                            "_show_images"])
+    assert_template("observer/show_observation")
+    assert_template("observer/_show_name_info")
+    assert_template("observer/_show_observation")
+    assert_template("naming/_show")
+    assert_template("comment/_show_comments")
+    assert_template("observer/_show_thumbnail_map")
+    assert_template("observer/_show_images")
   end
 
   def test_show_observation
@@ -1354,33 +1044,6 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_show_user_no_id
-    login
-    get_with_dump(:show_user)
-    assert_redirected_to(action: :index_user)
-  end
-
-  def test_ask_questions
-    id = observations(:coprinus_comatus_obs).id
-    requires_login(:ask_observation_question, id: id)
-    assert_form_action(action: :ask_observation_question, id: id)
-
-    id = mary.id
-    requires_login(:ask_user_question, id: id)
-    assert_form_action(action: :ask_user_question, id: id)
-
-    id = images(:in_situ_image).id
-    requires_login(:commercial_inquiry, id: id)
-    assert_form_action(action: :commercial_inquiry, id: id)
-
-    # Prove that trying to ask question of user who refuses questions
-    # redirects to that user's page (instead of an email form).
-    user = users(:no_general_questions_user)
-    login(user.name)
-    get(:ask_user_question, params: { id: user.id })
-    assert_flash_text(:permission_denied.t)
-  end
-
   def test_destroy_observation
     assert(obs = observations(:minimal_unknown_obs))
     id = obs.id
@@ -1411,343 +1074,6 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_redirected_to(action: :show_observation, id: obs.id)
     assert_equal(accurate_consensus, obs.name)
-  end
-
-  def test_some_admin_pages
-    [
-      [:users_by_name,  "list_users", {}],
-      [:email_features, "email_features", {}]
-    ].each do |page, response, params|
-      logout
-      get(page, params: params)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(page, params: params)
-      assert_redirected_to(action: :list_rss_logs)
-      assert_flash_text(/denied|only.*admin/i)
-
-      make_admin("rolf")
-      get_with_dump(page, params)
-      assert_template(response) # 1
-    end
-  end
-
-  def test_email_features
-    page = :email_features
-    params = { feature_email: { content: "test" } }
-
-    logout
-    post(page, params: params)
-    assert_redirected_to(controller: :account, action: :login)
-
-    login("rolf")
-    post(page, params: params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
-    assert_flash_text(/denied|only.*admin/i)
-
-    make_admin("rolf")
-    post_with_dump(page, params)
-    assert_redirected_to(controller: :observer, action: :users_by_name)
-  end
-
-  def test_send_commercial_inquiry
-    image = images(:commercial_inquiry_image)
-    params = {
-      id: image.id,
-      commercial_inquiry: {
-        content: "Testing commercial_inquiry"
-      }
-    }
-    post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
-  end
-
-  def test_send_ask_observation_question
-    obs = observations(:minimal_unknown_obs)
-    params = {
-      id: obs.id,
-      question: {
-        content: "Testing question"
-      }
-    }
-    post_requires_login(:ask_observation_question, params)
-    assert_redirected_to(action: :show_observation)
-    assert_flash_text(:runtime_ask_observation_question_success.t)
-  end
-
-  def test_send_ask_user_question
-    user = mary
-    params = {
-      id: user.id,
-      email: {
-        subject: "Email subject",
-        content: "Email content"
-      }
-    }
-    post_requires_login(:ask_user_question, params)
-    assert_redirected_to(action: :show_user, id: user.id)
-    assert_flash_text(:runtime_ask_user_question_success.t)
-  end
-
-  def test_email_merge_request
-    name1 = Name.all.sample
-    name2 = Name.all.sample
-    params = {
-      type: :Name,
-      old_id: name1.id,
-      new_id: name2.id
-    }
-
-    get(:email_merge_request, params: params)
-    assert_response(:redirect)
-
-    login("rolf")
-    get(:email_merge_request, params: params.except(:type))
-    assert_response(:redirect)
-    get(:email_merge_request, params: params.except(:old_id))
-    assert_response(:redirect)
-    get(:email_merge_request, params: params.except(:new_id))
-    assert_response(:redirect)
-    get(:email_merge_request, params: params.merge(type: :Bogus))
-    assert_response(:redirect)
-    get(:email_merge_request, params: params.merge(old_id: -123))
-    assert_response(:redirect)
-    get(:email_merge_request, params: params.merge(new_id: -456))
-    assert_response(:redirect)
-
-    get_with_dump(:email_merge_request, params)
-    assert_response(:success)
-    assert_names_equal(name1, assigns(:old_obj))
-    assert_names_equal(name2, assigns(:new_obj))
-    url = "email_merge_request?new_id=#{name2.id}&old_id=#{name1.id}&type=Name"
-    assert_select("form[action*='#{url}']", count: 1)
-  end
-
-  def test_email_merge_request_post
-    email_count = ActionMailer::Base.deliveries.count
-    name1 = Name.all.sample
-    name2 = Name.all.sample
-    params = {
-      type: :Name,
-      old_id: name1.id,
-      new_id: name2.id,
-      notes: "SHAZAM"
-    }
-
-    post(:email_merge_request, params: params)
-    assert_response(:redirect)
-    assert_equal(email_count, ActionMailer::Base.deliveries.count)
-
-    login("rolf")
-    post(:email_merge_request, params: params)
-    assert_response(:redirect)
-    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
-    assert_match(/SHAZAM/, ActionMailer::Base.deliveries.last.to_s)
-  end
-
-  def test_email_name_change_request_get
-    name = names(:lactarius)
-    assert(name.icn_id, "Test needs a fixture with an icn_id")
-    assert(name.dependents?, "Test needs a fixture with dependents")
-    params = {
-      name_id: name.id,
-      new_name_with_icn_id: "#{name.search_name} [#777]"
-    }
-    login("mary")
-
-    get(:email_name_change_request, params: params)
-    assert_select(
-      "#title-caption", text: :email_name_change_request_title.l, count: 1
-    )
-  end
-
-  def test_email_name_change_request_post
-    name = names(:lactarius)
-    assert(name.icn_id, "Test needs a fixture with an icn_id")
-    assert(name.dependents?, "Test needs a fixture with dependents")
-    params = {
-      name_id: name.id,
-      new_name_with_icn_id: "#{name.search_name} [#777]"
-    }
-    login("mary")
-
-    post(:email_name_change_request, params: params)
-    assert_redirected_to(
-      "#{name_show_name_path}/#{name.id}",
-      "Sending Name Change Request should redirect to Name page"
-    )
-  end
-
-  def test_author_request
-    id = name_descriptions(:coprinus_comatus_desc).id
-    requires_login(:author_request, id: id, type: :name_description)
-    assert_form_action(action: :author_request, id: id,
-                       type: :name_description)
-
-    id = location_descriptions(:albion_desc).id
-    requires_login(:author_request, id: id, type: :location_description)
-    assert_form_action(action: :author_request, id: id,
-                       type: :location_description)
-
-    params = {
-      id: name_descriptions(:coprinus_comatus_desc).id,
-      type: :name_description,
-      email: {
-        subject: "Author request subject",
-        message: "Message for authors"
-      }
-    }
-    post_requires_login(:author_request, params)
-    assert_redirected_to(
-      controller: :name,
-      action: :show_name_description,
-      id: name_descriptions(:coprinus_comatus_desc).id
-    )
-    assert_flash_text(:request_success.t)
-
-    params = {
-      id: location_descriptions(:albion_desc).id,
-      type: :location_description,
-      email: {
-        subject: "Author request subject",
-        message: "Message for authors"
-      }
-    }
-    post_requires_login(:author_request, params)
-    assert_redirected_to(controller: :location,
-                         action: :show_location_description,
-                         id: location_descriptions(:albion_desc).id)
-    assert_flash_text(:request_success.t)
-  end
-
-  def test_review_authors_locations
-    desc = location_descriptions(:albion_desc)
-    params = { id: desc.id, type: "LocationDescription" }
-    desc.authors.clear
-    assert_user_list_equal([], desc.reload.authors)
-
-    # Make sure it lets Rolf and only Rolf see this page.
-    assert_not(mary.in_group?("reviewers"))
-    assert(rolf.in_group?("reviewers"))
-    requires_user(:review_authors,
-                  [{ controller: :location,
-                     action: :show_location,
-                     id: desc.location_id }],
-                  params)
-    assert_template(:review_authors)
-
-    # Remove Rolf from reviewers group.
-    user_groups(:reviewers).users.delete(rolf)
-    rolf.reload
-    assert_not(rolf.in_group?("reviewers"))
-
-    # Make sure it fails to let unauthorized users see page.
-    get(:review_authors, params: params)
-    assert_redirected_to(controller: :location,
-                         action: :show_location,
-                         id: locations(:albion).id)
-
-    # Make Rolf an author.
-    desc.add_author(rolf)
-    desc.save
-    desc.reload
-    assert_user_list_equal([rolf], desc.authors)
-
-    # Rolf should be able to do it now.
-    get(:review_authors, params: params)
-    assert_template(:review_authors)
-
-    # Rolf giveth with one hand...
-    post(:review_authors, params: params.merge(add: mary.id))
-    assert_template(:review_authors)
-    desc.reload
-    assert_user_list_equal([mary, rolf], desc.authors, :sort)
-
-    # ...and taketh with the other.
-    post(:review_authors, params: params.merge(remove: mary.id))
-    assert_template(:review_authors)
-    desc.reload
-    assert_user_list_equal([rolf], desc.authors)
-  end
-
-  def test_review_authors_name
-    name = names(:peltigera)
-    desc = name.description
-
-    params = { id: desc.id, type: "NameDescription" }
-
-    # Make sure it lets reviewers get to page.
-    requires_login(:review_authors, params)
-    assert_template(:review_authors)
-
-    # Remove Rolf from reviewers group.
-    user_groups(:reviewers).users.delete(rolf)
-    assert_not(rolf.reload.in_group?("reviewers"))
-
-    # Make sure it fails to let unauthorized users see page.
-    get(:review_authors, params: params)
-    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
-
-    # Make Rolf an author.
-    desc.add_author(rolf)
-    assert_user_list_equal([rolf], desc.reload.authors)
-
-    # Rolf should be able to do it again now.
-    get(:review_authors, params: params)
-    assert_template(:review_authors)
-
-    # Rolf giveth with one hand...
-    post(:review_authors, params: params.merge(add: mary.id))
-    assert_template(:review_authors)
-    assert_user_list_equal([mary, rolf], desc.reload.authors, :sort)
-
-    # ...and taketh with the other.
-    post(:review_authors, params: params.merge(remove: mary.id))
-    assert_template(:review_authors)
-    assert_user_list_equal([rolf], desc.reload.authors)
-  end
-
-  # Test setting export status of names and descriptions.
-  def test_set_export_status
-    name = names(:petigera)
-    params = {
-      id: name.id,
-      type: "name",
-      value: "1"
-    }
-
-    # Require login.
-    get("set_export_status", params: params)
-    assert_redirected_to(controller: :account, action: :login)
-
-    # Require reviewer.
-    login("dick")
-    get("set_export_status", params: params)
-    assert_flash_error
-    logout
-
-    # Require correct params.
-    login("rolf")
-    get("set_export_status", params: params.merge(id: 9999))
-    assert_flash_error
-    get("set_export_status", params: params.merge(type: "bogus"))
-    assert_flash_error
-    get("set_export_status", params: params.merge(value: "true"))
-    assert_flash_error
-
-    # Now check *correct* usage.
-    assert_equal(true, name.reload.ok_for_export)
-    get("set_export_status", params: params.merge(value: "0"))
-    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
-    assert_equal(false, name.reload.ok_for_export)
-
-    get("set_export_status", params: params.merge(value: "1"))
-    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
-    assert_equal(true, name.reload.ok_for_export)
-
-    get("set_export_status", params: params.merge(value: "1", return: true))
-    assert_redirected_to("/")
   end
 
   def test_original_filename_visibility
@@ -3513,247 +2839,7 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
-  # ----------------------------
-  #  Lookup's.
-  #  These are links like /lookup_name/Amanita+muscaria
-  #  They can be created by the Textile Sandbox, and should always redirect
-  #  to the appropriate model.
-  # /lookup_accepted_name is intended for use by other web sites
-  # ----------------------------
-
-  def test_lookup_comment
-    login
-    c_id = comments(:minimal_unknown_obs_comment_1).id
-    get(:lookup_comment, params: { id: c_id })
-    assert_redirected_to(controller: :comment, action: :show_comment, id: c_id)
-    get(:lookup_comment, params: { id: 10_000 })
-    assert_redirected_to(controller: :comment, action: :index_comment)
-    assert_flash_error
-  end
-
-  def test_lookup_image
-    login
-    i_id = images(:in_situ_image).id
-    get(:lookup_image, params: { id: i_id })
-    assert_redirected_to(controller: :image, action: :show_image, id: i_id)
-    get(:lookup_image, params: { id: 10_000 })
-    assert_redirected_to(controller: :image, action: :index_image)
-    assert_flash_error
-  end
-
-  def test_lookup_location
-    login
-    l_id = locations(:albion).id
-    get(:lookup_location, params: { id: l_id })
-    assert_redirected_to(controller: :location,
-                         action: :show_location, id: l_id)
-    get(:lookup_location, params: { id: "Burbank, California" })
-    assert_redirected_to(controller: :location, action: :show_location,
-                         id: locations(:burbank).id)
-    get(:lookup_location, params: { id: "California, Burbank" })
-    assert_redirected_to(controller: :location, action: :show_location,
-                         id: locations(:burbank).id)
-    get(:lookup_location, params: { id: "Zyzyx, Califonria" })
-    assert_redirected_to(controller: :location, action: :index_location)
-    assert_flash_error
-    get(:lookup_location, params: { id: "California" })
-    # assert_redirected_to(controller: :location, action: :index_location)
-    assert_redirected_to(%r{/location/index_location})
-    assert_flash_warning
-  end
-
-  def test_lookup_accepted_name
-    login
-    get(:lookup_accepted_name,
-        params: { id: names(:lactarius_subalpinus).text_name })
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:lactarius_alpinus))
-  end
-
-  def test_lookup_name
-    login
-    n_id = names(:fungi).id
-    get(:lookup_name, params: { id: n_id })
-    assert_redirected_to(controller: :name, action: :show_name, id: n_id)
-
-    get(:lookup_name, params: { id: names(:coprinus_comatus).id })
-    assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
-
-    get(:lookup_name, params: { id: "Agaricus campestris" })
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:agaricus_campestris).id)
-
-    get(:lookup_name, params: { id: "Agaricus newname" })
-    assert_redirected_to(controller: :name, action: :index_name)
-    assert_flash_error
-
-    get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" })
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:amanita_baccata_borealis).id)
-
-    get(:lookup_name, params: { id: "Amanita baccata" })
-    assert_redirected_to(%r{/name/index_name})
-    assert_flash_warning
-
-    get(:lookup_name, params: { id: "Agaricus campestris L." })
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:agaricus_campestris).id)
-
-    get(:lookup_name, params: { id: "Agaricus campestris Linn." })
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:agaricus_campestris).id)
-
-    # Prove that when there are no hits and exactly one spelling suggestion,
-    # it gives a flash warning and shows the page for the suggestion.
-    get(:lookup_name, params: { id: "Fungia" })
-    assert_flash_text(:runtime_suggest_one_alternate.t(type: :name,
-                                                       match: "Fungia"))
-    assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:fungi).id)
-
-    # Prove that when there are no hits and >1 spelling suggestion,
-    # it flashes a warning and shows the name index
-    get(:lookup_name, params: { id: "Verpab" })
-    assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
-                                                             match: "Verpab"))
-    assert_redirected_to(%r{/name/index_name})
-
-    # Prove that lookup_name adds flash message when it hits an error,
-    # stubbing a method called by lookup_name in order to provoke an error.
-    ObserverController.any_instance.stubs(:fix_name_matches).
-      raises(RuntimeError)
-    get(:lookup_name, params: { id: names(:fungi).text_name })
-    assert_flash_text("RuntimeError")
-  end
-
-  def test_lookup_observation
-    login
-    get(:lookup_observation,
-        params: { id: observations(:minimal_unknown_obs).id })
-    assert_redirected_to(controller: :observer, action: :show_observation,
-                         id: observations(:minimal_unknown_obs).id)
-  end
-
-  def test_lookup_project
-    login
-    p_id = projects(:eol_project).id
-    get(:lookup_project, params: { id: p_id })
-    assert_redirected_to(controller: :project, action: :show_project, id: p_id)
-    get(:lookup_project, params: { id: "Bolete" })
-    assert_redirected_to(controller: :project, action: :show_project,
-                         id: projects(:bolete_project).id)
-    get(:lookup_project, params: { id: "Bogus" })
-    assert_redirected_to(controller: :project, action: :index_project)
-    assert_flash_error
-    get(:lookup_project, params: { id: "project" })
-    assert_redirected_to(%r{/project/index_project})
-    assert_flash_warning
-  end
-
-  def test_lookup_species_list
-    login
-    sl_id = species_lists(:first_species_list).id
-    get(:lookup_species_list, params: { id: sl_id })
-    assert_redirected_to(controller: :species_list, action: :show_species_list,
-                         id: sl_id)
-    get(:lookup_species_list, params: { id: "Mysteries" })
-    assert_redirected_to(controller: :species_list, action: :show_species_list,
-                         id: species_lists(:unknown_species_list).id)
-    get(:lookup_species_list, params: { id: "species list" })
-    assert_redirected_to(%r{/species_list/index_species_list})
-    assert_flash_warning
-    get(:lookup_species_list, params: { id: "Flibbertygibbets" })
-    assert_redirected_to(controller: :species_list, action: :index_species_list)
-    assert_flash_error
-  end
-
-  def test_lookup_user
-    login
-    get(:lookup_user, params: { id: rolf.id })
-    assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
-    get(:lookup_user, params: { id: "mary" })
-    assert_redirected_to(controller: :observer, action: :show_user, id: mary.id)
-    get(:lookup_user, params: { id: "Einstein" })
-    assert_redirected_to(controller: :observer, action: :index_rss_log)
-    assert_flash_error
-    # This caused router to crash in the wild.
-    assert_recognizes({ controller: "observer", action: "lookup_user",
-                        id: "I.+G.+Saponov" },
-                      "/observer/lookup_user/I.+G.+Saponov")
-  end
-
   ###################
-
-  def test_change_banner
-    use_test_locales do
-      # Oops!  One of these tags actually exists now!
-      TranslationString.where(tag: "app_banner_box").each(&:destroy)
-
-      str1 = TranslationString.create!(
-        language: languages(:english),
-        tag: :app_banner_box,
-        text: "old banner",
-        user: User.admin
-      )
-      str1.update_localization
-
-      str2 = TranslationString.create!(
-        language: languages(:french),
-        tag: :app_banner_box,
-        text: "banner ancienne",
-        user: User.admin
-      )
-      str2.update_localization
-
-      get(:change_banner)
-      assert_redirected_to(controller: :account, action: :login)
-
-      login("rolf")
-      get(:change_banner)
-      assert_flash_error
-      assert_redirected_to(action: :list_rss_logs)
-
-      make_admin("rolf")
-      get(:change_banner)
-      assert_no_flash
-      assert_response(:success)
-      assert_textarea_value(:val, :app_banner_box.l)
-
-      post(:change_banner, params: { val: "new banner" })
-      assert_no_flash
-      assert_redirected_to(action: :list_rss_logs)
-      assert_equal("new banner", :app_banner_box.l)
-
-      strs = TranslationString.where(tag: :app_banner_box)
-      strs.each do |str|
-        assert_equal("new banner", str.text,
-                     "Didn't change text of #{str.language.locale} correctly.")
-      end
-    end
-  end
-
-  def test_javascript_override
-    get(:turn_javascript_on)
-    assert_response(:redirect)
-    assert_equal(:on, session[:js_override])
-
-    get(:turn_javascript_off)
-    assert_response(:redirect)
-    assert_equal(:off, session[:js_override])
-
-    get(:turn_javascript_nil)
-    assert_response(:redirect)
-    assert_nil(session[:js_override])
-  end
-
-  # Prove w3c_tests renders html, with all content within the <body>
-  # (and therefore without MO's layout).
-  def test_w3c_tests
-    login
-    expect_start = "<html><head></head><body>"
-    get(:w3c_tests)
-    assert_equal(expect_start, @response.body[0..(expect_start.size - 1)])
-  end
 
   def test_index_observation_by_past_by
     login
@@ -3919,53 +3005,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_select("div#labels td", query.num_results)
   end
 
-  def test_normal_permissions
-    login
-    get(:intro)
-    assert_equal(200, @response.status)
-    get(:textile)
-    assert_equal(200, @response.status)
-  end
-
-  def test_whitelisted_robot_permissions
-    @request.user_agent =
-      "Mozilla/5.0 (compatible; Googlebot/2.1; " \
-      "+http://www.google.com/bot.html)"
-    get(:intro) # authorized robots and anonymous users are allowed here
-    assert_equal(200, @response.status)
-    get(:textile)
-    assert_equal(403, @response.status)
-  end
-
-  def test_unauthorized_robot_permissions
-    @request.user_agent =
-      "Mozilla/5.0 (compatible; Baiduspider/2.0; "\
-      "+http://www.baidu.com/search/spider.html)"
-    get(:intro) # only authorized robots and anonymous users are allowed here
-    assert_equal(403, @response.status)
-  end
-
-  def test_anon_user_ask_webmaster_question
-    get(:ask_webmaster_question)
-
-    assert_response(:success)
-    assert_head_title(:ask_webmaster_title.l)
-  end
-
-  def test_anon_user_how_to_use
-    get(:how_to_use)
-
-    assert_response(:success)
-    assert_head_title(:how_title.l)
-  end
-
-  def test_anon_user_intro
-    get(:intro)
-
-    assert_response(:success)
-    assert_head_title(:intro_title.l)
-  end
-
   def test_external_sites_user_can_add_links_to
     # not logged in
     do_external_sites_test([], nil, nil)
@@ -3985,221 +3024,6 @@ class ObserverControllerTest < FunctionalTestCase
     @controller.instance_variable_set("@user", user)
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
-  end
-
-  def test_site_stats
-    login
-    get(:show_site_stats)
-
-    assert_select("title").text.include?(:show_site_stats_title.l)
-    assert_select("#title", { text: :show_site_stats_title.l },
-                  "Displayed title should be #{:show_site_stats_title.l}")
-    assert(/#{:site_stats_contributing_users.l}/ =~ @response.body,
-           "Page is missing #{:site_stats_contributing_users.l}")
-  end
-
-  # ------------------------------------------------------------
-  #  User
-  #  observer_controller/user_controller
-  # ------------------------------------------------------------
-
-  #   -------------
-  #    user_search
-  #   -------------
-
-  # Prove that user-type pattern searches go to correct page
-  # When pattern is a user's id, go directly to that user's page
-  def test_user_search_id
-    login
-    user = users(:rolf)
-    get(:user_search, params: { pattern: user.id })
-    assert_redirected_to(action: "show_user", id: user.id)
-  end
-
-  # When a non-id pattern matches only one user, show that user.
-  def test_user_search_name
-    login
-    user = users(:uniquely_named_user)
-    get(:user_search, params: { pattern: user.name })
-    assert_redirected_to(%r{/show_user/#{user.id}})
-  end
-
-  # When pattern matches multiple users, list them.
-  def test_user_search_multiple_hits
-    login
-    pattern = "Roy"
-    get(:user_search, params: { pattern: pattern })
-    # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
-                 "Wrong page displayed")
-
-    prove_sorting_links_include_contribution
-  end
-
-  # When pattern has no matches, go to list page with flash message,
-  #  title not displayed and default metadata title
-  def test_user_search_unmatched
-    login
-    unmatched_pattern = "NonexistentUserContent"
-    get_without_clearing_flash(:user_search,
-                               params: { pattern: unmatched_pattern })
-    assert_template(:list_users)
-
-    assert_empty(@controller.instance_variable_get("@title"),
-                 "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
-                 "metadata <title> tag incorrect")
-    assert_empty(css_select("#sorts"),
-                 "There should be no sort links")
-
-    flash_text = :runtime_no_matches.l.sub("[types]", "users")
-    assert_flash_text(flash_text)
-  end
-
-  #   ---------------------
-  #    show_selected_users
-  #   ---------------------
-
-  # Prove that sorting links include "Contribution" (when not in admin mode)
-  def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
-    assert_match(/Contribution/, sorting_links.text)
-  end
-
-  #   -----------
-  #    checklist
-  #   -----------
-
-  # Prove that Life List goes to correct page which has correct content
-  def test_checklist_for_user
-    login
-    user = users(:rolf)
-    expect = Name.joins(observations: :user).
-             where("observations.user_id = #{user.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(:checklist, params: { id: user.id })
-    assert_match(/Checklist for #{user.name}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Species List checklist goes to correct page with correct content
-  def test_checklist_for_species_list
-    login
-    list = species_lists(:one_genus_three_species_list)
-    expect = Name.joins(observations: :species_list_observations).
-             where("species_list_observations.species_list_id
-                        = #{list.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(:checklist, params: { species_list_id: list.id })
-    assert_match(/Checklist for #{list.title}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Project checklist goes to correct page with correct content
-  def test_checklist_for_project
-    login
-    project = projects(:one_genus_two_species_project)
-    expect = Name.joins(observations: :project_observations).
-             where("project_observations.project_id = #{project.id}
-                    AND names.`rank` = #{Name.ranks[:Species]}").distinct
-
-    get(:checklist, params: { project_id: project.id })
-    assert_match(/Checklist for #{project.title}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  # Prove that Site checklist goes to correct page with correct content
-  def test_checklist_for_site
-    login
-    expect = Name.joins(:observations).with_rank(:Species).distinct
-
-    get(:checklist)
-    assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
-                 "Wrong page")
-
-    prove_checklist_content(expect)
-  end
-
-  def prove_checklist_content(expect)
-    # Get expected names not included in the displayed checklist links.
-    missing_names = (
-      expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
-
-        missing << taxon.text_name
-      end
-    )
-
-    assert_select(".checklist a", count: expect.size)
-    assert(missing_names.empty?, "Species List missing #{missing_names}")
-  end
-
-  def test_next_user_and_prev_user
-    login
-    # users sorted in default order
-    users_alpha = User.order(:name)
-
-    get(:next_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show_user, id: users_alpha.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:prev_user, params: { id: users_alpha.fourth.id })
-    assert_redirected_to(action: :show_user, id: users_alpha.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-
-  #   ---------------
-  #    admin actions
-  #   ---------------
-
-  # Prove that user_index is restricted to admins
-  def test_index_user
-    login("rolf")
-    get(:index_user)
-    assert_redirected_to(:root)
-
-    make_admin
-    get(:index_user)
-    assert_response(:success)
-  end
-
-  def test_change_user_bonuses
-    user = users(:mary)
-    old_contribution = mary.contribution
-    bonus = "7 lucky \n 13 unlucky"
-
-    # Prove that non-admin cannot change bonuses and attempt to do so
-    # redirects to target user's page
-    login("rolf")
-    get(:change_user_bonuses, params: { id: user.id })
-    assert_redirected_to(action: :show_user, id: user.id)
-
-    # Prove that admin posting bonuses in wrong format causes a flash error,
-    # leaving bonuses and contributions unchanged.
-    make_admin
-    post(:change_user_bonuses, params: { id: user.id, val: "wong format 7" })
-    assert_flash_error
-    user.reload
-    assert_empty(user.bonuses)
-    assert_equal(old_contribution, user.contribution)
-
-    # Prove that admin can change bonuses
-    post(:change_user_bonuses, params: { id: user.id, val: bonus })
-    user.reload
-    assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
-    assert_equal(old_contribution + 20, user.contribution)
-
-    # Prove that admin can get bonuses
-    get(:change_user_bonuses, params: { id: user.id })
-    assert_response(:success)
   end
 
   def test_suggestions

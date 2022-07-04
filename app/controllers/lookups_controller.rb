@@ -1,20 +1,27 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::MarkupController
-  def lookup_comment # :nologin
+class LookupsController < ApplicationController
+  # These need to be moved into the files where they are actually used.
+  require "find"
+  require "set"
+
+  before_action :login_required, except: [
+    :lookup_observation
+  ]
+
+  def lookup_comment
     lookup_general(Comment)
   end
 
-  def lookup_image # :nologin
+  def lookup_image
     lookup_general(Image)
   end
 
-  def lookup_location # :nologin
+  def lookup_location
     lookup_general(Location)
   end
 
-  def lookup_name # :nologin
+  def lookup_name
     lookup_general(Name)
   end
 
@@ -23,23 +30,23 @@ module ObserverController::MarkupController
   # used with a name ID.  It can actually return a deprecated name if you give
   # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it
   # because it should never be called that way in the first place. -JPH 1/2017
-  def lookup_accepted_name # :nologin
+  def lookup_accepted_name
     lookup_general(Name, true)
   end
 
-  def lookup_observation # :nologin
+  def lookup_observation
     lookup_general(Observation)
   end
 
-  def lookup_project # :nologin
+  def lookup_project
     lookup_general(Project)
   end
 
-  def lookup_species_list # :nologin
+  def lookup_species_list
     lookup_general(SpeciesList)
   end
 
-  def lookup_user # :nologin
+  def lookup_user
     lookup_general(User)
   end
 
@@ -75,15 +82,18 @@ module ObserverController::MarkupController
           end
         when "Location"
           pattern = "%#{id}%"
-          conditions = ["name LIKE ? OR scientific_name LIKE ?",
-                        pattern, pattern]
-          matches = Location.limit(100).where(conditions)
+          matches = Location.limit(100).
+                    where(Location[:name].matches(pattern).
+                      or(Location[:scientific_name].matches(pattern)))
         when "Project"
           pattern = "%#{id}%"
-          matches = Project.limit(100).where("title LIKE ?", pattern)
+          matches = Project.limit(100).
+                    where(Project[:title].matches(pattern))
+
         when "SpeciesList"
           pattern = "%#{id}%"
-          matches = SpeciesList.limit(100).where("title LIKE ?", pattern)
+          matches = SpeciesList.limit(100).
+                    where(SpeciesList[:title].matches(pattern))
         when "User"
           matches = User.where(login: id)
           matches = User.where(name: id) if matches.empty?
@@ -95,9 +105,12 @@ module ObserverController::MarkupController
 
     if matches.empty? && suggestions.empty?
       flash_error(:runtime_object_no_match.t(match: id, type: type))
-      action = model == User ? :index_rss_log : model.index_action
-      redirect_to(controller: model.show_controller,
-                  action: action)
+      if model == User
+        redirect_to("/") # (no public index for users)
+      else
+        redirect_to(controller: model.show_controller,
+                    action: model.index_action)
+      end
     elsif matches.length == 1 || suggestions.length == 1
       obj = matches.first || suggestions.first
       if suggestions.any?

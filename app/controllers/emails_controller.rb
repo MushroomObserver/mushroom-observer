@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
-# TODO: move this into a new EmailController
 # Send emails directly to webmaster and users via the application
-module ObserverController::EmailController
-  def email_features
+class EmailsController < ApplicationController
+  before_action :login_required, except: [
+    :ask_webmaster_question
+  ]
+
+  def features
     if in_admin_mode?
       @users = User.where("email_general_feature=1 && verified is not null")
       if request.method == "POST"
@@ -12,11 +15,11 @@ module ObserverController::EmailController
                                             params[:feature_email][:content])
         end
         flash_notice(:send_feature_email_success.t)
-        redirect_to(action: "users_by_name")
+        redirect_to(users_path(by: "name"))
       end
     else
       flash_error(:permission_denied.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to("/")
     end
   end
 
@@ -38,7 +41,7 @@ module ObserverController::EmailController
     content = params[:email][:content]
     UserEmail.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
-    redirect_to(action: "show_user", id: @target.id)
+    redirect_to(user_path(@target.id))
   end
 
   def ask_observation_question
@@ -50,7 +53,8 @@ module ObserverController::EmailController
     question = params[:question][:content]
     ObservationEmail.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
-    redirect_with_query(action: "show_observation", id: @observation.id)
+    redirect_with_query(controller: "observer", action: "show_observation",
+                        id: @observation.id)
   end
 
   def commercial_inquiry
@@ -76,30 +80,30 @@ module ObserverController::EmailController
     false
   end
 
-  def email_merge_request
+  def merge_request
     @model = validate_merge_model!(params[:type])
     return unless @model
 
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
     if !@old_obj || !@new_obj || @old_jb == @new_obj
-      redirect_back_or_default(action: :index)
+      redirect_back_or_default("/")
       return
     end
     send_merge_request if request.method == "POST"
   end
 
-  # get email_name_change_request(
+  # get emails_name_change_request(
   #   params: {
   #     name_id: 1258, new_name_with_icn_id: "Auricularia Bull. [#17132]"
   #   }
   # )
-  def email_name_change_request
+  def name_change_request
     @name = Name.safe_find(params[:name_id])
     name_with_icn_id = "#{@name.search_name} [##{@name.icn_id}]"
 
     if name_with_icn_id == params[:new_name_with_icn_id]
-      redirect_back_or_default(action: :index)
+      redirect_back_or_default("/")
       return
     end
 
@@ -124,7 +128,7 @@ module ObserverController::EmailController
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
-      redirect_to(action: "list_rss_logs")
+      redirect_to("/")
     end
   end
 
@@ -146,7 +150,7 @@ module ObserverController::EmailController
       Name
     else
       flash_error("Invalid type param: #{val.inspect}.")
-      redirect_back_or_default(action: :index)
+      redirect_back_or_default("/")
       nil
     end
   end

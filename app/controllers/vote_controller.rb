@@ -50,15 +50,16 @@ class VoteController < ApplicationController
                         id: observation.id)
   end
 
+  # This is very expensive, and not called anywhere. Putting it in storage
   # Refresh vote cache for all observations in the database.
-  def refresh_vote_cache
-    return unless in_admin_mode?
+  # def refresh_vote_cache
+  #   return unless in_admin_mode?
 
-    # Naming.refresh_vote_cache
-    Observation.refresh_vote_cache
-    flash_notice(:refresh_vote_cache.t)
-    redirect_with_query(controller: :observer,
-                        action: :list_rss_logs,
-                        id: observation.id)
-  end
+  #   # Naming.refresh_vote_cache
+  #   Observation.refresh_vote_cache
+  #   flash_notice(:refresh_vote_cache.t)
+  #   redirect_with_query(controller: :rss_logs,
+  #                       action: :index,
+  #                       id: observation.id)
+  # end
 end

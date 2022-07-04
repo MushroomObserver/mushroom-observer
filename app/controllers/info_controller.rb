@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
-# TODO: move this into a new InfoController
 # Display canned informations about site
-module ObserverController::InfoController
+class InfoController < ApplicationController
+  before_action :login_required, except: [
+    :how_to_help,
+    :how_to_use,
+    :intro
+  ]
+
   # Intro to site.
   def intro
     store_location
@@ -51,4 +56,21 @@ module ObserverController::InfoController
 
   # Allow translator to enter a special note linked to from the lower left.
   def translators_note; end
+
+  def site_stats
+    store_location
+    @site_data = SiteData.new.get_site_data
+
+    # Add some extra stats.
+    @site_data[:observed_taxa] = Observation.distinct.count(:name_id)
+    @site_data[:listed_taxa] = Name.count
+
+    # Get the last six observations whose thumbnails are highly rated.
+    query = Query.lookup(:Observation, :all,
+                         by: :updated_at,
+                         where: "images.vote_cache >= 3",
+                         join: :"images.thumb_image")
+    @observations = query.results(limit: 6,
+                                  include: { thumb_image: :image_votes })
+  end
 end

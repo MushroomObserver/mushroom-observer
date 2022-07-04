@@ -599,9 +599,7 @@ class LocationController < ApplicationController
           if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
-            redirect_to(controller: :observer,
-                        action: :show_user,
-                        id: @set_user)
+            redirect_to(user_path(@set_user.id))
           end
         else
           redirect_to(controller: :location,
@@ -660,8 +658,8 @@ class LocationController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(controller: :observer,
-                          action: :email_merge_request,
+      redirect_with_query(controller: :emails,
+                          action: :merge_request,
                           type: :Location,
                           old_id: @location.id,
                           new_id: merge.id)

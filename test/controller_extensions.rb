@@ -491,14 +491,14 @@ module ControllerExtensions
   #   assert_response( {action: show_observation, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: "observer", action: "index")
+  #   assert_response(controller: :rss_logs, action: :index)
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
-  #   assert_response(["observer", "index"])
+  #   assert_response(["rss_logs", "index"])
   #
   #   # Short-hand for common redirects:
-  #   assert_response(:index)   => /observer/list_rss_logs
+  #   assert_response(:index)   => /rss_logs
   #   assert_response(:login)   => /account/login
   #   assert_response(:welcome) => /account/welcome
   #
@@ -561,9 +561,8 @@ module ControllerExtensions
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <observer/list_rss_logs>#{got}"
-        assert_redirected_to({ controller: "observer",
-                               action: "list_rss_logs" }, msg)
+        msg += "Expected redirect to <root>#{got}"
+        assert_redirected_to("/", msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>#{got}"
         assert_redirected_to({ controller: "account", action: "login" }, msg)
@@ -573,24 +572,6 @@ module ControllerExtensions
       else
         raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")
       end
-    end
-  end
-
-  def assert_action(action, partials)
-    if partials
-      if partials.is_a?(Array)
-        assert_action_partials(action, partials)
-      else
-        assert_redirected_to(action: action, partial: partials)
-      end
-    else
-      assert_redirected_to(action: action)
-    end
-  end
-
-  def assert_action_partials(action, partials)
-    partials.each do |p|
-      assert_template(action, partial: p)
     end
   end
 
