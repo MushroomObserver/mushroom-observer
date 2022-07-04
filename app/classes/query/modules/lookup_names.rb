@@ -156,7 +156,7 @@ module Query
         lower_names = genera_and_down(min_names)
 
         if higher_names.empty?
-          include_immediate_lower_taxa(
+          include_lower_taxa(
             names: min_names,
             lower_names_regex:
               /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
@@ -169,15 +169,6 @@ module Query
             higher_names_matcher: /: _(#{higher_names.join("|")})_$/
           )
         end
-      end
-
-      def include_immediate_lower_taxa(names:, lower_names_regex:)
-        # The names_themselves
-        Name.where(id: names.map(&:first)).
-          # + lower names
-          or(Name.where(Name[:text_name] =~ lower_names_regex)).
-          distinct.
-          pluck(*minimal_name_columns)
       end
 
       def include_immediate_higher_and_lower_taxa(names:, lower_names_regex:,
