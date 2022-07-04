@@ -1,8 +1,8 @@
 <%
   @title = :download_observations_title.t
-  
+
   tabs = [
-    link_with_query(:download_observations_back.t, action: :index_observation)
+    link_with_query(:download_observations_back.t, action: :index)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>

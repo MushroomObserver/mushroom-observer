@@ -21,8 +21,13 @@ class SearchesControllerTest < FunctionalTestCase
         }
       )
       assert_response(:redirect)
-      assert_match(%r{#{model.show_controller}/advanced_search},
-                   redirect_to_url)
+      if model.controller_normalized?
+        assert_match(%r{#{model.pluralize}_path},
+          redirect_to_url)
+      else
+        assert_match(%r{#{model.show_controller}/advanced_search},
+                    redirect_to_url)
+      end
     end
   end
 
@@ -66,7 +71,7 @@ class SearchesControllerTest < FunctionalTestCase
     login
     params = { search: { pattern: "12", type: :observation } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :observation_search,
+    assert_redirected_to(controller: :observations, action: :index,
                          pattern: "12")
 
     params = { search: { pattern: "34", type: :image } }
@@ -117,7 +122,7 @@ class SearchesControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :observation } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_observations)
+    assert_redirected_to(controller: :observations, action: :index)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.

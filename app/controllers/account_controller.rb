@@ -807,7 +807,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group_user_mode
     flash_error(:permission_denied.t)
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default("/")
   end
 
   public

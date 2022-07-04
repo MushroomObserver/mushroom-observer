@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::CreateAndEditObservation
+# see observations_controller.rb
+module ObservationsController::CreateAndUpdate
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
   #
@@ -26,7 +26,10 @@ module ObserverController::CreateAndEditObservation
   #   @new_image                        blank image object
   #   @good_images                      list of images already downloaded
   #
-  def create_observation
+
+  # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
+
+  def new
     # These are needed to create pulldown menus in form.
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.zone.now)
@@ -34,15 +37,6 @@ module ObserverController::CreateAndEditObservation
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
 
-    # Create empty instances first time through.
-    if request.method != "POST"
-      create_observation_get
-    else
-      create_observation_post(params)
-    end
-  end
-
-  def create_observation_get
     @observation = Observation.new
     @naming      = Naming.new
     @vote        = Vote.new
@@ -80,7 +74,13 @@ module ObserverController::CreateAndEditObservation
     end
   end
 
-  def create_observation_post(params)
+  def create
+    @observation = create_observation_object(params[:observation])
+
+    # NOTE: I believe we need to set these again, in case they are not defined
+    @licenses = License.current_names_and_ids(@user.license)
+    @new_image = init_image(Time.zone.now)
+
     rough_cut(params)
     success = true
     success = false unless validate_name(params)
@@ -106,7 +106,6 @@ module ObserverController::CreateAndEditObservation
   end
 
   def rough_cut(params)
-    @observation = create_observation_object(params[:observation])
     @observation.notes = notes_to_sym_and_compact
     @naming = Naming.construct(params[:naming], @observation)
     @vote = Vote.construct(params[:vote], @naming)
@@ -273,12 +272,12 @@ module ObserverController::CreateAndEditObservation
 
   def redirect_to_next_page
     if @observation.location.nil?
-      redirect_to(controller: "location",
-                  action: "create_location",
+      redirect_to(controller: :location,
+                  action: :create_location,
                   where: @observation.place_name,
                   set_observation: @observation.id)
     else
-      redirect_to(action: "show_observation", id: @observation.id)
+      redirect_to(action: :show, id: @observation.id)
     end
   end
 
@@ -291,8 +290,13 @@ module ObserverController::CreateAndEditObservation
     init_list_vars_for_reload(@observation)
   end
 
+  #
+  #
+  #
   # Form to edit an existing observation.
   # Linked from: left panel
+  #
+  #
   #
   # Inputs:
   #   params[:id]                       observation id
@@ -307,83 +311,95 @@ module ObserverController::CreateAndEditObservation
   #   @new_image                        blank image object
   #   @good_images                      list of images already attached
   #
-  def edit_observation
+  def edit
     pass_query_params
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
+    return unless @observation = \
+      find_or_goto_index(Observation, params[:id].to_s)
+
+    # Make sure user owns this observation!
+    if !check_permission!(@observation)
+      redirect_with_query(action: :show, id: @observation.id) and return
+    end
 
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(@observation.when)
 
+    # Initialize form.
+    @images      = []
+    @good_images = @observation.images
+    init_project_vars_for_edit(@observation)
+    init_list_vars_for_edit(@observation)
+  end
+
+  def update
+    pass_query_params
+    return unless @observation = \
+      find_or_goto_index(Observation, params[:id].to_s)
+
     # Make sure user owns this observation!
     if !check_permission!(@observation)
-      redirect_with_query(action: :show_observation, id: @observation.id)
+      redirect_with_query(action: :show, id: @observation.id) and return
+    end
 
-      # Initialize form.
-    elsif request.method != "POST"
-      @images      = []
-      @good_images = @observation.images
-      init_project_vars_for_edit(@observation)
-      init_list_vars_for_edit(@observation)
+    @licenses = License.current_names_and_ids(@user.license)
+    @new_image = init_image(Time.zone.now)
 
-    else
-      any_errors = false
-      update_whitelisted_observation_attributes
-      @observation.notes = notes_to_sym_and_compact
-      warn_if_unchecking_specimen_with_records_present!
-      strip_images! if @observation.gps_hidden
+    any_errors = false
+    update_whitelisted_observation_attributes
+    @observation.notes = notes_to_sym_and_compact
+    warn_if_unchecking_specimen_with_records_present!
+    strip_images! if @observation.gps_hidden
 
-      # Validate place name
-      @place_name = @observation.place_name
-      @dubious_where_reasons = []
-      if @place_name != params[:approved_where] && @observation.location.nil?
-        db_name = Location.user_name(@user, @place_name)
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        any_errors = true if @dubious_where_reasons.any?
-      end
+    # Validate place name
+    @place_name = @observation.place_name
+    @dubious_where_reasons = []
+    if @place_name != params[:approved_where] && @observation.location.nil?
+      db_name = Location.user_name(@user, @place_name)
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+      any_errors = true if @dubious_where_reasons.any?
+    end
 
-      # Now try to upload images.
-      @good_images = update_good_images(params[:good_images])
-      @bad_images  = create_image_objects(params[:image],
-                                          @observation, @good_images)
-      attach_good_images(@observation, @good_images)
-      any_errors = true if @bad_images.any?
+    # Now try to upload images.
+    @good_images = update_good_images(params[:good_images])
+    @bad_images  = create_image_objects(params[:image],
+                                        @observation, @good_images)
+    attach_good_images(@observation, @good_images)
+    any_errors = true if @bad_images.any?
 
-      # Only save observation if there are changes.
-      if @dubious_where_reasons == [] && @observation.changed?
-        @observation.updated_at = Time.zone.now
-        if save_observation(@observation)
-          id = @observation.id
-          flash_notice(:runtime_edit_observation_success.t(id: id))
-          touch = (param_lookup([:log_change, :checked]) == "1")
-          @observation.log(:log_observation_updated, touch: touch)
-        else
-          any_errors = true
-        end
-      end
-
-      # Reload form if anything failed.
-      if any_errors
-        @images         = @bad_images
-        @new_image.when = @observation.when
-        init_project_vars_for_reload(@observation)
-        init_list_vars_for_reload(@observation)
-        return
-      end
-
-      # Update project and species_list attachments.
-      update_projects(@observation, params[:project])
-      update_species_lists(@observation, params[:list])
-
-      # Redirect to show_observation or create_location on success.
-      if @observation.location.nil?
-        redirect_with_query(controller: :location,
-                            action: :create_location,
-                            where: @observation.place_name,
-                            set_observation: @observation.id)
+    # Only save observation if there are changes.
+    if @dubious_where_reasons == [] && @observation.changed?
+      @observation.updated_at = Time.zone.now
+      if save_observation(@observation)
+        id = @observation.id
+        flash_notice(:runtime_edit_observation_success.t(id: id))
+        touch = (param_lookup([:log_change, :checked]) == "1")
+        @observation.log(:log_observation_updated, touch: touch)
       else
-        redirect_with_query(action: :show_observation, id: @observation.id)
+        any_errors = true
       end
+    end
+
+    # Reload form if anything failed.
+    if any_errors
+      @images         = @bad_images
+      @new_image.when = @observation.when
+      init_project_vars_for_reload(@observation)
+      init_list_vars_for_reload(@observation)
+      return
+    end
+
+    # Update project and species_list attachments.
+    update_projects(@observation, params[:project])
+    update_species_lists(@observation, params[:list])
+
+    # Redirect to show_observation or create_location on success.
+    if @observation.location.nil?
+      redirect_with_query(controller: :location,
+                          action: :create_location,
+                          where: @observation.place_name,
+                          set_observation: @observation.id)
+    else
+      redirect_with_query(action: :show, id: @observation.id)
     end
   end
 
@@ -403,10 +419,10 @@ module ObserverController::CreateAndEditObservation
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
-  def destroy_observation
+  def destroy
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
 
@@ -420,27 +436,27 @@ module ObserverController::CreateAndEditObservation
 
     if !check_permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
-      redirect_to(add_query_param({ action: "show_observation", id: obs_id },
+      redirect_to(add_query_param({ action: :show, id: obs_id },
                                   this_state))
     elsif !@observation.destroy
       flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
-      redirect_to(add_query_param({ action: "show_observation", id: obs_id },
+      redirect_to(add_query_param({ action: :show, id: obs_id },
                                   this_state))
     else
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if next_state
-        redirect_to(add_query_param({ action: "show_observation",
+        redirect_to(add_query_param({ action: :show,
                                       id: next_state.current_id },
                                     next_state))
       else
-        redirect_to(action: "list_observations")
+        redirect_to(action: :index)
       end
     end
   end
 
-  # I'm tired of tweaking show_observation to call calc_consensus for
+  # I'm tired of tweaking observations/show to call calc_consensus for
   # debugging.  I'll just leave this stupid action in and have it
-  # forward to show_observation.
+  # forward to observations/show.
   def recalc
     pass_query_params
     id = params[:id].to_s
@@ -452,7 +468,7 @@ module ObserverController::CreateAndEditObservation
       flash_error(:observer_recalc_caught_error.t(error: e))
     end
     # render(plain: "", layout: true)
-    redirect_with_query(action: "show_observation", id: id)
+    redirect_with_query(action: :show, id: id)
   end
 
   ##############################################################################
@@ -725,18 +741,6 @@ module ObserverController::CreateAndEditObservation
     image.license          = @user.license
     image.copyright_holder = @user.legal_name
     image
-  end
-
-  def hide_thumbnail_map
-    pass_query_params
-    id = params[:id].to_s
-    if @user
-      @user.update_attribute(:thumbnail_maps, false)
-      flash_notice(:show_observation_thumbnail_map_hidden.t)
-    else
-      session[:hide_thumbnail_maps] = true
-    end
-    redirect_with_query(action: :show_observation, id: id)
   end
 
   def strip_images!

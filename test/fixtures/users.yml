@@ -98,7 +98,7 @@ public_voter:
 
 # Has multiple Observations whose sortable attributes are unique
 # Need for tests in which sort order is predictable, e.g.,
-# ObserverControllerIntegrationTest#test_destroy_observation_from_search
+# ObservationsControllerIntegrationTest#test_destroy_observation_from_search
 sortable_obs_user:
   <<: *DEFAULTS
 

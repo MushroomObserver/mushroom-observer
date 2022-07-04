@@ -67,10 +67,12 @@ module TabsHelper
 
     [
       link_with_query(:show_observation_edit_observation.t,
-                      controller: :observer, action: :edit_observation,
+                      controller: :observations,
+                      action: :edit,
                       id: obs.id),
       link_with_query(:DESTROY.t,
-                      { controller: :observer, action: :destroy_observation,
+                      { controller: :observations,
+                        action: :destroy,
                         id: obs.id },
                       class: "text-danger", data: { confirm: :are_you_sure.l })
     ]

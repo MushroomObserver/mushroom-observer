@@ -121,7 +121,7 @@ class ImageController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search")
+    redirect_to(controller: :observations, action: :advanced_search)
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -283,7 +283,7 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Form for uploading and adding images to an observation.
-  # Linked from: show_observation, reuse_image,
+  # Linked from: observations/show, reuse_image,
   #   naming/create, and naming/edit (via _show_images partial)
   # Inputs: params[:id] (observation)
   #   params[:upload][:image1-4]
@@ -293,15 +293,15 @@ class ImageController < ApplicationController
   #   params[:image][:notes]
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def add_image
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
     if !check_permission!(@observation)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     elsif request.method != "POST"
       @image = Image.new
       @image.license = @user.license
@@ -314,8 +314,8 @@ class ImageController < ApplicationController
       init_project_vars_for_add_or_edit(@observation)
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     else
       args = params[:image]
       i = 1
@@ -323,8 +323,8 @@ class ImageController < ApplicationController
         process_image(args, params[:upload]["image#{i}"])
         i += 1
       end
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
     end
   end
 
@@ -514,9 +514,9 @@ class ImageController < ApplicationController
   end
 
   # Callback to remove a single image from an observation.
-  # Linked from: observer/edit_observation
+  # Linked from: observations/edit
   # Inputs: params[:image_id], params[:observation_id]
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_image
     pass_query_params
     @image = find_or_goto_index(Image, params[:image_id])
@@ -534,8 +534,8 @@ class ImageController < ApplicationController
       @image.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
-    redirect_with_query(controller: "observer",
-                        action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
   end
 
   def serve_reuse_form(params)
@@ -577,7 +577,7 @@ class ImageController < ApplicationController
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: observer/show_observation and account/profile
+  # Linked from: observations/show and account/profile
   # Inputs:
   #   params[:mode]       "observation" or "profile"
   #   params[:obs_id]     (observation)
@@ -602,8 +602,8 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) &&
        !check_permission!(@observation)
-      redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @observation.id)
+      redirect_with_query(controller: :observations,
+                          action: :show, id: @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -621,8 +621,8 @@ class ImageController < ApplicationController
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
-        redirect_with_query(controller: "observer",
-                            action: "show_observation", id: @observation.id)
+        redirect_with_query(controller: :observations,
+                            action: :show, id: @observation.id)
         done = true
 
       else
@@ -653,12 +653,12 @@ class ImageController < ApplicationController
   end
 
   # Form used to remove one or more images from an observation (not destroy!)
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs:
   #   params[:id]                  (observation)
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
-  # Redirects to show_observation.
+  # Redirects to observations/show.
   def remove_images
     remove_images_from_object(Observation, params)
   end

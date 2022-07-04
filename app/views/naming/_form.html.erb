@@ -54,8 +54,7 @@
       <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
       <%= select(:vote, :value,
                  options_for_select(Vote.confidence_menu, vote&.value),
-                 { include_blank: (action == :create ||
-                                   action == :create_observation) } ,
+                 { include_blank: (action == :create) } ,
                  class: "form-control",
                  data: { autofocus: focus_on_vote }) %>
     </div>

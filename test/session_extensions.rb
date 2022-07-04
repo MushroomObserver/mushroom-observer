@@ -105,6 +105,8 @@ module SessionExtensions
     end
   end
 
+  # FIXME: Need "put" and "patch" methods too?
+
   # Call the original +get+.
   def get_without_redirecting(action, **args)
     @doing_with_error_checking = true
@@ -189,9 +191,11 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
+    # NOTE: This was breaking in normalized controllers.
+    # The action for the form at "observations/new" is actually "observations"
     if args == []
       action = path.sub(/\?.*/, "")
-      args << "form[action^='#{action}']"
+      args << "form[action^='#{action.delete_suffix("/new")}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,

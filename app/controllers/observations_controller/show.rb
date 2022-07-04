@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-module ObserverController::ShowObservation
+# see observations_controller.rb
+module ObservationsController::Show
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
-  #   show_observation
+  #   observations/show
   #   _show_observation
   #   _show_images
   #   _show_namings
@@ -19,9 +19,16 @@ module ObserverController::ShowObservation
   #   @mappable
   #   @new_sites
   #   @votes
-  def show_observation
+  def show
     pass_query_params
     store_location
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Observation, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, Observation, params[:id]) and return
+    end
+
     check_if_user_wants_to_make_their_votes_public
     check_if_user_wants_to_change_thumbnail_size
     return unless load_observation_for_show_observation_page
@@ -88,8 +95,9 @@ module ObserverController::ShowObservation
   end
 
   # Tell search engines what the "correct" URL is for this page.
+  # Used in layouts/application
   def canonical_url(obs)
-    "#{MO.http_domain}/observer/show_observation/#{obs.id}"
+    observation_url(obs.id)
   end
 
   # Decide if the current query can be used to create a map.
@@ -112,18 +120,18 @@ module ObserverController::ShowObservation
   end
 
   def show_obs
-    redirect_to(action: "show_observation", id: params[:id].to_s)
+    redirect_to(action: :show, id: params[:id].to_s)
   end
 
-  # Go to next observation: redirects to show_observation.
-  def next_observation
-    redirect_to_next_object(:next, Observation, params[:id].to_s)
-  end
+  # Go to next observation: redirects to show.
+  # def next_observation
+  #   redirect_to_next_object(:next, Observation, params[:id].to_s)
+  # end
 
-  # Go to previous observation: redirects to show_observation.
-  def prev_observation
-    redirect_to_next_object(:prev, Observation, params[:id].to_s)
-  end
+  # Go to previous observation: redirects to show.
+  # def prev_observation
+  #   redirect_to_next_object(:prev, Observation, params[:id].to_s)
+  # end
 
   # Show map of observation.
   def map_observation
@@ -136,6 +144,6 @@ module ObserverController::ShowObservation
       MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
                                 obs.location)
     ]
-    render(action: :map_observations)
+    render(action: :map)
   end
 end

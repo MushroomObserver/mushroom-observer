@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# test the helpers for ObserverController
-class ObserverHelperTest < ActionView::TestCase
+# test the helpers for ObservationsController
+class ObservationsHelperTest < ActionView::TestCase
   def test_show_observation_name
     user = users(:rolf)
     location = locations(:albion)
