@@ -605,7 +605,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   root "rss_logs#index"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "observation_canonical"
+  get ":id" => "observations#show", id: /\d+/, as: "observation_id_only"
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])

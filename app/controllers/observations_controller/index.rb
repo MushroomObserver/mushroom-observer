@@ -142,8 +142,12 @@ module ObservationsController::Index
         search.errors.each do |error|
           flash_error(error.to_s)
         end
-        render(controller: :observations, action: :index)
+        @title = :title_for_observation_search.t
+        render(controller: :observations, action: :index,
+               locals: { title: @title })
       else
+        @title = :query_title_pattern_search.t(types: "Observations",
+                                               pattern: pattern)
         @suggest_alternate_spellings = search.query.params[:pattern]
         show_selected_observations(search.query)
       end

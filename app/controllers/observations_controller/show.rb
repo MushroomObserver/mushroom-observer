@@ -95,8 +95,9 @@ module ObservationsController::Show
   end
 
   # Tell search engines what the "correct" URL is for this page.
+  # Used in layouts/application
   def canonical_url(obs)
-    "#{MO.http_domain}/observer/show_observation/#{obs.id}"
+    observation_url(obs.id)
   end
 
   # Decide if the current query can be used to create a map.
