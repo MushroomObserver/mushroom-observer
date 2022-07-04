@@ -456,14 +456,21 @@ class ObservationsControllerTest < FunctionalTestCase
     pattern = "no hits"
     get_with_dump(:index, pattern: pattern)
     assert_template(:index)
+
+    assert_empty(@controller.instance_variable_get("@title"))
+    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
+    assert_equal("Mushroom Observer: Observation Search",
+                 css_select("title").text,
+                 "metadata <title> tag incorrect")
+
     # Change 2022/07 : Now setting title explicitly for refactored indexes
     # assert_empty(@controller.instance_variable_get("@title"))
-    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal(
-      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get("@title"),
-      "metadata <title> tag incorrect"
-    )
+    # assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
+    # assert_equal(
+    #   :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+    #   @controller.instance_variable_get("@title"),
+    #   "metadata <title> tag incorrect"
+    # )
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
