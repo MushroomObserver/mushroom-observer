@@ -99,7 +99,7 @@ module Query
 
         Name.
           where((Name[:correct_spelling_id].coalesce(Name[:id])).
-                in(clean_id_set(ids).split(",").map(&:to_i))).
+                in(limited_id_set(ids))).
           pluck(*minimal_name_columns)
       end
 
