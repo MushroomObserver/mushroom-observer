@@ -193,12 +193,6 @@ module Query
           pluck(*minimal_name_columns)
       end
 
-      def matching_lower_names(lower_names_regex)
-        Name.
-          where(Name[:text_name] =~ lower_names_regex).
-          pluck(*minimal_name_columns)
-      end
-
       def genera_and_up(min_names)
         min_names.map { |min_name| min_name[3] }.
           reject { |min_name| min_name.include?(" ") }
