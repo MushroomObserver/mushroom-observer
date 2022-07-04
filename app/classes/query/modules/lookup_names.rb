@@ -97,10 +97,10 @@ module Query
         ids = min_names.map { |min_name| min_name[1] || min_name[0] }
         return [] if ids.empty?
 
-        Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE COALESCE(correct_spelling_id, id) IN (#{clean_id_set(ids)})
-        ))
+        Name.
+          where((Name[:correct_spelling_id].coalesce(Name[:id])).
+                in(clean_id_set(ids).split(",").map(&:to_i))).
+          pluck(*minimal_name_columns)
       end
 
       def add_synonyms(min_names)
@@ -109,7 +109,7 @@ module Query
 
         min_names.reject { |min_name| min_name[2] } +
           Name.where(synonym_id: clean_id_set(ids).split(",")).
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def add_subtaxa(min_names)
@@ -136,7 +136,7 @@ module Query
           # + lower names
           or(Name.where(Name[:text_name] =~ lower_names_regex)).
           distinct.
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def include_higher_and_lower_taxa(names:, lower_names_regex:,
@@ -148,7 +148,7 @@ module Query
           # + lower names
           or(Name.where(Name[:text_name] =~ lower_names_regex)).
           distinct.
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def add_immediate_subtaxa(min_names)
@@ -177,7 +177,7 @@ module Query
           # + lower names
           or(Name.where(Name[:text_name] =~ lower_names_regex)).
           distinct.
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def include_immediate_higher_and_lower_taxa(names:, lower_names_regex:,
@@ -190,13 +190,13 @@ module Query
           # + lower names
           or(Name.where(Name[:text_name] =~ lower_names_regex)).
           distinct.
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def matching_lower_names(lower_names_regex)
         Name.
           where(Name[:text_name] =~ lower_names_regex).
-          pluck(*minimal_name_columns_array)
+          pluck(*minimal_name_columns)
       end
 
       def genera_and_up(min_names)
@@ -238,11 +238,7 @@ module Query
       end
 
       def minimal_name_columns
-        "id, correct_spelling_id, synonym_id, text_name"
-      end
-
-      def minimal_name_columns_array
-        minimal_name_columns.split(", ").map(&:to_sym)
+        [:id, :correct_spelling_id, :synonym_id, :text_name].freeze
       end
     end
   end
