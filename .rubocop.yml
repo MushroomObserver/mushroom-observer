@@ -51,11 +51,7 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-########### Individual Cops
-
-# Use RuboCop's default configuration, except as specified below
-
-########### Individual Pending Cops
+########### Pending Cops
 # https://docs.rubocop.org/rubocop/versioning.html#pending-cops
 # Once Rubocop removes pending status for these cops,
 # our configuration should be:
@@ -77,7 +73,7 @@ Layout/LineContinuationSpacing:
 Lint/ConstantOverwrittenInRescue:
   Enabled: true
 
-########### Individual Resolved (Non-Pending) Cops
+########### Resolved (Non-Pending) Cops
 
 # cops for which MO uses a non-default configuration
 
