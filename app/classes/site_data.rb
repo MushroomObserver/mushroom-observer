@@ -153,7 +153,7 @@ class SiteData
     observations_without_voucher:
       Observation.
         where(specimen: false).
-        where("LENGTH(observations.notes) >= 10").
+        where(Observation[:notes].length >= 10).
         where.not(thumb_image_id: nil),
     sequenced_observations:
       Sequence.
