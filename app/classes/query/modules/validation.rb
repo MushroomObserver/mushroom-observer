@@ -98,15 +98,18 @@ module Query
 
       def validate_enum(arg, val, hash)
         if hash.keys.length != 1
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
-                "query! (wrong number of keys in hash)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (wrong number of keys in hash)")
         end
 
         arg_type = hash.keys.first
         set = hash.values.first
         unless set.is_a?(Array)
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
-                "query! (expected value to be an array of allowed values)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (expected value to be an array of allowed values)"
+          )
         end
 
         val2 = scalar_validate(arg, val, arg_type)
