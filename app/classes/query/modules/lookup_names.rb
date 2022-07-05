@@ -122,53 +122,37 @@ module Query
       end
 
       def add_lower_names(query, names)
-        query.or(Name.where(Name[:text_name] =~ /^(#{names.join("|")}) /))
+        query.or(Name.
+          where(Name[:text_name] =~ /^(#{names.join("|")}) /))
       end
 
       def add_higher_names(query, names)
-        query.or(Name.where(Name[:classification] =~ /: _(#{names.join("|")})_/))
+        query.or(Name.
+          where(Name[:classification] =~ /: _(#{names.join("|")})_/))
       end
 
       def add_immediate_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
 
-        if higher_names.empty?
-          include_lower_taxa(
-            names: min_names,
-            lower_names_regex:
-              /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/
-          )
-        else
-          include_immediate_higher_and_lower_taxa(
-            names: min_names,
-            lower_names_regex:
-              /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/,
-            higher_names_matcher: /: _(#{higher_names.join("|")})_$/
-          )
+        query = Name.where(id: min_names.map(&:first))
+        query = add_immediate_lower_names(query, lower_names)
+        unless higher_names.empty?
+          query = add_immediate_higher_names(query, higher_names)
         end
+        query.distinct.pluck(*minimal_name_columns)
       end
 
-      def include_lower_taxa(names:, lower_names_regex:)
-        # The names_themselves
-        Name.where(id: names.map(&:first)).
-          # + lower names
-          or(Name.where(Name[:text_name] =~ lower_names_regex)).
-          distinct.
-          pluck(*minimal_name_columns)
+      def add_immediate_lower_names(query, lower_names)
+        query.or(Name.
+          where(Name[:text_name] =~
+            /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/))
       end
 
-      def include_immediate_higher_and_lower_taxa(names:, lower_names_regex:,
-                                                  higher_names_matcher:)
-        # The names_themselves
-        Name.where(id: names.map(&:first)).
-          # + higher names
-          or(Name.where(Name[:classification] =~ higher_names_matcher).
-                  where.not(Name[:text_name].matches("% %"))).
-          # + lower names
-          or(Name.where(Name[:text_name] =~ lower_names_regex)).
-          distinct.
-          pluck(*minimal_name_columns)
+      def add_immediate_higher_names(query, higher_names)
+        query.or(Name.
+          where(Name[:classification] =~ /: _(#{higher_names.join("|")})_$/).
+          where.not(Name[:text_name].matches("% %")))
       end
 
       def genera_and_up(min_names)
