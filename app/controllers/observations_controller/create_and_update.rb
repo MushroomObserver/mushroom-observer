@@ -101,7 +101,7 @@ module ObservationsController::CreateAndUpdate
 
     # If anything failed reload the form.
     else
-      reload_the_form(params[:reason])
+      reload_new_form(params[:reason])
     end
   end
 
@@ -281,13 +281,14 @@ module ObservationsController::CreateAndUpdate
     end
   end
 
-  def reload_the_form(reason)
+  def reload_new_form(reason)
     @reason          = @naming.init_reasons(reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
+    render(action: :new)
   end
 
   #
@@ -385,7 +386,7 @@ module ObservationsController::CreateAndUpdate
       @new_image.when = @observation.when
       init_project_vars_for_reload(@observation)
       init_list_vars_for_reload(@observation)
-      return
+      render(action: :edit) and return
     end
 
     # Update project and species_list attachments.
