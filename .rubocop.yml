@@ -25,8 +25,6 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-  # See https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-  NewCops: disable
 
   ########################### Excluded files ###################################
   # Completely ignore the following
@@ -53,10 +51,17 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-#####  Individual Cops
+###########  Individual Cops
 
 # Use RuboCop's default configuration, except as specified below
-# NOTE: pending cops have no default, so it must be specified
+
+#####  Pending Cops
+# https://docs.rubocop.org/rubocop/versioning.html#pending-cops
+# Once these are no longer pending, the configuration lines should be:
+#   deleted, if our configuration is the same as Rubocop's default, or
+#   moved to the Resolved cops area
+
+##### Resolved (Non-Pending) Cops
 
 # Rubocop supports multiple options and MO uses a non-default
 # Default: align "end" with **start of the line** that includes "begin"
