@@ -775,22 +775,19 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
-  resources :observations
-  match("observations/map(/:id)",
-        to: "observations#map", via: [:get, :post], id: /\d+/,
-        as: "map_observations")
   match("observations/suggestions(/:id)",
-        to: "observations#suggestions", via: [:get, :post], id: /\d+/,
+        to: "observations#suggestions", via: [:get], id: /\d+/,
         as: "suggest_observations")
-  match("observations/download(/:id)",
-        to: "observations#download", via: [:get, :post], id: /\d+/,
+  match("observations/map",
+        to: "observations#map", via: [:get],
+        as: "map_observations")
+  match("observations/download",
+        to: "observations#download", via: [:get],
         as: "download_observations")
-  match("observations/print_labels(/:id)",
-        to: "observations#print_labels", via: [:get, :post], id: /\d+/,
+  match("observations/print_labels",
+        to: "observations#print_labels", via: [:get],
         as: "print_observation_labels")
-  match("observations/recalc(/:id)",
-        to: "observations#recalc", via: [:get, :post], id: /\d+/,
-        as: "recalc_observation_consensus")
+  resources :observations
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications

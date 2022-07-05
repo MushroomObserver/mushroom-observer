@@ -573,7 +573,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
 
   # ------ Map ----------------------------------------------- #
-
+  # FIXME: this route does not work IRL
   def test_map_observations
     login
     get(:map)
@@ -1087,24 +1087,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       obs = Observation.find(id)
     end
-  end
-
-  # Prove that recalc redirects to show, and
-  # corrects an Observation's name.
-  def test_recalc
-    # Make the consensus inaccurate
-    obs = observations(:owner_only_favorite_eq_consensus)
-    accurate_consensus = obs.name
-    obs.name = names(:coprinus_comatus)
-    obs.save
-
-    # recalc
-    login
-    get(:recalc, params: { id: obs.id })
-    obs.reload
-
-    assert_redirected_to(action: :show, id: obs.id)
-    assert_equal(accurate_consensus, obs.name)
   end
 
   def test_original_filename_visibility
