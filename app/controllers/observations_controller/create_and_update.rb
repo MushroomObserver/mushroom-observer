@@ -459,23 +459,6 @@ module ObservationsController::CreateAndUpdate
     end
   end
 
-  # I'm tired of tweaking observations/show to call calc_consensus for
-  # debugging.  I'll just leave this stupid action in and have it
-  # forward to observations/show.
-  def recalc
-    pass_query_params
-    id = params[:id].to_s
-    begin
-      @observation = Observation.find(id)
-      @observation.name.display_name
-      @observation.calc_consensus
-    rescue StandardError => e
-      flash_error(:observer_recalc_caught_error.t(error: e))
-    end
-    # render(plain: "", layout: true)
-    redirect_with_query(action: :show, id: id)
-  end
-
   ##############################################################################
   #
   #  :section: Helpers

@@ -133,6 +133,7 @@ module ObservationsController::Show
   #   redirect_to_next_object(:prev, Observation, params[:id].to_s)
   # end
 
+  # FIXME: Is this used anywhere?
   # Show map of observation.
   def map_observation
     pass_query_params
