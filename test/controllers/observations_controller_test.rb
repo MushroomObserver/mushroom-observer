@@ -764,8 +764,9 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:show, params: { id: obs.id })
-    assert_select("a[href*=#{edit_observation_path(obs.id)}]", count: 0)
-    assert_select("a[href*=#{destroy_observation_path(obs.id)}]", count: 0)
+    assert_select("a:match('href',?)", edit_observation_path(obs.id), count: 0)
+    assert_select("a:match('href',?)", observation_path(obs.id),
+                  count: 0, text: :DESTROY.t)
     assert_select("a[href*=add_image]", count: 0)
     assert_select("a[href*=remove_image]", count: 0)
     assert_select("a[href*=reuse_image]", count: 0)
@@ -776,8 +777,9 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:show, params: { id: obs.id })
-    assert_select("a[href*=#{edit_observation_path(obs.id)}]", minimum: 1)
-    assert_select("a[href*=#{destroy_observation_path(obs.id)}]", minimum: 1)
+    assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]", observation_path(obs.id),
+                  minimum: 1, text: :DESTROY.t)
     assert_select("a[href*=add_image]", minimum: 1)
     assert_select("a[href*=remove_image]", minimum: 1)
     assert_select("a[href*=reuse_image]", minimum: 1)
@@ -786,8 +788,9 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login("dick")
     get(:show, params: { id: obs.id })
-    assert_select("a[href*=#{edit_observation_path(obs.id)}]", minimum: 1)
-    assert_select("a[href*=#{destroy_observation_path(obs.id)}]", minimum: 1)
+    assert_select("a[href=?]", edit_observation_path(obs.id), minimum: 1)
+    assert_select("a[href=?]", observation_path(obs.id),
+                  minimum: 1, text: :DESTROY.t)
     assert_select("a[href*=add_image]", minimum: 1)
     assert_select("a[href*=remove_image]", minimum: 1)
     assert_select("a[href*=reuse_image]", minimum: 1)

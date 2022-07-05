@@ -382,11 +382,7 @@ module ObservationsController::CreateAndUpdate
 
     # Reload form if anything failed.
     if any_errors
-      @images         = @bad_images
-      @new_image.when = @observation.when
-      init_project_vars_for_reload(@observation)
-      init_list_vars_for_reload(@observation)
-      render(action: :edit) and return
+      reload_edit_form and return
     end
 
     # Update project and species_list attachments.
@@ -417,6 +413,14 @@ module ObservationsController::CreateAndUpdate
               @observation.sequences.empty?
 
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
+  end
+
+  def reload_edit_form
+    @images         = @bad_images
+    @new_image.when = @observation.when
+    init_project_vars_for_reload(@observation)
+    init_list_vars_for_reload(@observation)
+    render(action: :edit)
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
