@@ -105,7 +105,8 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_show_observation_change_thumbnail_size
     user = users(:small_thumbnail_user)
     login(user.name)
-    get(:show, params: { set_thumbnail_size: "thumbnail" })
+    obs = observations(:detailed_unknown_obs)
+    get(:show, params: { id: obs.id, set_thumbnail_size: "thumbnail" })
     user.reload
     assert_equal("thumbnail", user.thumbnail_size)
   end
