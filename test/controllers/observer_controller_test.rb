@@ -2912,7 +2912,7 @@ class ObserverControllerTest < FunctionalTestCase
     # If fixtures change, these may also need to be changed.
     assert_equal(
       "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\","\
+        "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\"," \
         "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \

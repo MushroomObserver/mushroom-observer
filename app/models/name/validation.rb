@@ -64,7 +64,7 @@ module Name::Validation
 
     errors.add(
       :author,
-      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: "\
+      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: " \
       "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
     )
   end
@@ -74,7 +74,7 @@ module Name::Validation
 
     errors.add(
       :text_name,
-      "#{:validate_name_text_name_too_long.t} #{:MAXIMUM.t}: "\
+      "#{:validate_name_text_name_too_long.t} #{:MAXIMUM.t}: " \
       "#{Name.text_name_limit}"
     )
   end

@@ -284,7 +284,7 @@ class QueuedEmail < AbstractModel
 
   # Returns "flavor from to" for debugging.
   def text_name
-    "#{flavor.sub("QueuedEmail::", "")} "\
+    "#{flavor.sub("QueuedEmail::", "")} " \
     "#{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
   end
 

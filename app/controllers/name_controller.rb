@@ -1047,14 +1047,14 @@ class NameController < ApplicationController
         # This error message is no longer necessary.
         if Rails.env.test?
           flash_error(
-            "Unrecognized names given, including: "\
+            "Unrecognized names given, including: " \
             "#{sorter.new_name_strs[0].inspect}"
           )
         end
       else
         # Same with this one... err, no this is not reported anywhere.
         flash_error(
-          "Ambiguous names given, including: "\
+          "Ambiguous names given, including: " \
           "#{sorter.multiple_line_strs[0].inspect}"
         )
       end

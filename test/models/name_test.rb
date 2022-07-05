@@ -2967,7 +2967,7 @@ class NameTest < UnitTestCase
     assert(
       ancestor.dependents?,
       "`dependents?` should be true for a Name above genus " \
-      "(#{ancestor.text_name}) that is a correctly spelled ancestor "\
+      "(#{ancestor.text_name}) that is a correctly spelled ancestor " \
       "of a Proposed Name"
     )
 

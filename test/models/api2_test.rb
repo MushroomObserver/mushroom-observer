@@ -61,7 +61,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_api_results(expect)
-    msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n"\
+    msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n" \
           "Query sql: #{@api.query.query}"
     assert_obj_list_equal(expect, @api.results, :sort, msg)
   end

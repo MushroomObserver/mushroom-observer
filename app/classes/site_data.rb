@@ -132,7 +132,7 @@ class SiteData
     observations_with_voucher:
       "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
     observations_without_voucher:
-      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
+      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
       "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
