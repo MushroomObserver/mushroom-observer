@@ -71,14 +71,12 @@ Layout/LineContinuationLeadingSpace:
 
 # cops for which MO uses a non-default configuration
 
-# Rubocop supports multiple options and MO uses a non-default
 # Default: align "end" with **start of the line** that includes "begin"
-# MO align with "begin". This is how we've almost always done it.
+# MO: align with "begin". This is how we've almost always done it.
 # And it's consistent with Layout/EndAlignment for other keywords.
 Layout/BeginEndAlignment:
   EnforcedStyleAlignWith: begin
 
-# Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:
   EnforcedStyle: trailing
 
@@ -86,7 +84,6 @@ Layout/DotPosition:
 Layout/HashAlignment:
   EnforcedColonStyle: key
 
-# Rubocop supports multiple options and MO uses a non-default
 Layout/LineLength:
   # RuboCop default is 120 as of 0.84
   Max: 80
@@ -199,7 +196,7 @@ Style/AsciiComments:
 Style/DateTime:
   Enabled: false
 
-# Rubocop does not enable this cop by defaul
+# Rubocop does not enable this cop by default
 # MO uses parentheses
 Style/MethodCallWithArgsParentheses:
   Enabled: true
@@ -225,11 +222,9 @@ Style/RaiseArgs:
 Style/StringConcatenation:
   Mode: aggressive
 
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
