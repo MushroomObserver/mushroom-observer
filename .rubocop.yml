@@ -72,6 +72,11 @@ Layout/LineContinuationLeadingSpace:
 Layout/LineContinuationSpacing:
   Enabled: true
 
+# Pending in Rubocop 1.31.1
+# https://docs.rubocop.org/rubocop/cops_lint.html#lintconstantoverwritteninrescue
+Lint/ConstantOverwrittenInRescue:
+  Enabled: true
+
 ########### Individual Resolved (Non-Pending) Cops
 
 # cops for which MO uses a non-default configuration
