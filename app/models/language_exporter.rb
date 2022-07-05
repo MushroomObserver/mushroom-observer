@@ -175,7 +175,7 @@ module LanguageExporter
 
   def read_localization_file
     File.open(localization_file, "r:utf-8") do |fh|
-      YAML.load(fh)[locale][MO.locale_namespace]
+      YAML.safe_load(fh)[locale][MO.locale_namespace]
     end
   end
 
@@ -189,7 +189,7 @@ module LanguageExporter
 
   def read_export_file
     File.open(export_file, "r:utf-8") do |fh|
-      YAML.load(fh)
+      YAML.safe_load(fh)
     end
   end
 

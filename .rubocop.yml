@@ -53,24 +53,21 @@ AllCops:
 
 ########### Pending Cops
 # https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-# Once Rubocop removes pending status for these cops,
+# NOTE: Once Rubocop removes pending status for these cops,
 # our configuration should be:
 #   deleted, if our configuration is the same as Rubocop's default, or
-#   moved to the Individual Resolved (Non-Pending) Cops area
+#   moved to the Resolved (Non-Pending) Cops area
 
-# Pending in Rubocop 1.31.1
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationleadingspace
-Layout/LineContinuationLeadingSpace:
+Layout/LineContinuationLeadingSpace: #`new in 1.31.1
   Enabled: true
 
-# Pending in Rubocop 1.31.1
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationspacing
-Layout/LineContinuationSpacing:
+Layout/LineContinuationSpacing: #`new in 1.31.1
   Enabled: true
 
-# Pending in Rubocop 1.31.1
 # https://docs.rubocop.org/rubocop/cops_lint.html#lintconstantoverwritteninrescue
-Lint/ConstantOverwrittenInRescue:
+Lint/ConstantOverwrittenInRescue: #`new in 1.31.1
   Enabled: true
 
 ########### Resolved (Non-Pending) Cops
