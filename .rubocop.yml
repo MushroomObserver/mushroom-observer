@@ -51,22 +51,25 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-###########  Individual Cops
+########### Individual Cops
 
 # Use RuboCop's default configuration, except as specified below
 
-#####  Pending Cops
+########### Individual Pending Cops
 # https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-# Once these are no longer pending, the configuration lines should be:
+# Once Rubocop removes pending status for these cops,
+# our configuration should be:
 #   deleted, if our configuration is the same as Rubocop's default, or
-#   moved to the Resolved cops area
+#   moved to the Individual Resolved (Non-Pending) Cops area
 
-##### Resolved (Non-Pending) Cops
 # Pending in Rubocop 1.31.1
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationleadingspace
 Layout/LineContinuationLeadingSpace:
   Enabled: true
 
+########### Individual Resolved (Non-Pending) Cops
+
+# cops for which MO uses a non-default configuration
 
 # Rubocop supports multiple options and MO uses a non-default
 # Default: align "end" with **start of the line** that includes "begin"
