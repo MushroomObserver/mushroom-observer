@@ -119,9 +119,9 @@ module ObservationsController::Show
     end
   end
 
-  def show_obs
-    redirect_to(action: :show, id: params[:id].to_s)
-  end
+  # def show_obs
+  #   redirect_to(action: :show, id: params[:id].to_s)
+  # end
 
   # Go to next observation: redirects to show.
   # def next_observation

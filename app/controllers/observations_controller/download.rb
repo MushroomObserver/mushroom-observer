@@ -18,7 +18,7 @@ module ObservationsController::Download
     query = find_query(:Observation)
     if query
       @labels = make_labels(query.results)
-      render(action: :print_labels, layout: :printable)
+      render(layout: "printable", action: "print_labels")
     else
       flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default("/")
@@ -46,7 +46,7 @@ module ObservationsController::Download
 
   def render_labels
     @labels = make_labels(@query.results)
-    render(action: :print_labels, layout: :printable)
+    render(layout: "printable", action: "print_labels")
   end
 
   def create_report(args)

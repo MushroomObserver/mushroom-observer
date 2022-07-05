@@ -1479,7 +1479,7 @@ class ApplicationController < ActionController::Base
     # (overriding any title specified in the view)
     # and the html <title> metadata == a translated tag or the action name
     # see ApplicationHelper#title_tag_contents
-    @num_results.zero? ? @title = "" : @title ||= query.title
+    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
 
     # Add magic links for sorting if enough results to sort
     @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)

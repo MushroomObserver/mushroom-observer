@@ -425,7 +425,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
-  def test_observation_search
+  def test_observation_search_1
     login
     pattern = "Boletus edulis"
     get_with_dump(:index, pattern: pattern)
@@ -435,7 +435,11 @@ class ObservationsControllerTest < FunctionalTestCase
       @controller.instance_variable_get("@title")
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+  end
 
+  def test_observation_search_2
+    login
+    pattern = "Boletus edulis"
     get_with_dump(:index, pattern: pattern, page: 2)
     assert_template(:index)
     assert_equal(
@@ -443,17 +447,24 @@ class ObservationsControllerTest < FunctionalTestCase
       @controller.instance_variable_get("@title")
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+  end
 
+  def test_observation_search_no_hits
+    login
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
     pattern = "no hits"
     get_with_dump(:index, pattern: pattern)
     assert_template(:index)
-    assert_empty(@controller.instance_variable_get("@title"))
+
+    # Change 2022/07 : Now setting @title explicitly for refactored indexes
+    # assert_empty(@controller.instance_variable_get("@title"))
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
-    assert_equal("Mushroom Observer: Observation Search",
-                 css_select("title").text,
-                 "metadata <title> tag incorrect")
+    assert_equal(
+      :title_for_observation_search.t,
+      @controller.instance_variable_get("@title"),
+      "metadata <title> tag incorrect"
+    )
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
@@ -1135,7 +1146,7 @@ class ObservationsControllerTest < FunctionalTestCase
   # ------------------------------
 
   # Test "new" observation form.
-  def test_create_observation
+  def test_create_new_observation
     requires_login(:new)
     assert_form_action(action: :create, approved_name: "")
     assert_input_value(:collection_number_name,
