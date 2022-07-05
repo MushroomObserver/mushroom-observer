@@ -77,6 +77,10 @@ Lint/ConstantOverwrittenInRescue:
 
 # cops for which MO uses a non-default configuration
 
+# Not relevent (MO is not a gem)
+Gemspec:
+  Enabled: false
+
 # Default: align "end" with **start of the line** that includes "begin"
 # MO: align with "begin". This is how we've almost always done it.
 # And it's consistent with Layout/EndAlignment for other keywords.
