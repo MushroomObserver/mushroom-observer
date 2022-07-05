@@ -10,54 +10,54 @@ module ObservationsController::Index
       advanced_search and return
     elsif params[:pattern].present?
       observation_search and return
-    end
-
-    query = \
-      if params[:look_alikes].present? && params[:name].present?
-        observations_of_look_alikes
-      elsif params[:related_taxa].present? && params[:name].present?
-        observations_of_related_taxa
-      elsif params[:name].present?
-        observations_of_name
-      elsif params[:user].present?
-        observations_by_user
-      elsif params[:location].present?
-        observations_at_location
-      elsif params[:where].present?
-        observations_at_where
-      elsif params[:project].present?
-        observations_for_project
-      elsif params[:by].present?
-        index_observation
-      else
-        create_query(:Observation, :all, by: :date)
-      end
-    # Catch pattern search first; this may have the other params below
-    # if params[:pattern].present?
-    #   show_selected_observations(query)
-    if params[:id].present?
-      show_selected_observations(query, id: params[:id].to_s,
-                                 always_index: true)
-    elsif params[:where].present? || params[:project].present?
-      show_selected_observations(query, always_index: true)
+    elsif params[:look_alikes].present? && params[:name].present?
+      observations_of_look_alikes and return
+    elsif params[:related_taxa].present? && params[:name].present?
+      observations_of_related_taxa and return
+    elsif params[:name].present?
+      observations_of_name and return
+    elsif params[:user].present?
+      observations_by_user and return
+    elsif params[:location].present?
+      observations_at_location and return
+    elsif params[:where].present?
+      observations_at_where and return
+    elsif params[:project].present?
+      observations_for_project and return
+    elsif params[:by].present?
+      index_observation and return
     else
-      show_selected_observations(query)
+      list_observations and return
     end
+    # if params[:id].present?
+    #   show_selected_observations(query, id: params[:id].to_s,
+    #                              always_index: true)
+    # elsif params[:where].present? || params[:project].present?
+    #   show_selected_observations(query, always_index: true)
+    # else
+    #   show_selected_observations(query)
+    # end
   end
 
   # Displays matrix of selected Observations (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
-    # show_selected_observations(
-    #   query, id: params[:id].to_s, always_index: true
-    # )
+    show_selected_observations(
+      query, id: params[:id].to_s, always_index: true
+    )
+  end
+
+  # Displays matrix of all Observation's, sorted by date.
+  def list_observations
+    query = create_query(:Observation, :all, by: :date)
+    show_selected_observations(query)
   end
 
   # Of questionable utility?
   # Displays matrix of all Observations, alphabetically.
   def observations_by_name
     query = create_query(:Observation, :all, by: :name)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observations with the given name proposed but not
@@ -69,7 +69,7 @@ module ObservationsController::Index
                          include_all_name_proposals: true,
                          exclude_consensus: true,
                          by: :confidence)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observations with the given text_name (or search_name).
@@ -78,7 +78,7 @@ module ObservationsController::Index
                          names: [params[:name]],
                          include_synonyms: true,
                          by: :confidence)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observations of subtaxa of the parent of the given name.
@@ -87,17 +87,17 @@ module ObservationsController::Index
                          names: parents(params[:name]),
                          include_subtaxa: true,
                          by: :confidence)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Displays matrix of User's Observations, by date.
   def observations_by_user
     return unless (
-      user = find_or_goto_index(User, params[:user].to_s)
+      user = find_or_goto_index(User, params[:user])
     )
 
     query = create_query(:Observation, :by_user, user: user)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observations at a Location, by date.
@@ -107,7 +107,7 @@ module ObservationsController::Index
     )
 
     query = create_query(:Observation, :at_location, location: location)
-    # show_selected_observations(query)
+    show_selected_observations(query)
   end
 
   # Display matrix of Observations whose "where" matches a string.
@@ -117,7 +117,7 @@ module ObservationsController::Index
     query = create_query(:Observation, :at_where,
                          user_where: where,
                          location: Location.user_name(@user, where))
-    # show_selected_observations(query, always_index: 1)
+    show_selected_observations(query, always_index: 1)
   end
 
   # Display matrix of Observations attached to a given project.
@@ -127,7 +127,7 @@ module ObservationsController::Index
     )
 
     query = create_query(:Observation, :for_project, project: project)
-    # show_selected_observations(query, always_index: 1)
+    show_selected_observations(query, always_index: 1)
   end
 
   # Display matrix of Observations whose notes, etc. match a string pattern.
