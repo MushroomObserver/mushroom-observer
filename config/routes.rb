@@ -381,10 +381,8 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
-    # rubocop:todo Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -797,14 +795,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("searches/pattern_search(/:id)",
         to: "searches#pattern_search", via: [:get, :post], id: /\d+/,
         as: "searches_pattern_search")
-  match("searches/advanced_search_form(/:id)",
-        to: "searches#advanced_search_form", via: [:get, :post], id: /\d+/,
-        as: "searches_advanced_search_form")
+  match("searches/advanced(/:id)",
+        to: "searches#advanced", via: [:get], id: /\d+/,
+        as: "searches_advanced")
 
   get("/observer/pattern_search",
       to: redirect("/searches/pattern_search"))
   get("/observer/advanced_search_form",
-      to: redirect("/searches/advanced_search_form"))
+      to: redirect("/searches/advanced"))
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]

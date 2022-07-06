@@ -4,11 +4,11 @@ require("test_helper")
 
 # Controller tests for search pages
 class SearchesControllerTest < FunctionalTestCase
-  def test_advanced_search_form
+  def test_advanced
     login
     [Name, Image, Observation].each do |model|
       get(
-        :advanced_search_form,
+        :advanced,
         params: {
           search: {
             name: "Don't know",
@@ -29,7 +29,7 @@ class SearchesControllerTest < FunctionalTestCase
   def test_advanced_search_content_filters
     login
     # Make sure all the right buttons and fields are present.
-    get(:advanced_search_form)
+    get(:advanced)
     assert_select("input[type=radio]#content_filter_has_images_yes")
     assert_select("input[type=radio]#content_filter_has_images_no")
     assert_select("input[type=radio]#content_filter_has_images_")
@@ -53,7 +53,7 @@ class SearchesControllerTest < FunctionalTestCase
       content_filter_region: "California",
       content_filter_clade: ""
     }
-    get(:advanced_search_form, params: params)
+    get(:advanced, params: params)
     query = QueryRecord.last.query
     assert_equal("", query.params[:has_images])
     assert_true(query.params[:has_specimen])

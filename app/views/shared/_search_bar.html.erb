@@ -45,7 +45,7 @@
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,
                                            style: "white-space:nowrap"),
-                       searches_advanced_search_form_path)
+                       searches_advanced_path)
           @timer_end ||= Time.zone.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
           timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"

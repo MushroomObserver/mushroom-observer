@@ -65,7 +65,7 @@ class SearchesController < ApplicationController
   #   location/advanced_search
   #   name/advanced_search
   #   searches/advanced_search
-  def advanced_search_form
+  def advanced
     @filter_defaults = users_content_filters || {}
     return if params[:search].blank?
 
