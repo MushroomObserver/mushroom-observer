@@ -8,7 +8,7 @@ class SearchesControllerTest < FunctionalTestCase
     login
     [Name, Image, Observation].each do |model|
       get(
-        "advanced_search_form",
+        :advanced_search_form,
         params: {
           search: {
             name: "Don't know",
