@@ -12,7 +12,7 @@ class SearchController < ApplicationController
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
-  def pattern_search
+  def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
 

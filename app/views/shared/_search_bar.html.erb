@@ -1,6 +1,6 @@
 <nav class="navbar navbar-default">
   <%= form_tag(
-        controller: :search, action: :pattern_search, method: :get,
+        search_pattern_path, method: :get,
         { class: "navbar-form navbar-left" }
       ) do %>
       <div>
