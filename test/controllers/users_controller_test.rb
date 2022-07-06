@@ -72,7 +72,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   # When pattern has no matches, go to list page with flash message,
-  #  title not displayed and default metadata title
+  #  title displayed is default no_hits_title
   def test_user_search_unmatched
     login
     unmatched_pattern = "NonexistentUserContent"
@@ -80,10 +80,11 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_empty(@controller.instance_variable_get("@title"),
-                 "Displayed title should be empty")
-    assert_equal("Mushroom Observer: Index", css_select("title").text,
-                 "metadata <title> tag incorrect")
+    assert_equal(
+      :title_for_user_search.t,
+      @controller.instance_variable_get("@title"),
+      "metadata <title> tag incorrect"
+    )
     assert_empty(css_select("#sorts"),
                  "There should be no sort links")
 
