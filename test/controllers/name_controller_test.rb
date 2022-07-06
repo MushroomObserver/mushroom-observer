@@ -312,7 +312,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_select(
       "#nomenclature", /#{label}.*#{:show_name_icn_id_missing.l}/m,
-      "Nomenclature section missing an ICN id label and/or "\
+      "Nomenclature section missing an ICN id label and/or " \
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(

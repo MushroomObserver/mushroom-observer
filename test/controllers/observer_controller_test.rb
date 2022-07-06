@@ -2912,14 +2912,14 @@ class ObserverControllerTest < FunctionalTestCase
     # If fixtures change, these may also need to be changed.
     assert_equal(
       "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\","\
-        "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
-        "#{l.id},#{country},#{state},,#{city}," \
-        ",,,34.22,34.15,-118.29,-118.37," \
-        "#{l.high.to_f.round},#{l.low.to_f.round}," \
-        "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
-        "#{o.notes[Observation.other_notes_key]}," \
-        "#{MO.http_domain}/#{o.id}",
+      "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\"," \
+      "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
+      "#{l.id},#{country},#{state},,#{city}," \
+      ",,,34.22,34.15,-118.29,-118.37," \
+      "#{l.high.to_f.round},#{l.low.to_f.round}," \
+      "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
+      "#{o.notes[Observation.other_notes_key]}," \
+      "#{MO.http_domain}/#{o.id}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
     )

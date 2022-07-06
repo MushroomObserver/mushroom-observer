@@ -91,29 +91,32 @@ module Query
         elsif arg_type.is_a?(Hash)
           validate_enum(arg, val, arg_type)
         else
-          raise("Invalid declaration of :#{arg} for #{model} :#{flavor} "\
+          raise("Invalid declaration of :#{arg} for #{model} :#{flavor} " \
                 "query! (invalid type: #{arg_type.class.name})")
         end
       end
 
       def validate_enum(arg, val, hash)
         if hash.keys.length != 1
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
-                "query! (wrong number of keys in hash)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (wrong number of keys in hash)")
         end
 
         arg_type = hash.keys.first
         set = hash.values.first
         unless set.is_a?(Array)
-          raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
-                "query! (expected value to be an array of allowed values)")
+          raise(
+            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+            "query! (expected value to be an array of allowed values)"
+          )
         end
 
         val2 = scalar_validate(arg, val, arg_type)
         if (arg_type == :string) && set.include?(val2.to_sym)
           val2 = val2.to_sym
         elsif set.exclude?(val2)
-          raise("Value for :#{arg} should be one of the following: "\
+          raise("Value for :#{arg} should be one of the following: " \
                 "#{set.inspect}.")
         end
         val2
@@ -161,7 +164,7 @@ module Query
            val.is_a?(Symbol)
           val.to_s
         else
-          raise("Value for :#{arg} should be a string or symbol, "\
+          raise("Value for :#{arg} should be a string or symbol, " \
                 "got a #{val.class}: #{val.inspect}")
         end
       end
@@ -180,7 +183,7 @@ module Query
         elsif could_be_record_id?(val)
           val.to_i
         else
-          raise("Value for :#{arg} should be id or an #{type} instance, "\
+          raise("Value for :#{arg} should be id or an #{type} instance, " \
                 "got: #{val.inspect}")
         end
       end

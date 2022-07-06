@@ -59,7 +59,7 @@ module FlashExtensions
       assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Integer)
       assert(expect == lvl,
-             "#{msg} Wrong flash error level. "\
+             "#{msg} Wrong flash error level. " \
              "Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
       assert(got.match(expect),

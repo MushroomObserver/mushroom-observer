@@ -304,10 +304,10 @@ class EolData
 
   def eol_search_url(class_name, subject)
     if class_name == "Image"
-      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}"\
+      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}" \
       "&type%5B%5D=Image"
     elsif class_name == "Name"
-      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}"\
+      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}" \
       "&type%5B%5D=TaxonConcept"
     else
       "http://eol.org"

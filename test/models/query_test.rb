@@ -317,7 +317,7 @@ class QueryTest < UnitTestCase
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` " \
-      "JOIN `observations` ON observations.name_id = names.id "\
+      "JOIN `observations` ON observations.name_id = names.id " \
       "JOIN `rss_logs` ON observations.rss_log_id = rss_logs.id",
       clean(query.query(join: { observations: :rss_logs }))
     )

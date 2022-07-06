@@ -18,7 +18,7 @@ class PivotalControllerTest < FunctionalTestCase
       :get,
       "https://www.pivotaltracker.com/services/v5/projects/224629/stories?" \
       "fields=story_type,estimate,current_state,name,description,updated_at," \
-      "labels(name),comments(created_at,text)&"\
+      "labels(name),comments(created_at,text)&" \
       "filter=state:unscheduled,started,unstarted&limit=500"
     ).
       with(
