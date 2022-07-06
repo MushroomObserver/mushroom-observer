@@ -132,19 +132,4 @@ module ObservationsController::Show
   # def prev_observation
   #   redirect_to_next_object(:prev, Observation, params[:id].to_s)
   # end
-
-  # FIXME: Is this used anywhere?
-  # Show map of observation.
-  def map_observation
-    pass_query_params
-    obs = find_or_goto_index(Observation, params[:id].to_s)
-    return unless obs
-
-    @title = :map_observation_title.t(id: obs.id)
-    @observations = [
-      MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
-                                obs.location)
-    ]
-    render(action: :map)
-  end
 end

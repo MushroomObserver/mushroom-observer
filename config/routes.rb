@@ -605,7 +605,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   root "rss_logs#index"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "observation_id_only"
+  get ":id" => "observations#show", id: /\d+/, as: "observation_permanent"
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
@@ -775,19 +775,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
-  match("observations/suggestions(/:id)",
-        to: "observations#suggestions", via: [:get], id: /\d+/,
-        as: "suggest_observations")
-  match("observations/map",
-        to: "observations#map", via: [:get],
-        as: "map_observations")
-  match("observations/download",
-        to: "observations#download", via: [:get],
-        as: "download_observations")
-  match("observations/print_labels",
-        to: "observations#print_labels", via: [:get],
-        as: "print_observation_labels")
-  resources :observations
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions")
+    end
+    collection do
+      get("map")
+      get("download")
+      get("print_labels")
+    end
+  end
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications
