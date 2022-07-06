@@ -70,6 +70,8 @@ Layout/LineContinuationSpacing: #`new in 1.31.1
 Lint/ConstantOverwrittenInRescue: #`new in 1.31.1
   Enabled: true
 
+# ------------------------------------------------------------------------------
+
 ########### Resolved (Non-Pending) Cops
 
 # cops for which MO uses a non-default configuration
