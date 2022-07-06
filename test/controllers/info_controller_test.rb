@@ -48,7 +48,7 @@ class InfoControllerTest < FunctionalTestCase
 
   def test_unauthorized_robot_permissions
     @request.user_agent =
-      "Mozilla/5.0 (compatible; Baiduspider/2.0; "\
+      "Mozilla/5.0 (compatible; Baiduspider/2.0; " \
       "+http://www.baidu.com/search/spider.html)"
     get(:intro) # only authorized robots and anonymous users are allowed here
     assert_equal(403, @response.status)

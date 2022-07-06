@@ -90,16 +90,17 @@ class SequenceControllerTest < FunctionalTestCase
     owner = obs.user
 
     locus = "ITS"
-    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"\
-            "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac"\
-            "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac"\
-            "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt"\
-            "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg"\
-            "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt"\
-            "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga"\
-            "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga"\
-            "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
-            "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    bases = \
+      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
     params = {
       id: obs.id,
       sequence: { locus: locus,
@@ -275,16 +276,17 @@ class SequenceControllerTest < FunctionalTestCase
     sequencer = sequence.user
 
     locus = "mtSSU"
-    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"\
-            "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac"\
-            "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac"\
-            "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt"\
-            "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg"\
-            "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt"\
-            "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga"\
-            "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga"\
-            "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
-            "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    bases = \
+      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
     params = {
       id: sequence.id,
       sequence: { locus: locus,

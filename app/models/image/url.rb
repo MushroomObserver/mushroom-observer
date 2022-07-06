@@ -51,7 +51,7 @@ class Image
       when /^https:/
         remote_file_exists?(spec)
       else
-        raise("Invalid image source test spec for "\
+        raise("Invalid image source test spec for " \
               "#{source.inspect}: #{spec.inspect}")
       end
     end

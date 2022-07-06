@@ -5,9 +5,9 @@ module CapybaraHelper
   # Xpath for 1st link in each feed item,
   #   which items display "Observation Created"
   def rss_observation_created_xpath
-    "(//div[contains(@class, 'rss-box-details')]"\
-      "[descendant::div[contains(@class, 'rss-detail') and"\
-                        "normalize-space(text()) = 'Observation Created']]"\
+    "(//div[contains(@class, 'rss-box-details')]" \
+      "[descendant::div[contains(@class, 'rss-detail') and" \
+                        "normalize-space(text()) = 'Observation Created']]" \
       "//a[1])"
   end
 

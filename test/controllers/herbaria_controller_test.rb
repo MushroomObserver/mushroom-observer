@@ -698,13 +698,13 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_nil(
       herbarium.personal_user_id,
       "Use different fixture: #{herbarium.name} is already someone's " \
-        " personal herbarium"
+      "personal herbarium"
     )
     user = users(:zero_user)
     assert_false(
       herbarium.can_make_personal?(user),
       "Use different fixture: #{herbarium.name} cannot be made " \
-        " #{user}'s personal herbarium"
+      "#{user}'s personal herbarium"
     )
     params = herbarium_params.merge(name: herbarium.name, personal: "1")
     login(user.login)

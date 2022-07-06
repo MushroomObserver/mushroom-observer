@@ -112,7 +112,8 @@ class MatrixBoxPresenter
                    #{:Observations.t}: #{user.observations.count}".html_safe
     # rubocop:enable Rails/OutputSafety
     self.what  = view.link_with_query(name, controller: user.show_controller,
-                                            action: user.show_action, id: user.id)
+                                            action: user.show_action,
+                                            id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
 
