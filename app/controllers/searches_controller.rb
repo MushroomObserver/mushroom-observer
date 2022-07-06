@@ -77,7 +77,8 @@ class SearchesController < ApplicationController
     query = create_query(model, :advanced_search, query_params)
     if model.controller_normalized?
       redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :index },
+                                    action: :index,
+                                    advanced_search: 1 },
                                   query))
     else
       redirect_to(add_query_param({ controller: model.show_controller,
