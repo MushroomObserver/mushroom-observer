@@ -67,7 +67,7 @@ class SearchesController < ApplicationController
   #   searches/advanced_search
   def advanced_search_form
     @filter_defaults = users_content_filters || {}
-    return unless params[:search].present?
+    return if params[:search].blank?
 
     model = ADVANCED_SEARCHABLE_MODELS.
             find { |m| m.name.downcase == params[:search][:model] }
@@ -75,16 +75,7 @@ class SearchesController < ApplicationController
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
     query = create_query(model, :advanced_search, query_params)
-    if model.controller_normalized?
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :index,
-                                    advanced_search: 1 },
-                                  query))
-    else
-      redirect_to(add_query_param({ controller: model.show_controller,
-                                    action: :advanced_search },
-                                  query))
-    end
+    redirect_to_model_controller(model, query)
   end
 
   def add_filled_in_text_fields(query_params)
@@ -124,6 +115,19 @@ class SearchesController < ApplicationController
       redirect_to(index_path)
     else
       redirect_to(search_path)
+    end
+  end
+
+  def redirect_to_model_controller(model, query)
+    if model.controller_normalized?
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :index,
+                                    advanced_search: 1 },
+                                  query))
+    else
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :advanced_search },
+                                  query))
     end
   end
 end

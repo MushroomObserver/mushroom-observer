@@ -7,7 +7,7 @@ class SearchesControllerTest < FunctionalTestCase
   def test_advanced_search_form
     login
     [Name, Image, Observation].each do |model|
-      post(
+      get(
         "advanced_search_form",
         params: {
           search: {
