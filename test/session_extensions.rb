@@ -191,11 +191,18 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
-    # NOTE: This was breaking in normalized controllers.
-    # The action for the form at "observations/new" is actually "observations"
+    # FIXME: This is breaking in normalized controllers.
+    # The normalized action for the form at "observations/new" is ":create"
+    # The normalized action for the form at "observations/edit" is ":update"
     if args == []
       action = path.sub(/\?.*/, "")
-      args << "form[action^='#{action.delete_suffix("/new")}']"
+      # This works for the "new" form
+      if action.end_with?("/new")
+        action = action.delete_suffix("/new")
+      end
+      # But this doesn't work for the "edit" form
+      # action = action.delete_suffix("/edit")
+      args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,
