@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Controller tests for search pages
-class SearchesControllerTest < FunctionalTestCase
+class SearchControllerTest < FunctionalTestCase
   def test_advanced
     login
     [Name, Image, Observation].each do |model|

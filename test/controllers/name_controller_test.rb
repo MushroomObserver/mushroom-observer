@@ -584,7 +584,7 @@ class NameControllerTest < FunctionalTestCase
     query.record.delete
     login
     get(:advanced_search, params: params)
-    assert_redirected_to(searches_advanced_path)
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_edit_name_get

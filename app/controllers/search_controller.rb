@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # searches defined by the url query string
-class SearchesController < ApplicationController
+class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comment/image_search
@@ -64,7 +64,7 @@ class SearchesController < ApplicationController
   #   image/advanced_search
   #   location/advanced_search
   #   name/advanced_search
-  #   searches/advanced_search
+  #   observations/advanced_search
   def advanced
     @filter_defaults = users_content_filters || {}
     return if params[:search].blank?
