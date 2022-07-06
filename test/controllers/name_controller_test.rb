@@ -825,7 +825,7 @@ class NameControllerTest < FunctionalTestCase
   def test_name_guessing
     # Not all the genera actually have records in our test database.
     User.current = rolf
-    @controller.instance_variable_set("@user", rolf)
+    @controller.instance_variable_set(:@user, rolf)
     Name.create_needed_names("Agaricus")
     Name.create_needed_names("Pluteus")
     Name.create_needed_names("Coprinus comatus subsp. bogus var. varietus")

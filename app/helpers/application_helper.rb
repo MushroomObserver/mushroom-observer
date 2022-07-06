@@ -91,7 +91,7 @@ module ApplicationHelper
   def link_next(object)
     path = if object.class.controller_normalized?
              if object.type_tag == :rss_log
-               send("activity_log_path", object.id, flow: "next")
+               send(:activity_log_path, object.id, flow: "next")
              else
                send("#{object.type_tag}_path", object.id, flow: "next")
              end
@@ -106,7 +106,7 @@ module ApplicationHelper
   def link_prev(object)
     path = if object.class.controller_normalized?
              if object.type_tag == :rss_log
-               send("activity_log_path", object.id, flow: "prev")
+               send(:activity_log_path, object.id, flow: "prev")
              else
                send("#{object.type_tag}_path", object.id, flow: "prev")
              end

@@ -72,7 +72,7 @@ module SessionExtensions
     send(method.downcase.to_s, url, *args, **kwargs)
     follow_redirect! while response.redirect?
     if status == 500
-      msg = if (error = controller.instance_variable_get("@error"))
+      msg = if (error = controller.instance_variable_get(:@error))
               "#{error}\n#{error.backtrace.join("\n")}"
             else
               "Got unknown 500 error from outside our application?!\n" \

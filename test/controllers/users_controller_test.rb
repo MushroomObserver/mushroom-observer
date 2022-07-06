@@ -80,7 +80,7 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_empty(@controller.instance_variable_get("@title"),
+    assert_empty(@controller.instance_variable_get(:@title),
                  "Displayed title should be empty")
     assert_equal(css_select("title").text, "Mushroom Observer: Index",
                  "metadata <title> tag incorrect")
