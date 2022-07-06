@@ -360,12 +360,11 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
     observations = herbarium_record.observations
-    obs_rec_count = observations.map { |o| o.herbarium_records.count }.sum
+    obs_rec_count = observations.sum { |o| o.herbarium_records.count }
     get(:destroy_herbarium_record, params: params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
-    assert_true(obs_rec_count > observations.
-                map { |o| o.herbarium_records.count }.sum)
+    assert_true(obs_rec_count > observations.sum { |o| o.herbarium_records.count })
     assert_response(:redirect)
   end
 
