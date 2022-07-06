@@ -53,7 +53,7 @@ class SearchesControllerTest < FunctionalTestCase
       content_filter_region: "California",
       content_filter_clade: ""
     }
-    post(:advanced_search_form, params: params)
+    get(:advanced_search_form, params: params)
     query = QueryRecord.last.query
     assert_equal("", query.params[:has_images])
     assert_true(query.params[:has_specimen])
