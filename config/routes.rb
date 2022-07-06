@@ -381,10 +381,8 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
-    # rubocop:todo Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -758,15 +756,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
 
-  get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
-  get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
-  get("observer/intro", to: redirect(path: "info#intro"))
-  get("observer/news", to: redirect(path: "info#news"))
-  get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
-  get("observer/show_site_stats", to: "info#site_stats")
-  get("observer/textile", to: redirect(path: "info#textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
-  get("observer/translators_note", to: redirect(path: "info#translators_note"))
+  get("observer/how_to_help", to: redirect("info/how_to_help"))
+  get("observer/how_to_use", to: redirect("info/how_to_use"))
+  get("observer/intro", to: redirect("info/intro"))
+  get("observer/news", to: redirect("info/news"))
+  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
+  get("observer/show_site_stats", to: redirect("info/site_stats"))
+  get("observer/textile", to: redirect("info/textile_sandbox"))
+  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
+  get("observer/translators_note", to: redirect("info/translators_note"))
 
   # ----- Javascript: utility actions  ----------------------------
   get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
@@ -799,13 +797,13 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- RssLogs: standard actions with aliases ------------------------------
   # resources :rss_logs, only: [:show, :index]
-  get("/observer/index", to: redirect(path: "activity_logs"))
-  get("/observer/list_rss_logs", to: redirect(path: "activity_logs"))
-  get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
-  post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/index", to: redirect("/activity_logs"))
+  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
+  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
   get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "activity_logs", params: { id: /\d+/ }))
-  get("/observer/rss", to: redirect(path: "activity_logs#rss"))
+      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
+  get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
   match("searches/pattern_search(/:id)",
@@ -816,9 +814,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         as: "searches_advanced_search_form")
 
   get("/observer/pattern_search",
-      to: redirect(path: "searches#pattern_search"))
+      to: redirect("/searches/pattern_search"))
   get("/observer/advanced_search_form",
-      to: redirect(path: "searches#advanced_search_form"))
+      to: redirect("/searches/advanced_search_form"))
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
