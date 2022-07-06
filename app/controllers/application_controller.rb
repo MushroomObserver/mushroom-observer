@@ -1388,9 +1388,6 @@ class ApplicationController < ActionController::Base
   # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
-  # NIMMO QUESTION: Does anything send an args[:letter_arg]?
-  # Several controllers send args[:letters], but none send args[:letter_arg].
-  # (It's a param of MOPaginator)
   def show_index_of_objects(query, args = {})
     letter_arg   = args[:letter_arg] || :letter
     number_arg   = args[:number_arg] || :page
