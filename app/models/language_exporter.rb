@@ -189,7 +189,7 @@ module LanguageExporter
 
   def read_export_file
     File.open(export_file, "r:utf-8") do |fh|
-      YAML.safe_load(fh)
+      YAML.safe_load(fh, permitted_classes: [Symbol])
     end
   end
 
