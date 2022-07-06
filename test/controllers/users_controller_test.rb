@@ -82,7 +82,7 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: Index",
+    assert_equal("Mushroom Observer: Index", css_select("title").text,
                  "metadata <title> tag incorrect")
     assert_empty(css_select("#sorts"),
                  "There should be no sort links")
