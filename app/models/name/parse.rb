@@ -484,14 +484,14 @@ module Name::Parse
 
   def standardize_author(str)
     str = str.to_s.
-          sub(/^ ?#{AUCT_ABBR}/,  "auct. ").
-          sub(/^ ?#{INED_ABBR}/,  "ined. ").
-          sub(/^ ?#{NOM_ABBR}/,   "nom. ").
-          sub(/^ ?#{COMB_ABBR}/,  "comb. ").
-          sub(/^ ?#{SENSU_ABBR}/, "sensu ").
+          sub(/^ ?#{AUCT_ABBR}/o,  "auct. ").
+          sub(/^ ?#{INED_ABBR}/o,  "ined. ").
+          sub(/^ ?#{NOM_ABBR}/o,   "nom. ").
+          sub(/^ ?#{COMB_ABBR}/o,  "comb. ").
+          sub(/^ ?#{SENSU_ABBR}/o, "sensu ").
           # Having fixed comb. & nom., standardize their suffixes
-          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
-          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
+          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/o,  "nov. ").
+          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/o, "prov. ").
           strip_squeeze
     squeeze_author(str)
   end
