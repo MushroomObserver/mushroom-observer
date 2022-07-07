@@ -158,7 +158,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?("user_id=")
+    self.user_id ||= User.current_id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
@@ -250,13 +250,13 @@ class AbstractModel < ApplicationRecord
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
   def update_view_stats
-    return unless respond_to?("num_views=") || respond_to?("last_view=")
+    return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views
     @old_last_view = last_view
     self.class.record_timestamps = false
-    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-    self.last_view = Time.zone.now        if respond_to?("last_view=")
+    self.num_views = (num_views || 0) + 1 if respond_to?(:num_views=)
+    self.last_view = Time.zone.now        if respond_to?(:last_view=)
     save_without_our_callbacks
     self.class.record_timestamps = true
   end
@@ -724,7 +724,7 @@ class AbstractModel < ApplicationRecord
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user_id == user.id))
+    !respond_to?(:user) || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)

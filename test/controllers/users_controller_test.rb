@@ -82,7 +82,7 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_equal(
       :title_for_user_search.t,
-      @controller.instance_variable_get("@title"),
+      @controller.instance_variable_get(:@title),
       "metadata <title> tag incorrect"
     )
     assert_empty(css_select("#sorts"),

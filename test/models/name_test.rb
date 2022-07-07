@@ -290,7 +290,7 @@ class NameTest < UnitTestCase
   end
 
   def test_upper_word_pats
-    pat = /^#{::Name::Parse::UPPER_WORD}$/
+    pat = /^#{::Name::Parse::UPPER_WORD}$/o
     assert_no_match(pat, "")
     assert_no_match(pat, "A")
     assert_no_match(pat, "A-")
@@ -310,7 +310,7 @@ class NameTest < UnitTestCase
   end
 
   def test_lower_word_pats
-    pat = /^#{::Name::Parse::LOWER_WORD}$/
+    pat = /^#{::Name::Parse::LOWER_WORD}$/o
     assert_no_match(pat, "")
     assert_no_match(pat, "a")
     assert_no_match(pat, "a-")

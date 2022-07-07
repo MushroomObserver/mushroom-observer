@@ -448,7 +448,7 @@ class SiteData
       [lang, score]
     end
     @user_data[user.id][:languages] =
-      language_contributions.map { |_lang, score| score }.sum
+      language_contributions.sum { |_lang, score| score }
     @user_data[user.id][:languages_itemized] =
       language_contributions.select { |_lang, score| score.positive? }
   end

@@ -78,7 +78,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     assert_not_equal(
       0,
-      @controller.instance_variable_get("@observation").thumb_image_id,
+      @controller.instance_variable_get(:@observation).thumb_image_id,
       "Wrong image id"
     )
   end
@@ -344,7 +344,7 @@ class ObservationsControllerTest < FunctionalTestCase
                   location: "California",
                   advanced_search: "1" })
     assert_response(:success)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
     assert_equal(4, results.length)
   end
 
@@ -358,7 +358,7 @@ class ObservationsControllerTest < FunctionalTestCase
           advanced_search: "1"
         })
     assert_response(:success)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
 
     # Include notes, but notes don't have string yet!
@@ -372,7 +372,7 @@ class ObservationsControllerTest < FunctionalTestCase
       }
     )
     assert_response(:success)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
 
     # Add string to notes, make sure it is actually added.
@@ -391,7 +391,7 @@ class ObservationsControllerTest < FunctionalTestCase
           advanced_search: "1"
         })
     assert_response(:success)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
     assert_equal(0, results.length)
 
     # Now it should finally find the three unknowns at Burbank because Burbank
@@ -404,7 +404,7 @@ class ObservationsControllerTest < FunctionalTestCase
           advanced_search: "1"
         })
     assert_response(:success)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
     assert_equal(3, results.length)
   end
 
@@ -433,7 +433,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get("@title")
+      @controller.instance_variable_get(:@title)
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
@@ -445,7 +445,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_template(:index)
     assert_equal(
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
-      @controller.instance_variable_get("@title")
+      @controller.instance_variable_get(:@title)
     )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
@@ -463,7 +463,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
     assert_equal(
       :title_for_observation_search.t,
-      @controller.instance_variable_get("@title"),
+      @controller.instance_variable_get(:@title),
       "metadata <title> tag incorrect"
     )
 
@@ -540,7 +540,7 @@ class ObservationsControllerTest < FunctionalTestCase
   def test_observations_with_lichen_filter
     login(users(:lichenologist).name)
     get_with_dump(:index)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
     assert(results.all? { |result| result.lifeform.include?("lichen") },
@@ -548,7 +548,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login(users(:antilichenologist).name)
     get_with_dump(:index)
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
 
     assert(results.count.positive?)
     assert(results.none? { |result| result.lifeform.include?(" lichen ") },
@@ -568,7 +568,7 @@ class ObservationsControllerTest < FunctionalTestCase
 
     login(user.name)
     get(:index)
-    results = @controller.instance_variable_get("@objects").sort_by(&:id)
+    results = @controller.instance_variable_get(:@objects).sort_by(&:id)
     assert_obj_list_equal(observations_in_region, results)
   end
 
@@ -615,8 +615,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
                                         include?("118.3521"))
   end
-
-  # ------ Show ----------------------------------------------- #
 
   def test_show_observation_num_views
     login
@@ -1596,7 +1594,7 @@ class ObservationsControllerTest < FunctionalTestCase
                  "Wrong User score")
     assert_not_equal(
       0,
-      @controller.instance_variable_get("@observation").thumb_image_id,
+      @controller.instance_variable_get(:@observation).thumb_image_id,
       "Wrong image id"
     )
     assert_equal("Acarosporaceae", name.text_name)
@@ -2548,7 +2546,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert(img)
     assert_equal([], img.observations)
     assert_equal([img.id],
-                 @controller.instance_variable_get("@good_images").map(&:id))
+                 @controller.instance_variable_get(:@good_images).map(&:id))
   end
 
   def test_image_upload_when_process_image_fails
@@ -2584,8 +2582,8 @@ class ObservationsControllerTest < FunctionalTestCase
     img = Image.find_by(copyright_holder: "zuul")
     assert(img)
     assert_equal([], img.observations)
-    assert_includes(@controller.instance_variable_get("@bad_images"), img)
-    assert_empty(@controller.instance_variable_get("@good_images"))
+    assert_includes(@controller.instance_variable_get(:@bad_images), img)
+    assert_empty(@controller.instance_variable_get(:@good_images))
   end
 
   def test_project_checkboxes_in_create_observation
@@ -3037,7 +3035,7 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    @controller.instance_variable_set("@user", user)
+    @controller.instance_variable_set(:@user, user)
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
@@ -3056,7 +3054,7 @@ class ObservationsControllerTest < FunctionalTestCase
     suggestions = '[[["Coprinus comatus",0.7654],' \
                     '["Lentinellus ursinus",0.321]]]'
     requires_login(:suggestions, id: obs.id, names: suggestions)
-    data = @controller.instance_variable_get("@suggestions")
+    data = @controller.instance_variable_get(:@suggestions)
     assert_equal(2, data.length)
     data = data.sort_by(&:max).reverse
     assert_names_equal(name1, data[0].name)

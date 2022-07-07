@@ -207,7 +207,7 @@ module DescriptionHelper
   #   <% end %>
   #
   def colored_notes_box(even, msg = nil, &block)
-    msg = capture(&block) if block_given?
+    msg = capture(&block) if block
     klass = "ListLine#{even ? 0 : 1}"
     style = [
       "margin-left:10px",
@@ -216,7 +216,7 @@ module DescriptionHelper
       "border:1px dotted"
     ].join(";")
     result = content_tag(:div, msg, class: klass, style: style)
-    if block_given?
+    if block
       concat(result)
     else
       result

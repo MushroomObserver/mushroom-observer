@@ -175,7 +175,7 @@ class LurkerTest < IntegrationTestCase
     assert_template("observations/index")
     save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
 
-    observations = @controller.instance_variable_get("@objects")
+    observations = @controller.instance_variable_get(:@objects)
     if observations.size > MO.default_layout_count
       skip("Test skipped because it bombs when search results > " \
            "default layout size.

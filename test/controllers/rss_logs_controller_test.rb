@@ -63,7 +63,7 @@ class RssLogsControllerTest < FunctionalTestCase
     # Prove that MO offers to make non-default log the user's default.
     login("rolf")
     get(:index, params: { type: :glossary_term })
-    link_text = @controller.instance_variable_get("@links").flatten.first
+    link_text = @controller.instance_variable_get(:@links).flatten.first
     assert_equal(:rss_make_default.l, link_text)
 
     # Prove that user can change his default rss log type.
@@ -75,7 +75,7 @@ class RssLogsControllerTest < FunctionalTestCase
   def test_rss_log_with_content_filter
     login(users(:vouchered_only_user).name)
     get(:index, params: { type: :observation })
-    results = @controller.instance_variable_get("@objects")
+    results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
     assert(results.include?(rss_logs(:observation_rss_log)))

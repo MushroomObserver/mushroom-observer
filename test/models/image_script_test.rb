@@ -3,7 +3,7 @@
 require("test_helper")
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML.safe_load(IO.
+  DATABASE_CONFIG = YAML.safe_load(File.
     read("#{::Rails.root}/config/database.yml"))["test"]
 
   def script_file(cmd)
