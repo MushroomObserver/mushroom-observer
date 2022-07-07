@@ -77,7 +77,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("#{edit_observation_path(id: observation.id)}")
+    visit(edit_observation_path(id: observation.id).to_s)
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
@@ -96,7 +96,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("#{edit_observation_path(id: observation.id)}")
+    visit(edit_observation_path(id: observation.id).to_s)
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 

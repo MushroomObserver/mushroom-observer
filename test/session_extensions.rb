@@ -203,9 +203,9 @@ module SessionExtensions
                  elsif action.end_with?("/edit")
                    action
                  end
+        pp("action.now")
+        pp(action)
       end
-      pp("action.now")
-      pp(action)
       args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|

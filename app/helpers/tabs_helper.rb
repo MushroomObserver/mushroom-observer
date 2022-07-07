@@ -74,6 +74,7 @@ module TabsHelper
                       { controller: :observations,
                         action: :destroy,
                         id: obs.id },
+                      method: :delete,
                       class: "text-danger", data: { confirm: :are_you_sure.l })
     ]
   end

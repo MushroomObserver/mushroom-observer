@@ -123,7 +123,7 @@ class SearchControllerTest < FunctionalTestCase
     assert_redirected_to("/")
 
     params = { search: { pattern: "", type: :observation } }
-    get_with_dump(:pattern_search, params)
+    get_with_dump(:pattern, params)
     assert_redirected_to(controller: :observations, action: :index)
 
     # Make sure this redirects to the index that lists all herbaria,
