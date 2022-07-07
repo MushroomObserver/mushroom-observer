@@ -146,13 +146,7 @@ module ObservationsController::Index
   # Displays matrix of advanced search results.
   def advanced_search
     if params[:name] || params[:location] || params[:user] || params[:content]
-      search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
-      query = create_query(:Observation, :advanced_search, search)
+      query = create_advanced_search_query(params)
     else
       return if handle_advanced_search_invalid_q_param?
 
@@ -179,6 +173,16 @@ module ObservationsController::Index
   end
 
   private
+
+  def create_advanced_search_query(params)
+    search = {}
+    search[:name] = params[:name] if params[:name].present?
+    search[:location] = params[:location] if params[:location].present?
+    search[:user] = params[:user] if params[:user].present?
+    search[:content] = params[:content] if params[:content].present?
+    search[:search_location_notes] = params[:search_location_notes].present?
+    create_query(:Observation, :advanced_search, search)
+  end
 
   def parents(name_str)
     names = Name.where(id: name_str).to_a
@@ -255,12 +259,11 @@ module ObservationsController::Index
     args[:sorting_links] = links
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") ||
-       (query.params[:by] == "reverse_user")
+    case query.params[:by]
+    when "user", "reverse_user"
       args[:letters] = "users.login"
     # Paginate by letter if sorting by name.
-    elsif (query.params[:by] == "name") ||
-          (query.params[:by] == "reverse_name")
+    when "name", "reverse_name"
       args[:letters] = "names.sort_name"
     end
     args
