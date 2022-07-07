@@ -105,7 +105,23 @@ module SessionExtensions
     end
   end
 
-  # FIXME: Need "put" and "patch" methods too?
+  # Override all 'put' calls and do a bunch of extra error checking.
+  def put(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("PUT", action, **args)
+    else
+      super
+    end
+  end
+
+  # Override all 'patch' calls and do a bunch of extra error checking.
+  def patch(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("PATCH", action, **args)
+    else
+      super
+    end
+  end
 
   # Call the original +get+.
   def get_without_redirecting(action, **args)
