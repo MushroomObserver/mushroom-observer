@@ -1106,7 +1106,7 @@ class ApplicationController < ActionController::Base
     return unless invalid_q_param?
 
     flash_error(:advanced_search_bad_q_error.t)
-    redirect_to(searches_advanced_search_form_path)
+    redirect_to(search_advanced_path)
   end
 
   private ##########

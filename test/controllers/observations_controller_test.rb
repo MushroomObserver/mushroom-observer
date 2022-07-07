@@ -298,29 +298,29 @@ class ObservationsControllerTest < FunctionalTestCase
     o_id = observations(:minimal_unknown_obs).id
 
     login
-    get(:show, params: qp.merge({id: o_id, flow: "next"}))
+    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
     assert_redirected_to(action: :show, id: o_id, params: qp)
     assert_flash_text(/can.*t find.*results.*index/i)
-    get(:show, params: qp.merge({id: o1.id, flow: "next"}))
+    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({id: o2.id, flow: "next"}))
+    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({id: o3.id, flow: "next"}))
+    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o4.id, params: qp)
-    get(:show, params: qp.merge({id: o4.id, flow: "next"}))
+    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
     assert_redirected_to(action: :show, id: o4.id, params: qp)
     assert_flash_text(/no more/i)
 
-    get(:show, params: qp.merge({id: o4.id, flow: "prev"}))
+    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({id: o3.id, flow: "prev"}))
+    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({id: o2.id, flow: "prev"}))
+    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o1.id, params: qp)
-    get(:show, params: qp.merge({id: o1.id, flow: "prev"}))
+    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o1.id, params: qp)
     assert_flash_text(/no more/i)
-    get(:show, params: qp.merge({id: o_id, flow: "prev"}))
+    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
     assert_redirected_to(action: :show, id: o_id, params: qp)
     assert_flash_text(/can.*t find.*results.*index/i)
   end
@@ -417,7 +417,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_redirected_to(searches_advanced_search_form_path)
+    assert_redirected_to(searches_advanced_path)
   end
 
   def test_observation_search_help
@@ -572,7 +572,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_obj_list_equal(observations_in_region, results)
   end
 
-
   # ------ Map ----------------------------------------------- #
   # FIXME: this route does not work IRL
   def test_map_observations
@@ -617,7 +616,6 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
                                         include?("118.3521"))
   end
-
 
   # ------ Show ----------------------------------------------- #
 
@@ -2071,7 +2069,7 @@ class ObservationsControllerTest < FunctionalTestCase
       "mary"
     )
     # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(/#{ location_create_location_path }/)
+    assert_redirected_to(/#{location_create_location_path}/)
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)

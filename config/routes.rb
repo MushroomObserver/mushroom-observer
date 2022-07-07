@@ -806,17 +806,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
-  match("searches/pattern_search(/:id)",
-        to: "searches#pattern_search", via: [:get, :post], id: /\d+/,
-        as: "searches_pattern_search")
-  match("searches/advanced_search_form(/:id)",
-        to: "searches#advanced_search_form", via: [:get, :post], id: /\d+/,
-        as: "searches_advanced_search_form")
+  match("search/pattern(/:id)",
+        to: "search#pattern", via: [:get, :post], id: /\d+/,
+        as: "search_pattern")
+  match("search/advanced(/:id)",
+        to: "search#advanced", via: [:get, :post], id: /\d+/,
+        as: "search_advanced")
 
   get("/observer/pattern_search",
-      to: redirect("/searches/pattern_search"))
+      to: redirect("/search/pattern"))
   get("/observer/advanced_search_form",
-      to: redirect("/searches/advanced_search_form"))
+      to: redirect("/search/advanced"))
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]

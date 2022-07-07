@@ -161,7 +161,7 @@ module ObservationsController::Index
     show_selected_observations(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(searches_advanced_search_form_path)
+    redirect_to(search_advanced_path)
   end
 
   # Show selected search results as a matrix with "index" template.

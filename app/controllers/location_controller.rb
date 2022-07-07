@@ -119,7 +119,7 @@ class LocationController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observations, action: :advanced_search_form)
+    redirect_to(controller: :search, action: :advanced)
   end
 
   # Show selected search results as a list with 'list_locations' template.
