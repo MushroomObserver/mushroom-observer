@@ -573,7 +573,6 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   # ------ Map ----------------------------------------------- #
-  # FIXME: this route does not work IRL
   def test_map_observations
     login
     get(:map)

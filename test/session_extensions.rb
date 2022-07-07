@@ -193,15 +193,19 @@ module SessionExtensions
     form = nil
     # FIXME: This is breaking in normalized controllers.
     # The normalized action for the form at "observations/new" is ":create"
-    # The normalized action for the form at "observations/edit" is ":update"
+    # The normalized action for the form at "observations/:id/edit" is ":update"
     if args == []
       action = path.sub(/\?.*/, "")
-      # This works for the "new" form
-      if action.end_with?("/new")
-        action = action.delete_suffix("/new")
+      if action.end_with?("/new", "/edit")
+        pp(action)
+        action = if action.end_with?("/new")
+                   action.delete_suffix("/new")
+                 elsif action.end_with?("/edit")
+                   action
+                 end
       end
-      # But this doesn't work for the "edit" form
-      # action = action.delete_suffix("/edit")
+      pp("action.now")
+      pp(action)
       args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
