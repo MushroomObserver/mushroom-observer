@@ -201,7 +201,7 @@ module SessionExtensions
         action = if action.end_with?("/new")
                    action.delete_suffix("/new")
                  elsif action.end_with?("/edit")
-                   action
+                   action.delete_suffix("/edit")
                  end
         pp("action.now")
         pp(action)
