@@ -314,11 +314,12 @@ module ObservationsController::CreateAndUpdate
   #
   def edit
     pass_query_params
-    return unless @observation = \
-      find_or_goto_index(Observation, params[:id].to_s)
+    return unless (@observation = find_or_goto_index(
+      Observation, params[:id].to_s
+    ))
 
     # Make sure user owns this observation!
-    if !check_permission!(@observation)
+    unless check_permission!(@observation)
       redirect_with_query(action: :show, id: @observation.id) and return
     end
 
@@ -334,11 +335,12 @@ module ObservationsController::CreateAndUpdate
 
   def update
     pass_query_params
-    return unless @observation = \
-      find_or_goto_index(Observation, params[:id].to_s)
+    return unless (@observation = find_or_goto_index(
+      Observation, params[:id].to_s
+    ))
 
     # Make sure user owns this observation!
-    if !check_permission!(@observation)
+    unless check_permission!(@observation)
       redirect_with_query(action: :show, id: @observation.id) and return
     end
 
@@ -381,9 +383,7 @@ module ObservationsController::CreateAndUpdate
     end
 
     # Reload form if anything failed.
-    if any_errors
-      reload_edit_form and return
-    end
+    reload_edit_form and return if any_errors
 
     # Update project and species_list attachments.
     update_projects(@observation, params[:project])

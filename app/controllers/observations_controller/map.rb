@@ -4,9 +4,7 @@
 module ObservationsController::Map
   # Map results of a search or index.
   def map
-    if params[:id].present?
-      map_observation and return
-    end
+    map_observation and return if params[:id].present?
 
     @query = find_or_create_query(:Observation)
     apply_content_filters(@query)
