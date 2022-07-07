@@ -15,6 +15,7 @@ class ExternalSite < AbstractModel
   has_many   :external_links
   has_many   :observations, through: :external_links
 
+  validates :project, presence: true
   validates :name,    presence: true, length: { maximum: 100 },
                       uniqueness: { case_sensitive: false }
 

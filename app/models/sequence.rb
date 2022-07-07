@@ -197,7 +197,7 @@ class Sequence < AbstractModel
   protected
 
   # Validations, in order that error messages should appear in flash
-  validates :locus, presence: true
+  validates :locus, :observation, :user, presence: true
   validates :archive, length: { maximum: 255 }
   validates :accession, length: { maximum: 255 }
   validate  :bases_or_deposit
