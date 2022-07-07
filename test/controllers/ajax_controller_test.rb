@@ -42,7 +42,7 @@ class AjaxControllerTest < FunctionalTestCase
   def test_filters
     @request.env["HTTP_ACCEPT_LANGUAGE"] = "pt-pt,pt;q=0.5"
     good_ajax_request(:test)
-    assert_nil(@controller.instance_variable_get("@user"))
+    assert_nil(@controller.instance_variable_get(:@user))
     assert_nil(User.current)
     assert_equal(:pt, I18n.locale)
     assert_equal(0, cookies.count)
@@ -476,13 +476,13 @@ class AjaxControllerTest < FunctionalTestCase
     site = external_sites(:mycoportal)
     obs  = observations(:coprinus_comatus_obs)
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
-    @controller.instance_variable_set("@user", rolf)
+    @controller.instance_variable_set(:@user, rolf)
     assert_link_allowed(link)
     assert_link_allowed(obs, site)
-    @controller.instance_variable_set("@user", mary)
+    @controller.instance_variable_set(:@user, mary)
     assert_link_allowed(link)
     assert_link_allowed(obs, site)
-    @controller.instance_variable_set("@user", dick)
+    @controller.instance_variable_set(:@user, dick)
     assert_link_forbidden(link)
     assert_link_forbidden(obs, site)
 

@@ -111,8 +111,9 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model)
+    response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
-      [:xml, :json].each do |format|
+      response_formats.each do |format|
         get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)

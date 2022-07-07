@@ -916,7 +916,7 @@ class AccountController < ApplicationController
 
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")
-    return unless SPAM_BLOCKERS.any? { |d| domain == d }
+    return unless SPAM_BLOCKERS.any?(domain)
     return if user.login.to_s.match(BOGUS_LOGINS)
 
     notify_root_of_verification_email(user)

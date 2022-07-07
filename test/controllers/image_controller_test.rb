@@ -251,12 +251,12 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
+                 @controller.instance_variable_get(:@title))
     get_with_dump(:image_search, pattern: "Notes", page: 2)
     assert_template("list_images")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
+                 @controller.instance_variable_get(:@title))
   end
 
   def test_image_search_next

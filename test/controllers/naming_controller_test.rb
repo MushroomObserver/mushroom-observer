@@ -496,7 +496,7 @@ class NamingControllerTest < FunctionalTestCase
     login("dick")
     post(:create, params: params)
     assert_response(:success) # really means failed
-    params = @controller.instance_variable_get("@params")
+    params = @controller.instance_variable_get(:@params)
     assert_equal("Agaricus campestris L.", params.what)
   end
 
