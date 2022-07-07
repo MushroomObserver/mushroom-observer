@@ -40,18 +40,7 @@
 #  title_tag_contents           # text to put in html header <title>
 #
 module ApplicationHelper
-  include AutocompleteHelper
-  include DescriptionHelper
-  include ExporterHelper
-  include FooterHelper
-  include JavascriptHelper
-  include LocalizationHelper
-  include MapHelper
-  include ObjectLinkHelper
-  include TabsHelper
-  include ThumbnailHelper
-  include VersionHelper
-
+  # All helpers are autoloaded under Zeitwerk
   def safe_empty
     "".html_safe
   end
@@ -118,7 +107,7 @@ module ApplicationHelper
   end
 
   # button to destroy object
-  # Used instead of link because DESTROY link requires js
+  # Used instead of link_to because method: :delete requires jquery_ujs library
   # Sample usage:
   #   destroy_button(object: article)
   #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
@@ -151,6 +140,11 @@ module ApplicationHelper
     return [] unless links
 
     links.reject(&:nil?).map { |str, url| link_to(str, url) }
+  end
+
+  # Short-hand to render shared tab_set partial for a given set of links.
+  def draw_tab_set(links)
+    render(partial: "/shared/tab_set", locals: { links: links })
   end
 
   # ----------------------------------------------------------------------------

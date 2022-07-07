@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
 # html used in tabsets
-module TabsHelper
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def draw_tab_set(links)
-    render(partial: "/shared/tab_set", locals: { links: links })
-  end
-
+module ObservationTabsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
   def show_observation_tabset(obs, user)
@@ -68,12 +63,7 @@ module TabsHelper
     [
       link_with_query(:show_observation_edit_observation.t,
                       edit_observation_path(obs.id)),
-      # NOTE: this type of link requires jquery_ujs! (non-GET, POST)
-      link_with_query(:DESTROY.t,
-                      observation_path(obs.id),
-                      method: :delete,
-                      class: "text-danger",
-                      data: { confirm: :are_you_sure.l })
+      destroy_button(target: add_query_param(observation_path(obs.id)))
     ]
   end
 
