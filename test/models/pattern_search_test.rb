@@ -585,7 +585,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_images_no
-    expect = Observation.where("thumb_image_id IS NULL")
+    expect = Observation.where(thumb_image_id: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -634,7 +634,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.where("notes = ?", Observation.no_notes_persisted)
+    expect = Observation.where(notes: Observation.no_notes_persisted)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
