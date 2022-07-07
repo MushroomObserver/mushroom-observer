@@ -70,9 +70,19 @@ Layout/LineContinuationSpacing: #`new in 1.31.1
 Lint/ConstantOverwrittenInRescue: #`new in 1.31.1
   Enabled: true
 
+Security/CompoundHash: # new in 1.28
+  Enabled: true
+
+Security/IoMethods: # new in 1.22
+  Enabled: true
+
 ########### Resolved (Non-Pending) Cops
 
 # cops for which MO uses a non-default configuration
+
+# Not relevent (MO is not a gem)
+Gemspec:
+  Enabled: false
 
 # Default: align "end" with **start of the line** that includes "begin"
 # MO: align with "begin". This is how we've almost always done it.
