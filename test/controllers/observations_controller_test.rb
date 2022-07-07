@@ -417,7 +417,7 @@ class ObservationsControllerTest < FunctionalTestCase
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
-    assert_redirected_to(searches_advanced_path)
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_observation_search_help
