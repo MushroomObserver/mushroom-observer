@@ -534,8 +534,8 @@ class ImageController < ApplicationController
       @image.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
-      redirect_with_query(controller: :observations,
-                          action: :show, id: @observation.id)
+    redirect_with_query(controller: :observations,
+                        action: :show, id: @observation.id)
   end
 
   def serve_reuse_form(params)
