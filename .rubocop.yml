@@ -152,7 +152,11 @@ Rails/Pluck: # new in 2.7
 Rails/PluckInWhere: # new in 2.7
   Enabled: true
 Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
-  Enabled: true
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
+  Enabled: false
 Rails/RedundantTravelBack: # new in 2.12
   Enabled: true
 Rails/RenderInline: # new in 2.7
