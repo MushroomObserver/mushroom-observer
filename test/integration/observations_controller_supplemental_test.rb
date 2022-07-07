@@ -56,7 +56,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.id.to_s)
     # Destroy it.
-    within("div#right_tabs") { click_link("Destroy") }
+    within("div#right_tabs") { click_button("Destroy") }
 
     # MO should show next Observation.
     page.find_by_id("title")

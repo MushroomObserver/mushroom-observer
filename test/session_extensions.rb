@@ -123,6 +123,15 @@ module SessionExtensions
     end
   end
 
+  # Override all 'delete' calls and do a bunch of extra error checking.
+  def delete(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("DELETE", action, **args)
+    else
+      super
+    end
+  end
+
   # Call the original +get+.
   def get_without_redirecting(action, **args)
     @doing_with_error_checking = true
