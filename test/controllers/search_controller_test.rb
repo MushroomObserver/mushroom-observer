@@ -72,7 +72,7 @@ class SearchControllerTest < FunctionalTestCase
   def test_pattern_search
     login
     params = { search: { pattern: "12", type: :observation } }
-    get_with_dump(:pattern_search, params)
+    get_with_dump(:pattern, params)
     assert_redirected_to(controller: :observations, action: :index,
                          pattern: "12")
 
