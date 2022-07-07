@@ -28,9 +28,7 @@ class ExternalLink < AbstractModel
   belongs_to :external_site
   belongs_to :user
 
-  validates :observation, presence: true, uniqueness: { scope: :external_site }
-  validates :external_site, presence: true
-  validates :user, presence: true
+  validates :observation, uniqueness: { scope: :external_site }
   validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
 
