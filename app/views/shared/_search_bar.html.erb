@@ -1,7 +1,7 @@
 <nav class="navbar navbar-default">
   <%= form_tag(
-        searches_pattern_search_path,
-        { class: "navbar-form navbar-left" }
+        search_pattern_path,
+        { method: :get, class: "navbar-form navbar-left" }
       ) do %>
       <div>
         <div class="inline align-top icon-addon addon-sm">
@@ -45,7 +45,7 @@
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,
                                            style: "white-space:nowrap"),
-                       searches_advanced_search_form_path)
+                       search_advanced_path)
           @timer_end ||= Time.zone.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
           timer = "(#{ :app_index_timer.t(seconds: secs, num: @num_results.to_i) })"

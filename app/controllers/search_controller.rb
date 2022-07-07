@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # searches defined by the url query string
-class SearchesController < ApplicationController
+class SearchController < ApplicationController
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comment/image_search
@@ -12,7 +12,7 @@ class SearchesController < ApplicationController
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
-  def pattern_search
+  def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
 
@@ -64,10 +64,10 @@ class SearchesController < ApplicationController
   #   image/advanced_search
   #   location/advanced_search
   #   name/advanced_search
-  #   searches/advanced_search
-  def advanced_search_form
+  #   observations/advanced_search
+  def advanced
     @filter_defaults = users_content_filters || {}
-    return unless request.method == "POST"
+    return if params[:search].blank?
 
     model = ADVANCED_SEARCHABLE_MODELS.
             find { |m| m.name.downcase == params[:search][:model] }
@@ -75,9 +75,7 @@ class SearchesController < ApplicationController
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
     query = create_query(model, :advanced_search, query_params)
-    redirect_to(add_query_param({ controller: model.show_controller,
-                                  action: :advanced_search },
-                                query))
+    redirect_to_model_controller(model, query)
   end
 
   def add_filled_in_text_fields(query_params)
@@ -117,6 +115,19 @@ class SearchesController < ApplicationController
       redirect_to(index_path)
     else
       redirect_to(search_path)
+    end
+  end
+
+  def redirect_to_model_controller(model, query)
+    if model.controller_normalized?
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :index,
+                                    advanced_search: 1 },
+                                  query))
+    else
+      redirect_to(add_query_param({ controller: model.show_controller,
+                                    action: :advanced_search },
+                                  query))
     end
   end
 end

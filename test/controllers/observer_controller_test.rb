@@ -407,7 +407,7 @@ class ObserverControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
     login
     get(:advanced_search, params: @controller.query_params(query))
-    assert_redirected_to(searches_advanced_search_form_path)
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_observation_search_help
