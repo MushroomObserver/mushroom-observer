@@ -426,7 +426,7 @@ module ObservationsController::CreateAndUpdate
   # Callback to destroy an observation (and associated namings, votes, etc.)
   # Linked from: observations/show
   # Inputs: params[:id] (observation)
-  # Redirects to list_observations.
+  # Redirects to next obs in query or :index.
   def destroy
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))

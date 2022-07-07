@@ -67,15 +67,13 @@ module TabsHelper
 
     [
       link_with_query(:show_observation_edit_observation.t,
-                      controller: :observations,
-                      action: :edit,
-                      id: obs.id),
+                      edit_observation_path(obs.id)),
+      # NOTE: this type of link requires jquery_ujs! (non-GET, POST)
       link_with_query(:DESTROY.t,
-                      { controller: :observations,
-                        action: :destroy,
-                        id: obs.id },
+                      observation_path(obs.id),
                       method: :delete,
-                      class: "text-danger", data: { confirm: :are_you_sure.l })
+                      class: "text-danger",
+                      data: { confirm: :are_you_sure.l })
     ]
   end
 
