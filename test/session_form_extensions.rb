@@ -527,7 +527,7 @@ module SessionExtensions
                      "Couldn't find submit button labeled #{button.inspect}.")
       # Not all forms use "POST" - use the method in the form tag
       puts("#{form[:method].upcase} #{url}: #{hash.inspect}") if debug
-      context.send("#{form[:method]}", url, params: hash)
+      context.send(form[:method].to_s, url, params: hash)
     end
   end
 end
