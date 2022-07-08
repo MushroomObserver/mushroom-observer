@@ -370,8 +370,10 @@ module SessionExtensions
       /img /.match?(elem.to_s)
     when Regexp
       arg.match?(elem.to_s)
-    else
+    when String
       elem.to_s.index(arg)
+    else
+      true
     end
   end
 
