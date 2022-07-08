@@ -77,8 +77,7 @@ module ObservationsController::NewAndCreate
 
   def create # rubocop:disable Metrics/AbcSize
     @observation = create_observation_object(params[:observation])
-
-    # NOTE: I believe we need to set these again, in case they are not defined
+    # set these again, in case they are not defined
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.zone.now)
 
