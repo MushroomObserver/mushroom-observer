@@ -173,6 +173,8 @@ module ObservationsController::FormHelpers
   #
   # INPUT: params[:image], observation, good_images (and @user)
   # OUTPUT: list of images we couldn't create
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def create_image_objects(args, observation, good_images)
     bad_images = []
     if args
@@ -217,12 +219,14 @@ module ObservationsController::FormHelpers
     end
     bad_images
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   # List of images that we've successfully downloaded, but which
   # haven't been attached to the observation yet.  Also supports some
   # mininal editing.  INPUT: params[:good_images] (also looks at
   # params[:image_<id>_notes]) OUTPUT: list of images
-  def update_good_images(arg)
+  def update_good_images(arg) # rubocop:disable Metrics/AbcSize
     # Get list of images first.
     images = (arg || "").split(" ").map do |id|
       Image.safe_find(id.to_i)

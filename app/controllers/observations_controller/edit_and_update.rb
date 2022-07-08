@@ -43,7 +43,9 @@ module ObservationsController::EditAndUpdate
     init_list_vars_for_edit(@observation)
   end
 
-  def update # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
+  def update
     pass_query_params
     return unless (@observation = find_or_goto_index(
       Observation, params[:id].to_s
@@ -109,6 +111,8 @@ module ObservationsController::EditAndUpdate
       redirect_with_query(action: :show, id: @observation.id)
     end
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}

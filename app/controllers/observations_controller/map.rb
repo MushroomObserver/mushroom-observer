@@ -3,7 +3,9 @@
 # see observations_controller.rb
 module ObservationsController::Map
   # Map results of a search or index.
-  def map # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
+  def map
     map_observation and return if params[:id].present?
 
     @query = find_or_create_query(:Observation)
@@ -44,6 +46,8 @@ module ObservationsController::Map
     @num_results = @observations.count
     @timer_end = Time.current
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   # Show map of one observation by id.
   def map_observation

@@ -12,6 +12,8 @@ class SearchController < ApplicationController
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
@@ -56,6 +58,8 @@ class SearchController < ApplicationController
 
     redirect_to_search_or_list(ctrlr, type, pattern)
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def site_google_search(pattern)
     if pattern.blank?
