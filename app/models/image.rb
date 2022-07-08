@@ -400,20 +400,6 @@ class Image < AbstractModel
     size == :original ? original_extension : "jpg"
   end
 
-  def has_size?(size)
-    max = width.to_i > height.to_i ? width.to_i : height.to_i
-    case size.to_s
-    when "thumbnail" then true
-    when "small" then max > 160
-    when "medium" then max > 320
-    when "large" then max > 640
-    when "huge" then max > 960
-    when "full_size" then max > 1280
-    when "original" then true
-    else; false
-    end
-  end
-
   # Calculate the approximate dimensions of the image of the given size.
   def size(size)
     w = width
