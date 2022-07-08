@@ -532,7 +532,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
+MushroomObserver::Application.routes.draw do
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
@@ -698,17 +698,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Herbaria: standard redirects of Herbarium legacy actions
   redirect_legacy_actions(
     old_controller: "herbarium", new_controller: "herbaria",
-    actions: [:controller, :show, :list, :index]
+    actions: [:show, :list, :index]
   )
   # Herbaria: non-standard redirects of legacy Herbarium actions
   # Rails routes currently accept only template tokens
-  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
-  get("/herbarium/index", to: redirect(path: "herbaria"))
-  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
-
-  # Herbaria: non-standard redirect
+  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
+  get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("info/how_to_help", to: "info#how_to_help")
