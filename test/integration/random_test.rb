@@ -6,7 +6,7 @@ class RandomTest < IntegrationTestCase
   test "pivotal tracker" do
     login(users(:zero_user))
     get("/")
-    click(label: "Feature Tracker")
+    click_mo_link(label: "Feature Tracker")
     assert_template("pivotal/index")
   end
 
@@ -36,13 +36,13 @@ class RandomTest < IntegrationTestCase
     assert_link_exists("/account/logout_user")
     assert_link_exists("/users/#{rolf.id}")
 
-    click(label: "Logout")
+    click_mo_link(label: "Logout")
     assert_template("account/logout_user")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")
     assert_no_link_exists("/users/#{rolf.id}")
 
-    click(label: "Introduction")
+    click_mo_link(label: "Introduction")
     assert_template("info/intro")
     assert_link_exists("/account/login")
     assert_no_link_exists("/account/logout_user")

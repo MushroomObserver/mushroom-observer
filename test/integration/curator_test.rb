@@ -17,7 +17,7 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     get("/#{obs.id}")
     assert_template("observations/show")
-    click(label: :create_herbarium_record.t)
+    click_mo_link(label: :create_herbarium_record.t)
     assert_template("herbarium_record/create_herbarium_record")
     open_form do |form|
       form.submit("Add")
@@ -32,7 +32,7 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
-    click(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
+    click_mo_link(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
     assert_template("herbarium_record/edit_herbarium_record")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
@@ -48,11 +48,11 @@ class CuratorTest < IntegrationTestCase
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
     go_back
-    click(label: "Cancel (Show Observation)")
+    click_mo_link(label: "Cancel (Show Observation)")
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
-    click(href: "/herbarium_record/remove_observation/#{rec.id}")
+    click_mo_link(href: "/herbarium_record/remove_observation/#{rec.id}")
     assert_template("observations/show")
     assert_match(/href="#{edit_observation_path(id: obs.id)}"/,
                  response.body)
@@ -64,9 +64,9 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get("/#{obs.id}")
-    click(href: "/herbarium_record/show_herbarium_record/#{rec.id}")
+    click_mo_link(href: "/herbarium_record/show_herbarium_record/#{rec.id}")
     assert_template("herbarium_record/show_herbarium_record")
-    click(label: "Edit Fungarium Record")
+    click_mo_link(label: "Edit Fungarium Record")
     assert_template("herbarium_record/edit_herbarium_record")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
@@ -74,7 +74,7 @@ class CuratorTest < IntegrationTestCase
     end
     assert_template("herbarium_record/edit_herbarium_record")
     push_page
-    click(label: "Cancel (Show Fungarium Record)")
+    click_mo_link(label: "Cancel (Show Fungarium Record)")
     assert_template("herbarium_record/show_herbarium_record")
     go_back
     open_form do |form|
@@ -82,7 +82,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Save")
     end
     assert_template("herbarium_record/show_herbarium_record")
-    click(label: "Destroy Fungarium Record")
+    click_mo_link(label: "Destroy Fungarium Record")
     assert_template("herbarium_record/list_herbarium_records")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
@@ -92,9 +92,9 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:detailed_unknown_obs)
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     get(herbarium_path(rec.herbarium.id))
-    click(href: /herbarium_index/)
+    click_mo_link(href: /herbarium_index/)
     assert_template("herbarium_record/list_herbarium_records")
-    click(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
+    click_mo_link(href: "/herbarium_record/edit_herbarium_record/#{rec.id}")
     assert_template("herbarium_record/edit_herbarium_record")
     open_form do |form|
       form.change("herbarium_name", "This Should Cause It to Reload Form")
@@ -102,7 +102,7 @@ class CuratorTest < IntegrationTestCase
     end
     assert_template("herbarium_record/edit_herbarium_record")
     push_page
-    click(label: "Back to Fungarium Record Index")
+    click_mo_link(label: "Back to Fungarium Record Index")
     assert_template("herbarium_record/list_herbarium_records")
     go_back
     open_form do |form|
@@ -110,7 +110,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Save")
     end
     assert_template("herbarium_record/list_herbarium_records")
-    click(href: "/herbarium_record/destroy_herbarium_record/#{rec.id}")
+    click_mo_link(href: "/herbarium_record/destroy_herbarium_record/#{rec.id}")
     assert_template("herbarium_record/list_herbarium_records")
     assert_not(obs.reload.herbarium_records.include?(rec))
   end
@@ -132,7 +132,7 @@ class CuratorTest < IntegrationTestCase
     first_herbarium_path = herbaria_show_links.first.attributes["href"].value.
                            sub(/\?.*/, "") # strip query string
 
-    click(label: :sort_by_reverse.l)
+    click_mo_link(label: :sort_by_reverse.l)
     reverse_herbaria_show_links = assert_select("a:match('href', ?)",
                                                 herbarium_show_path_matcher)
     assert_equal(
@@ -146,7 +146,7 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
     get("/herbarium_record/create_herbarium_record/#{obs.id}")
-    click(label: :herbarium_index.l)
+    click_mo_link(label: :herbarium_index.l)
 
     assert_select(
       "#title-caption", { text: :query_title_nonpersonal.l },
@@ -233,7 +233,7 @@ class CuratorTest < IntegrationTestCase
     assert_equal([], user.curated_herbaria)
     login!(user.login, "testpassword", true)
     get(herbaria_path(flavor: :all))
-    click(label: :create_herbarium.l)
+    click_mo_link(label: :create_herbarium.l)
 
     open_form("form[action^='#{herbaria_path}']") do |form|
       form.assert_value("[name]", "")
@@ -298,7 +298,7 @@ class CuratorTest < IntegrationTestCase
 
     login!("mary", "testpassword", true)
     get(herbarium_path(nybg))
-    click(label: :show_herbarium_curator_request.l)
+    click_mo_link(label: :show_herbarium_curator_request.l)
     assert_select("#title-caption").text.
       starts_with?(:show_herbarium_curator_request.l)
     open_form("form[action^='#{herbaria_curator_requests_path(id: nybg)}']",
@@ -319,7 +319,7 @@ class CuratorTest < IntegrationTestCase
 
     login!("mary", "testpassword", true)
     get(herbaria_path(flavor: :all))
-    click(href: herbaria_path(merge: fundis))
+    click_mo_link(href: herbaria_path(merge: fundis))
     form = open_form( # merge button
       "form[action *= 'dest=#{mary_herbarium.id}']"
     )

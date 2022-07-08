@@ -81,7 +81,7 @@ class PostObservationTest < IntegrationTestCase
 
   def open_edit_observation_form
     new_obs = Observation.last
-    click(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
+    click_mo_link(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
     assert_template(EDIT_OBSERVATION_TEMPLATE)
     assert_form_has_correct_values(edit_observation_form_initial_values)
   end

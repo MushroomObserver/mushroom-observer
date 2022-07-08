@@ -13,7 +13,7 @@
 #      def test_simplest
 #        get('/controller/action?args=...')
 #        assert_template('controller/action')
-#        click(:label => 'Post Comment')
+#        click_mo_link(:label => 'Post Comment')
 #        open_form do |form|
 #          form.edit_field('message', 'This is a test.')
 #          form.submit('Post')
