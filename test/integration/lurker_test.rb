@@ -63,7 +63,8 @@ class LurkerTest < IntegrationTestCase
 
     # Check out location.
     get("/#{obs}")
-    click_mo_link(label: "Burbank, California") # Don't include USA due to <span>
+    # Don't include USA due to <span>
+    click_mo_link(label: "Burbank, California")
     assert_template("location/show_location")
 
     # Check out species list.
