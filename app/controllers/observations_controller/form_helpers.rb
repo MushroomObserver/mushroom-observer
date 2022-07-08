@@ -140,7 +140,7 @@ module ObservationsController::FormHelpers
     return unless checks
 
     User.current.all_editable_species_lists.includes(:observations).
-         each do |list|
+      each do |list|
       before = obs.species_lists.include?(list)
       after = checks["id_#{list.id}"] == "1"
       next unless before != after
