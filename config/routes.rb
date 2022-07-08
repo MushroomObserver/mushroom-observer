@@ -532,7 +532,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
+MushroomObserver::Application.routes.draw do
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
@@ -614,7 +614,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
-  redirect_legacy_actions(old_controller: "article")
+  redirect_legacy_actions(
+    old_controller: "article", actions: [:controller, :show, :list, :index]
+  )
 
   # ----- Authors: no resources, just forms ------------------------------------
   match("authors/email_request(/:id)",
@@ -682,7 +684,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
-    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+    actions: [:controller, :show, :list, :index, :show_past]
   )
 
   # ----- Herbaria: standard actions -------------------------------------------
@@ -696,54 +698,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Herbaria: standard redirects of Herbarium legacy actions
   redirect_legacy_actions(
     old_controller: "herbarium", new_controller: "herbaria",
-    actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
+    actions: [:show, :list, :index]
   )
   # Herbaria: non-standard redirects of legacy Herbarium actions
   # Rails routes currently accept only template tokens
-  # rubocop:disable Style/FormatStringToken
-  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
-  get("/herbarium/index", to: redirect(path: "herbaria"))
-  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
-  get("/herbarium/request_to_be_curator/:id",
-      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
-
-  # Herbaria: complicated redirects of legacy Herbarium actions
-  # Actions needing two routes in order to successfully redirect
-  #
-  # The next two routes combine to redirect
-  #   GET herbarium/delete_curator
-  #   DELETE herbaria/curators
-  # The "match" redirects
-  #   GET("/herbarium/delete_curator/nnn?user=uuu") and
-  #   POST("/herbarium/delete_curator/nnn?user=uuu")
-  # to
-  #   GET("/herbaria/curators/nnn?user=uuu")
-  # which would throw: No route matches [GET] "/herbaria/curators/nnnnn"
-  # absent the following get
-  match("/herbarium/delete_curator/:id",
-        to: redirect(path: "/herbaria/curators/%{id}"),
-        via: [:get, :post])
-  get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
-
-  # The next post and get combine to redirect the legacy
-  #   POST /herbarium/request_to_be_curator to
-  #   POST herbaria/curator_requests#create
-  post("/herbarium/request_to_be_curator/:id",
-       to: redirect(path: "/herbaria/curator_requests?id=%{id}"))
-  get("/herbaria/curator_requests",
-      to: "herbaria/curator_requests#create", id: /\d+/)
-
-  # The next post and get combine to redirect
-  #   POST /herbarium/show_herbarium/:id to
-  #   POST herbaria/curators#create
-  post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
-  get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
-
-  # rubocop:enable Style/FormatStringToken
-
-  # Herbaria: non-standard redirect
+  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
+  get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("info/how_to_help", to: "info#how_to_help")
