@@ -634,8 +634,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.where(notes: Observation.no_notes_persisted)
-    assert(expect.count.positive?)
+    # rubocop disable:Rails/WhereEquals
+    # `where` clause require SQL because AR/Arel escape
+    # Observation.no_notes_persisted, causing an incorrect query
+    expect = Observation.where("notes = ?", Observation.no_notes_persisted)
+    # rubocop disable:Rails/WhereEquals
+     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end

@@ -127,8 +127,8 @@ class CapybarLurkerTest < IntegrationTestCase
     # Check out species list.
     go_back_after do
       list = SpeciesList.joins(:observations).
-             where(observation_id: obs.id).first
-             click_link(list.title)
+             where(observations: { id: obs.id }).first
+      click_link(list.title)
       assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
                    page.title, "Wrong page")
 
