@@ -63,7 +63,7 @@ module ObservationTabsHelper
     [
       link_with_query(:show_observation_edit_observation.t,
                       edit_observation_path(obs.id)),
-      destroy_button(target: add_query_param(observation_path(obs.id)))
+      destroy_button(target: obs)
     ]
   end
 

@@ -119,7 +119,7 @@ module ApplicationHelper
     options = if target.is_a?(String)
                 target
               else
-                { action: "destroy", id: target.id }
+                add_query_param(send("#{target.type_tag}_path", target.id))
               end
     button_to(
       name, options, method: :delete, class: "text-danger",
