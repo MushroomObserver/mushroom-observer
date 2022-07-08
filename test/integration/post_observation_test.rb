@@ -3,13 +3,12 @@
 require("test_helper")
 
 class PostObservationTest < IntegrationTestCase
-  LOGIN_TEMPLATE = "account/login"
-  SHOW_OBSERVATION_TEMPLATE = "observations/show"
-  NEW_OBSERVATION_TEMPLATE = "observations/new"
-  CREATE_OBSERVATION_TEMPLATE = "observations"
-  EDIT_OBSERVATION_TEMPLATE = "observations/edit"
-  CREATE_LOCATION_TEMPLATE = "location/create_location"
-  OBSERVATION_INDEX_TEMPLATE = "observations/index"
+  LOGIN_PAGE = "account/login"
+  SHOW_OBSERVATION_PAGE = "observer/show_observation"
+  CREATE_OBSERVATION_PAGE = "observer/create_observation"
+  EDIT_OBSERVATION_PAGE = "observer/edit_observation"
+  CREATE_LOCATION_PAGE = "location/create_location"
+  OBSERVATION_INDEX_PAGE = "observer/list_observations"
 
   PASADENA_EXTENTS = {
     north: 34.251905,
@@ -35,16 +34,16 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def open_create_observation_form
-    get(new_observation_path)
-    assert_template(LOGIN_TEMPLATE)
+    get("/#{CREATE_OBSERVATION_PAGE}")
+    assert_template(LOGIN_PAGE)
     login!(katrina)
-    assert_template(NEW_OBSERVATION_TEMPLATE)
+    assert_template(CREATE_OBSERVATION_PAGE)
     assert_form_has_correct_values(create_observation_form_defaults)
   end
 
   def submit_observation_form_with_errors
     submit_form_with_changes(create_observation_form_first_changes)
-    assert_template(NEW_OBSERVATION_TEMPLATE)
+    assert_template(CREATE_OBSERVATION_PAGE)
     assert_has_location_warning(/Unknown country/)
     assert_form_has_correct_values(
       create_observation_form_values_after_first_changes
@@ -56,14 +55,14 @@ class PostObservationTest < IntegrationTestCase
       submit_form_with_changes(create_observation_form_second_changes)
     end
     assert_flash_for_create_observation
-    assert_template(CREATE_LOCATION_TEMPLATE)
+    assert_template(CREATE_LOCATION_PAGE)
     assert_new_observation_is_correct(expected_values_after_create)
     assert_form_has_correct_values(create_location_form_defaults)
   end
 
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes)
-    assert_template(CREATE_LOCATION_TEMPLATE)
+    assert_template(CREATE_LOCATION_PAGE)
     assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes
@@ -73,23 +72,22 @@ class PostObservationTest < IntegrationTestCase
   def submit_location_form_without_errors
     submit_form_with_changes(create_location_form_second_changes)
     assert_flash_for_create_location
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    assert_template(SHOW_OBSERVATION_PAGE)
     assert_new_location_is_correct(expected_values_after_location)
     assert_new_observation_is_correct(expected_values_after_location)
     assert_show_observation_page_has_important_info
   end
 
   def open_edit_observation_form
-    new_obs = Observation.last
-    click_mo_link(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
-    assert_template(EDIT_OBSERVATION_TEMPLATE)
+    click_mo_link(label: /edit/i, href: /edit_observation/)
+    assert_template(EDIT_OBSERVATION_PAGE)
     assert_form_has_correct_values(edit_observation_form_initial_values)
   end
 
   def submit_observation_form_with_changes
     submit_form_with_changes(edit_observation_form_changes)
     assert_flash_for_edit_observation
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    assert_template(SHOW_OBSERVATION_PAGE)
     assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
   end
@@ -114,11 +112,9 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def destroy_observation
-    # puts(response.body)
-    assert_template(SHOW_OBSERVATION_TEMPLATE)
-    within("div#right_tabs") { click_mo_link("Destroy") }
+    click_mo_link(label: /destroy/i, href: /destroy_observation/)
     assert_flash_for_destroy_observation
-    assert_template(OBSERVATION_INDEX_TEMPLATE)
+    assert_template(OBSERVATION_INDEX_PAGE)
   end
 
   def make_sure_observation_is_in_main_index(obs)
@@ -211,7 +207,7 @@ class PostObservationTest < IntegrationTestCase
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
-    assert_no_link_exists_containing("observations?where")
+    assert_no_link_exists_containing("observations_at_where")
     assert_link_exists_containing("show_location/#{new_loc.id}")
     assert_link_exists_containing("show_image/#{new_img.id}")
   end
@@ -404,7 +400,7 @@ class PostObservationTest < IntegrationTestCase
       vote: Vote.next_best_vote,
       is_collection_location: false,
       specimen: true,
-      notes: "Notes for observation", # string displayed in observations/show
+      notes: "Notes for observation", # string displayed in show_observation
       image_notes: "Notes for image"
     }
   end
@@ -431,7 +427,7 @@ class PostObservationTest < IntegrationTestCase
       alt: 987,
       is_collection_location: true,
       specimen: false,
-      notes: "New notes for observation", # displayed in observations/show
+      notes: "New notes for observation", # string displayed in show_observation
       image_notes: "New notes for image"
     )
   end
