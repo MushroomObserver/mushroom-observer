@@ -609,17 +609,17 @@ class User < AbstractModel
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
-  def all_editable_species_lists(include: nil)
+  def all_editable_species_lists
     @all_editable_species_lists ||=
       calc_all_editable_species_lists(include)
   end
 
   def calc_all_editable_species_lists(include)
-    return species_lists.includes(include) if projects_member.none?
+    return species_lists if projects_member.none?
 
-    SpeciesList.includes(include).
+    SpeciesList.
       where(SpeciesList[:user_id].eq(id).
-      or(SpeciesList[:id].in(species_lists_in_users_projects))).uniq
+      or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
   end
 
   def species_lists_in_users_projects
