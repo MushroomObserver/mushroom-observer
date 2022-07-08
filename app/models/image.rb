@@ -247,17 +247,14 @@ class Image < AbstractModel
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  def all_glossary_terms
-    best_glossary_terms + glossary_terms
-  end
-
-  def get_subjects
-    observations + subjects + best_glossary_terms + glossary_terms
+  # Array of all observations, users and glossary terms using this image.
+  def all_subjects
+    observations + subjects + glossary_terms
   end
 
   # Is image used by an object other than obj
   def other_subjects?(obj)
-    (get_subjects - [obj]).present?
+    (all_subjects - [obj]).present?
   end
 
   # Create plain-text title for image from observations, appending image id to
@@ -268,7 +265,7 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = get_subjects.map(&:text_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:text_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -284,7 +281,7 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = get_subjects.map(&:format_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:format_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -401,20 +398,6 @@ class Image < AbstractModel
 
   def extension(size)
     size == :original ? original_extension : "jpg"
-  end
-
-  def has_size?(size)
-    max = width.to_i > height.to_i ? width.to_i : height.to_i
-    case size.to_s
-    when "thumbnail" then true
-    when "small" then max > 160
-    when "medium" then max > 320
-    when "large" then max > 640
-    when "huge" then max > 960
-    when "full_size" then max > 1280
-    when "original" then true
-    else; false
-    end
   end
 
   # Calculate the approximate dimensions of the image of the given size.
