@@ -116,7 +116,7 @@ class PostObservationTest < IntegrationTestCase
   def destroy_observation
     # puts(response.body)
     assert_template(SHOW_OBSERVATION_TEMPLATE)
-    within("div#right_tabs") { click("Destroy") }
+    click_on("Destroy")
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end
