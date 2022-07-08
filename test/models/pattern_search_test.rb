@@ -592,7 +592,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_images_yes
-    expect = Observation.where("thumb_image_id IS NOT NULL")
+    expect = Observation.where.not(thumb_image_id: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -634,19 +634,25 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    # rubocop disable:Rails/WhereEquals
-    # `where` clause require SQL because AR/Arel escape
-    # Observation.no_notes_persisted, causing an incorrect query
-    expect = Observation.where("notes = ?", Observation.no_notes_persisted)
-    # rubocop disable:Rails/WhereEquals
-     assert(expect.count.positive?)
+
+    # Disable cop because `where` clause requires SQL
+    # because AR/Arel would escape Observation.no_notes_persisted,
+    # causing an incorrect query
+    expect = Observation.where( # rubocop:disable Rails/WhereEquals
+      "notes = ?", Observation.no_notes_persisted
+    )
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
-    expect = Observation.where("notes != ?", Observation.no_notes_persisted)
-    assert(expect.count.positive?)
+    # Disable cop because `where` clause requires SQL
+    # because AR/Arel would escape Observation.no_notes_persisted,
+    # causing an incorrect query
+    expect = Observation.where(   # rubocop:disable Rails/WhereNot
+      "notes != ?", Observation.no_notes_persisted
+    )
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
