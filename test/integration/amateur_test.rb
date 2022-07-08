@@ -14,7 +14,7 @@ class AmateurTest < IntegrationTestCase
     get("/")
 
     # Login.
-    click(label: "Login", in: :left_panel)
+    click_mo_link(label: "Login", in: :left_panel)
     assert_template("account/login")
 
     # Try to login without a password.
@@ -52,14 +52,14 @@ class AmateurTest < IntegrationTestCase
     assert_flash_text(/success/i)
 
     # This should only be accessible if logged in.
-    click(label: "Preferences", in: :left_panel)
+    click_mo_link(label: "Preferences", in: :left_panel)
     assert_template("account/prefs")
 
     # Log out and try again.
-    click(label: "Logout", in: :left_panel)
+    click_mo_link(label: "Logout", in: :left_panel)
     assert_template("account/logout_user")
     assert_raises(MiniTest::Assertion) do
-      click(label: "Preferences", in: :left_panel)
+      click_mo_link(label: "Preferences", in: :left_panel)
     end
     get("/account/prefs")
     assert_template("account/login")
@@ -124,7 +124,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
 
-    click(label: "Add Comment")
+    click_mo_link(label: "Add Comment")
     assert_template("comment/add_comment")
 
     # (Make sure the form is for the correct object!)
@@ -157,7 +157,7 @@ class AmateurTest < IntegrationTestCase
     assert_select("a[href*='destroy_comment/#{com.id}']", 1)
 
     # Try changing it.
-    click(label: /edit/i, href: /edit_comment/)
+    click_mo_link(label: /edit/i, href: /edit_comment/)
     assert_template("comment/edit_comment")
     open_form do |form|
       form.assert_value("summary", summary)
@@ -183,7 +183,7 @@ class AmateurTest < IntegrationTestCase
     end
 
     # I grow weary of this comment.
-    click(label: /destroy/i, href: /destroy_comment/)
+    click_mo_link(label: /destroy/i, href: /destroy_comment/)
     assert_template("observer/show_observation")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
@@ -268,7 +268,7 @@ class AmateurTest < IntegrationTestCase
     assert_template("observer/show_observation")
     assert_select("div.thumbnail-map", 1)
 
-    click(label: "Hide thumbnail map.")
+    click_mo_link(label: "Hide thumbnail map.")
     assert_template("observer/show_observation")
     assert_select("div.thumbnail-map", 0)
 
@@ -302,14 +302,14 @@ class AmateurTest < IntegrationTestCase
   module UserDsl
     def run_test
       get("/admin/test_flash_redirection?tags=")
-      click(label: :app_edit_translations_on_page.t)
+      click_mo_link(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 0)
       assert_select("span.tag", text: "test_tag2:", count: 0)
       assert_select("span.tag", text: "test_flash_redirection_title:", count: 1)
 
       get("/admin/test_flash_redirection?tags=test_tag1,test_tag2")
-      click(label: :app_edit_translations_on_page.t)
+      click_mo_link(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 1)
       assert_select("span.tag", text: "test_tag2:", count: 1)
@@ -343,7 +343,7 @@ class AmateurTest < IntegrationTestCase
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
       assert_template("observer/show_observation")
-      click(label: /login/i)
+      click_mo_link(label: /login/i)
       assert_template("account/login")
       open_form do |form|
         form.change("login", namer.login)
@@ -352,7 +352,7 @@ class AmateurTest < IntegrationTestCase
         form.submit("Login")
       end
       assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
-      click(label: /propose.*name/i)
+      click_mo_link(label: /propose.*name/i)
     end
 
     def create_name(obs, text_name)
@@ -417,7 +417,7 @@ class AmateurTest < IntegrationTestCase
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click(label: /edit/i, href: %r{naming/edit})
+      click_mo_link(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", text_name)
@@ -444,7 +444,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click(label: /edit/i, href: %r{naming/edit})
+      click_mo_link(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
@@ -455,17 +455,17 @@ class AmateurTest < IntegrationTestCase
         form.assert_unchecked("reason_3_check")
         form.assert_value("reason_3_notes", "")
       end
-      click(label: /cancel.*show/i)
+      click_mo_link(label: /cancel.*show/i)
       naming
     end
 
     def failed_delete(_obs)
-      click(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
       assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      click(label: /destroy/i, href: %r{naming/destroy})
+      click_mo_link(label: /destroy/i, href: %r{naming/destroy})
       assert_template("observer/show_observation")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
