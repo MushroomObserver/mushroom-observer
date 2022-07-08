@@ -82,13 +82,6 @@ class RedirectsTest < IntegrationTestCase
                  @response.request.fullpath)
   end
 
-  def test_destroy_article
-    login("article_writer", "testpassword", true)
-    delete(article_path(Article.first.id))
-    assert_equal(article_path(Article.first.id),
-                 @response.request.fullpath)
-  end
-
   # Glossary to GlossaryTerms --------------------------------------------------
 
   def test_controller_glossary
