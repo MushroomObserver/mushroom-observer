@@ -21,9 +21,6 @@ class InfoControllerTest < FunctionalTestCase
     get_with_dump(:news)
     assert_template(:news)
 
-    get_with_dump(:textile)
-    assert_template(:textile_sandbox)
-
     get_with_dump(:textile_sandbox)
     assert_template(:textile_sandbox)
   end
