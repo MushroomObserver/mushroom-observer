@@ -72,7 +72,7 @@ module SessionExtensions
     send(method.downcase.to_s, url, *args, **kwargs)
     follow_redirect! while response.redirect?
     if status == 500
-      msg = if (error = controller.instance_variable_get("@error"))
+      msg = if (error = controller.instance_variable_get(:@error))
               "#{error}\n#{error.backtrace.join("\n")}"
             else
               "Got unknown 500 error from outside our application?!\n" \
@@ -105,7 +105,32 @@ module SessionExtensions
     end
   end
 
-  # FIXME: Need "put" and "patch" methods too?
+  # Override all 'put' calls and do a bunch of extra error checking.
+  def put(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("PUT", action, **args)
+    else
+      super
+    end
+  end
+
+  # Override all 'patch' calls and do a bunch of extra error checking.
+  def patch(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("PATCH", action, **args)
+    else
+      super
+    end
+  end
+
+  # Override all 'delete' calls and do a bunch of extra error checking.
+  def delete(action, **args)
+    if !@doing_with_error_checking
+      process_with_error_checking("DELETE", action, **args)
+    else
+      super
+    end
+  end
 
   # Call the original +get+.
   def get_without_redirecting(action, **args)
@@ -191,11 +216,16 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
-    # NOTE: This was breaking in normalized controllers.
-    # The action for the form at "observations/new" is actually "observations"
     if args == []
       action = path.sub(/\?.*/, "")
-      args << "form[action^='#{action.delete_suffix("/new")}']"
+      if action.end_with?("/new", "/edit")
+        action = if action.end_with?("/new")
+                   action.delete_suffix("/new")
+                 elsif action.end_with?("/edit")
+                   action.delete_suffix("/edit")
+                 end
+      end
+      args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,

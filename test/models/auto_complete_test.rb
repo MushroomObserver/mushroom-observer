@@ -144,8 +144,8 @@ class AutoCompleteTest < UnitTestCase
   def assert_refines_correctly(auto, expected_matches, expected_string)
     string = auto.refine_matches
     if string != expected_string || auto.matches.length != expected_matches
-      msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n"\
-            "Refined string: #{string.inspect}, "\
+      msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n" \
+            "Refined string: #{string.inspect}, " \
             "expected: #{expected_string.inspect}\n #{show_matches(auto)}"
       flunk(msg)
     else

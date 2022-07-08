@@ -401,9 +401,9 @@ class ApplicationController < ActionController::Base
 
   def make_logged_in_user_available_to_everyone
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : "0"}" \
-                " robot=#{browser.bot? ? "Y" : "N"}" \
-                " ip=#{request.remote_ip}")
+    logger.warn("user=#{@user ? @user.id : "0"} " \
+                "robot=#{browser.bot? ? "Y" : "N"} " \
+                "ip=#{request.remote_ip}")
   end
 
   # Track when user requested a page, but update at most once an hour.
@@ -1106,7 +1106,7 @@ class ApplicationController < ActionController::Base
     return unless invalid_q_param?
 
     flash_error(:advanced_search_bad_q_error.t)
-    redirect_to(searches_advanced_search_form_path)
+    redirect_to(search_advanced_path)
   end
 
   private ##########
@@ -1388,9 +1388,6 @@ class ApplicationController < ActionController::Base
   # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
-  # NIMMO QUESTION: Does anything send an args[:letter_arg]?
-  # Several controllers send args[:letters], but none send args[:letter_arg].
-  # (It's a param of MOPaginator)
   def show_index_of_objects(query, args = {})
     letter_arg   = args[:letter_arg] || :letter
     number_arg   = args[:number_arg] || :page

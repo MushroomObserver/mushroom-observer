@@ -56,7 +56,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     # Show first Observation from Your Observations search.
     click_link(first_obs.id.to_s)
     # Destroy it.
-    within("div#right_tabs") { click_link("Destroy") }
+    within("div#right_tabs") { click_button("Destroy") }
 
     # MO should show next Observation.
     page.find_by_id("title")
@@ -77,7 +77,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("#{edit_observation_path(id: observation.id)}")
+    visit(edit_observation_path(id: observation.id).to_s)
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
@@ -96,7 +96,7 @@ class ObservationsControllerSupplementalTest < IntegrationTestCase
     login(user)
 
     # Edit the Observation, unchecking the Project.
-    visit("#{edit_observation_path(id: observation.id)}")
+    visit(edit_observation_path(id: observation.id).to_s)
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 

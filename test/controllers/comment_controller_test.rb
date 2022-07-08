@@ -92,7 +92,7 @@ class CommentControllerTest < FunctionalTestCase
     get(:add_comment,
         params: { type: "NameDescription", id: katrina_is_not_reader.id })
 
-    assert_flash_error("MO should flash if trying to comment on object"\
+    assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
   end
 

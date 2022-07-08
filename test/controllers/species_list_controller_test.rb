@@ -700,11 +700,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert_equal("Warnerbros bugs-bunny",
-                 @controller.instance_variable_get("@list_members"))
-    assert_equal([], @controller.instance_variable_get("@new_names"))
+                 @controller.instance_variable_get(:@list_members))
+    assert_equal([], @controller.instance_variable_get(:@new_names))
     assert_equal([bugs_names.first],
-                 @controller.instance_variable_get("@multiple_names"))
-    assert_equal([], @controller.instance_variable_get("@deprecated_names"))
+                 @controller.instance_variable_get(:@multiple_names))
+    assert_equal([], @controller.instance_variable_get(:@deprecated_names))
 
     # Now re-post, having selected the other Bugs Bunny name.
     params = {
@@ -1108,7 +1108,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
-    assert_equal(list_data, @controller.instance_variable_get("@list_members"))
+    assert_equal(list_data, @controller.instance_variable_get(:@list_members))
   end
 
   def test_read_species_list_two
@@ -1128,7 +1128,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:upload_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
-    new_data = @controller.instance_variable_get("@list_members")
+    new_data = @controller.instance_variable_get(:@list_members)
     new_data = new_data.split("\r\n").sort.join("\r\n")
     assert_equal(list_data, new_data)
   end
@@ -1234,7 +1234,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
 
     post(:name_lister, params: params.merge(commit: :name_lister_submit_spl.l))
-    ids = @controller.instance_variable_get("@names").map(&:id)
+    ids = @controller.instance_variable_get(:@names).map(&:id)
     assert_equal([names(:amanita_baccata_borealis).id,
                   names(:coprinus_comatus).id, names(:fungi).id,
                   names(:lactarius_alpigenes).id],

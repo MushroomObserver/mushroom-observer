@@ -737,7 +737,7 @@ class ObservationTest < UnitTestCase
     votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
               "mary=3.0(*), rolf=-3.0\n" \
             "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: " \
-              "mary=1.0(*), rolf=2.0(*)\n"\
+              "mary=1.0(*), rolf=2.0(*)\n" \
             "#{no_votes_naming.id} Fungi: no votes"
 
     assert_equal(votes, obs.dump_votes)

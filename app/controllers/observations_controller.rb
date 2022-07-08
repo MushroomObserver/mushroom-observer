@@ -7,7 +7,9 @@ class ObservationsController < ApplicationController
 
   include Index
   include Show
-  include CreateAndUpdate
+  include NewAndCreate
+  include EditAndUpdate
+  include Destroy
   include Suggestions
   include Map
   include Download

@@ -57,7 +57,7 @@ module GM
     def self.header(args)
       url = GMAPS_API_URL
       key = GMAPS_API_KEYS[::Rails.env][args[:host]]
-      "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>"\
+      "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>" \
       "</script>
       <script type='text/javascript'>
         var G = google.maps;
@@ -198,7 +198,7 @@ module GM
     def to_html(_args)
       "#{global_declarations_code}\n" \
       "G.event.addDomListener(window, 'load', function() {\n" \
-        "var M = #{name} = new G.Map(E('#{name}'), "\
+        "var M = #{name} = new G.Map(E('#{name}'), " \
         "{ #{map_options_code.join(", ")} });\n" \
         "#{center_map_code}\n" \
         "#{overlays_code}\n" \
@@ -224,7 +224,7 @@ module GM
         "M.setCenter(L(#{lat}, #{long}));\n" \
         "M.setZoom(#{zoom});"
       else
-        "M.fitBounds(new G.LatLngBounds( L(#{south},#{west}), "\
+        "M.fitBounds(new G.LatLngBounds( L(#{south},#{west}), " \
         "L(#{north},#{east}) ));"
       end
     end

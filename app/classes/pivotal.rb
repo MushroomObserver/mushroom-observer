@@ -18,7 +18,7 @@ class Pivotal
     end
 
     def request_stories(api_params, stories)
-      json = get_request("stories?limit=500&filter=state:unscheduled,"\
+      json = get_request("stories?limit=500&filter=state:unscheduled," \
                          "started,unstarted&#{story_fields}" + api_params)
       JSON.parse(json).each do |obj|
         if Rails.env.test? || obj["name"] != "test"
@@ -75,7 +75,7 @@ class Pivotal
     end
 
     def story_fields
-      "fields=story_type,estimate,current_state,name,description,updated_at,"\
+      "fields=story_type,estimate,current_state,name,description,updated_at," \
       "labels(name),comments(created_at,text)"
     end
 

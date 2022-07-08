@@ -3,7 +3,7 @@
 require("test_helper")
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML.safe_load(IO.
+  DATABASE_CONFIG = YAML.safe_load(File.
     read("#{::Rails.root}/config/database.yml"))["test"]
 
   def script_file(cmd)
@@ -69,12 +69,12 @@ class ScriptTest < UnitTestCase
   end
 
   def clear_image_transferred_state_externally(id)
-    system("mysql --defaults-extra-file=#{mysql_config_file} -e "\
+    system("mysql --defaults-extra-file=#{mysql_config_file} -e " \
            "'update images set transferred=false where id = #{id}'")
   end
 
   def get_image_transferred_state_externally(id)
-    result = `mysql --defaults-extra-file=#{mysql_config_file} -e '\
+    result = `mysql --defaults-extra-file=#{mysql_config_file} -e ' \
              '"select transferred from images where id = #{id}"`
     result.split("\n").last.strip == "1"
   end

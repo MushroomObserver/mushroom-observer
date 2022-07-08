@@ -251,12 +251,12 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
+                 @controller.instance_variable_get(:@title))
     get_with_dump(:image_search, pattern: "Notes", page: 2)
     assert_template("list_images")
     assert_equal(:query_title_pattern_search.t(types: "Images",
                                                pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
+                 @controller.instance_variable_get(:@title))
   end
 
   def test_image_search_next
@@ -288,7 +288,7 @@ class ImageControllerTest < FunctionalTestCase
     get(:advanced_search, params: { q: "xxxxx" })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(searches_advanced_search_form_path)
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_add_image

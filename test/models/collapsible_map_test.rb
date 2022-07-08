@@ -66,8 +66,8 @@ class CollapsibleMapTest < UnitTestCase
     expect = format("N=%.4f S=%.4f E=%.4f W=%.4f", north, south, east, west)
     actual = format("N=%.4f S=%.4f E=%.4f W=%.4f",
                     mapset.north, mapset.south, mapset.east, mapset.west)
-    message = "Extents wrong: <#{errors.join(", ")}>\n"\
-              "Expect: <#{expect}>\n"\
+    message = "Extents wrong: <#{errors.join(", ")}>\n" \
+              "Expect: <#{expect}>\n" \
               "Actual: <#{actual}>"
     flunk(message)
   end

@@ -4,6 +4,8 @@
 module ObservationsController::Map
   # Map results of a search or index.
   def map
+    map_observation and return if params[:id].present?
+
     @query = find_or_create_query(:Observation)
     apply_content_filters(@query)
     @title = :map_locations_title.t(locations: @query.title)
@@ -41,5 +43,19 @@ module ObservationsController::Map
     end
     @num_results = @observations.count
     @timer_end = Time.current
+  end
+
+  # Show map of one observation by id.
+  def map_observation
+    pass_query_params
+    obs = find_or_goto_index(Observation, params[:id].to_s)
+    return unless obs
+
+    @title = :map_observation_title.t(id: obs.id)
+    @observations = [
+      MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
+                                obs.location)
+    ]
+    render(template: "observations/map")
   end
 end

@@ -216,7 +216,8 @@ class SpeciesListController < ApplicationController
   def print_labels
     species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     query = lookup_species_list_query(species_list)
-    redirect_with_query({ controller: :observations, action: :print_labels }, query)
+    redirect_with_query({ controller: :observations, action: :print_labels },
+                        query)
   end
 
   def lookup_species_list_query(list)
@@ -271,14 +272,13 @@ class SpeciesListController < ApplicationController
   def render_name_list_as_rtf(names)
     charset = "UTF-8"
     doc = RTF::Document.new(RTF::Font::SWISS)
+    reportable_ranks = %w[Genus Species Subspecies Variety Form]
     names.each do |name|
       rank      = name.rank
       text_name = name.real_text_name
       author    = name.author
-      node = name.deprecated ? doc : doc.bold
-      if %w[Genus Species Subspecies Variety Form].include?(rank)
-        node = node.italic
-      end
+      node      = name.deprecated ? doc : doc.bold
+      node      = node.italic if reportable_ranks.include?(rank)
       node << text_name
       doc << " #{author}" if author.present?
       doc.line_break

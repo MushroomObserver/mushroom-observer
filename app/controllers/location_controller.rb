@@ -119,7 +119,7 @@ class LocationController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observations, action: :advanced_search_form)
+    redirect_to(controller: :search, action: :advanced)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -360,7 +360,7 @@ class LocationController < ApplicationController
     @location = find_or_goto_index(Location, loc_id)
     return unless @location
 
-    @canonical_url = "#{MO.http_domain}/location/show_location/"\
+    @canonical_url = "#{MO.http_domain}/location/show_location/" \
                      "#{@location.id}"
 
     # Load default description if user didn't request one explicitly.
@@ -390,7 +390,7 @@ class LocationController < ApplicationController
     @description = find_or_goto_index(LocationDescription, params[:id].to_s)
     return unless @description
 
-    @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
+    @canonical_url = "#{MO.http_domain}/location/show_location_description/" \
                      "#{@description.id}"
     # Public or user has permission.
     if in_admin_mode? || @description.is_reader?(@user)

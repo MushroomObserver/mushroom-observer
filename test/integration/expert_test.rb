@@ -47,8 +47,8 @@ class ExpertTest < IntegrationTestCase
     # work (e.g., I don't want to make any assertions about the hidden fields)
     # -- all I want to be sure of is that it doesn't mess up our list of names.
     open_form do |form|
-      assert_equal(list.split(/\r\n/).sort,
-                   form.get_value!("list_members").split(/\r\n/).sort)
+      assert_equal(list.split("\r\n").sort,
+                   form.get_value!("list_members").split("\r\n").sort)
       # field = form.get_field('approved_names')
       form.submit
     end
@@ -157,8 +157,8 @@ class ExpertTest < IntegrationTestCase
 
     # Fix the ambiguous names: should be good now.
     open_form do |form|
-      assert_equal(list.split(/\r\n/).sort,
-                   form.get_value!("list_members").split(/\r\n/).sort)
+      assert_equal(list.split("\r\n").sort,
+                   form.get_value!("list_members").split("\r\n").sort)
       form.check(
         /chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/
       )

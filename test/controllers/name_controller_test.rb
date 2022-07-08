@@ -312,7 +312,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_select(
       "#nomenclature", /#{label}.*#{:show_name_icn_id_missing.l}/m,
-      "Nomenclature section missing an ICN id label and/or "\
+      "Nomenclature section missing an ICN id label and/or " \
       "'#{:show_name_icn_id_missing.l}' note"
     )
     assert_select(
@@ -584,7 +584,7 @@ class NameControllerTest < FunctionalTestCase
     query.record.delete
     login
     get(:advanced_search, params: params)
-    assert_redirected_to(searches_advanced_search_form_path)
+    assert_redirected_to(search_advanced_path)
   end
 
   def test_edit_name_get
@@ -825,7 +825,7 @@ class NameControllerTest < FunctionalTestCase
   def test_name_guessing
     # Not all the genera actually have records in our test database.
     User.current = rolf
-    @controller.instance_variable_set("@user", rolf)
+    @controller.instance_variable_set(:@user, rolf)
     Name.create_needed_names("Agaricus")
     Name.create_needed_names("Pluteus")
     Name.create_needed_names("Coprinus comatus subsp. bogus var. varietus")

@@ -667,7 +667,7 @@ class Image < AbstractModel
           result = true
         rescue StandardError => e
           errors.add(:image,
-                     "Unexpected error while copying attached file "\
+                     "Unexpected error while copying attached file " \
                      "to temp file. Error class #{e.class}: #{e}")
           result = false
         end

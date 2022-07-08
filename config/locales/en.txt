@@ -2620,7 +2620,7 @@
   adjust_permissions_all_users: All Users
   adjust_permissions_site_admin: site admin
 
-  # searches/advanced_search
+  # search/advanced
   advanced_search_at_least_one: Please provide at least one search parameter
   advanced_search_caveat: "Advanced search has somewhat limited options because of performance issues that result in timeouts.  Please \"email the webmaster\":/observer/ask_webmaster_question if you experience timeouts or if there are particular types of searches you would like to have added.\n\nHints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use \"OR\" (all caps) to tell it to match one of several possible strings, e.g. \"Xanthoria OR Xanthomendoza\".  Use a star as a wildcard, e.g. \"Wells Gray*Canada\" will match \"Wells Gray, Canada\", \"Wells Gray Park, Canada\", and \"Wells Gray Provincial Park, Canada\".  (See notes under 'Content', too.)"
   advanced_search_content: Content

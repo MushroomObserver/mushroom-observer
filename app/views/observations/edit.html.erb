@@ -10,7 +10,7 @@
 
 <%= form_tag(add_query_param(action: :update, id: @observation,
                              approved_name: @what, approved_where: @place_name),
-             {multipart: true, method: :put, name: "observation_form"}) do %>
+             method: :put, multipart: true, name: "observation_form") do %>
   <%= render(partial: "form_observations", locals: {
         action: :update,
         logging_optional: true,

@@ -132,7 +132,7 @@ class SiteData
     observations_with_voucher:
       "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
     observations_without_voucher:
-      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
+      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10" \
       "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL",
     contributing_users: "contribution > 0"
@@ -153,7 +153,7 @@ class SiteData
     observations_without_voucher:
       Observation.
         where(specimen: false).
-        where("LENGTH(observations.notes) >= 10").
+        where(Observation[:notes].length >= 10).
         where.not(thumb_image_id: nil),
     sequenced_observations:
       Sequence.
@@ -448,7 +448,7 @@ class SiteData
       [lang, score]
     end
     @user_data[user.id][:languages] =
-      language_contributions.map { |_lang, score| score }.sum
+      language_contributions.sum { |_lang, score| score }
     @user_data[user.id][:languages_itemized] =
       language_contributions.select { |_lang, score| score.positive? }
   end

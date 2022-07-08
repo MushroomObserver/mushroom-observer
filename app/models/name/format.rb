@@ -122,7 +122,7 @@ module Name::Format
   module ClassMethods
     def display_to_real_text(name)
       name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
-        gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/x,
+        gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/ox,
              ' \1 ').
         # (this part should be unnecessary)
         # Because "group" was removed by the 1st gsub above,

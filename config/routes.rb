@@ -381,10 +381,8 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are to very old pages that we might get rid of.
-    # rubocop:todo Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -605,7 +603,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   root "rss_logs#index"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "observation_id_only"
+  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
@@ -758,15 +756,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
 
-  get("observer/how_to_help", to: redirect(path: "info#how_to_help"))
-  get("observer/how_to_use", to: redirect(path: "info#how_to_use"))
-  get("observer/intro", to: redirect(path: "info#intro"))
-  get("observer/news", to: redirect(path: "info#news"))
-  get("observer/search_bar_help", to: redirect(path: "info#search_bar_help"))
-  get("observer/show_site_stats", to: "info#site_stats")
-  get("observer/textile", to: redirect(path: "info#textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect(path: "info#textile_sandbox"))
-  get("observer/translators_note", to: redirect(path: "info#translators_note"))
+  get("observer/how_to_help", to: redirect("info/how_to_help"))
+  get("observer/how_to_use", to: redirect("info/how_to_use"))
+  get("observer/intro", to: redirect("info/intro"))
+  get("observer/news", to: redirect("info/news"))
+  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
+  get("observer/show_site_stats", to: redirect("info/site_stats"))
+  get("observer/textile", to: redirect("info/textile_sandbox"))
+  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
+  get("observer/translators_note", to: redirect("info/translators_note"))
 
   # ----- Javascript: utility actions  ----------------------------
   get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
@@ -775,22 +773,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
-  resources :observations
-  match("observations/map(/:id)",
-        to: "observations#map", via: [:get, :post], id: /\d+/,
-        as: "map_observations")
-  match("observations/suggestions(/:id)",
-        to: "observations#suggestions", via: [:get, :post], id: /\d+/,
-        as: "suggest_observations")
-  match("observations/download(/:id)",
-        to: "observations#download", via: [:get, :post], id: /\d+/,
-        as: "download_observations")
-  match("observations/print_labels(/:id)",
-        to: "observations#print_labels", via: [:get, :post], id: /\d+/,
-        as: "print_observation_labels")
-  match("observations/recalc(/:id)",
-        to: "observations#recalc", via: [:get, :post], id: /\d+/,
-        as: "recalc_observation_consensus")
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions")
+    end
+    collection do
+      get("map")
+      get("download")
+      get("print_labels")
+    end
+  end
 
   # ----- Publications: standard actions  ----------------------------
   resources :publications
@@ -799,32 +792,31 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # These routes must go before resources, or it will try to match
   # "rss" to an rss_log
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
-  match("/activity_logs", to: "rss_logs#index", as: "activity_logs",
-        via: [:get, :post])
+  get("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- RssLogs: standard actions with aliases ------------------------------
   # resources :rss_logs, only: [:show, :index]
-  get("/observer/index", to: redirect(path: "activity_logs"))
-  get("/observer/list_rss_logs", to: redirect(path: "activity_logs"))
-  get("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
-  post("/observer/index_rss_logs", to: redirect(path: "activity_logs"))
+  get("/observer/index", to: redirect("/activity_logs"))
+  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
+  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
   get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "activity_logs", params: { id: /\d+/ }))
-  get("/observer/rss", to: redirect(path: "activity_logs#rss"))
+      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
+  get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
-  match("searches/pattern_search(/:id)",
-        to: "searches#pattern_search", via: [:get, :post], id: /\d+/,
-        as: "searches_pattern_search")
-  match("searches/advanced_search_form(/:id)",
-        to: "searches#advanced_search_form", via: [:get, :post], id: /\d+/,
-        as: "searches_advanced_search_form")
+  match("search/pattern(/:id)",
+        to: "search#pattern", via: [:get, :post], id: /\d+/,
+        as: "search_pattern")
+  match("search/advanced(/:id)",
+        to: "search#advanced", via: [:get, :post], id: /\d+/,
+        as: "search_advanced")
 
   get("/observer/pattern_search",
-      to: redirect(path: "searches#pattern_search"))
+      to: redirect("/search/pattern"))
   get("/observer/advanced_search_form",
-      to: redirect(path: "searches#advanced_search_form"))
+      to: redirect("/search/advanced"))
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]

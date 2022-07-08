@@ -201,7 +201,7 @@ class NameController < ApplicationController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observations, action: :advanced_search_form)
+    redirect_to(controller: :search, action: :advanced)
   end
 
   # Used to test pagination.
@@ -1047,14 +1047,14 @@ class NameController < ApplicationController
         # This error message is no longer necessary.
         if Rails.env.test?
           flash_error(
-            "Unrecognized names given, including: "\
+            "Unrecognized names given, including: " \
             "#{sorter.new_name_strs[0].inspect}"
           )
         end
       else
         # Same with this one... err, no this is not reported anywhere.
         flash_error(
-          "Ambiguous names given, including: "\
+          "Ambiguous names given, including: " \
           "#{sorter.multiple_line_strs[0].inspect}"
         )
       end

@@ -56,14 +56,14 @@ class PostObservationTest < IntegrationTestCase
       submit_form_with_changes(create_observation_form_second_changes)
     end
     assert_flash_for_create_observation
-    assert_template(NEW_OBSERVATION_TEMPLATE)
+    assert_template(CREATE_LOCATION_TEMPLATE)
     assert_new_observation_is_correct(expected_values_after_create)
     assert_form_has_correct_values(create_location_form_defaults)
   end
 
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes)
-    assert_template(NEW_OBSERVATION_TEMPLATE)
+    assert_template(CREATE_LOCATION_TEMPLATE)
     assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(
       create_location_form_values_after_first_changes
@@ -80,7 +80,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def open_edit_observation_form
-    click(label: /edit/i, href: /#{edit_observation_path}/)
+    new_obs = Observation.last
+    click(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
     assert_template(EDIT_OBSERVATION_TEMPLATE)
     assert_form_has_correct_values(edit_observation_form_initial_values)
   end
@@ -113,7 +114,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def destroy_observation
-    click(label: /destroy/i, href: /#{destroy_observation_path}/)
+    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    within("div#right_tabs") { click("Destroy") }
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end
