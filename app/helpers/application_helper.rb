@@ -122,7 +122,8 @@ module ApplicationHelper
                 { action: "destroy", id: target.id }
               end
     button_to(
-      name, options, method: :delete, data: { confirm: :are_you_sure.t }
+      name, options, method: :delete, class: "text-danger",
+                     data: { confirm: :are_you_sure.t }
     )
   end
 
@@ -132,7 +133,25 @@ module ApplicationHelper
   #             confirm: :are_you_sure.t)
   def post_button(name:, path:, confirm: nil)
     data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :post, data: data)
+    button_to(name, path, method: :post, class: "text-info", data: data)
+  end
+
+  # PUT to a path; used instead of a link because PUT link requires js
+  # put_button(name: herbarium.name.t,
+  #            path: herbarium_path(id: @herbarium.id),
+  #            confirm: :are_you_sure.t)
+  def put_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :put, class: "text-info", data: data)
+  end
+
+  # PATCH to a path; used instead of a link because PATCH link requires js
+  # patch_button(name: herbarium.name.t,
+  #              path: herbarium_path(id: @herbarium.id),
+  #              confirm: :are_you_sure.t)
+  def patch_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :patch, class: "text-info", data: data)
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.

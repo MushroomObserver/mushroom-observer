@@ -114,7 +114,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def destroy_observation
-    click(label: /destroy/i, href: /#{observation_path}/)
+    assert_template(SHOW_OBSERVATION_TEMPLATE)
+    click_button("Destroy")
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end
