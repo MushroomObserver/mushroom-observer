@@ -23,7 +23,7 @@ module ObservationsController::FormHelpers
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
-  def create_observation_object(args)
+  def create_observation_object(args) # rubocop:disable Metrics/AbcSize
     now = Time.zone.now
     observation = if args
                     Observation.new(args.permit(whitelisted_observation_args))

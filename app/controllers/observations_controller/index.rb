@@ -195,7 +195,9 @@ module ObservationsController::Index
     names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
-  def define_index_links(query) # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
+  def define_index_links(query)
     @links ||= []
 
     # Add some extra links to the index user is sent to if they click on an
@@ -240,6 +242,8 @@ module ObservationsController::Index
     ]
     @links
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def define_index_args(query, args)
     args = { controller: :observations,
