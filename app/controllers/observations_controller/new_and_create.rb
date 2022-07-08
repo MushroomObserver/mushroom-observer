@@ -53,7 +53,7 @@ module ObservationsController::NewAndCreate
     defaults_from_last_observation_created
   end
 
-  def defaults_from_last_observation_created
+  def defaults_from_last_observation_created # rubocop:disable Metrics/AbcSize
     # Grab defaults for date and location from last observation the user
     # created if it was less than an hour ago
     # (i.e. if its creation time is larger than one hour ago)
@@ -75,7 +75,7 @@ module ObservationsController::NewAndCreate
     end
   end
 
-  def create
+  def create # rubocop:disable Metrics/AbcSize
     @observation = create_observation_object(params[:observation])
 
     # NOTE: I believe we need to set these again, in case they are not defined

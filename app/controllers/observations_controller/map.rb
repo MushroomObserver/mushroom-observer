@@ -3,7 +3,7 @@
 # see observations_controller.rb
 module ObservationsController::Map
   # Map results of a search or index.
-  def map
+  def map # rubocop:disable Metrics/AbcSize
     map_observation and return if params[:id].present?
 
     @query = find_or_create_query(:Observation)

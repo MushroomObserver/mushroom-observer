@@ -43,7 +43,7 @@ module ObservationsController::EditAndUpdate
     init_list_vars_for_edit(@observation)
   end
 
-  def update
+  def update # rubocop:disable Metrics/AbcSize
     pass_query_params
     return unless (@observation = find_or_goto_index(
       Observation, params[:id].to_s

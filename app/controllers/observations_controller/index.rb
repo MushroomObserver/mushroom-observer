@@ -4,7 +4,7 @@
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   # Searches come first because they may have the other params
-  def index
+  def index # rubocop:disable Metrics/AbcSize
     if params[:advanced_search].present?
       advanced_search and return
     elsif params[:pattern].present?
@@ -128,18 +128,22 @@ module ObservationsController::Index
       redirect_to(controller: :observations, action: :show,
                   id: observation.id)
     else
-      search = PatternSearch::Observation.new(pattern)
-      if search.errors.any?
-        search.errors.each do |error|
-          flash_error(error.to_s)
-        end
-        render(controller: :observations, action: :index)
-      else
-        @suggest_alternate_spellings = search.query.params[:pattern]
-        show_selected_observations(
-          search.query, no_hits_title: :title_for_observation_search.t
-        )
+      render_observation_search_results(pattern)
+    end
+  end
+
+  def render_observation_search_results(pattern)
+    search = PatternSearch::Observation.new(pattern)
+    if search.errors.any?
+      search.errors.each do |error|
+        flash_error(error.to_s)
       end
+      render(controller: :observations, action: :index)
+    else
+      @suggest_alternate_spellings = search.query.params[:pattern]
+      show_selected_observations(
+        search.query, no_hits_title: :title_for_observation_search.t
+      )
     end
   end
 
@@ -174,7 +178,7 @@ module ObservationsController::Index
 
   private
 
-  def create_advanced_search_query(params)
+  def create_advanced_search_query(params) # rubocop:disable Metrics/AbcSize
     search = {}
     search[:name] = params[:name] if params[:name].present?
     search[:location] = params[:location] if params[:location].present?
@@ -191,7 +195,7 @@ module ObservationsController::Index
     names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
-  def define_index_links(query)
+  def define_index_links(query) # rubocop:disable Metrics/AbcSize
     @links ||= []
 
     # Add some extra links to the index user is sent to if they click on an
