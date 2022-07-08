@@ -116,14 +116,16 @@ module ApplicationHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   def destroy_button(target:, name: :DESTROY.t)
-    options = if target.is_a?(String)
-                target
-              else
-                add_query_param(send("#{target.type_tag}_path", target.id))
-              end
+    path = if target.is_a?(String)
+             target
+           else
+             add_query_param(send("#{target.type_tag}_path", target.id))
+           end
+    id = target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
+
     button_to(
-      name, options, method: :delete, class: "text-danger",
-                     data: { confirm: :are_you_sure.t }
+      name, path, method: :delete, class: "text-danger", id: id,
+                  data: { confirm: :are_you_sure.t }
     )
   end
 

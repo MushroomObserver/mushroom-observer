@@ -276,10 +276,10 @@ module SessionExtensions
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
   # Sample use:
-  #   click(label: "Show Observation")
-  #   click(href: /show_name/)
-  #   click(label: "User", in: :sort_tabs)
-  def click(args = {})
+  #   click_mo_link(label: "Show Observation")
+  #   click_mo_link(href: /show_name/)
+  #   click_mo_link(label: "User", in: :sort_tabs)
+  def click_mo_link(args = {})
     select = "a[href]"
     sargs  = []
 

@@ -81,7 +81,7 @@ class PostObservationTest < IntegrationTestCase
 
   def open_edit_observation_form
     new_obs = Observation.last
-    click(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
+    click_mo_link(label: /edit/i, href: /#{edit_observation_path(new_obs.id)}/)
     assert_template(EDIT_OBSERVATION_TEMPLATE)
     assert_form_has_correct_values(edit_observation_form_initial_values)
   end
@@ -116,7 +116,7 @@ class PostObservationTest < IntegrationTestCase
   def destroy_observation
     # puts(response.body)
     assert_template(SHOW_OBSERVATION_TEMPLATE)
-    within("div#right_tabs") { click("Destroy") }
+    click_on("Destroy", id: "destroy_observation")
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_TEMPLATE)
   end
