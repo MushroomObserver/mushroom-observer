@@ -5,8 +5,12 @@ module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   # Searches come first because they may have the other params
   # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+  # NOTE: ABC offense could be fixed with the technique described in
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179469322
   def index # rubocop:disable Metrics/AbcSize
-    if params[:advanced_search].present?
+    # cop disabled because immediate fix is ugly and the offense is avoidable
+    # by fixing the ABC offense. See above
+    if params[:advanced_search].present? # rubocop:disable Style/GuardClause
       advanced_search and return
     elsif params[:pattern].present?
       observation_search and return
