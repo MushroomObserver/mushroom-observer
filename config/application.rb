@@ -71,10 +71,6 @@ module MushroomObserver
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
 
-    # Still validating 5.2 deploy and want to allow rollback
-    # TODO: Remove this once we are satisfied with 5.2 deplay.
-    config.action_dispatch.use_authenticated_cookie_encryption = false
-
     # Rails 6.1+
     config.active_record.legacy_connection_handling = false
   end
