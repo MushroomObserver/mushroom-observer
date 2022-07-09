@@ -75,6 +75,7 @@ module ObservationsController::NewAndCreate
     end
   end
 
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   def create # rubocop:disable Metrics/AbcSize
     @observation = create_observation_object(params[:observation])
     # set these again, in case they are not defined

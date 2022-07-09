@@ -3,6 +3,7 @@
 # see observations_controller.rb
 module ObservationsController::Map
   # Map results of a search or index.
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def map

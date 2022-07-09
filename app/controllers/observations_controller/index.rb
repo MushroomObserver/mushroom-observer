@@ -4,6 +4,7 @@
 module ObservationsController::Index
   # Displays matrix of all Observations, sorted by date.
   # Searches come first because they may have the other params
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   def index # rubocop:disable Metrics/AbcSize
     if params[:advanced_search].present?
       advanced_search and return
@@ -195,6 +196,7 @@ module ObservationsController::Index
     names.map { |name| name.approved_name.parents }.flatten.map(&:id).uniq
   end
 
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def define_index_links(query)

@@ -23,6 +23,7 @@ module ObservationsController::FormHelpers
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   def create_observation_object(args) # rubocop:disable Metrics/AbcSize
     now = Time.zone.now
     observation = if args
@@ -173,6 +174,8 @@ module ObservationsController::FormHelpers
   #
   # INPUT: params[:image], observation, good_images (and @user)
   # OUTPUT: list of images we couldn't create
+  #
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def create_image_objects(args, observation, good_images)

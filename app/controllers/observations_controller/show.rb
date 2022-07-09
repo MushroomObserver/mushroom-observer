@@ -118,18 +118,4 @@ module ObservationsController::Show
       @user.external_sites.where.not(id: obs_site_ids)
     end
   end
-
-  # def show_obs
-  #   redirect_to(action: :show, id: params[:id].to_s)
-  # end
-
-  # Go to next observation: redirects to show.
-  # def next_observation
-  #   redirect_to_next_object(:next, Observation, params[:id].to_s)
-  # end
-
-  # Go to previous observation: redirects to show.
-  # def prev_observation
-  #   redirect_to_next_object(:prev, Observation, params[:id].to_s)
-  # end
 end

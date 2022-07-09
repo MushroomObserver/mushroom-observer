@@ -43,6 +43,7 @@ module ObservationsController::EditAndUpdate
     init_list_vars_for_edit(@observation)
   end
 
+  # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/AbcSize
   def update
