@@ -1,16 +1,16 @@
-var EVENT_KEY_TAB       = 9;
-var EVENT_KEY_RETURN    = 13;
-var EVENT_KEY_ESC       = 27;
+var EVENT_KEY_TAB = 9;
+var EVENT_KEY_RETURN = 13;
+var EVENT_KEY_ESC = 27;
 var EVENT_KEY_BACKSPACE = 8;
-var EVENT_KEY_DELETE    = 46;
-var EVENT_KEY_UP        = 38;
-var EVENT_KEY_DOWN      = 40;
-var EVENT_KEY_LEFT      = 37;
-var EVENT_KEY_RIGHT     = 39;
-var EVENT_KEY_PAGEUP    = 33;
-var EVENT_KEY_PAGEDOWN  = 34;
-var EVENT_KEY_HOME      = 36;
-var EVENT_KEY_END       = 35;
+var EVENT_KEY_DELETE = 46;
+var EVENT_KEY_UP = 38;
+var EVENT_KEY_DOWN = 40;
+var EVENT_KEY_LEFT = 37;
+var EVENT_KEY_RIGHT = 39;
+var EVENT_KEY_PAGEUP = 33;
+var EVENT_KEY_PAGEDOWN = 34;
+var EVENT_KEY_HOME = 36;
+var EVENT_KEY_END = 35;
 
 var HTML_ENTITY_MAP = {
   "&": "&amp;",
@@ -21,14 +21,17 @@ var HTML_ENTITY_MAP = {
   "/": '&#x2F;'
 };
 
-String.prototype.escapeHTML = function() {
+// Polyfill to enable older jQuery to work without modification in jQuery3
+jQuery.fn.load = function (callback) { $(window).on("load", callback) };
+
+String.prototype.escapeHTML = function () {
   return String(this).replace(/[&<>"'\/]/g, function (s) {
     return HTML_ENTITY_MAP[s];
   });
 };
 
 // Center an element within the viewport.
-jQuery.fn.center = function() {
+jQuery.fn.center = function () {
   var win = jQuery(window);
   var sw = win.width();
   var sh = win.height();
@@ -45,7 +48,7 @@ jQuery.fn.center = function() {
 }
 
 // Scroll browser window to make an element visible.
-jQuery.fn.ensureVisible = function() {
+jQuery.fn.ensureVisible = function () {
   var win = jQuery(window);
   var sx = win.scrollLeft();
   var sy = win.scrollTop();
@@ -65,24 +68,24 @@ jQuery.fn.ensureVisible = function() {
   // Scroll left/right to make entire object visible.  If impossible, scroll
   // as little as possible.
   var nx = sx;
-  if (ex < sx && ex+ew < sx+sw) {
-    nx = ew<sw ? ex : ex+ew-sw;
-  } else if (ex > sx && ex+ew > sx+sw) {
-    nx = ew<sw ? ex+ew-sw : ex;
+  if (ex < sx && ex + ew < sx + sw) {
+    nx = ew < sw ? ex : ex + ew - sw;
+  } else if (ex > sx && ex + ew > sx + sw) {
+    nx = ew < sw ? ex + ew - sw : ex;
   }
 
   // Scroll up/down to make entire object visible.  Same deal.
   var ny = sy;
-  if (ey < sy && ey+eh < sy+sh) {
-    ny = eh<sh ? ey : ey+eh-sh;
-  } else if (ey > sy && ey+eh > sy+sh) {
-    ny = eh<sh ? ey+eh-sh : ey;
+  if (ey < sy && ey + eh < sy + sh) {
+    ny = eh < sh ? ey : ey + eh - sh;
+  } else if (ey > sy && ey + eh > sy + sh) {
+    ny = eh < sh ? ey + eh - sh : ey;
   }
 
   if (nx != sx || ny != sy) {
     jQuery("html,body").animate({
       scrollLeft: nx,
-      scrollTop:  ny
+      scrollTop: ny
     }, 1000);
   }
 }
@@ -90,13 +93,13 @@ jQuery.fn.ensureVisible = function() {
 // Sniff out width of scrollbar in browser-independent manner.
 // (Taken from: http://www.alexandre-gomes.com/?p=115)
 var scroll_bar_width = null;
-jQuery.fn.getScrollBarWidth = function() {
+jQuery.fn.getScrollBarWidth = function () {
   var inner, outer, w1, w2;
   var body = document.body || document.getElementsByTagName("body")[0];
 
   if (scroll_bar_width != null)
     return scroll_bar_width;
-  
+
   var inner = document.createElement('p');
   inner.style.width = "100%";
   inner.style.height = "200px";
@@ -129,10 +132,10 @@ jQuery.fn.getScrollBarWidth = function() {
 // [Taken from http://davidwalsh.name/javascript-debounce-function on 20140909.]
 function debounce(func, wait, immediate) {
   var timeout;
-  return function() {
+  return function () {
     var context = this, args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(function () {
       timeout = null;
       if (!immediate) func.apply(context, args);
     }, wait);
