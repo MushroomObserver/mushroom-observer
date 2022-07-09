@@ -286,17 +286,18 @@ class AmateurTest < IntegrationTestCase
     session = open_session.extend(UserDsl)
     session.login(mary)
     mary.locale = "el"
-    I18n.locale = "el"
-    mary.save
+    I18n.with_locale(:el) do
+      mary.save
 
-    TranslationString.store_localizations(
-      :el,
-      { test_tag1: "test_tag1 value",
-        test_tag2: "test_tag2 value",
-        test_flash_redirection_title: "Testing Flash Redirection" }
-    )
+      TranslationString.store_localizations(
+        :el,
+        { test_tag1: "test_tag1 value",
+          test_tag2: "test_tag2 value",
+          test_flash_redirection_title: "Testing Flash Redirection" }
+      )
 
-    session.run_test
+      session.run_test
+    end
   end
 
   module UserDsl
