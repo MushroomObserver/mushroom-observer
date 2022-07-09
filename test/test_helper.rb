@@ -127,7 +127,8 @@ module ActiveSupport
     # and makes sure User doesn't think a user is logged in.
     def setup
       I18n.locale = :en if I18n.locale != :en
-      Time.zone = "America/New_York"
+      # Disable cop; there's no block in which to limit the time zone change
+      Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
       start_timer if false
       clear_logs unless defined?(@@cleared_logs)
