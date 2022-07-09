@@ -126,7 +126,8 @@ module ActiveSupport
     # Standard setup to run before every test.  Sets the locale, timezone,
     # and makes sure User doesn't think a user is logged in.
     def setup
-      I18n.locale = :en if I18n.locale != :en
+      # Disable cop; there's no block in which to limit the time zone change
+      I18n.locale = :en if I18n.locale != :en # rubocop:disable Rails/I18nLocaleAssignment
       # Disable cop; there's no block in which to limit the time zone change
       Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
