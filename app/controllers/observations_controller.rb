@@ -22,7 +22,7 @@ class ObservationsController < ApplicationController
   ]
 
   before_action :disable_link_prefetching, except: [
-    :create,
+    :new,
     :edit,
     :show
   ]

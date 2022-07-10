@@ -7,9 +7,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(add_query_param({ controller: :observations,
-                               action: :print_labels },
-                             @query)) %>
+<%= form_tag(add_query_param(print_labels_observations_path, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_labels_header.t %>:</h3>
   <%= submit_tag(:species_list_labels_button.l, class: "btn") %>
 </form>
@@ -36,8 +34,7 @@
   <%= submit_tag(:species_list_report_button.l, class: "btn") %>
 </form>
 
-<%= form_tag(add_query_param({ controller: :observations,
-                               action: :download }, @query)) %>
+<%= form_tag(add_query_param(download_observations_path, @query)) %>
   <h3 class="margin-top:2em"><%= :species_list_download_header.t %>:</h3>
 
   <p><%= :download_observations_format.t %>:</p>
