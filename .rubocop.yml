@@ -161,6 +161,7 @@ Rails/RedundantTravelBack: # new in 2.12
   Enabled: true
 Rails/RenderInline: # new in 2.7
   Enabled: true
+  Exclude: "app/controllers/ajax_controller/**/*"
 Rails/RenderPlainText: # new in 2.7
   Enabled: true
 Rails/RootJoinChain: # new in 2.13
