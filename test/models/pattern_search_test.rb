@@ -635,7 +635,6 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-
     # Disable cop because `where` clause requires SQL
     # because AR/Arel would escape Observation.no_notes_persisted,
     # causing an incorrect query
