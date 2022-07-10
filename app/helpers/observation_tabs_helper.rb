@@ -4,12 +4,12 @@
 module ObservationTabsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
-  def show_observation_tabset(obs, user)
+  def show_observation_tabset(obs:, user:, mappable:)
     tabs = [
       show_obs_google_links_for(obs.name),
       general_questions_link(obs, user),
       manage_lists_link(obs, user),
-      map_link,
+      map_link(mappable),
       obs_change_links(obs),
       draw_interest_icons(obs)
     ].flatten.reject(&:empty?)
@@ -51,8 +51,8 @@ module ObservationTabsHelper
                     id: obs.id)
   end
 
-  def map_link
-    return unless @mappable
+  def map_link(mappable)
+    return unless mappable
 
     link_with_query(:MAP.t, controller: :location, action: :map_locations)
   end
