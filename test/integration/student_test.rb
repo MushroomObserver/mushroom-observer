@@ -44,10 +44,10 @@ class StudentTest < IntegrationTestCase
       end
       assert_no_match(/#{gen_desc}/, response.body)
       assert_select("a[href*=create_name_description]", 1)
-      click(href: /show_name_description/)
+      click_mo_link(href: /show_name_description/)
       assert_select("a[href*=edit_name_description]")
       assert_select("a[href*=destroy_name_description]")
-      click(href: /edit_name_description/)
+      click_mo_link(href: /edit_name_description/)
       open_form do |form|
         form.assert_value("source_type", "project")
         form.assert_value("source_name", project.title)
@@ -67,11 +67,11 @@ class StudentTest < IntegrationTestCase
     def create_draft(name, gen_desc, project)
       assert_nil(NameDescription.find_by(gen_desc: gen_desc))
       get("/")
-      click(label: "Names", in: :left_panel)
-      click(label: name.text_name)
+      click_mo_link(label: "Names", in: :left_panel)
+      click_mo_link(label: name.text_name)
       url = request.url
       assert_match(/there are no descriptions/i, response.body)
-      click(label: project.title)
+      click_mo_link(label: project.title)
       assert_match(:create_name_description_title.t(name: name.display_name),
                    response.body)
 
@@ -98,7 +98,7 @@ class StudentTest < IntegrationTestCase
 
       # Now give it some text to make sure it *can* (but doesn't) actually get
       # displayed (content, that is) on main show_name page.
-      click(href: /edit_name_description/)
+      click_mo_link(href: /edit_name_description/)
       open_form do |form|
         form.assert_value("source_type", :project)
         form.assert_value("source_name", project.title)
@@ -121,7 +121,7 @@ class StudentTest < IntegrationTestCase
     # Can view but not edit.
     def check_another_student(url)
       get(url)
-      click(href: /show_name_description/)
+      click_mo_link(href: /show_name_description/)
       assert_select("a[href*=edit_name_description]", 0)
       assert_select("a[href*=destroy_name_description]", 0)
     end
@@ -132,7 +132,7 @@ class StudentTest < IntegrationTestCase
     def check_another_user(url)
       get(url)
       assert_select("a[href*=show_name_description]", 1)
-      click(href: /show_name_description/)
+      click_mo_link(href: /show_name_description/)
       assert_flash_error
       assert_nil(assigns(:description))
     end

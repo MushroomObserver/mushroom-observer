@@ -283,37 +283,37 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observer: {
-    advanced_search: {},
-    create_observation: {},
-    destroy_observation: {},
-    download_observations: {},
-    edit_observation: {},
-    guess: {},
-    hide_thumbnail_map: {},
-    index_observation: {},
-    list_observations: {},
-    map_observation: {},
-    map_observations: {},
-    next_observation: {},
-    observation_search: {},
-    observations_at_location: {},
-    observations_at_where: {},
-    observations_by_name: {},
-    observations_by_user: {},
-    observations_for_project: {},
-    observations_of_look_alikes: {},
-    observations_of_name: {},
-    observations_of_related_taxa: {},
-    prev_observation: {},
-    print_labels: {},
-    recalc: {},
-    show_location_observations: {},
-    show_notifications: {},
-    show_obs: {},
-    show_observation: {},
-    suggestions: {}
-  },
+  # observations: {
+  #   advanced_search: {},
+  #   create_observation: {},
+  #   destroy_observation: {},
+  #   download_observations: {},
+  #   edit_observation: {},
+  #   guess: {},
+  #   hide_thumbnail_map: {},
+  #   index_observation: {},
+  #   list_observations: {},
+  #   map_observation: {},
+  #   map_observations: {},
+  #   next_observation: {},
+  #   observation_search: {},
+  #   observations_at_location: {},
+  #   observations_at_where: {},
+  #   observations_by_name: {},
+  #   observations_by_user: {},
+  #   observations_for_project: {},
+  #   observations_of_look_alikes: {},
+  #   observations_of_name: {},
+  #   observations_of_related_taxa: {},
+  #   prev_observation: {},
+  #   print_labels: {},
+  #   recalc: {},
+  #   show_location_observations: {},
+  #   show_notifications: {},
+  #   show_obs: {},
+  #   show_observation: {},
+  #   suggestions: {}
+  # },
   pivotal: {
     index: {}
   },
@@ -532,7 +532,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do
+MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
@@ -543,7 +543,6 @@ MushroomObserver::Application.routes.draw do
     post("/graphql", to: "graphql#execute")
   end
 
-  get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -602,8 +601,8 @@ MushroomObserver::Application.routes.draw do
   # Default page is /rss_logs
   root "rss_logs#index"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  # Route /123 to /observations/123.
+  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
@@ -718,11 +717,6 @@ MushroomObserver::Application.routes.draw do
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
 
-  # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
-
   get("observer/how_to_help", to: redirect("info/how_to_help"))
   get("observer/how_to_use", to: redirect("info/how_to_use"))
   get("observer/intro", to: redirect("info/intro"))
@@ -733,7 +727,29 @@ MushroomObserver::Application.routes.draw do
   get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
   get("observer/translators_note", to: redirect("info/translators_note"))
 
-  # ----- Publications: standard actions  ----------------------------
+  # ----- Javascript: utility actions  ----------------------------
+  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  # ----- Observations: standard actions  ----------------------------
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions")
+    end
+    collection do
+      get("map")
+      get("download")
+      get("print_labels")
+    end
+  end
+
+  # ----- Policy: one route  --------------------------------------------------
+  get "policy/privacy"
+
+  # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
   # ----- RssLogs: nonstandard actions ----------------------------------------

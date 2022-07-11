@@ -123,7 +123,7 @@ class LookupsControllerTest < FunctionalTestCase
     login
     get(:lookup_observation,
         params: { id: observations(:minimal_unknown_obs).id })
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: observations(:minimal_unknown_obs).id)
   end
 

@@ -1403,7 +1403,7 @@
   # observer/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
 
-  # observer/edit_observation
+  # observations/edit
   edit_observation_title: "[:edit_object(type=:observation)]: [name]"
   edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, fungarium records and/or sequences below, too, if you need to.
 
@@ -4220,7 +4220,7 @@
 
   # DEBUGGING STUFF -- this doesn't need translating
 
-  # observer/recalc
+  # observations/recalc
   observer_recalc_old_name: "old_name: [name]"
   observer_recalc_new_name: "new_name: [name]"
   observer_recalc_caught_error: "Caught exception: [error]"

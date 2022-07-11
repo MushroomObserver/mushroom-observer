@@ -18,12 +18,12 @@ April 22 - Moved Dbpict test logic over to Image and got it working.
 April 25 - Cleaned up list_images
 April 26 - Art class.  Got show/edit_image to show image and changed background color.
   Fixed image resizing.  Cleaned up show_image.
-April 30 - 
-May 1 - 
+April 30 -
+May 1 -
 May 2 - Added join tables
 May 3 - Art class.  Worked on checkboxes for selecting images.
 May 6 - Decided to not use checkboxes for selecting, but rather to think of images as
-  connected to particular observations.  Added thumbnails to show/edit_observation.
+  connected to particular observations.  Added thumbnails to show/edit observations.
 May 8 - Add observation list to show_image.
 May 10 - Art class
 

@@ -8,10 +8,12 @@ class SearchController < ApplicationController
   #   image/image_search
   #   location/location_search
   #   name/name_search
-  #   observer/observation_search
+  #   observer/index
   #   users/user_search
   #   project/project_search
   #   species_list/species_list_search
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def pattern
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
@@ -21,21 +23,30 @@ class SearchController < ApplicationController
     session[:search_type] = type
 
     case type
+    when :herbarium
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: herbaria_path(pattern: pattern),
+        index_path: herbaria_path(flavor: :all)
+      )
+      return
     when :observation
-      ctrlr = :observer
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: observations_path(pattern: pattern),
+        index_path: observations_path
+      )
+      return
+    when :user
+      redirect_to_search_or_index(
+        pattern: pattern,
+        search_path: users_path(pattern: pattern),
+        index_path: users_path
+      )
+      return
     when :comment, :image, :location, :name, :project, :species_list,
       :herbarium_record
       ctrlr = type
-    when :user
-      redirect_to_search_or_index(pattern: pattern,
-                                  search_path: users_path(pattern: pattern),
-                                  index_path: users_path)
-      return
-    when :herbarium
-      redirect_to_search_or_index(pattern: pattern,
-                                  search_path: herbaria_path(pattern: pattern),
-                                  index_path: herbaria_path(flavor: :all))
-      return
     when :google
       site_google_search(pattern)
       return
@@ -47,6 +58,8 @@ class SearchController < ApplicationController
 
     redirect_to_search_or_list(ctrlr, type, pattern)
   end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def site_google_search(pattern)
     if pattern.blank?
