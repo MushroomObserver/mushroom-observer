@@ -189,6 +189,21 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  scope :of_look_alikes, lambda { |name|
+    joins(:namings).where(namings: { name: name }).
+      where(Observation[:name] != name)
+  }
+  scope :of_related_taxa, lambda { |name|
+  }
+  scope :of_name, ->(name) { where(name: name) }
+  scope :by_user, ->(user) { where(user: user) }
+  scope :at_location, ->(location) { where(location: location) }
+  scope :at_where, ->(where) { where(Observation[:where].matches(where)) }
+  scope :for_project, lambda { |project|
+    joins(:project_observations).
+      where(ProjectObservation[:project_id] = project)
+  }
+
   # Override the default show_controller
   def self.show_controller
     "/observations"
