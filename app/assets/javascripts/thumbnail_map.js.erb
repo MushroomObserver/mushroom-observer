@@ -51,7 +51,7 @@ $(document).ready(function () {
     if (expanded) return
     var large = jQuery("<img/>");
     var url = "<%= image_url("globe_large.jpg") %>";
-    large.attr("src", url).load(function () {
+    large.attr("src", url).on('load', function () {
       map.find(">img").attr("src", url);
     });
     expanded = true;

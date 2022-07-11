@@ -1,5 +1,6 @@
-//= require jquery
+//= require jquery3
 //= require jquery_extensions
+//= require jquery_ujs
 //= require bootstrap
 //= require jstz
 //= require autocomplete
@@ -17,6 +18,6 @@
 //= require popup_exif
 
 lightbox.option({
-    'fadeDuration': 0,
-    'resizeDuration': 0
+  'fadeDuration': 0,
+  'resizeDuration': 0
 });

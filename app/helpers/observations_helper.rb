@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # helpers for show Observation view
-module ObserverHelper
+module ObservationsHelper
   ##### Portion of page title that includes consensus (site id) ################
   #
   # Depends on whether consensus is deprecated and user preferences include
@@ -52,7 +52,8 @@ module ObserverHelper
       capture do
         concat(link_to_display_name_brief_authors(name))
         # Differentiate this Name from Observer Preference
-        concat(" (#{:show_observation_site_id.t})") if @owner_id
+        # cop disabled per https://github.com/MushroomObserver/mushroom-observer/pull/1060#issuecomment-1179410808
+        concat(" (#{:show_observation_site_id.t})") if @owner_id # rubocop:disable Rails/HelperInstanceVariable
       end
     end
   end

@@ -283,37 +283,37 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observer: {
-    advanced_search: {},
-    create_observation: {},
-    destroy_observation: {},
-    download_observations: {},
-    edit_observation: {},
-    guess: {},
-    hide_thumbnail_map: {},
-    index_observation: {},
-    list_observations: {},
-    map_observation: {},
-    map_observations: {},
-    next_observation: {},
-    observation_search: {},
-    observations_at_location: {},
-    observations_at_where: {},
-    observations_by_name: {},
-    observations_by_user: {},
-    observations_for_project: {},
-    observations_of_look_alikes: {},
-    observations_of_name: {},
-    observations_of_related_taxa: {},
-    prev_observation: {},
-    print_labels: {},
-    recalc: {},
-    show_location_observations: {},
-    show_notifications: {},
-    show_obs: {},
-    show_observation: {},
-    suggestions: {}
-  },
+  # observations: {
+  #   advanced_search: {},
+  #   create_observation: {},
+  #   destroy_observation: {},
+  #   download_observations: {},
+  #   edit_observation: {},
+  #   guess: {},
+  #   hide_thumbnail_map: {},
+  #   index_observation: {},
+  #   list_observations: {},
+  #   map_observation: {},
+  #   map_observations: {},
+  #   next_observation: {},
+  #   observation_search: {},
+  #   observations_at_location: {},
+  #   observations_at_where: {},
+  #   observations_by_name: {},
+  #   observations_by_user: {},
+  #   observations_for_project: {},
+  #   observations_of_look_alikes: {},
+  #   observations_of_name: {},
+  #   observations_of_related_taxa: {},
+  #   prev_observation: {},
+  #   print_labels: {},
+  #   recalc: {},
+  #   show_location_observations: {},
+  #   show_notifications: {},
+  #   show_obs: {},
+  #   show_observation: {},
+  #   suggestions: {}
+  # },
   pivotal: {
     index: {}
   },
@@ -543,7 +543,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     post("/graphql", to: "graphql#execute")
   end
 
-  get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -602,8 +601,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Default page is /rss_logs
   root "rss_logs#index"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  # Route /123 to /observations/123.
+  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
   match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
@@ -614,7 +613,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
-  redirect_legacy_actions(old_controller: "article")
+  redirect_legacy_actions(
+    old_controller: "article", actions: [:controller, :show, :list, :index]
+  )
 
   # ----- Authors: no resources, just forms ------------------------------------
   match("authors/email_request(/:id)",
@@ -682,7 +683,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
-    actions: LEGACY_CRUD_ACTIONS - [:destroy] + [:show_past]
+    actions: [:controller, :show, :list, :index, :show_past]
   )
 
   # ----- Herbaria: standard actions -------------------------------------------
@@ -696,54 +697,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # Herbaria: standard redirects of Herbarium legacy actions
   redirect_legacy_actions(
     old_controller: "herbarium", new_controller: "herbaria",
-    actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
+    actions: [:show, :list, :index]
   )
   # Herbaria: non-standard redirects of legacy Herbarium actions
   # Rails routes currently accept only template tokens
-  # rubocop:disable Style/FormatStringToken
-  get("/herbarium/herbarium_search", to: redirect(path: "herbaria"))
-  get("/herbarium/index", to: redirect(path: "herbaria"))
-  get("/herbarium/list_herbaria", to: redirect(path: "herbaria?flavor=all"))
-  get("/herbarium/request_to_be_curator/:id",
-      to: redirect(path: "herbaria/curator_requests/new?id=%{id}"))
-
-  # Herbaria: complicated redirects of legacy Herbarium actions
-  # Actions needing two routes in order to successfully redirect
-  #
-  # The next two routes combine to redirect
-  #   GET herbarium/delete_curator
-  #   DELETE herbaria/curators
-  # The "match" redirects
-  #   GET("/herbarium/delete_curator/nnn?user=uuu") and
-  #   POST("/herbarium/delete_curator/nnn?user=uuu")
-  # to
-  #   GET("/herbaria/curators/nnn?user=uuu")
-  # which would throw: No route matches [GET] "/herbaria/curators/nnnnn"
-  # absent the following get
-  match("/herbarium/delete_curator/:id",
-        to: redirect(path: "/herbaria/curators/%{id}"),
-        via: [:get, :post])
-  get("/herbaria/curators/:id", to: "herbaria/curators#destroy", id: /\d+/)
-
-  # The next post and get combine to redirect the legacy
-  #   POST /herbarium/request_to_be_curator to
-  #   POST herbaria/curator_requests#create
-  post("/herbarium/request_to_be_curator/:id",
-       to: redirect(path: "/herbaria/curator_requests?id=%{id}"))
-  get("/herbaria/curator_requests",
-      to: "herbaria/curator_requests#create", id: /\d+/)
-
-  # The next post and get combine to redirect
-  #   POST /herbarium/show_herbarium/:id to
-  #   POST herbaria/curators#create
-  post("/herbarium/show_herbarium", to: redirect(path: "herbaria/curators"))
-  get("/herbaria/curators", to: "herbaria/curators#create", id: /\d+/)
-
-  # rubocop:enable Style/FormatStringToken
-
-  # Herbaria: non-standard redirect
+  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
+  get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect(path: "herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("info/how_to_help", to: "info#how_to_help")
@@ -752,14 +714,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("info/news", to: "info#news")
   get("info/search_bar_help", to: "info#search_bar_help")
   get("info/site_stats", to: "info#site_stats")
-  match("info/textile", to: "info#textile", via: [:get, :post])
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
-
-  # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
 
   get("observer/how_to_help", to: redirect("info/how_to_help"))
   get("observer/how_to_use", to: redirect("info/how_to_use"))
@@ -771,7 +727,29 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
   get("observer/translators_note", to: redirect("info/translators_note"))
 
-  # ----- Publications: standard actions  ----------------------------
+  # ----- Javascript: utility actions  ----------------------------
+  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+
+  # ----- Observations: standard actions  ----------------------------
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions")
+    end
+    collection do
+      get("map")
+      get("download")
+      get("print_labels")
+    end
+  end
+
+  # ----- Policy: one route  --------------------------------------------------
+  get "policy/privacy"
+
+  # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
   # ----- RssLogs: nonstandard actions ----------------------------------------

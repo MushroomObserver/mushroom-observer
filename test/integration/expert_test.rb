@@ -189,7 +189,7 @@ class ExpertTest < IntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    click(href: /edit_species_list/)
+    click_mo_link(href: /edit_species_list/)
     new_member_notes = "New member notes."
     open_form do |form|
       form.assert_value("list_members", "")
@@ -277,7 +277,7 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.
-    click(href: /add_comment/)
+    click_mo_link(href: /add_comment/)
     assert_template("comment/add_comment")
     assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)

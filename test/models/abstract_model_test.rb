@@ -269,7 +269,7 @@ class AbstractModelTest < UnitTestCase
 
     assert_nil(obs.rss_log)
     assert_save(obs)
-    # This is normally done by ObserverController#create_observation.
+    # This is normally done by ObservationsController#create.
     obs.log(:log_observation_created)
     obs_id = obs.id
     assert_not_nil(rss_log = obs.rss_log)
@@ -287,7 +287,7 @@ class AbstractModelTest < UnitTestCase
 
     # rss_log.update_attribute(:updated_at, time)
     Observation.update(obs.id, notes: "New Notes")
-    # This is normally done by ObserverController#edit_observation.
+    # This is normally done by ObservationsController#edit.
     obs.log(:log_observation_updated, touch: true)
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
@@ -446,8 +446,8 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Image, "image/show_image")
     assert_show_url(Location, "location/show_location")
     assert_show_url(Name, "name/show_name")
-    assert_show_url(Naming, "observer/show_naming")
-    assert_show_url(Observation, "observer/show_observation")
+    assert_show_url(Naming, "observations/show_naming")
+    assert_show_url(Observation, "observations")
     assert_show_url(Project, "project/show_project")
     assert_show_url(Sequence, "sequence/show_sequence")
     assert_show_url(SpeciesList, "species_list/show_species_list")

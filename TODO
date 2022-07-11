@@ -335,7 +335,7 @@ Data to incorporate:
     Descriptions (on going)
 
 Image improvements:
-  Make it easier to add and see image notes.  Image notes should be visible on show_observation page.  Maybe with a link to add a note. (16)
+  Make it easier to add and see image notes.  Image notes should be visible on observations/show page.  Maybe with a link to add a note. (16)
   Image rating for 'Pictorial', 'Scientific', 'Just Because' (40)
   textarea under or beside each file in the upload page, so you can add notes to individual photos. (8)
 

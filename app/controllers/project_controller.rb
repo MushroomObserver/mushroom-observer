@@ -106,7 +106,7 @@ class ProjectController < ApplicationController
   ##############################################################################
 
   # Display project by itself.
-  # Linked from: show_observation, list_projects
+  # Linked from: observations/show, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
   def show_project
@@ -231,8 +231,8 @@ class ProjectController < ApplicationController
   end
 
   # Callback to destroy a project.
-  # Linked from: show_project, show_observation
-  # Redirects to show_observation.
+  # Linked from: show_project, observations/show
+  # Redirects to observations/show.
   # Inputs: params[:id]
   # Outputs: none
   def destroy_project
