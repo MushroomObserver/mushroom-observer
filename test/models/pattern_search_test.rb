@@ -638,15 +638,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.where("notes = ?", Observation.no_notes_persisted)
+    expect = Observation.where(notes: Observation.no_notes)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
-    expect = Observation.where.not("notes = ?",
-                                   Observation.no_notes_persisted)
+    expect = Observation.where.not(notes: Observation.no_notes)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
