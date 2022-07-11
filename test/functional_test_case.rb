@@ -33,6 +33,11 @@ class FunctionalTestCase < ActionController::TestCase
     check_for_unsafe_html!
   end
 
+  def patch(action, **args)
+    super(action, **args)
+    check_for_unsafe_html!
+  end
+
   def delete(action, **args)
     super(action, **args)
     check_for_unsafe_html!

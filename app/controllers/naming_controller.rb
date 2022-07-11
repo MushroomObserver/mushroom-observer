@@ -55,7 +55,7 @@ class NamingController < ApplicationController
   def create_post
     if rough_draft && can_save?
       save_changes
-      default_redirect(@params.observation, :show_observation)
+      default_redirect(@params.observation, :show)
     else # If anything failed reload the form.
       flash_object_errors(@params.naming) if @params.name_missing?
       @params.add_reason(params[:reason])
@@ -93,8 +93,8 @@ class NamingController < ApplicationController
     success
   end
 
-  def default_redirect(obs, action = :show_observation)
-    redirect_with_query(controller: :observer,
+  def default_redirect(obs, action = :show)
+    redirect_with_query(controller: :observations,
                         action: action,
                         id: obs.id)
   end

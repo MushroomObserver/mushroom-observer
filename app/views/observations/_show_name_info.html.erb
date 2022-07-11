@@ -11,15 +11,17 @@
 <%= content_tag(:p, link_to("Mycobank", mycobank_name_search_url(name),
                             target: :_blank)) %>
 <%= content_tag(:p, link_to(:show_observation_more_like_this.t,
-                            controller: :observer,
-                            action: :observations_of_name,
+                            controller: :observations,
+                            action: :index,
                             name: name.id)) %>
 <%= content_tag(:p, link_to(:show_observation_look_alikes.t,
-                            controller: :observer,
-                            action: :observations_of_look_alikes,
+                            controller: :observations,
+                            action: :index,
+                            look_alikes: "1",
                             name: name.id)) %>
 <%= content_tag(:p, link_to(:show_observation_related_taxa.t,
-                            controller: :observer,
-                            action: :observations_of_related_taxa,
+                            controller: :observations,
+                            action: :index,
+                            related_taxa: "1",
                             name: name.id)) %>
 <%= list_descriptions(name)&.map { |link| content_tag(:p, link) }.safe_join %>

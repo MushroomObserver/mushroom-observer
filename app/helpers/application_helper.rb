@@ -40,18 +40,7 @@
 #  title_tag_contents           # text to put in html header <title>
 #
 module ApplicationHelper
-  include AutocompleteHelper
-  include DescriptionHelper
-  include ExporterHelper
-  include FooterHelper
-  include JavascriptHelper
-  include LocalizationHelper
-  include MapHelper
-  include ObjectLinkHelper
-  include TabsHelper
-  include ThumbnailHelper
-  include VersionHelper
-
+  # All helpers are autoloaded under Zeitwerk
   def safe_empty
     "".html_safe
   end
@@ -118,7 +107,7 @@ module ApplicationHelper
   end
 
   # button to destroy object
-  # Used instead of link because DESTROY link requires js
+  # Used instead of link_to because method: :delete requires jquery_ujs library
   # Sample usage:
   #   destroy_button(object: article)
   #   destroy_button(object: term, :destroy_object.t(type: :glossary_term)
@@ -127,13 +116,16 @@ module ApplicationHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   def destroy_button(target:, name: :DESTROY.t)
-    options = if target.is_a?(String)
-                target
-              else
-                { action: "destroy", id: target.id }
-              end
+    path = if target.is_a?(String)
+             target
+           else
+             add_query_param(send("#{target.type_tag}_path", target.id))
+           end
+    id = target.is_a?(String) ? nil : "destroy_#{target.type_tag}"
+
     button_to(
-      name, options, method: :delete, data: { confirm: :are_you_sure.t }
+      name, path, method: :delete, class: "text-danger", id: id,
+                  data: { confirm: :are_you_sure.t }
     )
   end
 
@@ -143,7 +135,25 @@ module ApplicationHelper
   #             confirm: :are_you_sure.t)
   def post_button(name:, path:, confirm: nil)
     data = confirm ? { confirm: confirm } : nil
-    button_to(name, path, method: :post, data: data)
+    button_to(name, path, method: :post, class: "text-info", data: data)
+  end
+
+  # PUT to a path; used instead of a link because PUT link requires js
+  # put_button(name: herbarium.name.t,
+  #            path: herbarium_path(id: @herbarium.id),
+  #            confirm: :are_you_sure.t)
+  def put_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :put, class: "text-info", data: data)
+  end
+
+  # PATCH to a path; used instead of a link because PATCH link requires js
+  # patch_button(name: herbarium.name.t,
+  #              path: herbarium_path(id: @herbarium.id),
+  #              confirm: :are_you_sure.t)
+  def patch_button(name:, path:, confirm: nil)
+    data = confirm ? { confirm: confirm } : nil
+    button_to(name, path, method: :patch, class: "text-info", data: data)
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.
@@ -151,6 +161,11 @@ module ApplicationHelper
     return [] unless links
 
     links.reject(&:nil?).map { |str, url| link_to(str, url) }
+  end
+
+  # Short-hand to render shared tab_set partial for a given set of links.
+  def draw_tab_set(links)
+    render(partial: "/shared/tab_set", locals: { links: links })
   end
 
   # ----------------------------------------------------------------------------

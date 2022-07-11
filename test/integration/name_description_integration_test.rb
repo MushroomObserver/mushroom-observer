@@ -102,7 +102,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     user.save
     sess = open_session
     sess.login!(user)
-    sess.click(href: /turn_admin_on/)
+    sess.click_mo_link(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
     sess.user = user
     sess
@@ -277,7 +277,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def create_name_description
       get(show_name_uri)
-      click(href: /create_name_description/)
+      click_mo_link(href: /create_name_description/)
       # assert_template("name/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)
@@ -355,7 +355,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_edit_description_link_behavior
-      click(href: edit_name_description_uri)
+      click_mo_link(href: edit_name_description_uri)
       if edit_description_requires_login?
         assert_match(%r{account/login}, response.body)
       else
