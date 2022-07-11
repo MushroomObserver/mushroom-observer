@@ -1,24 +1,20 @@
 # frozen_string_literal: true
 
+#  :section: Helpers
+#
+#    create_observation_object(...)     create rough first-drafts.
+#
+#    save_observation(...)              Save validated objects.
+#
+#    update_observation_object(...)     Update and save existing objects.
+#
+#    init_image()                       Handle image uploads.
+#    create_image_objects(...)
+#    update_good_images(...)
+#    attach_good_images(...)
+
 # see observations_controller.rb
 module ObservationsController::FormHelpers
-  ##############################################################################
-  #
-  #  :section: Helpers
-  #
-  #    create_observation_object(...)     create rough first-drafts.
-  #
-  #    save_observation(...)              Save validated objects.
-  #
-  #    update_observation_object(...)     Update and save existing objects.
-  #
-  #    init_image()                       Handle image uploads.
-  #    create_image_objects(...)
-  #    update_good_images(...)
-  #    attach_good_images(...)
-  #
-  ##############################################################################
-
   # Roughly create observation object.  Will validate and save later
   # once we're sure everything is correct.
   # INPUT: params[:observation] (and @user) (and various notes params)
