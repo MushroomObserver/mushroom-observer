@@ -203,6 +203,16 @@ class Observation < AbstractModel
     joins(:project_observations).
       where(ProjectObservation[:project_id] = project)
   }
+  scope :with_image, -> { where.not(thumb_image: nil) }
+  scope :without_image, -> { where(thumb_image: nil) }
+  scope :with_name, -> { where.not(name: Name.unknown) }
+  scope :without_name, -> { where(name: Name.unknown) }
+  scope :with_notes, -> { where.not(notes: Observation.no_notes) }
+  scope :without_notes, -> { where(notes: Observation.no_notes) }
+  scope :with_sequence, -> { where(sequence: true) }
+  scope :without_sequence, -> { where(sequence: false) }
+  scope :with_specimen, -> { where(specimen: true) }
+  scope :without_specimen, -> { where(specimen: false) }
 
   # Override the default show_controller
   def self.show_controller
