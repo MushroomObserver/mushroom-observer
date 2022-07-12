@@ -5,7 +5,7 @@ module CreatedUpdatedScopes
   extend ActiveSupport::Concern
 
   included do
-    scope :created_at, lambda { |ymd_string|
+    scope :created_on, lambda { |ymd_string|
       where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
     }
     scope :created_after, lambda { |ymd_string|
@@ -14,7 +14,11 @@ module CreatedUpdatedScopes
     scope :created_before, lambda { |ymd_string|
       where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
     }
-    scope :updated_at, lambda { |ymd_string|
+    scope :created_between, lambda { |earliest, latest|
+      where(arel_table[:created_at].format("%Y-%m-%d") == earliest).
+        where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
+    }
+    scope :updated_on, lambda { |ymd_string|
       where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
     }
     scope :updated_after, lambda { |ymd_string|
@@ -22,6 +26,10 @@ module CreatedUpdatedScopes
     }
     scope :updated_before, lambda { |ymd_string|
       where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
+    }
+    scope :updated_between, lambda { |earliest, latest|
+      where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
+        where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
     }
   end
 

@@ -959,7 +959,7 @@ class API2Test < UnitTestCase
       action: :herbarium
     }
 
-    herbs = Herbarium.created_at("2012-10-21")
+    herbs = Herbarium.created_on("2012-10-21")
     assert_not_empty(herbs)
     assert_api_pass(params.merge(created_at: "2012-10-21"))
     assert_api_results(herbs)
@@ -1213,7 +1213,7 @@ class API2Test < UnitTestCase
     assert_api_results(Image.where(Image[:created_at].year == 2006))
 
     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-    assert_api_results(Image.created_at("2006-05-22"))
+    assert_api_results(Image.created_on("2006-05-22"))
 
     assert_api_pass(params.merge(date: "2007-03"))
     assert_api_results(
@@ -1541,7 +1541,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
 
-    locs = Location.updated_at("2012-01-01")
+    locs = Location.updated_on("2012-01-01")
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
@@ -1735,7 +1735,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.updated_at("2008-09-05")
+    names = Name.with_correct_spelling.updated_on("2008-09-05")
     assert_not_empty(names)
     assert_api_pass(params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
@@ -1777,7 +1777,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(is_deprecated: "true"))
     assert_api_results(names)
 
-    names = Name.updated_at("2009-10-12")
+    names = Name.updated_on("2009-10-12")
     goods = names.reject(&:correct_spelling_id)
     bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
@@ -2151,7 +2151,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(created_at: "2010"))
     assert_api_results(obses)
 
-    obses = Observation.updated_at("2007-06-24")
+    obses = Observation.updated_on("2007-06-24")
     assert_not_empty(obses)
     assert_api_pass(params.merge(updated_at: "20070624"))
     assert_api_results(obses)
@@ -2879,7 +2879,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: seq.id))
     assert_api_results([seq])
 
-    seqs = Sequence.created_at("2017-01-01")
+    seqs = Sequence.created_on("2017-01-01")
     assert_not_empty(seqs)
     assert_api_pass(params.merge(created_at: "2017-01-01"))
     assert_api_results(seqs)
@@ -3219,7 +3219,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(id: spl.id))
     assert_api_results([spl])
 
-    spls = SpeciesList.created_at("2012-07-06")
+    spls = SpeciesList.created_on("2012-07-06")
     assert_not_empty(spls)
     assert_api_pass(params.merge(created_at: "2012-07-06"))
     assert_api_results(spls)
