@@ -431,14 +431,20 @@ class Name < AbstractModel
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
-  scope :author_like,
-        ->(author) { where(Name[:author].matches("%#{author}%")) }
-  scope :citation_like,
-        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
   scope :name_like,
         ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+  scope :author_like,
+        ->(author) { where(Name[:author].matches("%#{author}%")) }
+  scope :with_author, -> { where(Name[:author].not_blank) }
+  scope :without_author, -> { where(Name[:author].blank) }
+  scope :citation_like,
+        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+  scope :with_citation, -> { where(Name[:citation].not_blank) }
+  scope :without_citation, -> { where(Name[:citation].blank) }
   scope :notes_like,
-        ->(notes) { where(Name[:author].matches("%#{notes}%")) }
+        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+  scope :with_notes, -> { where(Name[:notes].not_blank) }
+  scope :without_notes, -> { where(Name[:notes].blank) }
 
   def <=>(other)
     sort_name <=> other.sort_name
