@@ -411,10 +411,11 @@ class PatternSearchTest < UnitTestCase
     TranslationString.store_localizations(
       :fr, { search_term_user: "utilisateur" }
     )
-    I18n.locale = "fr"
-    x = PatternSearch::Observation.new("")
-    assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
-    assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
+    I18n.with_locale(:fr) do
+      x = PatternSearch::Observation.new("")
+      assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
+      assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
+    end
   end
 
   def test_observation_search

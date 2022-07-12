@@ -180,7 +180,11 @@ class Observation < AbstractModel
                      through: :observation_views,
                      source: :user
 
+  # rubocop:disable Rails/ActiveRecordCallbacksOrder
+  # else Rubocop says: "before_save is supposed to appear before before_destroy"
+  # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists

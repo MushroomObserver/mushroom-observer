@@ -2444,7 +2444,7 @@ class NameTest < UnitTestCase
                     less_observed_name.observation_count,
                     "Test needs different fixtures")
     less_observed_naming = Naming.where(name: less_observed_name).first
-    less_observed_naming.update(created_at: Time.zone.now + 1.hour)
+    less_observed_naming.update(created_at: 1.hour.from_now)
     assert_equal(
       more_observed_name,
       more_observed_name.more_popular(less_observed_name),
@@ -2466,7 +2466,7 @@ class NameTest < UnitTestCase
                  later_proposed_name.observation_count,
                  "Test needs different fixtures")
     later_proposed_naming = Naming.where(name: later_proposed_name).first
-    later_proposed_naming.update(created_at: Time.zone.now + 1.hour)
+    later_proposed_naming.update(created_at: 1.hour.from_now)
 
     assert_equal(
       later_proposed_name,

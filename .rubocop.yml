@@ -105,6 +105,84 @@ Performance/StringIdentifierArgument: # new in 1.13
 Performance/Sum: # new in 1.8
   Enabled: true
 
+Rails/ActionControllerTestCase: # new in 2.14
+  Enabled: true
+Rails/ActiveRecordCallbacksOrder: # new in 2.7
+  Enabled: true
+Rails/AddColumnIndex: # new in 2.11
+  Enabled: true
+Rails/AfterCommitOverride: # new in 2.8
+  Enabled: true
+Rails/AttributeDefaultBlockValue: # new in 2.9
+  Enabled: true
+Rails/CompactBlank: # new in 2.13
+  Enabled: true
+Rails/DeprecatedActiveModelErrorsMethods: # new in 2.14
+  Enabled: true
+Rails/DuplicateAssociation: # new in 2.14
+  Enabled: true
+Rails/DuplicateScope: # new in 2.14
+  Enabled: true
+Rails/DurationArithmetic: # new in 2.13
+  Enabled: true
+Rails/EagerEvaluationLogMessage: # new in 2.11
+  Enabled: true
+Rails/ExpandedDateRange: # new in 2.11
+  Enabled: true
+Rails/FindById: # new in 2.7
+  Enabled: true
+Rails/I18nLazyLookup: # new in 2.14
+  Enabled: true
+Rails/I18nLocaleAssignment: # new in 2.11
+  Enabled: true
+Rails/I18nLocaleTexts: # new in 2.14
+  Enabled: true
+Rails/Inquiry: # new in 2.7
+  Enabled: true
+Rails/MailerName: # new in 2.7
+  Enabled: true
+Rails/MatchRoute: # new in 2.7
+  Enabled: true
+Rails/MigrationClassName: # new in 2.14
+  Enabled: true
+Rails/NegateInclude: # new in 2.7
+  Enabled: true
+Rails/Pluck: # new in 2.7
+  Enabled: true
+Rails/PluckInWhere: # new in 2.7
+  Enabled: true
+Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
+  Enabled: false
+Rails/RedundantTravelBack: # new in 2.12
+  Enabled: true
+Rails/RenderInline: # new in 2.7
+  Enabled: true
+  Exclude:
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
+    - "app/controllers/ajax_controller/**/*"
+Rails/RenderPlainText: # new in 2.7
+  Enabled: true
+Rails/RootJoinChain: # new in 2.13
+  Enabled: true
+Rails/ShortI18n: # new in 2.7
+  Enabled: true
+Rails/SquishedSQLHeredocs: # new in 2.8
+  Enabled: true
+Rails/TimeZoneAssignment: # new in 2.10
+  Enabled: true
+Rails/TransactionExitStatement: # new in 2.14
+  Enabled: true
+Rails/UnusedIgnoredColumns: # new in 2.11
+  Enabled: true
+Rails/WhereEquals: # new in 2.9
+  Enabled: true
+Rails/WhereNot: # new in 2.8
+  Enabled: true
+
 Security/CompoundHash: # new in 1.28
   Enabled: true
 Security/IoMethods: # new in 1.22
