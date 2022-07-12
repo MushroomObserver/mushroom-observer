@@ -757,7 +757,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("has_synonyms:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where.not(synonym_id: nil).reject(&:correct_spelling_id)
+    expect = Name.where.not(synonym_id: nil).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:yes")
     assert_name_list_equal(expect, x.query.results, :sort)

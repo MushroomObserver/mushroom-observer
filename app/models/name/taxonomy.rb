@@ -252,8 +252,8 @@ module Name::Taxonomy
       if at_or_below_genus?
         Name.with_correct_spelling.with_name_like(text_name)
       else
-        Name.with_correct_spelling.
-          with_rank_classification_like(rank, text_name)
+        Name.with_correct_spelling.with_rank(rank).
+          classification_like(text_name)
       end
 
     return scoped_children.to_a if all
@@ -376,8 +376,8 @@ module Name::Taxonomy
     if at_or_below_genus?
       Name.with_name_like(text_name).with_correct_spelling.any?
     else
-      Name.with_correct_spelling.
-        with_rank_classification_like(rank, text_name).any?
+      Name.with_correct_spelling.with_rank(rank).
+        classification_like(text_name).any?
     end
   end
 

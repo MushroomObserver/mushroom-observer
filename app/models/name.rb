@@ -409,6 +409,8 @@ class Name < AbstractModel
   end
 
   scope :lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
+  scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
+  scope :deprecated, -> { where(deprecated: true) }
   scope :not_deprecated, -> { where(deprecated: false) }
   scope :with_description, -> { where.not(description_id: nil) }
   scope :without_description, -> { where(description_id: nil) }
@@ -418,30 +420,24 @@ class Name < AbstractModel
   scope :with_self_referential_misspelling, lambda {
     where(Name[:correct_spelling_id].eq(Name[:id]))
   }
+  scope :with_synonyms, -> { where.not(synonym_id: nil) }
+  scope :without_synonyms, -> { where(synonym_id: nil) }
   ### Module Name::Taxonomy
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
   scope :with_rank_below,
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
-  scope :with_rank_classification_like,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
-        }
-  scope :with_name_like,
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
-  ### Pattern Search:
-  scope :with_author_like,
-        ->(author) { where(Name[:author].matches("%#{author}%")) }
-  scope :with_citation_like,
-        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
-  scope :with_classification_like,
+  scope :classification_like,
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
-  scope :with_notes_like,
+  scope :author_like,
+        ->(author) { where(Name[:author].matches("%#{author}%")) }
+  scope :citation_like,
+        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+  scope :name_like,
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+  scope :notes_like,
         ->(notes) { where(Name[:author].matches("%#{notes}%")) }
 
   def <=>(other)
