@@ -202,9 +202,14 @@ class Observation < AbstractModel
     joins(:namings).where(namings: { name: name }).
       where(Observation[:name] != name)
   }
-  # scope :of_related_taxa, lambda { |name|
-  #   # TBD
-  # }
+  scope :of_related_taxa, lambda { |text_name|
+    names = {}
+    starting_names = Name.text_name_like(text_name).with_correct_spelling
+    starting_names.each do |name|
+      names = starting_names.or(Name.related_taxa(name)).distinct
+    end
+    where(name: names)
+  }
   scope :of_synonyms, ->(name) { where(name: name.synonyms) }
   scope :of_name, ->(name) { where(name: name) }
   scope :of_name_like,

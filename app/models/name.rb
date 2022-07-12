@@ -475,6 +475,15 @@ class Name < AbstractModel
   scope :without_classification, -> { where(Name[:classification].blank) }
   scope :text_name_like,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+  scope :related_taxa,
+        lambda { |name|
+          if name.at_or_below_genus?
+            with_name_like(name.text_name).with_correct_spelling
+          else
+            with_rank_classification_like(name.rank, name.text_name).
+              with_correct_spelling
+          end
+        }
   scope :author_like,
         ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_author, -> { where(Name[:author].not_blank) }
