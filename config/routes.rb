@@ -283,37 +283,6 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  # observations: {
-  #   advanced_search: {},
-  #   create_observation: {},
-  #   destroy_observation: {},
-  #   download_observations: {},
-  #   edit_observation: {},
-  #   guess: {},
-  #   hide_thumbnail_map: {},
-  #   index_observation: {},
-  #   list_observations: {},
-  #   map_observation: {},
-  #   map_observations: {},
-  #   next_observation: {},
-  #   observation_search: {},
-  #   observations_at_location: {},
-  #   observations_at_where: {},
-  #   observations_by_name: {},
-  #   observations_by_user: {},
-  #   observations_for_project: {},
-  #   observations_of_look_alikes: {},
-  #   observations_of_name: {},
-  #   observations_of_related_taxa: {},
-  #   prev_observation: {},
-  #   print_labels: {},
-  #   recalc: {},
-  #   show_location_observations: {},
-  #   show_notifications: {},
-  #   show_obs: {},
-  #   show_observation: {},
-  #   suggestions: {}
-  # },
   pivotal: {
     index: {}
   },
@@ -609,13 +578,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
   get("admin/w3c_tests", to: "admin#w3c_tests")
-  # no legacy reroutes, these should not be public
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
-  redirect_legacy_actions(
-    old_controller: "article", actions: [:controller, :show, :list, :index]
-  )
 
   # ----- Authors: no resources, just forms ------------------------------------
   match("authors/email_request(/:id)",
@@ -624,12 +589,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("authors/review(/:id)",
         to: "authors#review", via: [:get, :post], id: /\d+/,
         as: "authors_review")
-  get("observer/author_request", to: redirect(path: "authors#email_request"))
-  get("observer/review_authors", to: redirect(path: "authors#review"))
 
   # ----- Checklist: just the show --------------------------------------
   get "checklist", to: "checklists#show"
-  get("/observer/checklist", to: redirect(path: "checklists#show"))
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
@@ -657,21 +619,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
         as: "emails_name_change_request")
 
-  get("observer/ask_observation_question",
-      to: redirect(path: "emails#ask_observation_question"))
-  get("observer/ask_user_question",
-      to: redirect(path: "emails#ask_user_question"))
-  get("observer/ask_webmaster_question",
-      to: redirect(path: "emails#ask_webmaster_question"))
-  get("observer/commercial_inquiry",
-      to: redirect(path: "emails#commercial_inquiry"))
-  get("observer/email_features",
-      to: redirect(path: "emails#features"))
-  get("observer/email_merge_request",
-      to: redirect(path: "emails#merge_request"))
-  get("observer/email_name_change_request",
-      to: redirect(path: "emails#name_change_request"))
-
   # ----- Export: no resources ------------------------------------
   get("export/set_export_status(/:id)",
       to: "export#set_export_status",
@@ -681,10 +628,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
   end
-  redirect_legacy_actions(
-    old_controller: "glossary", new_controller: "glossary_terms",
-    actions: [:controller, :show, :list, :index, :show_past]
-  )
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -694,18 +637,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
-  # Herbaria: standard redirects of Herbarium legacy actions
-  redirect_legacy_actions(
-    old_controller: "herbarium", new_controller: "herbaria",
-    actions: [:show, :list, :index]
-  )
-  # Herbaria: non-standard redirects of legacy Herbarium actions
-  # Rails routes currently accept only template tokens
-  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
-  get("/herbarium/index", to: redirect("/herbaria"))
-  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
-  # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("info/how_to_help", to: "info#how_to_help")
@@ -716,16 +647,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("info/site_stats", to: "info#site_stats")
   match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
   get("info/translators_note", to: "info#translators_note")
-
-  get("observer/how_to_help", to: redirect("info/how_to_help"))
-  get("observer/how_to_use", to: redirect("info/how_to_use"))
-  get("observer/intro", to: redirect("info/intro"))
-  get("observer/news", to: redirect("info/news"))
-  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
-  get("observer/show_site_stats", to: redirect("info/site_stats"))
-  get("observer/textile", to: redirect("info/textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
-  get("observer/translators_note", to: redirect("info/translators_note"))
 
   # ----- Javascript: utility actions  ----------------------------
   get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
@@ -747,7 +668,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # ----- Policy: one route  --------------------------------------------------
-  get "policy/privacy"
+  get("policy/privacy")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -755,19 +676,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- RssLogs: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
   # "rss" to an rss_log
+  # resources :rss_logs, only: [:show, :index]
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   get("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
-
-  # ----- RssLogs: standard actions with aliases ------------------------------
-  # resources :rss_logs, only: [:show, :index]
-  get("/observer/index", to: redirect("/activity_logs"))
-  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
-  get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Searches: nonstandard actions --------------------------------------
   match("search/pattern(/:id)",
@@ -777,21 +689,110 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
-  get("/observer/pattern_search",
-      to: redirect("/search/pattern"))
-  get("/observer/advanced_search_form",
-      to: redirect("/search/advanced"))
-
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
 
-  # Users: standard redirects of Observer legacy actions
-  # redirect_legacy_actions(
-  #   old_controller: "observer", new_controller: "users",
-  #   actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
-  # )
-  # Users: non-standard redirects of legacy Observer actions
-  # Rails routes currently accept only template tokens
+  # Short-hand notation for AJAX methods.
+  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
+  ACTIONS[:ajax].each_key do |action|
+    get("ajax/#{action}/:type/:id",
+        controller: "ajax", action: action, id: /\S.*/)
+  end
+
+  ##############################################################################
+  ###
+  ###
+  ### LEGACY ACTION REDIRECTS ##################################################
+  ###
+  ###
+  ### Note: Only public, bookmarkable GET routes, or routes appearing inside
+  ### translation strings, need to be redirected.
+  ### Form actions do not need redirections. The live site's forms will POST
+  ### or PUT to current action routes.
+
+  # ----- Articles: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "article", actions: [:controller, :show, :list, :index]
+  )
+
+  # ----- Authors: legacy action redirects
+  get("observer/author_request", to: redirect(path: "authors#email_request"))
+  get("observer/review_authors", to: redirect(path: "authors#review"))
+
+  # ----- Checklist: legacy action redirects
+  get("/observer/checklist", to: redirect(path: "checklists#show"))
+
+  # ----- Emails: legacy action redirects
+  get("observer/ask_observation_question",
+      to: redirect(path: "emails#ask_observation_question"))
+  get("observer/ask_user_question",
+      to: redirect(path: "emails#ask_user_question"))
+  get("observer/ask_webmaster_question",
+      to: redirect(path: "emails#ask_webmaster_question"))
+  get("observer/commercial_inquiry",
+      to: redirect(path: "emails#commercial_inquiry"))
+  get("observer/email_features",
+      to: redirect(path: "emails#features"))
+  get("observer/email_merge_request",
+      to: redirect(path: "emails#merge_request"))
+  get("observer/email_name_change_request",
+      to: redirect(path: "emails#name_change_request"))
+
+  # ----- Glossary Terms: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "glossary", new_controller: "glossary_terms",
+    actions: [:controller, :show, :list, :index, :show_past]
+  )
+
+  # ----- Herbaria: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "herbarium", new_controller: "herbaria",
+    actions: [:show, :list, :index]
+  )
+
+  # ----- Herbaria: nonstandard legacy action redirects
+  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
+  get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  # Must be the final route in order to give the others priority
+  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+
+  # ----- Info: legacy action redirects ---------------------------
+  get("observer/how_to_help", to: redirect("info/how_to_help"))
+  get("observer/how_to_use", to: redirect("info/how_to_use"))
+  get("observer/intro", to: redirect("info/intro"))
+  get("observer/news", to: redirect("info/news"))
+  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
+  get("observer/show_site_stats", to: redirect("info/site_stats"))
+  get("observer/textile", to: redirect("info/textile_sandbox"))
+  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
+  get("observer/translators_note", to: redirect("info/translators_note"))
+
+  # ----- Observations: legacy action redirects ----------------------------
+  get("observer/observation_search", to: redirect("observations"))
+  get("observer/advanced_search", to: redirect("observations"))
+  get("observer/index_observation", to: redirect("observations"))
+  get("observer/list_observations", to: redirect("observations"))
+  get("observer/observations_of_look_alikes", to: redirect("observations"))
+  get("observer/observations_of_related_taxa", to: redirect("observations"))
+  get("observer/observations_of_name", to: redirect("observations"))
+  get("observer/observations_by_user", to: redirect("observations"))
+  get("observer/observations_at_location", to: redirect("observations"))
+  get("observer/observations_at_where", to: redirect("observations"))
+  get("observer/observations_for_project", to: redirect("observations"))
+  get("observer/show_observation(/:id)",
+      to: redirect("observations"), id: /\d+/)
+
+  # ----- RssLogs: legacy action redirects ------------------------------
+  get("/observer/index", to: redirect("/activity_logs"))
+  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
+  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/show_rss_log(/:id)",
+      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
+  get("/observer/rss", to: redirect("/activity_logs/rss"))
+
+  # ----- Users: legacy action redirects  ----------------------------------
   get("/observer/user_search", to: redirect(path: "users"))
   get("/observer/index_user", to: redirect(path: "users"))
   get("/observer/list_users", to: redirect(path: "users"))
@@ -804,12 +805,15 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/change_user_bonuses",
       to: redirect(path: "users#edit"))
 
-  # Short-hand notation for AJAX methods.
-  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  ACTIONS[:ajax].each_key do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
-  end
+  # ----- Search: legacy action redirects ---------------------------------
+  get("/observer/pattern_search",
+      to: redirect("/search/pattern"))
+  get("/observer/advanced_search_form",
+      to: redirect("/search/advanced"))
+
+  ###
+  ###
+  ### END OF LEGACY ACTION REDIRECTS #####################################
 
   # Add support for PATCH and DELETE requests for API.
   api_endpoints.each do |controller, action|
