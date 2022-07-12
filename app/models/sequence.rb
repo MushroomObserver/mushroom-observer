@@ -41,6 +41,8 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
+  include CreatedUpdatedScopes
+
   ##############################################################################
   #
   #  :section: Matchers

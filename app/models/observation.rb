@@ -189,6 +189,8 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  include CreatedUpdatedScopes
+
   scope :include_all_name_proposals, lambda { |name|
     joins(:namings).where(namings: { name: name })
   }
@@ -199,19 +201,24 @@ class Observation < AbstractModel
   # scope :of_related_taxa, lambda { |name|
   #   # TBD
   # }
+  scope :of_synonyms, ->(name) { where(name: name.synonyms) }
   scope :of_name, ->(name) { where(name: name) }
+  scope :of_name_like,
+        ->(name) { where(name: Name.text_name_like(name)) }
+  scope :with_name, -> { where.not(name: Name.unknown) }
+  scope :without_name, -> { where(name: Name.unknown) }
   scope :by_user, ->(user) { where(user: user) }
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}%")) }
+  scope :is_collection_location, -> { where(is_collection_location: true) }
+  scope :not_collection_location, -> { where(is_collection_location: false) }
   scope :for_project, lambda { |project|
     joins(:project_observations).
       where(ProjectObservation[:project_id] = project)
   }
   scope :with_image, -> { where.not(thumb_image: nil) }
   scope :without_image, -> { where(thumb_image: nil) }
-  scope :with_name, -> { where.not(name: Name.unknown) }
-  scope :without_name, -> { where(name: Name.unknown) }
   scope :notes_like,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }

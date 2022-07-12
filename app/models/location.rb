@@ -134,6 +134,8 @@ class Location < AbstractModel
     end
   end
 
+  include CreatedUpdatedScopes
+
   scope :name_like,
         ->(name) { where(Location[:name].matches("%#{name}%")) }
   scope :in_box,

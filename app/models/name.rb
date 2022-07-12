@@ -408,6 +408,8 @@ class Name < AbstractModel
     end
   end
 
+  include CreatedUpdatedScopes
+
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
   scope :deprecated, -> { where(deprecated: true) }
@@ -433,8 +435,8 @@ class Name < AbstractModel
         }
   scope :with_classification, -> { where(Name[:classification].not_blank) }
   scope :without_classification, -> { where(Name[:classification].blank) }
-  scope :text_name_like, # Note the space after #{text_name}
-        ->(text_name) { where(Name[:text_name].matches("%#{text_name} %")) }
+  scope :text_name_like, # Note original test uses did not have the first %
+        ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
   scope :author_like,
         ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_author, -> { where(Name[:author].not_blank) }
@@ -447,6 +449,7 @@ class Name < AbstractModel
         ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where(Name[:notes].not_blank) }
   scope :without_notes, -> { where(Name[:notes].blank) }
+  scope :ok_for_export, -> { where(ok_for_export: true) }
 
   def <=>(other)
     sort_name <=> other.sort_name

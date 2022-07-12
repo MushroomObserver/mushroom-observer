@@ -237,15 +237,17 @@ class Image < AbstractModel
   belongs_to :license
   belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
   has_many :subjects, class_name: "User", foreign_key: "image_id"
-  has_many(:best_glossary_terms,
+  has_many :best_glossary_terms,
            class_name: "GlossaryTerm",
            foreign_key: "thumb_image_id",
-           inverse_of: :thumb_image)
+           inverse_of: :thumb_image
 
   has_many :copyright_changes, as: :target, dependent: :destroy
 
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
+
+  include CreatedUpdatedScopes
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects

@@ -250,7 +250,7 @@ module Name::Taxonomy
   def children(all: false)
     scoped_children =
       if at_or_below_genus?
-        Name.with_correct_spelling.text_name_like(text_name)
+        Name.with_correct_spelling.text_name_like("#{text_name} ")
       else
         Name.with_correct_spelling.with_rank(rank).
           classification_like(text_name)
