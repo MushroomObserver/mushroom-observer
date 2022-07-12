@@ -1563,11 +1563,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.where(
-      (Location[:south] >= 39).and(Location[:north] <= 40).
-      and(Location[:west] >= -124).and(Location[:east] <= -123).
-      and(Location[:west] <= Location[:east])
-    )
+    locs = Location.in_box(40, 39, -123, -124)
 
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
@@ -2366,11 +2362,7 @@ class API2Test < UnitTestCase
     assert_api_results(obses)
 
     obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.where(
-      (Location[:south] >= 34).and(Location[:north] <= 35).
-      and(Location[:west] >= -119).and(Location[:east] <= -118).
-      and(Location[:west] <= Location[:east])
-    )
+    locs = Location.in_box(35, 34, -118, -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
@@ -3078,11 +3070,7 @@ class API2Test < UnitTestCase
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
     obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.where(
-      (Location[:south] >= 34).and(Location[:north] <= 35).
-      and(Location[:west] >= -119).and(Location[:east] <= -118).
-      and(Location[:west] <= Location[:east])
-    )
+    locs = Location.in_box(35, 34, -118, -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)

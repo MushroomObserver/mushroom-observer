@@ -189,16 +189,21 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  scope :include_all_name_proposals, lambda { |name|
+    joins(:namings).where(namings: { name: name })
+  }
   scope :of_look_alikes, lambda { |name|
     joins(:namings).where(namings: { name: name }).
       where(Observation[:name] != name)
   }
-  scope :of_related_taxa, lambda { |name|
-  }
+  # scope :of_related_taxa, lambda { |name|
+  #   # TBD
+  # }
   scope :of_name, ->(name) { where(name: name) }
   scope :by_user, ->(user) { where(user: user) }
   scope :at_location, ->(location) { where(location: location) }
-  scope :at_where, ->(where) { where(Observation[:where].matches(where)) }
+  scope :in_region,
+        ->(where) { where(Observation[:where].matches("%#{where}%")) }
   scope :for_project, lambda { |project|
     joins(:project_observations).
       where(ProjectObservation[:project_id] = project)
@@ -207,6 +212,8 @@ class Observation < AbstractModel
   scope :without_image, -> { where(thumb_image: nil) }
   scope :with_name, -> { where.not(name: Name.unknown) }
   scope :without_name, -> { where(name: Name.unknown) }
+  scope :notes_like,
+        ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }
   scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :with_sequence, -> { where(sequence: true) }

@@ -134,6 +134,17 @@ class Location < AbstractModel
     end
   end
 
+  scope :name_like,
+        ->(name) { where(Location[:name].matches("%#{name}%")) }
+  scope :in_box,
+        lambda { |n, s, e, w|
+          where(
+            (Location[:south] >= s).and(Location[:north] <= n).
+            and(Location[:west] >= w).and(Location[:east] <= e).
+            and(Location[:west] <= Location[:east])
+          )
+        }
+
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
     Observation.update_cache("location", "where", id, name) if name_changed?

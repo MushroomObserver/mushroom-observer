@@ -250,7 +250,7 @@ module Name::Taxonomy
   def children(all: false)
     scoped_children =
       if at_or_below_genus?
-        Name.with_correct_spelling.with_name_like(text_name)
+        Name.with_correct_spelling.text_name_like(text_name)
       else
         Name.with_correct_spelling.with_rank(rank).
           classification_like(text_name)
@@ -390,7 +390,7 @@ module Name::Taxonomy
   end
 
   def above_genus_is_ancestor?
-    Name.joins(:namings).with_rank_classification_like(rank, text_name).any?
+    Name.joins(:namings).with_rank(rank).classification_like(text_name).any?
   end
 
   def genus_or_species_is_ancestor?

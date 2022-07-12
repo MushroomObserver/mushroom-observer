@@ -408,7 +408,7 @@ class Name < AbstractModel
     end
   end
 
-  scope :lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
+  scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
   scope :deprecated, -> { where(deprecated: true) }
   scope :not_deprecated, -> { where(deprecated: false) }
@@ -431,8 +431,10 @@ class Name < AbstractModel
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
-  scope :name_like,
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+  scope :with_classification, -> { where(Name[:classification].not_blank) }
+  scope :without_classification, -> { where(Name[:classification].blank) }
+  scope :text_name_like, # Note the space after #{text_name}
+        ->(text_name) { where(Name[:text_name].matches("%#{text_name} %")) }
   scope :author_like,
         ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_author, -> { where(Name[:author].not_blank) }
