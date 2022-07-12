@@ -589,14 +589,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_images_no
-    expect = Observation.where(thumb_image_id: nil)
+    expect = Observation.where(thumb_image: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_yes
-    expect = Observation.where.not(thumb_image_id: nil)
+    expect = Observation.where.not(thumb_image: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
