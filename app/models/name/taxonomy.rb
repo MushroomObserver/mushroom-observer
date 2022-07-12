@@ -253,7 +253,7 @@ module Name::Taxonomy
         Name.with_correct_spelling.with_name_like(text_name)
       else
         Name.with_correct_spelling.
-        with_rank_classification_like(rank, text_name)
+          with_rank_classification_like(rank, text_name)
       end
 
     return scoped_children.to_a if all
@@ -377,7 +377,7 @@ module Name::Taxonomy
       Name.with_name_like(text_name).with_correct_spelling.any?
     else
       Name.with_correct_spelling.
-      with_rank_classification_like(rank, text_name).any?
+        with_rank_classification_like(rank, text_name).any?
     end
   end
 

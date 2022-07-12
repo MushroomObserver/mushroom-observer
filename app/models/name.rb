@@ -437,9 +437,10 @@ class Name < AbstractModel
         ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_citation_like,
         ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
-  scope :with_classification_like, lambda { |classification|
-                                     where(Name[:classification].matches("%#{classification}%"))
-                                   }
+  scope :with_classification_like,
+        lambda { |classification|
+          where(Name[:classification].matches("%#{classification}%"))
+        }
   scope :with_notes_like,
         ->(notes) { where(Name[:author].matches("%#{notes}%")) }
 
