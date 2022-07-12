@@ -140,7 +140,7 @@ module Name::Create
   def make_name(params)
     result = nil
     search_name = params[:search_name]
-    matches = Name.where(search_name: search_name)
+    matches = Name.matching_search_name(search_name)
     if matches.empty?
       result = Name.new_name(params)
     elsif matches.length == 1
@@ -165,29 +165,5 @@ module Name::Create
   # Returns a Name instance, *UNSAVED*!!
   def new_name_from_parsed_name(parsed_name)
     new_name(parsed_name.params)
-  end
-
-  # Get list of Names that are potential matches when creating a new name.
-  # Takes results of Name.parse_name.  Used by NameController#create_name.
-  # Three cases:
-  #
-  #   1. group with author       - only accept exact matches
-  #   2. nongroup with author    - match names with correct author or no author
-  #   3. any name without author - ignore authors completely when matching names
-  #
-  # If the user provides an author, but the only match has no author, then we
-  # just need to add an author to the existing Name.  If the user didn't give
-  # an author, but there are matches with an author, then it already exists
-  # and we should just ignore the request.
-  #
-  def names_matching_desired_new_name(parsed_name)
-    if parsed_name.rank == "Group"
-      Name.where(search_name: parsed_name.search_name)
-    elsif parsed_name.author.empty?
-      Name.where(text_name: parsed_name.text_name)
-    else
-      Name.where(text_name: parsed_name.text_name).
-        where(author: [parsed_name.author, ""])
-    end
   end
 end

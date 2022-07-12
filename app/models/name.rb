@@ -424,20 +424,56 @@ class Name < AbstractModel
   }
   scope :with_synonyms, -> { where.not(synonym_id: nil) }
   scope :without_synonyms, -> { where(synonym_id: nil) }
+  ### Module Name::Create
+  # Get list of Names that are potential matches when creating a new name.
+  # Takes results of Name.parse_name.  Used by NameController#create_name.
+  # Three cases:
+  #
+  #   1. group with author       - only accept exact matches
+  #   2. nongroup with author    - match names with correct author or no author
+  #   3. any name without author - ignore authors completely when matching names
+  #
+  # If the user provides an author, but the only match has no author, then we
+  # just need to add an author to the existing Name.  If the user didn't give
+  # an author, but there are matches with an author, then it already exists
+  # and we should just ignore the request.
+  #
+  scope :matching_desired_new_name, lambda { |parsed_name|
+    if parsed_name.rank == "Group"
+      where(search_name: parsed_name.search_name)
+    elsif parsed_name.author.empty?
+      where(text_name: parsed_name.text_name)
+    else
+      where(text_name: parsed_name.text_name).
+        where(author: [parsed_name.author, ""])
+    end
+  }
+  scope :matching_search_name,
+        ->(search_name) { where(search_name: search_name) }
   ### Module Name::Taxonomy
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
   scope :with_rank_below,
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+  scope :with_rank_classification_like,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+        }
+  scope :with_name_like, # Note small diff w :text_name_like scope
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+  ### Pattern Search
+  # TODO: Maybe refactor tests and Name::Taxonomy to use these methods?
+  # Note small differences between :text_name_like, :with_name_like %
   scope :classification_like,
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
   scope :with_classification, -> { where(Name[:classification].not_blank) }
   scope :without_classification, -> { where(Name[:classification].blank) }
-  scope :with_name_like, # Note small diff w next method
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
-  scope :text_name_like, # Note original test uses did not have the first %
+  scope :text_name_like,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
   scope :author_like,
         ->(author) { where(Name[:author].matches("%#{author}%")) }
