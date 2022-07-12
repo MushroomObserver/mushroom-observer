@@ -1831,7 +1831,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.where("classification LIKE '%Ascomycota%'").count)
+    assert_equal(4, Name.classification_like("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)

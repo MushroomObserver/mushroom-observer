@@ -435,6 +435,8 @@ class Name < AbstractModel
         }
   scope :with_classification, -> { where(Name[:classification].not_blank) }
   scope :without_classification, -> { where(Name[:classification].blank) }
+  scope :with_name_like, # Note small diff w next method
+        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
   scope :text_name_like, # Note original test uses did not have the first %
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
   scope :author_like,
