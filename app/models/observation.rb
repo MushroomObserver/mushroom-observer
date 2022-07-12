@@ -202,7 +202,7 @@ class Observation < AbstractModel
     joins(:namings).where(namings: { name: name }).
       where(Observation[:name] != name)
   }
-  scope :of_related_taxa, lambda { |text_name|
+  scope :include_subtaxa, lambda { |text_name|
     names = {}
     starting_names = Name.text_name_like(text_name).with_correct_spelling
     starting_names.each do |name|
