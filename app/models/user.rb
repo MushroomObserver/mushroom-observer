@@ -575,8 +575,8 @@ class User < AbstractModel
     @preferred_herbarium ||= \
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
-                         order(created_at: :desc).
-                         pluck(:herbarium_id).first
+                       order(created_at: :desc).
+                       pluck(:herbarium_id).first
         if herbarium_id.blank?
           personal_herbarium
         else
@@ -751,7 +751,7 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
+       File.mtime(MO.user_primer_cache_file) < 1.day.ago
       data = primer_data
       write_primer_file(data)
       data

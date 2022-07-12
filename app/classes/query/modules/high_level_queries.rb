@@ -170,17 +170,7 @@ module Query::Modules::HighLevelQueries
     @results ||= {}
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
-    if needed.any?
-      set = clean_id_set(needed)
-      # Note that "set" will be truncated to MO.query_max_array if too large.
-      # This could result in some results not being returned. (See
-      # the reject(&:nil?) clause below.)
-      conditions = "#{model.table_name}.id IN (#{set})"
-      includes   = args[:include] || []
-      model.where(conditions).
-        includes(includes).
-        to_a.each { |obj| @results[obj.id] = obj }
-    end
+    add_needed_to_results(needed: needed, args: args) if needed.any?
     ids.map { |id| @results[id] }.reject(&:nil?)
   end
 
@@ -214,5 +204,20 @@ module Query::Modules::HighLevelQueries
       end
     end
     [args1, args2]
+  end
+
+  ##############################################################################
+
+  private
+
+  def add_needed_to_results(needed:, args:)
+    includes = args[:include] || []
+    model.
+      # NOTE: limited_id_set truncates ids to MO.query_max_array if too large.
+      # This could result in some results not being returned. (See
+      # the reject(&:nil?) clause below.)
+      where(id: limited_id_set(needed)).
+      includes(includes).
+      to_a.each { |obj| @results[obj.id] = obj }
   end
 end
