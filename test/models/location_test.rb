@@ -376,14 +376,15 @@ class LocationTest < UnitTestCase
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
-    I18n.locale = "es"
-    loc3 = Location.unknown
-    assert_objs_equal(loc1, loc3)
-    TranslationString.store_localizations(
-      :es, { unknown_locations: "Desconocido" }
-    )
-    loc4 = Location.unknown
-    assert_objs_equal(loc1, loc4)
+    I18n.with_locale(:es) do
+      loc3 = Location.unknown
+      assert_objs_equal(loc1, loc3)
+      TranslationString.store_localizations(
+        :es, { unknown_locations: "Desconocido" }
+      )
+      loc4 = Location.unknown
+      assert_objs_equal(loc1, loc4)
+    end
   end
 
   def test_merge_with_user
