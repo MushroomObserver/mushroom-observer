@@ -631,7 +631,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_names_yes
-    expect = Observation.where(Observation[:name_id] != names(:fungi).id)
+    expect = Observation.where.not(name: names(:fungi))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
