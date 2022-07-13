@@ -774,19 +774,19 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("observer/index_observation", to: redirect("observations"))
   get("observer/list_observations", to: redirect("observations"))
   get("observer/observations_of_look_alikes(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), name: /\d+/, look_alikes: true)
   get("observer/observations_of_related_taxa(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), name: /\d+/, related_taxa: true)
   get("observer/observations_of_name(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), name: /\d+/)
   get("observer/observations_by_user(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), user: /\d+/)
   get("observer/observations_at_location(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), location: /\d+/)
   get("observer/observations_at_where(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), where: /\d+/)
   get("observer/observations_for_project(/:id)",
-      to: redirect("observations"), id: /\d+/)
+      to: redirect("observations"), project: /\d+/)
   get("observer/show_observation(/:id)",
       to: redirect("observations"), id: /\d+/)
 
