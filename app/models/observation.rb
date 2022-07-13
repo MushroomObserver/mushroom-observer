@@ -215,7 +215,7 @@ class Observation < AbstractModel
       joins(:namings).where(namings: { name: names })
     elsif of_look_alikes
       joins(:namings).where(namings: { name: names }).
-        where(Observation[:name] != name)
+        where.not(name: name)
     else
       where(name: names)
     end

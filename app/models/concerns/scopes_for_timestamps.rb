@@ -13,6 +13,19 @@ module ScopesForTimestamps
   extend ActiveSupport::Concern
 
   included do
+    scope :found_on, lambda { |ymd_string|
+      where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+    }
+    scope :found_after, lambda { |ymd_string|
+      where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+    }
+    scope :found_before, lambda { |ymd_string|
+      where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+    }
+    scope :found_between, lambda { |earliest, latest|
+      where(arel_table[:when].format("%Y-%m-%d") >= earliest).
+        where(arel_table[:when].format("%Y-%m-%d") <= latest)
+    }
     scope :created_on, lambda { |ymd_string|
       where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
     }

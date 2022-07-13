@@ -139,7 +139,7 @@ module Name::Create
   def make_name(params)
     result = nil
     search_name = params[:search_name]
-    matches = Name.matching_search_name(search_name)
+    matches = Name.where(search_name: search_name)
     if matches.empty?
       result = Name.new_name(params)
     elsif matches.length == 1

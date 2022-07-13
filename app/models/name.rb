@@ -522,8 +522,6 @@ class Name < AbstractModel
         where(author: [parsed_name.author, ""])
     end
   }
-  scope :matching_search_name,
-        ->(search_name) { where(search_name: search_name) }
 
   def <=>(other)
     sort_name <=> other.sort_name
