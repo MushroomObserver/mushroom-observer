@@ -43,7 +43,7 @@ module Query
 
         SpeciesList.joins(:project_species_lists).
           where(project_species_lists: { project_id: project_ids }).distinct.
-          pluck(:id)
+          map(&:id)
       end
 
       def lookup_species_lists_by_name(vals)
