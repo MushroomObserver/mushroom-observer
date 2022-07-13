@@ -773,13 +773,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("observer/advanced_search", to: redirect("observations"))
   get("observer/index_observation", to: redirect("observations"))
   get("observer/list_observations", to: redirect("observations"))
-  get("observer/observations_of_look_alikes", to: redirect("observations"))
-  get("observer/observations_of_related_taxa", to: redirect("observations"))
-  get("observer/observations_of_name", to: redirect("observations"))
-  get("observer/observations_by_user", to: redirect("observations"))
-  get("observer/observations_at_location", to: redirect("observations"))
-  get("observer/observations_at_where", to: redirect("observations"))
-  get("observer/observations_for_project", to: redirect("observations"))
+  get("observer/observations_of_look_alikes(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_of_related_taxa(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_of_name(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_by_user(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_at_location(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_at_where(/:id)",
+      to: redirect("observations"), id: /\d+/)
+  get("observer/observations_for_project(/:id)",
+      to: redirect("observations"), id: /\d+/)
   get("observer/show_observation(/:id)",
       to: redirect("observations"), id: /\d+/)
 
