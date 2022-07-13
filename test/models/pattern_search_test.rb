@@ -208,7 +208,8 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_herbaria)
     x.vals = ["*Herbarium"]
-    expect = Herbarium.where("name LIKE '%Herbarium'").map(&:id).sort
+    expect = Herbarium.where(Herbarium[:name].matches("%Herbarium")).
+             map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_herbaria.sort)
   end
@@ -229,7 +230,8 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
     x.vals = ["*California, USA"]
-    expect = Location.where("name LIKE '%California, USA'").map(&:id).sort
+    expect = Location.where(Location[:name].matches("%California, USA")).
+             map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_locations.sort)
     x.vals = ["USA, California*"]
@@ -248,7 +250,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_projects)
     x.vals = ["two*"]
-    expect = Project.where("title LIKE 'two%'").map(&:id).sort
+    expect = Project.where(Project[:title].matches("two%")).map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_projects.sort)
   end
@@ -268,7 +270,8 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_species_lists)
     x.vals = ["query*"]
-    expect = SpeciesList.where("title LIKE 'query%'").map(&:id).sort
+    expect = SpeciesList.where(SpeciesList[:title].matches("query%")).
+             map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_species_lists.sort)
   end
@@ -471,21 +474,21 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_date
-    expect = Observation.where("YEAR(`when`) = 2006")
+    expect = Observation.where(Observation[:when].year == 2006)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("date:2006")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_created
-    expect = Observation.where("YEAR(created_at) = 2010")
+    expect = Observation.where(Observation[:created_at].year == 2010)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("created:2010")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_modified
-    expect = Observation.where("YEAR(updated_at) = 2013")
+    expect = Observation.where(Observation[:updated_at].year == 2013)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("modified:2013")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -509,8 +512,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_subtaxa
-    names = Name.where("text_name LIKE 'Agaricus%'")
-    expect = Observation.where("name_id IN (#{names.map(&:id).join(",")})")
+    names = Name.where(Name[:text_name].matches("Agaricus%")).map(&:id)
+    expect = Observation.where(name_id: names)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -556,14 +559,15 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_notes
-    expect = Observation.where("notes LIKE '%somewhere else%'")
+    expect = Observation.where(Observation[:notes].matches("%somewhere else%"))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_comments
-    expect = Comment.where("summary LIKE '%complicated%'").map(&:target)
+    expect = Comment.where(Comment[:summary].matches("%complicated%")).
+             map(&:target)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -586,14 +590,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_images_no
-    expect = Observation.where(thumb_image_id: nil)
+    expect = Observation.where(thumb_image: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_yes
-    expect = Observation.where.not(thumb_image_id: nil)
+    expect = Observation.where.not(thumb_image: nil)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -628,31 +632,22 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_names_yes
-    expect = Observation.where("name_id != #{names(:fungi).id}")
+    expect = Observation.where.not(name: names(:fungi))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_no
-    # Disable cop because `where` clause requires SQL
-    # because AR/Arel would escape Observation.no_notes_persisted,
-    # causing an incorrect query
-    expect = Observation.where( # rubocop:disable Rails/WhereEquals
-      "notes = ?", Observation.no_notes_persisted
-    )
+    expect = Observation.where(notes: Observation.no_notes)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
-    # Disable cop because `where` clause requires SQL
-    # because AR/Arel would escape Observation.no_notes_persisted,
-    # causing an incorrect query
-    expect = Observation.where(   # rubocop:disable Rails/WhereNot
-      "notes != ?", Observation.no_notes_persisted
-    )
+    expect = Observation.where.not(notes: Observation.no_notes)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
@@ -676,8 +671,10 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_region
-    expect = Observation.where("`where` LIKE '%, California, USA' OR " \
-                               "`where` = 'California, USA'")
+    expect = Observation.where(
+      Observation[:where].matches("%, California, USA").
+      or(Observation[:where] == "California, USA")
+    )
     cal = locations(:california).observations.first
     assert_not_nil(cal)
     assert_includes(expect, cal)
@@ -686,8 +683,10 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.where("`where` LIKE '%California, USA' OR " \
-                               "`where` LIKE '%New York, USA'").to_a
+    expect = Observation.where(
+      Observation[:where].matches("%California, USA").
+      or(Observation[:where].matches("%New York, USA"))
+    ).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
@@ -696,13 +695,13 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_lichen
-    lichens = Name.where("lifeform LIKE '%lichen%'")
+    lichens = Name.where(Name[:lifeform].matches("%lichen%"))
     expect = Observation.where(name: lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
 
-    lichens = Name.where("lifeform LIKE '% lichen %'")
+    lichens = Name.where(Name[:lifeform].matches("% lichen %"))
     expect = Observation.where.not(name: lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:false")
@@ -710,28 +709,28 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_created
-    expect = Name.where("YEAR(created_at) = 2010", correct_spelling: nil)
+    expect = Name.with_correct_spelling.where(Name[:created_at].year == 2010)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("created:2010")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_modified
-    expect = Name.where("YEAR(updated_at) = 2007", correct_spelling: nil)
+    expect = Name.with_correct_spelling.where(Name[:updated_at].year == 2007)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("modified:2007")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_rank
-    expect = Name.with_rank("Genus").where(correct_spelling: nil)
+    expect = Name.with_correct_spelling.with_rank("Genus")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:genus")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("`rank` > #{Name.ranks[:Genus]} AND " \
-                        "`rank` != #{Name.ranks[:Group]}").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:rank] > Name.ranks[:Genus]).
+             where(Name[:rank] != Name.ranks[:Group])
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:family-domain")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -759,7 +758,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("has_synonyms:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where.not(synonym_id: nil).reject(&:correct_spelling_id)
+    expect = Name.where.not(synonym_id: nil).with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -795,70 +794,62 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_lichen
-    expect = Name.where("lifeform LIKE '%lichen%'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:lifeform].matches("%lichen%"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where.not("lifeform LIKE '% lichen %'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:lifeform].does_not_match("% lichen %"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:no")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_author
-    expect = Name.where("COALESCE(author, '') = ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:author].blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("COALESCE(author, '') != ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:author].not_blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_citation
-    expect = Name.where("COALESCE(citation, '') = ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:citation].blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("COALESCE(citation, '') != ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:citation].not_blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_classification
-    expect = Name.where("COALESCE(classification, '') = ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:classification].blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("COALESCE(classification, '') != ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:classification].not_blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_notes
-    expect = Name.where("COALESCE(notes, '') = ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:notes].blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where("COALESCE(notes, '') != ''").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:notes].not_blank)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -873,46 +864,43 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_has_description
-    expect = Name.where.not(description_id: nil).
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where.not(description_id: nil)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.where(description_id: nil).
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(description_id: nil)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_author
-    expect = Name.where("author LIKE '%Vittad%'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:author].matches("%Vittad%"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_citation
-    expect = Name.where("citation LIKE '%lichenes%'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:citation].matches("%lichenes%"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_classification
-    expect = Name.where("classification LIKE '%ascomycota%'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.
+             where(Name[:classification].matches("%ascomycota%"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_notes
-    expect = Name.where("notes LIKE '%lichen%'").
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.where(Name[:notes].matches("%lichen%"))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
     assert_name_list_equal(expect, x.query.results, :sort)
