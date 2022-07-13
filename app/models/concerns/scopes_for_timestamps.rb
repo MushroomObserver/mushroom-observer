@@ -4,12 +4,12 @@
 # between a given "%Y-%m-%d" string(s).
 # Include in a model to have them available:
 #
-# include ScopesInvolvingTimestamps
+# include ScopesForTimestamps
 #
 # Examples: Observation.created_between("2006-09-01", "2012-09-01")
 #           Name.updated_after("2016-12-01")
 
-module ScopesInvolvingTimestamps
+module ScopesForTimestamps
   extend ActiveSupport::Concern
 
   included do

@@ -66,7 +66,7 @@ module NameController::CreateAndEditName
   # ------
 
   def make_sure_name_doesnt_exist!
-    matches = Name.matching_desired_new_name(@parse)
+    matches = Name.matching_desired_new_parsed_name(@parse)
     if matches.one?
       raise(:runtime_name_create_already_exists.
               t(name: matches.first.display_name))

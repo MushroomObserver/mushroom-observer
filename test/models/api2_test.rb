@@ -1762,7 +1762,8 @@ class API2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_like("Fungi").map do |n|
+    names = Name.with_correct_spelling.classification_includes("Fungi").
+            map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
     end.flatten.uniq.sort_by(&:id)
@@ -1873,27 +1874,27 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.with_correct_spelling.text_name_like("bunny")
+    names = Name.with_correct_spelling.text_name_includes("bunny")
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.author_like("peck")
+    names = Name.with_correct_spelling.author_includes("peck")
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.citation_like("lichenes")
+    names = Name.with_correct_spelling.citation_includes("lichenes")
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_like("lecanorales")
+    names = Name.with_correct_spelling.classification_includes("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.notes_like("known")
+    names = Name.with_correct_spelling.notes_include("known")
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
@@ -2177,7 +2178,7 @@ class API2Test < UnitTestCase
     Observation.create!(user: rolf, when: Time.zone.now,
                         where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
-    obses = Observation.of_synonyms(names(:lactarius_alpinus))
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
@@ -2233,13 +2234,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses)
 
-    obses = Observation.where(is_collection_location: false)
+    obses = Observation.not_collection_location
     assert(obses.length > 1)
     assert_api_pass(params.merge(is_collection_location: "no"))
     assert_api_results(obses)
 
-    with    = Observation.where.not(thumb_image_id: nil)
-    without = Observation.where(thumb_image_id: nil)
+    with    = Observation.with_image
+    without = Observation.without_image
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_images: "yes"))
@@ -2247,8 +2248,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without)
 
-    with    = Observation.where.not(location: nil)
-    without = Observation.where(location: nil)
+    with    = Observation.with_location
+    without = Observation.without_location
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_location: "yes"))
@@ -2274,8 +2275,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(obses)
 
-    with    = Observation.where(specimen: true)
-    without = Observation.where(specimen: false)
+    with    = Observation.with_specimen
+    without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_specimen: "yes"))
@@ -2288,8 +2289,8 @@ class API2Test < UnitTestCase
     # without = Observation.where("notes = ?", no_notes)
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
-    with = Observation.where(Observation[:notes] != Observation.no_notes)
-    without = Observation.where(Observation[:notes] == Observation.no_notes)
+    with = Observation.with_notes
+    without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -2297,14 +2298,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    obses = Observation.where(
-      Observation[:notes].matches("%:substrate:%")
-    ).reject { |o| o.notes[:substrate].blank? }
+    obses = Observation.notes_include(":substrate:").
+            reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.where(Observation[:notes].matches("%orphan%"))
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(notes_has: "orphan"))
     assert_api_results(obses)
@@ -2328,10 +2328,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses)
 
-    obses = Observation.where(
-      Observation[:where].matches("%, California, USA").
-      or(Observation[:where].matches("California, USA"))
-    )
+    obses = Observation.in_region("California, USA")
     assert_not_empty(obses)
     assert_api_pass(params.merge(region: "California, USA"))
     assert_api_results(obses)
@@ -2960,7 +2957,7 @@ class API2Test < UnitTestCase
     Observation.create!(user: rolf, when: Time.zone.now,
                         where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
-    obses = Observation.of_synonyms(names(:lactarius_alpinus))
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses.map(&:sequences).flatten)
@@ -3046,9 +3043,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    genus = Name.ranks[:Genus]
-    group = Name.ranks[:Group]
-    names = Name.where((Name[:rank] <= genus).or(Name[:rank] == group))
+    names = Name.with_rank_at_or_below_genus
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -3076,13 +3071,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_like(":substrate:").
+    obses = Observation.notes_include(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_like("orphan")
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -3255,7 +3250,7 @@ class API2Test < UnitTestCase
     obs1.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:another_species_list)
-    obses = Observation.of_synonyms(names(:lactarius_alpinus))
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert(ssp_lists.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))

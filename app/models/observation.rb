@@ -193,27 +193,36 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  include ScopesInvolvingTimestamps
+  include ScopesForTimestamps
 
-  scope :include_all_name_proposals, lambda { |name|
-    joins(:namings).where(namings: { name: name })
-  }
-  scope :of_look_alikes, lambda { |name|
-    joins(:namings).where(namings: { name: name }).
-      where(Observation[:name] != name)
-  }
-  scope :include_subtaxa, lambda { |text_name|
-    names = {}
-    starting_names = Name.text_name_like(text_name).with_correct_spelling
-    starting_names.each do |name|
-      names = starting_names.or(Name.related_taxa(name)).distinct
+  scope :of_name, lambda {
+    |name,
+     include_synonyms = false,
+     include_subtaxa = false,
+     include_all_name_proposals = false,
+     of_look_alikes = false|
+
+    names = [name]
+    names = name.synonyms if include_synonyms
+    if include_subtaxa
+      names.each do |n|
+        names << Name.subtaxa_of(n)
+      end
     end
-    where(name: names)
+
+    scope = where(name: names)
+    if include_all_name_proposals
+      scope.joins(:namings).where(namings: { name: names })
+    end
+    if of_look_alikes
+      scope.joins(:namings).where(namings: { name: names }).
+        where(Observation[:name] != name)
+    end
+    scope
   }
-  scope :of_synonyms, ->(name) { where(name: name.synonyms) }
-  scope :of_name, ->(name) { where(name: name) }
+
   scope :of_name_like,
-        ->(name) { where(name: Name.text_name_like(name)) }
+        ->(name) { where(name: Name.text_name_includes(name)) }
   scope :with_name, -> { where.not(name: Name.unknown) }
   scope :without_name, -> { where(name: Name.unknown) }
   scope :by_user, ->(user) { where(user: user) }
@@ -228,7 +237,9 @@ class Observation < AbstractModel
   }
   scope :with_image, -> { where.not(thumb_image: nil) }
   scope :without_image, -> { where(thumb_image: nil) }
-  scope :notes_like,
+  scope :with_location, -> { where.not(location: nil) }
+  scope :without_location, -> { where(location: nil) }
+  scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }
   scope :without_notes, -> { where(notes: Observation.no_notes) }

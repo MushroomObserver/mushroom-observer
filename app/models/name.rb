@@ -146,9 +146,36 @@
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
+#  of_lichens
+#  not_lichens
+#  deprecated
+#  not_deprecated
+#  with_description
+#  without_description
 #  with_correct_spelling
-#  with_rank_classification_like(rank, text_name)
+#  with_incorrect_spelling
+#  with_self_referential_misspelling
+#  with_synonyms
+#  without_synonyms
+#  with_rank(rank)
 #  with_rank_below(rank)
+#  with_rank_and_name_in_classification(rank, text_name)
+#  subtaxa_of_genus(genus)
+#  subtaxa_of(name)
+#  text_name_includes(text_name)
+#  classification_includes(classification)
+#  with_classification
+#  without_classification
+#  author_includes(author)
+#  with_author
+#  without_author
+#  citation_includes(citation)
+#  with_citation
+#  without_citation
+#  notes_include(notes)
+#  with_notes
+#  without_notes
+#  ok_for_export
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
@@ -408,7 +435,7 @@ class Name < AbstractModel
     end
   end
 
-  include ScopesInvolvingTimestamps
+  include ScopesForTimestamps
 
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
@@ -424,7 +451,57 @@ class Name < AbstractModel
   }
   scope :with_synonyms, -> { where.not(synonym_id: nil) }
   scope :without_synonyms, -> { where(synonym_id: nil) }
-  ### Module Name::Create
+  ### Module Name::Taxonomy
+  scope :with_rank,
+        ->(rank) { where(rank: Name.ranks[rank]) if rank }
+  scope :with_rank_below,
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+  scope :with_rank_and_name_in_classification,
+        # Use multi-line lambda literal because fixtures blow up with "lambda":
+        # NoMethodError: undefined method `ranks'
+        #   test/fixtures/names.yml:28:in `get_binding'
+        ->(rank, text_name) { # rubocop:disable Style/Lambda
+          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+        }
+  scope :subtaxa_of_genus, # Note small diff w :text_name_includes scope
+        ->(genus) { where(Name[:text_name].matches("#{genus} %")) }
+  scope :with_rank_at_or_below_genus,
+        lambda {
+          where((Name[:rank] <= Name.ranks[:Genus]).
+                or(Name[:rank] == Name.ranks[:Group]))
+        }
+  ### Pattern Search
+  scope :subtaxa_of,
+        lambda { |name|
+          if name.at_or_below_genus?
+            subtaxa_of_genus(name.text_name).with_correct_spelling
+          else
+            with_rank_and_name_in_classification(name.rank, name.text_name).
+              with_correct_spelling
+          end
+        }
+  scope :text_name_includes,
+        ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+  scope :classification_includes,
+        lambda { |classification|
+          where(Name[:classification].matches("%#{classification}%"))
+        }
+  scope :with_classification, -> { where(Name[:classification].not_blank) }
+  scope :without_classification, -> { where(Name[:classification].blank) }
+  scope :author_includes,
+        ->(author) { where(Name[:author].matches("%#{author}%")) }
+  scope :with_author, -> { where(Name[:author].not_blank) }
+  scope :without_author, -> { where(Name[:author].blank) }
+  scope :citation_includes,
+        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+  scope :with_citation, -> { where(Name[:citation].not_blank) }
+  scope :without_citation, -> { where(Name[:citation].blank) }
+  scope :notes_include,
+        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+  scope :with_notes, -> { where(Name[:notes].not_blank) }
+  scope :without_notes, -> { where(Name[:notes].blank) }
+  scope :ok_for_export, -> { where(ok_for_export: true) }
+  ### Specialized Scopes for Name::Create
   # Get list of Names that are potential matches when creating a new name.
   # Takes results of Name.parse_name.  Used by NameController#create_name.
   # Three cases:
@@ -438,7 +515,7 @@ class Name < AbstractModel
   # an author, but there are matches with an author, then it already exists
   # and we should just ignore the request.
   #
-  scope :matching_desired_new_name, lambda { |parsed_name|
+  scope :matching_desired_new_parsed_name, lambda { |parsed_name|
     if parsed_name.rank == "Group"
       where(search_name: parsed_name.search_name)
     elsif parsed_name.author.empty?
@@ -450,53 +527,6 @@ class Name < AbstractModel
   }
   scope :matching_search_name,
         ->(search_name) { where(search_name: search_name) }
-  ### Module Name::Taxonomy
-  scope :with_rank,
-        ->(rank) { where(rank: Name.ranks[rank]) if rank }
-  scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
-  scope :with_rank_classification_like,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
-          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
-        }
-  scope :with_name_like, # Note small diff w :text_name_like scope
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
-  ### Pattern Search
-  # TODO: Maybe refactor tests and Name::Taxonomy to use these methods?
-  # Note small differences between :text_name_like, :with_name_like %
-  scope :classification_like,
-        lambda { |classification|
-          where(Name[:classification].matches("%#{classification}%"))
-        }
-  scope :with_classification, -> { where(Name[:classification].not_blank) }
-  scope :without_classification, -> { where(Name[:classification].blank) }
-  scope :text_name_like,
-        ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
-  scope :related_taxa,
-        lambda { |name|
-          if name.at_or_below_genus?
-            with_name_like(name.text_name).with_correct_spelling
-          else
-            with_rank_classification_like(name.rank, name.text_name).
-              with_correct_spelling
-          end
-        }
-  scope :author_like,
-        ->(author) { where(Name[:author].matches("%#{author}%")) }
-  scope :with_author, -> { where(Name[:author].not_blank) }
-  scope :without_author, -> { where(Name[:author].blank) }
-  scope :citation_like,
-        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
-  scope :with_citation, -> { where(Name[:citation].not_blank) }
-  scope :without_citation, -> { where(Name[:citation].blank) }
-  scope :notes_like,
-        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
-  scope :with_notes, -> { where(Name[:notes].not_blank) }
-  scope :without_notes, -> { where(Name[:notes].blank) }
-  scope :ok_for_export, -> { where(ok_for_export: true) }
 
   def <=>(other)
     sort_name <=> other.sort_name

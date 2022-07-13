@@ -558,7 +558,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_notes
-    expect = Observation.notes_like("somewhere else")
+    expect = Observation.notes_include("somewhere else")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -870,7 +870,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_author
-    expect = Name.with_correct_spelling.author_like("Vittad")
+    expect = Name.with_correct_spelling.author_includes("Vittad")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -884,14 +884,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_classification
-    expect = Name.with_correct_spelling.classification_like("ascomycota")
+    expect = Name.with_correct_spelling.classification_includes("ascomycota")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_notes
-    expect = Name.with_correct_spelling.notes_like("lichen")
+    expect = Name.with_correct_spelling.notes_include("lichen")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
     assert_name_list_equal(expect, x.query.results, :sort)

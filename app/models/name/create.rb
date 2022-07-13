@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# NOTE: Use `Name extend Create`: these are all class methods
+# Usage: in class Name, `extend Create`, not `include Create`.
+# Extending makes these module methods into class methods of Name.
 module Name::Create
   # Shorthand for calling Name.find_names with +fill_in_authors: true+.
   def find_names_filling_in_authors(in_str, rank = nil,

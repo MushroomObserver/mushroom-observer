@@ -55,7 +55,7 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name, :personal, :personal_user_name
 
-  include ScopesInvolvingTimestamps
+  include ScopesForTimestamps
 
   def can_edit?(user = User.current)
     if personal_user_id

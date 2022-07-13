@@ -134,9 +134,9 @@ class Location < AbstractModel
     end
   end
 
-  include ScopesInvolvingTimestamps
+  include ScopesForTimestamps
 
-  scope :name_like,
+  scope :name_includes,
         ->(name) { where(Location[:name].matches("%#{name}%")) }
   scope :in_box,
         lambda { |n, s, e, w|

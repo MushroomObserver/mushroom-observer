@@ -1831,7 +1831,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_like("Ascomycota").count)
+    assert_equal(4, Name.classification_includes("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2958,8 +2958,9 @@ class NameTest < UnitTestCase
     ancestor = names(:basidiomycetes)
     assert(
       !ancestor.is_misspelling? &&
-      Name.joins(:namings).
-        with_rank_classification_like(ancestor.rank, ancestor.text_name).any?,
+      Name.joins(:namings).with_rank_and_name_in_classification(
+        ancestor.rank, ancestor.text_name
+      ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
@@ -3048,29 +3049,29 @@ class NameTest < UnitTestCase
     assert_false(names(:fungi).imageless?)
   end
 
-  def test_names_matching_desired_new_name
+  def test_names_matching_desired_new_parsed_name
     # Prove unauthored ParseName matches are all extant matches to text_name
     # Such as multiple authored Names
     parsed = Name.parse_name("Amanita baccata")
     expect = [names(:amanita_baccata_arora), names(:amanita_baccata_borealis)]
     assert_equal(expect,
-                 Name.matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
     # or unauthored and authored Names
     parsed = Name.parse_name(names(:unauthored_with_naming).text_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
 
     # Prove authored Group ParsedName is not matched by extant unauthored Name
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
-    assert_not(Name.matching_desired_new_name(parsed).
+    assert_not(Name.matching_desired_new_parsed_name(parsed).
                 include?(names(:unauthored_with_naming)))
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
     extant = names(:authored_group)
     desired = extant.text_name
     parsed = Name.parse_name(desired)
-    assert_not(Name.matching_desired_new_name(parsed).include?(extant),
+    assert_not(Name.matching_desired_new_parsed_name(parsed).include?(extant),
                "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
     # Prove authored non-Group ParsedName matched by union of exact matches and
@@ -3078,7 +3079,7 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name(names(:authored_with_naming).search_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
   def test_refresh_classification_caches
