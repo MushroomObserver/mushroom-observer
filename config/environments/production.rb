@@ -121,6 +121,10 @@ MushroomObserver::Application.configure do
   # the I18n.default_locale when a translation can not be found)
   config.i18n.fallbacks = [I18n.default_locale]
 
+  # Allow YAML deserializer to deserialize symbols
+  # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
+  config.active_record.yaml_column_permitted_classes = [Symbol]
+
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 

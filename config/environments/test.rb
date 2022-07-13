@@ -71,6 +71,10 @@ MushroomObserver::Application.configure do
   # like if you have constraints or database-specific column types
   # config.active_record.schema_format = :sql
 
+  # Allow YAML deserializer to deserialize symbols
+  # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
+  config.active_record.yaml_column_permitted_classes = [Symbol]
+
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
 
