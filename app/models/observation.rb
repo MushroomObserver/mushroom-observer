@@ -228,7 +228,7 @@ class Observation < AbstractModel
   scope :by_user, ->(user) { where(user: user) }
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
-        ->(where) { where(Observation[:where].matches("%#{where}%")) }
+        ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :is_collection_location, -> { where(is_collection_location: true) }
   scope :not_collection_location, -> { where(is_collection_location: false) }
   scope :for_project, lambda { |project|
