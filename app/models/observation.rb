@@ -210,15 +210,14 @@ class Observation < AbstractModel
       end
     end
 
-    scope = where(name: names)
     if include_all_name_proposals
-      scope.joins(:namings).where(namings: { name: names })
-    end
-    if of_look_alikes
-      scope.joins(:namings).where(namings: { name: names }).
+      joins(:namings).where(namings: { name: names })
+    elsif of_look_alikes
+      joins(:namings).where(namings: { name: names }).
         where(Observation[:name] != name)
+    else
+      where(name: names)
     end
-    scope
   }
 
   scope :of_name_like,
