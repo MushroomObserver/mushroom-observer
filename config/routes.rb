@@ -574,53 +574,53 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
-  match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
-  match("admin/test_flash_redirection",
+  match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
+  match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
-  get("admin/w3c_tests", to: "admin#w3c_tests")
+  get("/admin/w3c_tests", to: "admin#w3c_tests")
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
   # ----- Authors: no resources, just forms ------------------------------------
-  match("authors/email_request(/:id)",
+  match("/authors/email_request(/:id)",
         to: "authors#email_request", via: [:get, :post], id: /\d+/,
         as: "authors_email_request")
-  match("authors/review(/:id)",
+  match("/authors/review(/:id)",
         to: "authors#review", via: [:get, :post], id: /\d+/,
         as: "authors_review")
 
   # ----- Checklist: just the show --------------------------------------
-  get "checklist", to: "checklists#show"
+  get "/checklist", to: "checklists#show"
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
   # ----- Emails: no resources, just forms -------------------------------------
-  match("emails/ask_observation_question(/:id)",
+  match("/emails/ask_observation_question(/:id)",
         to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_observation_question")
-  match("emails/ask_user_question(/:id)",
+  match("/emails/ask_user_question(/:id)",
         to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_user_question")
-  match("emails/ask_webmaster_question(/:id)",
+  match("/emails/ask_webmaster_question(/:id)",
         to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_webmaster_question")
-  match("emails/commercial_inquiry(/:id)",
+  match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
-  match("emails/features(/:id)",
+  match("/emails/features(/:id)",
         to: "emails#features", via: [:get, :post], id: /\d+/,
         as: "emails_features")
-  match("emails/merge_request(/:id)",
+  match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
-  match("emails/name_change_request(/:id)",
+  match("/emails/name_change_request(/:id)",
         to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
         as: "emails_name_change_request")
 
   # ----- Export: no resources ------------------------------------
-  get("export/set_export_status(/:id)",
+  get("/export/set_export_status(/:id)",
       to: "export#set_export_status",
       id: /\d+/, as: "export_set_export_status")
 
@@ -639,20 +639,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   resources :herbaria, id: /\d+/
 
   # ----- Info: no resources, just forms and pages ----------------------------
-  get("info/how_to_help", to: "info#how_to_help")
-  get("info/how_to_use", to: "info#how_to_use")
-  get("info/intro", to: "info#intro")
-  get("info/news", to: "info#news")
-  get("info/search_bar_help", to: "info#search_bar_help")
-  get("info/site_stats", to: "info#site_stats")
-  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
-  get("info/translators_note", to: "info#translators_note")
+  get("/info/how_to_help", to: "info#how_to_help")
+  get("/info/how_to_use", to: "info#how_to_use")
+  get("/info/intro", to: "info#intro")
+  get("/info/news", to: "info#news")
+  get("/info/search_bar_help", to: "info#search_bar_help")
+  get("/info/site_stats", to: "info#site_stats")
+  match("/info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
+  get("/info/translators_note", to: "info#translators_note")
 
   # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
-  get("javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
+  get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   # ----- Observations: standard actions  ----------------------------
   resources :observations do
@@ -668,7 +668,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   end
 
   # ----- Policy: one route  --------------------------------------------------
-  get("policy/privacy")
+  get("/policy/privacy")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -682,10 +682,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
   # ----- Searches: nonstandard actions --------------------------------------
-  match("search/pattern(/:id)",
+  match("/search/pattern(/:id)",
         to: "search#pattern", via: [:get, :post], id: /\d+/,
         as: "search_pattern")
-  match("search/advanced(/:id)",
+  match("/search/advanced(/:id)",
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
