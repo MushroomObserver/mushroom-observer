@@ -455,7 +455,7 @@ class Name < AbstractModel
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
   scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+        ->(rank) { where(Name[:rank] < Name.ranks[rank]) if rank }
   scope :with_rank_and_name_in_classification,
         lambda { |rank, text_name|
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))

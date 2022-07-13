@@ -245,6 +245,10 @@ class Observation < AbstractModel
   scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :with_specimen, -> { where(specimen: true) }
   scope :without_specimen, -> { where(specimen: false) }
+  scope :with_sequence, -> { joins(:sequences) }
+  scope :without_sequence, -> { missing(:sequences) }
+  scope :with_comments, -> { joins(:comments) }
+  scope :without_comments, -> { missing(:comments) }
 
   # Override the default show_controller
   def self.show_controller
