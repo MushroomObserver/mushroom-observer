@@ -1,4 +1,4 @@
-inherit_from: .rubocop_todo.yml
+# inherit_from: .rubocop_todo.yml
 
 require:
   - rubocop-performance
@@ -69,7 +69,8 @@ Layout/LineContinuationSpacing: #`new in 1.31.1
 Lint/AmbiguousAssignment: # new in 1.7
   Enabled: true
 Lint/AmbiguousOperatorPrecedence: # new in 1.21
-  Enabled: true
+  # We do this only in rare cases; Always doing it would add uneeded clutter
+  Enabled: false
 Lint/AmbiguousRange: # new in 1.19
   Enabled: true
 # https://docs.rubocop.org/rubocop/cops_lint.html#lintconstantoverwritteninrescue
