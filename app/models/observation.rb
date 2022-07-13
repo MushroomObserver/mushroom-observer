@@ -196,24 +196,18 @@ class Observation < AbstractModel
   include ScopesForTimestamps
 
   # NOTE: Experimental; not tested yet. Needs tests.
-  scope :of_name, lambda {
-    |name,
-     include_synonyms = false,
-     include_subtaxa = false,
-     include_all_name_proposals = false,
-     of_look_alikes = false|
-
+  scope :of_name, lambda { |name, **args|
     names = [name]
-    names = name.synonyms if include_synonyms
-    if include_subtaxa
+    names = name.synonyms if args[:include_synonyms]
+    if args[:include_subtaxa]
       names.each do |n|
         names << Name.subtaxa_of(n)
       end
     end
 
-    if include_all_name_proposals
+    if args[:include_all_name_proposals]
       joins(:namings).where(namings: { name: names })
-    elsif of_look_alikes
+    elsif args[:of_look_alikes]
       joins(:namings).where(namings: { name: names }).
         where.not(name: name)
     else
