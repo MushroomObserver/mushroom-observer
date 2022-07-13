@@ -243,8 +243,6 @@ class Observation < AbstractModel
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }
   scope :without_notes, -> { where(notes: Observation.no_notes) }
-  scope :with_sequence, -> { where(sequence: true) }
-  scope :without_sequence, -> { where(sequence: false) }
   scope :with_specimen, -> { where(specimen: true) }
   scope :without_specimen, -> { where(specimen: false) }
 
