@@ -195,6 +195,7 @@ class Observation < AbstractModel
 
   include ScopesForTimestamps
 
+  # NOTE: Experimental; not tested yet. Needs tests.
   scope :of_name, lambda {
     |name,
      include_synonyms = false,
