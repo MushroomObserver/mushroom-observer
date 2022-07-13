@@ -1,7 +1,15 @@
 # frozen_string_literal: true
 
-# Observation.created_at("2005-03-04").to_sql
-module CreatedUpdatedScopes
+# Scopes for collecting objects created (or updated) on, before, after or
+# between a given "%Y-%m-%d" string(s).
+# Include in a model to have them available:
+#
+# include ScopesInvolvingTimestamps
+#
+# Examples: Observation.created_between("2006-09-01", "2012-09-01")
+#           Name.updated_after("2016-12-01")
+
+module ScopesInvolvingTimestamps
   extend ActiveSupport::Concern
 
   included do
@@ -15,7 +23,7 @@ module CreatedUpdatedScopes
       where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
     }
     scope :created_between, lambda { |earliest, latest|
-      where(arel_table[:created_at].format("%Y-%m-%d") == earliest).
+      where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
         where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
     }
     scope :updated_on, lambda { |ymd_string|

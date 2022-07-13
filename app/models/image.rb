@@ -247,7 +247,7 @@ class Image < AbstractModel
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  include CreatedUpdatedScopes
+  include ScopesInvolvingTimestamps
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects

@@ -193,7 +193,7 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  include CreatedUpdatedScopes
+  include ScopesInvolvingTimestamps
 
   scope :include_all_name_proposals, lambda { |name|
     joins(:namings).where(namings: { name: name })

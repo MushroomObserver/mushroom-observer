@@ -103,7 +103,7 @@ class SpeciesList < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  include CreatedUpdatedScopes
+  include ScopesInvolvingTimestamps
 
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(_obs)

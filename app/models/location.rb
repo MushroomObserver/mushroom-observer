@@ -134,7 +134,7 @@ class Location < AbstractModel
     end
   end
 
-  include CreatedUpdatedScopes
+  include ScopesInvolvingTimestamps
 
   scope :name_like,
         ->(name) { where(Location[:name].matches("%#{name}%")) }

@@ -408,7 +408,7 @@ class Name < AbstractModel
     end
   end
 
-  include CreatedUpdatedScopes
+  include ScopesInvolvingTimestamps
 
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
