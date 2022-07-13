@@ -457,10 +457,7 @@ class Name < AbstractModel
   scope :with_rank_below,
         ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
   scope :with_rank_and_name_in_classification,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
+        lambda { |rank, text_name|
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
   scope :subtaxa_of_genus, # Note small diff w :text_name_includes scope

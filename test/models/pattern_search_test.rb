@@ -230,7 +230,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
     x.vals = ["*California, USA"]
-    expect = Location.name_like("California, USA").map(&:id).sort
+    expect = Location.name_includes("California, USA").map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_locations.sort)
     x.vals = ["USA, California*"]
@@ -511,7 +511,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_subtaxa
-    names = Name.text_name_like("Agaricus").map(&:id)
+    names = Name.text_name_includes("Agaricus").map(&:id)
     expect = Observation.where(name_id: names)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
@@ -521,7 +521,7 @@ class PatternSearchTest < UnitTestCase
   def test_observation_search_include_all_name_proposals
     name = names(:agaricus_campestris)
     consensus = Observation.where(name: name)
-    expect = Observation.include_all_name_proposals(name)
+    expect = Observation.joins(:namings).where(namings: { name: name })
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \
                                        "include_all_name_proposals:yes")
@@ -877,7 +877,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_citation
-    expect = Name.with_correct_spelling.citation_like("lichenes")
+    expect = Name.with_correct_spelling.citation_includes("lichenes")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
     assert_name_list_equal(expect, x.query.results, :sort)
