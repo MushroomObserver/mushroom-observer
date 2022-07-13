@@ -716,27 +716,27 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   )
 
   # ----- Authors: legacy action redirects
-  get("observer/author_request", to: redirect(path: "authors#email_request"))
-  get("observer/review_authors", to: redirect(path: "authors#review"))
+  get("/observer/author_request", to: redirect("/authors/email_request"))
+  get("/observer/review_authors", to: redirect("/authors/review"))
 
   # ----- Checklist: legacy action redirects
-  get("/observer/checklist", to: redirect(path: "checklists#show"))
+  get("/observer/checklist", to: redirect("/checklist"))
 
   # ----- Emails: legacy action redirects
-  get("observer/ask_observation_question",
-      to: redirect(path: "emails#ask_observation_question"))
-  get("observer/ask_user_question",
-      to: redirect(path: "emails#ask_user_question"))
-  get("observer/ask_webmaster_question",
-      to: redirect(path: "emails#ask_webmaster_question"))
-  get("observer/commercial_inquiry",
-      to: redirect(path: "emails#commercial_inquiry"))
-  get("observer/email_features",
-      to: redirect(path: "emails#features"))
-  get("observer/email_merge_request",
-      to: redirect(path: "emails#merge_request"))
-  get("observer/email_name_change_request",
-      to: redirect(path: "emails#name_change_request"))
+  get("/observer/ask_observation_question",
+      to: redirect(path: "/emails/ask_observation_question"))
+  get("/observer/ask_user_question",
+      to: redirect(path: "/emails/ask_user_question"))
+  get("/observer/ask_webmaster_question",
+      to: redirect(path: "/emails/ask_webmaster_question"))
+  get("/observer/commercial_inquiry",
+      to: redirect(path: "/emails/commercial_inquiry"))
+  get("/observer/email_features",
+      to: redirect(path: "/emails/features"))
+  get("/observer/email_merge_request",
+      to: redirect(path: "/emails/merge_request"))
+  get("/observer/email_name_change_request",
+      to: redirect(path: "/emails/name_change_request"))
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
@@ -758,59 +758,79 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: legacy action redirects ---------------------------
-  get("observer/how_to_help", to: redirect("info/how_to_help"))
-  get("observer/how_to_use", to: redirect("info/how_to_use"))
-  get("observer/intro", to: redirect("info/intro"))
-  get("observer/news", to: redirect("info/news"))
-  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
-  get("observer/show_site_stats", to: redirect("info/site_stats"))
-  get("observer/textile", to: redirect("info/textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
-  get("observer/translators_note", to: redirect("info/translators_note"))
+  get("/observer/how_to_help", to: redirect("/info/how_to_help"))
+  get("/observer/how_to_use", to: redirect("/info/how_to_use"))
+  get("/observer/intro", to: redirect("/info/intro"))
+  get("/observer/news", to: redirect("/info/news"))
+  get("/observer/search_bar_help", to: redirect("/info/search_bar_help"))
+  get("/observer/show_site_stats", to: redirect("/info/site_stats"))
+  get("/observer/textile", to: redirect("/info/textile_sandbox"))
+  get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
+  get("/observer/translators_note", to: redirect("/info/translators_note"))
 
   # ----- Observations: legacy action redirects ----------------------------
-  get("observer/observation_search", to: redirect("observations"))
-  get("observer/advanced_search", to: redirect("observations"))
-  get("observer/index_observation", to: redirect("observations"))
-  get("observer/list_observations", to: redirect("observations"))
-  get("observer/observations_of_look_alikes(/:id)",
-      to: redirect("observations"), name: /\d+/, look_alikes: true)
-  get("observer/observations_of_related_taxa(/:id)",
-      to: redirect("observations"), name: /\d+/, related_taxa: true)
-  get("observer/observations_of_name(/:id)",
-      to: redirect("observations"), name: /\d+/)
-  get("observer/observations_by_user(/:id)",
-      to: redirect("observations"), user: /\d+/)
-  get("observer/observations_at_location(/:id)",
-      to: redirect("observations"), location: /\d+/)
-  get("observer/observations_at_where(/:id)",
-      to: redirect("observations"), where: /\d+/)
-  get("observer/observations_for_project(/:id)",
-      to: redirect("observations"), project: /\d+/)
-  get("observer/show_observation(/:id)",
-      to: redirect("observations"), id: /\d+/)
+  get("/observer/observation_search", to: redirect("/observations"))
+  get("/observer/advanced_search", to: redirect("/observations"))
+  get("/observer/index_observation", to: redirect("/observations"))
+  get("/observer/list_observations", to: redirect("/observations"))
+  get("/observer/observations_of_look_alikes(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}&look_alikes=1"
+      end)
+  get("/observer/observations_of_related_taxa(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}&related_taxa=1"
+      end)
+  get("/observer/observations_of_name(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}"
+      end)
+  get("/observer/observations_by_user(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?user=#{req.params[:id]}"
+      end)
+  get("/observer/observations_at_location(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?location=#{req.params[:id]}"
+      end)
+  get("/observer/observations_at_where(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?where=#{req.params[:id]}"
+      end)
+  get("/observer/observations_for_project(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?project=#{req.params[:id]}"
+      end)
+  get("/observer/show_observation(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations/#{req.params[:id]}"
+      end)
 
   # ----- RssLogs: legacy action redirects ------------------------------
   get("/observer/index", to: redirect("/activity_logs"))
   get("/observer/list_rss_logs", to: redirect("/activity_logs"))
   get("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
   get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
+      to: redirect do |_path_params, req|
+        "/activity_logs/#{req.params[:id]}"
+      end)
   get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Users: legacy action redirects  ----------------------------------
-  get("/observer/user_search", to: redirect(path: "users"))
-  get("/observer/index_user", to: redirect(path: "users"))
-  get("/observer/list_users", to: redirect(path: "users"))
+  get("/observer/user_search", to: redirect(path: "/users"))
+  get("/observer/index_user", to: redirect(path: "/users"))
+  get("/observer/list_users", to: redirect(path: "/users"))
   get("/observer/users_by_contribution",
-      to: redirect(path: "contributors"))
-  get("/observer/users_by_name",
-      to: redirect(path: "users", params: { by: "name" }))
-  get("/observer/show_user", to: redirect(path: "user"))
-
-  get("/observer/change_user_bonuses",
-      to: redirect(path: "users#edit"))
+      to: redirect(path: "/contributors"))
+  get("/observer/users_by_name", to: redirect("/users?by=name"))
+  get("/observer/show_user(/:id)",
+      to: redirect do |_path_params, req|
+        "/users/#{req.params[:id]}"
+      end)
+  get("/observer/change_user_bonuses(/:id)",
+      to: redirect do |_path_params, req|
+        "/users/#{req.params[:id]}/edit"
+      end)
 
   # ----- Search: legacy action redirects ---------------------------------
   get("/observer/pattern_search",
