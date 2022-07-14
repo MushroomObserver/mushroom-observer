@@ -1,0 +1,22 @@
+Inspecting 842 files
+......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................W........................................................................................................................................................................................................................W.............................................................W........................W...................
+
+Offenses:
+
+app/models/language_tracking.rb:97:28: W: [Correctable] Lint/NonAtomicFileOperation: Remove unnecessary existence checks File.exist?.
+    FileUtils.mkpath(path) unless File.exist?(path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+test/general_extensions.rb:478:40: W: [Correctable] Lint/NonAtomicFileOperation: Remove unnecessary existence checks File.exist?.
+        File.delete("#{filename}.old") if File.exist?("#{filename}.old")
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/general_extensions.rb:488:33: W: [Correctable] Lint/NonAtomicFileOperation: Remove unnecessary existence checks File.exist?.
+      File.delete(new_filename) if File.exist?(new_filename)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/models/ip_stats_test.rb:115:35: W: [Correctable] Lint/NonAtomicFileOperation: Remove unnecessary existence checks File.exist?.
+    File.delete(MO.ip_stats_file) if File.exist?(MO.ip_stats_file)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/models/script_test.rb:115:31: W: [Correctable] Lint/NonAtomicFileOperation: Remove unnecessary existence checks File.exist?.
+    FileUtils.rm(output_file) if File.exist?(output_file)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+842 files inspected, 5 offenses detected, 5 offenses autocorrectable

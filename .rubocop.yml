@@ -95,7 +95,9 @@ Lint/LambdaWithoutLiteralBlock: # new in 1.8
 Lint/NoReturnInBeginEndBlocks: # new in 1.2
   Enabled: true
 Lint/NonAtomicFileOperation: # new in 1.31
-  Enabled: true
+  # Disable until I understand the cop's implications - jdc 2022-07-14
+  # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
+  Enabled: false
 Lint/NumberedParameterAssignment: # new in 1.9
   Enabled: true
 Lint/OrAssignmentToConstant: # new in 1.9
