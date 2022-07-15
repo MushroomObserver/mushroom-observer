@@ -205,18 +205,24 @@ class Observation < AbstractModel
   #
   # NOTE: Experimental. Tests written & commented out in PatternSearchTest.
   scope :of_name, lambda { |name, **args|
-    # First, get a name record if string submitted
-    name_record = Name.find_by(text_name: name) if name.is_a?(String)
+    # First, get a name record if string or id submitted
+    case name
+    when String
+      name_record = Name.find_by(text_name: name)
+    when Integer
+      name_record = Name.find_by(id: name)
+    end
     return unless name_record.is_a?(Name)
 
     # Filter args may add to an array of names to collect Observations
     names_array = [name_record]
-    # Maybe add synonyms: #synonyms includes original name
+    # Maybe add synonyms (Name#synonyms includes original name)
     names_array = name_record.synonyms if args[:include_synonyms]
+    # Keep names_array intact as is; we'll maybe add more to its clone name_ids.
     # I'm thinking it's easier to pass an array of ids to the Observation query
     name_ids = names_array.map(&:id)
 
-    # Add subtaxa to name_ids array, possibly also subtaxa of synonyms
+    # Add subtaxa to name_ids array, i.e. possibly also subtaxa of synonyms too
     # (without modifying names_array we're iterating over)
     if args[:include_subtaxa]
       names_array.each do |n|
@@ -225,7 +231,7 @@ class Observation < AbstractModel
       end
     end
 
-    # Query, possibly with join to Naming. These are mutually exclusive:
+    # Query, possible join to Naming. These three are mutually exclusive:
     if args[:include_all_name_proposals]
       joins(:namings).where(namings: { name_id: name_ids })
     elsif args[:of_look_alikes]
