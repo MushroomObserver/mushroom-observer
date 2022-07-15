@@ -2595,6 +2595,10 @@ class NameTest < UnitTestCase
     # group with author
     assert_equal("**__Groupauthored__** group",
                  names(:authored_group).display_name_without_authors)
+
+    # Autonym
+    assert_equal("**__Agaricus__** sect. **__Agaricus__**",
+                 names(:sect_agaricus).display_name_without_authors)
   end
 
   def test_format_autonym
