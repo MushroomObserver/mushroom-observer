@@ -121,7 +121,8 @@ class IpStats
     end
 
     def clear_okay_ips
-      File.truncate(MO.okay_ips_file, 0) {}
+      # cop gives false positive
+      File.truncate(MO.okay_ips_file, 0) {} # rubocop disable:Lint/EmptyBlock
     end
 
     def clean_blocked_ips
