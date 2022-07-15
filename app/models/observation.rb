@@ -208,16 +208,16 @@ class Observation < AbstractModel
     # First, get a name record if string or id submitted
     case name
     when String
-      name_record = Name.find_by(text_name: name)
+      name = Name.find_by(text_name: name)
     when Integer
-      name_record = Name.find_by(id: name)
+      name = Name.find_by(id: name)
     end
-    return unless name_record.is_a?(Name)
+    return unless name.is_a?(Name)
 
     # Filter args may add to an array of names to collect Observations
-    names_array = [name_record]
+    names_array = [name]
     # Maybe add synonyms (Name#synonyms includes original name)
-    names_array = name_record.synonyms if args[:include_synonyms]
+    names_array = name.synonyms if args[:include_synonyms]
     # Keep names_array intact as is; we'll maybe add more to its clone name_ids.
     # I'm thinking it's easier to pass an array of ids to the Observation query
     name_ids = names_array.map(&:id)
