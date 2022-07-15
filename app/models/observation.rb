@@ -220,7 +220,8 @@ class Observation < AbstractModel
     # (without modifying names_array we're iterating over)
     if args[:include_subtaxa]
       names_array.each do |n|
-        name_ids += Name.subtaxa_of(n).map(&:id)
+        # |= don't add duplicates
+        name_ids |= Name.subtaxa_of(n).map(&:id)
       end
     end
 
@@ -229,7 +230,7 @@ class Observation < AbstractModel
       joins(:namings).where(namings: { name_id: name_ids })
     elsif args[:of_look_alikes]
       joins(:namings).where(namings: { name_id: name_ids }).
-        where.not(name: name_record)
+        where.not(name: name_ids)
     else
       where(name_id: name_ids)
     end
