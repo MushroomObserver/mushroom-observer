@@ -514,6 +514,11 @@ class Name < AbstractModel
   scope :without_notes, -> { where(Name[:notes].blank) }
   scope :with_comments, -> { joins(:comments).distinct }
   scope :without_comments, -> { missing(:comments) }
+  scope :on_species_list,
+        lambda { |species_list|
+          joins(observations: :species_list_observations).
+            where(species_list_id: species_list.id)
+        }
 
   ### Specialized Scopes for Name::Create
   # Get list of Names that are potential matches when creating a new name.
