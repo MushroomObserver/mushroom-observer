@@ -451,6 +451,7 @@ class Name < AbstractModel
   }
   scope :with_synonyms, -> { where.not(synonym_id: nil) }
   scope :without_synonyms, -> { where(synonym_id: nil) }
+  scope :ok_for_export, -> { where(ok_for_export: true) }
   ### Module Name::Taxonomy
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
@@ -460,14 +461,18 @@ class Name < AbstractModel
         lambda { |rank, text_name|
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
-  scope :subtaxa_of_genus, # Note small diff w :text_name_includes scope
-        ->(genus) { where(Name[:text_name].matches("#{genus} %")) }
   scope :with_rank_at_or_below_genus,
         lambda {
           where((Name[:rank] <= Name.ranks[:Genus]).
                 or(Name[:rank] == Name.ranks[:Group]))
         }
-  ### Pattern Search
+  scope :with_rank_above_genus,
+        lambda {
+          where(Name[:rank] > Name.ranks[:Genus]).
+            where(Name[:rank] != Name.ranks[:Group])
+        }
+  scope :subtaxa_of_genus, # Note small diff w :text_name_includes scope
+        ->(genus) { where(Name[:text_name].matches("#{genus} %")) }
   scope :subtaxa_of,
         lambda { |name|
           if name.at_or_below_genus?
@@ -476,6 +481,16 @@ class Name < AbstractModel
             with_rank_and_name_in_classification(name.rank, name.text_name).
               with_correct_spelling
           end
+        }
+  ### Pattern Search
+  scope :include_synonyms_of,
+        lambda { |name|
+          where(id: name.synonyms.map(&:id)).with_correct_spelling
+        }
+  scope :include_subtaxa_of,
+        lambda { |name|
+          names = [name] + Name.subtaxa_of(name)
+          where(id: names.map(&:id)).with_correct_spelling
         }
   scope :text_name_includes,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
@@ -497,7 +512,9 @@ class Name < AbstractModel
         ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where(Name[:notes].not_blank) }
   scope :without_notes, -> { where(Name[:notes].blank) }
-  scope :ok_for_export, -> { where(ok_for_export: true) }
+  scope :with_comments, -> { joins(:comments).distinct }
+  scope :without_comments, -> { missing(:comments) }
+
   ### Specialized Scopes for Name::Create
   # Get list of Names that are potential matches when creating a new name.
   # Takes results of Name.parse_name.  Used by NameController#create_name.

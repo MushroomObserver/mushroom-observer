@@ -195,23 +195,43 @@ class Observation < AbstractModel
 
   include ScopesForTimestamps
 
-  # NOTE: Experimental; not tested yet. Needs tests.
+  # Current goal is to accept either a string or a Name instance as the first
+  # argument. Other args:
+  #
+  # include_synonyms: boolean
+  # include_subtaxa: boolean
+  # include_all_name_proposals: boolean
+  # of_look_alikes: boolean
+  #
+  # NOTE: Experimental. Tests written & commented out in PatternSearchTest.
   scope :of_name, lambda { |name, **args|
-    names = [name]
-    names = name.synonyms if args[:include_synonyms]
+    # First, get a name record if string submitted
+    name_record = Name.find_by(text_name: name) if name.is_a?(String)
+    return unless name_record.is_a?(Name)
+
+    # Filter args may add to an array of names to collect Observations
+    names_array = [name_record]
+    # Maybe add synonyms: #synonyms includes original name
+    names_array = name_record.synonyms if args[:include_synonyms]
+    # I'm thinking it's easier to pass an array of ids to the Observation query
+    name_ids = names_array.map(&:id)
+
+    # Add subtaxa to name_ids array, possibly also subtaxa of synonyms
+    # (without modifying names_array we're iterating over)
     if args[:include_subtaxa]
-      names.each do |n|
-        names << Name.subtaxa_of(n)
+      names_array.each do |n|
+        name_ids += Name.subtaxa_of(n).map(&:id)
       end
     end
 
+    # Query, possibly with join to Naming. These are mutually exclusive:
     if args[:include_all_name_proposals]
-      joins(:namings).where(namings: { name: names })
+      joins(:namings).where(namings: { name_id: name_ids })
     elsif args[:of_look_alikes]
-      joins(:namings).where(namings: { name: names }).
-        where.not(name: name)
+      joins(:namings).where(namings: { name_id: name_ids }).
+        where.not(name: name_record)
     else
-      where(name: names)
+      where(name_id: name_ids)
     end
   }
 
@@ -225,10 +245,6 @@ class Observation < AbstractModel
         ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :is_collection_location, -> { where(is_collection_location: true) }
   scope :not_collection_location, -> { where(is_collection_location: false) }
-  scope :for_project, lambda { |project|
-    joins(:project_observations).
-      where(ProjectObservation[:project_id] = project)
-  }
   scope :with_image, -> { where.not(thumb_image: nil) }
   scope :without_image, -> { where(thumb_image: nil) }
   scope :with_location, -> { where.not(location: nil) }
@@ -239,10 +255,30 @@ class Observation < AbstractModel
   scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :with_specimen, -> { where(specimen: true) }
   scope :without_specimen, -> { where(specimen: false) }
-  scope :with_sequence, -> { joins(:sequences) }
+  scope :with_sequence, -> { joins(:sequences).distinct }
   scope :without_sequence, -> { missing(:sequences) }
-  scope :with_comments, -> { joins(:comments) }
+  scope :comments_include, lambda { |summary|
+    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+  }
+  scope :with_comments, -> { joins(:comments).distinct }
   scope :without_comments, -> { missing(:comments) }
+  scope :for_project, lambda { |project|
+    joins(:project_observations).
+      where(ProjectObservation[:project_id] == project.id).distinct
+  }
+  scope :in_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+  }
+  scope :on_species_list, lambda { |species_list|
+    joins(:species_list_observations).
+      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      distinct
+  }
+  scope :on_species_list_of_project, lambda { |project|
+    joins(species_lists: :project_species_lists).
+      where(ProjectSpeciesList[:project_id] == project.id).distinct
+  }
 
   # Override the default show_controller
   def self.show_controller

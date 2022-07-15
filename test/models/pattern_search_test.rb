@@ -511,6 +511,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_subtaxa
+    # expect = Observation.of_name(names(:agaricus), include_subtaxa: true)
     names = Name.text_name_includes("Agaricus").map(&:id)
     expect = Observation.where(name_id: names)
     assert(expect.count.positive?)
@@ -519,6 +520,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_all_name_proposals
+    # expect = Observation.of_name(names(:agaricus_campestris),
+    #                              include_all_name_proposals: true)
     name = names(:agaricus_campestris)
     consensus = Observation.where(name: name)
     expect = Observation.joins(:namings).where(namings: { name: name })
@@ -536,22 +539,21 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_project
-    expect = projects(:bolete_project).observations
+    expect = Observation.for_project(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project_lists
-    expect = projects(:bolete_project).species_lists.
-             map(&:observations).flatten
+    expect = Observation.on_species_list_of_project(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_list
-    expect = species_lists(:unknown_species_list).observations
+    expect = Observation.on_species_list(species_lists(:unknown_species_list))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('list:"List of mysteries"')
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -565,8 +567,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_comments
-    expect = Comment.where(Comment[:summary].matches("%complicated%")).
-             map(&:target)
+    expect = Observation.comments_include("complicated")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -617,7 +618,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_sequence
-    expect = Sequence.all.map(&:observation).uniq
+    expect = Observation.with_sequence
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("sequence:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -652,16 +653,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_comments_yes
-    expect = Comment.where(target_type: "Observation").map(&:target).uniq
+    expect = Observation.with_comments
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_comments:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_herbarium
-    nybg = herbaria(:nybg_herbarium)
-    expect = HerbariumRecord.where(herbarium: nybg).
-             map(&:observations).flatten.uniq
+    expect = Observation.in_herbarium(herbaria(:nybg_herbarium))
     assert_not_empty(expect)
     x = PatternSearch::Observation.new(
       'herbarium:"The New York Botanical Garden"'
@@ -679,10 +678,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.where(
-      Observation[:where].matches("%California, USA").
-      or(Observation[:where].matches("%New York, USA"))
-    ).to_a
+    expect = Observation.in_region("California, USA").
+             or(Observation.in_region("New York, USA")).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
@@ -691,14 +688,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_lichen
-    lichens = Name.where(Name[:lifeform].matches("%lichen%"))
-    expect = Observation.where(name: lichens)
+    expect = Observation.where(name: Name.of_lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
 
-    lichens = Name.where(Name[:lifeform].matches("% lichen %"))
-    expect = Observation.where.not(name: lichens)
+    expect = Observation.where(name: Name.not_lichens)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:false")
     assert_obj_list_equal(expect, x.query.results, :sort)
@@ -724,25 +719,21 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Name.new("rank:genus")
     assert_name_list_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.
-             where(Name[:rank] > Name.ranks[:Genus]).
-             where(Name[:rank] != Name.ranks[:Group])
+    expect = Name.with_correct_spelling.with_rank_above_genus
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:family-domain")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_include_synonyms
-    expect = names(:macrolepiota_rachodes).synonyms.
-             reject(&:correct_spelling_id)
+    expect = Name.include_synonyms_of(names(:macrolepiota_rachodes))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Macrolepiota rachodes include_synonyms:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_include_subtaxa
-    name = names(:agaricus)
-    expect = [name] + name.all_children.reject(&:correct_spelling_id)
+    expect = Name.include_subtaxa_of(names(:agaricus))
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Agaricus include_subtaxa:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -850,8 +841,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_has_comments
-    expect = Comment.where(target_type: "Name").map(&:target).uniq.
-             reject(&:correct_spelling_id)
+    expect = Name.with_correct_spelling.with_comments
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_comments:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
