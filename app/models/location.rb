@@ -136,15 +136,23 @@ class Location < AbstractModel
 
   include ScopesForTimestamps
 
+  scope :by_user, ->(user) { where(user: user) }
   scope :name_includes,
-        ->(name) { where(Location[:name].matches("%#{name}%")) }
+        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
+  scope :in_region,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box,
-        lambda { |n, s, e, w|
-          where(
-            (Location[:south] >= s).and(Location[:north] <= n).
-            and(Location[:west] >= w).and(Location[:east] <= e).
-            and(Location[:west] <= Location[:east])
-          )
+        lambda { |**args|
+          if args[:s].present? && args[:n].present? &&
+             args[:w].present? && args[:e].present? &&
+             (args[:w] < args[:e])
+
+            where(
+              (Location[:south] >= args[:s]).and(Location[:north] <= args[:n]).
+              and(Location[:west] >= args[:w]).and(Location[:east] <= args[:e]).
+              and(Location[:west] <= Location[:east])
+            )
+          end
         }
 
   # Let attached observations update their cache if these fields changed.

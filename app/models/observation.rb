@@ -226,36 +226,36 @@ class Observation < AbstractModel
     when Integer
       name = Name.find_by(id: name)
     end
-    return unless name.is_a?(Name)
 
-    # Filter args may add to an array of names to collect Observations
-    names_array = [name]
-    # Maybe add synonyms (Name#synonyms includes original name)
-    names_array = name.synonyms if args[:include_synonyms]
-    # Keep names_array intact as is; we'll maybe add more to its clone name_ids.
-    # (I'm thinking it's easier to pass name ids to the Observation query)
-    name_ids = names_array.map(&:id)
+    if name.is_a?(Name)
+      # Filter args may add to an array of names to collect Observations
+      names_array = [name]
+      # Maybe add synonyms (Name#synonyms includes original name)
+      names_array = name.synonyms if args[:include_synonyms]
+      # Keep names_array intact as is; maybe add more to its clone name_ids.
+      # (I'm thinking it's easier to pass name ids to the Observation query)
+      name_ids = names_array.map(&:id)
 
-    # Add subtaxa to name_ids array, i.e. subtaxa of synonyms too, if requested
-    # (don't modify the names_array we're iterating over)
-    if args[:include_subtaxa]
-      names_array.each do |n|
-        # |= don't add duplicates
-        name_ids |= Name.subtaxa_of(n).map(&:id)
+      # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
+      # (don't modify the names_array we're iterating over)
+      if args[:include_subtaxa]
+        names_array.each do |n|
+          # |= don't add duplicates
+          name_ids |= Name.subtaxa_of(n).map(&:id)
+        end
+      end
+
+      # Query, with possible join to Naming. Mutually exclusive options:
+      if args[:include_all_name_proposals]
+        joins(:namings).where(namings: { name_id: name_ids })
+      elsif args[:of_look_alikes]
+        joins(:namings).where(namings: { name_id: name_ids }).
+          where.not(name: name_ids)
+      else
+        where(name_id: name_ids)
       end
     end
-
-    # Query, with possible join to Naming. Mutually exclusive options:
-    if args[:include_all_name_proposals]
-      joins(:namings).where(namings: { name_id: name_ids })
-    elsif args[:of_look_alikes]
-      joins(:namings).where(namings: { name_id: name_ids }).
-        where.not(name: name_ids)
-    else
-      where(name_id: name_ids)
-    end
   }
-
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
   scope :with_name, -> { where.not(name: Name.unknown) }
@@ -264,12 +264,28 @@ class Observation < AbstractModel
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}")) }
+  scope :in_box,
+        lambda { |**args|
+          if args[:s].present? && args[:n].present? &&
+             args[:w].present? && args[:e].present? &&
+             (args[:w] < args[:e])
+
+            where(
+              (Observation[:lat] >= args[:s]).
+              and(Observation[:lat] <= args[:n]).
+              and(Observation[:long] >= args[:w]).
+              and(Observation[:long] <= args[:e])
+            )
+          end
+        }
   scope :is_collection_location, -> { where(is_collection_location: true) }
   scope :not_collection_location, -> { where(is_collection_location: false) }
   scope :with_image, -> { where.not(thumb_image: nil) }
   scope :without_image, -> { where(thumb_image: nil) }
   scope :with_location, -> { where.not(location: nil) }
   scope :without_location, -> { where(location: nil) }
+  scope :has_notes_field,
+        ->(field) { where(Observation[:notes].matches(":#{field}:")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }
@@ -278,6 +294,9 @@ class Observation < AbstractModel
   scope :without_specimen, -> { where(specimen: false) }
   scope :with_sequence, -> { joins(:sequences).distinct }
   scope :without_sequence, -> { missing(:sequences) }
+  # TODO: Figure out confidence queries.
+  # scope :has_confidence_at_least, -> { hmmm }
+  # scope :has_less_confidence_than, -> { hmmm }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
@@ -290,6 +309,10 @@ class Observation < AbstractModel
   scope :in_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
       where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+  }
+  scope :herbarium_record_notes_include, lambda { |notes|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:notes].matches("%#{notes}%")).distinct
   }
   scope :on_species_list, lambda { |species_list|
     joins(:species_list_observations).
