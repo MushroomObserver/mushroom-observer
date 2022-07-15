@@ -1551,7 +1551,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.in_box(40, 39, -123, -124)
+    locs = Location.in_box(n: 40, s: 39, e: -123, w: -124)
 
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
@@ -2317,7 +2317,7 @@ class API2Test < UnitTestCase
     assert_api_results(obses)
 
     obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.in_box(35, 34, -118, -119)
+    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
@@ -3018,7 +3018,7 @@ class API2Test < UnitTestCase
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
     obses = Observation.where(lat: [34..35], long: [-119..-118])
-    locs = Location.in_box(35, 34, -118, -119)
+    locs = Location.in_box(n: 35, s: 34, e: -118, w: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
