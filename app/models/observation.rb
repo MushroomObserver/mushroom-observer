@@ -194,16 +194,30 @@ class Observation < AbstractModel
   self.autolog_events = [:destroyed]
 
   include ScopesForTimestamps
+  # Extra timestamp scopes for when Observation found:
+  scope :found_on, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :found_after, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :found_before, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :found_between, lambda { |earliest, latest|
+    where(arel_table[:when].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:when].format("%Y-%m-%d") <= latest)
+  }
 
-  # Current goal is to accept either a string or a Name instance as the first
-  # argument. Other args:
+  # scope :of_name(name, **args)
   #
-  # include_synonyms: boolean
-  # include_subtaxa: boolean
-  # include_all_name_proposals: boolean
-  # of_look_alikes: boolean
+  # Accepts either a Name instance, a string, or an id as the first argument.
+  #  Other args:
+  #  - include_synonyms: boolean
+  #  - include_subtaxa: boolean
+  #  - include_all_name_proposals: boolean
+  #  - of_look_alikes: boolean
   #
-  # NOTE: Experimental. Tests written & commented out in PatternSearchTest.
   scope :of_name, lambda { |name, **args|
     # First, get a name record if string or id submitted
     case name
@@ -219,11 +233,11 @@ class Observation < AbstractModel
     # Maybe add synonyms (Name#synonyms includes original name)
     names_array = name.synonyms if args[:include_synonyms]
     # Keep names_array intact as is; we'll maybe add more to its clone name_ids.
-    # I'm thinking it's easier to pass an array of ids to the Observation query
+    # (I'm thinking it's easier to pass name ids to the Observation query)
     name_ids = names_array.map(&:id)
 
-    # Add subtaxa to name_ids array, i.e. possibly also subtaxa of synonyms too
-    # (without modifying names_array we're iterating over)
+    # Add subtaxa to name_ids array, i.e. subtaxa of synonyms too, if requested
+    # (don't modify the names_array we're iterating over)
     if args[:include_subtaxa]
       names_array.each do |n|
         # |= don't add duplicates
@@ -231,7 +245,7 @@ class Observation < AbstractModel
       end
     end
 
-    # Query, possible join to Naming. These three are mutually exclusive:
+    # Query, with possible join to Naming. Mutually exclusive options:
     if args[:include_all_name_proposals]
       joins(:namings).where(namings: { name_id: name_ids })
     elsif args[:of_look_alikes]
