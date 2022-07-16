@@ -63,7 +63,7 @@ class MapSet
       elsif obj.is_observation? && obj.location
         obj.location
       end
-    end.reject(&:nil?).uniq
+    end.compact.uniq
   end
 
   def is_point?

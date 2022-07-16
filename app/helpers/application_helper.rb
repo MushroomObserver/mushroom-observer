@@ -160,7 +160,7 @@ module ApplicationHelper
   def create_links(links)
     return [] unless links
 
-    links.reject(&:nil?).map { |str, url| link_to(str, url) }
+    links.compact.map { |str, url| link_to(str, url) }
   end
 
   # Short-hand to render shared tab_set partial for a given set of links.

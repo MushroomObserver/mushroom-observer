@@ -724,8 +724,7 @@ class NameController < ApplicationController
     @list_members     = sorter.all_line_strs.join("\r\n")
     @new_names        = sorter.new_name_strs.uniq
     @synonym_name_ids = sorter.all_synonyms.map(&:id)
-    @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.
-                        reject(&:nil?)
+    @synonym_names    = synonym_name_ids.filter_map { |id| Name.safe_find(id) }
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
