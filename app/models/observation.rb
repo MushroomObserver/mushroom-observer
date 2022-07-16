@@ -294,9 +294,9 @@ class Observation < AbstractModel
   scope :without_specimen, -> { where(specimen: false) }
   scope :with_sequence, -> { joins(:sequences).distinct }
   scope :without_sequence, -> { missing(:sequences) }
-  # TODO: Figure out confidence queries.
-  # scope :has_confidence_at_least, -> { hmmm }
-  # scope :has_less_confidence_than, -> { hmmm }
+  # TODO: Please check if this is how we do confidence.
+  scope :has_confidence_at_least, ->(value) { where(vote_cache: value..) }
+  scope :has_confidence_less_than, ->(value) { where(vote_cache: ..value) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
