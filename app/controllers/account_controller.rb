@@ -111,10 +111,7 @@ class AccountController < ApplicationController
     # first before we can verify them.
     elsif user.password.blank?
       @user = user
-      if request.method != "POST"
-        flash_warning(:account_choose_password_warning.t)
-        render(action: :choose_password)
-      else
+      if request.method == "POST"
         password = begin
                      params[:user][:password]
                    rescue StandardError
@@ -143,6 +140,9 @@ class AccountController < ApplicationController
           flash_object_errors(user)
           render(action: :choose_password)
         end
+      else
+        flash_warning(:account_choose_password_warning.t)
+        render(action: :choose_password)
       end
 
     # If not already verified, and the code checks out, then mark account
@@ -389,13 +389,7 @@ class AccountController < ApplicationController
 
   def profile
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method != "POST"
-      @place_name        = @user.location ? @user.location.display_name : ""
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license.id
-
-    else
+    if request.method == "POST"
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
         @user.send("#{arg}=", val) if @user.send(arg) != val
@@ -461,6 +455,12 @@ class AccountController < ApplicationController
           redirect_to(user_path(@user.id))
         end
       end
+    else
+      @place_name        = @user.location ? @user.location.display_name : ""
+      @copyright_holder  = @user.legal_name
+      @copyright_year    = Time.zone.now.year
+      @upload_license_id = @user.license.id
+
     end
   end
 

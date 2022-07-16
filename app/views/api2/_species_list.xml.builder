@@ -11,10 +11,7 @@ xml.tag!(
   xml_date(xml, :date, object.when)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
-  if !detail
-    xml_minimal_location(xml, :location, object.location_id, object.where)
-    xml_minimal_object(xml, :owner, :user, object.user_id)
-  else
+  if detail
     xml_detailed_location(xml, :location, object.location, object.where)
     xml_detailed_object(xml, :owner, object.user)
     if object.comments.any?
@@ -24,5 +21,8 @@ xml.tag!(
         end
       end
     end
+  else
+    xml_minimal_location(xml, :location, object.location_id, object.where)
+    xml_minimal_object(xml, :owner, :user, object.user_id)
   end
 end

@@ -240,12 +240,12 @@ module ApplicationHelper
 
   def make_row(row, tr_opts = {}, td_opts = {})
     content_tag(:tr, tr_opts) do
-      if !row.is_a?(Array)
-        row
-      else
+      if row.is_a?(Array)
         row.map do |cell|
           make_cell(cell, td_opts)
         end.safe_join
+      else
+        row
       end
     end
   end

@@ -59,9 +59,7 @@ module Query::Modules::HighLevelQueries
   def result_ids(args = {})
     expect_args(:result_ids, args, RESULTS_ARGS)
     @result_ids ||=
-      if !need_letters
-        select_values(args).map(&:to_i)
-      else
+      if need_letters
         # Include first letter of paginate-by-letter field right away; there's
         # typically no avoiding it.  This optimizes away an extra query or two.
         @letters = map = {}
@@ -73,6 +71,8 @@ module Query::Modules::HighLevelQueries
           ids << id.to_i
         end
         ids
+      else
+        select_values(args).map(&:to_i)
       end
   end
 

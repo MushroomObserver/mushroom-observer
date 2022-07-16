@@ -10,9 +10,7 @@ xml.tag!(
   xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
-  if !detail
-    xml_minimal_object(xml, :creator, :user, object.user_id)
-  else
+  if detail
     xml_detailed_object(xml, :creator, object.user)
     if object.comments.any?
       xml.comments(number: object.comments.length) do
@@ -21,5 +19,7 @@ xml.tag!(
         end
       end
     end
+  else
+    xml_minimal_object(xml, :creator, :user, object.user_id)
   end
 end

@@ -10,8 +10,8 @@ json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 json.observation_id(object.observation_id) if object.observation_id
-if !detail
-  json.user_id(object.user_id)
-else
+if detail
   json.user(json_user(object.user))
+else
+  json.user_id(object.user_id)
 end

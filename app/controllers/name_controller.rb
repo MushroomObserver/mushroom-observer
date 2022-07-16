@@ -1042,7 +1042,13 @@ class NameController < ApplicationController
       flash_notice(:name_bulk_success.t)
       redirect_to("/")
     else
-      if sorter.new_name_strs != []
+      if sorter.new_name_strs == []
+        # Same with this one... err, no this is not reported anywhere.
+        flash_error(
+          "Ambiguous names given, including: " \
+          "#{sorter.multiple_line_strs[0].inspect}"
+        )
+      else
         # This error message is no longer necessary.
         if Rails.env.test?
           flash_error(
@@ -1050,12 +1056,6 @@ class NameController < ApplicationController
             "#{sorter.new_name_strs[0].inspect}"
           )
         end
-      else
-        # Same with this one... err, no this is not reported anywhere.
-        flash_error(
-          "Ambiguous names given, including: " \
-          "#{sorter.multiple_line_strs[0].inspect}"
-        )
       end
       @list_members = sorter.all_line_strs.join("\r\n")
       @new_names    = sorter.new_name_strs.uniq.sort
@@ -1085,10 +1085,10 @@ class NameController < ApplicationController
     flavor = Notification.flavors[:name]
     @notification = Notification.
                     find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
-    if request.method != "POST"
-      initialize_tracking_form
-    else
+    if request.method == "POST"
       submit_tracking_form(name_id)
+    else
+      initialize_tracking_form
     end
   end
 

@@ -33,13 +33,7 @@ xml.tag!(
     end
     xml_html_string(xml, :notes, other_notes.to_s.tpl_nodiv)
   end
-  if !detail
-    xml_minimal_object(xml, :owner, :user, object.user_id)
-    xml_minimal_object(xml, :consensus_id, :name, object.name_id)
-    xml_string(xml, :consensus_name, object.text_name)
-    xml_minimal_location(xml, :location, object.location_id, object.where)
-    xml_minimal_object(xml, :primary_image, :image, object.thumb_image_id)
-  else
+  if detail
     xml_detailed_object(xml, :owner, object.user)
     xml_detailed_object(xml, :consensus_name, object.name)
     if object.namings.any?
@@ -105,5 +99,11 @@ xml.tag!(
         end
       end
     end
+  else
+    xml_minimal_object(xml, :owner, :user, object.user_id)
+    xml_minimal_object(xml, :consensus_id, :name, object.name_id)
+    xml_string(xml, :consensus_name, object.text_name)
+    xml_minimal_location(xml, :location, object.location_id, object.where)
+    xml_minimal_object(xml, :primary_image, :image, object.thumb_image_id)
   end
 end

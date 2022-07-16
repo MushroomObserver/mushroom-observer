@@ -14,14 +14,14 @@ class AjaxControllerTest < FunctionalTestCase
 
   def ajax_request(action, params, status)
     get(action, params: params.dup)
-    if @response.response_code != status
+    if @response.response_code == status
+      pass
+    else
       url = ajax_request_url(action, params)
       msg = "Expected #{status} from: #{url}\n"
       msg += "Got #{@response.response_code}:\n"
       msg += @response.body
       flunk(msg)
-    else
-      pass
     end
   end
 
