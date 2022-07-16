@@ -519,6 +519,19 @@ class Name < AbstractModel
           joins(observations: :species_list_observations).
             where(species_list_id: species_list.id)
         }
+  # Accepts region string, location_id, or Location instance
+  scope :at_location,
+        lambda { |location|
+          case location
+          when String # treat it as a region, we're not looking for all matches
+            joins(observations: :location).
+              where(Location[:name].matches("%#{location}"))
+          when Integer
+            joins(:observations).where(location_id: location)
+          when Location
+            joins(:observations).where(location_id: location.id)
+          end
+        }
 
   ### Specialized Scopes for Name::Create
   # Get list of Names that are potential matches when creating a new name.
