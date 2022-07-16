@@ -176,8 +176,8 @@ class API2Test < UnitTestCase
     assert_equal(true, img.ok_for_export)
     assert_equal_even_if_nil(@orig, img.original_name)
     assert_equal(false, img.transferred)
-    assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
-    assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
+    assert_obj_list_equal([@proj].compact, img.projects)
+    assert_obj_list_equal([@obs].compact, img.observations)
     assert_equal_even_if_nil(@vote, img.users_vote(@user))
   end
 
@@ -248,7 +248,7 @@ class API2Test < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
+    assert_obj_list_equal([@img1, @img2].compact, obs.images)
     assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
@@ -259,8 +259,8 @@ class API2Test < UnitTestCase
     assert(@lat == obs.lat)
     assert(@long == obs.long)
     assert(@alt == obs.alt)
-    assert_obj_list_equal([@proj].reject(&:nil?), obs.projects)
-    assert_obj_list_equal([@spl].reject(&:nil?), obs.species_lists)
+    assert_obj_list_equal([@proj].compact, obs.projects)
+    assert_obj_list_equal([@spl].compact, obs.species_lists)
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
