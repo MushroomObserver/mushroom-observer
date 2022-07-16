@@ -559,7 +559,7 @@ class String
     str      = to_s
     alphabet = alphabet.to_s
     len      = alphabet.length
-    str.split("").inject(0) do |num, char|
+    str.chars.inject(0) do |num, char|
       i = alphabet.index(char)
       raise("Character not in alphabet: '#{char}'") if i.nil?
 
