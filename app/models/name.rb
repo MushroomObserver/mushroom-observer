@@ -443,6 +443,36 @@ class Name < AbstractModel
   scope :not_deprecated, -> { where(deprecated: false) }
   scope :with_description, -> { where.not(description_id: nil) }
   scope :without_description, -> { where(description_id: nil) }
+  scope :description_includes,
+        lambda { |text|
+          joins(:name_descriptions).
+            where(NameDescription[:gen_desc].matches("%#{text}%")).
+            or(where(NameDescription[:diag_desc].matches("%#{text}%"))).
+            or(where(NameDescription[:distribution].matches("%#{text}%"))).
+            or(where(NameDescription[:habitat].matches("%#{text}%"))).
+            or(where(NameDescription[:look_alikes].matches("%#{text}%"))).
+            or(where(NameDescription[:notes].matches("%#{text}%"))).
+            or(where(NameDescription[:ref].matches("%#{text}%")))
+        }
+  scope :with_description_in_project,
+        lambda { |project|
+          joins(:name_descriptions).where(project: project)
+        }
+  scope :with_description_created_by,
+        lambda { |user|
+          joins(:name_descriptions).where(user: user)
+        }
+  scope :with_description_reviewed_by,
+        lambda { |user|
+          joins(:name_descriptions).where(reviewer: user)
+        }
+  scope :with_description_of_type,
+        lambda { |source|
+          if Description.all_source_types.include?(source)
+            joins(:name_descriptions).where(source_type: source)
+          end
+        }
+
   ### Module Name::Spelling
   scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
   scope :with_incorrect_spelling, -> { where.not(correct_spelling_id: nil) }
