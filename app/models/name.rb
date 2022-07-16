@@ -468,6 +468,7 @@ class Name < AbstractModel
         }
   scope :with_description_of_type,
         lambda { |source|
+          # Check that it's a valid source type (string enum value)
           if Description.all_source_types.include?(source)
             joins(:name_descriptions).where(source_type: source)
           end
