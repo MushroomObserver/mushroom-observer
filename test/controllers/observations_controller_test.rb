@@ -527,13 +527,21 @@ class ObservationsControllerTest < FunctionalTestCase
   end
 
   def test_observations_of_name
-    login
-    params = { species_list_id: species_lists(:unknown_species_list).id,
-               name: observations(:minimal_unknown_obs).name }
-    get_with_dump(:index, params)
-    # Needs an assertion. Was
-    # assert_select("title", /Observations of Synonyms of/)
-    # but that broken by PR 497.
+    name = names(:fungi)
+    ids = Observation.where(name: name).map(&:id)
+    assert(ids.length.positive?, "Test needs ifferent fixture for 'name'")
+
+    params = { name: name }
+    login("zero") # Has no observations
+    get(:index, params: params)
+
+    assert_response(:success)
+    ids.each do |id|
+      assert_select(
+        "a:match('href', ?)", %r{^/#{id}}, true,
+        "Observations of Name should link to each Observation of Name"
+      )
+    end
   end
 
   # Prove that lichen content_filter works on observations
