@@ -35,6 +35,20 @@
 #  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
 #
+#  == Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  name_includes(place_name)
+#  in_region(place_name)
+#  in_box(n,s,e,w)
+#
 #  == Instance methods
 #
 #  interests::          Interests in this Location.

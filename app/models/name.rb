@@ -146,36 +146,58 @@
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
 #  of_lichens
 #  not_lichens
 #  deprecated
 #  not_deprecated
 #  with_description
 #  without_description
+#  description_includes
+#  with_description_in_project(project)
+#  with_description_created_by(user)
+#  with_description_reviewed_by(user)
+#  with_description_of_type(source_type)
 #  with_correct_spelling
 #  with_incorrect_spelling
 #  with_self_referential_misspelling
 #  with_synonyms
 #  without_synonyms
+#  ok_for_export
 #  with_rank(rank)
 #  with_rank_below(rank)
 #  with_rank_and_name_in_classification(rank, text_name)
+#  with_rank_at_or_below_genus
+#  with_rank_above_genus
 #  subtaxa_of_genus(genus)
 #  subtaxa_of(name)
+#  include_synonyms_of(name)
+#  include_subtaxa_of(name)
 #  text_name_includes(text_name)
-#  classification_includes(classification)
 #  with_classification
 #  without_classification
-#  author_includes(author)
+#  classification_includes(classification)
 #  with_author
 #  without_author
-#  citation_includes(citation)
+#  author_includes(author)
 #  with_citation
 #  without_citation
-#  notes_include(notes)
+#  citation_includes(citation)
 #  with_notes
 #  without_notes
-#  ok_for_export
+#  notes_include(notes)
+#  with_comments
+#  without_comments
+#  comments_include(summary)
+#  on_species_list(species_list)
+#  at_location(location)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
@@ -527,26 +549,29 @@ class Name < AbstractModel
         }
   scope :text_name_includes,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+  scope :with_classification, -> { where(Name[:classification].not_blank) }
+  scope :without_classification, -> { where(Name[:classification].blank) }
   scope :classification_includes,
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
-  scope :with_classification, -> { where(Name[:classification].not_blank) }
-  scope :without_classification, -> { where(Name[:classification].blank) }
-  scope :author_includes,
-        ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_author, -> { where(Name[:author].not_blank) }
   scope :without_author, -> { where(Name[:author].blank) }
-  scope :citation_includes,
-        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+  scope :author_includes,
+        ->(author) { where(Name[:author].matches("%#{author}%")) }
   scope :with_citation, -> { where(Name[:citation].not_blank) }
   scope :without_citation, -> { where(Name[:citation].blank) }
-  scope :notes_include,
-        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+  scope :citation_includes,
+        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
   scope :with_notes, -> { where(Name[:notes].not_blank) }
   scope :without_notes, -> { where(Name[:notes].blank) }
+  scope :notes_include,
+        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
   scope :with_comments, -> { joins(:comments).distinct }
   scope :without_comments, -> { missing(:comments) }
+  scope :comments_include, lambda { |summary|
+    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+  }
   scope :on_species_list,
         lambda { |species_list|
           joins(observations: :species_list_observations).

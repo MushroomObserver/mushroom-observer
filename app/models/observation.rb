@@ -75,6 +75,53 @@
 #  show_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  found_on("yyyymmdd")
+#  found_after("yyyymmdd")
+#  found_before("yyyymmdd")
+#  found_between(start, end)
+#  of_name(name)
+#  of_name_like(string)
+#  with_name
+#  without_name
+#  by_user(user)
+#  with_location
+#  without_location
+#  at_location(location)
+#  in_region(where)
+#  in_box(n,s,e,w)
+#  is_collection_location
+#  not_collection_location
+#  with_image
+#  without_image
+#  with_notes
+#  without_notes
+#  has_notes_field(field)
+#  notes_include(note)
+#  with_specimen
+#  without_specimen
+#  with_sequence
+#  without_sequence
+#  has_confidence_at_least(value)
+#  has_confidence_less_than(value)
+#  with_comments
+#  without_comments
+#  comments_include(summary)
+#  for_project(project)
+#  in_herbarium(herbarium)
+#  herbarium_record_notes_include(notes)
+#  on_species_list(species_list)
+#  on_species_list_of_project(project)
+#
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
@@ -209,6 +256,8 @@ class Observation < AbstractModel
       where(arel_table[:when].format("%Y-%m-%d") <= latest)
   }
 
+  scope :with_name, -> { where.not(name: Name.unknown) }
+  scope :without_name, -> { where(name: Name.unknown) }
   # scope :of_name(name, **args)
   #
   # Accepts either a Name instance, a string, or an id as the first argument.
@@ -258,9 +307,9 @@ class Observation < AbstractModel
   }
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
-  scope :with_name, -> { where.not(name: Name.unknown) }
-  scope :without_name, -> { where(name: Name.unknown) }
   scope :by_user, ->(user) { where(user: user) }
+  scope :with_location, -> { where.not(location: nil) }
+  scope :without_location, -> { where(location: nil) }
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}")) }
@@ -282,14 +331,12 @@ class Observation < AbstractModel
   scope :not_collection_location, -> { where(is_collection_location: false) }
   scope :with_image, -> { where.not(thumb_image: nil) }
   scope :without_image, -> { where(thumb_image: nil) }
-  scope :with_location, -> { where.not(location: nil) }
-  scope :without_location, -> { where(location: nil) }
+  scope :with_notes, -> { where.not(notes: Observation.no_notes) }
+  scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :has_notes_field,
         ->(field) { where(Observation[:notes].matches(":#{field}:")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
-  scope :with_notes, -> { where.not(notes: Observation.no_notes) }
-  scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :with_specimen, -> { where(specimen: true) }
   scope :without_specimen, -> { where(specimen: false) }
   scope :with_sequence, -> { joins(:sequences).distinct }
@@ -297,11 +344,11 @@ class Observation < AbstractModel
   # TODO: Please check if this is how we do confidence.
   scope :has_confidence_at_least, ->(value) { where(vote_cache: value..) }
   scope :has_confidence_less_than, ->(value) { where(vote_cache: ..value) }
+  scope :with_comments, -> { joins(:comments).distinct }
+  scope :without_comments, -> { missing(:comments) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
-  scope :with_comments, -> { joins(:comments).distinct }
-  scope :without_comments, -> { missing(:comments) }
   scope :for_project, lambda { |project|
     joins(:project_observations).
       where(ProjectObservation[:project_id] == project.id).distinct
