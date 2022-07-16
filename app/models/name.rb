@@ -445,7 +445,7 @@ class Name < AbstractModel
   scope :without_description, -> { where(description_id: nil) }
   scope :description_includes,
         lambda { |text|
-          joins(:name_descriptions).
+          joins(:descriptions).
             where(NameDescription[:gen_desc].matches("%#{text}%")).
             or(where(NameDescription[:diag_desc].matches("%#{text}%"))).
             or(where(NameDescription[:distribution].matches("%#{text}%"))).
@@ -456,21 +456,21 @@ class Name < AbstractModel
         }
   scope :with_description_in_project,
         lambda { |project|
-          joins(:name_descriptions).where(project: project)
+          joins(:descriptions).where(project: project)
         }
   scope :with_description_created_by,
         lambda { |user|
-          joins(:name_descriptions).where(user: user)
+          joins(:descriptions).where(user: user)
         }
   scope :with_description_reviewed_by,
         lambda { |user|
-          joins(:name_descriptions).where(reviewer: user)
+          joins(:descriptions).where(reviewer: user)
         }
   scope :with_description_of_type,
         lambda { |source|
           # Check that it's a valid source type (string enum value)
           if Description.all_source_types.include?(source)
-            joins(:name_descriptions).where(source_type: source)
+            joins(:descriptions).where(source_type: source)
           end
         }
 
