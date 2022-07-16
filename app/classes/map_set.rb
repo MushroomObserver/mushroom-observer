@@ -119,10 +119,7 @@ class MapSet
   def update_extents_with_point(loc)
     lat = loc.lat.to_f.round(4)
     long = loc.long.to_f.round(4)
-    if !@north
-      @north = @south = lat
-      @east = @west = long
-    else
+    if @north
       @north = lat if lat > @north
       @south = lat if lat < @south
       if long_outside_existing_extents?(long)
@@ -134,6 +131,9 @@ class MapSet
           @west = long
         end
       end
+    else
+      @north = @south = lat
+      @east = @west = long
     end
   end
 
@@ -150,12 +150,7 @@ class MapSet
     s = loc.south.to_f.round(4)
     e = loc.east.to_f.round(4)
     w = loc.west.to_f.round(4)
-    if !@north
-      @north = n
-      @south = s
-      @east = e
-      @west = w
-    else
+    if @north
       @north = n if n > @north
       @south = s if s < @south
       if new_box_not_contained_by_old_box?(e, w)
@@ -183,6 +178,11 @@ class MapSet
           end
         end
       end
+    else
+      @north = n
+      @south = s
+      @east = e
+      @west = w
     end
   end
 

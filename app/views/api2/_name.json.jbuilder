@@ -14,9 +14,7 @@ json.updated_at(object.updated_at.try(&:utc))
 json.number_of_views(object.num_views)
 json.last_viewed(object.last_view.try(&:utc))
 json.ok_for_export(object.ok_for_export ? true : false)
-if !detail
-  json.synonym_id(object.synonym_id) if object.synonym_id
-else
+if detail
   if object.synonym_id
     json.synonyms((object.synonyms - [object]).map { |x| json_name(x) })
   end
@@ -29,4 +27,6 @@ else
   if object.comments.any?
     json.comments(object.comments.map { |x| json_comment(x) })
   end
+else
+  json.synonym_id(object.synonym_id) if object.synonym_id
 end

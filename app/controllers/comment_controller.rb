@@ -206,13 +206,13 @@ class CommentController < ApplicationController
     return unless request.method == "POST"
 
     @comment.attributes = whitelisted_comment_params if params[:comment]
-    if !@comment.save
-      flash_object_errors(@comment)
-    else
+    if @comment.save
       @comment.log_create
       flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
       redirect_with_query(controller: @target.show_controller,
                           action: @target.show_action, id: @target.id)
+    else
+      flash_object_errors(@comment)
     end
   end
 

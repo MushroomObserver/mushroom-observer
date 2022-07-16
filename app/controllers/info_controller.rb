@@ -42,11 +42,11 @@ class InfoController < ApplicationController
 
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox
-    if request.method != "POST"
-      @code = nil
-    else
+    if request.method == "POST"
       @code = params[:code]
       @submit = params[:commit]
+    else
+      @code = nil
     end
     render(action: :textile_sandbox)
   end

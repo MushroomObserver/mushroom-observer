@@ -344,18 +344,18 @@ class ImageController < ApplicationController
     @image.original_name = "" if @user.keep_filenames == "toss"
     return flash_object_errors(@image) unless @image.save
 
-    if !@image.process_image(strip: @observation.gps_hidden)
-      name = @image.original_name
-      name = "???" if name.empty?
-      flash_error(:runtime_image_invalid_image.t(name: name))
-      flash_object_errors(@image)
-    else
+    if @image.process_image(strip: @observation.gps_hidden)
       @observation.add_image(@image)
       @image.log_create_for(@observation)
       name = @image.original_name
       name = "##{@image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded_image.t(name: name))
       update_projects(@image, params[:project])
+    else
+      name = @image.original_name
+      name = "???" if name.empty?
+      flash_error(:runtime_image_invalid_image.t(name: name))
+      flash_object_errors(@image)
     end
   end
 
@@ -498,9 +498,7 @@ class ImageController < ApplicationController
       this_state.current = @image
       next_state = this_state.next
     end
-    if !check_permission!(@image)
-      redirect_with_query(action: "show_image", id: @image.id)
-    else
+    if check_permission!(@image)
       @image.log_destroy
       @image.destroy
       flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
@@ -510,6 +508,8 @@ class ImageController < ApplicationController
       else
         redirect_to(action: "list_images")
       end
+    else
+      redirect_with_query(action: "show_image", id: @image.id)
     end
   end
 

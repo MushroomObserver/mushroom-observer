@@ -466,10 +466,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def legal_name
-    if name.to_s != ""
-      name
-    else
+    if name.to_s == ""
       login
+    else
+      name
     end
   end
 

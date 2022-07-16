@@ -864,17 +864,17 @@ class Observation < AbstractModel
   def process_real_vote(naming, vote, value, user)
     downgrade_totally_confident_votes(value, user)
     favorite = adjust_other_favorites(value, other_votes(vote, user))
-    if !vote
+    if vote
+      vote.value = value
+      vote.favorite = favorite
+      vote.save
+    else
       naming.votes.create!(
         user: user,
         observation: self,
         value: value,
         favorite: favorite
       )
-    else
-      vote.value = value
-      vote.favorite = favorite
-      vote.save
     end
   end
 

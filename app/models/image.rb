@@ -680,9 +680,7 @@ class Image < AbstractModel
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
-      if !move_original
-        result = false
-      else
+      if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
@@ -692,6 +690,8 @@ class Image < AbstractModel
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
+      else
+        result = false
       end
     end
     result
