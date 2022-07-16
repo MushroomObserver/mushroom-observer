@@ -483,6 +483,7 @@ class Name < AbstractModel
   scope :with_synonyms, -> { where.not(synonym_id: nil) }
   scope :without_synonyms, -> { where(synonym_id: nil) }
   scope :ok_for_export, -> { where(ok_for_export: true) }
+
   ### Module Name::Taxonomy
   scope :with_rank,
         ->(rank) { where(rank: Name.ranks[rank]) if rank }
@@ -513,6 +514,7 @@ class Name < AbstractModel
               with_correct_spelling
           end
         }
+
   ### Pattern Search
   scope :include_synonyms_of,
         lambda { |name|
