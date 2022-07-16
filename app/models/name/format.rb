@@ -63,7 +63,7 @@ module Name::Format
     else
       # Remove author and preceding space after markup
       display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1 ").
-                   strip_squeeze
+        strip_squeeze
     end
   end
 
