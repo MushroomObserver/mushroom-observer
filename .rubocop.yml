@@ -121,6 +121,9 @@ Lint/UnmodifiedReduceAccumulator: # new in 1.1
 Lint/UselessRuby2Keywords: # new in 1.23
   Enabled: true
 
+Naming/BlockForwarding: # new in 1.24
+  Enabled: true
+
 Performance/AncestorsInclude: # new in 1.7
   Enabled: true
 Performance/BigDecimalWithNumericArgument: # new in 1.7
