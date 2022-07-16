@@ -142,6 +142,6 @@ class LookupsController < ApplicationController
       else
         name.correct_spelling || name
       end
-    end.reject(&:nil?)
+    end.compact
   end
 end

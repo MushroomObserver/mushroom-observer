@@ -82,7 +82,7 @@ module Query
           else
             result + find_matching_names(val)
           end
-        end.uniq.reject(&:nil?)
+        end.uniq.compact
       end
 
       def find_matching_names(name)
@@ -104,7 +104,7 @@ module Query
       end
 
       def add_synonyms(min_names)
-        ids = min_names.map { |min_name| min_name[2] }.reject(&:nil?)
+        ids = min_names.map { |min_name| min_name[2] }.compact
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +

@@ -4,7 +4,8 @@
 module API2::Uploads
   def prepare_upload
     uploads = [upload_from_url, upload_from_file, upload_from_http]
-    uploads.reject!(&:nil?)
+debugger
+    uploads.compact!
     raise(API2::TooManyUploads.new) if uploads.length > 1
 
     uploads.first

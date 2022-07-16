@@ -171,7 +171,7 @@ module Query::Modules::HighLevelQueries
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
     add_needed_to_results(needed: needed, args: args) if needed.any?
-    ids.map { |id| @results[id] }.reject(&:nil?)
+    ids.map { |id| @results[id] }.compact
   end
 
   # Clear out the results cache.  Useful if you need to reload results with

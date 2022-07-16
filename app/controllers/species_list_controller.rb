@@ -314,7 +314,7 @@ class SpeciesListController < ApplicationController
         Name.find_by(text_name: name)
       end
     end
-    @names.reject!(&:nil?)
+    @names.compact!
     case params[:commit]
     when :name_lister_submit_spl.l
       if @user

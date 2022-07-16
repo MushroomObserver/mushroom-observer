@@ -229,7 +229,7 @@ module ObservationsController::FormHelpers
     # Get list of images first.
     images = (arg || "").split(" ").map do |id|
       Image.safe_find(id.to_i)
-    end.reject(&:nil?)
+    end.compact
 
     # Now check for edits.
     images.each do |image|
