@@ -1723,11 +1723,14 @@ class NameTest < UnitTestCase
     assert_name_list_equal(
       [], names(:agaricus_campestris).children
     )
-    assert_name_list_equal([names(:agaricus_campestras),
+    assert_name_list_equal([names(:sect_agaricus)],
+                           names(:agaricus).children(all: false), :sort)
+    assert_name_list_equal([names(:sect_agaricus),
+                            names(:agaricus_campestras),
                             names(:agaricus_campestris),
                             names(:agaricus_campestros),
                             names(:agaricus_campestrus)],
-                           names(:agaricus).children, :sort)
+                           names(:agaricus).children(all: true), :sort)
   end
 
   def test_ancestors_2
