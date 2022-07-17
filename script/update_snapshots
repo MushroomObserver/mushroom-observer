@@ -8,6 +8,7 @@ public=$app_root/public
 
 echo "image_id	observation_id" > $public/observation_images.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select image_id, observation_id from observation_images' >> $public/observation_images.csv
+# Maintain a copy of the old file for backwards compatibility.
 cp $public/observation_images.csv $public/images_observations.csv
 
 echo "id	name	north	south	east	west	high	low" > $public/locations.csv
