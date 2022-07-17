@@ -62,7 +62,7 @@ class GraphqlController < ApplicationController
   def http_auth_header
     headers = request.headers
     if headers["authorization"].present?
-      return headers["authorization"].split(" ").last
+      return headers["authorization"].split.last
       # else
       # Don't error if there's no token, we're just checking
       # errors.add(:token, "Missing token")

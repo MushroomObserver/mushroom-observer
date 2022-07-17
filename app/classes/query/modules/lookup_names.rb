@@ -169,7 +169,7 @@ module Query
         end
         # Remove species if genus also present.
         text_names.reject do |text_name|
-          text_name.include?(" ") && genera[text_name.split(" ").first]
+          text_name.include?(" ") && genera[text_name.split.first]
         end.uniq
       end
 
