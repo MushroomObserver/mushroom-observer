@@ -868,7 +868,7 @@ class LocationController < ApplicationController
     @matches, @others = (
       split_out_matches(all, @where) ||
       split_out_matches(all, @where.split(",").first) ||
-      split_out_matches(all, @where.split(" ").first) ||
+      split_out_matches(all, @where.split.first) ||
       [nil, all]
     )
   end
