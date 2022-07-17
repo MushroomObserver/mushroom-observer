@@ -396,7 +396,7 @@ class QueryTest < UnitTestCase
             { observation_images: :images }
           ]
         },
-        :'users.reviewer'
+        :"users.reviewer"
       ]
     )
     assert_match(/names.reviewer_id = users.id/, sql)
