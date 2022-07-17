@@ -1,6 +1,7 @@
 //= require jquery3
 //= require jquery_extensions
 //= require jquery_ujs
+//= require popper
 //= require bootstrap
 //= require jstz
 //= require autocomplete

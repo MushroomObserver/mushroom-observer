@@ -51,8 +51,8 @@ gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 
-# Use bootstrap style generator
-gem("bootstrap-sass")
+# Use bootstrap style and JS generator
+gem("bootstrap", "~> 4.6.1")
 
 # Use SCSS for stylesheets
 gem("sassc-rails")
