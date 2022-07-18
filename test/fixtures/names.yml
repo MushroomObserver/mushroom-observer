@@ -1245,3 +1245,13 @@ eukarya:
   search_name:       Eukarya
   sort_name:         Eukarya
   display_name: "**__Eukarya_**"
+
+# This should actually be section Leucoagaricus, but I was too lazy to add the genus Leucoagaricus!
+sect_agaricus:
+  <<: *DEFAULTS
+  rank: <%= Name.ranks[:Section] %>
+  text_name:    "Agaricus sect. Agaricus"
+  search_name:  "Agaricus sect. Agaricus"
+  display_name: "**__Agaricus__** sect. **__Agaricus__**"
+  sort_name:    "Agaricus  {2sect.  !Agaricus"
+  classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"

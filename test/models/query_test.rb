@@ -463,7 +463,8 @@ class QueryTest < UnitTestCase
                   names(:agaricus).id.to_s,
                   names(:agaricus_campestrus).id.to_s,
                   names(:agaricus_campestras).id.to_s,
-                  names(:agaricus_campestros).id.to_s].sort,
+                  names(:agaricus_campestros).id.to_s,
+                  names(:sect_agaricus).id.to_s].sort,
                  query.select_values(where: 'text_name LIKE "Agaricus%"').
                        map(&:to_s).sort)
 
@@ -479,8 +480,10 @@ class QueryTest < UnitTestCase
     assert_equal({ "id" => Name.first.id }, query.select_one)
 
     assert_equal([Name.first], query.find_by_sql(limit: 1))
-    assert_equal(@agaricus.children.sort_by(&:id),
-                 query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
+    assert_name_list_equal(
+      @agaricus.children(all: true).sort_by(&:id),
+      query.find_by_sql(where: 'text_name LIKE "Agaricus %"')
+    )
   end
 
   def test_tables_used
