@@ -44,9 +44,7 @@ xml.tag!(
         end
       end
     end
-  else
-    if object.synonym_id
-      xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
-    end
+  elsif object.synonym_id
+    xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
   end
 end

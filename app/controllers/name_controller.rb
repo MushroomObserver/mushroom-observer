@@ -1048,14 +1048,12 @@ class NameController < ApplicationController
           "Ambiguous names given, including: " \
           "#{sorter.multiple_line_strs[0].inspect}"
         )
-      else
+      elsif Rails.env.test?
         # This error message is no longer necessary.
-        if Rails.env.test?
-          flash_error(
-            "Unrecognized names given, including: " \
-            "#{sorter.new_name_strs[0].inspect}"
-          )
-        end
+        flash_error(
+          "Unrecognized names given, including: " \
+          "#{sorter.new_name_strs[0].inspect}"
+        )
       end
       @list_members = sorter.all_line_strs.join("\r\n")
       @new_names    = sorter.new_name_strs.uniq.sort

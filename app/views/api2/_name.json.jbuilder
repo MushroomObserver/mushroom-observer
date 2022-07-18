@@ -27,6 +27,6 @@ if detail
   if object.comments.any?
     json.comments(object.comments.map { |x| json_comment(x) })
   end
-else
-  json.synonym_id(object.synonym_id) if object.synonym_id
+elsif object.synonym_id
+  json.synonym_id(object.synonym_id)
 end
