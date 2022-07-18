@@ -19,7 +19,7 @@ class IpStatsTest < UnitTestCase
               File.size(dest_file) == File.size(src_file) &&
               (File.mtime(dest_file) - File.mtime(src_file)).abs < 1e-3
 
-    File.write(dest_file, File.open(src_file, "r").read)
+    File.write(dest_file, File.read(src_file))
     FileUtils.touch(dest_file, mtime: File.mtime(src_file))
     IpStats.reset!
   end
