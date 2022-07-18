@@ -104,7 +104,7 @@ module Query
       end
 
       def add_synonyms(min_names)
-        ids = min_names.map { |min_name| min_name[2] }.compact
+        ids = min_names.filter_map { |min_name| min_name[2] }
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +

@@ -57,13 +57,13 @@ class MapSet
   end
 
   def underlying_locations
-    @objects.map do |obj|
+    @objects.filter_map do |obj|
       if obj.is_location?
         obj
       elsif obj.is_observation? && obj.location
         obj.location
       end
-    end.compact.uniq
+    end.uniq
   end
 
   def is_point?

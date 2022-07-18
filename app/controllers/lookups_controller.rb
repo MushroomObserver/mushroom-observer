@@ -136,12 +136,12 @@ class LookupsController < ApplicationController
   end
 
   def fix_name_matches(matches, accepted)
-    matches.map do |name|
+    matches.filter_map do |name|
       if accepted && name.deprecated
         name.approved_synonyms.first
       else
         name.correct_spelling || name
       end
-    end.compact
+    end
   end
 end
