@@ -237,7 +237,7 @@ class AbstractModel < ApplicationRecord
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
-  #   def show_observation
+  #   def show
   #     @observation = Observation.find(params[:id].to_s)
   #     @observation.update_view_stats
   #     ...

@@ -583,8 +583,8 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          redirect_to(controller: :observer,
-                      action: :show_observation,
+          redirect_to(controller: :observations,
+                      action: :show,
                       id: @set_observation)
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,

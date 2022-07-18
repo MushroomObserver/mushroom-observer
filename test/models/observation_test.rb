@@ -919,7 +919,7 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       # Note that 'when' gets automagically converted to Date
-      Observation.create!(name_id: fungi.id, when: Time.zone.now + 2.days)
+      Observation.create!(name_id: fungi.id, when: 2.days.from_now)
     end
     assert_match(:validate_future_time.t, exception.message)
   end

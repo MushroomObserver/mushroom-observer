@@ -21,7 +21,8 @@ xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
         end
       end
     elsif @api.results.empty?
-      xml.results(number: 0) {}
+      # cop gives false positive
+      xml.results(number: 0) {} # rubocop disable:Lint/EmptyBlock
     else
       xml.results(number: @api.results.length) do
         xml.target! << render(

@@ -17,8 +17,8 @@
     y = ((90.0 - lat) / 1.80).round(6)
   end
 
-  map_url = url_for(add_query_param(controller: :observer,
-                                    action: :map_observation,
+  map_url = url_for(add_query_param(controller: :observations,
+                                    action: :map,
                                     id: observation.id))
 %>
 
@@ -27,7 +27,8 @@
     <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
     <span class="pull-right inline">
       <%= link_with_query(:show_observation_hide_map.t,
-                          action: :hide_thumbnail_map, id: @observation.id) %>
+                          controller: :javascript, action: :hide_thumbnail_map,
+                          id: @observation.id) %>
     </span>
   </div>
 </div>

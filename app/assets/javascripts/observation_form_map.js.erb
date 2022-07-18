@@ -1,10 +1,12 @@
 // Observation Form Map - Lat/Long/Alt Helper
 /* globals $, google */
 
+// This key is configured in Google Cloud Platform.
+// It is a public key that accepts requests only from mushroomobserver.org/*
 var GMAPS_API_SCRIPT = "https://maps.googleapis.com/maps/api/js?key=" +
                        "AIzaSyCxT5WScc3b99_2h2Qfy5SX6sTnE1CX3FA";
 
-// ./observer/create_observation
+// ./observations/new
 $(document).ready(function() {
   var opened = false;
 
@@ -52,7 +54,7 @@ $(document).ready(function() {
 
       // check if `Lat` & `Lng` fields are populated on load if so, drop a
       // pin on that location and center otherwise, check if a `Where` field
-      // has been prepopulated and use that to focus map 
+      // has been prepopulated and use that to focus map
       if ($(latInput) !== '' && $(lngInput).val() !== '') {
         var location = {
           lat: parseFloat($(latInput).val()),

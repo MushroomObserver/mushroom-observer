@@ -1723,11 +1723,14 @@ class NameTest < UnitTestCase
     assert_name_list_equal(
       [], names(:agaricus_campestris).children
     )
-    assert_name_list_equal([names(:agaricus_campestras),
+    assert_name_list_equal([names(:sect_agaricus)],
+                           names(:agaricus).children(all: false), :sort)
+    assert_name_list_equal([names(:sect_agaricus),
+                            names(:agaricus_campestras),
                             names(:agaricus_campestris),
                             names(:agaricus_campestros),
                             names(:agaricus_campestrus)],
-                           names(:agaricus).children, :sort)
+                           names(:agaricus).children(all: true), :sort)
   end
 
   def test_ancestors_2
@@ -2444,7 +2447,7 @@ class NameTest < UnitTestCase
                     less_observed_name.observation_count,
                     "Test needs different fixtures")
     less_observed_naming = Naming.where(name: less_observed_name).first
-    less_observed_naming.update(created_at: Time.zone.now + 1.hour)
+    less_observed_naming.update(created_at: 1.hour.from_now)
     assert_equal(
       more_observed_name,
       more_observed_name.more_popular(less_observed_name),
@@ -2466,7 +2469,7 @@ class NameTest < UnitTestCase
                  later_proposed_name.observation_count,
                  "Test needs different fixtures")
     later_proposed_naming = Naming.where(name: later_proposed_name).first
-    later_proposed_naming.update(created_at: Time.zone.now + 1.hour)
+    later_proposed_naming.update(created_at: 1.hour.from_now)
 
     assert_equal(
       later_proposed_name,
@@ -2595,6 +2598,10 @@ class NameTest < UnitTestCase
     # group with author
     assert_equal("**__Groupauthored__** group",
                  names(:authored_group).display_name_without_authors)
+
+    # Autonym
+    assert_equal("**__Agaricus__** sect. **__Agaricus__**",
+                 names(:sect_agaricus).display_name_without_authors)
   end
 
   def test_format_autonym

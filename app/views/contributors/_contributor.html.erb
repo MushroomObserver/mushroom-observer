@@ -17,7 +17,7 @@
             <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
             <%= link_to(
                   :Observations.t,
-                  observer_observations_by_user_path(id: user.id)
+                  observations_path(user: user.id)
                 ) %>
           </td>
         </tr>

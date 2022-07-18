@@ -155,7 +155,7 @@ class Location < AbstractModel
   \s*$/x
 
   ALTITUDE_REGEX = /^\s*
-    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
+    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′]*)
   \s*$/x
 
   # Shared logic between latitude and longitude

@@ -158,18 +158,18 @@ module Name::Taxonomy
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
     @accepted_genus ||= \
-    begin
-      accepted = approved_name
-      return unless accepted.text_name.include?(" ")
-
-      genus_name = accepted.text_name.split(" ", 2).first
-      genera     = Name.with_correct_spelling.where(text_name: genus_name)
-      accepted   = genera.reject(&:deprecated)
-      genera     = accepted if accepted.any?
-      nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
-      genera     = nonsensu if nonsensu.any?
-      genera.first
-    end
+      begin
+        accepted = approved_name
+        if accepted.text_name.include?(" ")
+          genus_name = accepted.text_name.split(" ", 2).first
+          genera     = Name.with_correct_spelling.where(text_name: genus_name)
+          accepted   = genera.reject(&:deprecated)
+          genera     = accepted if accepted.any?
+          nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
+          genera     = nonsensu if nonsensu.any?
+          genera.first
+        end
+      end
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.

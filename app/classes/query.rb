@@ -144,7 +144,7 @@
 #  This is how it should work: (this code would be in a controller, with access
 #  to the handy helper method ApplicationController#find_or_create_query)
 #
-#    # The setup all happens in show_observation:
+#    # The setup all happens in observations/show:
 #    outer = find_or_create_query(:Observation)
 #    inner = create_query(:Image, :inside_observation, outer: outer,
 #                         observation: @observation)
@@ -160,7 +160,7 @@
 #    link_to("Next",
 #      add_query_param({action: :next_image, id: image.id}, query))
 #    link_to("Back",
-#      add_query_param({action: :show_observation, id: image.id, query))
+#      add_query_param({action: :show, id: image.id, query))
 #
 #    # And this is how prev and next work:
 #    query = find_or_create_query(:Image, current: params[:id].to_s)
@@ -174,9 +174,9 @@
 #    end
 #
 #  *NOTE*: The inner query knows about the outer query.  So, when show_image
-#  links back to show_observation (see above), and show_observation looks up
+#  links back to observations/show (see above), and observations/show looks up
 #  the inner query, even though the inner query is an image query, it should
-#  still know to use the outer query.  (Normally, show_observation would throw
+#  still know to use the outer query.  (Normally, observations/show would throw
 #  away any non-observation-based query it is passed.)
 #
 #  == Caching

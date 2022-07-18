@@ -167,7 +167,7 @@ jQuery.extend(MOAutocompleter.prototype, {
       elem.keyup(function(event) { return this2.our_keyup(event) });
       elem.keypress(function(event) { return this2.our_keypress(event) });
       elem.change(function(event) { return this2.our_change(false) });
-      $(window).unload(function(event) { return this2.our_unload() });
+      $(window).on('unload', function(event) { return this2.our_unload() });
     }
 
     // Disable default browser autocomplete.

@@ -11,7 +11,7 @@ class UsersController < ApplicationController
 
   # User index
   def index
-    return patterned_index if params[:pattern].present?
+    return user_search if params[:pattern].present?
 
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
@@ -86,13 +86,13 @@ class UsersController < ApplicationController
   private
 
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def patterned_index
+  def user_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) && (user = User.safe_find(pattern))
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :pattern_search, pattern: pattern)
-      show_selected_users(query)
+      show_selected_users(query, no_hits_title: :title_for_user_search.t)
     end
   end
 

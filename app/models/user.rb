@@ -575,8 +575,8 @@ class User < AbstractModel
     @preferred_herbarium ||= \
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
-                         order(created_at: :desc).
-                         pluck(:herbarium_id).first
+                       order(created_at: :desc).
+                       pluck(:herbarium_id).first
         if herbarium_id.blank?
           personal_herbarium
         else
@@ -607,19 +607,17 @@ class User < AbstractModel
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Return an Array of SpeciesList's that User owns or that are attached to a
-  # Project that the User is a member of.
-  def all_editable_species_lists(include: nil)
+  # Return an ActiveRecord::Association of SpeciesList's that User owns or that
+  # are attached to a Project that the User is a member of.
+  def all_editable_species_lists
     @all_editable_species_lists ||=
-      calc_all_editable_species_lists(include)
-  end
-
-  def calc_all_editable_species_lists(include)
-    return species_lists.includes(include) if projects_member.none?
-
-    SpeciesList.includes(include).
-      where(SpeciesList[:user_id].eq(id).
-      or(SpeciesList[:id].in(species_lists_in_users_projects))).uniq
+      if projects_member.any?
+        SpeciesList.
+          where(SpeciesList[:user_id].eq(id).
+          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
+      else
+        species_lists
+      end
   end
 
   def species_lists_in_users_projects
@@ -753,7 +751,7 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
+       File.mtime(MO.user_primer_cache_file) < 1.day.ago
       data = primer_data
       write_primer_file(data)
       data

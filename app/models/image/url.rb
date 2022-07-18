@@ -46,9 +46,7 @@ class Image
         transferred
       when /^file:/
         local_file_exists?(spec)
-      when /^http:/
-        remote_file_exists?(spec)
-      when /^https:/
+      when /^https?:/
         remote_file_exists?(spec)
       else
         raise("Invalid image source test spec for " \

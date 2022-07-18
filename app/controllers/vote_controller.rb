@@ -4,7 +4,7 @@ class VoteController < ApplicationController
   before_action :login_required # except: [:show_votes]
 
   # Show breakdown of votes for a given naming.
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs: params[:id] (naming)
   # Outputs: @naming
   def show_votes
@@ -22,8 +22,8 @@ class VoteController < ApplicationController
     naming = Naming.find(params[:id].to_s)
     observation = naming.observation
     observation.change_vote(naming, params[:value])
-    redirect_with_query(controller: :observer,
-                        action: :show_observation,
+    redirect_with_query(controller: :observations,
+                        action: :show,
                         id: observation.id)
   end
 
@@ -45,8 +45,8 @@ class VoteController < ApplicationController
         flashed = true
       end
     end
-    redirect_with_query(controller: :observer,
-                        action: :show_observation,
+    redirect_with_query(controller: :observations,
+                        action: :show,
                         id: observation.id)
   end
 

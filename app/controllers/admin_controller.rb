@@ -15,8 +15,8 @@ class AdminController < ApplicationController
     else
       # (sleight of hand to prevent localization_file_text from complaining
       # about missing test_flash_redirection_title tag)
-      @title = "test_flash_redirection_title".to_sym.t
-      # debugger
+      # Disable cop in order to use sleight of hand
+      @title = "test_flash_redirection_title".to_sym.t # rubocop:disable Lint/SymbolConversion
       render(layout: "application", html: "")
     end
   end

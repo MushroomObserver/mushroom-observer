@@ -283,37 +283,6 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observer: {
-    advanced_search: {},
-    create_observation: {},
-    destroy_observation: {},
-    download_observations: {},
-    edit_observation: {},
-    guess: {},
-    hide_thumbnail_map: {},
-    index_observation: {},
-    list_observations: {},
-    map_observation: {},
-    map_observations: {},
-    next_observation: {},
-    observation_search: {},
-    observations_at_location: {},
-    observations_at_where: {},
-    observations_by_name: {},
-    observations_by_user: {},
-    observations_for_project: {},
-    observations_of_look_alikes: {},
-    observations_of_name: {},
-    observations_of_related_taxa: {},
-    prev_observation: {},
-    print_labels: {},
-    recalc: {},
-    show_location_observations: {},
-    show_notifications: {},
-    show_obs: {},
-    show_observation: {},
-    suggestions: {}
-  },
   pivotal: {
     index: {}
   },
@@ -532,7 +501,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do
+MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   if Rails.env.development?
     mount(GraphiQL::Rails::Engine, at: "/graphiql",
                                    graphql_path: "/graphql#execute")
@@ -543,7 +512,6 @@ MushroomObserver::Application.routes.draw do
     post("/graphql", to: "graphql#execute")
   end
 
-  get "policy/privacy"
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -602,79 +570,57 @@ MushroomObserver::Application.routes.draw do
   # Default page is /rss_logs
   root "rss_logs#index"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  # Route /123 to /observations/123.
+  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
 
   # ----- Admin: no resources, just actions ------------------------------------
-  match("admin/change_banner", to: "admin#change_banner", via: [:get, :post])
-  match("admin/test_flash_redirection",
+  match("/admin/change_banner", to: "admin#change_banner", via: [:get, :post])
+  match("/admin/test_flash_redirection",
         to: "admin#test_flash_redirection", via: [:get, :post])
-  get("admin/w3c_tests", to: "admin#w3c_tests")
-  # no legacy reroutes, these should not be public
+  get("/admin/w3c_tests", to: "admin#w3c_tests")
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
-  redirect_legacy_actions(
-    old_controller: "article", actions: [:controller, :show, :list, :index]
-  )
 
   # ----- Authors: no resources, just forms ------------------------------------
-  match("authors/email_request(/:id)",
+  match("/authors/email_request(/:id)",
         to: "authors#email_request", via: [:get, :post], id: /\d+/,
         as: "authors_email_request")
-  match("authors/review(/:id)",
+  match("/authors/review(/:id)",
         to: "authors#review", via: [:get, :post], id: /\d+/,
         as: "authors_review")
-  get("observer/author_request", to: redirect(path: "authors#email_request"))
-  get("observer/review_authors", to: redirect(path: "authors#review"))
 
   # ----- Checklist: just the show --------------------------------------
-  get "checklist", to: "checklists#show"
-  get("/observer/checklist", to: redirect(path: "checklists#show"))
+  get "/checklist", to: "checklists#show"
 
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
   # ----- Emails: no resources, just forms -------------------------------------
-  match("emails/ask_observation_question(/:id)",
+  match("/emails/ask_observation_question(/:id)",
         to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_observation_question")
-  match("emails/ask_user_question(/:id)",
+  match("/emails/ask_user_question(/:id)",
         to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_user_question")
-  match("emails/ask_webmaster_question(/:id)",
+  match("/emails/ask_webmaster_question(/:id)",
         to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
         as: "emails_ask_webmaster_question")
-  match("emails/commercial_inquiry(/:id)",
+  match("/emails/commercial_inquiry(/:id)",
         to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
         as: "emails_commercial_inquiry")
-  match("emails/features(/:id)",
+  match("/emails/features(/:id)",
         to: "emails#features", via: [:get, :post], id: /\d+/,
         as: "emails_features")
-  match("emails/merge_request(/:id)",
+  match("/emails/merge_request(/:id)",
         to: "emails#merge_request", via: [:get, :post], id: /\d+/,
         as: "emails_merge_request")
-  match("emails/name_change_request(/:id)",
+  match("/emails/name_change_request(/:id)",
         to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
         as: "emails_name_change_request")
 
-  get("observer/ask_observation_question",
-      to: redirect(path: "emails#ask_observation_question"))
-  get("observer/ask_user_question",
-      to: redirect(path: "emails#ask_user_question"))
-  get("observer/ask_webmaster_question",
-      to: redirect(path: "emails#ask_webmaster_question"))
-  get("observer/commercial_inquiry",
-      to: redirect(path: "emails#commercial_inquiry"))
-  get("observer/email_features",
-      to: redirect(path: "emails#features"))
-  get("observer/email_merge_request",
-      to: redirect(path: "emails#merge_request"))
-  get("observer/email_name_change_request",
-      to: redirect(path: "emails#name_change_request"))
-
   # ----- Export: no resources ------------------------------------
-  get("export/set_export_status(/:id)",
+  get("/export/set_export_status(/:id)",
       to: "export#set_export_status",
       id: /\d+/, as: "export_set_export_status")
 
@@ -682,10 +628,6 @@ MushroomObserver::Application.routes.draw do
   resources :glossary_terms, id: /\d+/ do
     get "show_past", on: :member
   end
-  redirect_legacy_actions(
-    old_controller: "glossary", new_controller: "glossary_terms",
-    actions: [:controller, :show, :list, :index, :show_past]
-  )
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -695,98 +637,60 @@ MushroomObserver::Application.routes.draw do
     resources :nexts, only: [:show], id: /\d+/
   end
   resources :herbaria, id: /\d+/
-  # Herbaria: standard redirects of Herbarium legacy actions
-  redirect_legacy_actions(
-    old_controller: "herbarium", new_controller: "herbaria",
-    actions: [:show, :list, :index]
-  )
-  # Herbaria: non-standard redirects of legacy Herbarium actions
-  # Rails routes currently accept only template tokens
-  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
-  get("/herbarium/index", to: redirect("/herbaria"))
-  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
-  # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
   # ----- Info: no resources, just forms and pages ----------------------------
-  get("info/how_to_help", to: "info#how_to_help")
-  get("info/how_to_use", to: "info#how_to_use")
-  get("info/intro", to: "info#intro")
-  get("info/news", to: "info#news")
-  get("info/search_bar_help", to: "info#search_bar_help")
-  get("info/site_stats", to: "info#site_stats")
-  match("info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
-  get("info/translators_note", to: "info#translators_note")
+  get("/info/how_to_help", to: "info#how_to_help")
+  get("/info/how_to_use", to: "info#how_to_use")
+  get("/info/intro", to: "info#intro")
+  get("/info/news", to: "info#news")
+  get("/info/search_bar_help", to: "info#search_bar_help")
+  get("/info/site_stats", to: "info#site_stats")
+  match("/info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
+  get("/info/translators_note", to: "info#translators_note")
 
   # ----- Javascript: utility actions  ----------------------------
-  get("javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
-  get("javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
-  get("javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
+  get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
+  get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
+  get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
-  get("observer/how_to_help", to: redirect("info/how_to_help"))
-  get("observer/how_to_use", to: redirect("info/how_to_use"))
-  get("observer/intro", to: redirect("info/intro"))
-  get("observer/news", to: redirect("info/news"))
-  get("observer/search_bar_help", to: redirect("info/search_bar_help"))
-  get("observer/show_site_stats", to: redirect("info/site_stats"))
-  get("observer/textile", to: redirect("info/textile_sandbox"))
-  get("observer/textile_sandbox", to: redirect("info/textile_sandbox"))
-  get("observer/translators_note", to: redirect("info/translators_note"))
+  # ----- Observations: standard actions  ----------------------------
+  resources :observations do
+    member do
+      get("map")
+      get("suggestions")
+    end
+    collection do
+      get("map")
+      get("download")
+      get("print_labels")
+    end
+  end
 
-  # ----- Publications: standard actions  ----------------------------
+  # ----- Policy: one route  --------------------------------------------------
+  get("/policy/privacy")
+
+  # ----- Publications: standard actions  -------------------------------------
   resources :publications
 
   # ----- RssLogs: nonstandard actions ----------------------------------------
   # These routes must go before resources, or it will try to match
   # "rss" to an rss_log
+  # resources :rss_logs, only: [:show, :index]
   get("/activity_logs/rss", to: "rss_logs#rss", as: "activity_logs_rss")
   get("/activity_logs", to: "rss_logs#index", as: "activity_logs")
   get("/activity_logs/:id", to: "rss_logs#show", as: "activity_log")
 
-  # ----- RssLogs: standard actions with aliases ------------------------------
-  # resources :rss_logs, only: [:show, :index]
-  get("/observer/index", to: redirect("/activity_logs"))
-  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  post("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/show_rss_log(/:id)",
-      to: redirect(path: "/activity_logs", params: { id: /\d+/ }))
-  get("/observer/rss", to: redirect("/activity_logs/rss"))
-
   # ----- Searches: nonstandard actions --------------------------------------
-  match("search/pattern(/:id)",
+  match("/search/pattern(/:id)",
         to: "search#pattern", via: [:get, :post], id: /\d+/,
         as: "search_pattern")
-  match("search/advanced(/:id)",
+  match("/search/advanced(/:id)",
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
-  get("/observer/pattern_search",
-      to: redirect("/search/pattern"))
-  get("/observer/advanced_search_form",
-      to: redirect("/search/advanced"))
-
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
-
-  # Users: standard redirects of Observer legacy actions
-  # redirect_legacy_actions(
-  #   old_controller: "observer", new_controller: "users",
-  #   actions: LEGACY_CRUD_ACTIONS - [:controller, :index, :show_past]
-  # )
-  # Users: non-standard redirects of legacy Observer actions
-  # Rails routes currently accept only template tokens
-  get("/observer/user_search", to: redirect(path: "users"))
-  get("/observer/index_user", to: redirect(path: "users"))
-  get("/observer/list_users", to: redirect(path: "users"))
-  get("/observer/users_by_contribution",
-      to: redirect(path: "contributors"))
-  get("/observer/users_by_name",
-      to: redirect(path: "users", params: { by: "name" }))
-  get("/observer/show_user", to: redirect(path: "user"))
-
-  get("/observer/change_user_bonuses",
-      to: redirect(path: "users#edit"))
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
@@ -794,6 +698,149 @@ MushroomObserver::Application.routes.draw do
     get("ajax/#{action}/:type/:id",
         controller: "ajax", action: action, id: /\S.*/)
   end
+
+  ##############################################################################
+  ###
+  ###
+  ### LEGACY ACTION REDIRECTS ##################################################
+  ###
+  ###
+  ### Note: Only public, bookmarkable GET routes, or routes appearing inside
+  ### translation strings, need to be redirected.
+  ### Form actions do not need redirections. The live site's forms will POST
+  ### or PUT to current action routes.
+
+  # ----- Articles: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "article", actions: [:controller, :show, :list, :index]
+  )
+
+  # ----- Authors: legacy action redirects
+  get("/observer/author_request", to: redirect("/authors/email_request"))
+  get("/observer/review_authors", to: redirect("/authors/review"))
+
+  # ----- Checklist: legacy action redirects
+  get("/observer/checklist", to: redirect("/checklist"))
+
+  # ----- Emails: legacy action redirects
+  get("/observer/ask_observation_question",
+      to: redirect(path: "/emails/ask_observation_question"))
+  get("/observer/ask_user_question",
+      to: redirect(path: "/emails/ask_user_question"))
+  get("/observer/ask_webmaster_question",
+      to: redirect(path: "/emails/ask_webmaster_question"))
+  get("/observer/commercial_inquiry",
+      to: redirect(path: "/emails/commercial_inquiry"))
+  get("/observer/email_features",
+      to: redirect(path: "/emails/features"))
+  get("/observer/email_merge_request",
+      to: redirect(path: "/emails/merge_request"))
+  get("/observer/email_name_change_request",
+      to: redirect(path: "/emails/name_change_request"))
+
+  # ----- Glossary Terms: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "glossary", new_controller: "glossary_terms",
+    actions: [:controller, :show, :list, :index, :show_past]
+  )
+
+  # ----- Herbaria: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "herbarium", new_controller: "herbaria",
+    actions: [:show, :list, :index]
+  )
+
+  # ----- Herbaria: nonstandard legacy action redirects
+  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
+  get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  # Must be the final route in order to give the others priority
+  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+
+  # ----- Info: legacy action redirects ---------------------------
+  get("/observer/how_to_help", to: redirect("/info/how_to_help"))
+  get("/observer/how_to_use", to: redirect("/info/how_to_use"))
+  get("/observer/intro", to: redirect("/info/intro"))
+  get("/observer/news", to: redirect("/info/news"))
+  get("/observer/search_bar_help", to: redirect("/info/search_bar_help"))
+  get("/observer/show_site_stats", to: redirect("/info/site_stats"))
+  get("/observer/textile", to: redirect("/info/textile_sandbox"))
+  get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
+  get("/observer/translators_note", to: redirect("/info/translators_note"))
+
+  # ----- Observations: legacy action redirects ----------------------------
+  get("/observer/observation_search", to: redirect("/observations"))
+  get("/observer/advanced_search", to: redirect("/observations"))
+  get("/observer/index_observation", to: redirect("/observations"))
+  get("/observer/list_observations", to: redirect("/observations"))
+  get("/observer/observations_of_look_alikes(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}&look_alikes=1"
+      end)
+  get("/observer/observations_of_related_taxa(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}&related_taxa=1"
+      end)
+  get("/observer/observations_of_name(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?name=#{req.params[:id]}"
+      end)
+  get("/observer/observations_by_user(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?user=#{req.params[:id]}"
+      end)
+  get("/observer/observations_at_location(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?location=#{req.params[:id]}"
+      end)
+  get("/observer/observations_at_where(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?where=#{req.params[:id]}"
+      end)
+  get("/observer/observations_for_project(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations?project=#{req.params[:id]}"
+      end)
+  get("/observer/show_observation(/:id)",
+      to: redirect do |_path_params, req|
+        "/observations/#{req.params[:id]}"
+      end)
+
+  # ----- RssLogs: legacy action redirects ------------------------------
+  get("/observer/index", to: redirect("/activity_logs"))
+  get("/observer/list_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
+  get("/observer/show_rss_log(/:id)",
+      to: redirect do |_path_params, req|
+        "/activity_logs/#{req.params[:id]}"
+      end)
+  get("/observer/rss", to: redirect("/activity_logs/rss"))
+
+  # ----- Users: legacy action redirects  ----------------------------------
+  get("/observer/user_search", to: redirect(path: "/users"))
+  get("/observer/index_user", to: redirect(path: "/users"))
+  get("/observer/list_users", to: redirect(path: "/users"))
+  get("/observer/users_by_contribution",
+      to: redirect(path: "/contributors"))
+  get("/observer/users_by_name", to: redirect("/users?by=name"))
+  get("/observer/show_user(/:id)",
+      to: redirect do |_path_params, req|
+        "/users/#{req.params[:id]}"
+      end)
+  get("/observer/change_user_bonuses(/:id)",
+      to: redirect do |_path_params, req|
+        "/users/#{req.params[:id]}/edit"
+      end)
+
+  # ----- Search: legacy action redirects ---------------------------------
+  get("/observer/pattern_search",
+      to: redirect("/search/pattern"))
+  get("/observer/advanced_search_form",
+      to: redirect("/search/advanced"))
+
+  ###
+  ###
+  ### END OF LEGACY ACTION REDIRECTS #####################################
 
   # Add support for PATCH and DELETE requests for API.
   api_endpoints.each do |controller, action|

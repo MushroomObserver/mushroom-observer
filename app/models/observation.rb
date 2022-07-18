@@ -180,7 +180,11 @@ class Observation < AbstractModel
                      through: :observation_views,
                      source: :user
 
+  # rubocop:disable Rails/ActiveRecordCallbacksOrder
+  # else Rubocop says: "before_save is supposed to appear before before_destroy"
+  # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
@@ -191,7 +195,12 @@ class Observation < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    "/observations"
+  end
+
+  # Override the default show_action
+  def self.show_action
+    "show"
   end
 
   def is_location?

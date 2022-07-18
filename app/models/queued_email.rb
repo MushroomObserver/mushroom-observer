@@ -509,9 +509,3 @@ class QueuedEmail < AbstractModel
     self.queued_email_note = note
   end
 end
-
-################################################################################
-
-# Tell rdoc not to document Email class.  (But do allow subclasses!)
-class Email # :nodoc:
-end

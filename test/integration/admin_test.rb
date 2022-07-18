@@ -7,7 +7,7 @@ class AdminTest < IntegrationTestCase
     rolf.admin = true
     rolf.save!
     login!(rolf)
-    click(href: /turn_admin_on/)
+    click_mo_link(href: /turn_admin_on/)
     get("/support/review_donations")
     open_form(&:submit)
     # If it fails it renders a simple text message.
@@ -19,16 +19,16 @@ class AdminTest < IntegrationTestCase
     rolf.save!
     login!(rolf)
     assert_equal(rolf.id, User.current_id)
-    click(href: /turn_admin_on/)
+    click_mo_link(href: /turn_admin_on/)
     assert_match(/DANGER: You are in administrator mode/, response.body)
-    click(href: /switch_users/)
+    click_mo_link(href: /switch_users/)
     open_form do |form|
       form.change("id", "mary")
       form.submit
     end
     assert_equal(mary.id, User.current_id)
     assert_match(/DANGER: You are currently logged in as mary/, response.body)
-    click(href: /logout_user/)
+    click_mo_link(href: /logout_user/)
     assert_equal(rolf.id, User.current_id)
     assert_match(/DANGER: You are in administrator mode/, response.body)
   end

@@ -15,7 +15,7 @@
   <div class="row">
     <div class="col-xs-12 col-sm-8 max-width-text">
       <div class="push-down">
-        <%= render(partial: "observer/show_observation",
+        <%= render(partial: "observations/show_observation",
                    locals: { observation: @observation }) %>
       </div>
 
@@ -28,7 +28,7 @@
     </div>
 
     <div class="col-xs-12 col-sm-4">
-      <%= render(partial: "observer/show_images",
+      <%= render(partial: "observations/show_images",
                  locals: { observation: @observation,
                            thumb_size_control: false }) %>
     </div>
