@@ -606,7 +606,7 @@ class LocationController < ApplicationController
         @location.west = -89
       end
 
-    # Submit form.
+      # Submit form.
     end
   end
 
