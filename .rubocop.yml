@@ -377,6 +377,13 @@ Style/AsciiComments:
 Style/DateTime:
   Enabled: false
 
+# This doesn't apply in routes.rb because Rails routes don't accept annotated
+# tokens (at least yet).
+Style/FormatStringToken:
+  Enabled: true
+  Exclude:
+    - "config/routes.rb"
+
 # Rubocop does not enable this cop by default
 # MO uses parentheses
 Style/MethodCallWithArgsParentheses:
