@@ -127,31 +127,44 @@ module Query::Modules::HighLevelQueries
   def paginate_ids(paginator, args = {})
     results_args, args = split_args(args, RESULTS_ARGS)
     expect_args(:paginate_ids, args, PAGINATE_ARGS)
-
-    # Get list of letters used in results.
     if need_letters
-      @result_ids = nil
-      @num_results = nil
-      result_ids(results_args)
-      map = @letters
-      paginator.used_letters = map.values.uniq
-
-      # Filter by letter. (paginator keeps letter upper case, as do we)
-      if (letter = paginator.letter)
-        @result_ids = @result_ids.select { |id| map[id] == letter }
-        @num_results = @result_ids.count
-      end
-      paginator.num_total = num_results(results_args)
-      @result_ids[paginator.from..paginator.to] || []
+      paginate_ids_by_letter(paginator, results_args)
     else
-      paginate_remaining_results(paginator, results_args)
+      paginate_ids_by_number(paginator, results_args)
     end
   end
 
-  def paginate_remaining_results(paginator, results_args)
+  def paginate_ids_by_letter(paginator, results_args)
+    # Get list of letters used in results.
+    @result_ids = nil
+    @num_results = nil
+    result_ids(results_args)
+    map = @letters
+    paginator.used_letters = map.values.uniq
+
+    # Filter by letter. (paginator keeps letter upper case, as do we)
+    if (letter = paginator.letter)
+      @result_ids = @result_ids.select { |id| map[id] == letter }
+      @num_results = @result_ids.count
+    end
     paginator.num_total = num_results(results_args)
-    results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
-    result_ids(results_args) || []
+    @result_ids[paginator.from..paginator.to] || []
+  end
+
+  def paginate_ids_by_number(paginator, results_args)
+    if @result_ids
+      limit_existing_result_ids(paginator)
+    else
+      paginator.num_total = num_results(results_args)
+      results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
+      result_ids(results_args) || []
+    end
+  end
+
+  def limit_existing_result_ids(paginator)
+    paginator.num_total = @result_ids.count
+    @results = @results[paginator.from..paginator.to] if @results
+    @result_ids = @result_ids[paginator.from..paginator.to]
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
