@@ -457,8 +457,6 @@ class Name < AbstractModel
     end
   end
 
-  include ScopesForTimestamps
-
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
   scope :deprecated, -> { where(deprecated: true) }

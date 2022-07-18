@@ -240,7 +240,6 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  include ScopesForTimestamps
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
@@ -258,6 +257,12 @@ class Observation < AbstractModel
 
   scope :with_name, -> { where.not(name: Name.unknown) }
   scope :without_name, -> { where(name: Name.unknown) }
+  scope :without_confident_name, lambda {
+    without_name.or(where(vote_cache: ..0))
+  }
+  scope :needs_identification, lambda {
+    without_confident_name.order(created_at: :desc)
+  }
   # scope :of_name(name, **args)
   #
   # Accepts either a Name instance, a string, or an id as the first argument.

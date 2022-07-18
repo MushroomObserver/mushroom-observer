@@ -148,8 +148,6 @@ class Location < AbstractModel
     end
   end
 
-  include ScopesForTimestamps
-
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
