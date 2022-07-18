@@ -971,15 +971,13 @@ class Image < AbstractModel
     data, old_name, user
   )
     data.map do |id, year, lic|
-      Hash[
-        "user_id" => user.id,
+      { "user_id" => user.id,
         "updated_at" => Time.zone.now,
         "target_type" => "Image",
         "target_id" => id,
         "year" => year,
         "name" => old_name,
-        "license_id" => lic
-      ]
+        "license_id" => lic }
     end
   end
 
