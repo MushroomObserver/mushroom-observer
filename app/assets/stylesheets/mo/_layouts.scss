@@ -1,0 +1,115 @@
+// Most browsers allow you to zoom in or out: let the user decide what
+// an optimal width for a line of text should be.  There is no way for us
+// to decide for them intelligently, since browsers differ so much in how
+// they deal with print views.
+@media screen {
+  .max-width-text {
+      max-width: 600px;
+  }
+
+  .max-width-text-plus-padding {
+      max-width: 650px;
+  }
+
+  .max-width-text-plus-image {
+      max-width: 850px; // 600px text column + 160pm max thumbnail
+  }
+
+  .max-width-text-times-two {
+      max-width: 1200px;
+  }
+}
+
+//
+// small devices, tablets
+// --------------------------------------------------
+
+@media screen and (max-width: 767px) {
+  // #navigation {
+  //   padding-left: 15px;
+  //   padding-right: 15px;
+  // }
+
+  .rss-box-details {
+      height: auto !important;
+  }
+
+  .row-offcanvas {
+      position: relative;
+      -webkit-transition: all .25s ease-out;
+      -o-transition: all .25s ease-out;
+      transition: all .25s ease-out;
+      -webkit-transform: translate3d(0,0,0);
+  }
+
+  .row-offcanvas-right {
+      right: 0;
+  }
+
+  .row-offcanvas-left {
+      left: 0;
+  }
+
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+      right: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+      left: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-right.active {
+      right: $sidebar-max-width;
+  }
+
+  .row-offcanvas-left.active {
+      left: $sidebar-max-width;
+  }
+
+  .sidebar-offcanvas {
+      position: absolute;
+      top: 0;
+      width: $sidebar-max-width;
+  }
+
+  .hidden-overflow-x {
+      overflow-x: hidden !important;
+  }
+
+  .navbar-default {
+      margin: 0;
+  }
+
+  .navbar-form {
+      margin: 0;
+      border: 0;
+  }
+}
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: 767px) {
+  .pull-left-sm {
+      float: left;
+  }
+  .pull-right-sm {
+      float: right;
+  }
+  .push-down-sm {
+      margin-top: 1em;
+  }
+}
+
+//
+// specialized stuff for print view
+// --------------------------------------------------
+
+@media print {
+  #right_side {
+      width: 100% !important;
+  }
+}

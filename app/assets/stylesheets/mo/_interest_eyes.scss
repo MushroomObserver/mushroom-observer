@@ -1,0 +1,34 @@
+//
+// interest eyes
+// --------------------------------------------------
+
+.interest_big {
+  height: 50px;
+  width: 50px;
+}
+
+.interest_small {
+  height: 23px;
+  width: 23px;
+}
+
+@media (min-width: $screen-sm-min) {
+.interest-eyes {
+  position: absolute;
+  top: 0;
+}
+}
+
+@media (min-width: $screen-md-min) {
+.interest-eyes {
+  position: absolute;
+  top: 0;
+}
+}
+
+@media (min-width: $screen-lg-min) {
+.interest-eyes {
+  position: absolute;
+  top: 0;
+}
+}

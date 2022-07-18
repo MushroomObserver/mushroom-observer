@@ -1,0 +1,307 @@
+//
+// overall page style
+// --------------------------------------------------
+
+a {
+  background-color: $LINK_BG_COLOR;
+  font-weight: $LINK_WEIGHT;
+}
+
+a:visited {
+  color: $LINK_VISITED_FG_COLOR;
+  background-color: $LINK_VISITED_BG_COLOR;
+}
+
+a:hover {
+  color: $LINK_HOVER_FG_COLOR;
+  background-color: $LINK_HOVER_BG_COLOR;
+}
+
+body {
+  word-wrap: break-word;
+}
+
+blockquote {
+  font-size: 100%;
+}
+
+.btn, .btn:visited,
+.btn-default, .btn-default:visited {
+  color: $BUTTON_FG_COLOR;
+  @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
+      background-color: $BUTTON_BG_COLOR1;
+  } @else {
+      @include gradient-vertical($BUTTON_BG_COLOR1, $BUTTON_BG_COLOR2);
+  }
+  border-color: $BUTTON_BORDER_COLOR;
+  border-width: $BUTTON_BORDER_WIDTH;
+  border-style: $BUTTON_BORDER_STYLE;
+  border-radius: $BUTTON_BORDER_RADIUS;
+  padding: 4px 8px;
+}
+
+.btn:hover, .btn-default:hover {
+  color: $BUTTON_HOVER_FG_COLOR;
+  @if $BUTTON_HOVER_BG_COLOR1 == $BUTTON_HOVER_BG_COLOR2 {
+      background-color: $BUTTON_HOVER_BG_COLOR1;
+  } @else {
+      @include gradient-vertical($BUTTON_HOVER_BG_COLOR1, $BUTTON_HOVER_BG_COLOR2);
+  }
+  border-color: $BUTTON_HOVER_BORDER_COLOR;
+}
+
+.btn-primary {
+  color: $BUTTON_PRIMARY_FG_COLOR !important;
+  @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
+      background-color: $BUTTON_PRIMARY_BG_COLOR1 !important;
+  } @else {
+      @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
+  }
+  border-color: $BUTTON_PRIMARY_BORDER_COLOR;
+}
+
+.btn-primary:hover {
+  color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
+  @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
+      background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1 !important;
+  } @else {
+      @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
+  }
+  border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
+}
+
+.form-control {
+  border-width: $INPUT_BORDER_WIDTH;
+  border-style: $INPUT_BORDER_STYLE;
+  border-radius: $INPUT_BORDER_RADIUS;
+  padding: 4px 8px 3px 8px;
+}
+
+.help-block {
+  max-width: $help-block-max-width
+}
+.tooltip-inner {
+  word-wrap: break-word;
+}
+
+ul.tight-list {
+  list-style: none;
+  margin-bottom: 0.5em;
+  padding-left: 1em;
+}
+
+.arrow-up {
+  margin-top: 3px;
+}
+
+//
+// style tweaks
+// --------------------------------------------------
+
+.well p {
+  margin: 0;
+  padding: 0;
+}
+
+table.table-compact tr td {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+
+.list-group.list-group-compact .list-group-item {
+  padding: 4px;
+}
+
+.input-group .icon-addon .form-control {
+  border-radius: 0;
+}
+
+input[type=checkbox] {
+  // fixes alignment issue in firefox; bootstrap applies this only to IE9:
+  // margin-top: 1px \9;
+  margin-top: 1px;
+}
+
+[data-role=link]:hover {
+  cursor: pointer;
+}
+
+// got this trick from:
+// http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+.file-field {
+  position: relative;
+  overflow: hidden;
+  input[type=file] {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 100%;
+      min-height: 100%;
+      font-size: 100px;
+      text-align: right;
+      filter: alpha(opacity=0);
+      opacity: 0;
+      background: red;
+      cursor: inherit;
+      display: block;
+  }
+  + span {
+      margin-left: 0.5em;
+  }
+}
+
+//
+// don't bold the labels on image date and geotag helper boxes
+// on create observation page
+
+.image_messages label,
+.geocode_messages label {
+  font-weight: normal;
+}
+
+.dashed-border {
+    border: 5px dashed;
+}
+
+//
+// generally useful classes
+// --------------------------------------------------
+
+.inline {
+  display: inline-block;
+}
+
+.indent {
+  padding-left: 10px !important;
+}
+
+.indent-one-em {
+  padding-left: 1em;
+}
+
+.name-section p {
+  margin: 0;
+  padding-left: 1em;
+  text-indent: -1em;
+}
+
+.obs-notes p {
+  margin: 0;
+  padding: 0;
+  text-indent: 0;
+}
+
+.align-bottom {
+  vertical-align: bottom !important;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-top {
+  vertical-align: top !important;
+}
+
+.align-1px {
+  text-align: 1px;
+}
+
+.bold {
+  font-weight: 800;
+}
+
+.border-none {
+  border: none;
+}
+
+.border-radius-none {
+  border-radius: 0 !important;
+}
+
+form.button_to {
+display: inline;
+margin: 0;
+padding: 0;
+div { display: inline; }
+input[type=submit] {
+  margin: 0;
+  padding: 0;
+  -webkit-appearance: caret;
+  background: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: normal;
+  cursor: pointer;
+  // Note: Use a text-info type utility class to color the button text
+  // color: #2050E0;
+}
+input[type=submit]:hover {
+  text-decoration: underline;
+}
+}
+
+.monospace {
+  font-family: monospace
+}
+
+.push-down {
+  margin-top: 1em;
+}
+
+.push-down-more {
+  margin-top: 1.5em;
+}
+
+.push-below-buttons {
+  margin-top: 23px;
+}
+
+.push-up {
+  margin-bottom: 1em;
+}
+
+.slight-pad {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.pad-box {
+  padding: 5px;
+}
+
+.border-box {
+  border: 1px solid;
+}
+
+.pad-bottom {
+  padding-bottom: .25em;
+}
+
+.pad-top {
+  padding-top: 1em;
+}
+
+.kill-padding {
+  padding: 0 !important;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.nowrap-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vcenter {
+  display: flex;
+  align-items: center;
+}

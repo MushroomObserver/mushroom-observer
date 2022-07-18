@@ -1,3 +1,11 @@
+// Order of loading:
+// App loads the user's theme variables file (prior to any other scss file)
+// mushroom_observer.scss loads this (bootstrap_custom_load_order.scss)
+// This loads Bootstrap functions and variable defaults
+// This loads bootstrap_themed_variables, which assigns the MO theme variables
+// to bootstrap's variables
+// The rest of bootstrap is loaded using those variables
+
 /*!
  * Bootstrap v4.6.1 (https://getbootstrap.com/)
  * Copyright 2011-2021 The Bootstrap Authors
@@ -7,6 +15,9 @@
 
  @import "bootstrap/functions";
  @import "bootstrap/variables";
+
+ @import "bootstrap_themed_variables";
+
  @import "bootstrap/mixins";
  @import "bootstrap/root";
  @import "bootstrap/reboot";

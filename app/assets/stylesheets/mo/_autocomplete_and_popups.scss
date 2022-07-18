@@ -1,0 +1,109 @@
+//
+// autocompletion
+// --------------------------------------------------
+
+div.auto_complete {
+  position: absolute;
+  color: $MENU_FG_COLOR;
+  background-color: $MENU_BG_COLOR;
+  margin: 0px;
+  border: 1px solid $MENU_BORDER_COLOR;
+  padding: 0px;
+  overflow-x: hidden;
+  display: none;
+  text-align: left;
+  z-index: 100;
+
+  ul {
+      margin: 0px;
+      border: 0px;
+      padding: 0px;
+      list-style: none;
+      overflow-x: hidden;
+
+      li {
+          margin: 0px;
+          border: 0px;
+          padding: 2px 4px 2px 4px;
+          white-space: nowrap;
+      }
+
+      li.selected {
+          color: $MENU_HOT_FG_COLOR;
+          background-color: $MENU_HOT_BG_COLOR;
+      }
+  }
+}
+
+//
+// naming vote popup
+// --------------------------------------------------
+
+.popup {
+  z-index: 1000;
+  border: 1px solid $MENU_BORDER_COLOR;
+  color: $MENU_FG_COLOR !important;
+  background-color: $MENU_BG_COLOR !important;
+  display: none;
+}
+
+//
+// popup dialogs
+// --------------------------------------------------
+
+.hidden-links {
+  display: none;
+}
+
+.cover {
+  z-index: 999;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  background: rgba(128,128,128,0.50);
+}
+
+.popup-dialog {
+  z-index: 1000;
+  position: absolute;
+  border: 1px solid $MENU_BORDER_COLOR;
+  padding: 0em 1em;
+  color: $MENU_FG_COLOR !important;
+  background-color: $MENU_BG_COLOR !important;
+  div {
+      margin: 1em 0em;
+      text-align: center;
+      input {
+          margin: 0em 1em;
+      }
+  }
+}
+
+//
+// Help tips on create observation page
+// ------------------------------------------
+.arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: 25px;
+  top: 25px;
+  margin-left: 1px;
+}
+
+.arrow-left {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: 0;
+  top: 25px;
+  margin-left: 1px;
+}

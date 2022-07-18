@@ -1,0 +1,13 @@
+//
+// content
+// --------------------------------------------------
+
+#content {
+  // margin-left: 2em; // NO! This pushes content off screen
+  padding-bottom: 5em;
+}
+
+#title-caption, .sub-caption, .owner-id {
+  font-size: 170%;
+  margin-top: 5px;
+}

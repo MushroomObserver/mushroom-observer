@@ -1,0 +1,12 @@
+//
+// alerts
+// --------------------------------------------------
+
+.alert {
+  margin: 0.5em 1.0em;
+  border-width: $ALERT_BORDER_WIDTH;
+  border-style: $ALERT_BORDER_STYLE;
+  border-radius: $ALERT_BORDER_RADIUS;
+  padding: 0.5em 1.0em;
+  text-align: left;
+}
