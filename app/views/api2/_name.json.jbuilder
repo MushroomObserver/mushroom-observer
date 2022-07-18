@@ -6,7 +6,7 @@ json.name(object.real_text_name.to_s)
 json.author(object.author.to_s) if object.author.present?
 json.rank(object.rank.to_s.downcase)
 json.deprecated(object.deprecated ? true : false)
-json.misspelled(object.is_misspelling? ? true : false)
+json.misspelled(object.is_misspelling?)
 json.citation(object.citation.to_s.tl) if object.citation.present?
 json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
 json.created_at(object.created_at.try(&:utc))
