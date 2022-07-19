@@ -80,7 +80,7 @@ class CacheTest < UnitTestCase
     name = names(:agaricus)
     saved_obs_updated_ats =
       Observation.where(Observation[:text_name].matches("Agaricus%")).
-      pluck(:updated_at)
+      map(&:updated_at)
     new_classification = names(:peltigera).classification
 
     name.update(classification: new_classification)
@@ -94,7 +94,7 @@ class CacheTest < UnitTestCase
     assert_equal(
       saved_obs_updated_ats,
       Observation.where(Observation[:text_name].matches("Agaricus%")).
-        pluck(:updated_at)
+        map(&:updated_at)
     )
   end
 
@@ -102,10 +102,10 @@ class CacheTest < UnitTestCase
   # caches (and does not touch updated_at).
   def test_propagate_lifeform
     name = names(:agaricus)
-    saved_name_updated_ats = Name.with_name_like("Agaricus").pluck(:updated_at)
+    saved_name_updated_ats = Name.with_name_like("Agaricus").map(&:updated_at)
     saved_obs_updated_ats =
       Observation.where(Observation[:text_name].matches("Agaricus %")).
-      pluck(:updated_at)
+      map(&:updated_at)
 
     name.propagate_add_lifeform("lichen")
 
@@ -116,14 +116,14 @@ class CacheTest < UnitTestCase
     assert_equal(
       saved_obs_updated_ats,
       Observation.where(Observation[:text_name].matches("Agaricus %")).
-        pluck(:updated_at)
+        map(&:updated_at)
     )
     Name.with_name_like("Agaricus").each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_name_updated_ats,
-      Name.with_name_like("Agaricus").pluck(:updated_at)
+      Name.with_name_like("Agaricus").map(&:updated_at)
     )
 
     name.propagate_remove_lifeform("lichen")
@@ -135,7 +135,7 @@ class CacheTest < UnitTestCase
     assert_equal(
       saved_obs_updated_ats,
       Observation.where(Observation[:text_name].matches("Agaricus %")).
-        pluck(:updated_at)
+        map(&:updated_at)
     )
 
     Name.with_name_like("Agaricus").each do |nam|
@@ -143,7 +143,7 @@ class CacheTest < UnitTestCase
     end
     assert_equal(
       saved_name_updated_ats,
-      Name.with_name_like("Agaricus").pluck(:updated_at)
+      Name.with_name_like("Agaricus").map(&:updated_at)
     )
   end
 
