@@ -247,8 +247,6 @@ class Image < AbstractModel
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  include ScopesForTimestamps
-
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + subjects + glossary_terms
@@ -392,8 +390,7 @@ class Image < AbstractModel
     when "image/gif" then "gif"
     when "image/png" then "png"
     when "image/tiff" then "tiff"
-    when "image/bmp" then "bmp"
-    when "image/x-ms-bmp" then "bmp"
+    when "image/bmp", "image/x-ms-bmp" then "bmp"
     else; "raw"
     end
   end
