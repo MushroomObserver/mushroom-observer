@@ -1249,6 +1249,8 @@ eukarya:
 # This should actually be section Leucoagaricus, but I was too lazy to add the genus Leucoagaricus!
 sect_agaricus:
   <<: *DEFAULTS
+  created_at: 2007-06-23 20:04:00
+  updated_at: 2007-06-23 20:04:00
   rank: <%= Name.ranks[:Section] %>
   text_name:    "Agaricus sect. Agaricus"
   search_name:  "Agaricus sect. Agaricus"
