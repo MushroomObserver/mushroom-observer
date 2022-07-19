@@ -93,32 +93,49 @@ class CacheTest < UnitTestCase
   # caches (and does not touch updated_at).
   def test_propagate_lifeform
     name = names(:agaricus)
+    saved_name_updated_ats = Name.with_name_like("Agaricus").pluck(:updated_at)
+    saved_obs_updated_ats =
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+      pluck(:updated_at)
+
     name.propagate_add_lifeform("lichen")
-    Observation.where(
-      Observation[:text_name].matches("Agaricus %")
-    ).each do |obs|
-      assert_true(obs.lifeform.include?(" lichen "))
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
-    end
-    Name.where(
-      Name[:text_name].matches("Agaricus %")
-    ).each do |nam|
+
+    Observation.
+      where(Observation[:text_name].matches("Agaricus %")).each do |obs|
+        assert_true(obs.lifeform.include?(" lichen "))
+      end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+        pluck(:updated_at)
+    )
+    Name.with_name_like("Agaricus").each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))
-      assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_name_updated_ats,
+      Name.with_name_like("Agaricus").pluck(:updated_at)
+    )
+
     name.propagate_remove_lifeform("lichen")
-    Observation.where(
-      Observation[:text_name].matches("Agaricus %")
-    ).each do |obs|
-      assert_false(obs.lifeform.include?(" lichen "))
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
-    end
-    Name.where(
-      Name[:text_name].matches("Agaricus %")
-    ).each do |nam|
+
+    Observation.
+      where(Observation[:text_name].matches("Agaricus %")).each do |obs|
+        assert_false(obs.lifeform.include?(" lichen "))
+      end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+        pluck(:updated_at)
+    )
+
+    Name.with_name_like("Agaricus").each do |nam|
       assert_false(nam.lifeform.include?(" lichen "))
-      assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_name_updated_ats,
+      Name.with_name_like("Agaricus").pluck(:updated_at)
+    )
   end
 
   # def test_cronjob_refresh_caches
