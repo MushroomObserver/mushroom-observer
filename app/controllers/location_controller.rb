@@ -513,30 +513,7 @@ class LocationController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
 
     # Render a blank form.
-    if request.method != "POST"
-      user_name = Location.user_name(@user, @display_name)
-      if @display_name
-        @dubious_where_reasons = Location.
-                                 dubious_name?(user_name, true)
-      end
-      @location = Location.new
-      geocoder = Geocoder.new(user_name)
-      if geocoder.valid
-        @location.display_name = @display_name
-        @location.north = geocoder.north
-        @location.south = geocoder.south
-        @location.east = geocoder.east
-        @location.west = geocoder.west
-      else
-        @location.display_name = ""
-        @location.north = 80
-        @location.south = -80
-        @location.east = 89
-        @location.west = -89
-      end
-
-    # Submit form.
-    else
+    if request.method == "POST"
       # Set to true below if created successfully, or if a matching location
       # already exists.  In either case, we're done with this form.
       done = false
@@ -607,6 +584,29 @@ class LocationController < ApplicationController
                       id: @location.id)
         end
       end
+    else
+      user_name = Location.user_name(@user, @display_name)
+      if @display_name
+        @dubious_where_reasons = Location.
+                                 dubious_name?(user_name, true)
+      end
+      @location = Location.new
+      geocoder = Geocoder.new(user_name)
+      if geocoder.valid
+        @location.display_name = @display_name
+        @location.north = geocoder.north
+        @location.south = geocoder.south
+        @location.east = geocoder.east
+        @location.west = geocoder.west
+      else
+        @location.display_name = ""
+        @location.north = 80
+        @location.south = -80
+        @location.east = 89
+        @location.west = -89
+      end
+
+      # Submit form.
     end
   end
 
@@ -868,7 +868,7 @@ class LocationController < ApplicationController
     @matches, @others = (
       split_out_matches(all, @where) ||
       split_out_matches(all, @where.split(",").first) ||
-      split_out_matches(all, @where.split(" ").first) ||
+      split_out_matches(all, @where.split.first) ||
       [nil, all]
     )
   end

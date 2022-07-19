@@ -24,14 +24,7 @@ if object.notes.present?
   json.notes_fields(notes_fields) if notes_fields.any?
   json.notes(other_notes.to_s.tpl_nodiv) if other_notes.present?
 end
-if !detail
-  json.owner_id(object.user_id)
-  json.consensus_id(object.name_id) if object.name_id
-  json.consensus_name(object.text_name) if object.text_name.present?
-  json.location_id(object.location_id) if object.location_id
-  json.location_name(object.where) if object.where.present?
-  json.primary_image_id(object.thumb_image_id) if object.thumb_image_id
-else
+if detail
   json.owner(json_user(object.user))
   json.consensus(json_name(object.name)) if object.name
   json.namings(object.namings.map { |x| json_naming(x) }) \
@@ -68,4 +61,11 @@ else
     if object.sequences.any?
   json.external_links(object.external_links.map { |x| json_external_link(x) }) \
     if object.external_links.any?
+else
+  json.owner_id(object.user_id)
+  json.consensus_id(object.name_id) if object.name_id
+  json.consensus_name(object.text_name) if object.text_name.present?
+  json.location_id(object.location_id) if object.location_id
+  json.location_name(object.where) if object.where.present?
+  json.primary_image_id(object.thumb_image_id) if object.thumb_image_id
 end

@@ -408,12 +408,12 @@ class SiteData
   #   user.contribution = @user_data[user.id][:metric]
   #
   def load_user_data(id = nil)
-    if !id
-      @user_id = nil
-      users = User.all
-    else
+    if id
       @user_id = id.to_i
       users = [User.find(id)]
+    else
+      @user_id = nil
+      users = User.all
     end
 
     # Prime @user_data structure.

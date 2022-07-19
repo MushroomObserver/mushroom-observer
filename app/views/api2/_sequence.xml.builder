@@ -15,9 +15,9 @@ xml.tag!(
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_minimal_object(xml, :observation, :observation, object.observation_id)
-  if !detail
-    xml_minimal_object(xml, :user, :user, object.user_id)
-  else
+  if detail
     xml_detailed_object(xml, :user, object.user)
+  else
+    xml_minimal_object(xml, :user, :user, object.user_id)
   end
 end

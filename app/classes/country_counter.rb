@@ -34,11 +34,11 @@ class CountryCounter
   end
 
   def wheres
-    Observation.where(location: nil).pluck(:where).reject(&:nil?)
+    Observation.where(location: nil).pluck(:where).compact
   end
 
   def location_names
-    Observation.where.not(location: nil).pluck(:where).reject(&:nil?)
+    Observation.where.not(location: nil).pluck(:where).compact
   end
 
   private_class_method def self.load_param_hash(file)

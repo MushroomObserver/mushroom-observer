@@ -99,7 +99,7 @@ class API2
       rescue StandardError => e
         errors << e
         nil
-      end.reject!(&:nil?)
+      end.compact!
     end
 
     # Stub for parsing and validating attributes to pass to record.update.

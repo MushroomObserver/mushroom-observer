@@ -7,14 +7,7 @@ json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
 json.date(object.when)
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
-if !detail
-  json.owner_id(object.user_id)
-  if object.location_id
-    json.location_id(object.location_id)
-  elsif object.where.present?
-    json.location_name(object.where.to_s)
-  end
-else
+if detail
   json.owner(json_user(object.user))
   if object.location
     json.location(json_location(object.location))
@@ -23,4 +16,11 @@ else
   end
   json.comments(object.comments.map { |x| json_comment(x) }) \
     if object.comments.any?
+else
+  json.owner_id(object.user_id)
+  if object.location_id
+    json.location_id(object.location_id)
+  elsif object.where.present?
+    json.location_name(object.where.to_s)
+  end
 end

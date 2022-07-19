@@ -63,7 +63,7 @@ module Query
       def add_indexed_enum_condition(col, vals, allowed, *joins)
         return if vals.empty?
 
-        vals = vals.map { |v| allowed.index_of(v.to_sym) }.reject(&:nil?)
+        vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
         return if vals.empty?
 
         @where << "#{col} IN (#{val.join(",")})"

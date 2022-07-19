@@ -386,7 +386,7 @@ module Name::Parse
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
   def standardize_sp_nov_variants(name)
-    words = name.split(" ")
+    words = name.split
     if words.length > 2
       genus = words[0]
       epithet = words[2]
@@ -401,13 +401,13 @@ module Name::Parse
   # Fix common error: Amanita vaginatae Author var. vaginatae
   # Convert to: Amanita vaginatae var. vaginatae Author
   def fix_autonym(name, author, rank)
-    last_word = name.split(" ").last.gsub(/[()]/, "")
+    last_word = name.split.last.gsub(/[()]/, "")
     if (match = author.to_s.match(
       /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
     ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
-      words = match[2].split(" ")
+      words = match[2].split
       while words.any?
         next_rank = parse_rank_abbreviation(words.shift)
         words.shift
@@ -430,7 +430,7 @@ module Name::Parse
   # in natural varieties such as
   # "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
   def format_autonym(name, author, _rank, deprecated)
-    words = name.split(" ")
+    words = name.split
     if author.blank?
       format_name(name, deprecated)
     elsif words[-7] == words[-1]
@@ -466,7 +466,7 @@ module Name::Parse
   end
 
   def standardize_name(str)
-    words = str.split(" ")
+    words = str.split
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i.positive?
@@ -504,7 +504,7 @@ module Name::Parse
   # Add italics and boldface markup to a standardized name (without author).
   def format_name(str, deprecated = false)
     boldness = deprecated ? "" : "**"
-    words = str.split(" ")
+    words = str.split
     if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]

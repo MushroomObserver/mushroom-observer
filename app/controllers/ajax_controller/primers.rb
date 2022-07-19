@@ -18,7 +18,7 @@ module AjaxController::Primers
     name_ids = Observation.select(:name_id).distinct
     fields = [:id, :text_name, :author, :deprecated, :synonym_id]
     names = Name.where(id: name_ids).select(*fields)
-    synonyms = names.to_a.map(&:synonym_id).reject(&:nil?).uniq
+    synonyms = names.to_a.filter_map(&:synonym_id).uniq
     names | Name.where(deprecated: false, synonym_id: synonyms).select(*fields)
   end
 

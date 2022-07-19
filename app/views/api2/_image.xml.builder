@@ -23,9 +23,7 @@ xml.tag!(
   xml_integer(xml, :width, object.width)
   xml_integer(xml, :height, object.height)
   xml_url(xml, :original_url, object.original_url)
-  if !detail
-    xml_minimal_object(xml, :owner, :user, object.user_id)
-  else
+  if detail
     xml_detailed_object(xml, :owner, object.user)
     xml.files(number: Image.all_sizes.length + 1) do
       (Image.all_sizes + [:original]).each do |size|
@@ -39,5 +37,7 @@ xml.tag!(
         end
       end
     end
+  else
+    xml_minimal_object(xml, :owner, :user, object.user_id)
   end
 end

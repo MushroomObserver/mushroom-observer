@@ -208,9 +208,7 @@ module DescriptionControllerHelpers
       end
 
       # Okay, *now* we can try to save the new description...
-      if !desc.save
-        flash_object_errors(desc)
-      else
+      if desc.save
         dest.log(:log_description_created,
                  user: @user.login,
                  name: desc.unique_partial_format_name,
@@ -218,6 +216,8 @@ module DescriptionControllerHelpers
         flash_notice(:runtime_description_copy_success.
                      t(old: src_title, new: desc.format_name))
         redirect_with_query(action: desc.show_action, id: desc.id)
+      else
+        flash_object_errors(desc)
       end
     end
   end
