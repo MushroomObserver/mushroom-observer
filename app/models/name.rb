@@ -463,6 +463,11 @@ class Name < AbstractModel
   scope :not_deprecated, -> { where(deprecated: false) }
   scope :with_description, -> { where.not(description_id: nil) }
   scope :without_description, -> { where(description_id: nil) }
+  # most used Names without descriptions
+  scope :description_needed, lambda {
+    without_description.joins(:observations).
+      group(:name_id).order(Arel.star.count.desc)
+  }
   scope :description_includes,
         lambda { |text|
           joins(:descriptions).
