@@ -27,7 +27,7 @@ module PaginationHelper
   #   def action
   #     query = create_query(:Name)
   #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, letter_field: 'names.sort_name')
+  #     @names = query.paginate(@pages)
   #   end
   #
   #   # In view:
@@ -41,7 +41,7 @@ module PaginationHelper
     args[:params] = (args[:params] || {}).dup
     args[:params][pages.number_arg] = nil
     str = LETTERS.map do |letter|
-      if !pages.used_letters || pages.used_letters.include?(letter)
+      if pages.used_letters.include?(letter)
         pagination_link(letter, letter, pages.letter_arg, args)
       else
         content_tag(:li, content_tag(:span, letter), class: "disabled")
@@ -55,7 +55,7 @@ module PaginationHelper
 
     pages.letter_arg &&
       (pages.letter || pages.num_total > pages.num_per_page) &&
-      (!pages.used_letters || pages.used_letters.length > 1)
+      (pages.used_letters && pages.used_letters.length > 1)
   end
 
   # Insert numbered pagination links.  I've thrown out the Rails plugin
