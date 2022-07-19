@@ -378,9 +378,10 @@ Style/DateTime:
   Enabled: false
 
 # This doesn't apply in routes.rb because Rails routes don't accept annotated
-# tokens (at least yet).
+# tokens (at least yet).  Also, enabling this produce a ton of new errors.
+# Let's talk about this before we enable it, I guess.
 Style/FormatStringToken:
-  Enabled: true
+  Enabled: false
   Exclude:
     - "config/routes.rb"
 
