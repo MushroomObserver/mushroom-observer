@@ -78,15 +78,24 @@ class CacheTest < UnitTestCase
   # changed in all of a genus's subtaxa (and that updated_at not changed).
   def test_propagate_classification
     name = names(:agaricus)
+    saved_obs_updated_ats =
+      Observation.where(Observation[:text_name].matches("Agaricus%")).
+      pluck(:updated_at)
     new_classification = names(:peltigera).classification
+
     name.update(classification: new_classification)
     name.propagate_classification
+
     Observation.where(
       Observation[:text_name].matches("Agaricus%")
     ).each do |obs|
       assert_equal(new_classification, obs.classification)
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus%")).
+        pluck(:updated_at)
+    )
   end
 
   # Prove that bulk changing lifeform also updates corresponding observation
