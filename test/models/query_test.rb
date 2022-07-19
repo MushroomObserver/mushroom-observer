@@ -558,7 +558,7 @@ class QueryTest < UnitTestCase
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
     )
     assert_equal(@names.size, @pages.num_total)
-    assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_name_list_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -592,7 +592,7 @@ class QueryTest < UnitTestCase
     assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_equal(@ells[3..5], @query.paginate(@pages))
+    assert_name_list_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator
