@@ -436,13 +436,11 @@ Style/AsciiComments:
 Style/DateTime:
   Enabled: false
 
-# This doesn't apply in routes.rb because Rails routes don't accept annotated
-# tokens (at least yet).  Also, enabling this produce a ton of new errors.
-# Let's talk about this before we enable it, I guess.
+# This doesn't work for redirect in config/routes.rb.
 Style/FormatStringToken:
-  Enabled: false
-  Exclude:
-    - "config/routes.rb"
+  Enabled: true
+  IgnoredMethods:
+    - "redirect"
 
 # Rubocop does not enable this cop by default
 # MO uses parentheses

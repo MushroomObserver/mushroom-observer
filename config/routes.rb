@@ -456,7 +456,9 @@ def redirect_legacy_actions(old_controller: "",
     to_url = format(data[:to],
                     new_controller: new_controller,
                     model: model,
-                    id: "%{id}")
+                    # This is going to be used in a redirect which rubocop
+                    # has been instructed to ignore, but doesn't realize it.
+                    id: "%{id}") # rubocop:disable Style/FormatStringToken
 
     match(format(data[:from], old_controller: old_controller, model: model),
           to: redirect(path: to_url),
