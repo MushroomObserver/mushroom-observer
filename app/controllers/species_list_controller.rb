@@ -314,7 +314,7 @@ class SpeciesListController < ApplicationController
         Name.find_by(text_name: name)
       end
     end
-    @names.reject!(&:nil?)
+    @names.compact!
     case params[:commit]
     when :name_lister_submit_spl.l
       if @user
@@ -340,14 +340,14 @@ class SpeciesListController < ApplicationController
 
   def create_species_list
     @species_list = SpeciesList.new
-    if request.method != "POST"
+    if request.method == "POST"
+      process_species_list(:create)
+    else
       init_name_vars_for_create
       init_member_vars_for_create
       init_project_vars_for_create
       init_name_vars_for_clone(params[:clone]) if params[:clone].present?
       @checklist ||= calc_checklist
-    else
-      process_species_list(:create)
     end
   end
 
@@ -547,9 +547,7 @@ class SpeciesListController < ApplicationController
   def manage_projects
     return unless (@list = find_or_goto_index(SpeciesList, params[:id].to_s))
 
-    if !check_permission!(@list)
-      redirect_to(action: "show_species_list", id: @list.id)
-    else
+    if check_permission!(@list)
       @projects = projects_to_manage
       @object_states = manage_object_states
       @project_states = manage_project_states
@@ -570,6 +568,8 @@ class SpeciesListController < ApplicationController
           flash_error("Invalid submit button: #{params[:commit].inspect}")
         end
       end
+    else
+      redirect_to(action: "show_species_list", id: @list.id)
     end
   end
 
@@ -807,9 +807,7 @@ class SpeciesListController < ApplicationController
     # (construct_observations) create the observations.  This always succeeds,
     # so we can redirect to show_species_list (or chain to create_location).
     if !failed && @dubious_where_reasons == []
-      if !@species_list.save
-        flash_object_errors(@species_list)
-      else
+      if @species_list.save
         if create_or_update == :create
           @species_list.log(:log_species_list_created)
           id = @species_list.id
@@ -830,6 +828,8 @@ class SpeciesListController < ApplicationController
           redirect_to(action: "show_species_list", id: @species_list)
         end
         redirected = true
+      else
+        flash_object_errors(@species_list)
       end
     end
 

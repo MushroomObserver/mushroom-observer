@@ -193,7 +193,7 @@ module Query
 
     def initialize_join_desc_parameter
       if params[:join_desc] == :default
-        add_join(:'name_descriptions.default')
+        add_join(:"name_descriptions.default")
       elsif any_param_desc_fields?
         add_join(:name_descriptions)
       end

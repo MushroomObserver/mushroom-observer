@@ -55,9 +55,7 @@ module Query::Modules::HighLevelQueries
   def result_ids(args = {})
     expect_args(:result_ids, args, RESULTS_ARGS)
     @result_ids ||=
-      if !need_letters
-        select_values(args).map(&:to_i)
-      else
+      if need_letters
         # Include first letter of paginate-by-letter field right away; there's
         # typically no avoiding it.  This optimizes away an extra query or two.
         @letters = {}
@@ -69,6 +67,8 @@ module Query::Modules::HighLevelQueries
           ids << id.to_i
         end
         ids
+      else
+        select_values(args).map(&:to_i)
       end
   end
 
@@ -147,7 +147,7 @@ module Query::Modules::HighLevelQueries
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
     add_needed_to_results(needed: needed, args: args) if needed.any?
-    ids.map { |id| @results[id] }.reject(&:nil?)
+    ids.filter_map { |id| @results[id] }
   end
 
   # Clear out the results cache.  Useful if you need to reload results with

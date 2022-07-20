@@ -111,7 +111,7 @@ module Comment::Callbacks
     users += search_for_highlighted_users(str, USER_LINK_PAT)
     users += search_for_highlighted_users(str, AT_USER_AT_PAT)
     users += search_for_highlighted_users(str, AT_USER_PAT)
-    users.uniq.reject(&:nil?)
+    users.uniq.compact
   end
 
   def search_for_highlighted_users(str, regex)

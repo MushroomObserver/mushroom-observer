@@ -185,9 +185,7 @@ family_to_genus.keys.sort.each do |family|
   end
   data["families"] << family_data
 end
-File.open(JSON_FILE, "w") do |fh|
-  fh.write(JSON.generate(data))
-end
+File.write(JSON_FILE, JSON.generate(data))
 
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|

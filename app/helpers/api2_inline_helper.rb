@@ -146,7 +146,7 @@ module API2InlineHelper
                author: name.author.to_s,
                rank: name.rank.to_s.downcase,
                deprecated: name.deprecated ? true : false,
-               misspelled: name.is_misspelling? ? true : false,
+               misspelled: name.is_misspelling?,
                synonym_id: name.synonym_id)
   end
 

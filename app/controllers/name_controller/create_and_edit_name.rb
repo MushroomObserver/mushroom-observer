@@ -47,16 +47,16 @@ module NameController::CreateAndEditName
   end
 
   def init_edit_name_form
-    if !params[:name]
+    if params[:name]
+      @misspelling      = params[:name][:misspelling] == "1"
+      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
+    else
       @misspelling      = @name.is_misspelling?
       @correct_spelling = if @misspelling
                             @name.correct_spelling.real_search_name
                           else
                             ""
                           end
-    else
-      @misspelling      = params[:name][:misspelling] == "1"
-      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
     @name_string = @name.real_text_name
   end

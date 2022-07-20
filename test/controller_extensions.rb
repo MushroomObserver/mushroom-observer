@@ -670,7 +670,7 @@ module ControllerExtensions
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
         actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
-                         join("")).strip
+                         join).strip
         message = if actual_val != expect_val.to_s
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"

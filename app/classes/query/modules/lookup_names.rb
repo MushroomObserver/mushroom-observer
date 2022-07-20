@@ -82,7 +82,7 @@ module Query
           else
             result + find_matching_names(val)
           end
-        end.uniq.reject(&:nil?)
+        end.uniq.compact
       end
 
       def find_matching_names(name)
@@ -104,7 +104,7 @@ module Query
       end
 
       def add_synonyms(min_names)
-        ids = min_names.map { |min_name| min_name[2] }.reject(&:nil?)
+        ids = min_names.filter_map { |min_name| min_name[2] }
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +
@@ -169,7 +169,7 @@ module Query
         end
         # Remove species if genus also present.
         text_names.reject do |text_name|
-          text_name.include?(" ") && genera[text_name.split(" ").first]
+          text_name.include?(" ") && genera[text_name.split.first]
         end.uniq
       end
 

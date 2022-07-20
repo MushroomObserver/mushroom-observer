@@ -11,10 +11,10 @@ json.description(object.description.to_s.tpl_nodiv) \
   if object.description.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
-if !detail
-  json.location_id(object.location_id) if object.location_id
-  json.personal_user_id(object.personal_user_id) if object.personal_user_id
-else
+if detail
   json.location(json_location(object.location)) if object.location
   json.personal_user(json_user(object.personal_user)) if object.personal_user
+else
+  json.location_id(object.location_id) if object.location_id
+  json.personal_user_id(object.personal_user_id) if object.personal_user_id
 end

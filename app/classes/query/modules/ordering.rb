@@ -103,7 +103,7 @@ module Query::Modules::Ordering
 
     when "thumbnail_quality"
       if model == Observation
-        add_join(:'images.thumb_image')
+        add_join(:"images.thumb_image")
         "images.vote_cache DESC, observations.vote_cache DESC"
       end
 
@@ -116,7 +116,7 @@ module Query::Modules::Ordering
 
     when "owners_thumbnail_quality"
       if model == Observation
-        add_join(:'images.thumb_image', :image_votes)
+        add_join(:"images.thumb_image", :image_votes)
         where << "images.user_id = observations.user_id"
         where << "image_votes.user_id = observations.user_id"
         "image_votes.value DESC, " \

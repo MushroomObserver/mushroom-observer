@@ -148,7 +148,7 @@ module SessionExtensions
             inputs << field
 
           when "textarea"
-            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join)
             inputs << field
 
           when "file"
@@ -167,7 +167,7 @@ module SessionExtensions
               elems.each do |elem|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(elem["value"])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join)
                 opts << opt
                 val = opt.value \
                   if elem["selected"] == "selected"

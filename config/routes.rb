@@ -456,7 +456,9 @@ def redirect_legacy_actions(old_controller: "",
     to_url = format(data[:to],
                     new_controller: new_controller,
                     model: model,
-                    id: "%{id}")
+                    # This is going to be used in a redirect which rubocop
+                    # has been instructed to ignore, but doesn't realize it.
+                    id: "%{id}") # rubocop:disable Style/FormatStringToken
 
     match(format(data[:from], old_controller: old_controller, model: model),
           to: redirect(path: to_url),
@@ -804,7 +806,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/observations_for_project/:id",
       to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
-      to: redirect("/observations/%{id]}"))
+      to: redirect("/observations/%{id}"))
 
   # ----- RssLogs: legacy action redirects ------------------------------
   get("/observer/index", to: redirect("/activity_logs"))

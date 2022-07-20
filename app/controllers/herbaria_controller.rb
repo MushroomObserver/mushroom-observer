@@ -244,11 +244,11 @@ class HerbariaController < ApplicationController
     dest = Herbarium.where(name: @herbarium.name).first
     return true if !dest || dest == @herbarium
 
-    if !@herbarium.id # i.e. in create mode
+    if @herbarium.id
+      @herbarium = perform_or_request_merge(@herbarium, dest)
+    else # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       false
-    else
-      @herbarium = perform_or_request_merge(@herbarium, dest)
     end
   end
 

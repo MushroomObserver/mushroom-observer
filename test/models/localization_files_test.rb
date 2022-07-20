@@ -51,7 +51,7 @@ class LocalizationFilesTest < UnitTestCase
     assert_empty(
       errors,
       "Found #{errors.length} undefined tag reference(s) in language files:\n" \
-      "#{errors.join("")}"
+      "#{errors.join}"
     )
   end
 
@@ -65,12 +65,12 @@ class LocalizationFilesTest < UnitTestCase
     end
     assert_true(missing_tags.empty?,
                 "Found #{missing_tags.length} undefined tag reference(s) " \
-                "in source files:\n #{missing_tags.join("")}")
+                "in source files:\n #{missing_tags.join}")
     assert_true(
       duplicate_function_defs.empty?,
       "Found #{duplicate_function_defs.length} duplicate method " \
       "definition(s) in source files:\n" \
-      "#{duplicate_function_defs.join("")}"
+      "#{duplicate_function_defs.join}"
     )
   end
 

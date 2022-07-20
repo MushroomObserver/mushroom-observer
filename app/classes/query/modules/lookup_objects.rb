@@ -71,7 +71,7 @@ module Query
           else
             yield(val).map(&:id)
           end
-        end.flatten.uniq.reject(&:nil?)
+        end.flatten.uniq.compact
       end
     end
   end
