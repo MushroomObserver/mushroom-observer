@@ -21,14 +21,7 @@ namespace :email do
 
         # Sent successfully.  (Delete it without sending if user isn't local!
         # This shouldn't happen, but just in case, better safe...)
-        if !e.to_user
-          e.destroy
-          count += 1
-          if count >= MO.email_per_minute
-            # break
-          end
-
-        else
+        if e.to_user
           result = nil
           File.open("#{::Rails.root}/log/email-low-level.log", "a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
@@ -64,6 +57,13 @@ namespace :email do
             end
             e.save
           end
+        else
+          e.destroy
+          count += 1
+          if count >= MO.email_per_minute
+            # break
+          end
+
         end
       end
     end

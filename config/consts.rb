@@ -7,7 +7,7 @@ class ImageConfigData
 
   def initialize
     root = File.expand_path("..", __dir__)
-    @env = ENV["RAILS_ENV"] || "development"
+    @env = ENV.fetch("RAILS_ENV", "development")
     @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
   end
 end
@@ -18,7 +18,7 @@ MushroomObserver::Application.configure do
   # Ensure that these are defined in case we're executing this script
   # on its own (e.g., to provide access to configs for bash sripts).
   config.root = File.expand_path("..", __dir__)
-  config.env  = ENV["RAILS_ENV"]
+  config.env  = ENV.fetch("RAILS_ENV", nil)
 
   # List of alternate server domains.  We redirect from each of these
   # to the real one.

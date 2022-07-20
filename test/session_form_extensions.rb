@@ -148,7 +148,7 @@ module SessionExtensions
             inputs << field
 
           when "textarea"
-            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join)
             inputs << field
 
           when "file"
@@ -167,7 +167,7 @@ module SessionExtensions
               elems.each do |elem|
                 opt = Field::Option.new
                 opt.value = CGI.unescapeHTML(elem["value"])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
+                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join)
                 opts << opt
                 val = opt.value \
                   if elem["selected"] == "selected"
@@ -195,9 +195,8 @@ module SessionExtensions
       results = []
       inputs.each do |field|
         id2 = field.id
-        if id.is_a?(Regexp) && id2.match(id)
-          results << field
-        elsif (i = id2.rindex(id)) && (i + id.length == id2.length)
+        if id.is_a?(Regexp) && id2.match(id) ||
+           (i = id2.rindex(id)) && (i + id.length == id2.length)
           results << field
         end
       end
@@ -226,9 +225,8 @@ module SessionExtensions
       results = []
       inputs.each do |field|
         nm2 = field.name
-        if name.is_a?(Regexp) && nm2.match(name)
-          results << field
-        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+        if name.is_a?(Regexp) && nm2.match(name) ||
+           (i = nm2.rindex(name)) && (i + name.length == nm2.length)
           results << field
         end
       end
@@ -257,9 +255,8 @@ module SessionExtensions
         next unless field.type == :checkbox
 
         nm2 = field.name
-        if name.is_a?(Regexp) && nm2.match(name)
-          results << field
-        elsif (i = nm2.rindex(name)) && (i + name.length == nm2.length)
+        if name.is_a?(Regexp) && nm2.match(name) ||
+           (i = nm2.rindex(name)) && (i + name.length == nm2.length)
           results << field
         end
       end

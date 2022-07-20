@@ -58,7 +58,8 @@ if swap_pct > 50 && mem_pct > 99
     system("kill -HUP #{pid}")
     warn("Restarted server!")
   elsif File.exist?(PASSENGER_FILE)
-    File.open(PASSENGER_FILE, "w") {}
+    # cop gives false positive
+    File.open(PASSENGER_FILE, "w") {} # rubocop disable:Lint/EmptyBlock
     warn("Restarted server!")
   else
     warn("Time to restart server, but couldn't find unicorn or passenger!")

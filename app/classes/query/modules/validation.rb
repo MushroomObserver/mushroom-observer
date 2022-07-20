@@ -195,9 +195,7 @@ module Query
           @params_cache ||= {}
           @params_cache[arg] = val
           val.id
-        elsif val.is_a?(String)
-          val
-        elsif val.is_a?(Integer)
+        elsif val.is_a?(String) || val.is_a?(Integer)
           val
         else
           raise("Value for :#{arg} should be a Name, String or Integer, " \
@@ -208,9 +206,8 @@ module Query
       def validate_date(arg, val)
         if val.acts_like?(:date)
           format("%04d-%02d-%02d", val.year, val.mon, val.day)
-        elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s)
-          val
-        elsif /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
+        elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
+              /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
           val
         elsif val.blank? || val.to_s == "0"
           nil

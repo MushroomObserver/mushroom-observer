@@ -470,7 +470,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map { |x| "<\/#{x}>" }.join("")
+    result += opens.reverse.map { |x| "<\/#{x}>" }.join
     # Disable cop; we need `html_safe` to prevent Rails from adding escaping
     result.html_safe # rubocop:disable Rails/OutputSafety
   end
@@ -559,7 +559,7 @@ class String
     str      = to_s
     alphabet = alphabet.to_s
     len      = alphabet.length
-    str.split("").inject(0) do |num, char|
+    str.chars.inject(0) do |num, char|
       i = alphabet.index(char)
       raise("Character not in alphabet: '#{char}'") if i.nil?
 

@@ -73,7 +73,7 @@ class CollapsibleMapTest < UnitTestCase
   end
 
   def assert_list_of_mapsets(coll, objs)
-    list = objs.reject(&:nil?).map do |x|
+    list = objs.compact.map do |x|
       x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
     end
 

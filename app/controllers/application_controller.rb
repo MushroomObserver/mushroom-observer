@@ -371,7 +371,7 @@ class ApplicationController < ActionController::Base
 
   def valid_user_from_cookie
     return unless (cookie = cookies["mo_user"]) &&
-                  (split = cookie.split(" ")) &&
+                  (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
                   (split[1] == user.auth_code)
 
@@ -753,7 +753,7 @@ class ApplicationController < ActionController::Base
   # top of the next page the User sees.
   def flash_notice(*strs)
     session[:notice] ||= "0"
-    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join("")
+    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join
   end
   helper_method :flash_notice
 

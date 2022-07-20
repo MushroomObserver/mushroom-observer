@@ -396,7 +396,7 @@ class QueryTest < UnitTestCase
             { observation_images: :images }
           ]
         },
-        :'users.reviewer'
+        :"users.reviewer"
       ]
     )
     assert_match(/names.reviewer_id = users.id/, sql)
@@ -463,7 +463,8 @@ class QueryTest < UnitTestCase
                   names(:agaricus).id.to_s,
                   names(:agaricus_campestrus).id.to_s,
                   names(:agaricus_campestras).id.to_s,
-                  names(:agaricus_campestros).id.to_s].sort,
+                  names(:agaricus_campestros).id.to_s,
+                  names(:sect_agaricus).id.to_s].sort,
                  query.select_values(where: 'text_name LIKE "Agaricus%"').
                        map(&:to_s).sort)
 
@@ -479,8 +480,10 @@ class QueryTest < UnitTestCase
     assert_equal({ "id" => Name.first.id }, query.select_one)
 
     assert_equal([Name.first], query.find_by_sql(limit: 1))
-    assert_equal(@agaricus.children.sort_by(&:id),
-                 query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
+    assert_name_list_equal(
+      @agaricus.children(all: true).sort_by(&:id),
+      query.find_by_sql(where: 'text_name LIKE "Agaricus %"')
+    )
   end
 
   def test_tables_used
@@ -555,7 +558,7 @@ class QueryTest < UnitTestCase
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
     )
     assert_equal(@names.size, @pages.num_total)
-    assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_name_list_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -589,7 +592,7 @@ class QueryTest < UnitTestCase
     assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_equal(@ells[3..5], @query.paginate(@pages))
+    assert_name_list_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator

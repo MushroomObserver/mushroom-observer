@@ -59,9 +59,7 @@ module SessionExtensions
   # Save response from last request so you can look at it in a browser.
   def save_page(file = nil)
     file ||= "#{::Rails.root}/public/test.html"
-    File.open(file, "w") do |fh|
-      fh.write(response.body)
-    end
+    File.write(file, response.body)
   end
 
   # Call follow_redirect!, checking for 500 errors and missing language
@@ -89,46 +87,46 @@ module SessionExtensions
 
   # Override all 'get' calls and do a bunch of extra error checking.
   def get(action, **args)
-    if !@doing_with_error_checking
-      process_with_error_checking("get", action, **args)
-    else
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("get", action, **args)
     end
   end
 
   # Override all 'post' calls and do a bunch of extra error checking.
   def post(action, **args)
-    if !@doing_with_error_checking
-      process_with_error_checking("POST", action, **args)
-    else
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("POST", action, **args)
     end
   end
 
   # Override all 'put' calls and do a bunch of extra error checking.
   def put(action, **args)
-    if !@doing_with_error_checking
-      process_with_error_checking("PUT", action, **args)
-    else
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("PUT", action, **args)
     end
   end
 
   # Override all 'patch' calls and do a bunch of extra error checking.
   def patch(action, **args)
-    if !@doing_with_error_checking
-      process_with_error_checking("PATCH", action, **args)
-    else
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("PATCH", action, **args)
     end
   end
 
   # Override all 'delete' calls and do a bunch of extra error checking.
   def delete(action, **args)
-    if !@doing_with_error_checking
-      process_with_error_checking("DELETE", action, **args)
-    else
+    if @doing_with_error_checking
       super
+    else
+      process_with_error_checking("DELETE", action, **args)
     end
   end
 

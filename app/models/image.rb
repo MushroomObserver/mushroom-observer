@@ -680,9 +680,7 @@ class Image < AbstractModel
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
-      if !move_original
-        result = false
-      else
+      if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
@@ -692,6 +690,8 @@ class Image < AbstractModel
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
+      else
+        result = false
       end
     end
     result
@@ -971,15 +971,13 @@ class Image < AbstractModel
     data, old_name, user
   )
     data.map do |id, year, lic|
-      Hash[
-        "user_id" => user.id,
+      { "user_id" => user.id,
         "updated_at" => Time.zone.now,
         "target_type" => "Image",
         "target_id" => id,
         "year" => year,
         "name" => old_name,
-        "license_id" => lic
-      ]
+        "license_id" => lic }
     end
   end
 

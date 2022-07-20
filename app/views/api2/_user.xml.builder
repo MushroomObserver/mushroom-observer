@@ -22,10 +22,7 @@ xml.tag!(
   end
   xml_string(xml, :mailing_address,
              object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
-  if !detail
-    xml_minimal_object(xml, :location, :location, object.location_id)
-    xml_minimal_object(xml, :image, :image, object.image_id)
-  else
+  if detail
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)
     if (@user == object ||
@@ -38,5 +35,8 @@ xml.tag!(
         end
       end
     end
+  else
+    xml_minimal_object(xml, :location, :location, object.location_id)
+    xml_minimal_object(xml, :image, :image, object.image_id)
   end
 end

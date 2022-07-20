@@ -152,9 +152,7 @@ class VoteControllerTest < FunctionalTestCase
     table.each_key do |str|
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
-      elsif str == str1
-        assert_equal(1, table[str][:num])
-      elsif str == str2
+      elsif str == str1 || str == str2
         assert_equal(1, table[str][:num])
       else
         assert_equal(0, table[str][:num])

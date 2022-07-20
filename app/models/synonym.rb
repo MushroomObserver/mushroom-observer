@@ -40,7 +40,7 @@ class Synonym < AbstractModel
     missing = references - records
 
     Synonym.where(id: unused).delete_all
-    Synonym.insert_all(missing.map { |m| Hash[id: m] }) if missing.present?
+    Synonym.insert_all(missing.map { |m| { id: m } }) if missing.present?
 
     changed_synonyms_msgs(unused, missing)
   end

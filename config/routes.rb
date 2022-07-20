@@ -456,7 +456,8 @@ def redirect_legacy_actions(old_controller: "",
     to_url = format(data[:to],
                     new_controller: new_controller,
                     model: model,
-                    # Rails routes currently only accept template tokens
+                    # This is going to be used in a redirect which rubocop
+                    # has been instructed to ignore, but doesn't realize it.
                     id: "%{id}") # rubocop:disable Style/FormatStringToken
 
     match(format(data[:from], old_controller: old_controller, model: model),
@@ -663,6 +664,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     collection do
       get("map")
       get("download")
+      post("download")
       get("print_labels")
     end
   end
@@ -723,14 +725,14 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/checklist", to: redirect("/checklist"))
 
   # ----- Emails: legacy action redirects
-  get("/observer/ask_observation_question",
-      to: redirect(path: "/emails/ask_observation_question"))
-  get("/observer/ask_user_question",
-      to: redirect(path: "/emails/ask_user_question"))
+  get("/observer/ask_observation_question/:id",
+      to: redirect(path: "/emails/ask_observation_question/%{id}"))
+  get("/observer/ask_user_question/:id",
+      to: redirect(path: "/emails/ask_user_question/%{id}"))
   get("/observer/ask_webmaster_question",
       to: redirect(path: "/emails/ask_webmaster_question"))
-  get("/observer/commercial_inquiry",
-      to: redirect(path: "/emails/commercial_inquiry"))
+  get("/observer/commercial_inquiry/:id",
+      to: redirect(path: "/emails/commercial_inquiry/%{id}"))
   get("/observer/email_features",
       to: redirect(path: "/emails/features"))
   get("/observer/email_merge_request",
@@ -753,7 +755,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Herbaria: nonstandard legacy action redirects
   get("/herbarium/herbarium_search", to: redirect("/herbaria"))
   get("/herbarium/index", to: redirect("/herbaria"))
+  get("/herbarium/index_herbarium/:id", to: redirect("/herbaria?id=%{id}"))
+  get("/herbarium/index_herbarium", to: redirect("/herbaria"))
   get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  get("/herbarium/request_to_be_curator/:id",
+      to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
 
@@ -768,75 +774,61 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
 
+  # ----- Javascript: legacy action redirects ----------------------------
+  get("/observer/hide_thumbnail_map/:id",
+      to: redirect("/javascript/hide_thumbnail_map?id=%{id}"))
+
   # ----- Observations: legacy action redirects ----------------------------
+  get("/observer/create_observation", to: redirect("/observations/new"))
   get("/observer/observation_search", to: redirect("/observations"))
   get("/observer/advanced_search", to: redirect("/observations"))
+  get("/observer/index_observation/:id", to: redirect("/observations?id=%{id}"))
   get("/observer/index_observation", to: redirect("/observations"))
   get("/observer/list_observations", to: redirect("/observations"))
-  get("/observer/observations_of_look_alikes(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?name=#{req.params[:id]}&look_alikes=1"
-      end)
-  get("/observer/observations_of_related_taxa(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?name=#{req.params[:id]}&related_taxa=1"
-      end)
-  get("/observer/observations_of_name(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?name=#{req.params[:id]}"
-      end)
-  get("/observer/observations_by_user(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?user=#{req.params[:id]}"
-      end)
-  get("/observer/observations_at_location(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?location=#{req.params[:id]}"
-      end)
-  get("/observer/observations_at_where(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?where=#{req.params[:id]}"
-      end)
-  get("/observer/observations_for_project(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations?project=#{req.params[:id]}"
-      end)
-  get("/observer/show_observation(/:id)",
-      to: redirect do |_path_params, req|
-        "/observations/#{req.params[:id]}"
-      end)
+  get("/observer/map_observation/:id", to: redirect("/observations/%{id}/map"))
+  get("/observer/map_observations", to: redirect("/observations/map"))
+  get("/observer/next_observation/:id",
+      to: redirect("/observations/%{id}?flow=next"))
+  get("/observer/prev_observation/:id",
+      to: redirect("/observations/%{id}?flow=prev"))
+  get("/observer/observations_of_look_alikes/:id",
+      to: redirect("/observations?name=%{id}&look_alikes=1"))
+  get("/observer/observations_of_related_taxa/:id",
+      to: redirect("/observations?name=%{id}&related_taxa=1"))
+  get("/observer/observations_of_name/:id",
+      to: redirect("/observations?name=%{id}"))
+  get("/observer/observations_by_user/:id",
+      to: redirect("/observations?user=%{id}"))
+  get("/observer/observations_at_location/:id",
+      to: redirect("/observations?location=%{id}"))
+  get("/observer/observations_at_where/:id",
+      to: redirect("/observations?where=%{id}"))
+  get("/observer/observations_for_project/:id",
+      to: redirect("/observations?project=%{id}"))
+  get("/observer/show_observation/:id",
+      to: redirect("/observations/%{id}"))
 
   # ----- RssLogs: legacy action redirects ------------------------------
   get("/observer/index", to: redirect("/activity_logs"))
   get("/observer/list_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/index_rss_logs", to: redirect("/activity_logs"))
-  get("/observer/show_rss_log(/:id)",
-      to: redirect do |_path_params, req|
-        "/activity_logs/#{req.params[:id]}"
-      end)
+  get("/observer/index_rss_log/:id", to: redirect("/activity_logs?id=%{id}"))
+  get("/observer/index_rss_log", to: redirect("/activity_logs"))
+  get("/observer/show_rss_log/:id", to: redirect("/activity_logs/%{id}"))
   get("/observer/rss", to: redirect("/activity_logs/rss"))
 
   # ----- Users: legacy action redirects  ----------------------------------
   get("/observer/user_search", to: redirect(path: "/users"))
+  get("/observer/index_user/:id", to: redirect(path: "/users?id=%{id}"))
   get("/observer/index_user", to: redirect(path: "/users"))
   get("/observer/list_users", to: redirect(path: "/users"))
-  get("/observer/users_by_contribution",
-      to: redirect(path: "/contributors"))
+  get("/observer/users_by_contribution", to: redirect(path: "/contributors"))
   get("/observer/users_by_name", to: redirect("/users?by=name"))
-  get("/observer/show_user(/:id)",
-      to: redirect do |_path_params, req|
-        "/users/#{req.params[:id]}"
-      end)
-  get("/observer/change_user_bonuses(/:id)",
-      to: redirect do |_path_params, req|
-        "/users/#{req.params[:id]}/edit"
-      end)
+  get("/observer/show_user/:id", to: redirect("/users/%{id}"))
+  get("/observer/change_user_bonuses/:id", to: redirect("/users/%{id}/edit"))
 
   # ----- Search: legacy action redirects ---------------------------------
-  get("/observer/pattern_search",
-      to: redirect("/search/pattern"))
-  get("/observer/advanced_search_form",
-      to: redirect("/search/advanced"))
+  get("/observer/pattern_search", to: redirect("/search/pattern"))
+  get("/observer/advanced_search_form", to: redirect("/search/advanced"))
 
   ###
   ###

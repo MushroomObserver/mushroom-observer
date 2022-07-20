@@ -227,9 +227,9 @@ module ObservationsController::FormHelpers
   # params[:image_<id>_notes]) OUTPUT: list of images
   def update_good_images(arg) # rubocop:disable Metrics/AbcSize
     # Get list of images first.
-    images = (arg || "").split(" ").map do |id|
+    images = (arg || "").split.filter_map do |id|
       Image.safe_find(id.to_i)
-    end.reject(&:nil?)
+    end
 
     # Now check for edits.
     images.each do |image|

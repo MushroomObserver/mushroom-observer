@@ -204,14 +204,14 @@ class NameDescription < Description
   #
   def update_review_status(value)
     user = User.current
-    if !user.in_group?("reviewers")
+    if user.in_group?("reviewers")
+      reviewer_id = user.id
+    else
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
       value = :unreviewed
       reviewer_id = nil
-    else
-      reviewer_id = user.id
     end
     self.review_status = value
     self.reviewer_id   = reviewer_id

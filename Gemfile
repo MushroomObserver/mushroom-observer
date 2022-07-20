@@ -16,20 +16,24 @@ source("https://rubygems.org")
 # NOTE: Be sure no other gems list `rails` as a dependency in Gemfile.lock,
 #       or else all of Rails will load anyway.
 #
-# gem("actioncable", "~> 6.1")
-# gem("actionmailbox", "~> 6.1")
-gem("actionmailer", "~> 6.1")
-gem("actionpack", "~> 6.1")
-# gem("actiontext", "~> 6.1")
-gem("actionview", "~> 6.1")
-gem("activejob", "~> 6.1")
-gem("activemodel", "~> 6.1")
-gem("activerecord", "~> 6.1")
-# gem("activestorage", "~> 6.1")
-gem("activesupport", "~> 6.1")
-gem("bundler")
-gem("railties", "~> 6.1")
-gem("sprockets-rails")
+# Convenience group for updating rails constituents with one command
+# Usage: bundle update --group==rails
+group :rails do
+  # gem("actioncable", "~> 6.1")
+  # gem("actionmailbox", "~> 6.1")
+  gem("actionmailer", "~> 6.1")
+  gem("actionpack", "~> 6.1")
+  # gem("actiontext", "~> 6.1")
+  gem("actionview", "~> 6.1")
+  gem("activejob", "~> 6.1")
+  gem("activemodel", "~> 6.1")
+  gem("activerecord", "~> 6.1")
+  # gem("activestorage", "~> 6.1")
+  gem("activesupport", "~> 6.1")
+  gem("bundler")
+  gem("railties", "~> 6.1")
+  gem("sprockets-rails")
+end
 
 # security fix for CVE-2021-41817 regex denial of service vulnerability
 gem("date", ">= 3.2.1")

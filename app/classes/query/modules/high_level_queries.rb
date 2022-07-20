@@ -16,7 +16,6 @@
 #  Add additional arguments to the three "global" Arrays immediately below:
 #
 #  RESULTS_ARGS::       Args passed to +select_values+ via +result_ids+.
-#  PAGINATE_ARGS::      Args passed to +paginate_ids+.
 #  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate+.
 #
 ##############################################################################
@@ -27,9 +26,6 @@ module Query::Modules::HighLevelQueries
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
   RESULTS_ARGS = [:join, :where, :limit, :group].freeze
-
-  # Args accepted by +paginate+ and +paginate_ids+.
-  PAGINATE_ARGS = [].freeze
 
   # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
   # call +instantiate+, too).
@@ -59,20 +55,20 @@ module Query::Modules::HighLevelQueries
   def result_ids(args = {})
     expect_args(:result_ids, args, RESULTS_ARGS)
     @result_ids ||=
-      if !need_letters
-        select_values(args).map(&:to_i)
-      else
+      if need_letters
         # Include first letter of paginate-by-letter field right away; there's
         # typically no avoiding it.  This optimizes away an extra query or two.
-        @letters = map = {}
+        @letters = {}
         ids = []
         select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
         select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
-          map[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
+          @letters[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
           ids << id.to_i
         end
         ids
+      else
+        select_values(args).map(&:to_i)
       end
   end
 
@@ -122,43 +118,23 @@ module Query::Modules::HighLevelQueries
     @need_letters = letters
   end
 
-  # Returns a subset of the results (as ids).  Optional arguments:
-  # (Also accepts args for
-  def paginate_ids(paginator, args = {})
-    results_args, args = split_args(args, RESULTS_ARGS)
-    expect_args(:paginate_ids, args, PAGINATE_ARGS)
-
-    # Get list of letters used in results.
+  # Returns a subset of the results (as ids).
+  def paginate_ids(paginator)
+    ids = result_ids
     if need_letters
-      @result_ids = nil
-      @num_results = nil
-      result_ids(results_args)
-      map = @letters
-      paginator.used_letters = map.values.uniq
-
-      # Filter by letter. (paginator keeps letter upper case, as do we)
+      paginator.used_letters = @letters.values.uniq
       if (letter = paginator.letter)
-        @result_ids = @result_ids.select { |id| map[id] == letter }
-        @num_results = @result_ids.count
+        ids = ids.select { |id| @letters[id] == letter }
       end
-      paginator.num_total = num_results(results_args)
-      @result_ids[paginator.from..paginator.to] || []
-    else
-      paginate_remaining_results(paginator, results_args)
     end
-  end
-
-  def paginate_remaining_results(paginator, results_args)
-    paginator.num_total = num_results(results_args)
-    results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
-    result_ids(results_args) || []
+    paginator.num_total = ids.count
+    ids[paginator.from..paginator.to] || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
-  # (Takes same args as both +instantiate+ and +paginate_ids+.)
+  # (Takes args for +instantiate+.)
   def paginate(paginator, args = {})
-    paginate_args, instantiate_args = split_args(args, PAGINATE_ARGS)
-    instantiate(paginate_ids(paginator, paginate_args), instantiate_args)
+    instantiate(paginate_ids(paginator), args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of
@@ -171,7 +147,7 @@ module Query::Modules::HighLevelQueries
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
     add_needed_to_results(needed: needed, args: args) if needed.any?
-    ids.map { |id| @results[id] }.reject(&:nil?)
+    ids.filter_map { |id| @results[id] }
   end
 
   # Clear out the results cache.  Useful if you need to reload results with

@@ -158,18 +158,18 @@ module Name::Taxonomy
   # Beyond that it just chooses the first one arbitrarily.
   def accepted_genus
     @accepted_genus ||= \
-    begin
-      accepted = approved_name
-      return unless accepted.text_name.include?(" ")
-
-      genus_name = accepted.text_name.split(" ", 2).first
-      genera     = Name.with_correct_spelling.where(text_name: genus_name)
-      accepted   = genera.reject(&:deprecated)
-      genera     = accepted if accepted.any?
-      nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
-      genera     = nonsensu if nonsensu.any?
-      genera.first
-    end
+      begin
+        accepted = approved_name
+        if accepted.text_name.include?(" ")
+          genus_name = accepted.text_name.split(" ", 2).first
+          genera     = Name.with_correct_spelling.where(text_name: genus_name)
+          accepted   = genera.reject(&:deprecated)
+          genera     = accepted if accepted.any?
+          nonsensu   = genera.reject { |n| n.author.start_with?("sensu ") }
+          genera     = nonsensu if nonsensu.any?
+          genera.first
+        end
+      end
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.
@@ -191,7 +191,7 @@ module Name::Taxonomy
 
     # Start with infrageneric and genus names.
     # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split(" ") - %w[group clade complex]
+    words = text_name.split - %w[group clade complex]
     words.pop
     until words.empty?
       name = words.join(" ")
@@ -346,7 +346,7 @@ module Name::Taxonomy
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
     subtaxa = Name.subtaxa_of_genus(text_name).not_deprecated.to_a
-    uniq_subtaxa = subtaxa.map(&:synonym_id).reject(&:nil?).uniq
+    uniq_subtaxa = subtaxa.map(&:synonym_id).compact.uniq
     # Beware of AR where.not gotcha - will not match a null classification below
     synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).
                where(Name[:classification].not_eq(classification))

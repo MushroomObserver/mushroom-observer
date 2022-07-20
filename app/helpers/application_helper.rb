@@ -160,7 +160,7 @@ module ApplicationHelper
   def create_links(links)
     return [] unless links
 
-    links.reject(&:nil?).map { |str, url| link_to(str, url) }
+    links.compact.map { |str, url| link_to(str, url) }
   end
 
   # Short-hand to render shared tab_set partial for a given set of links.
@@ -240,12 +240,12 @@ module ApplicationHelper
 
   def make_row(row, tr_opts = {}, td_opts = {})
     content_tag(:tr, tr_opts) do
-      if !row.is_a?(Array)
-        row
-      else
+      if row.is_a?(Array)
         row.map do |cell|
           make_cell(cell, td_opts)
         end.safe_join
+      else
+        row
       end
     end
   end

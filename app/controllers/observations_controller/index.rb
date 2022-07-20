@@ -28,7 +28,7 @@ module ObservationsController::Index
       observations_at_where and return
     elsif params[:project].present?
       observations_for_project and return
-    elsif params[:by].present? || params[:q].present?
+    elsif params[:by].present? || params[:q].present? || params[:id].present?
       index_observation and return
     else
       list_observations and return

@@ -52,15 +52,15 @@ module VersionHelper
   def show_past_versions(obj, args = {})
     type = obj.type_tag
 
-    if !@merge_source_id
-      versions = obj.versions.reverse
-    else
+    if @merge_source_id
       version_class = "#{obj.class.name}::Version".constantize
       versions = version_class.find_by_sql(%(
         SELECT * FROM #{type}s_versions
         WHERE #{type}_id = #{@old_parent_id} AND id <= #{@merge_source_id}
         ORDER BY id DESC
       ))
+    else
+      versions = obj.versions.reverse
     end
 
     table = versions.map do |ver|

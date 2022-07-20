@@ -34,11 +34,10 @@ module ObservationsController::Map
 
     unless locations.empty?
       # Eager-load corresponding locations.
-      @locations = Location.
-                   where(id: locations.keys.sort).
-                   pluck(:id, :name, :north, :south, :east, :west).
-                   map do |id, *the_rest|
-        locations[id] = MinimalMapLocation.new(id, *the_rest)
+      @locations = Location.where(id: locations.keys).map do |loc|
+        locations[loc.id] = MinimalMapLocation.new(
+          loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
+        )
       end
       @observations.each do |obs|
         obs.location = locations[obs.location_id] if obs.location_id

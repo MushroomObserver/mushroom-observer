@@ -115,13 +115,13 @@ class HerbariumRecord < AbstractModel
 
   def log_update
     observations.each do |obs|
-      if herbarium_id_was != herbarium_id
-        obs.log(:log_herbarium_record_moved,
-                to: accession_at_herbarium,
-                touch: true)
-      else
+      if herbarium_id_was == herbarium_id
         obs.log(:log_herbarium_record_updated,
                 name: accession_at_herbarium,
+                touch: true)
+      else
+        obs.log(:log_herbarium_record_moved,
+                to: accession_at_herbarium,
                 touch: true)
       end
     end

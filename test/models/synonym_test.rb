@@ -17,7 +17,7 @@ class SynonymTest < UnitTestCase
     msgs = Synonym.make_sure_all_referenced_synonyms_exist
     assert_nil(Synonym.safe_find(unused_id))
     assert_not_nil(Synonym.safe_find(missing_id))
-    assert_includes(msgs.join(""), unused_id.to_s)
-    assert_includes(msgs.join(""), missing_id.to_s)
+    assert_includes(msgs.join, unused_id.to_s)
+    assert_includes(msgs.join, missing_id.to_s)
   end
 end

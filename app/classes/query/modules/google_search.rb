@@ -70,13 +70,13 @@ module Query::Modules::GoogleSearch
 
   # Pull off one "and" clause from the beginning of the string.
   def google_parse_one_clause(str, goods, bads)
-    if str.sub!(/^-"([^""]+)"( |$)/, "") ||
+    if str.sub!(/^-"([^"]+)"( |$)/, "") ||
        str.sub!(/^-(\S+)( |$)/, "")
       bads << Regexp.last_match(1)
-    elsif str.sub!(/^(("[^""]+"|\S+)( OR ("[^""]+"|\S+))*)( |$)/, "")
+    elsif str.sub!(/^(("[^"]+"|\S+)( OR ("[^"]+"|\S+))*)( |$)/, "")
       str2 = Regexp.last_match(1)
       or_strs = []
-      while str2.sub!(/^"([^""]+)"( OR |$)/, "") ||
+      while str2.sub!(/^"([^"]+)"( OR |$)/, "") ||
             str2.sub!(/^(\S+)( OR |$)/, "")
         or_strs << Regexp.last_match(1)
       end
