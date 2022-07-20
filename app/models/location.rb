@@ -148,11 +148,14 @@ class Location < AbstractModel
     end
   end
 
+  # TODO: write tests for :in_region, :in_box, and any other untested scopes.
+  # Coveralls has info
+
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box,
+  scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           if args[:s].present? && args[:n].present? &&
              args[:w].present? && args[:e].present? &&

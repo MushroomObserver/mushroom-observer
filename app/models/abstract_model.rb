@@ -107,6 +107,8 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
+  # TODO: write tests for untested scopes. None tested except :created_on
+
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
   }

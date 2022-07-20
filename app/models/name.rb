@@ -457,13 +457,15 @@ class Name < AbstractModel
     end
   end
 
+  # TODO: write tests for untested scopes. Coveralls has info
+
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
   scope :deprecated, -> { where(deprecated: true) }
   scope :not_deprecated, -> { where(deprecated: false) }
   scope :with_description, -> { where.not(description_id: nil) }
   scope :without_description, -> { where(description_id: nil) }
-  # most used Names without descriptions
+  # Names without descriptions, order by most frequently used
   scope :description_needed, lambda {
     without_description.joins(:observations).
       group(:name_id).order(Arel.star.count.desc)
@@ -584,13 +586,27 @@ class Name < AbstractModel
   scope :at_location,
         lambda { |location|
           case location
-          when String # treat it as a region, we're not looking for all matches
+          when String # treat it as a region, not looking for all string matches
             joins(observations: :location).
               where(Location[:name].matches("%#{location}"))
           when Integer
             joins(:observations).where(location_id: location)
           when Location
             joins(:observations).where(location_id: location.id)
+          end
+        }
+  # Occurrence of name within a lat/long box
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          if args[:s].present? && args[:n].present? &&
+             args[:w].present? && args[:e].present? &&
+             (args[:w] < args[:e])
+
+            joins(observations: :location).where(
+              (Location[:south] >= args[:s]).and(Location[:north] <= args[:n]).
+              and(Location[:west] >= args[:w]).and(Location[:east] <= args[:e]).
+              and(Location[:west] <= Location[:east])
+            )
           end
         }
 

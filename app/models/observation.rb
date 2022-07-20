@@ -240,6 +240,10 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  # TODO: write tests for untested scopes, including :found_*,
+  # :has_notes_field, :herbarium_record_notes_include, :in_box,
+  # and parts of :of_name. Coveralls has the info.
+
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
@@ -318,7 +322,7 @@ class Observation < AbstractModel
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}")) }
-  scope :in_box,
+  scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           if args[:s].present? && args[:n].present? &&
              args[:w].present? && args[:e].present? &&
