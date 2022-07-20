@@ -61,9 +61,16 @@ AllCops:
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationleadingspace
 Layout/LineContinuationLeadingSpace: #`new in 1.31.1
   Enabled: true
-
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationspacing
 Layout/LineContinuationSpacing: #`new in 1.31.1
+  Enabled: true
+Layout/LineEndStringConcatenationIndentation: # new in 1.18
+  # We most consistently align the start of the continued line
+  # with the start of the string on the previous line.
+  # This does not correspond to any available EnforcedStyle.
+  Enabled: false
+
+Layout/SpaceBeforeBrackets: # new in 1.7
   Enabled: true
 
 Lint/AmbiguousAssignment: # new in 1.7
