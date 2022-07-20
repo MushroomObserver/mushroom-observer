@@ -806,7 +806,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/observations_for_project/:id",
       to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
-      to: redirect("/observations/%{id]}"))
+      to: redirect("/observations/%{id}"))
 
   # ----- RssLogs: legacy action redirects ------------------------------
   get("/observer/index", to: redirect("/activity_logs"))
