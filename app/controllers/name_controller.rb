@@ -420,23 +420,8 @@ class NameController < ApplicationController
     return unless @description
 
     @name = @description.name
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = NameDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.name_description_id
-      subversion = params[:version]
-      if subversion.present? &&
-         (version.version != subversion.to_i)
-        version = NameDescription::Version.find_by(
-          version: params[:version],
-          name_description_id: @old_parent_id
-        )
-      end
-      @description.clone_versioned_model(version, @description)
+    @description.revert_to(params[:version].to_i)
     end
-  end
 
   # Go to next name: redirects to show_name.
   def next_name
@@ -583,7 +568,6 @@ class NameController < ApplicationController
         if (params[:delete_after] == "true") &&
            (old_desc = NameDescription.safe_find(params[:old_desc_id]))
           v = @description.versions.latest
-          v.merge_source_id = old_desc.versions.latest.id
           v.save
           if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
