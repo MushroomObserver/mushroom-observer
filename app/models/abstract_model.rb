@@ -322,6 +322,8 @@ class AbstractModel < ApplicationRecord
   # that handles the "show_<object>" action for this object.
   #
   # The name must be anchored with a slash to avoid namespacing it.
+  # references: http://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
+  # https://stackoverflow.com/questions/20057910/rails-url-for-behaving-differently-when-using-namespace-based-on-current-cont
   #
   #   Article.show_controller => "/articles" # for normalized controller
   #
