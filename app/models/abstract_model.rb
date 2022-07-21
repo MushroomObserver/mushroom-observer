@@ -330,9 +330,9 @@ class AbstractModel < ApplicationRecord
   #
   def self.show_controller
     if controller_normalized?
-      "/#{name.pluralize.underscore}" # Rails standard for most controllers
+      name.pluralize.underscore.to_sym # Rails standard for most controllers
     else
-      "/#{name.underscore}" # old MO controller names and any special cases
+      name.underscore.to_sym # old MO controller names and any special cases
     end
   end
 
@@ -374,9 +374,9 @@ class AbstractModel < ApplicationRecord
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
   def self.index_action
-    return "index" if controller_normalized? # Rails standard
+    return :index if controller_normalized? # Rails standard
 
-    "index_#{name.underscore}" # Old MO style
+    "index_#{name.underscore}".to_sym # Old MO style
   end
 
   def index_action
@@ -392,9 +392,9 @@ class AbstractModel < ApplicationRecord
   #   name.show_action => "show_name"
   #
   def self.show_action
-    return "show" if controller_normalized? # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "show_#{name.underscore}" # Old MO style
+    "show_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_action
@@ -413,9 +413,9 @@ class AbstractModel < ApplicationRecord
   # Note that show_controller has a leading forward slash
   def self.show_url(id)
     if controller_normalized?
-      "#{MO.http_domain}#{show_controller}/#{id}"
+      "#{MO.http_domain}/#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
     end
   end
 
@@ -428,9 +428,9 @@ class AbstractModel < ApplicationRecord
   # actions are normalized.
   # See https://www.pivotaltracker.com/story/show/174440291
   def self.show_past_action
-    return "show_past" if controller_normalized? # Rails standard
+    return :show_past if controller_normalized? # Rails standard
 
-    "show_past_#{name.underscore}" # Old MO style
+    "show_past_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_past_action
@@ -440,9 +440,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "next" action
   # See comments above at show_action
   def self.next_action
-    return "next" if controller_normalized? # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "next_#{name.underscore}" # Old MO style
+    "next_#{name.underscore}".to_sym # Old MO style
   end
 
   def next_action
@@ -452,9 +452,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "prev" action
   # See comments above at show_action
   def self.prev_action
-    return "prev" if controller_normalized? # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "prev_#{name.underscore}" # Old MO style
+    "prev_#{name.underscore}".to_sym # Old MO style
   end
 
   def prev_action
@@ -512,9 +512,9 @@ class AbstractModel < ApplicationRecord
   #   name.edit_action => "edit_name"
   #
   def self.edit_action
-    return "edit" if controller_normalized? # Rails standard
+    return :edit if controller_normalized? # Rails standard
 
-    "edit_#{name.underscore}" # Old MO styl
+    "edit_#{name.underscore}".to_sym # Old MO styl
   end
 
   def edit_action
@@ -568,7 +568,9 @@ class AbstractModel < ApplicationRecord
   #   name.destroy_action => "destroy_name"
   #
   def self.destroy_action
-    "destroy_#{name.underscore}"
+    return :destroy if controller_normalized? # Rails standard
+
+    "destroy_#{name.underscore}".to_sym # Old MO styl
   end
 
   def destroy_action

@@ -195,12 +195,7 @@ class Observation < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observations"
-  end
-
-  # Override the default show_action
-  def self.show_action
-    "show"
+    :observations
   end
 
   def is_location?

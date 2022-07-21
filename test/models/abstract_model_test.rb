@@ -404,27 +404,27 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_show_controller
-    assert_equal("/articles", Article.show_controller)
-    assert_equal("/#{self.class.name.underscore}/phony", Phony.show_controller)
+    assert_equal(:articles, Article.show_controller)
+    assert_equal("#{self.class.name.underscore}/phony", Phony.show_controller)
   end
 
   def test_show_action
-    assert_equal("show", Article.show_action)
-    assert_equal("show_#{Phony.name.underscore}", Phony.show_action)
+    assert_equal(:show, Article.show_action)
+    assert_equal("show_#{Phony.name.underscore}".to_sym, Phony.show_action)
   end
 
   def test_show_url
     assert_equal("#{MO.http_domain}/articles/2020",
                  Article.show_url(2020))
     assert_equal(
-      "#{MO.http_domain}#{Phony.show_controller}/#{Phony.show_action}/2020",
+      "#{MO.http_domain}/#{Phony.show_controller}/#{Phony.show_action}/2020",
       Phony.show_url(2020)
     )
   end
 
   def test_index_action
-    assert_equal("index", Article.index_action)
-    assert_equal("index_#{Phony.name.underscore}", Phony.index_action)
+    assert_equal(:index, Article.index_action)
+    assert_equal("index_#{Phony.name.underscore}".to_sym, Phony.index_action)
   end
 
   # fixture for above tests
