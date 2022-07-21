@@ -80,6 +80,11 @@ Layout/LineLength:
   # RuboCop default: 120
   # Use 80 instead because some developers have smaller screens
   Max: 80
+Layout/MultilineMethodParameterLineBreaks: # new in 1.32
+  # Makes Each param in a multi-line method definition start on a separate line.
+  # RuboCop default: true
+  # Cop seems like overkill; MO has many relevant methods with >1 param per line
+  Enabled: false
 
 Lint/AmbiguousOperatorPrecedence: # new in 1.21
   # RuboCop default: true
