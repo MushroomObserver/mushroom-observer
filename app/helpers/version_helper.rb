@@ -16,10 +16,6 @@ module VersionHelper
   def show_previous_version(obj)
     html = "#{:VERSION.t}: #{obj.version}".html_safe
     latest_version = obj.versions.latest
-    if latest_version.respond_to?(:merge_source_id) &&
-       latest_version.merge_source_id
-      html += indent(1) + get_version_merge_link(obj, latest_version)
-    end
     html += safe_br
     return html unless latest_version
 
@@ -27,10 +23,6 @@ module VersionHelper
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
       html += link_with_query(str, action: obj.show_past_action, id: obj.id,
                                    version: previous_version.version)
-      if previous_version.respond_to?(:merge_source_id) &&
-         previous_version.merge_source_id
-        html += indent(1) + get_version_merge_link(obj, previous_version)
-      end
       html += safe_br
     end
     html
