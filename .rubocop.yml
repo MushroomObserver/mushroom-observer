@@ -25,7 +25,7 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-
+  NewCops: enable
   ########################### Excluded files ###################################
   # Completely ignore the following
   Exclude:
@@ -51,378 +51,136 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-########### Pending Cops
-# https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-# NOTE: Once Rubocop removes pending status for these cops,
-# our configuration should be:
-#   deleted, if our configuration is the same as Rubocop's default, or
-#   moved to the Resolved (Non-Pending) Cops area
+########### Individual cops for which MO uses a non-default configuration
 
-# https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationleadingspace
-Layout/LineContinuationLeadingSpace: #`new in 1.31.1
-  Enabled: true
-# https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationspacing
-Layout/LineContinuationSpacing: #`new in 1.31.1
-  Enabled: true
+Gemspec:
+  # Not relevent (MO is not a gem)
+  Enabled: false
+
+Layout/BeginEndAlignment:
+  # Rubocop default: start_of_line
+  # which aligns "end" with **start of the line** that includes "begin"
+  # MO: align with "begin". This is how we've almost always done it.
+  # And it's consistent with Layout/EndAlignment for other keywords.
+  EnforcedStyleAlignWith: begin
+Layout/DotPosition:
+  # Rubocop default: leading
+  EnforcedStyle: trailing
+Layout/HashAlignment:
+  # Repeat the Rubocop default because Codeclimate ignores it as of 2019-07-09
+  EnforcedColonStyle: key
 Layout/LineEndStringConcatenationIndentation: # new in 1.18
+  # Rubocop default: true
   # We most consistently align the start of the continued line
   # with the start of the string on the previous line.
   # This does not correspond to any available EnforcedStyle.
   Enabled: false
+Layout/LineLength:
+  # RuboCop default: 120
+  # Use 80 instead because some developers have smaller screens
+  Max: 80
 
-Layout/SpaceBeforeBrackets: # new in 1.7
-  Enabled: true
-
-Lint/AmbiguousAssignment: # new in 1.7
-  Enabled: true
 Lint/AmbiguousOperatorPrecedence: # new in 1.21
+  # RuboCop default: true
   # We do this only in rare cases; Always doing it would add uneeded clutter
   Enabled: false
-Lint/AmbiguousRange: # new in 1.19
-  Enabled: true
-# https://docs.rubocop.org/rubocop/cops_lint.html#lintconstantoverwritteninrescue
-Lint/ConstantOverwrittenInRescue: # new in 1.31.1
-  Enabled: true
-Lint/DeprecatedConstants: # new in 1.8
-  Enabled: true
-Lint/DuplicateBranch: # new in 1.3
-  Enabled: true
-Lint/DuplicateRegexpCharacterClassElement: # new in 1.1
-  Enabled: true
-Lint/EmptyBlock: # new in 1.1
-  Enabled: true
-Lint/EmptyClass: # new in 1.3
-  Enabled: true
-Lint/EmptyInPattern: # new in 1.16
-  Enabled: true
-Lint/IncompatibleIoSelectWithFiberScheduler: # new in 1.21
-  Enabled: true
-Lint/LambdaWithoutLiteralBlock: # new in 1.8
-  Enabled: true
-Lint/NoReturnInBeginEndBlocks: # new in 1.2
-  Enabled: true
 Lint/NonAtomicFileOperation: # new in 1.31
   # Disable until I understand the cop's implications - jdc 2022-07-14
   # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
   Enabled: false
-Lint/NumberedParameterAssignment: # new in 1.9
-  Enabled: true
-Lint/OrAssignmentToConstant: # new in 1.9
-  Enabled: true
-Lint/RedundantDirGlobSort: # new in 1.8
-  Enabled: true
-Lint/RefinementImportMethods: # new in 1.27
-  Enabled: true
-Lint/RequireRelativeSelfPath: # new in 1.22
-  Enabled: true
-Lint/SymbolConversion: # new in 1.9
-  Enabled: true
-Lint/ToEnumArguments: # new in 1.1
-  Enabled: true
-Lint/TripleQuotes: # new in 1.9
-  Enabled: true
-Lint/UnexpectedBlockArity: # new in 1.5
-  Enabled: true
-Lint/UnmodifiedReduceAccumulator: # new in 1.1
-  Enabled: true
-Lint/UselessRuby2Keywords: # new in 1.23
-  Enabled: true
-
-Naming/BlockForwarding: # new in 1.24
-  Enabled: true
-
-Performance/AncestorsInclude: # new in 1.7
-  Enabled: true
-Performance/BigDecimalWithNumericArgument: # new in 1.7
-  Enabled: true
-Performance/BlockGivenWithExplicitBlock: # new in 1.9
-  Enabled: true
-Performance/CollectionLiteralInLoop: # new in 1.8
-  Enabled: true
-Performance/ConcurrentMonotonicTime: # new in 1.12
-  Enabled: true
-Performance/ConstantRegexp: # new in 1.9
-  Enabled: true
-Performance/MapCompact: # new in 1.11
-  Enabled: true
-Performance/MethodObjectAsBlock: # new in 1.9
-  Enabled: true
-Performance/RedundantEqualityComparisonBlock: # new in 1.10
-  Enabled: true
-Performance/RedundantSortBlock: # new in 1.7
-  Enabled: true
-Performance/RedundantSplitRegexpArgument: # new in 1.10
-  Enabled: true
-Performance/RedundantStringChars: # new in 1.7
-  Enabled: true
-Performance/ReverseFirst: # new in 1.7
-  Enabled: true
-Performance/SortReverse: # new in 1.7
-  Enabled: true
-Performance/Squeeze: # new in 1.7
-  Enabled: true
-Performance/StringIdentifierArgument: # new in 1.13
-  Enabled: true
-Performance/Sum: # new in 1.8
-  Enabled: true
-
-Rails/ActionControllerTestCase: # new in 2.14
-  Enabled: true
-Rails/ActiveRecordCallbacksOrder: # new in 2.7
-  Enabled: true
-Rails/AddColumnIndex: # new in 2.11
-  Enabled: true
-Rails/AfterCommitOverride: # new in 2.8
-  Enabled: true
-Rails/AttributeDefaultBlockValue: # new in 2.9
-  Enabled: true
-Rails/CompactBlank: # new in 2.13
-  Enabled: true
-Rails/DeprecatedActiveModelErrorsMethods: # new in 2.14
-  Enabled: true
-Rails/DuplicateAssociation: # new in 2.14
-  Enabled: true
-Rails/DuplicateScope: # new in 2.14
-  Enabled: true
-Rails/DurationArithmetic: # new in 2.13
-  Enabled: true
-Rails/EagerEvaluationLogMessage: # new in 2.11
-  Enabled: true
-Rails/ExpandedDateRange: # new in 2.11
-  Enabled: true
-Rails/FindById: # new in 2.7
-  Enabled: true
-Rails/I18nLazyLookup: # new in 2.14
-  Enabled: true
-Rails/I18nLocaleAssignment: # new in 2.11
-  Enabled: true
-Rails/I18nLocaleTexts: # new in 2.14
-  Enabled: true
-Rails/Inquiry: # new in 2.7
-  Enabled: true
-Rails/MailerName: # new in 2.7
-  Enabled: true
-Rails/MatchRoute: # new in 2.7
-  Enabled: true
-Rails/MigrationClassName: # new in 2.14
-  Enabled: true
-Rails/NegateInclude: # new in 2.7
-  Enabled: true
-Rails/Pluck: # new in 2.7
-  Enabled: true
-Rails/PluckInWhere: # new in 2.7
-  Enabled: true
-Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
-  # Cop gives false positives
-  # Perhaps because we don't load Rails defaults in config, and also don't have
-  # config.active_record.belongs_to_required_by_default
-  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
-  Enabled: false
-Rails/RedundantTravelBack: # new in 2.12
-  Enabled: true
-Rails/RenderInline: # new in 2.7
-  Enabled: true
-  Exclude:
-    # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
-    - "app/controllers/ajax_controller/**/*"
-Rails/RenderPlainText: # new in 2.7
-  Enabled: true
-Rails/RootJoinChain: # new in 2.13
-  Enabled: true
-Rails/ShortI18n: # new in 2.7
-  Enabled: true
-Rails/SquishedSQLHeredocs: # new in 2.8
-  Enabled: true
-Rails/TimeZoneAssignment: # new in 2.10
-  Enabled: true
-Rails/TransactionExitStatement: # new in 2.14
-  Enabled: true
-Rails/UnusedIgnoredColumns: # new in 2.11
-  Enabled: true
-Rails/WhereEquals: # new in 2.9
-  Enabled: true
-Rails/WhereNot: # new in 2.8
-  Enabled: true
-
-Security/CompoundHash: # new in 1.28
-  Enabled: true
-Security/IoMethods: # new in 1.22
-  Enabled: true
-
-Style/ArgumentsForwarding: # new in 1.1
-  Enabled: true
-Style/CollectionCompact: # new in 1.2
-  Enabled: true
-Style/DocumentDynamicEvalDefinition: # new in 1.1
-  Enabled: true
-Style/EndlessMethod: # new in 1.8
-  Enabled: true
-Style/EnvHome: # new in 1.29
-  Enabled: true
-Style/FetchEnvVar: # new in 1.28
-  Enabled: true
-Style/FileRead: # new in 1.24
-  Enabled: true
-Style/FileWrite: # new in 1.24
-  Enabled: true
-Style/HashConversion: # new in 1.10
-  Enabled: true
-Style/HashExcept: # new in 1.7
-  Enabled: true
-Style/IfWithBooleanLiteralBranches: # new in 1.9
-  Enabled: true
-Style/InPatternThen: # new in 1.16
-  Enabled: true
-Style/MapCompactWithConditionalBlock: # new in 1.30
-  Enabled: true
-Style/MapToHash: # new in 1.24
-  Enabled: true
-Style/MultilineInPatternThen: # new in 1.16
-  Enabled: true
-Style/NegatedIfElseCondition: # new in 1.2
-  Enabled: true
-Style/NestedFileDirname: # new in 1.26
-  Enabled: true
-Style/NilLambda: # new in 1.3
-  Enabled: true
-Style/NumberedParameters: # new in 1.22
-  Enabled: true
-Style/NumberedParametersLimit: # new in 1.22
-  Enabled: true
-Style/ObjectThen: # new in 1.28
-  Enabled: true
-Style/OpenStructUse: # new in 1.23
-  Enabled: true
-Style/QuotedSymbols: # new in 1.16
-  Enabled: true
-Style/RedundantArgument: # new in 1.4
-  Enabled: true
-Style/RedundantInitialize: # new in 1.27
-  Enabled: true
-Style/RedundantSelfAssignmentBranch: # new in 1.19
-  Enabled: true
-Style/SelectByRegexp: # new in 1.22
-  Enabled: true
-Style/StringChars: # new in 1.12
-  Enabled: true
-Style/SwapValues: # new in 1.1
-  Enabled: true
-
-# ------------------------------------------------------------------------------
-
-########### Resolved (Non-Pending) Cops
-
-# cops for which MO uses a non-default configuration
-
-# Not relevent (MO is not a gem)
-Gemspec:
-  Enabled: false
-
-# Default: align "end" with **start of the line** that includes "begin"
-# MO: align with "begin". This is how we've almost always done it.
-# And it's consistent with Layout/EndAlignment for other keywords.
-Layout/BeginEndAlignment:
-  EnforcedStyleAlignWith: begin
-
-Layout/DotPosition:
-  EnforcedStyle: trailing
-
-# Repeat the default because Codeclimate ignores it as of 2019-07-09
-Layout/HashAlignment:
-  EnforcedColonStyle: key
-
-Layout/LineLength:
-  # RuboCop default is 120 as of 0.84
-  Max: 80
 
 Metrics/AbcSize:
-  # Can we try relaxing this one?  Even short simple methods sometimes exceed
-  # 15 or 16.  Simplifying them further just forces us to make tons of tiny
+  # Rubocop default: 15
+  # Even short simple methods sometimes exceed 15.
+  # Simplifying them further just forces us to make tons of tiny
   # trivial methods with really cumbersome names, without actually making
   # the code any better.
-  # Max: 15
   Max: 20
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/BlockLength:
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/ClassLength:
-  # Relaxed metrics based on CodeClimages default .rubocop.yml
-  # Max: 100
+  # Rubocop default: 100
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/CyclomaticComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/MethodLength:
-  # Relaxed metrics based on CodeClimages default .rubocop.yml
-  # Max: 10
+  # Rubocop default: 10
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
   Max: 30
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/ModuleLength:
-  # Relaxed metrics based on CodeClimages default .rubocop.yml
-  # Max: 100
+  # Rubocop default: 100
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
   Max: 250
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
-
 Metrics/PerceivedComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
 
-# Disable because it does not work with Unicode in Ruby 2.4
-# Cop supports --auto-correct.
 Performance/Casecmp:
+  # Rubocop default: true
+  # Disable because it does not work with Unicode in Ruby 2.4
   Enabled: false
-
 Performance/RegexpMatch:
   # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
   # The latter throws an error when something == nil:
   #   undefined method `match?' for nil:NilClass
   # So manually correct to: regexp.match?(something)
   AutoCorrect: false
-
 Performance/StringInclude:
+  # Rubocop default: true
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
-# Make autocorrect saf(er) by whitelisting our find_by methods
 Rails/DynamicFindBy:
+  # Make autocorrect saf(er) by whitelisting our find_by methods
   AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
   AutoCorrect: true
-
-# MO uses HABTM extensively; RuboCop prefers the newer has_many through
-# Switching would require a migration process, detailed here:
-# http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
-# It's not worth the effort
 Rails/HasAndBelongsToMany:
+  # MO uses HABTM extensively; RuboCop prefers the newer has_many through
+  # Switching would require a migration process, detailed here:
+  # http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
+  # It's not worth the effort
   Enabled: false
-
-# Can be unsafe depending on eager_load vs pre_load
-# https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
+Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
+  # Rubocop default: true
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
+  Enabled: false
+Rails/RenderInline: # new in 2.7
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
+  Exclude:
+    - "app/controllers/ajax_controller/**/*"
 Rails/WhereExists:
+  # Rubocop default: true
+  # Can be unsafe depending on eager_load vs pre_load
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
   Enabled: false
 
 Style/AccessorGrouping:
+  # Rubocop default: true
   # Disabled. See discussion at
   # https://github.com/MushroomObserver/mushroom-observer/pull/988
   Enabled: false
-  # The follow in case we re-enable the cop
+  # The followin Exclude in case we re-enable the cop
   # Exclude files that individually comment accessors
   # else Rubocop concatenates the accessors and comments on a single line.
   # Disabling Style/AccessorGrouping around the accessors doesn't
@@ -433,30 +191,26 @@ Style/AccessorGrouping:
     - "app/classes/country_counter.rb"
     - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
-
-# Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
+  # Rubocop default: true
+  # Allow non-ascii characters in comments; we need to use accented chars
   Enabled: false
-
-# Repeat the RuboCop default because CodeClimate silently overrides it
-# Is this still true? JDC 2020-08-17
 Style/DateTime:
+  # Repeat the RuboCop default because CodeClimate silently overrides it
+  # Is this still true? JDC 2020-08-17
   Enabled: false
-
-# This doesn't work for redirect in config/routes.rb.
 Style/FormatStringToken:
   Enabled: true
+  # # This doesn't work for redirect in config/routes.rb.
   IgnoredMethods:
     - "redirect"
-
-# Rubocop does not enable this cop by default
-# MO uses parentheses
 Style/MethodCallWithArgsParentheses:
+  # Rubocop default: false
+  # MO uses parentheses (except for some macro-style methods)
   Enabled: true
-
-# Repeat the RuboCop defaults because Codeclimate silently overrides them
-# Is that still true? JDC 2020-08-17?
 Style/PercentLiteralDelimiters:
+  # Repeat the RuboCop defaults because Codeclimate silently overrides them
+  # Is that still true? JDC 2020-08-17?
   PreferredDelimiters:
     default: "()"
     "%i": "[]"
@@ -464,27 +218,21 @@ Style/PercentLiteralDelimiters:
     "%r": "{}"
     "%w": "[]"
     "%W": "[]"
-
-# I can't figure out how to get exploded to work with API.
 Style/RaiseArgs:
+  # Rubocop defaiult: exploded
+  # I can't figure out how to get exploded to work with API.
   EnforcedStyle: compact
-
-# Added to facilitiate temporarily switching Mode
-# default mode: aggressive (unsafe)
-# https://docs.rubocop.org/rubocop/1.29/cops_style.html#safety-44
-Style/StringConcatenation:
-  Mode: aggressive
-
 Style/StringLiterals:
+  # Rubocop default: single_quotes
   EnforcedStyle: double_quotes
-
 Style/StringLiteralsInInterpolation:
+  # Rubocop default: single_quotes
   EnforcedStyle: double_quotes
-
-# MO uses [] not %i() or %I()
 Style/SymbolArray:
+  # Rubocop default: percent. Ex: %i[foo bar baz]
+  # MO uses plain brackets. Ex: [:foo, :bar, :baz]
   EnforcedStyle: brackets
 
-# We skip validations all the time.  I'm tired of disabling this cop.
 Rails/SkipsModelValidations:
+  # We skip validations all the time.  I'm tired of disabling this cop.
   Enabled: false
