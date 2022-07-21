@@ -784,7 +784,6 @@ class LocationController < ApplicationController
         if (params[:delete_after] == "true") &&
            (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
           v = @description.versions.latest
-          v.merge_source_id = old_desc.versions.latest.id
           v.save
           if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
