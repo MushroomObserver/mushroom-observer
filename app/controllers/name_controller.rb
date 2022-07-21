@@ -421,7 +421,7 @@ class NameController < ApplicationController
 
     @name = @description.name
     @description.revert_to(params[:version].to_i)
-    end
+  end
 
   # Go to next name: redirects to show_name.
   def next_name
