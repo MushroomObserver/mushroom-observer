@@ -10,6 +10,7 @@ require:
 # *** Update The Codeclimate Channel When Updating Rubocop
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
 # Use the highest available channel that's compatible with the RuboCop version.
+# Available channels: https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
 # .codeclimate.yml specifies the RuboCop version ('channel') used
 # by Code Climate, which can be different than the version in Gemfile.lock
 #
