@@ -3393,9 +3393,13 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_with_description_created_by
+    name = names(:coprinus_comatus)
+    description = name_descriptions(:draft_coprinus_comatus)
+    assert_not_equal(name.user, description.user)
+
     assert_includes(
-      Name.with_description_created_by(users(:dick)),
-      names(:boletus_edulis)
+      Name.with_description_created_by(description.user),
+      name
     )
     assert_not_includes(
       Name.with_description_created_by(users(:zero_user)),
