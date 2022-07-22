@@ -3404,7 +3404,14 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_with_description_reviewed_by
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(
+      Name.with_description_reviewed_by(users(:rolf)),
+      names(:peltigera)
+    )
+   assert_not_includes(
+        Name.with_description_reviewed_by(users(:dick)),
+        names(:peltigera)
+      )
   end
 
   def test_scope_with_description_of_type
