@@ -3432,7 +3432,7 @@ class NameTest < UnitTestCase
       names(:peltigera)
     )
     assert_nil(
-      Name.with_description_of_type("halucinating"),
+      Name.with_description_of_type("spam"),
       names(:peltigera)
     )
   end

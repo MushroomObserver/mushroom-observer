@@ -498,7 +498,8 @@ class Name < AbstractModel
         lambda { |source|
           # Check that it's a valid source type (string enum value)
           if Description.all_source_types.include?(source)
-            joins(:descriptions).where(source_type: source)
+            joins(:descriptions).
+              merge(NameDescription.where(source_type: source))
           end
         }
 
