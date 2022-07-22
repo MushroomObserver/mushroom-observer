@@ -405,7 +405,7 @@ class AbstractModelTest < UnitTestCase
 
   def test_show_controller
     assert_equal(:articles, Article.show_controller)
-    assert_equal("#{self.class.name.underscore}/phony", Phony.show_controller)
+    assert_equal(:phony, Phony.show_controller)
   end
 
   def test_show_action
@@ -428,7 +428,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   # fixture for above tests
-  class Phony < AbstractModel
+  class ::Phony < AbstractModel
   end
 
   # -------------------------------------------

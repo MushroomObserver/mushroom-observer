@@ -29,10 +29,10 @@
   links = []
   if obj.class.controller_normalized?
     links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.id}"])
+      "#{MO.http_domain}/#{obj.show_controller}/#{obj.id}"])
   else
     links.push([:email_links_show_object.t(type: type),
-      "#{MO.http_domain}#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
+      "#{MO.http_domain}/#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
   end
 
   links.push([:email_links_latest_changes.t,
