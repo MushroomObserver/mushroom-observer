@@ -149,7 +149,7 @@ class Location < AbstractModel
   end
 
   # TODO: write tests for :in_region, :in_box, and any other untested scopes.
-  # Coveralls has info
+  # Coveralls has info. E.g., https://coveralls.io/builds/51093827
 
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }

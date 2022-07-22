@@ -137,8 +137,7 @@
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #
-#  ==== Name Formats
-#  text_name::              Plain text.
+#  ==== Name Formats #  text_name::              Plain text.
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
@@ -242,7 +241,7 @@ class Observation < AbstractModel
 
   # TODO: write tests for untested scopes, including :found_*,
   # :has_notes_field, :herbarium_record_notes_include, :in_box,
-  # and parts of :of_name. Coveralls has the info.
+  # and parts of :of_name. E.g., https://coveralls.io/builds/51093827
 
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
