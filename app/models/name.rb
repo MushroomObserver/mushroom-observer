@@ -479,7 +479,7 @@ class Name < AbstractModel
             or(where(NameDescription[:habitat].matches("%#{text}%"))).
             or(where(NameDescription[:look_alikes].matches("%#{text}%"))).
             or(where(NameDescription[:notes].matches("%#{text}%"))).
-            or(where(NameDescription[:ref].matches("%#{text}%")))
+            or(where(NameDescription[:refs].matches("%#{text}%")))
         }
   scope :with_description_in_project,
         lambda { |project|
