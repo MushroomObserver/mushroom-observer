@@ -3419,7 +3419,22 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_with_description_of_type
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(
+      Name.with_description_of_type("public"),
+      names(:peltigera)
+    )
+    assert_includes(
+      Name.with_description_of_type("user"),
+      names(:peltigera)
+    )
+    assert_not_includes(
+      Name.with_description_of_type("foreign"),
+      names(:peltigera)
+    )
+    assert_nil(
+      Name.with_description_of_type("halucinating"),
+      names(:peltigera)
+    )
   end
 
   def test_scope_subtaxa_of
