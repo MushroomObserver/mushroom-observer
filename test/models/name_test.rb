@@ -3382,7 +3382,14 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_with_description_in_project
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:boletus_edulis)
+    )
+    assert_not_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:peltigera)
+    )
   end
 
   def test_scope_with_description_created_by
