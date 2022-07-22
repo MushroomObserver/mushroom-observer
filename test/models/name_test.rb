@@ -3382,38 +3382,38 @@ class NameTest < UnitTestCase
   end
 
   def test_with_description_in_project
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_with_description_created_by
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_with_description_reviewed_by
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_with_description_of_type
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_subtaxa_of
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_comments_include
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_on_species_list
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_at_location
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 
   def test_in_box
-    flunk("Test under construction")
+    skip_until(2022, 07, 26, "Test under construction")
   end
 end
