@@ -486,7 +486,8 @@ class Name < AbstractModel
         }
   scope :with_description_created_by,
         lambda { |user|
-          joins(:descriptions).where(user: user)
+          joins(:descriptions).
+            merge(NameDescription.where(user: user))
         }
   scope :with_description_reviewed_by,
         lambda { |user|
