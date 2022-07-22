@@ -457,8 +457,6 @@ class Name < AbstractModel
     end
   end
 
-  # TODO: write tests for untested scopes. Coveralls has info
-
   scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
   scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
   scope :deprecated, -> { where(deprecated: true) }

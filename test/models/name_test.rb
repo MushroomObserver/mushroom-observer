@@ -3380,4 +3380,40 @@ class NameTest < UnitTestCase
     arbitrary_sha = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
     assert_equal(0, Name.description_includes(arbitrary_sha).count)
   end
+
+  def test_with_description_in_project
+    flunk("Test under construction")
+  end
+
+  def test_with_description_created_by
+    flunk("Test under construction")
+  end
+
+  def test_with_description_reviewed_by
+    flunk("Test under construction")
+  end
+
+  def test_with_description_of_type
+    flunk("Test under construction")
+  end
+
+  def test_subtaxa_of
+    flunk("Test under construction")
+  end
+
+  def test_comments_include
+    flunk("Test under construction")
+  end
+
+  def test_on_species_list
+    flunk("Test under construction")
+  end
+
+  def test_at_location
+    flunk("Test under construction")
+  end
+
+  def test_in_box
+    flunk("Test under construction")
+  end
 end
