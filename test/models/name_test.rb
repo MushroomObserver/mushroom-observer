@@ -3365,4 +3365,19 @@ class NameTest < UnitTestCase
     assert_equal(:log_orphan, log1.parse_log[0][0])
     assert_equal(:log_name_merged, log1.parse_log[1][0])
   end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_description_includes
+    assert_equal(
+      [names(:suillus)],
+      Name.description_includes("by any other name would smell as sweet").to_a
+    )
+    # a string that's Very unlikely to be in any description
+    arbitrary_sha = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
+    assert_equal(0, Name.description_includes(arbitrary_sha).count)
+  end
 end
