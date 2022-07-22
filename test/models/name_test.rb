@@ -3371,7 +3371,7 @@ class NameTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_description_includes
+  def test_scope_description_includes
     assert_equal(
       [names(:suillus)],
       Name.description_includes("by any other name would smell as sweet").to_a
@@ -3381,39 +3381,39 @@ class NameTest < UnitTestCase
     assert_equal(0, Name.description_includes(arbitrary_sha).count)
   end
 
-  def test_with_description_in_project
+  def test_scope_with_description_in_project
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_with_description_created_by
+  def test_scope_with_description_created_by
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_with_description_reviewed_by
+  def test_scope_with_description_reviewed_by
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_with_description_of_type
+  def test_scope_with_description_of_type
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_subtaxa_of
+  def test_scope_subtaxa_of
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_comments_include
+  def test_scope_comments_include
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_on_species_list
+  def test_scope_on_species_list
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_at_location
+  def test_scope_at_location
     skip_until(2022, 7, 26, "Test under construction")
   end
 
-  def test_in_box
+  def test_scope_in_box
     skip_until(2022, 7, 26, "Test under construction")
   end
 end
