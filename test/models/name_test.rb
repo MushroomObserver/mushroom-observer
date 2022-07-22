@@ -3408,10 +3408,10 @@ class NameTest < UnitTestCase
       Name.with_description_reviewed_by(users(:rolf)),
       names(:peltigera)
     )
-   assert_not_includes(
-        Name.with_description_reviewed_by(users(:dick)),
-        names(:peltigera)
-      )
+    assert_not_includes(
+      Name.with_description_reviewed_by(users(:dick)),
+      names(:peltigera)
+    )
   end
 
   def test_scope_with_description_of_type
