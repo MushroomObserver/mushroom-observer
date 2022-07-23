@@ -3438,7 +3438,18 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_subtaxa_of
+    mispelled_name = Name.create!(
+      text_name: "Amanita boodairy",
+      author: "",
+      display_name: "__Amanita boodairy__ ",
+      correct_spelling: names(:amanita_boudieri),
+      deprecated: true,
+      rank: "Species",
+      user: users(:rolf)
+    )
+
     subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+
     assert_includes(
       subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
       "`subtaxa_of` a genus should include subgenera"
@@ -3466,10 +3477,18 @@ class NameTest < UnitTestCase
       "`subtaxa_of` should include deprecated, but correctly spelled, names"
     )
 
-    # TODO: other names that should be included
-    # Subtaxa of a bane with rank above genus
-    # Subtaxa of a genus should include "species group"
-    # Subtaxa of a genus should include species s.l.
+    assert_includes(
+      Name.subtaxa_of(names(:boletus)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` a genus should include species groups"
+    )
+
+    assert_includes(
+      Name.subtaxa_of(names(:agaricales)),
+      names(:agaricaceae),
+      "`subtaxa_of` a class should include family whose classification" \
+      "includes that class"
+    )
 
     # -----------------
 
@@ -3481,16 +3500,6 @@ class NameTest < UnitTestCase
       subtaxa_of_amanita, names(:boletus_edulis),
       "`subtaxa_of` a genus should not species from other genera"
     )
-    mispelled_name = Name.create!(
-      text_name: "Amanita boodairy",
-      author: "",
-      display_name: "__Amanita boodairy__ ",
-      synonym: synonyms(:chlorophyllum_rachodes_synonym),
-      correct_spelling: names(:amanita_boudieri),
-      deprecated: true,
-      rank: "Species",
-      user: users(:rolf)
-    )
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
@@ -3499,7 +3508,6 @@ class NameTest < UnitTestCase
     # subtaxa of a group should be empty
     # subtaxa of a name s.l. should be empty
     # Subtaxa of a genus should not include genus group
-    # Subtaxa of a genus should not include genus s.l.
   end
 
   def test_scope_comments_include
