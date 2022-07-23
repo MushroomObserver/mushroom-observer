@@ -3514,6 +3514,22 @@ class NameTest < UnitTestCase
     # subtaxa of a name s.l. should be empty
   end
 
+  def test_scope_subtaxa_of_genus
+    amanita_group = Name.create!(
+      text_name: "Amanita group",
+      display_name: "__Amanita group__",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Group",
+      user: users(:rolf)
+    )
+
+    assert_not_includes(
+      Name.subtaxa_of_genus("Amanita"), amanita_group,
+      "`subtaxa_of` genus <X> should not include '<X> group'"
+    )
+  end
+
   def test_scope_comments_include
     skip_until(2022, 7, 26, "Test under construction")
   end
