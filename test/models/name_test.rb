@@ -4,6 +4,10 @@ require("test_helper")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
+  # a string that's VERY unlikely to appear anywhere in the database
+  # Useful for testing that an object doesn't include something
+  ARBITRARY_SHA = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
+
   def create_test_name(string, force_rank = nil)
     User.current = rolf
     parse = Name.parse_name(string)
@@ -3376,9 +3380,7 @@ class NameTest < UnitTestCase
       [names(:suillus)],
       Name.description_includes("by any other name would smell as sweet").to_a
     )
-    # a string that's Very unlikely to be in any description
-    arbitrary_sha = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
-    assert_equal(0, Name.description_includes(arbitrary_sha).count)
+    assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
   end
 
   def test_scope_with_description_in_project
@@ -3542,7 +3544,11 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_comments_include
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(Name.comments_include("do not change"), names(:fungi))
+    assert_empty(Name.comments_include(ARBITRARY_SHA))
+    assert_empty(
+      Name.comments_include(comments(:detailed_unknown_obs_comment).summary)
+    )
   end
 
   def test_scope_on_species_list
