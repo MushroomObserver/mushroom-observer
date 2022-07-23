@@ -3431,9 +3431,9 @@ class NameTest < UnitTestCase
       Name.with_description_of_type("foreign"),
       names(:peltigera)
     )
-    assert_nil(
-      Name.with_description_of_type("spam"),
-      names(:peltigera)
+    assert_empty(Name.with_description_of_type("spam"))
+    assert_kind_of(
+      ActiveRecord::Relation, Name.with_description_of_type("spam")
     )
   end
 

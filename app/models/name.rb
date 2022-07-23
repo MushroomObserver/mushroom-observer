@@ -497,10 +497,10 @@ class Name < AbstractModel
   scope :with_description_of_type,
         lambda { |source|
           # Check that it's a valid source type (string enum value)
-          if Description.all_source_types.include?(source)
-            joins(:descriptions).
-              merge(NameDescription.where(source_type: source))
-          end
+          return Name.none if Description.all_source_types.exclude?(source)
+
+          joins(:descriptions).
+            merge(NameDescription.where(source_type: source))
         }
 
   ### Module Name::Spelling
