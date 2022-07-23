@@ -3447,6 +3447,14 @@ class NameTest < UnitTestCase
       rank: "Species",
       user: users(:rolf)
     )
+    amanita_group = Name.create!(
+      text_name: "Amanita group",
+      display_name: "__Amanita group__",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Group",
+      user: users(:rolf)
+    )
 
     subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
 
@@ -3504,10 +3512,12 @@ class NameTest < UnitTestCase
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
     )
+    assert_not_includes(
+      subtaxa_of_amanita, amanita_group,
+      "`subtaxa_of` a genus should not include genus group"
+    )
     # TODO: other names that should not be included
-    # subtaxa of a group should be empty
     # subtaxa of a name s.l. should be empty
-    # Subtaxa of a genus should not include genus group
   end
 
   def test_scope_comments_include
