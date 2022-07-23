@@ -534,17 +534,13 @@ class Name < AbstractModel
         }
   scope :subtaxa_of_genus_or_below,
         lambda { |text_name|
+          text_name_followed_by_group =
+            /#{text_name} (#{Name::Parse::GROUP_ABBR.source.delete(" ")})/
+
           # Note small diff w :text_name_includes scope
           where(Name[:text_name].matches("#{text_name} %")).
             # "<name> group" is not a subtaxon of "<name>"
-            # Therefore exclude "<text_name> <group/complex/clade etc.>"
-            where.not(text_name: "#{text_name} group").
-            where.not(text_name: "#{text_name} gr.").
-            where.not(text_name: "#{text_name} gr").
-            where.not(text_name: "#{text_name} gp.").
-            where.not(text_name: "#{text_name} gp").
-            where.not(text_name: "#{text_name} clade").
-            where.not(text_name: "#{text_name} complex")
+            where.not(Name[:text_name] =~ text_name_followed_by_group)
         }
   scope :subtaxa_of,
         lambda { |name|
