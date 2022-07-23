@@ -537,8 +537,10 @@ class Name < AbstractModel
   scope :subtaxa_of,
         lambda { |name|
           if name.at_or_below_genus?
+            # Subtaxa can be determined from the text_nam
             subtaxa_of_genus(name.text_name).with_correct_spelling
           else
+            # Need to examine the classification strings
             with_rank_and_name_in_classification(name.rank, name.text_name).
               with_correct_spelling
           end
