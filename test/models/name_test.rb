@@ -3523,10 +3523,24 @@ class NameTest < UnitTestCase
       rank: "Group",
       user: users(:rolf)
     )
+    amanita_sensu_lato = Name.create!(
+      text_name: "Amanita",
+      author: "sensu lato",
+      display_name: "__Amanita__ sensu lato",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Genus",
+      user: users(:rolf)
+    )
 
     assert_not_includes(
       Name.subtaxa_of_genus_or_below("Amanita"), amanita_group,
-      "`subtaxa_of` genus <X> should not include '<X> group'"
+      "`subtaxa_of_genus_or_below` genus <X> should not include `<X> group`"
+    )
+    assert_not_includes(
+      Name.subtaxa_of_genus_or_below("Amanita"), amanita_sensu_lato,
+      "`subtaxa_of_genus_or_below` genus <X> should not include " \
+      "`<X> sensu lato`"
     )
   end
 
