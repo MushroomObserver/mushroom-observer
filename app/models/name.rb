@@ -593,8 +593,8 @@ class Name < AbstractModel
   }
   scope :on_species_list,
         lambda { |species_list|
-          joins(observations: :species_list_observations).
-            where(species_list_id: species_list.id)
+          joins(observations: :species_lists).
+            merge(SpeciesListObservation.where(species_list: species_list))
         }
   # Accepts region string, location_id, or Location instance
   scope :at_location,
