@@ -3552,7 +3552,10 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_on_species_list
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(
+      Name.on_species_list(species_lists(:unknown_species_list)), names(:fungi)
+    )
+    assert_empty(Name.on_species_list(species_lists(:first_species_list)))
   end
 
   def test_scope_at_location
