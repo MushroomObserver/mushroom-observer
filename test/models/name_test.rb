@@ -3559,7 +3559,26 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_at_location
-    skip_until(2022, 7, 26, "Test under construction")
+    assert_includes(
+      Name.at_location(locations(:burbank)), # at location called with Location
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).id), # at location called with id
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).name), # called with string
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:california).name), # region
+      names(:agaricus_campestris)
+    )
+    assert_not_includes(
+      Name.at_location(locations(:obs_default_location)),
+      names(:notification_but_no_observation)
+    )
   end
 
   def test_scope_in_box
