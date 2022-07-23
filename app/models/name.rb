@@ -532,8 +532,20 @@ class Name < AbstractModel
           where(Name[:rank] > Name.ranks[:Genus]).
             where(Name[:rank] != Name.ranks[:Group])
         }
-  scope :subtaxa_of_genus, # Note small diff w :text_name_includes scope
-        ->(genus) { where(Name[:text_name].matches("#{genus} %")) }
+  scope :subtaxa_of_genus,
+        lambda { |text_name|
+          # Note small diff w :text_name_includes scope
+          where(Name[:text_name].matches("#{text_name} %")).
+            # "<name> group" is not a subtaxon of "<name>"
+            # Therefore exclude "<text_name> <group/complex/clade etc.>"
+            where.not(text_name: "#{text_name} group").
+            where.not(text_name: "#{text_name} gr.").
+            where.not(text_name: "#{text_name} gr").
+            where.not(text_name: "#{text_name} gp.").
+            where.not(text_name: "#{text_name} gp").
+            where.not(text_name: "#{text_name} clade").
+            where.not(text_name: "#{text_name} complex")
+        }
   scope :subtaxa_of,
         lambda { |name|
           if name.at_or_below_genus?
