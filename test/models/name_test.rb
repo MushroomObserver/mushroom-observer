@@ -3509,9 +3509,6 @@ class NameTest < UnitTestCase
       names(:boletus_edulis_group),
       "`subtaxa_of` <name> should not include <name> group"
     )
-
-    # TODO: other names that should not be included
-    # subtaxa of a name s.l. should be empty
   end
 
   def test_scope_subtaxa_of_genus_or_below
