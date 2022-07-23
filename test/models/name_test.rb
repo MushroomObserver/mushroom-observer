@@ -3438,7 +3438,66 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_subtaxa_of
-    skip_until(2022, 7, 26, "Test under construction")
+    subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri),
+      "`subtaxa_of` a genus should include species"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a genus should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:amanita_boudieri)),
+      names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a species should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:pluteus)),
+      names(:pluteus_petasatus_deprecated),
+      "`subtaxa_of` should include deprecated, but correctly spelled, names"
+    )
+
+    # TODO: other names that should be included
+    # Subtaxa of a bane with rank above genus
+    # Subtaxa of a genus should include "species group"
+    # Subtaxa of a genus should include species s.l.
+
+    # -----------------
+
+    assert_not_includes(
+      subtaxa_of_amanita, names(:amanita),
+      "`subtaxa_of` a genus should not include that genus"
+    )
+    assert_not_includes(
+      subtaxa_of_amanita, names(:boletus_edulis),
+      "`subtaxa_of` a genus should not species from other genera"
+    )
+    mispelled_name = Name.create!(text_name: "Amanita boodairy",
+                                  author: "",
+                                  display_name: "__Amanita boodairy__ ",
+                                  synonym: synonyms(:chlorophyllum_rachodes_synonym),
+                                  correct_spelling: names(:amanita_boudieri),
+                                  deprecated: true,
+                                  rank: "Species",
+                                  user: users(:rolf))
+    assert_not_includes(
+      subtaxa_of_amanita, mispelled_name,
+      "`subtaxa_of` should not include misspellings"
+    )
+    # TODO: other names that should not be included
+    # subtaxa of a group should be empty
+    # subtaxa of a name s.l. should be empty
+    # Subtaxa of a genus should not include genus group
+    # Subtaxa of a genus should not include genus s.l.
   end
 
   def test_scope_comments_include
