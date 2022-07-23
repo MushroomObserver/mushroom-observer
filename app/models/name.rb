@@ -603,9 +603,7 @@ class Name < AbstractModel
           when String # treat it as a region, not looking for all string matches
             joins(observations: :location).
               where(Location[:name].matches("%#{location}"))
-          when Integer
-            joins(:observations).where(observations: { location: location })
-          when Location
+          when Integer, Location
             joins(:observations).where(observations: { location: location })
           end
         }
