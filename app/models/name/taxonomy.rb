@@ -250,7 +250,7 @@ module Name::Taxonomy
   def children(all: false)
     scoped_children =
       if at_or_below_genus?
-        Name.with_correct_spelling.subtaxa_of_genus(text_name)
+        Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
       else
         Name.with_correct_spelling.
           with_rank_and_name_in_classification(rank, text_name)
@@ -345,7 +345,7 @@ module Name::Taxonomy
   # names below genus with the same generic epithet.  Then add all those
   # names' synonyms.
   def subtaxa_whose_classification_needs_to_be_changed
-    subtaxa = Name.subtaxa_of_genus(text_name).not_deprecated.to_a
+    subtaxa = Name.subtaxa_of_genus_or_below(text_name).not_deprecated.to_a
     uniq_subtaxa = subtaxa.filter_map(&:synonym_id).uniq
     # Beware of AR where.not gotcha - will not match a null classification below
     synonyms = Name.where(deprecated: true, synonym_id: uniq_subtaxa).
@@ -374,7 +374,7 @@ module Name::Taxonomy
 
   def ancestor_of_correctly_spelled_name?
     if at_or_below_genus?
-      Name.subtaxa_of_genus(text_name).with_correct_spelling.any?
+      Name.subtaxa_of_genus_or_below(text_name).with_correct_spelling.any?
     else
       Name.with_correct_spelling.
         with_rank_and_name_in_classification(rank, text_name).any?
@@ -395,7 +395,7 @@ module Name::Taxonomy
   end
 
   def genus_or_species_is_ancestor?
-    Name.joins(:namings).subtaxa_of_genus(text_name).
+    Name.joins(:namings).subtaxa_of_genus_or_below(text_name).
       with_rank_below(rank).any?
   end
 

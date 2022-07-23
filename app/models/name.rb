@@ -176,7 +176,7 @@
 #  with_rank_and_name_in_classification(rank, text_name)
 #  with_rank_at_or_below_genus
 #  with_rank_above_genus
-#  subtaxa_of_genus(genus)
+#  subtaxa_of_genus_or_below(genus)
 #  subtaxa_of(name)
 #  include_synonyms_of(name)
 #  include_subtaxa_of(name)
@@ -532,7 +532,7 @@ class Name < AbstractModel
           where(Name[:rank] > Name.ranks[:Genus]).
             where(Name[:rank] != Name.ranks[:Group])
         }
-  scope :subtaxa_of_genus,
+  scope :subtaxa_of_genus_or_below,
         lambda { |text_name|
           # Note small diff w :text_name_includes scope
           where(Name[:text_name].matches("#{text_name} %")).
@@ -550,7 +550,7 @@ class Name < AbstractModel
         lambda { |name|
           if name.at_or_below_genus?
             # Subtaxa can be determined from the text_nam
-            subtaxa_of_genus(name.text_name).with_correct_spelling
+            subtaxa_of_genus_or_below(name.text_name).with_correct_spelling
           else
             # Need to examine the classification strings
             with_rank_and_name_in_classification(name.rank, name.text_name).

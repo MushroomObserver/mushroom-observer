@@ -98,7 +98,8 @@ class CacheTest < UnitTestCase
   # caches (and does not touch updated_at).
   def test_propagate_lifeform
     name = names(:agaricus)
-    saved_name_updated_ats = Name.subtaxa_of_genus("Agaricus").map(&:updated_at)
+    saved_name_updated_ats = Name.subtaxa_of_genus_or_below("Agaricus").
+                             map(&:updated_at)
     saved_obs_updated_ats =
       Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
 
@@ -112,12 +113,12 @@ class CacheTest < UnitTestCase
       Observation.where(Observation[:text_name].matches("Agaricus %")).
         map(&:updated_at)
     )
-    Name.subtaxa_of_genus("Agaricus").each do |nam|
+    Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_name_updated_ats,
-      Name.subtaxa_of_genus("Agaricus").map(&:updated_at)
+      Name.subtaxa_of_genus_or_below("Agaricus").map(&:updated_at)
     )
 
     name.propagate_remove_lifeform("lichen")
@@ -130,12 +131,12 @@ class CacheTest < UnitTestCase
       Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
     )
 
-    Name.subtaxa_of_genus("Agaricus").each do |nam|
+    Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|
       assert_false(nam.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_name_updated_ats,
-      Name.subtaxa_of_genus("Agaricus").map(&:updated_at)
+      Name.subtaxa_of_genus_or_below("Agaricus").map(&:updated_at)
     )
   end
 
