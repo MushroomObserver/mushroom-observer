@@ -3481,14 +3481,16 @@ class NameTest < UnitTestCase
       subtaxa_of_amanita, names(:boletus_edulis),
       "`subtaxa_of` a genus should not species from other genera"
     )
-    mispelled_name = Name.create!(text_name: "Amanita boodairy",
-                                  author: "",
-                                  display_name: "__Amanita boodairy__ ",
-                                  synonym: synonyms(:chlorophyllum_rachodes_synonym),
-                                  correct_spelling: names(:amanita_boudieri),
-                                  deprecated: true,
-                                  rank: "Species",
-                                  user: users(:rolf))
+    mispelled_name = Name.create!(
+      text_name: "Amanita boodairy",
+      author: "",
+      display_name: "__Amanita boodairy__ ",
+      synonym: synonyms(:chlorophyllum_rachodes_synonym),
+      correct_spelling: names(:amanita_boudieri),
+      deprecated: true,
+      rank: "Species",
+      user: users(:rolf)
+    )
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
