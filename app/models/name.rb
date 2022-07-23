@@ -604,9 +604,9 @@ class Name < AbstractModel
             joins(observations: :location).
               where(Location[:name].matches("%#{location}"))
           when Integer
-            joins(:observations).where(location_id: location)
+            joins(:observations).where(observations: { location: location })
           when Location
-            joins(:observations).where(location_id: location.id)
+            joins(:observations).where(observations: { location: location })
           end
         }
   # Occurrence of name within a lat/long box
