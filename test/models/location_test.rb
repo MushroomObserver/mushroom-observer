@@ -496,4 +496,26 @@ class LocationTest < UnitTestCase
     assert_false(loc.lat_long_close?(centrum[:lat], centrum [:lon] + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_name_includes
+    skip_until(2022, 7, 26, "Under construction")
+  end
+
+  def test_scope_in_region
+    skip_until(2022, 7, 26, "Under construction")
+  end
+
+  def test_scope_in_box
+    # don't foreget these:
+    # -90 <= ns <= 90
+    # -180 <= ew <= 180
+    # n >= s
+    # e >= w or ew straddles dateline
+    skip_until(2022, 7, 26, "Under construction")
+  end
 end
