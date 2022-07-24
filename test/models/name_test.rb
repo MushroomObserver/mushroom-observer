@@ -3478,18 +3478,23 @@ class NameTest < UnitTestCase
       names(:pluteus_petasatus_deprecated),
       "`subtaxa_of` should include deprecated, but correctly spelled, names"
     )
-
     assert_includes(
       Name.subtaxa_of(names(:boletus)),
       names(:boletus_edulis_group),
       "`subtaxa_of` a genus should include species groups"
     )
-
     assert_includes(
       Name.subtaxa_of(names(:agaricales)),
       names(:agaricaceae),
       "`subtaxa_of` a class should include family whose classification" \
       "includes that class"
+    )
+    # This is a counter-intuitive compromise for an edge case.
+    # See comments in test_scope_subtaxa_of_genus_or_below
+    assert_includes(
+      Name.subtaxa_of(names(:boletus_edulis)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` <name> should include <name> group"
     )
 
     # -----------------
@@ -3505,11 +3510,6 @@ class NameTest < UnitTestCase
     assert_not_includes(
       subtaxa_of_amanita, mispelled_name,
       "`subtaxa_of` should not include misspellings"
-    )
-    assert_not_includes(
-      Name.subtaxa_of(names(:boletus_edulis)),
-      names(:boletus_edulis_group),
-      "`subtaxa_of` <name> should not include <name> group"
     )
   end
 
@@ -3532,10 +3532,18 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
 
-    assert_not_includes(
+    # This is somewhat counter-intuitive, but
+    #  is a rarely occuring edge case;
+    #  is consistent with the current behavior of pattern_search;
+    #  improves the performance of the scope; and
+    #  greatly simplifies the code.
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
+    assert_includes(
       Name.subtaxa_of_genus_or_below("Amanita"), amanita_group,
-      "`subtaxa_of_genus_or_below` genus <X> should not include `<X> group`"
+      "`subtaxa_of_genus_or_below` genus <X> should include `<X> group`"
     )
+
     assert_not_includes(
       Name.subtaxa_of_genus_or_below("Amanita"), amanita_sensu_lato,
       "`subtaxa_of_genus_or_below` genus <X> should not include " \

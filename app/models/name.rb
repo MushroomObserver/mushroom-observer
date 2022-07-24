@@ -535,13 +535,8 @@ class Name < AbstractModel
         }
   scope :subtaxa_of_genus_or_below,
         lambda { |text_name|
-          text_name_followed_by_group =
-            /#{text_name} (#{Name::Parse::GROUP_ABBR.source.delete(" ")})/
-
           # Note small diff w :text_name_includes scope
-          where(Name[:text_name].matches("#{text_name} %")).
-            # "<name> group" is not a subtaxon of "<name>"
-            where.not(Name[:text_name] =~ text_name_followed_by_group)
+          where(Name[:text_name].matches("#{text_name} %"))
         }
   scope :subtaxa_of,
         lambda { |name|
