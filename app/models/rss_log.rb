@@ -442,7 +442,7 @@ class RssLog < AbstractModel
   end
 
   def decode_time(str)
-    Time.parse(str).in_time_zone
+    Time.parse(str + "+0000").in_time_zone
   rescue StandardError
     Time.zone.now
   end
