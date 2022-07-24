@@ -15,7 +15,7 @@ class NamingControllerTest < FunctionalTestCase
   def test_edit_get
     nam = namings(:coprinus_comatus_naming)
     params = { id: nam.id.to_s }
-    requires_user(:edit, { controller: :observer, action: :show_observation,
+    requires_user(:edit, { controller: :observations, action: :show,
                            id: nam.observation_id }, params)
     assert_form_action(action: "edit", approved_name: nam.text_name,
                        id: nam.id.to_s)
@@ -69,7 +69,7 @@ class NamingControllerTest < FunctionalTestCase
     params = assigns(:params)
     nam = params.naming
 
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: nam.observation_id)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
@@ -109,7 +109,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: 1 }
     }
     post(:edit, params: params)
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: nmg.observation.id)
     # Must be cloning naming with no vote.
     assert_equal(12, rolf.reload.contribution)
@@ -153,7 +153,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: 1 }
     }
     post(:edit, params: params)
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: nmg.observation.id)
     # Must be cloning naming, with no vote.
     assert_equal(12, rolf.reload.contribution)
@@ -176,7 +176,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: 3 }
     }
     post(:edit, params: params)
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observations, action: :show,
                          id: nmg.observation.id)
     # Must be cloning the naming, but no votes?
     assert_equal(12, rolf.reload.contribution)
@@ -475,7 +475,7 @@ class NamingControllerTest < FunctionalTestCase
     }
     login("dick")
     post(:create, params: params)
-    assert_redirected_to(controller: :observer, action: "show_observation",
+    assert_redirected_to(controller: :observations, action: :show,
                          id: observations(:coprinus_comatus_obs).id)
     # Dick is getting points for the naming, vote, and name change.
     assert_equal(12 + 10, dick.reload.contribution)
@@ -496,7 +496,7 @@ class NamingControllerTest < FunctionalTestCase
     login("dick")
     post(:create, params: params)
     assert_response(:success) # really means failed
-    params = @controller.instance_variable_get("@params")
+    params = @controller.instance_variable_get(:@params)
     assert_equal("Agaricus campestris L.", params.what)
   end
 
@@ -603,18 +603,17 @@ class NamingControllerTest < FunctionalTestCase
   end
 
   def assert_edit
-    assert_action("edit", %w[
-                    _show_observation
-                    _form_name_feedback
-                    _form
-                    _show_images
-                  ])
+    assert_template("naming/edit")
+    assert_template("observations/_show_observation")
+    assert_template("shared/_form_name_feedback")
+    assert_template("naming/_form")
+    assert_template("observations/_show_images")
   end
 
   def test_automatic_author_bug
     obs = observations(:minimal_unknown_obs)
     name = names(:peltigera)
-    assert_equal(:Genus, name.rank)
+    assert_equal("Genus", name.rank)
     assert_not_empty(name.author)
     old_author = name.author
 

@@ -4,7 +4,7 @@ class VoteController < ApplicationController
   before_action :login_required # except: [:show_votes]
 
   # Show breakdown of votes for a given naming.
-  # Linked from: show_observation
+  # Linked from: observations/show
   # Inputs: params[:id] (naming)
   # Outputs: @naming
   def show_votes
@@ -22,8 +22,8 @@ class VoteController < ApplicationController
     naming = Naming.find(params[:id].to_s)
     observation = naming.observation
     observation.change_vote(naming, params[:value])
-    redirect_with_query(controller: :observer,
-                        action: :show_observation,
+    redirect_with_query(controller: :observations,
+                        action: :show,
                         id: observation.id)
   end
 
@@ -45,20 +45,21 @@ class VoteController < ApplicationController
         flashed = true
       end
     end
-    redirect_with_query(controller: :observer,
-                        action: :show_observation,
+    redirect_with_query(controller: :observations,
+                        action: :show,
                         id: observation.id)
   end
 
+  # This is very expensive, and not called anywhere. Putting it in storage
   # Refresh vote cache for all observations in the database.
-  def refresh_vote_cache
-    return unless in_admin_mode?
+  # def refresh_vote_cache
+  #   return unless in_admin_mode?
 
-    # Naming.refresh_vote_cache
-    Observation.refresh_vote_cache
-    flash_notice(:refresh_vote_cache.t)
-    redirect_with_query(controller: :observer,
-                        action: :list_rss_logs,
-                        id: observation.id)
-  end
+  #   # Naming.refresh_vote_cache
+  #   Observation.refresh_vote_cache
+  #   flash_notice(:refresh_vote_cache.t)
+  #   redirect_with_query(controller: :rss_logs,
+  #                       action: :index,
+  #                       id: observation.id)
+  # end
 end

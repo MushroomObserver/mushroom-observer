@@ -8,6 +8,7 @@ class AbstractModelTest < UnitTestCase
     (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort.each do |key|
       old_val = old_attrs[key]
       new_val = new_attrs[key]
+      rss_log_id_or_reason = %w[rss_log_id reasons]
       if key == "num_views"
         assert_equal((old_val || 0) + 1, new_val, "#{msg}num_views wrong")
       elsif key == "last_view"
@@ -15,7 +16,7 @@ class AbstractModelTest < UnitTestCase
           assert(new_val > 1.hour.ago, "#{msg}#{key} more than one hour old")
           assert(new_val > old_val, "#{msg}#{key} wasn't updated") if old_val
         end
-      elsif %w[rss_log_id reasons].member?(key) && (new_val != old_val)
+      elsif rss_log_id_or_reason.member?(key) && (new_val != old_val)
         assert(new_val)
       elsif key == "updated_at"
         assert(new_val >= old_val, "#{msg}#{key} is older than it was")
@@ -268,7 +269,7 @@ class AbstractModelTest < UnitTestCase
 
     assert_nil(obs.rss_log)
     assert_save(obs)
-    # This is normally done by ObserverController#create_observation.
+    # This is normally done by ObservationsController#create.
     obs.log(:log_observation_created)
     obs_id = obs.id
     assert_not_nil(rss_log = obs.rss_log)
@@ -286,7 +287,7 @@ class AbstractModelTest < UnitTestCase
 
     # rss_log.update_attribute(:updated_at, time)
     Observation.update(obs.id, notes: "New Notes")
-    # This is normally done by ObserverController#edit_observation.
+    # This is normally done by ObservationsController#edit.
     obs.log(:log_observation_updated, touch: true)
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
@@ -435,7 +436,7 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------
 
   def test_show_urls
-    assert_show_url(ApiKey, "account/show_api_key")
+    assert_show_url(APIKey, "account/show_api_key")
     assert_show_url(CollectionNumber,
                     "collection_number/show_collection_number")
     assert_show_url(Comment, "comment/show_comment")
@@ -445,12 +446,12 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Image, "image/show_image")
     assert_show_url(Location, "location/show_location")
     assert_show_url(Name, "name/show_name")
-    assert_show_url(Naming, "observer/show_naming")
-    assert_show_url(Observation, "observer/show_observation")
+    assert_show_url(Naming, "observations/show_naming")
+    assert_show_url(Observation, "observations")
     assert_show_url(Project, "project/show_project")
     assert_show_url(Sequence, "sequence/show_sequence")
     assert_show_url(SpeciesList, "species_list/show_species_list")
-    assert_show_url(User, "observer/show_user")
+    assert_show_url(User, "users")
   end
 
   def assert_show_url(model, path)

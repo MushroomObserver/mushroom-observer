@@ -6,8 +6,6 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
-#  enum_default_value   Default value (as a Symbol) of an enum attribute
-#                       Ex: User.enum_default_value(:image_size) => :medium
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
@@ -86,16 +84,6 @@ class AbstractModel < ApplicationRecord
     self.class.name.underscore.to_sym
   end
 
-  # Default value (as a symbol) for an enum attribute
-  def self.enum_default_value(attr)
-    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
-  end
-
-  # number (or nil) that is the default value for attr
-  def self.default_cardinal(attr)
-    column_defaults[attr.to_s]
-  end
-
   ##############################################################################
   #
   #  :section: "Find" Extensions
@@ -170,7 +158,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?("user_id=")
+    self.user_id ||= User.current_id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
@@ -249,7 +237,7 @@ class AbstractModel < ApplicationRecord
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
-  #   def show_observation
+  #   def show
   #     @observation = Observation.find(params[:id].to_s)
   #     @observation.update_view_stats
   #     ...
@@ -262,13 +250,13 @@ class AbstractModel < ApplicationRecord
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
   def update_view_stats
-    return unless respond_to?("num_views=") || respond_to?("last_view=")
+    return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views
     @old_last_view = last_view
     self.class.record_timestamps = false
-    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-    self.last_view = Time.zone.now        if respond_to?("last_view=")
+    self.num_views = (num_views || 0) + 1 if respond_to?(:num_views=)
+    self.last_view = Time.zone.now        if respond_to?(:last_view=)
     save_without_our_callbacks
     self.class.record_timestamps = true
   end
@@ -341,7 +329,7 @@ class AbstractModel < ApplicationRecord
   #   name.show_controller => "/name"
   #
   def self.show_controller
-    if controller_normalized?(name)
+    if controller_normalized?
       "/#{name.pluralize.underscore}" # Rails standard for most controllers
     else
       "/#{name.underscore}" # old MO controller names and any special cases
@@ -354,7 +342,7 @@ class AbstractModel < ApplicationRecord
 
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
-  def self.controller_normalized?(name)
+  def self.controller_normalized?
     class_defined?("#{name.pluralize}Controller")
   end
 
@@ -386,7 +374,7 @@ class AbstractModel < ApplicationRecord
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
   def self.index_action
-    return "index" if controller_normalized?(name) # Rails standard
+    return "index" if controller_normalized? # Rails standard
 
     "index_#{name.underscore}" # Old MO style
   end
@@ -404,7 +392,7 @@ class AbstractModel < ApplicationRecord
   #   name.show_action => "show_name"
   #
   def self.show_action
-    return "show" if controller_normalized?(name) # Rails standard
+    return "show" if controller_normalized? # Rails standard
 
     "show_#{name.underscore}" # Old MO style
   end
@@ -424,7 +412,7 @@ class AbstractModel < ApplicationRecord
   #
   # Note that show_controller has a leading forward slash
   def self.show_url(id)
-    if controller_normalized?(name)
+    if controller_normalized?
       "#{MO.http_domain}#{show_controller}/#{id}"
     else
       "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
@@ -440,7 +428,7 @@ class AbstractModel < ApplicationRecord
   # actions are normalized.
   # See https://www.pivotaltracker.com/story/show/174440291
   def self.show_past_action
-    return "show_past" if controller_normalized?(name) # Rails standard
+    return "show_past" if controller_normalized? # Rails standard
 
     "show_past_#{name.underscore}" # Old MO style
   end
@@ -452,7 +440,7 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "next" action
   # See comments above at show_action
   def self.next_action
-    return "next" if controller_normalized?(name) # Rails standard
+    return "next" if controller_normalized? # Rails standard
 
     "next_#{name.underscore}" # Old MO style
   end
@@ -464,7 +452,7 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "prev" action
   # See comments above at show_action
   def self.prev_action
-    return "prev" if controller_normalized?(name) # Rails standard
+    return "prev" if controller_normalized? # Rails standard
 
     "prev_#{name.underscore}" # Old MO style
   end
@@ -524,7 +512,7 @@ class AbstractModel < ApplicationRecord
   #   name.edit_action => "edit_name"
   #
   def self.edit_action
-    return "edit" if controller_normalized?(name) # Rails standard
+    return "edit" if controller_normalized? # Rails standard
 
     "edit_#{name.underscore}" # Old MO styl
   end
@@ -736,7 +724,7 @@ class AbstractModel < ApplicationRecord
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user_id == user.id))
+    !respond_to?(:user) || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)

@@ -25,21 +25,18 @@ module Validations
   end
 
   def check_time(when_date, errors)
-    unless when_date.is_a?(Time) && when_date > Time.zone.now + 1.day
-      return true
-    end
+    return true unless when_date.is_a?(Time) && when_date > 1.day.from_now
 
     # As of July 5, 2020 these statements appear to be unreachable
     # because 'when' is a 'date' in the database.
-    errors.add(:when,
-               when_message(when_date, "Time.now=#{Time.zone.now + 6.hours}"))
+    errors.add(:when, when_message(when_date, "Time.now=#{6.hours.from_now}"))
     errors.add(:when, :validate_future_time.t)
     false
   end
 
   def check_year(when_date, errors)
     return true unless !when_date.respond_to?(:year) || when_date.year < 1500 ||
-                       when_date.year > (Time.zone.now + 1.day).year
+                       when_date.year > (1.day.from_now).year
 
     errors.add(:when, when_message(when_date))
     errors.add(:when, :validate_invalid_year.t)

@@ -15,7 +15,8 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Tracks of descriptions that were merged into this one.
+#  merge_source_id::  (V) Obsolete
+#    Track of descriptions that were merged into this one.
 #    Primarily useful in the past versions: stores id of latest version of the
 #    Description merged into this one at the time of the merge.
 #
@@ -55,14 +56,14 @@ class LocationDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:source_type,
-          { public: 1,
-            foreign: 2,
-            project: 3,
-            source: 4,
-            user: 5 },
-          source: :source_type,
-          accessor: :whiny)
+  enum source_type:
+       {
+         public: 1,
+         foreign: 2,
+         project: 3,
+         source: 4,
+         user: 5
+       }, _suffix: :source
 
   belongs_to :license
   belongs_to :location

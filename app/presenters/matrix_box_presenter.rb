@@ -38,8 +38,8 @@ class MatrixBoxPresenter
                              id: target.id)
       else
         view.link_with_query(name,
-                             controller: :observer,
-                             action: :show_rss_log,
+                             controller: :rss_logs,
+                             action: :show,
                              id: rss_log.id)
       end
     self.where = view.location_link(target.place_name, target.location) \
@@ -83,8 +83,8 @@ class MatrixBoxPresenter
     name = observation.unique_format_name.t
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
-    self.what  = view.link_with_query(name, controller: :observer,
-                                            action: :show_observation,
+    self.what  = view.link_with_query(name, controller: :observations,
+                                            action: :show,
                                             id: observation.id)
     self.where = view.location_link(observation.place_name,
                                     observation.location)
@@ -96,8 +96,8 @@ class MatrixBoxPresenter
 
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: :observer,
-                             action: :show_observation,
+                     link: { controller: :observations,
+                             action: :show,
                              id: observation.id })
   end
 
@@ -111,7 +111,9 @@ class MatrixBoxPresenter
                    #{:list_users_contribution.t}: #{user.contribution}<br/>
                    #{:Observations.t}: #{user.observations.count}".html_safe
     # rubocop:enable Rails/OutputSafety
-    self.what  = view.link_with_query(name, action: :show_user, id: user.id)
+    self.what  = view.link_with_query(name, controller: user.show_controller,
+                                            action: user.show_action,
+                                            id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
     return unless user.image_id
 

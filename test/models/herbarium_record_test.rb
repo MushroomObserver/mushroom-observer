@@ -18,6 +18,8 @@ class HerbariumRecordTest < UnitTestCase
       { user_personal_herbarium: "[name]: Herbier Personnel" }
     )
     user = mary
+    # disable cop in order to have proper scope for variable "herbarium"
+    # rubocop:disable Rails/I18nLocaleAssignment
     I18n.locale = "en"
     assert_equal("Mary Newbie (mary): Personal Fungarium",
                  user.personal_herbarium_name)
@@ -29,11 +31,13 @@ class HerbariumRecordTest < UnitTestCase
       Herbarium.create!(name: user.personal_herbarium_name, personal_user: user)
     assert_objs_equal(herbarium, user.personal_herbarium)
     I18n.locale = "en"
+    # rubocop:enable Rails/I18nLocaleAssignment
     assert_objs_equal(herbarium, user.personal_herbarium)
     herbarium.update!(name: "My very own herbarium")
     assert_objs_equal(herbarium, user.personal_herbarium)
     assert_equal("My very own herbarium", user.personal_herbarium_name)
-    I18n.locale = "fr"
-    assert_equal("My very own herbarium", user.personal_herbarium_name)
+    I18n.with_locale(:fr) do
+      assert_equal("My very own herbarium", user.personal_herbarium_name)
+    end
   end
 end

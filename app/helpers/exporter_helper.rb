@@ -25,7 +25,7 @@ module ExporterHelper
       content_tag(:b, :review_ok_for_export.t, class: "nowrap")
     else
       link_with_query(:review_ok_for_export.t,
-                      { controller: :observer,
+                      { controller: :export,
                         action: :set_export_status,
                         type: obj.type_tag,
                         id: obj.id, value: 1 },
@@ -33,7 +33,7 @@ module ExporterHelper
     end + " | " +
       if obj.ok_for_export
         link_with_query(:review_no_export.t,
-                        { controller: :observer,
+                        { controller: :export,
                           action: :set_export_status,
                           type: obj.type_tag,
                           id: obj.id, value: 0 },

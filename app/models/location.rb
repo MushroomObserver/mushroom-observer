@@ -155,7 +155,7 @@ class Location < AbstractModel
   \s*$/x
 
   ALTITUDE_REGEX = /^\s*
-    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
+    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′]*)
   \s*$/x
 
   # Shared logic between latitude and longitude
@@ -259,11 +259,11 @@ class Location < AbstractModel
   end
 
   def display_name
-    User.current_location_format == :scientific ? scientific_name : name
+    User.current_location_format == "scientific" ? scientific_name : name
   end
 
   def display_name=(val)
-    if User.current_location_format == :scientific
+    if User.current_location_format == "scientific"
       self.name = Location.reverse_name(val)
       self.scientific_name = val
     else
@@ -341,7 +341,7 @@ class Location < AbstractModel
     #   ORDER BY observations.updated_at DESC
     #   LIMIT 100
     # )).sort
-    # if User.current_location_format == :scientific
+    # if User.current_location_format == "scientific"
     #   result.map! { |n| Location.reverse_name(n) }
     # end
     # result
@@ -382,7 +382,7 @@ class Location < AbstractModel
   end
 
   def self.user_name(user, name)
-    if user && (user.location_format == :scientific)
+    if user && (user.location_format == "scientific")
       Location.reverse_name(name)
     else
       name
@@ -663,8 +663,8 @@ class Location < AbstractModel
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: "\
-             "North: #{old_loc.north}, South: #{old_loc.south}, "\
+    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: " \
+             "North: #{old_loc.north}, South: #{old_loc.south}, " \
              "West: #{old_loc.west}, East: #{old_loc.east}")
 
     # Merge the two "main" descriptions if it can.

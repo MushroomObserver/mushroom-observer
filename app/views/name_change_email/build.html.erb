@@ -50,7 +50,7 @@
     one_liners += "*#{:Citation.l} #{is_now}:* #{new_name.citation}\n"  if new_name.citation   != old_name.citation
     one_liners += "*#{:Rank.l} #{is_now}:* #{new_name.rank}\n"          if new_name.rank       != old_name.rank
     one_liners += "*#{:License.l} #{is_now}:* #{license.display_name}\n" if license && new_desc.license_id != old_desc.license_id
-    one_liners += "*#{:Reviewed.l} #{is_now}:* #{@review_status}\n"      if @review_status       != :no_change
+    one_liners += "*#{:Reviewed.l} #{is_now}:* #{@review_status}\n"      if @review_status       != "no_change"
     one_liners += "*#{:Name.l} #{is_now}:* #{:Deprecated.l}\n"           if new_name.deprecated && !old_name.deprecated
     one_liners += "*#{:Status.l} #{is_now}:* #{:Accepted.l}\n"       if !new_name.deprecated && old_name.deprecated
     one_liners += "*#{:Status.l} #{is_now}:* #{:Misspelled.l}\n"     if !new_name.correct_spelling_id && !!old_name.correct_spelling_id

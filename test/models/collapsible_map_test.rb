@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-require("map_collapsible")
+require("collapsible_collection_of_mappable_objects")
 require("map_set")
 
 class BigDecimal
@@ -66,14 +66,14 @@ class CollapsibleMapTest < UnitTestCase
     expect = format("N=%.4f S=%.4f E=%.4f W=%.4f", north, south, east, west)
     actual = format("N=%.4f S=%.4f E=%.4f W=%.4f",
                     mapset.north, mapset.south, mapset.east, mapset.west)
-    message = "Extents wrong: <#{errors.join(", ")}>\n"\
-              "Expect: <#{expect}>\n"\
+    message = "Extents wrong: <#{errors.join(", ")}>\n" \
+              "Expect: <#{expect}>\n" \
               "Actual: <#{actual}>"
     flunk(message)
   end
 
   def assert_list_of_mapsets(coll, objs)
-    list = objs.reject(&:nil?).map do |x|
+    list = objs.compact.map do |x|
       x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
     end
 

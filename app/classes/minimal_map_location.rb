@@ -15,7 +15,7 @@ class MinimalMapLocation
   include BoxMethods
 
   def display_name
-    if User.current_location_format == :scientific
+    if User.current_location_format == "scientific"
       Location.reverse_name(name)
     else
       name

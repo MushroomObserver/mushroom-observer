@@ -16,10 +16,6 @@ module VersionHelper
   def show_previous_version(obj)
     html = "#{:VERSION.t}: #{obj.version}".html_safe
     latest_version = obj.versions.latest
-    if latest_version.respond_to?(:merge_source_id) &&
-       latest_version.merge_source_id
-      html += indent(1) + get_version_merge_link(obj, latest_version)
-    end
     html += safe_br
     return html unless latest_version
 
@@ -27,10 +23,6 @@ module VersionHelper
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
       html += link_with_query(str, action: obj.show_past_action, id: obj.id,
                                    version: previous_version.version)
-      if previous_version.respond_to?(:merge_source_id) &&
-         previous_version.merge_source_id
-        html += indent(1) + get_version_merge_link(obj, previous_version)
-      end
       html += safe_br
     end
     html
@@ -50,19 +42,7 @@ module VersionHelper
   #   </p>
   #
   def show_past_versions(obj, args = {})
-    type = obj.type_tag
-
-    if !@merge_source_id
-      versions = obj.versions.reverse
-    else
-      version_class = "#{obj.class.name}::Version".constantize
-      versions = version_class.find_by_sql(%(
-        SELECT * FROM #{type}s_versions
-        WHERE #{type}_id = #{@old_parent_id} AND id <= #{@merge_source_id}
-        ORDER BY id DESC
-      ))
-    end
-
+    versions = obj.versions.reverse
     table = versions.map do |ver|
       # Date change was made.
       date = begin
@@ -82,13 +62,7 @@ module VersionHelper
       link = "#{:VERSION.t} #{ver.version}"
       link += " #{ver.format_name.t}" if ver.respond_to?(:format_name)
       if ver.version != obj.version
-        link = if @merge_source_id
-                 link_with_query(link, controller: obj.show_controller,
-                                       action: obj.show_past_action,
-                                       id: obj.id,
-                                       merge_source_id: @merge_source_id,
-                                       version: version)
-               elsif ver == obj.versions.last
+        link = if ver == obj.versions.last
                  link_with_query(link, controller: obj.show_controller,
                                        action: obj.show_action,
                                        id: obj.id)
@@ -101,39 +75,11 @@ module VersionHelper
       end
       link = content_tag(:b, link) if args[:bold]&.call(ver)
 
-      # Was this the result of a merge?
-      if ver.respond_to?(:merge_source_id)
-        merge = get_version_merge_link(obj, ver)
-      end
-
       i = indent(1)
-      [date, i, user, i, link, i, merge]
+      [date, i, user, i, link, i]
     end
 
     table = make_table(table, style: "margin-left:20px")
     tag.p(:VERSIONS.t) + table + safe_br
-  end
-
-  ##############################################################################
-
-  private
-
-  # Return link to orphaned versions of old description if this version
-  # was the result of a merge.
-  def get_version_merge_link(obj, ver)
-    type = obj.type_tag
-    if ver.merge_source_id &&
-       (other_ver = begin
-                      ver.class.find(ver.merge_source_id)
-                    rescue StandardError
-                      nil
-                    end)
-      parent_id = other_ver.send("#{type}_id")
-      link_with_query(:show_past_version_merged_with.t(id: parent_id),
-                      controller: obj.show_controller,
-                      action: obj.show_past_action,
-                      id: obj.id,
-                      merge_source_id: ver.merge_source_id)
-    end
   end
 end

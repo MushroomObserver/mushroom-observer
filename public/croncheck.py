@@ -2,7 +2,7 @@
 import re, time
 
 file_path = "/home/velosa/mushroomobserver.org/log/production.log"
-pat = re.compile('Processing ObserverController#index \(for 65\.111\.164\.187 at (.+)\)')
+pat = re.compile('Processing ObservationsController#index \(for 65\.111\.164\.187 at (.+)\)')
 time_format = '%Y-%m-%d %H:%M:%S'
 f = open(file_path)
 line = f.readline()

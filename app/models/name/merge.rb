@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Combine two Name objects (and associations) into one
-class Name < AbstractModel
+module Name::Merge
   # Would merger into another Name destroy data in the sense that the
   # merger could not be uncrambled? If any information will get
   # lost we return true.
@@ -106,7 +106,7 @@ class Name < AbstractModel
     # Save any notes the old name had.
     if old_name.has_notes? && (old_name.notes != notes)
       if has_notes?
-        self.notes += "\n\nThese notes come from #{old_name.format_name} "\
+        self.notes += "\n\nThese notes come from #{old_name.format_name} " \
                       "when it was merged with this name:\n\n #{old_name.notes}"
       else
         self.notes = old_name.notes

@@ -16,25 +16,25 @@
     <% need_help = false
     if root %>
       <%= form.select(:source_type, [
-        [:form_description_source_public.l,  :public],
-        [:form_description_source_foreign.l, :foreign],
-        [:form_description_source_project.l, :project],
-        [:form_description_source_source.l,  :source],
-        [:form_description_source_user.l,    :user],
+        [:form_description_source_public.l,  "public"],
+        [:form_description_source_foreign.l, "foreign"],
+        [:form_description_source_project.l, "project"],
+        [:form_description_source_source.l,  "source"],
+        [:form_description_source_user.l,    "user"],
       ], class: "form-control") %>
-    <% elsif new_record && [:public, :source, :user].include?(type) %>
+    <% elsif new_record && ["public", "source", "user"].include?(type) %>
       <% need_help = true %>
       <%= form.select(:source_type, [
-        [:form_description_source_public.l, :public],
-        [:form_description_source_source.l, :source],
-        [:form_description_source_user.l,   :user],
+        [:form_description_source_public.l, "public"],
+        [:form_description_source_source.l, "source"],
+        [:form_description_source_user.l,   "user"],
       ], class: "form-control") %>
     <% else %>
       <%= form.hidden_field(:source_type, value: type) %>
       <%= :"form_description_source_#{type}".l %>
     <% end %>
 
-    <% if !root && [:foreign, :project].include?(type) %>
+    <% if !root && ["foreign", "project"].include?(type) %>
       <%= form.hidden_field(:source_name) %>
       <%= @description.source_name.t %>
     <% else %>
@@ -50,7 +50,7 @@
   <p>
     <b><%= :form_description_permissions.t %>:</b>
     <% args = { class: "form-control" }
-    if [:public, :foreign].include?(type) && !root && !new_record
+    if ["public", "foreign"].include?(type) && !root && !new_record
       args[:disabled] = "disabled"
     end %>
     <div class="form-group form-inline">

@@ -127,6 +127,16 @@ module ControllerExtensions
     html_dump(page, @response.body, params)
   end
 
+  def put_with_dump(page, params = {})
+    put(page, params: params)
+    html_dump(page, @response.body, params)
+  end
+
+  def patch_with_dump(page, params = {})
+    patch(page, params: params)
+    html_dump(page, @response.body, params)
+  end
+
   # Send GET request to a page that should require login.
   #
   #   # Make sure only logged-in users get to see this page.
@@ -145,6 +155,14 @@ module ControllerExtensions
     either_requires_either(:post, page, nil, *args)
   end
 
+  def put_requires_login(page, *args)
+    either_requires_either(:put, page, nil, *args)
+  end
+
+  def patch_requires_login(page, *args)
+    either_requires_either(:patch, page, nil, *args)
+  end
+
   # Send GET request to a page that should require a specific user.
   #
   #   # Make sure only reviewers can see this page (non-reviewers get
@@ -159,13 +177,21 @@ module ControllerExtensions
   # Send POST request to a page that should require login.
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation").
-  #   post_requires_user(:edit_obs, :show_obs, notes: 'new notes')
-  #   post_requires_user(:edit_obs, [:observer, :show_obs],
+  #   # redirected to "observations/show").
+  #   post_requires_user(:update, :show, notes: 'new notes')
+  #   post_requires_user(:update, [:observations, :show],
   #                      notes: 'new notes')
   #
   def post_requires_user(*args)
     either_requires_either(:post, *args)
+  end
+
+  def put_requires_user(*args)
+    either_requires_either(:put, *args)
+  end
+
+  def patch_requires_user(*args)
+    either_requires_either(:patch, *args)
   end
 
   # Helper used by the blah_requires_blah methods.
@@ -194,10 +220,10 @@ module ControllerExtensions
   #   requires_user(:review_authors, {id: 1}, :show_location)
   #
   #   # Make sure only owner can edit observation (non-owners get
-  #   # redirected to "show_observation"), and that it redirects to
-  #   # "show_observation" when it succeeds (last argument).
-  #   post_requires_user(:edit_observation, {notes: 'new notes'},
-  #     :show_observation, [:show_observation])
+  #   # redirected to "observations/show"), and that it redirects to
+  #   # "observations/show" when it succeeds (last argument).
+  #   post_requires_user(:update, {notes: 'new notes'},
+  #     :show, [:show])
   #
   #   # Even more general case where second case renders a template:
   #   post_requires_user(:action, params,
@@ -421,7 +447,7 @@ module ControllerExtensions
   # rendered template is correct.
   #
   # method::        HTTP request method.  Defaults to "GET".
-  # action::        Action/page requested, e.g., :show_observation.
+  # action::        Action/page requested, e.g., :show.
   # params::        Hash of parameters to pass in.  Defaults to {}.
   # user::          User name.  Defaults to "rolf" (user #1, a reviewer).
   # password::      Password.  Defaults to "testpassword".
@@ -487,18 +513,18 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response( {controller: observer, action: show_observation, id: 1 })
-  #   assert_response( {action: show_observation, id: 1 })
+  #   assert_response({ controller: :observations, action: :show, id: 1 })
+  #   assert_response({ action: :show, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: "observer", action: "index")
+  #   assert_response(controller: :rss_logs, action: :index)
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
-  #   assert_response(["observer", "index"])
+  #   assert_response(["rss_logs", "index"])
   #
   #   # Short-hand for common redirects:
-  #   assert_response(:index)   => /observer/list_rss_logs
+  #   assert_response(:index)   => /rss_logs
   #   assert_response(:login)   => /account/login
   #   assert_response(:welcome) => /account/welcome
   #
@@ -561,9 +587,8 @@ module ControllerExtensions
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <observer/list_rss_logs>#{got}"
-        assert_redirected_to({ controller: "observer",
-                               action: "list_rss_logs" }, msg)
+        msg += "Expected redirect to <root>#{got}"
+        assert_redirected_to("/", msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>#{got}"
         assert_redirected_to({ controller: "account", action: "login" }, msg)
@@ -573,24 +598,6 @@ module ControllerExtensions
       else
         raise("Invalid response type expected: [#{arg.class}: #{arg}]\n")
       end
-    end
-  end
-
-  def assert_action(action, partials)
-    if partials
-      if partials.is_a?(Array)
-        assert_action_partials(action, partials)
-      else
-        assert_redirected_to(action: action, partial: partials)
-      end
-    else
-      assert_redirected_to(action: action)
-    end
-  end
-
-  def assert_action_partials(action, partials)
-    partials.each do |p|
-      assert_template(action, partial: p)
     end
   end
 
@@ -663,7 +670,7 @@ module ControllerExtensions
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
         actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
-                         join("")).strip
+                         join).strip
         message = if actual_val != expect_val.to_s
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"

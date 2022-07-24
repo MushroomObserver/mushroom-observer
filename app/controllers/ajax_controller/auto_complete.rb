@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::AutoComplete
   require "cgi"
 
   # Auto-complete string as user types. Renders list of strings in plain text.

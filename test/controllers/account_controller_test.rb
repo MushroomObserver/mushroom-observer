@@ -142,13 +142,13 @@ class AccountControllerTest < FunctionalTestCase
   def test_anon_user_verify
     get(:verify)
 
-    assert_redirected_to(observer_index_user_path)
+    assert_redirected_to(users_path)
   end
 
   def test_anon_user_send_verify
     get(:send_verify)
 
-    assert_redirected_to(observer_index_user_path)
+    assert_redirected_to(users_path)
   end
 
   def test_anon_user_welcome
@@ -437,17 +437,17 @@ class AccountControllerTest < FunctionalTestCase
       email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
-      hide_authors: :above_species,
-      keep_filenames: :keep_but_hide,
+      hide_authors: "above_species",
+      keep_filenames: "keep_but_hide",
       license_id: licenses(:publicdomain).id.to_s,
       layout_count: "100",
       locale: "el",
-      location_format: :scientific,
+      location_format: "scientific",
       notes_template: "Collector's #",
       theme: "Agaricus",
       thumbnail_maps: "",
       view_owner_id: "",
-      votes_anonymous: :yes,
+      votes_anonymous: "yes",
       has_images: "1",
       has_specimen: "1",
       lichen: "yes",
@@ -481,17 +481,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_email_observations_all, "")
     assert_input_value(:user_email_observations_consensus, "1")
     assert_input_value(:user_email_observations_naming, "1")
-    assert_input_value(:user_hide_authors, :above_species)
-    assert_input_value(:user_keep_filenames, :keep_but_hide)
+    assert_input_value(:user_hide_authors, "above_species")
+    assert_input_value(:user_keep_filenames, "keep_but_hide")
     assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
     assert_input_value(:user_layout_count, "100")
     assert_input_value(:user_locale, "el")
-    assert_input_value(:user_location_format, :scientific)
+    assert_input_value(:user_location_format, "scientific")
     assert_textarea_value(:user_notes_template, "Collector's #")
     assert_input_value(:user_theme, "Agaricus")
     assert_input_value(:user_thumbnail_maps, "")
     assert_input_value(:user_view_owner_id, "")
-    assert_input_value(:user_votes_anonymous, :yes)
+    assert_input_value(:user_votes_anonymous, "yes")
     assert_input_value(:user_has_images, "1")
     assert_input_value(:user_has_specimen, "1")
     assert_input_value(:user_lichen, "yes")
@@ -522,17 +522,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(false, user.email_observations_all)
     assert_equal(true, user.email_observations_consensus)
     assert_equal(true, user.email_observations_naming)
-    assert_equal(:above_species, user.hide_authors)
-    assert_equal(:keep_but_hide, user.keep_filenames)
+    assert_equal("above_species", user.hide_authors)
+    assert_equal("keep_but_hide", user.keep_filenames)
     assert_equal(100, user.layout_count)
     assert_equal(licenses(:publicdomain), user.license)
     assert_equal("el", user.locale)
-    assert_equal(:scientific, user.location_format)
+    assert_equal("scientific", user.location_format)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(false, user.view_owner_id)
-    assert_equal(:yes, user.votes_anonymous)
+    assert_equal("yes", user.votes_anonymous)
     assert_equal("yes", user.content_filter[:has_images])
     assert_equal("yes", user.content_filter[:has_specimen])
     assert_equal("yes", user.content_filter[:lichen])
@@ -623,7 +623,7 @@ class AccountControllerTest < FunctionalTestCase
       login("rolf", "testpassword")
       post_with_dump(:profile, params)
     end
-    assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
+    assert_redirected_to(user_path(rolf.id))
     assert_flash_success
 
     rolf.reload
@@ -665,8 +665,8 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_api_key_manager
-    ApiKey.all.each(&:destroy)
-    assert_equal(0, ApiKey.count)
+    APIKey.all.each(&:destroy)
+    assert_equal(0, APIKey.count)
 
     # Get initial (empty) form.
     requires_login(:api_keys)
@@ -678,7 +678,7 @@ class AccountControllerTest < FunctionalTestCase
     login("mary")
     post(:api_keys, params: { commit: :account_api_keys_create_button.l })
     assert_flash_error
-    assert_equal(0, ApiKey.count)
+    assert_equal(0, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 0)
 
     # Create good key.
@@ -688,7 +688,7 @@ class AccountControllerTest < FunctionalTestCase
            key: { notes: "app name" }
          })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key1 = mary.api_keys.first
     assert_equal("app name", key1.notes)
@@ -701,7 +701,7 @@ class AccountControllerTest < FunctionalTestCase
            key: { notes: "another name" }
          })
     assert_flash_success
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_equal(2, mary.reload.api_keys.length)
     key2 = mary.api_keys.last
     assert_equal("another name", key2.notes)
@@ -710,7 +710,7 @@ class AccountControllerTest < FunctionalTestCase
     # Press "remove" without selecting anything.
     post(:api_keys, params: { commit: :account_api_keys_remove_button.l })
     assert_flash_warning
-    assert_equal(2, ApiKey.count)
+    assert_equal(2, APIKey.count)
     assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Remove first key.
@@ -720,7 +720,7 @@ class AccountControllerTest < FunctionalTestCase
            "key_#{key1.id}" => "1"
          })
     assert_flash_success
-    assert_equal(1, ApiKey.count)
+    assert_equal(1, APIKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key = mary.api_keys.last
     assert_objs_equal(key, key2)
@@ -728,7 +728,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_activate_api_key
-    key = ApiKey.new
+    key = APIKey.new
     key.provide_defaults
     key.verified = nil
     key.notes = "Testing"

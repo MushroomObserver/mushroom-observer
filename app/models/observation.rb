@@ -180,7 +180,11 @@ class Observation < AbstractModel
                      through: :observation_views,
                      source: :user
 
+  # rubocop:disable Rails/ActiveRecordCallbacksOrder
+  # else Rubocop says: "before_save is supposed to appear before before_destroy"
+  # because a before_destroy must precede the has_many's
   before_save :cache_content_filter_data
+  # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
   before_destroy :destroy_orphaned_collection_numbers
   before_destroy :notify_species_lists
@@ -191,7 +195,12 @@ class Observation < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    "/observations"
+  end
+
+  # Override the default show_action
+  def self.show_action
+    "show"
   end
 
   def is_location?
@@ -300,11 +309,11 @@ class Observation < AbstractModel
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to :postal).
+  # Also applies the location_format of the current user (defaults to "postal").
   def place_name
     if location
       location.display_name
-    elsif User.current_location_format == :scientific
+    elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else
       where
@@ -316,7 +325,7 @@ class Observation < AbstractModel
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
     place_name = place_name.strip_squeeze
-    where = if User.current_location_format == :scientific
+    where = if User.current_location_format == "scientific"
               Location.reverse_name(place_name)
             else
               place_name
@@ -855,17 +864,17 @@ class Observation < AbstractModel
   def process_real_vote(naming, vote, value, user)
     downgrade_totally_confident_votes(value, user)
     favorite = adjust_other_favorites(value, other_votes(vote, user))
-    if !vote
+    if vote
+      vote.value = value
+      vote.favorite = favorite
+      vote.save
+    else
       naming.votes.create!(
         user: user,
         observation: self,
         value: value,
         favorite: favorite
       )
-    else
-      vote.value = value
-      vote.favorite = favorite
-      vote.save
     end
   end
 

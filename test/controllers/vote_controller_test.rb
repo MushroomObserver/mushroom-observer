@@ -142,7 +142,8 @@ class VoteControllerTest < FunctionalTestCase
     login
     # First just make sure the page displays.
     get_with_dump(:show_votes, id: namings(:coprinus_comatus_naming).id)
-    assert_template(:show_votes, partial: "_show_votes")
+    assert_template(:show_votes)
+    assert_template("vote/_show_votes")
 
     # Now try to make somewhat sure the content is right.
     table = namings(:coprinus_comatus_naming).calc_vote_table
@@ -151,9 +152,7 @@ class VoteControllerTest < FunctionalTestCase
     table.each_key do |str|
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
-      elsif str == str1
-        assert_equal(1, table[str][:num])
-      elsif str == str2
+      elsif str == str1 || str == str2
         assert_equal(1, table[str][:num])
       else
         assert_equal(0, table[str][:num])

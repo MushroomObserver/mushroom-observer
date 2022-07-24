@@ -127,12 +127,8 @@ class Checklist
 
   def count_synonyms(synonyms)
     synonyms.each do |syn_id, text_name|
-      text_name ||= Name.connection.select_values(%(
-        SELECT text_name FROM names
-        WHERE synonym_id = #{syn_id}
-          AND `rank` IN (#{ranks_to_consider})
-        ORDER BY deprecated ASC
-      )).first
+      text_name ||= Name.where(synonym_id: syn_id, rank: ranks_to_consider).
+                    order(deprecated: :asc).pluck(:text_name).first
       count_species(text_name)
     end
   end
@@ -146,7 +142,7 @@ class Checklist
   end
 
   def ranks_to_consider
-    Name.ranks.values_at(:Species, :Subspecies, :Variety, :Form).join(", ")
+    Name.ranks.values_at("Species", "Subspecies", "Variety", "Form").join(", ")
   end
 
   def query(args = {})

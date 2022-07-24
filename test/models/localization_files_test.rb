@@ -51,7 +51,7 @@ class LocalizationFilesTest < UnitTestCase
     assert_empty(
       errors,
       "Found #{errors.length} undefined tag reference(s) in language files:\n" \
-      "#{errors.join("")}"
+      "#{errors.join}"
     )
   end
 
@@ -65,12 +65,12 @@ class LocalizationFilesTest < UnitTestCase
     end
     assert_true(missing_tags.empty?,
                 "Found #{missing_tags.length} undefined tag reference(s) " \
-                "in source files:\n #{missing_tags.join("")}")
+                "in source files:\n #{missing_tags.join}")
     assert_true(
       duplicate_function_defs.empty?,
       "Found #{duplicate_function_defs.length} duplicate method " \
       "definition(s) in source files:\n" \
-      "#{duplicate_function_defs.join("")}"
+      "#{duplicate_function_defs.join}"
     )
   end
 
@@ -150,16 +150,17 @@ class LocalizationFilesTest < UnitTestCase
     end
   end
 
+  TRANSLATION_ERRORS = %w[Error ObjectError BadParameterValue].freeze
   def test_api_error_translations
     tags = []
-    file = "#{::Rails.root}/app/classes/api2/errors.rb"
-    File.open(file, "r:utf-8") do |fh|
-      fh.each_line do |line|
-        next unless line.match(/^\s*class (\w+) < /) &&
-                    %w[Error ObjectError BadParameterValue].
-                    exclude?(Regexp.last_match(1))
+    Dir.glob("#{::Rails.root}/app/classes/api2/error/*.rb").each do |file|
+      File.open(file, "r:utf-8") do |fh|
+        fh.each_line do |line|
+          next unless line.match(/^\s*class (\w+) < /) &&
+                      TRANSLATION_ERRORS.exclude?(Regexp.last_match(1))
 
-        tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
+          tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
+        end
       end
     end
     Dir.glob("#{::Rails.root}/app/classes/api2/parsers/*.rb").each do |file|

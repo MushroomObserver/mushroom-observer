@@ -1,7 +1,75 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
-  require Rails.root.join("app", "classes", "rank_matcher.rb")
+# NOTE: Use `class Name extend Parse`: these are all class methods
+module Name::Parse
+  # RankMatcher:: Lighweight class used to get ranks from text strings
+  # Use:
+  #   XXX_MATCHERS = [RankMatcher.new(:Rank1, /regexp1/),
+  #                   ...
+  #                   RankMatcher.new(:Rankn, /regexpn/)]
+  #
+  #   def self.guess_rank(text_name)
+  #     TEXT_NAME_MATCHERS.find { |matcher| matcher.match?(text_name) }.rank
+  #   end
+  #
+  class RankMatcher
+    attr_reader :pattern, :rank
+
+    def initialize(rank, pattern)
+      @rank = rank
+      @pattern = pattern
+    end
+
+    def match?(str)
+      str.match?(@pattern)
+    end
+  end
+
+  # All abbrevisations for a given rank
+  # Used by RANK_FROM_ABBREV_MATCHERS and in app/models/name/parse.rb
+  SUBG_ABBR    = / subgenus | subgen\.? | subg\.?          /xi
+  SECT_ABBR    = / section | sect\.?                       /xi
+  SUBSECT_ABBR = / subsection | subsect\.?                 /xi
+  STIRPS_ABBR  = / stirps                                  /xi
+  SP_ABBR      = / species | sp\.?                         /xi
+  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.?   /xi
+  VAR_ABBR     = / variety | var\.? | v\.?                 /xi
+  F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
+
+  # Match text_name to rank
+  TEXT_NAME_MATCHERS = [
+    RankMatcher.new("Group",      / (group|clade|complex)$/),
+    RankMatcher.new("Form",       / f\. /),
+    RankMatcher.new("Variety",    / var\. /),
+    RankMatcher.new("Subspecies", / subsp\. /),
+    RankMatcher.new("Stirps",     / stirps /),
+    RankMatcher.new("Subsection", / subsect\. /),
+    RankMatcher.new("Section",    / sect\. /),
+    RankMatcher.new("Subgenus",   / subg\. /),
+    RankMatcher.new("Species",    / /),
+    RankMatcher.new("Family",     /^\S+aceae$/),
+    RankMatcher.new("Family",     /^\S+ineae$/), # :Suborder
+    RankMatcher.new("Order",      /^\S+ales$/),
+    RankMatcher.new("Order",      /^\S+mycetidae$/), # :Subclass
+    RankMatcher.new("Class",      /^\S+mycetes$/),
+    RankMatcher.new("Class",      /^\S+mycotina$/), # :Subphylum
+    RankMatcher.new("Phylum",     /^\S+mycota$/),
+    RankMatcher.new("Phylum",     /^Fossil-/),
+    RankMatcher.new("Genus",      //) # match anything else
+  ].freeze
+
+  # Matcher abbreviation to rank
+  RANK_FROM_ABBREV_MATCHERS = [
+    RankMatcher.new("Subgenus",   SUBG_ABBR),
+    RankMatcher.new("Section",    SECT_ABBR),
+    RankMatcher.new("Subsection", SUBSECT_ABBR),
+    RankMatcher.new("Stirps",     STIRPS_ABBR),
+    RankMatcher.new("Subspecies", SSP_ABBR),
+    RankMatcher.new("Variety",    VAR_ABBR),
+    RankMatcher.new("Form",       F_ABBR),
+    RankMatcher.new(nil,          //) # match anything else
+  ].freeze
 
   AUCT_ABBR    = / auct\.? /xi
   INED_ABBR    = / in\s?ed\.? /xi
@@ -131,48 +199,26 @@ class Name < AbstractModel
   # <group_wd> capture group capturing the stripped group or clade abbr
   GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
 
-  # parsing a string to a Name
-  class ParsedName
-    attr_accessor :text_name, :search_name, :sort_name, :display_name, :rank,
-                  :author, :parent_name
+  # matches to ranks that are included in the name proper
+  # subspecies is not included because it's the catchall default
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i
 
-    def initialize(params)
-      @text_name = params[:text_name]
-      @search_name = params[:search_name]
-      @sort_name = params[:sort_name]
-      @display_name = params[:display_name]
-      @parent_name = params[:parent_name]
-      @rank = params[:rank]
-      @author = params[:author]
-    end
+  # convert rank start_match to standard form of rank
+  # subspecies is not included because it's the catchall default
+  STANDARD_SECONDARY_RANKS = {
+    f: "f.",
+    sect: "sect.",
+    stirps: "stirps",
+    subg: "subg.",
+    subsect: "subsect.",
+    v: "var."
+  }.freeze
 
-    def real_text_name
-      Name.display_to_real_text(self)
-    end
-
-    def real_search_name
-      Name.display_to_real_search(self)
-    end
-
-    # Values required to create/modify attributes of Name instance.
-    def params
-      {
-        text_name: @text_name,
-        search_name: @search_name,
-        sort_name: @sort_name,
-        display_name: @display_name,
-        author: @author,
-        rank: @rank
-      }
-    end
-
-    def inspect
-      params.merge(parent_name: @parent_name).inspect
-    end
+  class RankMessedUp < ::StandardError
   end
 
   # Parse a name given no additional information. Returns a ParsedName instance.
-  def self.parse_name(str, rank: :Genus, deprecated: false)
+  def parse_name(str, rank: "Genus", deprecated: false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated) ||
       parse_subgenus(str, deprecated) ||
@@ -187,11 +233,11 @@ class Name < AbstractModel
   end
 
   # Guess rank of +text_name+.
-  def self.guess_rank(text_name)
-    TEXT_NAME_MATCHERS.find { |matcher| matcher.match?(text_name) }.rank
+  def guess_rank(text_name)
+    TEXT_NAME_MATCHERS.find { |m| m.match?(text_name) }.rank
   end
 
-  def self.parse_author(str)
+  def parse_author(str)
     str = clean_incoming_string(str)
     results = [str, nil]
     if (match = AUTHOR_PAT.match(str))
@@ -200,11 +246,11 @@ class Name < AbstractModel
     results
   end
 
-  def self.parse_group(str, deprecated = false)
+  def parse_group(str, deprecated = false)
     return unless GROUP_PAT.match(str)
 
     result = parse_name(str_without_group(str),
-                        rank: :Group, deprecated: deprecated)
+                        rank: "Group", deprecated: deprecated)
     return nil unless result
 
     # Adjust the parsed name
@@ -225,27 +271,27 @@ class Name < AbstractModel
       result.display_name += " #{group_type}"
     end
 
-    result.rank = :Group
+    result.rank = "Group"
     result.parent_name ||= ""
 
     result
   end
 
-  def self.str_without_group(str)
+  def str_without_group(str)
     str.sub(GROUP_CHUNK, "")
   end
 
-  def self.standardized_group_abbr(str)
+  def standardized_group_abbr(str)
     word = group_wd(str.to_s.downcase)
     word.start_with?("g") ? "group" : word
   end
 
   # sripped group_abbr
-  def self.group_wd(str)
+  def group_wd(str)
     GROUP_CHUNK.match(str)[:group_wd]
   end
 
-  def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
+  def parse_genus_or_up(str, deprecated = false, rank = "Genus")
     results = nil
     if (match = GENUS_OR_UP_PAT.match(str))
       name = match[1]
@@ -255,8 +301,9 @@ class Name < AbstractModel
       author = standardize_author(author)
       author2 = author.blank? ? "" : " #{author}"
       text_name = name.tr("ë", "e")
-      parent_name =
-        Name.ranks_below_genus.include?(rank) ? name.sub(LAST_PART, "") : nil
+      parent_name = if Name.ranks_below_genus.include?(rank)
+                      name.sub(LAST_PART, "")
+                    end
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         text_name: text_name,
@@ -273,12 +320,12 @@ class Name < AbstractModel
     nil
   end
 
-  def self.parse_below_genus(str, deprecated, rank, pattern)
+  def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if (match = pattern.match(str))
       name = match[1]
       author = match[2].to_s
-      name = standardize_sp_nov_variants(name) if rank == :Species
+      name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
@@ -301,45 +348,45 @@ class Name < AbstractModel
     nil
   end
 
-  def self.parse_subgenus(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subgenus, SUBGENUS_PAT)
+  def parse_subgenus(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Subgenus", SUBGENUS_PAT)
   end
 
-  def self.parse_section(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Section, SECTION_PAT)
+  def parse_section(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Section", SECTION_PAT)
   end
 
-  def self.parse_subsection(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subsection, SUBSECTION_PAT)
+  def parse_subsection(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Subsection", SUBSECTION_PAT)
   end
 
-  def self.parse_stirps(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
+  def parse_stirps(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Stirps", STIRPS_PAT)
   end
 
-  def self.parse_species(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Species, SPECIES_PAT)
+  def parse_species(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Species", SPECIES_PAT)
   end
 
-  def self.parse_subspecies(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Subspecies, SUBSPECIES_PAT)
+  def parse_subspecies(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Subspecies", SUBSPECIES_PAT)
   end
 
-  def self.parse_variety(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Variety, VARIETY_PAT)
+  def parse_variety(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Variety", VARIETY_PAT)
   end
 
-  def self.parse_form(str, deprecated = false)
-    parse_below_genus(str, deprecated, :Form, FORM_PAT)
+  def parse_form(str, deprecated = false)
+    parse_below_genus(str, deprecated, "Form", FORM_PAT)
   end
 
-  def self.parse_rank_abbreviation(str)
+  def parse_rank_abbreviation(str)
     RANK_FROM_ABBREV_MATCHERS.find { |matcher| matcher.match?(str) }.rank
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
-  def self.standardize_sp_nov_variants(name)
-    words = name.split(" ")
+  def standardize_sp_nov_variants(name)
+    words = name.split
     if words.length > 2
       genus = words[0]
       epithet = words[2]
@@ -353,14 +400,14 @@ class Name < AbstractModel
 
   # Fix common error: Amanita vaginatae Author var. vaginatae
   # Convert to: Amanita vaginatae var. vaginatae Author
-  def self.fix_autonym(name, author, rank)
-    last_word = name.split(" ").last.gsub(/[()]/, "")
+  def fix_autonym(name, author, rank)
+    last_word = name.split.last.gsub(/[()]/, "")
     if (match = author.to_s.match(
       /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
     ))
       name = "#{name}#{match[2]}"
       author = match[1].strip
-      words = match[2].split(" ")
+      words = match[2].split
       while words.any?
         next_rank = parse_rank_abbreviation(words.shift)
         words.shift
@@ -371,10 +418,7 @@ class Name < AbstractModel
     [name, author, rank]
   end
 
-  class RankMessedUp < ::StandardError
-  end
-
-  def self.make_sure_ranks_ordered_right!(prev_rank, next_rank)
+  def make_sure_ranks_ordered_right!(prev_rank, next_rank)
     if compare_ranks(prev_rank, next_rank) <= 0 ||
        Name.ranks_above_species.include?(prev_rank) &&
        Name.ranks_below_species.include?(next_rank)
@@ -385,8 +429,8 @@ class Name < AbstractModel
   # Format a name ranked below genus, moving the author to before the var.
   # in natural varieties such as
   # "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
-  def self.format_autonym(name, author, _rank, deprecated)
-    words = name.split(" ")
+  def format_autonym(name, author, _rank, deprecated)
+    words = name.split
     if author.blank?
       format_name(name, deprecated)
     elsif words[-7] == words[-1]
@@ -421,27 +465,13 @@ class Name < AbstractModel
     end
   end
 
-  # matches to ranks that are included in the name proper
-  # subspecies is not included because it's the catchall default
-  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i
-
-  # convert rank start_match to standard form of rank
-  # subspecies is not included because it's the catchall default
-  STANDARD_SECONDARY_RANKS = {
-    f: "f.",
-    sect: "sect.",
-    stirps: "stirps",
-    subg: "subg.",
-    subsect: "subsect.",
-    v: "var."
-  }.freeze
-
-  def self.standardize_name(str)
-    words = str.split(" ")
+  def standardize_name(str)
+    words = str.split
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i.positive?
-      words[i] = if (match_start_of_rank = RANK_START_MATCHER.match(words[i]))
+      words[i] = if (match_start_of_rank =
+                       RANK_START_MATCHER.match(words[i]))
                    start_of_rank = match_start_of_rank[0]
                    STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
                  else
@@ -452,29 +482,29 @@ class Name < AbstractModel
     words.join(" ")
   end
 
-  def self.standardize_author(str)
+  def standardize_author(str)
     str = str.to_s.
-          sub(/^ ?#{AUCT_ABBR}/,  "auct. ").
-          sub(/^ ?#{INED_ABBR}/,  "ined. ").
-          sub(/^ ?#{NOM_ABBR}/,   "nom. ").
-          sub(/^ ?#{COMB_ABBR}/,  "comb. ").
-          sub(/^ ?#{SENSU_ABBR}/, "sensu ").
+          sub(/^ ?#{AUCT_ABBR}/o,  "auct. ").
+          sub(/^ ?#{INED_ABBR}/o,  "ined. ").
+          sub(/^ ?#{NOM_ABBR}/o,   "nom. ").
+          sub(/^ ?#{COMB_ABBR}/o,  "comb. ").
+          sub(/^ ?#{SENSU_ABBR}/o, "sensu ").
           # Having fixed comb. & nom., standardize their suffixes
-          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
-          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
+          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/o,  "nov. ").
+          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/o, "prov. ").
           strip_squeeze
     squeeze_author(str)
   end
 
   # Squeeze "A. H. Smith" into "A.H. Smith".
-  def self.squeeze_author(str)
+  def squeeze_author(str)
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
   # Add italics and boldface markup to a standardized name (without author).
-  def self.format_name(str, deprecated = false)
+  def format_name(str, deprecated = false)
     boldness = deprecated ? "" : "**"
-    words = str.split(" ")
+    words = str.split
     if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]
@@ -488,7 +518,7 @@ class Name < AbstractModel
     words.join(" ")
   end
 
-  def self.clean_incoming_string(str)
+  def clean_incoming_string(str)
     str.to_s.
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
@@ -498,7 +528,7 @@ class Name < AbstractModel
   end
 
   # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
-  def self.format_sort_name(name, author)
+  def format_sort_name(name, author)
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top

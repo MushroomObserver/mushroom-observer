@@ -25,8 +25,6 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-  # See https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-  NewCops: disable
 
   ########################### Excluded files ###################################
   # Completely ignore the following
@@ -53,19 +51,279 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-#####  Individual Cops
+########### Pending Cops
+# https://docs.rubocop.org/rubocop/versioning.html#pending-cops
+# NOTE: Once Rubocop removes pending status for these cops,
+# our configuration should be:
+#   deleted, if our configuration is the same as Rubocop's default, or
+#   moved to the Resolved (Non-Pending) Cops area
 
-# Use RuboCop's default configuration, except as specified below
-# NOTE: pending cops have no default, so it must be specified
+# https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationleadingspace
+Layout/LineContinuationLeadingSpace: #`new in 1.31.1
+  Enabled: true
+# https://docs.rubocop.org/rubocop/cops_layout.html#layoutlinecontinuationspacing
+Layout/LineContinuationSpacing: #`new in 1.31.1
+  Enabled: true
+Layout/LineEndStringConcatenationIndentation: # new in 1.18
+  # We most consistently align the start of the continued line
+  # with the start of the string on the previous line.
+  # This does not correspond to any available EnforcedStyle.
+  Enabled: false
 
-# Rubocop supports multiple options and MO uses a non-default
+Layout/SpaceBeforeBrackets: # new in 1.7
+  Enabled: true
+
+Lint/AmbiguousAssignment: # new in 1.7
+  Enabled: true
+Lint/AmbiguousOperatorPrecedence: # new in 1.21
+  # We do this only in rare cases; Always doing it would add uneeded clutter
+  Enabled: false
+Lint/AmbiguousRange: # new in 1.19
+  Enabled: true
+# https://docs.rubocop.org/rubocop/cops_lint.html#lintconstantoverwritteninrescue
+Lint/ConstantOverwrittenInRescue: # new in 1.31.1
+  Enabled: true
+Lint/DeprecatedConstants: # new in 1.8
+  Enabled: true
+Lint/DuplicateBranch: # new in 1.3
+  Enabled: true
+Lint/DuplicateRegexpCharacterClassElement: # new in 1.1
+  Enabled: true
+Lint/EmptyBlock: # new in 1.1
+  Enabled: true
+Lint/EmptyClass: # new in 1.3
+  Enabled: true
+Lint/EmptyInPattern: # new in 1.16
+  Enabled: true
+Lint/IncompatibleIoSelectWithFiberScheduler: # new in 1.21
+  Enabled: true
+Lint/LambdaWithoutLiteralBlock: # new in 1.8
+  Enabled: true
+Lint/NoReturnInBeginEndBlocks: # new in 1.2
+  Enabled: true
+Lint/NonAtomicFileOperation: # new in 1.31
+  # Disable until I understand the cop's implications - jdc 2022-07-14
+  # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
+  Enabled: false
+Lint/NumberedParameterAssignment: # new in 1.9
+  Enabled: true
+Lint/OrAssignmentToConstant: # new in 1.9
+  Enabled: true
+Lint/RedundantDirGlobSort: # new in 1.8
+  Enabled: true
+Lint/RefinementImportMethods: # new in 1.27
+  Enabled: true
+Lint/RequireRelativeSelfPath: # new in 1.22
+  Enabled: true
+Lint/SymbolConversion: # new in 1.9
+  Enabled: true
+Lint/ToEnumArguments: # new in 1.1
+  Enabled: true
+Lint/TripleQuotes: # new in 1.9
+  Enabled: true
+Lint/UnexpectedBlockArity: # new in 1.5
+  Enabled: true
+Lint/UnmodifiedReduceAccumulator: # new in 1.1
+  Enabled: true
+Lint/UselessRuby2Keywords: # new in 1.23
+  Enabled: true
+
+Naming/BlockForwarding: # new in 1.24
+  Enabled: true
+
+Performance/AncestorsInclude: # new in 1.7
+  Enabled: true
+Performance/BigDecimalWithNumericArgument: # new in 1.7
+  Enabled: true
+Performance/BlockGivenWithExplicitBlock: # new in 1.9
+  Enabled: true
+Performance/CollectionLiteralInLoop: # new in 1.8
+  Enabled: true
+Performance/ConcurrentMonotonicTime: # new in 1.12
+  Enabled: true
+Performance/ConstantRegexp: # new in 1.9
+  Enabled: true
+Performance/MapCompact: # new in 1.11
+  Enabled: true
+Performance/MethodObjectAsBlock: # new in 1.9
+  Enabled: true
+Performance/RedundantEqualityComparisonBlock: # new in 1.10
+  Enabled: true
+Performance/RedundantSortBlock: # new in 1.7
+  Enabled: true
+Performance/RedundantSplitRegexpArgument: # new in 1.10
+  Enabled: true
+Performance/RedundantStringChars: # new in 1.7
+  Enabled: true
+Performance/ReverseFirst: # new in 1.7
+  Enabled: true
+Performance/SortReverse: # new in 1.7
+  Enabled: true
+Performance/Squeeze: # new in 1.7
+  Enabled: true
+Performance/StringIdentifierArgument: # new in 1.13
+  Enabled: true
+Performance/Sum: # new in 1.8
+  Enabled: true
+
+Rails/ActionControllerTestCase: # new in 2.14
+  Enabled: true
+Rails/ActiveRecordCallbacksOrder: # new in 2.7
+  Enabled: true
+Rails/AddColumnIndex: # new in 2.11
+  Enabled: true
+Rails/AfterCommitOverride: # new in 2.8
+  Enabled: true
+Rails/AttributeDefaultBlockValue: # new in 2.9
+  Enabled: true
+Rails/CompactBlank: # new in 2.13
+  Enabled: true
+Rails/DeprecatedActiveModelErrorsMethods: # new in 2.14
+  Enabled: true
+Rails/DuplicateAssociation: # new in 2.14
+  Enabled: true
+Rails/DuplicateScope: # new in 2.14
+  Enabled: true
+Rails/DurationArithmetic: # new in 2.13
+  Enabled: true
+Rails/EagerEvaluationLogMessage: # new in 2.11
+  Enabled: true
+Rails/ExpandedDateRange: # new in 2.11
+  Enabled: true
+Rails/FindById: # new in 2.7
+  Enabled: true
+Rails/I18nLazyLookup: # new in 2.14
+  Enabled: true
+Rails/I18nLocaleAssignment: # new in 2.11
+  Enabled: true
+Rails/I18nLocaleTexts: # new in 2.14
+  Enabled: true
+Rails/Inquiry: # new in 2.7
+  Enabled: true
+Rails/MailerName: # new in 2.7
+  Enabled: true
+Rails/MatchRoute: # new in 2.7
+  Enabled: true
+Rails/MigrationClassName: # new in 2.14
+  Enabled: true
+Rails/NegateInclude: # new in 2.7
+  Enabled: true
+Rails/Pluck: # new in 2.7
+  Enabled: true
+Rails/PluckInWhere: # new in 2.7
+  Enabled: true
+Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
+  Enabled: false
+Rails/RedundantTravelBack: # new in 2.12
+  Enabled: true
+Rails/RenderInline: # new in 2.7
+  Enabled: true
+  Exclude:
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
+    - "app/controllers/ajax_controller/**/*"
+Rails/RenderPlainText: # new in 2.7
+  Enabled: true
+Rails/RootJoinChain: # new in 2.13
+  Enabled: true
+Rails/ShortI18n: # new in 2.7
+  Enabled: true
+Rails/SquishedSQLHeredocs: # new in 2.8
+  Enabled: true
+Rails/TimeZoneAssignment: # new in 2.10
+  Enabled: true
+Rails/TransactionExitStatement: # new in 2.14
+  Enabled: true
+Rails/UnusedIgnoredColumns: # new in 2.11
+  Enabled: true
+Rails/WhereEquals: # new in 2.9
+  Enabled: true
+Rails/WhereNot: # new in 2.8
+  Enabled: true
+
+Security/CompoundHash: # new in 1.28
+  Enabled: true
+Security/IoMethods: # new in 1.22
+  Enabled: true
+
+Style/ArgumentsForwarding: # new in 1.1
+  Enabled: true
+Style/CollectionCompact: # new in 1.2
+  Enabled: true
+Style/DocumentDynamicEvalDefinition: # new in 1.1
+  Enabled: true
+Style/EndlessMethod: # new in 1.8
+  Enabled: true
+Style/EnvHome: # new in 1.29
+  Enabled: true
+Style/FetchEnvVar: # new in 1.28
+  Enabled: true
+Style/FileRead: # new in 1.24
+  Enabled: true
+Style/FileWrite: # new in 1.24
+  Enabled: true
+Style/HashConversion: # new in 1.10
+  Enabled: true
+Style/HashExcept: # new in 1.7
+  Enabled: true
+Style/IfWithBooleanLiteralBranches: # new in 1.9
+  Enabled: true
+Style/InPatternThen: # new in 1.16
+  Enabled: true
+Style/MapCompactWithConditionalBlock: # new in 1.30
+  Enabled: true
+Style/MapToHash: # new in 1.24
+  Enabled: true
+Style/MultilineInPatternThen: # new in 1.16
+  Enabled: true
+Style/NegatedIfElseCondition: # new in 1.2
+  Enabled: true
+Style/NestedFileDirname: # new in 1.26
+  Enabled: true
+Style/NilLambda: # new in 1.3
+  Enabled: true
+Style/NumberedParameters: # new in 1.22
+  Enabled: true
+Style/NumberedParametersLimit: # new in 1.22
+  Enabled: true
+Style/ObjectThen: # new in 1.28
+  Enabled: true
+Style/OpenStructUse: # new in 1.23
+  Enabled: true
+Style/QuotedSymbols: # new in 1.16
+  Enabled: true
+Style/RedundantArgument: # new in 1.4
+  Enabled: true
+Style/RedundantInitialize: # new in 1.27
+  Enabled: true
+Style/RedundantSelfAssignmentBranch: # new in 1.19
+  Enabled: true
+Style/SelectByRegexp: # new in 1.22
+  Enabled: true
+Style/StringChars: # new in 1.12
+  Enabled: true
+Style/SwapValues: # new in 1.1
+  Enabled: true
+
+# ------------------------------------------------------------------------------
+
+########### Resolved (Non-Pending) Cops
+
+# cops for which MO uses a non-default configuration
+
+# Not relevent (MO is not a gem)
+Gemspec:
+  Enabled: false
+
 # Default: align "end" with **start of the line** that includes "begin"
-# MO align with "begin". This is how we've almost always done it.
+# MO: align with "begin". This is how we've almost always done it.
 # And it's consistent with Layout/EndAlignment for other keywords.
 Layout/BeginEndAlignment:
   EnforcedStyleAlignWith: begin
 
-# Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:
   EnforcedStyle: trailing
 
@@ -73,17 +331,16 @@ Layout/DotPosition:
 Layout/HashAlignment:
   EnforcedColonStyle: key
 
-# Rubocop supports multiple options and MO uses a non-default
 Layout/LineLength:
   # RuboCop default is 120 as of 0.84
   Max: 80
 
 Metrics/AbcSize:
-# Can we try relaxing this one?  Even short simple methods sometimes exceed
-# 15 or 16.  Simplifying them further just forces us to make tons of tiny
-# trivial methods with really cumbersome names, without actually making
-# the code any better.
-# Max: 15
+  # Can we try relaxing this one?  Even short simple methods sometimes exceed
+  # 15 or 16.  Simplifying them further just forces us to make tons of tiny
+  # trivial methods with really cumbersome names, without actually making
+  # the code any better.
+  # Max: 15
   Max: 20
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -95,8 +352,8 @@ Metrics/BlockLength:
     - "test//**/*"
 
 Metrics/ClassLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 100
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -108,16 +365,16 @@ Metrics/CyclomaticComplexity:
     - "test//**/*"
 
 Metrics/MethodLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 10
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 10
   Max: 30
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
 
 Metrics/ModuleLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
+  # Relaxed metrics based on CodeClimages default .rubocop.yml
+  # Max: 100
   Max: 250
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
@@ -186,7 +443,13 @@ Style/AsciiComments:
 Style/DateTime:
   Enabled: false
 
-# Rubocop does not enable this cop by defaul
+# This doesn't work for redirect in config/routes.rb.
+Style/FormatStringToken:
+  Enabled: true
+  IgnoredMethods:
+    - "redirect"
+
+# Rubocop does not enable this cop by default
 # MO uses parentheses
 Style/MethodCallWithArgsParentheses:
   Enabled: true
@@ -196,11 +459,11 @@ Style/MethodCallWithArgsParentheses:
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
     default: "()"
-    '%i':    "[]"
-    '%I':    "[]"
-    '%r':    "{}"
-    '%w':    "[]"
-    '%W':    "[]"
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
 
 # I can't figure out how to get exploded to work with API.
 Style/RaiseArgs:
@@ -212,11 +475,9 @@ Style/RaiseArgs:
 Style/StringConcatenation:
   Mode: aggressive
 
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 

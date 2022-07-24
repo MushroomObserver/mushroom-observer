@@ -18,15 +18,15 @@ class PivotalControllerTest < FunctionalTestCase
       :get,
       "https://www.pivotaltracker.com/services/v5/projects/224629/stories?" \
       "fields=story_type,estimate,current_state,name,description,updated_at," \
-      "labels(name),comments(created_at,text)&"\
+      "labels(name),comments(created_at,text)&" \
       "filter=state:unscheduled,started,unstarted&limit=500"
     ).
       with(
         headers: {
-          'Accept': "*/*",
-          'Accept-Encoding': "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          'User-Agent': "Ruby",
-          'X-Trackertoken': "xxx"
+          Accept: "*/*",
+          "Accept-Encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "User-Agent": "Ruby",
+          "X-Trackertoken": "xxx"
         }
       ).to_return(status: 200,
                   body: '[{"id":"1",

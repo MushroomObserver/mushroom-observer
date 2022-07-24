@@ -2,7 +2,7 @@
 
 module Report
   # Default CSV report.
-  class Raw < Report::CSV
+  class Raw < CSV
     # rubocop:disable Metrics/MethodLength
     def labels
       %w[

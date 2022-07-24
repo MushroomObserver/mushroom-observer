@@ -607,7 +607,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :emails, action: :merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
   end
 
@@ -698,13 +698,13 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_nil(
       herbarium.personal_user_id,
       "Use different fixture: #{herbarium.name} is already someone's " \
-        " personal herbarium"
+      "personal herbarium"
     )
     user = users(:zero_user)
     assert_false(
       herbarium.can_make_personal?(user),
       "Use different fixture: #{herbarium.name} cannot be made " \
-        " #{user}'s personal herbarium"
+      "#{user}'s personal herbarium"
     )
     params = herbarium_params.merge(name: herbarium.name, personal: "1")
     login(user.login)

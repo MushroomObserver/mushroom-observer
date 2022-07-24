@@ -65,7 +65,7 @@ class RssLogTest < UnitTestCase
 
   def normalized_rss_log_types
     RssLog.all_types.each_with_object([]) do |type, ary|
-      ary << type if model(type).controller_normalized?(model(type).name)
+      ary << type if model(type).controller_normalized?
     end
   end
 

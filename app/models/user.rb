@@ -203,54 +203,59 @@ class User < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  as_enum(:thumbnail_size,
-          {
-            thumbnail: 1,
-            small: 2
-          },
-          source: :thumbnail_size,
-          accessor: :whiny)
-  as_enum(:image_size,
-          {
-            thumbnail: 1,
-            small: 2,
-            medium: 3,
-            large: 4,
-            huge: 5,
-            full_size: 6
-          },
-          source: :image_size,
-          accessor: :whiny)
-  as_enum(:votes_anonymous,
-          {
-            no: 1,
-            yes: 2,
-            old: 3
-          },
-          source: :votes_anonymous,
-          accessor: :whiny)
-  as_enum(:location_format,
-          {
-            postal: 1,
-            scientific: 2
-          },
-          source: :location_format,
-          accessor: :whiny)
-  as_enum(:hide_authors,
-          {
-            none: 1,
-            above_species: 2
-          },
-          source: :hide_authors,
-          accessor: :whiny)
-  as_enum(:keep_filenames,
-          {
-            toss: 1,
-            keep_but_hide: 2,
-            keep_and_show: 3
-          },
-          source: :keep_filenames,
-          accessor: :whiny)
+  enum thumbnail_size:
+       {
+         thumbnail: 1,
+         small: 2
+       },
+       _prefix: :thumb_size,
+       _default: "thumbnail"
+
+  enum image_size:
+       {
+         thumbnail: 1,
+         small: 2,
+         medium: 3,
+         large: 4,
+         huge: 5,
+         full_size: 6
+       },
+       _prefix: true,
+       _default: "medium"
+
+  enum votes_anonymous:
+       {
+         no: 1,
+         yes: 2,
+         old: 3
+       },
+       _prefix: :votes_anon,
+       _default: "no"
+
+  enum location_format:
+       {
+         postal: 1,
+         scientific: 2
+       },
+       _prefix: true,
+       _default: "postal"
+
+  enum hide_authors:
+       {
+         none: 1,
+         above_species: 2
+       },
+       _prefix: true,
+       _default: "none"
+
+  enum keep_filenames:
+       {
+         toss: 1,
+         keep_but_hide: 2,
+         keep_and_show: 3
+       },
+       _suffix: :filenames,
+       _default: "toss"
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
@@ -330,6 +335,10 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
+  scope :by_contribution, lambda {
+    order(contribution: :desc, name: :asc, login: :asc)
+  }
+
   # These are used by forms.
   attr_accessor :place_name
   attr_accessor :email_confirmation
@@ -340,7 +349,12 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    "/users"
+  end
+
+  # Override the default show_action
+  def self.show_action
+    "show"
   end
 
   # Find admin's record.
@@ -375,7 +389,7 @@ class User < AbstractModel
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter and API authentication.
   def self.current=(val)
-    @@location_format = val ? val.location_format : :postal
+    @@location_format = val ? val.location_format : "postal"
     @@user = val
   end
 
@@ -384,7 +398,7 @@ class User < AbstractModel
   #   location_format = User.current_location_format
   #
   def self.current_location_format
-    @@location_format = :postal unless defined?(@@location_format)
+    @@location_format = "postal" unless defined?(@@location_format)
     @@location_format
   end
 
@@ -452,10 +466,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def legal_name
-    if name.to_s != ""
-      name
-    else
+    if name.to_s == ""
       login
+    else
+      name
     end
   end
 
@@ -533,15 +547,7 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    # For join tables with no model, need to create an Arel::Table object
-    # so we can use Arel methods on it, eg access columns
-    # Note: ActiveRecord joins: through is slower; produces two extra joins
-    select_manager = Project.arel_table.join(UserGroupUser.arel_table).
-                     on(Project[:admin_group_id].eq(
-                       UserGroupUser[:user_group_id]
-                     ).and(UserGroupUser[:user_id].eq(id)))
-
-    @projects_admin ||= Project.joins(*select_manager.join_sources)
+    Project.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
@@ -569,8 +575,8 @@ class User < AbstractModel
     @preferred_herbarium ||= \
       begin
         herbarium_id = HerbariumRecord.where(user_id: id).
-                         order(created_at: :desc).
-                         pluck(:herbarium_id).first
+                       order(created_at: :desc).
+                       pluck(:herbarium_id).first
         if herbarium_id.blank?
           personal_herbarium
         else
@@ -601,19 +607,17 @@ class User < AbstractModel
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
-  # Return an Array of SpeciesList's that User owns or that are attached to a
-  # Project that the User is a member of.
-  def all_editable_species_lists(include: nil)
+  # Return an ActiveRecord::Association of SpeciesList's that User owns or that
+  # are attached to a Project that the User is a member of.
+  def all_editable_species_lists
     @all_editable_species_lists ||=
-      calc_all_editable_species_lists(include)
-  end
-
-  def calc_all_editable_species_lists(include)
-    return species_lists.includes(include) if projects_member.none?
-
-    SpeciesList.includes(include).
-      where(SpeciesList[:user_id].eq(id).
-      or(SpeciesList[:id].in(species_lists_in_users_projects))).uniq
+      if projects_member.any?
+        SpeciesList.
+          where(SpeciesList[:user_id].eq(id).
+          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
+      else
+        species_lists
+      end
   end
 
   def species_lists_in_users_projects
@@ -747,7 +751,7 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < Time.zone.now - 1.day
+       File.mtime(MO.user_primer_cache_file) < 1.day.ago
       data = primer_data
       write_primer_file(data)
       data

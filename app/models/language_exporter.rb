@@ -175,7 +175,7 @@ module LanguageExporter
 
   def read_localization_file
     File.open(localization_file, "r:utf-8") do |fh|
-      YAML.load(fh)[locale][MO.locale_namespace]
+      YAML.safe_load(fh)[locale][MO.locale_namespace]
     end
   end
 
@@ -189,7 +189,7 @@ module LanguageExporter
 
   def read_export_file
     File.open(export_file, "r:utf-8") do |fh|
-      YAML.load(fh)
+      YAML.safe_load(fh, permitted_classes: [Symbol])
     end
   end
 
@@ -431,7 +431,8 @@ module LanguageExporter
       pass = false unless /^'([^'\\]|\\.)*'$/.match?(str)
     elsif str.start_with?('"')
       pass = false unless /^"([^"\\]|\\.)*"$/.match?(str)
-    elsif /:(\s|$)| #/.match?(str) ||
+    # Disable cop because conditions must be tested in order
+    elsif /:(\s|$)| #/.match?(str) || # rubocop:disable Lint/DuplicateBranch
           (/^[^\w(]/.match?(str) && str[0].is_ascii_character?)
       pass = false
     end

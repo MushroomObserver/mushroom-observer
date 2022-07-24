@@ -59,8 +59,8 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(locale)
-    do_init = I18n.backend.translations.empty? ? true : false
-    I18n.backend.translations(do_init: do_init)\
+    do_init = I18n.backend.translations.empty?
+    I18n.backend.translations(do_init: do_init) \
       [locale.to_sym][MO.locale_namespace.to_sym]
   end
 

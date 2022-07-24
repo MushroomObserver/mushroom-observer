@@ -102,7 +102,7 @@ function MultiImageUploader(localized_text) {
             obsDate = _this.observationDate();
 
         $imgRadioContainer.html('');
-        $obsRadioContainer.html('');       
+        $obsRadioContainer.html('');
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
@@ -367,7 +367,7 @@ function MultiImageUploader(localized_text) {
             fileReader.readAsDataURL(_this.file);
         } else {
             var $img = _this.dom_element.find('.img-responsive').first();
-            $img.attr('src', _this.url).error(function () {
+            $img.attr('src', _this.url).on('error', function () {
                 alert("Couldn't read image from: " + _this.url);
                 _this.destroy();
             });
@@ -375,13 +375,13 @@ function MultiImageUploader(localized_text) {
     };
 
     FileStoreItem.prototype.getExifData = function () {  //extracts the exif data async;
-        var _fsItem = this;
-        _fsItem.dom_element.find('.img-responsive').first().load(function() {
-            EXIF.getData(this, function () {
-                _fsItem.exif_data = this.exifdata;
-                _fsItem.applyExifData();  //apply the data to the DOM
-            });
+      var _fsItem = this;
+      _fsItem.dom_element.find('.img-responsive').first().on('load', function() {
+        EXIF.getData(this, function () {
+          _fsItem.exif_data = this.exifdata;
+          _fsItem.applyExifData();  //apply the data to the DOM
         });
+      });
     };
 
     FileStoreItem.prototype.applyExifData = function () {  //applys exif data to the DOM element, DOM element must already be attached
@@ -555,25 +555,26 @@ function MultiImageUploader(localized_text) {
           }
         };
 
-        update = function() {
-          var req = new XMLHttpRequest();
-          req.open("GET", _progressUri, 1);
-          req.setRequestHeader("X-Progress-ID", _this.uuid);
-          req.onreadystatechange = function () {
-            if (req.readyState == 4 && req.status == 200) {
-              var upload = eval(req.responseText);
-              if (upload.state == "done" || upload.state == "uploading") {
-                _this.incrementProgressBar(upload.received / upload.size);
-                progress = window.setTimeout(update, 1000);
-              } else {
-                window.clearTimeout(progress);
-                progress = null;
-              }
-            }
-          };
-          req.send(null);
-        };
-        progress = window.setTimeout(update, 1000);
+        // This is currently disabled in nginx, so no sense making the request.
+        // update = function() {
+        //   var req = new XMLHttpRequest();
+        //   req.open("GET", _progressUri, 1);
+        //   req.setRequestHeader("X-Progress-ID", _this.uuid);
+        //   req.onreadystatechange = function () {
+        //     if (req.readyState == 4 && req.status == 200) {
+        //       var upload = eval(req.responseText);
+        //       if (upload.state == "done" || upload.state == "uploading") {
+        //         _this.incrementProgressBar(upload.received / upload.size);
+        //         progress = window.setTimeout(update, 1000);
+        //       } else {
+        //         window.clearTimeout(progress);
+        //         progress = null;
+        //       }
+        //     }
+        //   };
+        //   req.send(null);
+        // };
+        // progress = window.setTimeout(update, 1000);
 
         // Note: You need to add the event listeners before calling open()
         // on the request.
@@ -695,23 +696,23 @@ function MultiImageUploader(localized_text) {
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
-        
-               
+
+
         //Drag and Drop bindings on the window
-        
+
         $content.bind('dragover dragenter', function (e){
             if (e.preventDefault) { e.preventDefault(); }
             jQuery('#right_side').addClass('dashed-border');
             return false;
         });
 
-        $content.bind('dragend dragleave dragexit', function (e){            
-            jQuery('#right_side').removeClass('dashed-border');            
+        $content.bind('dragend dragleave dragexit', function (e){
+            jQuery('#right_side').removeClass('dashed-border');
         });
         $content.bind('drop', function (e) {
             if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
             jQuery('#right_side').removeClass('dashed-border');
-            var dataTransfer = e.originalEvent.dataTransfer;            
+            var dataTransfer = e.originalEvent.dataTransfer;
             if (dataTransfer.files.length > 0)
                 fileStore.addFiles(dataTransfer.files);
             // There are issues to work out concerning dragging and dropping

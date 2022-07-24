@@ -30,7 +30,7 @@ class API2
 
     def create_params
       {
-        display_name: parse(:string, :name, limit: 1024, help: :postal),
+        display_name: parse(:string, :name, limit: 1024, help: "postal"),
         north: parse(:latitude, :north),
         south: parse(:longitude, :south),
         east: parse(:longitude, :east),
@@ -45,7 +45,7 @@ class API2
     def update_params
       {
         display_name: parse(:string, :set_name, limit: 1024, not_blank: true,
-                                                help: :postal),
+                                                help: "postal"),
         north: parse(:latitude, :set_north),
         south: parse(:longitude, :set_south),
         east: parse(:longitude, :set_east),

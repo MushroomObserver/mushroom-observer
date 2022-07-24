@@ -30,13 +30,15 @@ end
 
 # ----------------------------------------
 
+HELP_ARGS = ["-h", "--help"].freeze
+
 app_root = File.expand_path("..", __dir__)
 require("#{app_root}/config/consts.rb")
 require("#{app_root}/app/classes/ip_stats.rb")
 require("fileutils")
 require("time")
 
-abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
+abort(<<"HELP") if ARGV.any? { |arg| HELP_ARGS.include?(arg) }
 
   USAGE::
 

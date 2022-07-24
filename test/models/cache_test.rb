@@ -31,7 +31,7 @@ class CacheTest < UnitTestCase
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
     first_updated_at = name.observations.first.updated_at
-    name.change_text_name("Stereum blah", "Foo", :Species)
+    name.change_text_name("Stereum blah", "Foo", "Species")
     name.save
     assert(name.observations.all? { |o| o.text_name == name.text_name })
     assert_equal(first_updated_at, name.observations.first.updated_at)
@@ -78,47 +78,73 @@ class CacheTest < UnitTestCase
   # changed in all of a genus's subtaxa (and that updated_at not changed).
   def test_propagate_classification
     name = names(:agaricus)
+    saved_obs_updated_ats =
+      Observation.where(Observation[:text_name].matches("Agaricus%")).
+      map(&:updated_at)
     new_classification = names(:peltigera).classification
+
     name.update(classification: new_classification)
     name.propagate_classification
+
     Observation.where(
       Observation[:text_name].matches("Agaricus%")
     ).each do |obs|
       assert_equal(new_classification, obs.classification)
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus%")).
+        map(&:updated_at)
+    )
   end
 
   # Prove that bulk changing lifeform also updates corresponding observation
   # caches (and does not touch updated_at).
   def test_propagate_lifeform
     name = names(:agaricus)
+    saved_name_updated_ats = Name.with_name_like("Agaricus").map(&:updated_at)
+    saved_obs_updated_ats =
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+      map(&:updated_at)
+
     name.propagate_add_lifeform("lichen")
-    Observation.where(
-      Observation[:text_name].matches("Agaricus %")
-    ).each do |obs|
-      assert_true(obs.lifeform.include?(" lichen "))
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
-    end
-    Name.where(
-      Name[:text_name].matches("Agaricus %")
-    ).each do |nam|
+
+    Observation.
+      where(Observation[:text_name].matches("Agaricus %")).each do |obs|
+        assert_true(obs.lifeform.include?(" lichen "))
+      end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+        map(&:updated_at)
+    )
+    Name.with_name_like("Agaricus").each do |nam|
       assert_true(nam.lifeform.include?(" lichen "))
-      assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_name_updated_ats,
+      Name.with_name_like("Agaricus").map(&:updated_at)
+    )
+
     name.propagate_remove_lifeform("lichen")
-    Observation.where(
-      Observation[:text_name].matches("Agaricus %")
-    ).each do |obs|
-      assert_false(obs.lifeform.include?(" lichen "))
-      assert_operator(obs.updated_at, :<, 1.minute.ago)
-    end
-    Name.where(
-      Name[:text_name].matches("Agaricus %")
-    ).each do |nam|
+
+    Observation.
+      where(Observation[:text_name].matches("Agaricus %")).each do |obs|
+        assert_false(obs.lifeform.include?(" lichen "))
+      end
+    assert_equal(
+      saved_obs_updated_ats,
+      Observation.where(Observation[:text_name].matches("Agaricus %")).
+        map(&:updated_at)
+    )
+
+    Name.with_name_like("Agaricus").each do |nam|
       assert_false(nam.lifeform.include?(" lichen "))
-      assert_operator(nam.updated_at, :<, 1.minute.ago)
     end
+    assert_equal(
+      saved_name_updated_ats,
+      Name.with_name_like("Agaricus").map(&:updated_at)
+    )
   end
 
   # def test_cronjob_refresh_caches

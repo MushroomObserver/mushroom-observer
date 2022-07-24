@@ -6,7 +6,7 @@ require("graphql_request_helper")
 # Tests the GraphQL Controller and the most basic queries that reflect
 # controller's `context` hash back to the JSON response, Visitor and Admin
 # https://graphql-ruby.org/testing/integration_tests.html
-class Mutations::HttpRequestTest < ActionDispatch::IntegrationTest
+class Mutations::HTTPRequestTest < ActionDispatch::IntegrationTest
   include GraphQLRequestHelper
 
   def invalid_variables

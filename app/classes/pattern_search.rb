@@ -32,9 +32,5 @@
 ################################################################################
 
 module PatternSearch
-  require_dependency "pattern_search/base"
-  require_dependency "pattern_search/parser"
-  require_dependency "pattern_search/term"
-  require_dependency "pattern_search/errors"
-  # (the others should auto-load)
+  # everything is autoloaded via Zeitwerk
 end

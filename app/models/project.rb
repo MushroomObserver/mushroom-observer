@@ -47,6 +47,9 @@ class Project < AbstractModel
   belongs_to :user
   belongs_to :user_group
 
+  has_many :admin_group_users, through: :admin_group, source: :users
+  has_many :member_group_users, through: :user_group, source: :users
+
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
 

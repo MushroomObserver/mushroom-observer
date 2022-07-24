@@ -201,7 +201,7 @@ class ApplicationController < ActionController::Base
     return true if @user&.successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
     false
   end
 
@@ -371,7 +371,7 @@ class ApplicationController < ActionController::Base
 
   def valid_user_from_cookie
     return unless (cookie = cookies["mo_user"]) &&
-                  (split = cookie.split(" ")) &&
+                  (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
                   (split[1] == user.auth_code)
 
@@ -401,9 +401,9 @@ class ApplicationController < ActionController::Base
 
   def make_logged_in_user_available_to_everyone
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : "0"}" \
-                " robot=#{browser.bot? ? "Y" : "N"}" \
-                " ip=#{request.remote_ip}")
+    logger.warn("user=#{@user ? @user.id : "0"} " \
+                "robot=#{browser.bot? ? "Y" : "N"} " \
+                "ip=#{request.remote_ip}")
   end
 
   # Track when user requested a page, but update at most once an hour.
@@ -753,7 +753,7 @@ class ApplicationController < ActionController::Base
   # top of the next page the User sees.
   def flash_notice(*strs)
     session[:notice] ||= "0"
-    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join("")
+    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join
   end
   helper_method :flash_notice
 
@@ -1106,7 +1106,7 @@ class ApplicationController < ActionController::Base
     return unless invalid_q_param?
 
     flash_error(:advanced_search_bad_q_error.t)
-    redirect_to(observer_advanced_search_form_path)
+    redirect_to(search_advanced_path)
   end
 
   private ##########
@@ -1275,7 +1275,7 @@ class ApplicationController < ActionController::Base
 
   def query_and_next_object_rss_log_increment(object, method)
     # Special exception for prev/next in RssLog query: If go to "next" in
-    # show_observation, for example, inside an RssLog query, go to the next
+    # observations/show, for example, inside an RssLog query, go to the next
     # object, even if it's not an observation. If...
     #             ... q param is an RssLog query
     return unless (query = current_query_is_rss_log) &&
@@ -1476,7 +1476,7 @@ class ApplicationController < ActionController::Base
     # (overriding any title specified in the view)
     # and the html <title> metadata == a translated tag or the action name
     # see ApplicationHelper#title_tag_contents
-    @num_results.zero? ? @title = "" : @title ||= query.title
+    @num_results.zero? ? @title = args[:no_hits_title] : @title ||= query.title
 
     # Add magic links for sorting if enough results to sort
     @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
@@ -1748,7 +1748,7 @@ class ApplicationController < ActionController::Base
   #
   # The old policy was to disable this feature for a few obviously dangerous
   # actions.  I've changed it now to only _enable_ it for common (and safe)
-  # actions like show_observation, post_comment, etc.  Each controller is now
+  # actions like observations/show, post_comment, etc.  Each controller is now
   # responsible for explicitly listing the actions which accept it.
   # -JPH 20100123
   #
@@ -1776,7 +1776,7 @@ class ApplicationController < ActionController::Base
       @user.thumbnail_size
     else
       session[:thumbnail_size]
-    end || :thumbnail
+    end || "thumbnail"
   end
   helper_method :default_thumbnail_size
 

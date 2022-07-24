@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
-  # Activate mode: sets verified field of given ApiKey, returns nothing.
-  # Edit mode: sets notes field of given ApiKey, returns new value.
+module AjaxController::APIKey
+  # Activate mode: sets verified field of given APIKey, returns nothing.
+  # Edit mode: sets notes field of given APIKey, returns new value.
   # In both cases returns error message if there is an error.
   # type::  "activate" or "edit"
-  # id::    ID of ApiKey
+  # id::    ID of APIKey
   # value:: New value of the notes field (edit mode only)
   def api_key
     @user = session_user!
-    key   = ApiKey.find(@id)
+    key   = APIKey.find(@id)
     raise("Permission denied") if key.user != @user
 
     if @type == "activate"

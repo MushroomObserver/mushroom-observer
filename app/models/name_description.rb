@@ -15,12 +15,13 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Used to keep track of descriptions that were merged
+#  merge_source_id::  (V) Obsolete
+#    Used to keep track of descriptions that were merged
 #    into this one. Primarily useful in the past versions: stores id of latest
 #    version of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
-#  review_status::    (-) :vetted, :unvetted, :inaccurate, :unreviewed.
+#  review_status::    (-) "vetted", "unvetted", "inaccurate", "unreviewed".
 #  last_review::      (-) Last time it was reviewed.
 #  reviewer::         (-) User that reviewed it.
 #  ok_for_export::    (-) Boolean: is this ready for export to EOL?
@@ -70,22 +71,21 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:review_status,
-          { unreviewed: 1,
-            unvetted: 2,
-            vetted: 3,
-            inaccurate: 4 },
-          source: :review_status,
-          accessor: :whiny)
-  as_enum(:source_type,
-          { public: 1,
-            foreign: 2,
-            project: 3,
-            source: 4,
-            user: 5 },
-          source: :source_type,
-          accessor: :whiny)
-
+  enum review_status:
+        {
+          unreviewed: 1,
+          unvetted: 2,
+          vetted: 3,
+          inaccurate: 4
+        }
+  enum source_type:
+        {
+          public: 1,
+          foreign: 2,
+          project: 3,
+          source: 4,
+          user: 5
+        }, _suffix: :source
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -186,11 +186,11 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
-
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses
-    ALL_REVIEW_STATUSES
+    review_statuses.map do |name, _integer|
+      name
+    end
   end
 
   # Update the review status.  Saves the changes if there are no substantive
@@ -205,14 +205,14 @@ class NameDescription < Description
   #
   def update_review_status(value)
     user = User.current
-    if !user.in_group?("reviewers")
+    if user.in_group?("reviewers")
+      reviewer_id = user.id
+    else
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
       value = :unreviewed
       reviewer_id = nil
-    else
-      reviewer_id = user.id
     end
     self.review_status = value
     self.reviewer_id   = reviewer_id
@@ -236,7 +236,7 @@ class NameDescription < Description
     if (name.description_id == id) &&
        (name.classification != classification)
       name.update(classification: classification)
-      name.propagate_classification if name.rank == :Genus
+      name.propagate_classification if name.rank == "Genus"
     end
   end
 

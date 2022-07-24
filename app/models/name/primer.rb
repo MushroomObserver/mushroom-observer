@@ -1,26 +1,41 @@
 # frozen_string_literal: true
 
-#
-# Prime the name auto-completer
-class Name < AbstractModel
-  # Get list of most used names to prime auto-completer.
-  # Return a simple Array of up to 1000 name String's (no authors).
-  #
-  # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
-  # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (MO.name_primer_cache_file).
-  #
-  def self.primer
-    # Temporarily disable. It rarely takes autocomplete long even on my horrible
-    # internet connection. And the primer can -- at least briefly -- have names
-    # that have been merged or deprecated or misspelled.  That may be confusing
-    # some users.  Let's try it without for a while to see if anyone complains.
-    # current_name_cache || refreshed_name_cache
-    []
+module Name::Primer
+  # When we `include` a module, the way to add class methods is like this:
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
-  # private class methods
-  class << self
+  module ClassMethods
+    # Get list of most used names to prime auto-completer.
+    # Return a simple Array of up to 1000 name String's (no authors).
+    #
+    # NOTE: Since this is an expensive query (well, okay it only takes a tenth
+    # of a second but that could change), it gets cached periodically (daily?)
+    # in a plain old file (MO.name_primer_cache_file).
+    #
+    def primer
+      # Temporarily disable. It rarely takes autocomplete long even on my
+      # horrible internet connection. And the primer can -- at least briefly --
+      # have names that have been merged or deprecated or misspelled.
+      # That may be confusing some users.
+      # Let's try it without for a while to see if anyone complains.
+      # current_name_cache || refreshed_name_cache
+      []
+    end
+
+    # For NameController#needed_descriptions
+    # Returns a list of the most popular 100 names that don't have descriptions.
+    def descriptions_needed
+      names = Name.where(description: nil).joins(:observations).
+              group(:name_id).order(Arel.star.count.desc).limit(100).
+              pluck(:id)
+
+      Query.lookup(:Name, :in_set,
+                   ids: names,
+                   title: :needed_descriptions_title.l)
+    end
+
     private
 
     def current_name_cache

@@ -19,9 +19,7 @@ class IpStatsTest < UnitTestCase
               File.size(dest_file) == File.size(src_file) &&
               (File.mtime(dest_file) - File.mtime(src_file)).abs < 1e-3
 
-    File.open(dest_file, "w") do |fh|
-      fh.write(File.open(src_file, "r").read)
-    end
+    File.write(dest_file, File.read(src_file))
     FileUtils.touch(dest_file, mtime: File.mtime(src_file))
     IpStats.reset!
   end
@@ -120,16 +118,16 @@ class IpStatsTest < UnitTestCase
 
     User.current = nil
     IpStats.log_stats(ip: ip1, time: 15.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 12.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 9.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: :observations, action: :show)
     IpStats.log_stats(ip: ip1, time: 6.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: :observations, action: :show)
     User.current = rolf
     IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
-                      controller: "observer", action: "create_observation")
+                      controller: :observations, action: :show)
 
     stats = IpStats.read_stats(do_activity: true)
     assert_equal([ip1, ip2], stats.keys.sort)
@@ -143,7 +141,7 @@ class IpStatsTest < UnitTestCase
     assert_equal(1, stats[ip2][:activity].length)
     assert_operator(stats[ip2][:activity][0][0], :>=, 2.seconds.ago.to_s)
     assert_operator(stats[ip2][:activity][0][1], :>=, 2.seconds)
-    assert_equal("observer", stats[ip2][:activity][0][2])
-    assert_equal("create_observation", stats[ip2][:activity][0][3])
+    assert_equal("observations", stats[ip2][:activity][0][2])
+    assert_equal("show", stats[ip2][:activity][0][3])
   end
 end
