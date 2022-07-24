@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
-    t.boolean "ok_for_ml"
+    t.boolean "ok_for_ml", default: true, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
