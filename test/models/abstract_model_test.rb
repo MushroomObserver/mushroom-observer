@@ -470,4 +470,33 @@ class AbstractModelTest < UnitTestCase
     arel_find_user = User.find_by(User[:login].eq(rolf.login))
     assert_equal(arel_find_user.login, rolf.login)
   end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_created_after
+    skip("Under construction")
+  end
+
+  def test_scope_created_before
+    skip("Under construction")
+  end
+
+  def test_scope_created_between
+    skip("Under construction")
+  end
+
+  def test_scope_updated_after
+    skip("Under construction")
+  end
+
+  def test_scope_updated_before
+    skip("Under construction")
+  end
+
+  def test_scope_updated_between
+    skip("Under construction")
+  end
 end
