@@ -193,6 +193,12 @@
       </div>
     <% end %>
 
+    <% if reviewer? %>
+      <div class="push-up text-center">
+        <%= set_ml_status_controls(@image) %>
+      </div>
+    <% end %>
+
     <!-- VOTE_PANEL -->
     <div id="quality_vote_container"><!--Note: used by ajax-->
       <div id="quality_vote_content" class="panel panel-default">
