@@ -567,8 +567,6 @@ class NameController < ApplicationController
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
            (old_desc = NameDescription.safe_find(params[:old_desc_id]))
-          v = @description.versions.latest
-          v.save
           if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
