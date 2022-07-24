@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Strip GPS data from EXIF header of original image file.
 #

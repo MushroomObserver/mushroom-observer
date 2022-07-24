@@ -81,24 +81,6 @@ class ScriptTest < UnitTestCase
     # system("cp #{dest_file} x.xml")
   end
 
-  test "monitor_top" do
-    script = script_file("monitor_top")
-    tempfile = Tempfile.new("test").path
-    logfile = "#{::Rails.root}/log/top.log"
-    old_size = begin
-                 File.size(logfile)
-               rescue StandardError
-                 0
-               end
-    cmd = "#{script} 2>&1 > #{tempfile}"
-    status = system(cmd)
-    errors = File.read(tempfile)
-    assert(status, "Something went wrong with #{script}:\n#{errors}")
-    assert_equal("", File.read(tempfile))
-    new_size = File.size(logfile)
-    assert_operator(new_size, :>, old_size)
-  end
-
   test "parse_log" do
     script = script_file("parse_log")
     tempfile = Tempfile.new("test").path
