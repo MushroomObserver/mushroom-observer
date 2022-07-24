@@ -16,6 +16,10 @@ module ExporterHelper
     end
   end
 
+  def set_ml_status_controls(obj)
+    set_export_status_controls(obj)
+  end
+
   # Display the two export statuses, making the current state plain text and
   # the other a link to the observer/set_export_status callback.
   def set_export_status_controls(obj)
