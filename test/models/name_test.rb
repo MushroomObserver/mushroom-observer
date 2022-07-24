@@ -4,10 +4,6 @@ require("test_helper")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
-  # a string that's VERY unlikely to appear anywhere in the database
-  # Useful for testing that an object doesn't include something
-  ARBITRARY_SHA = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
-
   def create_test_name(string, force_rank = nil)
     User.current = rolf
     parse = Name.parse_name(string)
