@@ -229,7 +229,6 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.integer "merge_source_id"
     t.text "gen_desc"
     t.text "ecology"
     t.text "species"
@@ -333,7 +332,6 @@ ActiveRecord::Schema.define(version: 2022_07_23_194140) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.integer "merge_source_id"
     t.text "gen_desc"
     t.text "diag_desc"
     t.text "distribution"
