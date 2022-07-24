@@ -17,13 +17,17 @@ module ExporterHelper
   end
 
   def set_ml_status_controls(obj)
-    status_controls(obj, obj.ok_for_ml, :review_ok_for_export.t, :review_no_export.t, :set_export_status)
+    status_controls(obj, obj.ok_for_ml,
+                    :review_ok_for_ml.t, :review_no_ml.t,
+                    :set_ml_status)
   end
 
   # Display the two export statuses, making the current state plain text and
   # the other a link to the observer/set_export_status callback.
   def set_export_status_controls(obj)
-    status_controls(obj, obj.ok_for_export, :review_ok_for_export.t, :review_no_export.t, :set_export_status)
+    status_controls(obj, obj.ok_for_export,
+                    :review_ok_for_export.t, :review_no_export.t,
+                    :set_export_status)
   end
 
   def status_controls(obj, status, ok_msg, not_ok_msg, action)
