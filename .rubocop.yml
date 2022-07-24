@@ -152,12 +152,6 @@ Rails/DynamicFindBy:
   # Make autocorrect saf(er) by whitelisting our find_by methods
   AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
   AutoCorrect: true
-Rails/HasAndBelongsToMany:
-  # MO uses HABTM extensively; RuboCop prefers the newer has_many through
-  # Switching would require a migration process, detailed here:
-  # http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
-  # It's not worth the effort
-  Enabled: false
 Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
   # Rubocop default: true
   # Cop gives false positives
