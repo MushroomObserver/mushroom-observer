@@ -503,16 +503,30 @@ class LocationTest < UnitTestCase
   # ----------------------------------------------------
 
   def test_scope_name_includes
-    skip_until(2022, 7, 26, "Under construction")
+    assert_includes(
+      Location.name_includes("Albion"),
+      locations(:albion)
+    )
+    assert_empty(Location.name_includes(ARBITRARY_SHA))
   end
 
   def test_scope_in_region
-    skip_until(2022, 7, 26, "Under construction")
+    assert_includes(
+      Location.in_region("New York\, USA"),
+      locations(:nybg_location)
+    )
+    assert_not_includes(
+      Location.in_region("York"),
+      locations(:nybg_location),
+      "Entire trailing part of Location name should match region"
+    )
+    assert_empty(Location.in_region(ARBITRARY_SHA))
   end
 
+  # supplements API tests
   def test_scope_in_box
     # don't foreget these:
-    # -90 <= ns <= 90
+    # 0 <= ns <= 90
     # -180 <= ew <= 180
     # n >= s
     # e >= w or ew straddles dateline
