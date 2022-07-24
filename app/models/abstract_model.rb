@@ -107,9 +107,6 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # TODO: write tests for untested scopes.˝˝˝
-  # See, e.g., https://coveralls.io/builds/51093827
-
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
   }
