@@ -10,6 +10,7 @@
 /* 1.3182    -O3 -mmmx -msse -msse2
 */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

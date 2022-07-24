@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Get listings of all local and remote image files, transfer ones that need
 #  to be transferred, and delete ones that are no longer needed locally.
