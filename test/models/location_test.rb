@@ -525,11 +525,19 @@ class LocationTest < UnitTestCase
 
   # supplements API tests
   def test_scope_in_box
+    cal = locations(:california)
+    locs_in_cal_box = Location.in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+
+    assert_includes(locs_in_cal_box, locations(:albion))
+    assert_includes(locs_in_cal_box, cal)
+
     # don't foreget these:
     # 0 <= ns <= 90
     # -180 <= ew <= 180
     # n >= s
-    # e >= w or ew straddles dateline
+    # e >= w or ew straddles 180
     skip_until(2022, 7, 26, "Under construction")
   end
 end
