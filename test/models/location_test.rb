@@ -529,9 +529,15 @@ class LocationTest < UnitTestCase
     locs_in_cal_box = Location.in_box(
       n: cal.north, s: cal.south, e: cal.east, w: cal.west
     )
-
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
+
+    wrangel = locations(:east_lt_west_location)
+    locs_in_wrangel_box = Location.in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+    assert_includes(locs_in_wrangel_box, wrangel)
+    assert_not_includes(locs_in_wrangel_box, cal)
 
     # don't foreget these:
     # 0 <= ns <= 90
