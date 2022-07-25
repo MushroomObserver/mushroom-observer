@@ -161,9 +161,18 @@ class Location < AbstractModel
              args[:w].present? && args[:e].present? &&
              (args[:w] < args[:e])
 
+            epsilon = 0.00001 # leeway for Float rounding
+
+            n = args[:n] + epsilon
+            s = args[:s] - epsilon
+            e = args[:e] + epsilon
+            w = args[:w] - epsilon
+
             where(
-              (Location[:south] >= args[:s]).and(Location[:north] <= args[:n]).
-              and(Location[:west] >= args[:w]).and(Location[:east] <= args[:e]).
+              (Location[:south] >= s).
+              and(Location[:north] <= n).
+              and(Location[:west] >= w).
+              and(Location[:east] <= e).
               and(Location[:west] <= Location[:east])
             )
           end
@@ -804,7 +813,7 @@ class Location < AbstractModel
   protected
 
   validate :check_requirements
-  def check_requirements # :nodoc:
+  def check_requirements
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end
