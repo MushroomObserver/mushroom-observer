@@ -175,6 +175,8 @@ class Location < AbstractModel
               and(Location[:east] <= e).
               and(Location[:west] <= Location[:east])
             )
+          else
+            Location.none
           end
         }
 
