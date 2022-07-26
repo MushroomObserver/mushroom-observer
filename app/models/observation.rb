@@ -321,6 +321,10 @@ class Observation < AbstractModel
   scope :at_location, ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}")) }
+  # TODO: Reexamine this:
+  #  If Obs lacks lat/lon, should it fall back on Location,
+  #  i.e., Location.in_box(<Obs.location boundaries>)
+  #  And it's buggy (among other things, doesn't cover box straddling 180 def)
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           if args[:s].present? && args[:n].present? &&

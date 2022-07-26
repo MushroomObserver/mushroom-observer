@@ -603,6 +603,11 @@ class Name < AbstractModel
           end
         }
   # Occurrence of name within a lat/long box
+  # TODO: Reexamine this:
+  #  As currently written, it finds Names whose Observations
+  #  are in Locations completely inside the box
+  #  And it's buggy (among other things, doesn't cover box straddling 180 def)
+  #  Probably better to just chain Observation.in_box(**args)
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
           if args[:s].present? && args[:n].present? &&
