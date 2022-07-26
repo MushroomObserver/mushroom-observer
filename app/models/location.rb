@@ -171,18 +171,19 @@ class Location < AbstractModel
             e = args[:e] + epsilon
             w = args[:w] - epsilon
 
-            # box does not straddle 180 deg
-            if args[:w] <= args[:e]
+            # Does box straddle 180 deg?
+            if args[:e] < args[:w]
               where(
                 (Location[:south] >= s).and(Location[:north] <= n).
-                and(Location[:west] >= w).and(Location[:east] <= e).
-                and(Location[:west] <= Location[:east])
+                # Location[:west] between w & 180 OR between 180 and e
+                and((Location[:west] >= w).or(Location[:west] <= e)).
+                and((Location[:east] >= w).or(Location[:east] <= e))
               )
             else
               where(
                 (Location[:south] >= s).and(Location[:north] <= n).
-                and((Location[:west] >= w).or(Location[:west] <= e)).
-                and((Location[:east] <= e).or(Location[:east] <= w))
+                and(Location[:west] >= w).and(Location[:east] <= e).
+                and(Location[:west] <= Location[:east])
               )
             end
           else
