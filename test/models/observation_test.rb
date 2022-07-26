@@ -1042,20 +1042,44 @@ class ObservationTest < UnitTestCase
   #  Scopes: Tests of scopes not completely covered elsewhere
   # ----------------------------------------------------------
 
+  def start_of_time
+    Date.jd(0).strftime("%Y-%m-%d")
+  end
+
+  def a_century_from_now
+    (Time.zone.today + 100.years).strftime("%Y-%m,-%d")
+  end
+
+  def two_centuries_from_now
+    (Time.zone.today + 200.years).strftime("%Y-%m-%d")
+  end
+
   def test_scope_found_on
-    fail_after(2022, 7, 29, "Missing test")
+    obs = observations(:minimal_unknown_obs)
+    assert_includes(Observation.found_on(obs.when), obs)
+    assert_empty(Observation.found_on(two_centuries_from_now))
   end
 
   def test_scope_found_after
-    fail_after(2022, 7, 29, "Missing test")
+    assert_equal(Observation.count,
+                 Observation.found_after(start_of_time).count)
+    assert_empty(Observation.found_after(two_centuries_from_now))
   end
 
   def test_scope_found_before
-    fail_after(2022, 7, 29, "Missing test")
+    assert_equal(Observation.count,
+                 Observation.found_before(two_centuries_from_now).count)
+    assert_empty(Observation.found_before(start_of_time))
   end
 
   def test_scope_found_between
-    fail_after(2022, 7, 29, "Missing test")
+    assert_equal(
+      Observation.count,
+      Observation.found_between(start_of_time, two_centuries_from_now).count
+    )
+    assert_empty(
+      Observation.found_between(two_centuries_from_now, start_of_time)
+    )
   end
 
   def test_scope_without_confident_name
