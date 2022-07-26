@@ -1083,15 +1083,35 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_without_confident_name
-    fail_after(2022, 7, 29, "Missing test")
+    assert_includes(Observation.without_confident_name,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.without_confident_name,
+                        observations(:peltigera_obs))
   end
 
   def test_scope_needs_identification
-    fail_after(2022, 7, 29, "Missing test")
+    assert_includes(Observation.needs_identification,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.needs_identification,
+                        observations(:peltigera_obs))
   end
 
   def test_scope_of_name
     fail_after(2022, 7, 29, "Missing test")
+    assert_includes(Observation.of_name(names(:peltigera).id),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.of_name(names(:fungi)),
+                        observations(:peltigera_obs))
+    # Ensure fixtures aren't broken before testing Observations of look-alikes
+    tremella_obs = observations(:owner_only_favorite_ne_consensus)
+    t_mesenterica_obs = observations(:sortable_obs_users_second_obs)
+    assert_equal(names(:tremella), tremella_obs.name,
+                 "Test needs different fixture")
+    assert_equal(namings(:tremella_mesenterica_naming).observation,
+                 tremella_obs,
+                 "Test needs different fixture")
+    assert_equal(names(:tremella_mesenterica), t_mesenterica_obs.name,
+                 "Test needs different fixture")
   end
 
   def test_scope_in_box
