@@ -553,10 +553,5 @@ class LocationTest < UnitTestCase
       ),
       "`scope: in_box` should be empty if N < S"
     )
-
-
-    # don't foreget these:
-    # -180 <= ew <= 180
-    skip_until(2022, 7, 26, "Under construction")
   end
 end

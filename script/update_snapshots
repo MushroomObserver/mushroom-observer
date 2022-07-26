@@ -21,5 +21,5 @@ mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, `when`, l
 echo "id	name_id	source_type	source_name	general_description	diagnostic_description	distribution	habitat	look_alikes	uses	notes	refs" > $public/name_descriptions.csv
 mysql --defaults-extra-file=$config_file -q -s -e 'select id, name_id, source_type, source_name, gen_desc, diag_desc, distribution, habitat, look_alikes, uses, notes, refs from name_descriptions where public is true' >> $public/name_descriptions.csv
 
-echo "id	content_type	copyright_holder	license	ok_for_export	ok_for_ml" > $public/images.csv
-mysql --defaults-extra-file=$config_file -q -s -e 'select i.id, i.content_type, i.copyright_holder, l.display_name, i.ok_for_export, i.ok_for_ml from images i, licenses l where i.license_id = l.id' >> $public/images.csv
+echo "id	content_type	copyright_holder	license	ok_for_export" > $public/imagess.csv
+mysql --defaults-extra-file=$config_file -q -s -e 'select i.id, i.content_type, i.copyright_holder, l.display_name, i.ok_for_export, i.ok_for_ml from images i, licenses l where i.license_id = l.id' >> $public/locations.csv
