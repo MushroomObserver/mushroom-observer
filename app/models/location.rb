@@ -157,17 +157,15 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          if args[:s].present? &&
-             args[:n].present? &&
-             args[:w].present? &&
-             args[:e].present? &&
+          if args[:s]&.between?(0, 90) && args[:n].between?(0, 90) &&
+             args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
+             args[:s] <= args[:n] &&
              ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
 
             # leeway for Float rounding
             # Fixes a bug where Califoria fixture was not in a box
             # defined by the fixture's north, south, east, west
             epsilon = 0.00001
-
             n = args[:n] + epsilon
             s = args[:s] - epsilon
             e = args[:e] + epsilon
@@ -176,16 +174,13 @@ class Location < AbstractModel
             # box does not straddle 180 deg
             if args[:w] <= args[:e]
               where(
-                (Location[:south] >= s).
-                and(Location[:north] <= n).
-                and(Location[:west] >= w).
-                and(Location[:east] <= e).
+                (Location[:south] >= s).and(Location[:north] <= n).
+                and(Location[:west] >= w).and(Location[:east] <= e).
                 and(Location[:west] <= Location[:east])
               )
             else
               where(
-                (Location[:south] >= s).
-                and(Location[:north] <= n).
+                (Location[:south] >= s).and(Location[:north] <= n).
                 and((Location[:west] >= w).or(Location[:west] <= e)).
                 and((Location[:east] <= e).or(Location[:east] <= w))
               )
