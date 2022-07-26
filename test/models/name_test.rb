@@ -3583,9 +3583,13 @@ class NameTest < UnitTestCase
       Name.at_location(locations(:obs_default_location)),
       names(:notification_but_no_observation)
     )
+    assert_empty(
+      Name.at_location({}),
+      "Name.at_location should be empty if called with bad argument class"
+    )
   end
 
   def test_scope_in_box
-    skip_until(2022, 7, 26, "Test under construction")
+    fail_after(2022, 7, 28, "Missing test for Name.in_box")
   end
 end
