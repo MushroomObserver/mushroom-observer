@@ -600,6 +600,8 @@ class Name < AbstractModel
               where(Location[:name].matches("%#{location}"))
           when Integer, Location
             joins(:observations).where(observations: { location: location })
+          else
+            Name.none
           end
         }
   # Occurrence of name within a lat/long box
@@ -619,6 +621,8 @@ class Name < AbstractModel
               and(Location[:west] >= args[:w]).and(Location[:east] <= args[:e]).
               and(Location[:west] <= Location[:east])
             )
+          else
+            Name.none
           end
         }
 

@@ -283,34 +283,33 @@ class Observation < AbstractModel
     when Integer
       name = Name.find_by(id: name)
     end
+    return Observation.none unless name.is_a?(Name)
 
-    if name.is_a?(Name)
-      # Filter args may add to an array of names to collect Observations
-      names_array = [name]
-      # Maybe add synonyms (Name#synonyms includes original name)
-      names_array = name.synonyms if args[:include_synonyms]
-      # Keep names_array intact as is; maybe add more to its clone name_ids.
-      # (I'm thinking it's easier to pass name ids to the Observation query)
-      name_ids = names_array.map(&:id)
+    # Filter args may add to an array of names to collect Observations
+    names_array = [name]
+    # Maybe add synonyms (Name#synonyms includes original name)
+    names_array = name.synonyms if args[:include_synonyms]
+    # Keep names_array intact as is; maybe add more to its clone name_ids.
+    # (I'm thinking it's easier to pass name ids to the Observation query)
+    name_ids = names_array.map(&:id)
 
-      # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
-      # (don't modify the names_array we're iterating over)
-      if args[:include_subtaxa]
-        names_array.each do |n|
-          # |= don't add duplicates
-          name_ids |= Name.subtaxa_of(n).map(&:id)
-        end
+    # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
+    # (don't modify the names_array we're iterating over)
+    if args[:include_subtaxa]
+      names_array.each do |n|
+        # |= don't add duplicates
+        name_ids |= Name.subtaxa_of(n).map(&:id)
       end
+    end
 
-      # Query, with possible join to Naming. Mutually exclusive options:
-      if args[:include_all_name_proposals]
-        joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:of_look_alikes]
-        joins(:namings).where(namings: { name_id: name_ids }).
-          where.not(name: name_ids)
-      else
-        where(name_id: name_ids)
-      end
+    # Query, with possible join to Naming. Mutually exclusive options:
+    if args[:include_all_name_proposals]
+      joins(:namings).where(namings: { name_id: name_ids })
+    elsif args[:of_look_alikes]
+      joins(:namings).where(namings: { name_id: name_ids }).
+        where.not(name: name_ids)
+    else
+      where(name_id: name_ids)
     end
   }
   scope :of_name_like,
@@ -337,6 +336,8 @@ class Observation < AbstractModel
               and(Observation[:long] >= args[:w]).
               and(Observation[:long] <= args[:e])
             )
+          else
+            Observation.none
           end
         }
   scope :is_collection_location, -> { where(is_collection_location: true) }
