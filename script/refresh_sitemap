@@ -48,7 +48,8 @@ CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observations/ID"],
+   "observations/ID",
+   "observations/show/ID"],
   ["names",
    "Name",
    "name/show_name/ID"],
@@ -63,9 +64,11 @@ OBJECT_TYPES = [
    "project/show_project/ID"],
   ["glossary_terms",
    "GlossaryTerm",
-   "glossary_terms/ID"],
+   "glossary_terms/ID",
+   "glossary_terms/show/ID"],
   ["herbaria",
    "Herbarium",
+   "herbaria/ID",
    "herbaria/show/ID"],
   ["name_descriptions",
    "NameDescription",
@@ -385,8 +388,9 @@ end
 
 def deduce_allowed_actions
   actions = {}
-  OBJECT_TYPES.each do |_table, _type, path|
-    add_action(actions, path)
+  OBJECT_TYPES.each do |_table, _type, path1, path2|
+    add_action(actions, path1)
+    add_action(actions, path2) if path2
   end
   STATIC_PAGES.each do |_str, path, _freq|
     add_action(actions, path)
