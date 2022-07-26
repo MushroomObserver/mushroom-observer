@@ -16,30 +16,42 @@ module ExporterHelper
     end
   end
 
+  def set_ml_status_controls(obj)
+    status_controls(obj, obj.ok_for_ml,
+                    :review_ok_for_ml.t, :review_no_ml.t,
+                    :set_ml_status)
+  end
+
   # Display the two export statuses, making the current state plain text and
   # the other a link to the observer/set_export_status callback.
   def set_export_status_controls(obj)
+    status_controls(obj, obj.ok_for_export,
+                    :review_ok_for_export.t, :review_no_export.t,
+                    :set_export_status)
+  end
+
+  def status_controls(obj, status, ok_msg, not_ok_msg, action)
     return unless reviewer?
 
-    if obj.ok_for_export
-      content_tag(:b, :review_ok_for_export.t, class: "nowrap")
+    if status
+      content_tag(:b, ok_msg, class: "nowrap")
     else
-      link_with_query(:review_ok_for_export.t,
+      link_with_query(ok_msg,
                       { controller: :export,
-                        action: :set_export_status,
+                        action: action,
                         type: obj.type_tag,
                         id: obj.id, value: 1 },
                       class: "nowrap")
     end + " | " +
-      if obj.ok_for_export
-        link_with_query(:review_no_export.t,
+      if status
+        link_with_query(not_ok_msg,
                         { controller: :export,
-                          action: :set_export_status,
+                          action: action,
                           type: obj.type_tag,
                           id: obj.id, value: 0 },
                         class: "nowrap")
       else
-        content_tag(:b, :review_no_export.t)
+        content_tag(:b, not_ok_msg)
       end
   end
 end

@@ -15,9 +15,6 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Used to keep track of descriptions that were merged
-#    into this one. Primarily useful in the past versions: stores id of latest
-#    version of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
 #  review_status::    (-) "vetted", "unvetted", "inaccurate", "unreviewed".

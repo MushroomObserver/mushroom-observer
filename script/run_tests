@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ $RAKE_TEST_LOADER != '' ]]; then
   loader=$RAKE_TEST_LOADER
