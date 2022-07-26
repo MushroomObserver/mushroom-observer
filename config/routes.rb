@@ -624,6 +624,9 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/export/set_export_status(/:id)",
       to: "export#set_export_status",
       id: /\d+/, as: "export_set_export_status")
+  get("/export/set_ml_status(/:id)",
+      to: "export#set_ml_status",
+      id: /\d+/, as: "export_set_ml_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do

@@ -491,9 +491,9 @@ class LocationTest < UnitTestCase
     loc = locations(:east_lt_west_location)
     centrum = { lat: loc.south + loc.north_south_distance / 2,
                 lon: loc.east - loc.east_west_distance / 2 }
-    assert_true(loc.lat_long_close?(centrum[:lat], centrum [:lon]),
+    assert_true(loc.lat_long_close?(centrum[:lat], centrum[:lon]),
                 "Location's centrum should be 'close' to Location.")
-    assert_false(loc.lat_long_close?(centrum[:lat], centrum [:lon] + 180),
+    assert_false(loc.lat_long_close?(centrum[:lat], centrum[:lon] + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
 

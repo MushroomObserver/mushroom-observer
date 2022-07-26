@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_06_14_184435) do
+ActiveRecord::Schema.define(version: 2022_07_23_194140) do
 
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at"
@@ -164,6 +164,7 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
+    t.boolean "ok_for_ml", default: true, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -228,7 +229,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.integer "merge_source_id"
     t.text "gen_desc"
     t.text "ecology"
     t.text "species"
@@ -332,7 +332,6 @@ ActiveRecord::Schema.define(version: 2022_06_14_184435) do
     t.string "locale", limit: 8
     t.boolean "public"
     t.integer "license_id"
-    t.integer "merge_source_id"
     t.text "gen_desc"
     t.text "diag_desc"
     t.text "distribution"

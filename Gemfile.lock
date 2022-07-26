@@ -128,6 +128,7 @@ GEM
       railties (>= 3.1)
     json (2.6.2)
     kgio (2.11.4)
+    libv8-node (16.10.0.0-arm64-darwin)
     libv8-node (16.10.0.0-x86_64-linux)
     loofah (2.18.0)
       crass (~> 1.0.2)
@@ -150,6 +151,8 @@ GEM
       ruby-progressbar
     mocha (1.14.0)
     mysql2 (0.5.4)
+    nokogiri (1.13.7-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.13.7-x86_64-linux)
       racc (~> 1.4)
     parallel (1.22.1)
@@ -187,17 +190,17 @@ GEM
       io-console (~> 0.5)
     rexml (3.2.5)
     rtf (0.3.3)
-    rubocop (1.31.1)
+    rubocop (1.32.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8, < 3.0)
       rexml (>= 3.2.5, < 4.0)
-      rubocop-ast (>= 1.18.0, < 2.0)
+      rubocop-ast (>= 1.19.1, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.18.0)
+    rubocop-ast (1.19.1)
       parser (>= 3.1.1.0)
     rubocop-graphql (0.14.3)
       rubocop (>= 0.87, < 2)
@@ -264,6 +267,7 @@ GEM
     zeitwerk (2.6.0)
 
 PLATFORMS
+  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
