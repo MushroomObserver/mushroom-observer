@@ -157,7 +157,10 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          if args[:s]&.between?(0, 90) && args[:n].between?(0, 90) &&
+          # rubocop disable:Lint/SafeNavigationConsistency
+          # false positive and attempted correction cause Ruby syntax error
+          # and I can't seem to disable the cop -- JDC 2022-07-25
+          if args[:s]&.between?(0, 90) && args[:n]&.between?(0, 90) &&
              args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
              args[:s] <= args[:n] &&
              ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
