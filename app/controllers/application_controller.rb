@@ -183,6 +183,7 @@ class ApplicationController < ActionController::Base
 
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
+    return true if params[:controller].start_with?("api")
     return true unless browser.bot?
     return true if Robots.authorized?(browser.ua) &&
                    Robots.action_allowed?(
