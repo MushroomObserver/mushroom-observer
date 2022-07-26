@@ -1037,4 +1037,48 @@ class ObservationTest < UnitTestCase
     obs.destroy!
     assert_nil(log.reload.target_id)
   end
+
+  # ----------------------------------------------------------
+  #  Scopes: Tests of scopes not completely covered elsewhere
+  # ----------------------------------------------------------
+
+  def test_scope_found_on
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_found_after
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_found_before
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_found_between
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_without_confident_name
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_needs_identification
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_of_name
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_in_box
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_has_notes_field
+    fail_after(2022, 7, 29, "Missing test")
+  end
+
+  def test_scope_herbarium_record_notes_include
+    fail_after(2022, 7, 29, "Missing test")
+  end
 end
