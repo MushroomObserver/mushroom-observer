@@ -539,11 +539,24 @@ class LocationTest < UnitTestCase
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 
+    assert_empty(
+      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      "`scope: in_box` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`scope: in_box` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Location.in_box(
+        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+      ),
+      "`scope: in_box` should be empty if N < S"
+    )
+
+
     # don't foreget these:
-    # 0 <= ns <= 90
     # -180 <= ew <= 180
-    # n >= s
-    # e >= w or ew straddles 180
     skip_until(2022, 7, 26, "Under construction")
   end
 end
