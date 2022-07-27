@@ -1137,6 +1137,11 @@ class ObservationTest < UnitTestCase
   def test_scope_has_notes_field
     assert_includes(Observation.has_notes_field("substrate"),
                     observations(:substrate_notes_obs))
+    obs_substrate_in_plain_text =
+      Observation.create!(notes: "The substrate is wood",
+                          user: users(:rolf))
+    assert_not_includes(Observation.has_notes_field("substrate"),
+                        obs_substrate_in_plain_text)
     assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
   end
 
