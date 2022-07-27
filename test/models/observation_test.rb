@@ -1135,6 +1135,8 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_has_notes_field
+    skip("`[notes_field]` in the scope is a Hash; " \
+         "there's no Arel method (like `key?`) that matches the key")
     assert_includes(Observation.has_notes_field("substrate"),
                     observations(:substrate_notes_obs))
     assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
