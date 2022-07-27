@@ -1125,7 +1125,6 @@ class ObservationTest < UnitTestCase
                     "Observation of T. mesenterica")
   end
 
-
   def test_scope_in_box
     skip
     fail_after(2022, 7, 29, "Missing test")
