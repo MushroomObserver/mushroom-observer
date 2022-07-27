@@ -1135,7 +1135,9 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_has_notes_field
-    fail_after(2022, 7, 29, "Missing test")
+    assert_includes(Observation.has_notes_field("substrate"),
+                    observations(:substrate_notes_obs))
+    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
   end
 
   def test_scope_herbarium_record_notes_include
