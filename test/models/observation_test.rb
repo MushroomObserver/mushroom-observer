@@ -1141,6 +1141,14 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_herbarium_record_notes_include
-    fail_after(2022, 7, 29, "Missing test")
+    obss_with_hr_notes =
+      Observation.herbarium_record_notes_include("cleaned & dried at 115°")
+    assert_includes(obss_with_hr_notes,
+                    observations(:minimal_unknown_obs))
+    assert_includes(obss_with_hr_notes,
+                    observations(:detailed_unknown_obs))
+    assert_not_includes(obss_with_hr_notes,
+                        observations(:imageless_unvouchered_obs))
+    assert_empty(Observation.herbarium_record_notes_include("ARBITRARY_SHA"))
   end
 end
