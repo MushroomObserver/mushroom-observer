@@ -347,7 +347,7 @@ class Observation < AbstractModel
   scope :with_notes, -> { where.not(notes: Observation.no_notes) }
   scope :without_notes, -> { where(notes: Observation.no_notes) }
   scope :has_notes_field,
-        ->(field) { merge(Observation.notes_include(field.to_sym)) }
+        ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
   scope :with_specimen, -> { where(specimen: true) }
