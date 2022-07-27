@@ -1104,25 +1104,29 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_of_name_of_look_alikes
-    skip
-
     # Prove that Observations of look-alikes of <Name> include
+    # Observations of other Names proposed for Observations of <Name>
+    # NOTE: `of_look_alikes` is (currently) asymmetric / noncommunative. I.e.,
+    # Observations of look-alikes of <Name> does NOT necessarily include
     # Observations of other Names suggested for Observations of <Name>
+
     # Ensure fixtures aren't broken before testing Observations of look-alikes
     tremella_obs = observations(:owner_only_favorite_ne_consensus)
     t_mesenterica_obs = observations(:sortable_obs_users_second_obs)
     assert_equal(names(:tremella), tremella_obs.name,
                  "Test needs different fixture")
+    assert_equal(names(:tremella_mesenterica), t_mesenterica_obs.name,
+                 "Test needs different fixture")
+    # T. mesenterica was proposed for an Observation of Tremella
     assert_equal(namings(:tremella_mesenterica_naming).observation,
                  tremella_obs,
                  "Test needs different fixture")
-    assert_equal(names(:tremella_mesenterica), t_mesenterica_obs.name,
-                 "Test needs different fixture")
-
-    assert_includes(Observation.of_name(names(:tremella), of_look_alikes: true),
-                    t_mesenterica_obs,
-                    "Observations of look-alikes of Tremella should include " \
-                    "Observation of T. mesenterica")
+    assert_includes(
+      Observation.of_name(names(:tremella_mesenterica), of_look_alikes: true),
+      tremella_obs,
+      "Observations of look-alikes of <Name> should include " \
+      "Observations of other Names for which <Name> was proposed"
+    )
   end
 
   def test_scope_in_box
