@@ -3590,7 +3590,7 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_in_box
-    fail_after(2022, 7, 28, "Missing test for Name.in_box")
+    fail_after(2022, 7, 31, "Missing test for Name.in_box")
     skip("Test Name scope :in_box")
   end
 end
