@@ -326,16 +326,37 @@ class Observation < AbstractModel
   #  And it's buggy (among other things, doesn't cover box straddling 180 def)
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          if args[:s].present? && args[:n].present? &&
-             args[:w].present? && args[:e].present? &&
-             (args[:w] < args[:e])
+          if args[:s]&.between?(0, 90) && args[:n]&.between?(0, 90) &&
+             args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
+             args[:s] <= args[:n] &&
+             ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
 
-            where(
-              (Observation[:lat] >= args[:s]).
-              and(Observation[:lat] <= args[:n]).
-              and(Observation[:long] >= args[:w]).
-              and(Observation[:long] <= args[:e])
-            )
+            # expand box by epsilon to create leeway for Float rounding
+            # Fixes a bug where Califoria fixture was not in a box
+            # defined by the fixture's north, south, east, west
+            epsilon = 0.00001
+            n = args[:n] + epsilon
+            s = args[:s] - epsilon
+            e = args[:e] + epsilon
+            w = args[:w] - epsilon
+
+            # Does box straddle 180 deg?
+            if args[:e] < args[:w]
+              where(
+                # Observation[:long] between w & 180 OR between 180 and e
+                (Observation[:lat] >= s).
+                and(Observation[:lat] <= n).
+                and(Observation[:long] >= w).
+                or(Observation[:long] <= e)
+              )
+            else
+              where(
+                (Observation[:lat] >= s).
+                and(Observation[:lat] <= n).
+                and(Observation[:long] >= w).
+                and(Observation[:long] <= e)
+              )
+            end
           else
             Observation.none
           end

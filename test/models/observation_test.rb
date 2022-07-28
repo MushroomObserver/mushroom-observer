@@ -1130,8 +1130,58 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_in_box
-    skip
-    fail_after(2022, 7, 29, "Missing test")
+    cal = locations(:california)
+    obss_in_cal_box = Observation.in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    nybg = locations(:nybg_location)
+    obss_in_nybg_box = Observation.in_box(
+      n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
+    )
+    wrangel = locations(:east_lt_west_location)
+    wrangel_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: (wrangel.north + wrangel.south) / 2,
+        long: (wrangel.east + wrangel.west) / 2 + wrangel.west
+      )
+    obss_in_wrangel_box = Observation.in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+
+    # boxes not straddling 180 deg
+    assert_includes(obss_in_cal_box,
+                    observations(:unknown_with_lat_long))
+    assert_not_includes(obss_in_nybg_box,
+                        observations(:unknown_with_lat_long))
+    assert_not_includes(obss_in_cal_box,
+                        observations(:minimal_unknown_obs),
+                        "Observation without lat/lon should not be in box")
+
+    # box straddling 180 deg
+    assert_includes(obss_in_wrangel_box, wrangel_obs)
+    assert_not_includes(obss_in_wrangel_box,
+                        observations(:unknown_with_lat_long))
+
+    assert_empty(Observation.where(lat: 0.001), "Test needs different fixture")
+    assert_empty(Observation.in_box(n: 0.0001, s: 0.0001, e: 0.0001, w: 0),
+                 "Observation.in_box should be empty if " \
+                 "there are no Observations in the box")
+
+    # invalid arguments
+    assert_empty(
+      Observation.in_box(n: cal.north, s: cal.south, e: cal.east),
+      "`Observation.in_box` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Observation.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`Observation.in_box` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Observation.in_box(n: cal.south - 10,
+                         s: cal.south, e: cal.east, w: cal.west),
+      "`Observation.in_box` should be empty if N < S"
+    )
   end
 
   def test_scope_has_notes_field
