@@ -3590,7 +3590,31 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_in_box
-    fail_after(2022, 7, 31, "Missing test for Name.in_box")
-    skip("Test Name scope :in_box")
+    cal = locations(:california)
+    names_in_cal_box =
+      Name.in_box(n: cal.north, s: cal.south, e: cal.east, w: cal.west)
+    # Grab a couple of Names that are unused in Observation fixtures
+    names_without_observations =
+      Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
+    obs_on_cal_border =
+      Observation.create!(name: names_without_observations.first,
+                          location: nil,
+                          lat: cal.north,
+                          long: cal.east,
+                          user: rolf)
+    obs_in_cal_without_lat_long =
+      Observation.create!(name: names_without_observations.second,
+                          location: locations(:burbank),
+                          lat: nil,
+                          long: nil,
+                          user: rolf)
+
+    assert_includes(names_in_cal_box, obs_on_cal_border.name)
+    assert_not_includes(
+      names_in_cal_box,
+      obs_in_cal_without_lat_long.name,
+      "Name.in_box should exclude Names whose only Observations lack lat/long"
+    )
+    assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))
   end
 end
