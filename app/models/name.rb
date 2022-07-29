@@ -199,6 +199,7 @@
 #  comments_include(summary)
 #  on_species_list(species_list)
 #  at_location(location)
+#  in_box(n:, s:, e:, w:)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
