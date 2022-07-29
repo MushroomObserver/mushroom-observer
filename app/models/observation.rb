@@ -239,10 +239,6 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  # TODO: write tests for untested scopes, including :found_*,
-  # :has_notes_field, :herbarium_record_notes_include, :in_box,
-  # and parts of :of_name. E.g., https://coveralls.io/builds/51093827
-
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
