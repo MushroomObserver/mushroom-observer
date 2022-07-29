@@ -3387,7 +3387,7 @@ class NameTest < UnitTestCase
     assert_includes(names_with_descriptions_by_roy,
                     names(:boletus_edulis))
     assert_not_includes(names_with_descriptions_by_roy,
-                        names(:boletus_edulis))
+                        names(:coprinus_comatus_desc))
   end
 
   def test_scope_with_description_in_project
