@@ -3379,6 +3379,17 @@ class NameTest < UnitTestCase
     assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
   end
 
+  def test_scope_with_description_by_author
+    skip("scope `Name.with_description_by_author`` under construction")
+    names_with_descriptions_by_roy =
+      Name.with_description_by_author(users(:roy))
+
+    assert_includes(names_with_descriptions_by_roy,
+                    names(:boletus_edulis))
+    assert_not_includes(names_with_descriptions_by_roy,
+                        names(:boletus_edulis))
+  end
+
   def test_scope_with_description_in_project
     assert_includes(
       Name.with_description_in_project(projects(:bolete_project)),
