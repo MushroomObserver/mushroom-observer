@@ -1195,6 +1195,19 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
   end
 
+  def test_scope_confidence
+    assert_includes(Observation.confidence(0, 0),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(0),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(0, 1),
+                    observations(:minimal_unknown_obs))
+    assert_includes(Observation.confidence(75, 100),
+                    observations(:peltigera_obs))
+    assert_equal(Observation.count, Observation.confidence(-100, 100).count)
+    assert_empty(Observation.confidence(102, 103))
+  end
+
   def test_scope_herbarium_record_notes_include
     obss_with_hr_notes =
       Observation.herbarium_record_notes_include("cleaned & dried at 115°")
