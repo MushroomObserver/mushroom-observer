@@ -384,11 +384,11 @@ class Observation < AbstractModel
         -> { joins(:sequences).distinct }
   scope :without_sequence,
         -> { missing(:sequences) }
-  # TODO: Please check if this is how we do confidence.
-  scope :has_confidence_at_least,
-        ->(value) { where(vote_cache: value..) }
-  scope :has_confidence_less_than,
-        ->(value) { where(vote_cache: ..value) }
+  # Observations whose confidence Percent is from min to max (inclusive)
+  # If only min supplied, htne confidence % = min
+  scope :confidence, lambda { |min, max = min|
+    where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
+  }
   scope :with_comments,
         -> { joins(:comments).distinct }
   scope :without_comments,
