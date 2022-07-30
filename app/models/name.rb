@@ -459,12 +459,19 @@ class Name < AbstractModel
     end
   end
 
-  scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
-  scope :not_lichens, -> { where(Name[:lifeform].does_not_match("% lichen %")) }
-  scope :deprecated, -> { where(deprecated: true) }
-  scope :not_deprecated, -> { where(deprecated: false) }
-  scope :with_description, -> { where.not(description_id: nil) }
-  scope :without_description, -> { where(description_id: nil) }
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  scope :of_lichens,
+        -> { where(Name[:lifeform].matches("%lichen%")) }
+  scope :not_lichens,
+        -> { where(Name[:lifeform].does_not_match("% lichen %")) }
+  scope :deprecated,
+        -> { where(deprecated: true) }
+  scope :not_deprecated,
+        -> { where(deprecated: false) }
+  scope :with_description,
+        -> { where.not(description_id: nil) }
+  scope :without_description,
+        -> { where(description_id: nil) }
   # Names without descriptions, order by most frequently used
   scope :description_needed, lambda {
     without_description.joins(:observations).
@@ -506,14 +513,19 @@ class Name < AbstractModel
         }
 
   ### Module Name::Spelling
-  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
-  scope :with_incorrect_spelling, -> { where.not(correct_spelling_id: nil) }
+  scope :with_correct_spelling,
+        -> { where(correct_spelling_id: nil) }
+  scope :with_incorrect_spelling,
+        -> { where.not(correct_spelling_id: nil) }
   scope :with_self_referential_misspelling, lambda {
     where(Name[:correct_spelling_id].eq(Name[:id]))
   }
-  scope :with_synonyms, -> { where.not(synonym_id: nil) }
-  scope :without_synonyms, -> { where(synonym_id: nil) }
-  scope :ok_for_export, -> { where(ok_for_export: true) }
+  scope :with_synonyms,
+        -> { where.not(synonym_id: nil) }
+  scope :without_synonyms,
+        -> { where(synonym_id: nil) }
+  scope :ok_for_export,
+        -> { where(ok_for_export: true) }
 
   ### Module Name::Taxonomy
   scope :with_rank,
@@ -564,26 +576,36 @@ class Name < AbstractModel
         }
   scope :text_name_includes,
         ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
-  scope :with_classification, -> { where(Name[:classification].not_blank) }
-  scope :without_classification, -> { where(Name[:classification].blank) }
+  scope :with_classification,
+        -> { where(Name[:classification].not_blank) }
+  scope :without_classification,
+        -> { where(Name[:classification].blank) }
   scope :classification_includes,
         lambda { |classification|
           where(Name[:classification].matches("%#{classification}%"))
         }
-  scope :with_author, -> { where(Name[:author].not_blank) }
-  scope :without_author, -> { where(Name[:author].blank) }
+  scope :with_author,
+        -> { where(Name[:author].not_blank) }
+  scope :without_author,
+        -> { where(Name[:author].blank) }
   scope :author_includes,
         ->(author) { where(Name[:author].matches("%#{author}%")) }
-  scope :with_citation, -> { where(Name[:citation].not_blank) }
-  scope :without_citation, -> { where(Name[:citation].blank) }
+  scope :with_citation,
+        -> { where(Name[:citation].not_blank) }
+  scope :without_citation,
+        -> { where(Name[:citation].blank) }
   scope :citation_includes,
         ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
-  scope :with_notes, -> { where(Name[:notes].not_blank) }
-  scope :without_notes, -> { where(Name[:notes].blank) }
+  scope :with_notes,
+        -> { where(Name[:notes].not_blank) }
+  scope :without_notes,
+        -> { where(Name[:notes].blank) }
   scope :notes_include,
         ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
-  scope :with_comments, -> { joins(:comments).distinct }
-  scope :without_comments, -> { missing(:comments) }
+  scope :with_comments,
+        -> { joins(:comments).distinct }
+  scope :without_comments,
+        -> { missing(:comments) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }

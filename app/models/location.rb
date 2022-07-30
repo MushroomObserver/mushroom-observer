@@ -148,6 +148,7 @@ class Location < AbstractModel
     end
   end
 
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
   scope :in_region,

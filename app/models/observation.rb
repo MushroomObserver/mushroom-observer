@@ -239,6 +239,7 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
     where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
@@ -254,8 +255,10 @@ class Observation < AbstractModel
       where(arel_table[:when].format("%Y-%m-%d") <= latest)
   }
 
-  scope :with_name, -> { where.not(name: Name.unknown) }
-  scope :without_name, -> { where(name: Name.unknown) }
+  scope :with_name,
+        -> { where.not(name: Name.unknown) }
+  scope :without_name,
+        -> { where(name: Name.unknown) }
   scope :without_confident_name, lambda {
     without_name.or(where(vote_cache: ..0))
   }
@@ -310,10 +313,14 @@ class Observation < AbstractModel
   }
   scope :of_name_like,
         ->(name) { where(name: Name.text_name_includes(name)) }
-  scope :by_user, ->(user) { where(user: user) }
-  scope :with_location, -> { where.not(location: nil) }
-  scope :without_location, -> { where(location: nil) }
-  scope :at_location, ->(location) { where(location: location) }
+  scope :by_user,
+        ->(user) { where(user: user) }
+  scope :with_location,
+        -> { where.not(location: nil) }
+  scope :without_location,
+        -> { where(location: nil) }
+  scope :at_location,
+        ->(location) { where(location: location) }
   scope :in_region,
         ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
@@ -353,25 +360,39 @@ class Observation < AbstractModel
             Observation.none
           end
         }
-  scope :is_collection_location, -> { where(is_collection_location: true) }
-  scope :not_collection_location, -> { where(is_collection_location: false) }
-  scope :with_image, -> { where.not(thumb_image: nil) }
-  scope :without_image, -> { where(thumb_image: nil) }
-  scope :with_notes, -> { where.not(notes: Observation.no_notes) }
-  scope :without_notes, -> { where(notes: Observation.no_notes) }
+  scope :is_collection_location,
+        -> { where(is_collection_location: true) }
+  scope :not_collection_location,
+        -> { where(is_collection_location: false) }
+  scope :with_image,
+        -> { where.not(thumb_image: nil) }
+  scope :without_image,
+        -> { where(thumb_image: nil) }
+  scope :with_notes,
+        -> { where.not(notes: Observation.no_notes) }
+  scope :without_notes,
+        -> { where(notes: Observation.no_notes) }
   scope :has_notes_field,
         ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,
         ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
-  scope :with_specimen, -> { where(specimen: true) }
-  scope :without_specimen, -> { where(specimen: false) }
-  scope :with_sequence, -> { joins(:sequences).distinct }
-  scope :without_sequence, -> { missing(:sequences) }
+  scope :with_specimen,
+        -> { where(specimen: true) }
+  scope :without_specimen,
+        -> { where(specimen: false) }
+  scope :with_sequence,
+        -> { joins(:sequences).distinct }
+  scope :without_sequence,
+        -> { missing(:sequences) }
   # TODO: Please check if this is how we do confidence.
-  scope :has_confidence_at_least, ->(value) { where(vote_cache: value..) }
-  scope :has_confidence_less_than, ->(value) { where(vote_cache: ..value) }
-  scope :with_comments, -> { joins(:comments).distinct }
-  scope :without_comments, -> { missing(:comments) }
+  scope :has_confidence_at_least,
+        ->(value) { where(vote_cache: value..) }
+  scope :has_confidence_less_than,
+        ->(value) { where(vote_cache: ..value) }
+  scope :with_comments,
+        -> { joins(:comments).distinct }
+  scope :without_comments,
+        -> { missing(:comments) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
