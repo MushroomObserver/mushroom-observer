@@ -188,7 +188,7 @@ class Location < AbstractModel
               )
             end
           else
-            Location.none
+            none
           end
         }
 

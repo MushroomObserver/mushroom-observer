@@ -368,9 +368,9 @@ class Observation < AbstractModel
   scope :without_image,
         -> { where(thumb_image: nil) }
   scope :with_notes,
-        -> { where.not(notes: Observation.no_notes) }
+        -> { where.not(notes: no_notes) }
   scope :without_notes,
-        -> { where(notes: Observation.no_notes) }
+        -> { where(notes: no_notes) }
   scope :has_notes_field,
         ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
   scope :notes_include,

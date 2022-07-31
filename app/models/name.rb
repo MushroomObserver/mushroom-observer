@@ -505,7 +505,7 @@ class Name < AbstractModel
   scope :with_description_of_type,
         lambda { |source|
           # Check that it's a valid source type (string enum value)
-          return Name.none if Description.all_source_types.exclude?(source)
+          return none if Description.all_source_types.exclude?(source)
 
           joins(:descriptions).
             merge(NameDescription.where(source_type: source))
@@ -528,22 +528,22 @@ class Name < AbstractModel
 
   ### Module Name::Taxonomy
   scope :with_rank,
-        ->(rank) { where(rank: Name.ranks[rank]) if rank }
+        ->(rank) { where(rank: ranks[rank]) if rank }
   scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) if rank }
+        ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
   scope :with_rank_and_name_in_classification,
         lambda { |rank, text_name|
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
   scope :with_rank_at_or_below_genus,
         lambda {
-          where((Name[:rank] <= Name.ranks[:Genus]).
-                or(Name[:rank] == Name.ranks[:Group]))
+          where((Name[:rank] <= ranks[:Genus]).
+                or(Name[:rank] == ranks[:Group]))
         }
   scope :with_rank_above_genus,
         lambda {
-          where(Name[:rank] > Name.ranks[:Genus]).
-            where(Name[:rank] != Name.ranks[:Group])
+          where(Name[:rank] > ranks[:Genus]).
+            where(Name[:rank] != ranks[:Group])
         }
   scope :subtaxa_of_genus_or_below,
         lambda { |text_name|
@@ -570,7 +570,7 @@ class Name < AbstractModel
         }
   scope :include_subtaxa_of,
         lambda { |name|
-          names = [name] + Name.subtaxa_of(name)
+          names = [name] + subtaxa_of(name)
           where(id: names.map(&:id)).with_correct_spelling
         }
   scope :text_name_includes,
@@ -623,7 +623,7 @@ class Name < AbstractModel
           when Integer, Location
             joins(:observations).where(observations: { location: location })
           else
-            Name.none
+            none
           end
         }
   # Names with Observations whose lat/lon are in a box
