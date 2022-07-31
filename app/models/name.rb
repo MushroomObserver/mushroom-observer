@@ -605,7 +605,7 @@ class Name < AbstractModel
   scope :with_comments,
         -> { joins(:comments).distinct }
   scope :without_comments,
-        -> { missing(:comments) }
+        -> { where.not(id: with_comments) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
