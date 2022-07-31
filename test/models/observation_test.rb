@@ -1192,6 +1192,13 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def test_scope_is_collection_location
+    assert_includes(Observation.is_collection_location,
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.is_collection_location,
+                        observations(:displayed_at_obs))
+  end
+
   def test_scope_has_notes_field
     assert_includes(Observation.has_notes_field("substrate"),
                     observations(:substrate_notes_obs))
