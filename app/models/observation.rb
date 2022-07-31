@@ -324,39 +324,28 @@ class Observation < AbstractModel
         ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          if args[:s]&.between?(-90, 90) && args[:n]&.between?(-90, 90) &&
-             args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
-             args[:s] <= args[:n] &&
-             ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
+          box = Box.new(**args)
+          return none unless box.valid?
 
-            # expand box by epsilon to create leeway for Float rounding
-            # Fixes a bug where Califoria fixture was not in a box
-            # defined by the fixture's north, south, east, west
-            epsilon = 0.00001
-            n = args[:n] + epsilon
-            s = args[:s] - epsilon
-            e = args[:e] + epsilon
-            w = args[:w] - epsilon
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
 
-            # Does box straddle 180 deg?
-            if args[:e] < args[:w]
-              where(
-                # Observation[:long] between w & 180 OR between 180 and e
-                (Observation[:lat] >= s).
-                and(Observation[:lat] <= n).
-                and(Observation[:long] >= w).
-                or(Observation[:long] <= e)
-              )
-            else
-              where(
-                (Observation[:lat] >= s).
-                and(Observation[:lat] <= n).
-                and(Observation[:long] >= w).
-                and(Observation[:long] <= e)
-              )
-            end
+          if box.straddles_180_deg?
+            where(
+              (Observation[:lat] >= expanded_box.s).
+              and(Observation[:lat] <= expanded_box.n).
+              and(Observation[:long] >= expanded_box.w).
+              or(Observation[:long] <= expanded_box.e)
+            )
           else
-            Observation.none
+            where(
+              (Observation[:lat] >= expanded_box.s).
+              and(Observation[:lat] <= expanded_box.n).
+              and(Observation[:long] >= expanded_box.w).
+              and(Observation[:long] <= expanded_box.e)
+            )
           end
         }
   scope :is_collection_location,

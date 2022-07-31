@@ -155,40 +155,32 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          # rubocop disable:Lint/SafeNavigationConsistency
-          # false positive and attempted correction cause Ruby syntax error
-          # and I can't seem to disable the cop -- JDC 2022-07-25
-          if args[:s]&.between?(-90, 90) && args[:n]&.between?(-90, 90) &&
-             args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
-             args[:s] <= args[:n] &&
-             ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
+          box = Box.new(**args)
+          return none unless box.valid?
 
-            # leeway for Float rounding
-            # Fixes a bug where Califoria fixture was not in a box
-            # defined by the fixture's north, south, east, west
-            epsilon = 0.00001
-            n = args[:n] + epsilon
-            s = args[:s] - epsilon
-            e = args[:e] + epsilon
-            w = args[:w] - epsilon
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
 
-            # Does box straddle 180 deg?
-            if args[:e] < args[:w]
-              where(
-                (Location[:south] >= s).and(Location[:north] <= n).
-                # Location[:west] between w & 180 OR between 180 and e
-                and((Location[:west] >= w).or(Location[:west] <= e)).
-                and((Location[:east] >= w).or(Location[:east] <= e))
-              )
-            else
-              where(
-                (Location[:south] >= s).and(Location[:north] <= n).
-                and(Location[:west] >= w).and(Location[:east] <= e).
-                and(Location[:west] <= Location[:east])
-              )
-            end
+          if box.straddles_180_deg?
+            where(
+              (Location[:south] >= expanded_box.s).
+                and(Location[:north] <= expanded_box.n).
+              # Location[:west] between w & 180 OR between 180 and e
+              and((Location[:west] >= expanded_box.w).
+                or(Location[:west] <= expanded_box.e)).
+              and((Location[:east] >= expanded_box.w).
+                or(Location[:east] <= expanded_box.e))
+            )
           else
-            none
+            where(
+              (Location[:south] >= expanded_box.s).
+                and(Location[:north] <= expanded_box.n).
+              and(Location[:west] >= expanded_box.w).
+                and(Location[:east] <= expanded_box.e).
+              and(Location[:west] <= Location[:east])
+            )
           end
         }
 
