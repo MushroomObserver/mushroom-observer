@@ -1146,6 +1146,16 @@ class ObservationTest < UnitTestCase
     obss_in_nybg_box = Observation.in_box(
       n: nybg.north, s: nybg.south, e: nybg.east, w: nybg.west
     )
+    obss_in_ecuador_box = Observation.in_box(
+      n: 1.49397, s: -5.06906, e: -75.1904, w: -92.6038
+    )
+    quito_obs =
+      Observation.create!(
+        user: users(:rolf),
+        lat: -0.1865944,
+        long: -78.4305382,
+        where: "Quito, Ecuador"
+      )
     wrangel = locations(:east_lt_west_location)
     wrangel_obs =
       Observation.create!(
@@ -1160,6 +1170,8 @@ class ObservationTest < UnitTestCase
     # boxes not straddling 180 deg
     assert_includes(obss_in_cal_box,
                     observations(:unknown_with_lat_long))
+    assert_includes(obss_in_ecuador_box,
+                    quito_obs)
     assert_not_includes(obss_in_nybg_box,
                         observations(:unknown_with_lat_long))
     assert_not_includes(obss_in_cal_box,
