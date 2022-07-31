@@ -1103,6 +1103,14 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  def test_scope_by_user
+    assert_includes(Observation.by_user(users(:mary)),
+                    observations(:minimal_unknown_obs))
+    assert_not_includes(Observation.by_user(users(:mary)),
+                        observations(:coprinus_comatus_obs))
+    assert_empty(Observation.by_user(users(:zero_user)))
+  end
+
   def test_scope_of_name_of_look_alikes
     # Prove that Observations of look-alikes of <Name> include
     # Observations of other Names proposed for Observations of <Name>
