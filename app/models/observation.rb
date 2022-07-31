@@ -392,7 +392,7 @@ class Observation < AbstractModel
   scope :with_comments,
         -> { joins(:comments).distinct }
   scope :without_comments,
-        -> { missing(:comments) }
+        -> { merge(Observation.where.missing(:comments)) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
