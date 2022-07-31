@@ -1230,6 +1230,13 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(102, 103))
   end
 
+  def test_scope_without_comments
+    assert_includes(Observation.without_comments,
+                    observations(:unlisted_rolf_obs))
+    assert_not_includes(Observation.without_comments,
+                        observations(:minimal_unknown_obs))
+  end
+
   def test_scope_herbarium_record_notes_include
     obss_with_hr_notes =
       Observation.herbarium_record_notes_include("cleaned & dried at 115°")
