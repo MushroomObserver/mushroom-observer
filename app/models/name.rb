@@ -161,7 +161,6 @@
 #  with_description
 #  without_description
 #  description_includes
-# TODO: Add with_descriptions_by_author https://github.com/MushroomObserver/mushroom-observer/pull/1082/files?show-viewed-files=true&file-filters%5B%5D=#r928141093
 #  with_description_in_project(project)
 #  with_description_created_by(user)
 #  with_description_reviewed_by(user)
