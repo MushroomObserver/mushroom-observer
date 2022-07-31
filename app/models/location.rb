@@ -158,7 +158,7 @@ class Location < AbstractModel
           # rubocop disable:Lint/SafeNavigationConsistency
           # false positive and attempted correction cause Ruby syntax error
           # and I can't seem to disable the cop -- JDC 2022-07-25
-          if args[:s]&.between?(0, 90) && args[:n]&.between?(0, 90) &&
+          if args[:s]&.between?(-90, 90) && args[:n]&.between?(-90, 90) &&
              args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
              args[:s] <= args[:n] &&
              ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))

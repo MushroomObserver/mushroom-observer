@@ -324,7 +324,7 @@ class Observation < AbstractModel
         ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          if args[:s]&.between?(0, 90) && args[:n]&.between?(0, 90) &&
+          if args[:s]&.between?(-90, 90) && args[:n]&.between?(-90, 90) &&
              args[:w]&.between?(-180, 180) && args[:e]&.between?(-180, 180) &&
              args[:s] <= args[:n] &&
              ((args[:w] <= args[:e]) || (args[:w] >= 0 && args[:e] <= 0))
