@@ -3547,6 +3547,11 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_scope_without_comments
+    assert_includes(Name.without_comments, names(:bugs_bunny_one))
+    assert_not_includes(Name.without_comments, names(:fungi))
+  end
+
   def test_scope_comments_include
     assert_includes(Name.comments_include("do not change"), names(:fungi))
     assert_empty(Name.comments_include(ARBITRARY_SHA))
