@@ -382,8 +382,9 @@ class Observation < AbstractModel
   scope :with_sequence,
         -> { joins(:sequences).distinct }
   scope :without_sequence, lambda {
+    # much faster than `missing(:sequences)` which uses left outer join.
     where.not(id: Sequence.where.not(observation: nil).
-      map(&:observation_id).uniq)
+                  map(&:observation_id).uniq)
   }
   scope :confidence, lambda { |min, max = min| # confidence between min & max %
     where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
