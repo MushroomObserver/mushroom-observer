@@ -4,47 +4,50 @@ require("test_helper")
 
 class BoxTest < UnitTestCase
   def test_valid
-    valid_args = { n: 10, s: -10, e: 10, w: -10 }
+    valid_args = { north: 10, south: -10, east: 10, west: -10 }
     assert(Box.new(**valid_args).valid?)
-    assert(Box.new(**valid_args.merge({ e: -10, w: 10 })).valid?)
+    assert(Box.new(**valid_args.merge({ east: -10, west: 10 })).valid?)
 
-    assert_not(Box.new(**valid_args.merge({ n: nil })).valid?,
-               "Box missing n should be invalid")
-    assert_not(Box.new(**valid_args.merge({ s: nil })).valid?,
-               "Box missing w should be invalid")
-    assert_not(Box.new(**valid_args.merge({ e: nil })).valid?,
-               "Box missing e should be invalid")
-    assert_not(Box.new(**valid_args.merge({ w: nil })).valid?,
-               "Box missing w should be invalid")
+    assert_not(Box.new(**valid_args.merge({ north: nil })).valid?,
+               "Box missing north should be invalid")
+    assert_not(Box.new(**valid_args.merge({ south: nil })).valid?,
+               "Box missing west should be invalid")
+    assert_not(Box.new(**valid_args.merge({ east: nil })).valid?,
+               "Box missing east should be invalid")
+    assert_not(Box.new(**valid_args.merge({ west: nil })).valid?,
+               "Box missing west should be invalid")
 
-    assert_not(Box.new(**valid_args.merge({ n: 91 })).valid?,
-               "Box with out of bounds n should be invalid")
-    assert_not(Box.new(**valid_args.merge({ s: -91 })).valid?,
-               "Box with out of bounds s should be invalid")
-    assert_not(Box.new(**valid_args.merge({ e: 181 })).valid?,
-               "Box with out of bounds e should be invalid")
-    assert_not(Box.new(**valid_args.merge({ w: -181 })).valid?,
-               "Box with out of bound w should be invalid")
+    assert_not(Box.new(**valid_args.merge({ north: 91 })).valid?,
+               "Box with out of bounds north should be invalid")
+    assert_not(Box.new(**valid_args.merge({ south: -91 })).valid?,
+               "Box with out of bounds south should be invalid")
+    assert_not(Box.new(**valid_args.merge({ east: 181 })).valid?,
+               "Box with out of bounds east should be invalid")
+    assert_not(Box.new(**valid_args.merge({ west: -181 })).valid?,
+               "Box with out of bound west should be invalid")
 
-    assert_not(Box.new(**valid_args.merge({ s: 20 })).valid?,
-               "Box with s > n should be invalid")
-    assert_not(Box.new(**valid_args.merge({ w: 20 })).valid?,
+    assert_not(Box.new(**valid_args.merge({ south: 20 })).valid?,
+               "Box with south > north should be invalid")
+    assert_not(Box.new(**valid_args.merge({ west: 20 })).valid?,
                "Box with w > e and not straddling dateline should be invalid")
   end
 
   def test_straddle_dateline
-    assert(Box.new(n: 10, s: -10, e: -10, w: 10).straddles_180_deg?)
-    assert_not(Box.new(n: 10, s: -10, e: 10, w: -10).straddles_180_deg?)
-    assert_not(Box.new(n: 10, s: -10, e: 10, w: 20).straddles_180_deg?)
+    assert(Box.new(north: 10, south: -10, east: -10, west: 10).
+           straddles_180_deg?)
+    assert_not(Box.new(north: 10, south: -10, east: 10, west: -10).
+               straddles_180_deg?)
+    assert_not(Box.new(north: 10, south: -10, east: 10, west: 20).
+               straddles_180_deg?)
   end
 
   def test_expand
-    box = Box.new(n: 10, s: -10, e: 10, w: -10)
+    box = Box.new(north: 10, south: -10, east: 10, west: -10)
     expanded_box = box.expand(0.0001)
 
-    assert_operator(expanded_box.n, :>, box.n)
-    assert_operator(expanded_box.s, :<, box.s)
-    assert_operator(expanded_box.e, :>, box.e)
-    assert_operator(expanded_box.w, :<, box.w)
+    assert_operator(expanded_box.north, :>, box.north)
+    assert_operator(expanded_box.south, :<, box.south)
+    assert_operator(expanded_box.east, :>, box.east)
+    assert_operator(expanded_box.west, :<, box.west)
   end
 end

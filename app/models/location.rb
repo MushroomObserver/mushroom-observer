@@ -155,7 +155,9 @@ class Location < AbstractModel
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(**args)
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
           return none unless box.valid?
 
           # expand box by epsilon to create leeway for Float rounding
@@ -165,20 +167,20 @@ class Location < AbstractModel
 
           if box.straddles_180_deg?
             where(
-              (Location[:south] >= expanded_box.s).
-                and(Location[:north] <= expanded_box.n).
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
               # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= expanded_box.w).
-                or(Location[:west] <= expanded_box.e)).
-              and((Location[:east] >= expanded_box.w).
-                or(Location[:east] <= expanded_box.e))
+              and((Location[:west] >= expanded_box.west).
+                or(Location[:west] <= expanded_box.east)).
+              and((Location[:east] >= expanded_box.west).
+                or(Location[:east] <= expanded_box.east))
             )
           else
             where(
-              (Location[:south] >= expanded_box.s).
-                and(Location[:north] <= expanded_box.n).
-              and(Location[:west] >= expanded_box.w).
-                and(Location[:east] <= expanded_box.e).
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
+              and(Location[:west] >= expanded_box.west).
+                and(Location[:east] <= expanded_box.east).
               and(Location[:west] <= Location[:east])
             )
           end

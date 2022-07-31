@@ -324,7 +324,9 @@ class Observation < AbstractModel
         ->(where) { where(Observation[:where].matches("%#{where}")) }
   scope :in_box, # Use named parameters (n, s, e, w), any order
         lambda { |**args|
-          box = Box.new(**args)
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
           return none unless box.valid?
 
           # expand box by epsilon to create leeway for Float rounding
@@ -334,17 +336,17 @@ class Observation < AbstractModel
 
           if box.straddles_180_deg?
             where(
-              (Observation[:lat] >= expanded_box.s).
-              and(Observation[:lat] <= expanded_box.n).
-              and(Observation[:long] >= expanded_box.w).
-              or(Observation[:long] <= expanded_box.e)
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              or(Observation[:long] <= expanded_box.east)
             )
           else
             where(
-              (Observation[:lat] >= expanded_box.s).
-              and(Observation[:lat] <= expanded_box.n).
-              and(Observation[:long] >= expanded_box.w).
-              and(Observation[:long] <= expanded_box.e)
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              and(Observation[:long] <= expanded_box.east)
             )
           end
         }

@@ -1,32 +1,35 @@
 # frozen_string_literal: true
 
-# rectangle on the surface of the earth, whose borders are n, s, e, w
+# rectangle on the surface of the earth, with borders: north, south, east, west
 # used mostly (exclusively?) by model scopes
 class Box
-  attr :n, :s, :e, :w
+  attr :north, :south, :east, :west
 
-  def initialize(n: nil, s: nil, e: nil, w: nil)
-    @n = n
-    @s = s
-    @e = e
-    @w = w
+  def initialize(north: nil, south: nil, east: nil, west: nil)
+    @north = north
+    @south = south
+    @east = east
+    @west = west
   end
 
   def valid?
     args_in_bounds? &&
-    s <= n &&
-    ((w <= e) || straddles_180_deg?)
+      south <= north &&
+      ((west <= east) || straddles_180_deg?)
   end
 
   def straddles_180_deg?
-    w > e && (w >= 0 && e <= 0)
+    west > east && (west >= 0 && east <= 0)
   end
 
   # Return a new box with edges expanded by delta
   # Useful for dealing with float rounding errors when
   # making comparisons to edges
   def expand(delta)
-    Box.new(n: n + delta, s: s - delta, e: e + delta, w: w - delta)
+    Box.new(north: north + delta,
+            south: south - delta,
+            east: east + delta,
+            west: west - delta)
   end
 
   ##############################################################################
@@ -34,7 +37,7 @@ class Box
   private
 
   def args_in_bounds?
-    s&.between?(-90, 90) && n&.between?(-90, 90) &&
-    w&.between?(-180, 180) && e&.between?(-180, 180)
+    south&.between?(-90, 90) && north&.between?(-90, 90) &&
+      west&.between?(-180, 180) && east&.between?(-180, 180)
   end
 end
