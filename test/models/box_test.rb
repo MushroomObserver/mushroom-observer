@@ -37,4 +37,14 @@ class BoxTest < UnitTestCase
     assert_not(Box.new(n: 10, s: -10, e: 10, w: -10).straddles_180_deg?)
     assert_not(Box.new(n: 10, s: -10, e: 10, w: 20).straddles_180_deg?)
   end
+
+  def test_expand
+    box = Box.new(n: 10, s: -10, e: 10, w: -10)
+    expanded_box = box.expand(0.0001)
+
+    assert_operator(expanded_box.n, :>, box.n)
+    assert_operator(expanded_box.s, :<, box.s)
+    assert_operator(expanded_box.e, :>, box.e)
+    assert_operator(expanded_box.w, :<, box.w)
+  end
 end

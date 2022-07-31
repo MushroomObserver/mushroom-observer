@@ -3,7 +3,7 @@
 # rectangle on the surface of the earth, whose borders are n, s, e, w
 # used mostly (exclusively?) by model scopes
 class Box
-  attr_accessor :n, :s, :e, :w
+  attr :n, :s, :e, :w
 
   def initialize(n: nil, s: nil, e: nil, w: nil)
     @n = n
@@ -20,6 +20,13 @@ class Box
 
   def straddles_180_deg?
     w > e && (w >= 0 && e <= 0)
+  end
+
+  # Return a new box with edges expanded by delta
+  # Useful for dealing with float rounding errors when
+  # making comparisons to edges
+  def expand(delta)
+    Box.new(n: n + delta, s: s - delta, e: e + delta, w: w - delta)
   end
 
   ##############################################################################
