@@ -41,6 +41,10 @@
 ################################################################################
 
 module GeneralExtensions
+  # a string that's VERY unlikely to appear anywhere
+  # Useful to test that an object doesn't include or isn't equal to something
+  ARBITRARY_SHA = "7b2d0b50147a2a6497236a722c9c7a9136d2879c"
+
   ##############################################################################
   #
   #  :section: Test unit helpers

@@ -75,6 +75,52 @@
 #  show_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
+#  ==== Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  found_on("yyyymmdd")
+#  found_after("yyyymmdd")
+#  found_before("yyyymmdd")
+#  found_between(start, end)
+#  of_name(name)
+#  of_name_like(string)
+#  with_name
+#  without_name
+#  by_user(user)
+#  with_location
+#  without_location
+#  at_location(location)
+#  in_region(where)
+#  in_box(n,s,e,w)
+#  is_collection_location
+#  not_collection_location
+#  with_image
+#  without_image
+#  with_notes
+#  without_notes
+#  has_notes_field(field)
+#  notes_include(note)
+#  with_specimen
+#  without_specimen
+#  with_sequence
+#  without_sequence
+#  confidence (min %, max %)
+#  with_comments
+#  without_comments
+#  comments_include(summary)
+#  for_project(project)
+#  in_herbarium(herbarium)
+#  herbarium_record_notes_include(notes)
+#  on_species_list(species_list)
+#  on_species_list_of_project(project)
+#
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
@@ -90,8 +136,7 @@
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #
-#  ==== Name Formats
-#  text_name::              Plain text.
+#  ==== Name Formats #  text_name::              Plain text.
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
@@ -192,6 +237,176 @@ class Observation < AbstractModel
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
+
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  # Extra timestamp scopes for when Observation found:
+  scope :found_on, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :found_after, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :found_before, lambda { |ymd_string|
+    where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :found_between, lambda { |earliest, latest|
+    where(arel_table[:when].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:when].format("%Y-%m-%d") <= latest)
+  }
+
+  scope :with_name,
+        -> { where.not(name: Name.unknown) }
+  scope :without_name,
+        -> { where(name: Name.unknown) }
+  scope :without_confident_name, lambda {
+    without_name.or(where(vote_cache: ..0))
+  }
+  scope :needs_identification, lambda {
+    without_confident_name.order(created_at: :desc)
+  }
+  # scope :of_name(name, **args)
+  #
+  # Accepts either a Name instance, a string, or an id as the first argument.
+  #  Other args:
+  #  - include_synonyms: boolean
+  #  - include_subtaxa: boolean
+  #  - include_all_name_proposals: boolean
+  #  - of_look_alikes: boolean
+  #
+  scope :of_name, lambda { |name, **args|
+    # First, get a name record if string or id submitted
+    case name
+    when String
+      name = Name.find_by(text_name: name)
+    when Integer
+      name = Name.find_by(id: name)
+    end
+    return Observation.none unless name.is_a?(Name)
+
+    # Filter args may add to an array of names to collect Observations
+    names_array = [name]
+    # Maybe add synonyms (Name#synonyms includes original name)
+    names_array = name.synonyms if args[:include_synonyms]
+    # Keep names_array intact as is; maybe add more to its clone name_ids.
+    # (I'm thinking it's easier to pass name ids to the Observation query)
+    name_ids = names_array.map(&:id)
+
+    # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
+    # (don't modify the names_array we're iterating over)
+    if args[:include_subtaxa]
+      names_array.each do |n|
+        # |= don't add duplicates
+        name_ids |= Name.subtaxa_of(n).map(&:id)
+      end
+    end
+
+    # Query, with possible join to Naming. Mutually exclusive options:
+    if args[:include_all_name_proposals]
+      joins(:namings).where(namings: { name_id: name_ids })
+    elsif args[:of_look_alikes]
+      joins(:namings).where(namings: { name_id: name_ids }).
+        where.not(name: name_ids)
+    else
+      where(name_id: name_ids)
+    end
+  }
+  scope :of_name_like,
+        ->(name) { where(name: Name.text_name_includes(name)) }
+  scope :by_user,
+        ->(user) { where(user: user) }
+  scope :with_location,
+        -> { where.not(location: nil) }
+  scope :without_location,
+        -> { where(location: nil) }
+  scope :at_location,
+        ->(location) { where(location: location) }
+  scope :in_region,
+        ->(where) { where(Observation[:where].matches("%#{where}")) }
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+          return none unless box.valid?
+
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              or(Observation[:long] <= expanded_box.east)
+            )
+          else
+            where(
+              (Observation[:lat] >= expanded_box.south).
+              and(Observation[:lat] <= expanded_box.north).
+              and(Observation[:long] >= expanded_box.west).
+              and(Observation[:long] <= expanded_box.east)
+            )
+          end
+        }
+  scope :is_collection_location,
+        -> { where(is_collection_location: true) }
+  scope :not_collection_location,
+        -> { where(is_collection_location: false) }
+  scope :with_image,
+        -> { where.not(thumb_image: nil) }
+  scope :without_image,
+        -> { where(thumb_image: nil) }
+  scope :with_notes,
+        -> { where.not(notes: no_notes) }
+  scope :without_notes,
+        -> { where(notes: no_notes) }
+  scope :has_notes_field,
+        ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
+  scope :notes_include,
+        ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
+  scope :with_specimen,
+        -> { where(specimen: true) }
+  scope :without_specimen,
+        -> { where(specimen: false) }
+  scope :with_sequence,
+        -> { joins(:sequences).distinct }
+  scope :without_sequence, lambda {
+    # much faster than `missing(:sequences)` which uses left outer join.
+    where.not(id: with_sequence)
+  }
+  scope :confidence, lambda { |min, max = min| # confidence between min & max %
+    where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
+  }
+  scope :with_comments,
+        -> { joins(:comments).distinct }
+  scope :without_comments,
+        -> { where.not(id: Observation.with_comments) }
+  scope :comments_include, lambda { |summary|
+    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+  }
+  scope :for_project, lambda { |project|
+    joins(:project_observations).
+      where(ProjectObservation[:project_id] == project.id).distinct
+  }
+  scope :in_herbarium, lambda { |herbarium|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:herbarium_id] == herbarium.id).distinct
+  }
+  scope :herbarium_record_notes_include, lambda { |notes|
+    joins(:herbarium_records).
+      where(HerbariumRecord[:notes].matches("%#{notes}%")).distinct
+  }
+  scope :on_species_list, lambda { |species_list|
+    joins(:species_list_observations).
+      where(SpeciesListObservation[:species_list_id] == species_list.id).
+      distinct
+  }
+  scope :on_species_list_of_project, lambda { |project|
+    joins(species_lists: :project_species_lists).
+      where(ProjectSpeciesList[:project_id] == project.id).distinct
+  }
 
   # Override the default show_controller
   def self.show_controller

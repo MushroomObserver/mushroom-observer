@@ -1834,7 +1834,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.where("classification LIKE '%Ascomycota%'").count)
+    assert_equal(4, Name.classification_includes("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2965,9 +2965,9 @@ class NameTest < UnitTestCase
     ancestor = names(:basidiomycetes)
     assert(
       !ancestor.is_misspelling? &&
-      Name.joins(:namings).
-        where(Name[:classification].
-          matches("%#{ancestor.rank}: _#{ancestor.text_name}_%")).any?,
+      Name.joins(:namings).with_rank_and_name_in_classification(
+        ancestor.rank, ancestor.text_name
+      ).any?,
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
@@ -3056,29 +3056,29 @@ class NameTest < UnitTestCase
     assert_false(names(:fungi).imageless?)
   end
 
-  def test_names_matching_desired_new_name
+  def test_names_matching_desired_new_parsed_name
     # Prove unauthored ParseName matches are all extant matches to text_name
     # Such as multiple authored Names
     parsed = Name.parse_name("Amanita baccata")
     expect = [names(:amanita_baccata_arora), names(:amanita_baccata_borealis)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
     # or unauthored and authored Names
     parsed = Name.parse_name(names(:unauthored_with_naming).text_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
 
     # Prove authored Group ParsedName is not matched by extant unauthored Name
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
-    assert_not(Name.names_matching_desired_new_name(parsed).
+    assert_not(Name.matching_desired_new_parsed_name(parsed).
                 include?(names(:unauthored_with_naming)))
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
     extant = names(:authored_group)
     desired = extant.text_name
     parsed = Name.parse_name(desired)
-    assert_not(Name.names_matching_desired_new_name(parsed).include?(extant),
+    assert_not(Name.matching_desired_new_parsed_name(parsed).include?(extant),
                "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
     # Prove authored non-Group ParsedName matched by union of exact matches and
@@ -3086,7 +3086,7 @@ class NameTest < UnitTestCase
     parsed = Name.parse_name(names(:authored_with_naming).search_name)
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
-                 Name.names_matching_desired_new_name(parsed).order(:author))
+                 Name.matching_desired_new_parsed_name(parsed).order(:author))
   end
 
   def test_refresh_classification_caches
@@ -3364,5 +3364,262 @@ class NameTest < UnitTestCase
     assert_not_nil(log2.reload.target_id)
     assert_equal(:log_orphan, log1.parse_log[0][0])
     assert_equal(:log_name_merged, log1.parse_log[1][0])
+  end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_description_includes
+    assert_equal(
+      [names(:suillus)],
+      Name.description_includes("by any other name would smell as sweet").to_a
+    )
+    assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
+  end
+
+  def test_scope_with_description_in_project
+    assert_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:boletus_edulis)
+    )
+    assert_not_includes(
+      Name.with_description_in_project(projects(:bolete_project)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_created_by
+    name = names(:coprinus_comatus)
+    description = name_descriptions(:draft_coprinus_comatus)
+    assert_not_equal(name.user, description.user)
+
+    assert_includes(
+      Name.with_description_created_by(description.user),
+      name
+    )
+    assert_not_includes(
+      Name.with_description_created_by(users(:zero_user)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_reviewed_by
+    assert_includes(
+      Name.with_description_reviewed_by(users(:rolf)),
+      names(:peltigera)
+    )
+    assert_not_includes(
+      Name.with_description_reviewed_by(users(:dick)),
+      names(:peltigera)
+    )
+  end
+
+  def test_scope_with_description_of_type
+    assert_includes(
+      Name.with_description_of_type("public"),
+      names(:peltigera)
+    )
+    assert_includes(
+      Name.with_description_of_type("user"),
+      names(:peltigera)
+    )
+    assert_not_includes(
+      Name.with_description_of_type("foreign"),
+      names(:peltigera)
+    )
+    assert_empty(Name.with_description_of_type("spam"))
+    assert_kind_of(
+      ActiveRecord::Relation, Name.with_description_of_type("spam")
+    )
+  end
+
+  def test_scope_subtaxa_of
+    mispelled_name = Name.create!(
+      text_name: "Amanita boodairy",
+      author: "",
+      display_name: "__Amanita boodairy__ ",
+      correct_spelling: names(:amanita_boudieri),
+      deprecated: true,
+      rank: "Species",
+      user: users(:rolf)
+    )
+
+    subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
+      "`subtaxa_of` a genus should include subgenera"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri),
+      "`subtaxa_of` a genus should include species"
+    )
+    assert_includes(
+      subtaxa_of_amanita, names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a genus should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:amanita_boudieri)),
+      names(:amanita_boudieri_var_beillei),
+      "`subtaxa_of` a species should include variety"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:pluteus)),
+      names(:pluteus_petasatus_deprecated),
+      "`subtaxa_of` should include deprecated, but correctly spelled, names"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:boletus)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` a genus should include species groups"
+    )
+    assert_includes(
+      Name.subtaxa_of(names(:agaricales)),
+      names(:agaricaceae),
+      "`subtaxa_of` a class should include family whose classification" \
+      "includes that class"
+    )
+    # This is a counter-intuitive compromise for an edge case.
+    # See comments in test_scope_subtaxa_of_genus_or_below
+    assert_includes(
+      Name.subtaxa_of(names(:boletus_edulis)),
+      names(:boletus_edulis_group),
+      "`subtaxa_of` <name> should include <name> group"
+    )
+
+    # -----------------
+
+    assert_not_includes(
+      subtaxa_of_amanita, names(:amanita),
+      "`subtaxa_of` a genus should not include that genus"
+    )
+    assert_not_includes(
+      subtaxa_of_amanita, names(:boletus_edulis),
+      "`subtaxa_of` a genus should not species from other genera"
+    )
+    assert_not_includes(
+      subtaxa_of_amanita, mispelled_name,
+      "`subtaxa_of` should not include misspellings"
+    )
+  end
+
+  def test_scope_subtaxa_of_genus_or_below
+    amanita_group = Name.create!(
+      text_name: "Amanita group",
+      display_name: "__Amanita group__",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Group",
+      user: users(:rolf)
+    )
+    amanita_sensu_lato = Name.create!(
+      text_name: "Amanita",
+      author: "sensu lato",
+      display_name: "__Amanita__ sensu lato",
+      correct_spelling: nil,
+      deprecated: false,
+      rank: "Genus",
+      user: users(:rolf)
+    )
+
+    # This is somewhat counter-intuitive, but
+    #  is a rarely occuring edge case;
+    #  is consistent with the current behavior of pattern_search;
+    #  improves the performance of the scope; and
+    #  greatly simplifies the code.
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
+    # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
+    assert_includes(
+      Name.subtaxa_of_genus_or_below("Amanita"), amanita_group,
+      "`subtaxa_of_genus_or_below` genus <X> should include `<X> group`"
+    )
+
+    assert_not_includes(
+      Name.subtaxa_of_genus_or_below("Amanita"), amanita_sensu_lato,
+      "`subtaxa_of_genus_or_below` genus <X> should not include " \
+      "`<X> sensu lato`"
+    )
+  end
+
+  def test_scope_without_comments
+    assert_includes(Name.without_comments, names(:bugs_bunny_one))
+    assert_not_includes(Name.without_comments, names(:fungi))
+  end
+
+  def test_scope_comments_include
+    assert_includes(Name.comments_include("do not change"), names(:fungi))
+    assert_empty(Name.comments_include(ARBITRARY_SHA))
+    assert_empty(
+      Name.comments_include(comments(:detailed_unknown_obs_comment).summary)
+    )
+  end
+
+  def test_scope_on_species_list
+    assert_includes(
+      Name.on_species_list(species_lists(:unknown_species_list)), names(:fungi)
+    )
+    assert_empty(Name.on_species_list(species_lists(:first_species_list)))
+  end
+
+  def test_scope_at_location
+    assert_includes(
+      Name.at_location(locations(:burbank)), # at location called with Location
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).id), # at location called with id
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:burbank).name), # called with string
+      names(:agaricus_campestris)
+    )
+    assert_includes(
+      Name.at_location(locations(:california).name), # region
+      names(:agaricus_campestris)
+    )
+    assert_not_includes(
+      Name.at_location(locations(:obs_default_location)),
+      names(:notification_but_no_observation)
+    )
+    assert_empty(
+      Name.at_location({}),
+      "Name.at_location should be empty if called with bad argument class"
+    )
+  end
+
+  def test_scope_in_box
+    cal = locations(:california)
+    names_in_cal_box =
+      Name.in_box(n: cal.north, s: cal.south, e: cal.east, w: cal.west)
+    # Grab a couple of Names that are unused in Observation fixtures
+    names_without_observations =
+      Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
+    obs_on_cal_border =
+      Observation.create!(name: names_without_observations.first,
+                          location: nil,
+                          lat: cal.north,
+                          long: cal.east,
+                          user: rolf)
+    obs_in_cal_without_lat_long =
+      Observation.create!(name: names_without_observations.second,
+                          location: locations(:burbank),
+                          lat: nil,
+                          long: nil,
+                          user: rolf)
+
+    assert_includes(names_in_cal_box, obs_on_cal_border.name)
+    assert_not_includes(
+      names_in_cal_box,
+      obs_in_cal_without_lat_long.name,
+      "Name.in_box should exclude Names whose only Observations lack lat/long"
+    )
+    assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))
   end
 end
