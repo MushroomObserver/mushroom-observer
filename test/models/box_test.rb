@@ -3,10 +3,15 @@
 require("test_helper")
 
 class BoxTest < UnitTestCase
+  def valid_args
+    { north: 10, south: -10, east: 10, west: -10 }
+  end
+
   def test_valid
-    valid_args = { north: 10, south: -10, east: 10, west: -10 }
     assert(Box.new(**valid_args).valid?)
     assert(Box.new(**valid_args.merge({ east: -10, west: 10 })).valid?)
+    # Box 370 degrees wide & wraps around date line
+    assert(Box.new(**valid_args.merge({ west: 20 })).valid?)
 
     assert_not(Box.new(**valid_args.merge({ north: nil })).valid?,
                "Box missing north should be invalid")
@@ -28,21 +33,17 @@ class BoxTest < UnitTestCase
 
     assert_not(Box.new(**valid_args.merge({ south: 20 })).valid?,
                "Box with south > north should be invalid")
-    assert_not(Box.new(**valid_args.merge({ west: 20 })).valid?,
-               "Box with w > e and not straddling dateline should be invalid")
   end
 
   def test_straddle_dateline
-    assert(Box.new(north: 10, south: -10, east: -10, west: 10).
+    assert(Box.new(**valid_args.merge({ east: -10, west: 10 })).
            straddles_180_deg?)
-    assert_not(Box.new(north: 10, south: -10, east: 10, west: -10).
-               straddles_180_deg?)
-    assert_not(Box.new(north: 10, south: -10, east: 10, west: 20).
-               straddles_180_deg?)
+    assert(Box.new(**valid_args.merge({ west: 20 })).straddles_180_deg?)
+    assert_not(Box.new(**valid_args).straddles_180_deg?)
   end
 
   def test_expand
-    box = Box.new(north: 10, south: -10, east: 10, west: -10)
+    box = Box.new(**valid_args)
     expanded_box = box.expand(0.0001)
 
     assert_operator(expanded_box.north, :>, box.north)
