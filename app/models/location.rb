@@ -35,6 +35,20 @@
 #  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
 #
+#  == Scopes
+#
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  name_includes(place_name)
+#  in_region(place_name)
+#  in_box(n,s,e,w)
+#
 #  == Instance methods
 #
 #  interests::          Interests in this Location.
@@ -133,6 +147,44 @@ class Location < AbstractModel
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
+
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  scope :name_includes,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
+  scope :in_region,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          box = Box.new(
+            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
+          )
+          return none unless box.valid?
+
+          # expand box by epsilon to create leeway for Float rounding
+          # Fixes a bug where Califoria fixture was not in a box
+          # defined by the fixture's north, south, east, west
+          expanded_box = box.expand(0.00001)
+
+          if box.straddles_180_deg?
+            where(
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
+              # Location[:west] between w & 180 OR between 180 and e
+              and((Location[:west] >= expanded_box.west).
+                or(Location[:west] <= expanded_box.east)).
+              and((Location[:east] >= expanded_box.west).
+                or(Location[:east] <= expanded_box.east))
+            )
+          else
+            where(
+              (Location[:south] >= expanded_box.south).
+                and(Location[:north] <= expanded_box.north).
+              and(Location[:west] >= expanded_box.west).
+                and(Location[:east] <= expanded_box.east).
+              and(Location[:west] <= Location[:east])
+            )
+          end
+        }
 
   # Let attached observations update their cache if these fields changed.
   def update_observation_cache
@@ -769,7 +821,7 @@ class Location < AbstractModel
   protected
 
   validate :check_requirements
-  def check_requirements # :nodoc:
+  def check_requirements
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end

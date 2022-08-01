@@ -496,4 +496,62 @@ class LocationTest < UnitTestCase
     assert_false(loc.lat_long_close?(centrum[:lat], centrum[:lon] + 180),
                  "Opposite side of globe should not be 'close' to Location.")
   end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def test_scope_name_includes
+    assert_includes(
+      Location.name_includes("Albion"),
+      locations(:albion)
+    )
+    assert_empty(Location.name_includes(ARBITRARY_SHA))
+  end
+
+  def test_scope_in_region
+    assert_includes(
+      Location.in_region("New York\, USA"),
+      locations(:nybg_location)
+    )
+    assert_not_includes(
+      Location.in_region("York"),
+      locations(:nybg_location),
+      "Entire trailing part of Location name should match region"
+    )
+    assert_empty(Location.in_region(ARBITRARY_SHA))
+  end
+
+  # supplements API tests
+  def test_scope_in_box
+    cal = locations(:california)
+    locs_in_cal_box = Location.in_box(
+      n: cal.north, s: cal.south, e: cal.east, w: cal.west
+    )
+    assert_includes(locs_in_cal_box, locations(:albion))
+    assert_includes(locs_in_cal_box, cal)
+
+    wrangel = locations(:east_lt_west_location)
+    locs_in_wrangel_box = Location.in_box(
+      n: wrangel.north, s: wrangel.south, e: wrangel.east, w: wrangel.west
+    )
+    assert_includes(locs_in_wrangel_box, wrangel)
+    assert_not_includes(locs_in_wrangel_box, cal)
+
+    assert_empty(
+      Location.in_box(n: cal.north, s: cal.south, e: cal.east),
+      "`scope: in_box` should be empty if an argument is missing"
+    )
+    assert_empty(
+      Location.in_box(n: 91, s: cal.south, e: cal.east, w: cal.west),
+      "`scope: in_box` should be empty if an argument is out of bounds"
+    )
+    assert_empty(
+      Location.in_box(
+        n: cal.south - 10, s: cal.south, e: cal.east, w: cal.west
+      ),
+      "`scope: in_box` should be empty if N < S"
+    )
+  end
 end
