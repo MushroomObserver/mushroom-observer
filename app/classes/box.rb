@@ -13,13 +13,11 @@ class Box
   end
 
   def valid?
-    args_in_bounds? &&
-      south <= north &&
-      ((west <= east) || straddles_180_deg?)
+    args_in_bounds? && south <= north
   end
 
   def straddles_180_deg?
-    west > east && (west >= 0 && east <= 0)
+    west > east
   end
 
   # Return a new box with edges expanded by delta
