@@ -98,9 +98,10 @@ class Location < AbstractModel
   belongs_to :user
 
   has_many :descriptions, -> { order(num_views: :desc) },
-           class_name: "LocationDescription"
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+           class_name: "LocationDescription",
+           inverse_of: :location
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more

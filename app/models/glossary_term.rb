@@ -6,7 +6,6 @@ class GlossaryTerm < AbstractModel
 
   belongs_to(:thumb_image,
              class_name: "Image",
-             foreign_key: "thumb_image_id",
              inverse_of: :best_glossary_terms)
   belongs_to :user
   belongs_to :rss_log

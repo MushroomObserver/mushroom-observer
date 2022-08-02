@@ -183,7 +183,7 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-  belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
+  belongs_to :thumb_image, class_name: "Image"
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
@@ -194,8 +194,8 @@ class Observation < AbstractModel
   before_destroy :notify_users_before_destroy
 
   has_many :votes
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :sequences, dependent: :destroy
   has_many :external_links, dependent: :destroy
 
