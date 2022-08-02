@@ -367,8 +367,7 @@ class Name < AbstractModel
           Group: 16 # used for both "group" and "clade"
         }
 
-  belongs_to :correct_spelling, class_name: "Name",
-                                foreign_key: "correct_spelling_id"
+  belongs_to :correct_spelling, class_name: "Name"
   belongs_to :description, class_name: "NameDescription",
                            inverse_of: :name # (main one)
   belongs_to :rss_log
@@ -377,7 +376,8 @@ class Name < AbstractModel
   belongs_to :user
 
   has_many :misspellings, class_name: "Name",
-                          foreign_key: "correct_spelling_id"
+                          foreign_key: "correct_spelling_id",
+                          inverse_of: :correct_spelling
   has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "NameDescription",
            inverse_of: :name
