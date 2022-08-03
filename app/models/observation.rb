@@ -193,11 +193,6 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  # Override the default show_controller
-  def self.show_controller
-    :observations
-  end
-
   def is_location?
     false
   end
