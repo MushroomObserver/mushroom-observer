@@ -100,9 +100,8 @@ end.flatten
 unless File.directory?(MO.name_lister_cache_file)
   FileUtils.mkpath(File.dirname(MO.name_lister_cache_file))
 end
-# NOTE: Use File.write in the following, or at least disable Style/FileWrite
-# JDC 2022-07-16
-File.open(MO.name_lister_cache_file, "w") do |fh|
+# Cop does not know how to handle this
+File.open(MO.name_lister_cache_file, "w") do |fh| # rubocop:disable Style/FileWrite
   fh.write(<<-END.unindent)
     var NL_GENERA  = [#{genera.map  { |n| "'#{escape(n)}'" }.join(",")}];
     var NL_SPECIES = [#{species.map { |n| "'#{escape(n)}'" }.join(",")}];
