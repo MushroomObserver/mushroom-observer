@@ -318,17 +318,12 @@ class AbstractModel < ApplicationRecord
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
   #
-  # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
+  # Return the name of the controller (as a symbol)
+  # that handles the "show_<object>" for this object.
   #
-  # The name must be anchored with a slash to avoid namespacing it.
-  # references: http://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
-  # https://stackoverflow.com/questions/20057910/rails-url-for-behaving-differently-when-using-namespace-based-on-current-cont
+  #   Article.show_controller => :articles # for normalized controller
   #
-  #   Article.show_controller => "/articles" # for normalized controller
-  #
-  #   Name.show_controller => "/name" # unnormalized controller & special cases
-  #   name.show_controller => "/name"
+  #   Name.show_controller => :name # unnormalized controller & special cases
   #
   def self.show_controller
     if controller_normalized?
@@ -355,13 +350,11 @@ class AbstractModel < ApplicationRecord
     false
   end
 
-  # Return the name of the "index_<object>" action (as a simple
-  # lowercase string) that displays search index for this object.
+  # Return the name of the "index_<object>" action (as a symbol)
+  # that displays search index for this object.
   #
-  #   Article.index_action => "index" # normalized controller
-  #
-  #   Name.index_action => "index_name" #unormalized
-  #   name.index_action => "index_name"
+  #   Article.index_action => :index # normalized controller
+  #   Name.index_action => :index_name # unormalized
   #
   # WARNING.
   # 1. There is no standard Rails action name for displaying a **search** index.
@@ -385,13 +378,13 @@ class AbstractModel < ApplicationRecord
     self.class.index_action
   end
 
-  # Return the name of the "show_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "show_<object>" action (as a symbol)
+  # that displays this object.
   #
-  #   Article.show_action => "show" # normalized controller
+  #   Article.show_action => :show # normalized controller
   #
-  #   Name.show_action => "show_name" #unormalized
-  #   name.show_action => "show_name"
+  #   Name.show_action => :show_name # unormalized
+  #   name.show_action => :show_name
   #
   def self.show_action
     return :show if controller_normalized? # Rails standard
@@ -403,7 +396,7 @@ class AbstractModel < ApplicationRecord
     self.class.show_action
   end
 
-  # Return the URL of the "show_<object>" action
+  # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
   #   Article.index_action => "https://mushroomobserver.org/article/12"
@@ -412,7 +405,6 @@ class AbstractModel < ApplicationRecord
   #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
-  # Note that show_controller has a leading forward slash
   def self.show_url(id)
     if controller_normalized?
       "#{MO.http_domain}/#{show_controller}/#{id}"
@@ -563,11 +555,11 @@ class AbstractModel < ApplicationRecord
     show_controller
   end
 
-  # Return the name of the "destroy_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "destroy_<object>" action (as a symbol)
+  # that displays this object.
   #
+  #   Article.destroy_action => :destroy
   #   Name.destroy_action => "destroy_name"
-  #   name.destroy_action => "destroy_name"
   #
   def self.destroy_action
     return :destroy if controller_normalized? # Rails standard

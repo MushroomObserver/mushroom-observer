@@ -1615,11 +1615,12 @@ class ApplicationController < ActionController::Base
   def flash_error_and_goto_index(model, id)
     flash_error(:runtime_object_not_found.t(id: id || "0",
                                             type: model.type_tag))
-    # Assure that this method calls a top level controller namespace by putting
+
+    # Assure that this method calls a top level controller namespace by
     # the show_controller in a string after a leading slash.
-    # (Fixes a routing error arising from Rails `redirect_to`'s computation of
-    # the controller name for namespaced Herbaria controllers, where it wants to
-    # prepend the controller name with duplicate namespace, "herbaria/herbaria")
+    # The name must be anchored with a slash to avoid namespacing it.
+    # references: http://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
+    # https://stackoverflow.com/questions/20057910/rails-url-for-behaving-differently-when-using-namespace-based-on-current-cont
     redirect_with_query(controller: "/#{model.show_controller}",
                         action: model.index_action)
     nil
