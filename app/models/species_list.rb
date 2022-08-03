@@ -95,8 +95,8 @@ class SpeciesList < AbstractModel
                           after_add: :add_obs_callback,
                           before_remove: :remove_obs_callback
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   attr_accessor :data
 

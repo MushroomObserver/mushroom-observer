@@ -69,7 +69,8 @@ class UserGroup < AbstractModel
                         source: :name_description
 
   has_one :project
-  has_one :admin_project, class_name: "Project", foreign_key: :admin_group_id
+  has_one :admin_project, class_name: "Project", foreign_key: :admin_group_id,
+                          inverse_of: :user_group
 
   # Returns +name+ for debugging.
   def text_name

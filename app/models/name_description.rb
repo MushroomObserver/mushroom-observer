@@ -85,11 +85,11 @@ class NameDescription < Description
   belongs_to :license
   belongs_to :name
   belongs_to :project
-  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
+  belongs_to :reviewer, class_name: "User"
   belongs_to :user
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   has_many :name_description_admins, dependent: :destroy
   has_many :admin_groups, through: :name_description_admins,
@@ -146,7 +146,7 @@ class NameDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "/name"
+    :name
   end
 
   # Don't add any authors until someone has written something "useful".

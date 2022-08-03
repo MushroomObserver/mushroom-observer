@@ -66,8 +66,8 @@ class LocationDescription < Description
   belongs_to :project
   belongs_to :user
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   has_many :location_description_admins, dependent: :destroy
   has_many :admin_groups, through: :location_description_admins,
@@ -121,7 +121,7 @@ class LocationDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "/location"
+    :location
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).
