@@ -408,16 +408,6 @@ class Observation < AbstractModel
       where(ProjectSpeciesList[:project_id] == project.id).distinct
   }
 
-  # Override the default show_controller
-  def self.show_controller
-    "/observations"
-  end
-
-  # Override the default show_action
-  def self.show_action
-    "show"
-  end
-
   def is_location?
     false
   end
