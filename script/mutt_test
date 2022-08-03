@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Drop-in replacement of "mutt" which just dumps email to stdout instead of
 #  actually mailing it.  Useful for test mode.

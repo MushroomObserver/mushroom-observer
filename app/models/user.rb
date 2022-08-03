@@ -279,10 +279,13 @@ class User < AbstractModel
   has_many :test_add_image_logs
   has_many :votes
 
-  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
+  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id",
+                             inverse_of: :reviewer
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
-                                        foreign_key: "reviewer_id"
-  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
+                                        foreign_key: "reviewer_id",
+                                        inverse_of: :reviewer
+  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id",
+                       inverse_of: :queued_email
 
   has_many :user_group_users, dependent: :destroy
   has_many :user_groups, through: :user_group_users

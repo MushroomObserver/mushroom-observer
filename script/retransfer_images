@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Re-transfer any images that haven't transferred correctly yet.
 #

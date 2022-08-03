@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# NOTE: Use `class Name extend Parse`: these are all class methods
+# Usage: in class Name, `extend Parse`, not `include Parse`.
+# Extending makes these module methods into class methods of Name.
 module Name::Parse
   # RankMatcher:: Lighweight class used to get ranks from text strings
   # Use:

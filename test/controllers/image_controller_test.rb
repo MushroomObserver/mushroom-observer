@@ -905,4 +905,12 @@ class ImageControllerTest < FunctionalTestCase
     assert(conic.thumb_image_id)
     get(:show_image, params: { id: conic.thumb_image_id })
   end
+
+  def test_show_image_has_okay_link
+    login
+    image = images(:in_situ_image)
+    image.update(ok_for_ml: false)
+    get(:show_image, params: { id: image.id })
+    assert_true(@response.body.include?("type=image&amp;value=1"))
+  end
 end

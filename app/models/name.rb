@@ -146,9 +146,59 @@
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
+#  created_on("yyyymmdd")
+#  created_after("yyyymmdd")
+#  created_before("yyyymmdd")
+#  created_between(start, end)
+#  updated_on("yyyymmdd")
+#  updated_after("yyyymmdd")
+#  updated_before("yyyymmdd")
+#  updated_between(start, end)
+#  of_lichens
+#  not_lichens
+#  deprecated
+#  not_deprecated
+#  with_description
+#  without_description
+#  description_includes
+#  with_description_in_project(project)
+#  with_description_created_by(user)
+#  with_description_reviewed_by(user)
+#  with_description_of_type(source_type)
 #  with_correct_spelling
-#  with_classification_like(rank, text_name)
+#  with_incorrect_spelling
+#  with_self_referential_misspelling
+#  with_synonyms
+#  without_synonyms
+#  ok_for_export
+#  with_rank(rank)
 #  with_rank_below(rank)
+#  with_rank_and_name_in_classification(rank, text_name)
+#  with_rank_at_or_below_genus
+#  with_rank_above_genus
+#  subtaxa_of_genus_or_below(genus)
+#  subtaxa_of(name)
+#  include_synonyms_of(name)
+#  include_subtaxa_of(name)
+#  text_name_includes(text_name)
+#  with_classification
+#  without_classification
+#  classification_includes(classification)
+#  with_author
+#  without_author
+#  author_includes(author)
+#  with_citation
+#  without_citation
+#  citation_includes(citation)
+#  with_notes
+#  without_notes
+#  notes_include(notes)
+#  with_comments
+#  without_comments
+#  comments_include(summary)
+#  on_species_list(species_list)
+#  at_location(location)
+#  in_box(n:, s:, e:, w:)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
@@ -317,8 +367,7 @@ class Name < AbstractModel
           Group: 16 # used for both "group" and "clade"
         }
 
-  belongs_to :correct_spelling, class_name: "Name",
-                                foreign_key: "correct_spelling_id"
+  belongs_to :correct_spelling, class_name: "Name"
   belongs_to :description, class_name: "NameDescription",
                            inverse_of: :name # (main one)
   belongs_to :rss_log
@@ -327,7 +376,8 @@ class Name < AbstractModel
   belongs_to :user
 
   has_many :misspellings, class_name: "Name",
-                          foreign_key: "correct_spelling_id"
+                          foreign_key: "correct_spelling_id",
+                          inverse_of: :correct_spelling
   has_many :descriptions, -> { order(num_views: :desc) },
            class_name: "NameDescription",
            inverse_of: :name
@@ -408,33 +458,206 @@ class Name < AbstractModel
     end
   end
 
-  scope :with_rank,
-        ->(rank) { where(rank: Name.ranks[rank]) if rank }
+  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
+  scope :of_lichens,
+        -> { where(Name[:lifeform].matches("%lichen%")) }
+  scope :not_lichens,
+        -> { where(Name[:lifeform].does_not_match("% lichen %")) }
+  scope :deprecated,
+        -> { where(deprecated: true) }
+  scope :not_deprecated,
+        -> { where(deprecated: false) }
+  scope :with_description,
+        -> { where.not(description_id: nil) }
+  scope :without_description,
+        -> { where(description_id: nil) }
+  # Names without descriptions, order by most frequently used
+  scope :description_needed, lambda {
+    without_description.joins(:observations).
+      group(:name_id).order(Arel.star.count.desc)
+  }
+  scope :description_includes,
+        lambda { |text|
+          joins(:descriptions).
+            where(NameDescription[:gen_desc].matches("%#{text}%")).
+            or(where(NameDescription[:diag_desc].matches("%#{text}%"))).
+            or(where(NameDescription[:distribution].matches("%#{text}%"))).
+            or(where(NameDescription[:habitat].matches("%#{text}%"))).
+            or(where(NameDescription[:look_alikes].matches("%#{text}%"))).
+            or(where(NameDescription[:notes].matches("%#{text}%"))).
+            or(where(NameDescription[:refs].matches("%#{text}%")))
+        }
+  scope :with_description_in_project,
+        lambda { |project|
+          joins(descriptions: :project).
+            merge(NameDescription.where(project: project))
+        }
+  scope :with_description_created_by,
+        lambda { |user|
+          joins(:descriptions).
+            merge(NameDescription.where(user: user))
+        }
+  scope :with_description_reviewed_by,
+        lambda { |user|
+          joins(:descriptions).
+            merge(NameDescription.where(reviewer: user))
+        }
+  scope :with_description_of_type,
+        lambda { |source|
+          # Check that it's a valid source type (string enum value)
+          return none if Description.all_source_types.exclude?(source)
 
-  scope :not_deprecated, -> { where(deprecated: false) }
+          joins(:descriptions).
+            merge(NameDescription.where(source_type: source))
+        }
 
   ### Module Name::Spelling
-  scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
-
-  # For a glitch discovered in the wild:
+  scope :with_correct_spelling,
+        -> { where(correct_spelling_id: nil) }
+  scope :with_incorrect_spelling,
+        -> { where.not(correct_spelling_id: nil) }
   scope :with_self_referential_misspelling, lambda {
     where(Name[:correct_spelling_id].eq(Name[:id]))
   }
+  scope :with_synonyms,
+        -> { where.not(synonym_id: nil) }
+  scope :without_synonyms,
+        -> { where(synonym_id: nil) }
+  scope :ok_for_export,
+        -> { where(ok_for_export: true) }
 
   ### Module Name::Taxonomy
-  scope :with_classification_like,
-        # Use multi-line lambda literal because fixtures blow up with "lambda":
-        # NoMethodError: undefined method `ranks'
-        #   test/fixtures/names.yml:28:in `get_binding'
-        ->(rank, text_name) { # rubocop:disable Style/Lambda
+  scope :with_rank,
+        ->(rank) { where(rank: ranks[rank]) if rank }
+  scope :with_rank_below,
+        ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
+  scope :with_rank_and_name_in_classification,
+        lambda { |rank, text_name|
           where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
         }
+  scope :with_rank_at_or_below_genus,
+        lambda {
+          where((Name[:rank] <= ranks[:Genus]).
+                or(Name[:rank] == ranks[:Group]))
+        }
+  scope :with_rank_above_genus,
+        lambda {
+          where(Name[:rank] > ranks[:Genus]).
+            where(Name[:rank] != ranks[:Group])
+        }
+  scope :subtaxa_of_genus_or_below,
+        lambda { |text_name|
+          # Note small diff w :text_name_includes scope
+          where(Name[:text_name].matches("#{text_name} %"))
+        }
+  scope :subtaxa_of,
+        lambda { |name|
+          if name.at_or_below_genus?
+            # Subtaxa can be determined from the text_nam
+            subtaxa_of_genus_or_below(name.text_name).
+              with_correct_spelling
+          else
+            # Need to examine the classification strings
+            with_rank_and_name_in_classification(name.rank, name.text_name).
+              with_correct_spelling
+          end
+        }
 
-  scope :with_name_like,
-        ->(text_name) { where(Name[:text_name].matches("#{text_name} %")) }
+  ### Pattern Search
+  scope :include_synonyms_of,
+        lambda { |name|
+          where(id: name.synonyms.map(&:id)).with_correct_spelling
+        }
+  scope :include_subtaxa_of,
+        lambda { |name|
+          names = [name] + subtaxa_of(name)
+          where(id: names.map(&:id)).with_correct_spelling
+        }
+  scope :text_name_includes,
+        ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+  scope :with_classification,
+        -> { where(Name[:classification].not_blank) }
+  scope :without_classification,
+        -> { where(Name[:classification].blank) }
+  scope :classification_includes,
+        lambda { |classification|
+          where(Name[:classification].matches("%#{classification}%"))
+        }
+  scope :with_author,
+        -> { where(Name[:author].not_blank) }
+  scope :without_author,
+        -> { where(Name[:author].blank) }
+  scope :author_includes,
+        ->(author) { where(Name[:author].matches("%#{author}%")) }
+  scope :with_citation,
+        -> { where(Name[:citation].not_blank) }
+  scope :without_citation,
+        -> { where(Name[:citation].blank) }
+  scope :citation_includes,
+        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+  scope :with_notes,
+        -> { where(Name[:notes].not_blank) }
+  scope :without_notes,
+        -> { where(Name[:notes].blank) }
+  scope :notes_include,
+        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+  scope :with_comments,
+        -> { joins(:comments).distinct }
+  scope :without_comments,
+        -> { where.not(id: with_comments) }
+  scope :comments_include, lambda { |summary|
+    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+  }
+  scope :on_species_list,
+        lambda { |species_list|
+          joins(observations: :species_lists).
+            merge(SpeciesListObservation.where(species_list: species_list))
+        }
+  # Accepts region string, location_id, or Location instance
+  scope :at_location,
+        lambda { |location|
+          case location
+          when String # treat it as a region, not looking for all string matches
+            joins(observations: :location).
+              where(Location[:name].matches("%#{location}"))
+          when Integer, Location
+            joins(:observations).where(observations: { location: location })
+          else
+            none
+          end
+        }
+  # Names with Observations whose lat/lon are in a box
+  scope :in_box, # Use named parameters (n, s, e, w), any order
+        lambda { |**args|
+          joins(:observations).
+            merge(Observation.in_box(**args)).
+            distinct
+        }
 
-  scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < Name.ranks[rank]) }
+  ### Specialized Scopes for Name::Create
+  # Get list of Names that are potential matches when creating a new name.
+  # Takes results of Name.parse_name.  Used by NameController#create_name.
+  # Three cases:
+  #
+  #   1. group with author       - only accept exact matches
+  #   2. nongroup with author    - match names with correct author or no author
+  #   3. any name without author - ignore authors completely when matching names
+  #
+  # If the user provides an author, but the only match has no author, then we
+  # just need to add an author to the existing Name.  If the user didn't give
+  # an author, but there are matches with an author, then it already exists
+  # and we should just ignore the request.
+  #
+  scope :matching_desired_new_parsed_name, lambda { |parsed_name|
+    if parsed_name.rank == "Group"
+      where(search_name: parsed_name.search_name)
+    elsif parsed_name.author.empty?
+      where(text_name: parsed_name.text_name)
+    else
+      where(text_name: parsed_name.text_name).
+        where(author: [parsed_name.author, ""])
+    end
+  }
 
   def <=>(other)
     sort_name <=> other.sort_name

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# NOTE: Use `Name extend Create`: these are all class methods
+# Usage: in class Name, `extend Create`, not `include Create`.
+# Extending makes these module methods into class methods of Name.
 module Name::Create
   # Shorthand for calling Name.find_names with +fill_in_authors: true+.
   def find_names_filling_in_authors(in_str, rank = nil,
@@ -163,29 +164,5 @@ module Name::Create
   # Returns a Name instance, *UNSAVED*!!
   def new_name_from_parsed_name(parsed_name)
     new_name(parsed_name.params)
-  end
-
-  # Get list of Names that are potential matches when creating a new name.
-  # Takes results of Name.parse_name.  Used by NameController#create_name.
-  # Three cases:
-  #
-  #   1. group with author       - only accept exact matches
-  #   2. nongroup with author    - match names with correct author or no author
-  #   3. any name without author - ignore authors completely when matching names
-  #
-  # If the user provides an author, but the only match has no author, then we
-  # just need to add an author to the existing Name.  If the user didn't give
-  # an author, but there are matches with an author, then it already exists
-  # and we should just ignore the request.
-  #
-  def names_matching_desired_new_name(parsed_name)
-    if parsed_name.rank == "Group"
-      Name.where(search_name: parsed_name.search_name)
-    elsif parsed_name.author.empty?
-      Name.where(text_name: parsed_name.text_name)
-    else
-      Name.where(text_name: parsed_name.text_name).
-        where(author: [parsed_name.author, ""])
-    end
   end
 end

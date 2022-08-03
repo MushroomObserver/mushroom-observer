@@ -470,4 +470,65 @@ class AbstractModelTest < UnitTestCase
     arel_find_user = User.find_by(User[:login].eq(rolf.login))
     assert_equal(arel_find_user.login, rolf.login)
   end
+
+  # ----------------------------------------------------
+  #  Scopes
+  #    Explicit tests of some scopes to improve coverage
+  # ----------------------------------------------------
+
+  def start_of_time
+    Date.jd(0).strftime("%Y, %m, %d")
+  end
+
+  def a_century_from_now
+    (Time.zone.today + 100.years).strftime("%Y, %m, %d")
+  end
+
+  def two_centuries_from_now
+    (Time.zone.today + 200.years).strftime("%Y, %m, %d")
+  end
+
+  def test_scope_created_after
+    assert_equal(Observation.count,
+                 Observation.created_after(start_of_time).count)
+    assert_empty(Observation.created_after(a_century_from_now))
+  end
+
+  def test_scope_created_before
+    assert_equal(Observation.count,
+                 Observation.created_before(a_century_from_now).count)
+    assert_empty(Observation.created_before(start_of_time))
+  end
+
+  def test_scope_created_between
+    assert_equal(
+      Observation.count,
+      Observation.created_between(start_of_time, a_century_from_now).count
+    )
+    assert_empty(
+      Observation.created_between(a_century_from_now, two_centuries_from_now)
+    )
+  end
+
+  def test_scope_updated_after
+    assert_equal(Observation.count,
+                 Observation.updated_after(start_of_time).count)
+    assert_empty(Observation.updated_after(a_century_from_now))
+  end
+
+  def test_scope_updated_before
+    assert_equal(Observation.count,
+                 Observation.updated_before(a_century_from_now).count)
+    assert_empty(Observation.updated_before(start_of_time))
+  end
+
+  def test_scope_updated_between
+    assert_equal(
+      Observation.count,
+      Observation.updated_between(start_of_time, a_century_from_now).count
+    )
+    assert_empty(
+      Observation.updated_between(a_century_from_now, two_centuries_from_now)
+    )
+  end
 end

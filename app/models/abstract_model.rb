@@ -7,6 +7,23 @@
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
 #
+#  == Scopes
+#
+#  Scopes for collecting objects created (or updated) on, before, after or
+#  between a given "%Y-%m-%d" string(s).
+#
+#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
+#            Name.updated_after("2016-12-01")
+#
+#  created_on::
+#  created_after::
+#  created_before::
+#  created_between::
+#  updated_on::
+#  updated_after::
+#  updated_before::
+#  updated_between::
+#
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
@@ -83,6 +100,39 @@ class AbstractModel < ApplicationRecord
   def type_tag
     self.class.name.underscore.to_sym
   end
+
+  ##############################################################################
+  #
+  #  :section: Scopes
+  #
+  ##############################################################################
+
+  scope :created_on, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :created_after, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :created_before, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :created_between, lambda { |earliest, latest|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
+  }
+  scope :updated_on, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :updated_after, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :updated_before, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :updated_between, lambda { |earliest, latest|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
+  }
 
   ##############################################################################
   #

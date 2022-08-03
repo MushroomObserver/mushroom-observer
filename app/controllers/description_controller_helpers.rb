@@ -693,13 +693,6 @@ module DescriptionControllerHelpers
         dest.send("#{f}=", val) if val.present?
       end
 
-      # Store where merge came from in new version of destination.
-      dest.merge_source_id = begin
-                               src.versions.latest.id
-                             rescue StandardError
-                               nil
-                             end
-
       # Save changes to destination.
       dest.save
 

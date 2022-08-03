@@ -41,8 +41,7 @@
 ################################################################################
 #
 class Project < AbstractModel
-  belongs_to :admin_group, class_name: "UserGroup",
-                           foreign_key: "admin_group_id"
+  belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
@@ -50,8 +49,8 @@ class Project < AbstractModel
   has_many :admin_group_users, through: :admin_group, source: :users
   has_many :member_group_users, through: :user_group, source: :users
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   has_many :project_images, dependent: :destroy
   has_many :images, through: :project_images
