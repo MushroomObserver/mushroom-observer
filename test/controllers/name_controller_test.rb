@@ -4900,7 +4900,6 @@ class NameControllerTest < FunctionalTestCase
 
     # Make sure have to be logged in. (update_column should avoid callbacks)
     new_val = names(:peltigera).classification
-    # disable cop because we're trying to avoid callbacks
     genus.update_columns(classification: new_val)
     logout
     get(:propagate_classification, params: { id: genus.id })
