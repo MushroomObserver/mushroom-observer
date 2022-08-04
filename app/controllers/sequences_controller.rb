@@ -43,18 +43,6 @@ class SequencesController < ApplicationController
     end
   end
 
-  # Display list of Sequences whose text matches a string pattern.
-  def search
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (sequence = Sequence.safe_find(pattern))
-      redirect_to(action: :show_sequence, id: sequence.id)
-    else
-      query = create_query(:Sequence, :pattern_search, pattern: pattern)
-      show_selected_sequences(query)
-    end
-  end
-
   def observation_index
     store_location
     query = create_query(:Sequence, :for_observation,
