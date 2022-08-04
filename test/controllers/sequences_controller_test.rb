@@ -54,6 +54,30 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_sequence)
   end
 
+  def test_show_next
+    query = Query.lookup_and_save(:Sequence, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    login
+    get(:show, params: { id: number1.id, q: q, flow: "next" })
+    assert_redirected_to(sequence(number2, q: q))
+  end
+
+  def test_show_prev
+    query = Query.lookup_and_save(:Sequence, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    login
+    get(:show, params: { id: number2.id, q: q, flow: "prev" })
+    assert_redirected_to(sequence_path(number1, q: q))
+  end
+
   def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs   = observations(:minimal_unknown_obs)
