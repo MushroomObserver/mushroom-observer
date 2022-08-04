@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Controller tests for nucleotide sequences
-class SequenceControllerTest < FunctionalTestCase
+class SequencesControllerTest < FunctionalTestCase
   def test_list_sequences
     login
     get(:list_sequences)
