@@ -41,7 +41,7 @@ class SequencesController < ApplicationController
   end
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence
+  def search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
