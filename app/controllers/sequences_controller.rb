@@ -150,7 +150,7 @@ class SequencesController < ApplicationController
 
   def build_sequence
     @sequence = @observation.sequences.new
-    @sequence.attributes = whitelisted_sequence_params
+    @sequence.attributes = sequence_params
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
@@ -161,7 +161,7 @@ class SequencesController < ApplicationController
   end
 
   def save_edits
-    @sequence.attributes = whitelisted_sequence_params
+    @sequence.attributes = sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
       redirect_with_query(@back_object.show_link_args)
@@ -194,7 +194,7 @@ class SequencesController < ApplicationController
     ]
   end
 
-  def whitelisted_sequence_params
+  def sequence_params
     params[:sequence].permit(:archive, :accession, :bases, :locus, :notes)
   end
 end
