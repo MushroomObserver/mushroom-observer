@@ -300,18 +300,6 @@ ACTIONS = {
     project_search: {},
     show_project: {}
   },
-  sequence: {
-    create_sequence: {},
-    destroy_sequence: {},
-    edit_sequence: {},
-    index_sequence: {},
-    list_sequences: {},
-    next_sequence: {},
-    observation_index: {},
-    prev_sequence: {},
-    sequence_search: {},
-    show_sequence: {}
-  },
   species_list: {
     add_observation_to_species_list: {},
     add_remove_observations: {},
@@ -693,6 +681,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   match("/search/advanced(/:id)",
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
+
+
+  # ----- Sequences: standard actions ---------------------------------------
+  resources :sequences, id: /\d+/
 
   # ----- Users: standard actions -------------------------------------------
   resources :users, id: /\d+/, only: [:index, :show, :edit, :update]
