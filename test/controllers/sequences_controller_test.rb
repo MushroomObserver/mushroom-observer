@@ -104,7 +104,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove Observation owner can add Sequence
     login(owner.login)
-    get(:new, id: obs.id)
+    get(:new, params: { id: obs.id })
     assert_response(:success)
 
     # Prove admin can add Sequence
