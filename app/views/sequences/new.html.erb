@@ -11,5 +11,5 @@
            locals: { observation: @observation }) %>
 
 <%= form_for(:sequence, url: add_query_param(action: :create_sequence)) do |form| %>
-  <%= render(partial: "form_sequence", locals: { form: form }) %>
+  <%= render(partial: "form", locals: { form: form }) %>
 <% end %>
