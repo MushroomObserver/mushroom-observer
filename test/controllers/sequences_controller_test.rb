@@ -16,18 +16,27 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_list
+  def test_index_all
     login
-    get(:list)
-    assert(:success)
+    get(:index, params: { flavor: :all })
+
+    assert_response(:success)
+    assert_select("#title-caption", { text: "#{:SEQUENCE.l} Index" },
+                  "index should display #{:SEQUENCES.l} Index")
+    Sequence.find_each do |sequence|
+      assert_select(
+        "a[href *= '#{sequence_path(sequence)}']", true,
+        "Sequence Index missing link to #{sequence.format_name})"
+      )
+    end
   end
 
   def test_search
     login
-    get(:search, params: { pattern: Sequence.last.id })
+    get(:index, params: { pattern: Sequence.last.id })
     assert_redirected_to(Sequence.last.show_link_args)
 
-    get(:search, params: { pattern: "ITS" })
+    get(:index, params: { pattern: "ITS" })
     assert(:success)
   end
 

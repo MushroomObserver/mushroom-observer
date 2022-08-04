@@ -30,14 +30,17 @@ class SequencesController < ApplicationController
   ################# Actions that show data without modifying it
 
   def index
-    query = find_or_create_query(:Sequence, by: params[:by])
-    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
-  end
+    return patterned_index if params[:pattern].present?
 
-  def list
-    store_location
-    query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
+    case params[:flavor]
+    when "all"
+      store_location
+      query = create_query(:Sequence, :all)
+      show_selected_sequences(query)
+    else
+      query = find_or_create_query(:Sequence, by: params[:by])
+      show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+    end
   end
 
   # Display list of Sequences whose text matches a string pattern.
@@ -148,6 +151,45 @@ class SequencesController < ApplicationController
 
   private
 
+  def figure_out_where_to_go_back_to
+    @back = params[:back]
+    @back_object = @back == "show" ? @sequence : @sequence.observation
+  end
+
+  # ---------- Index -----------------------------------------------------------
+
+  def patterned_index
+    pattern = params[:pattern].to_s
+    if pattern.match?(/^\d+$/) && (sequence = Sequence.safe_find(pattern))
+      redirect_to(sequence_path(sequence.id))
+    else
+      show_selected_sequences(
+        create_query(:Sequence, :pattern_search, pattern: pattern)
+      )
+    end
+  end
+
+  def show_selected_sequences(query, args = {})
+    args = { action: :list,
+             include: [{ observation: :name }, :user],
+             letters: "sequences.locus",
+             num_per_page: 50 }.merge(args)
+    @links ||= []
+    args[:sorting_links] = sequence_index_sorts
+    show_index_of_objects(query, args)
+  end
+
+  def sequence_index_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :USER.t],
+      ["observation", :OBSERVATION.t]
+    ]
+  end
+
+  # ---------- Create, Edit ----------------------------------------------------
+
   def build_sequence
     @sequence = @observation.sequences.new
     @sequence.attributes = sequence_params
@@ -170,29 +212,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  def figure_out_where_to_go_back_to
-    @back = params[:back]
-    @back_object = @back == "show" ? @sequence : @sequence.observation
-  end
-
-  def show_selected_sequences(query, args = {})
-    args = { action: :list,
-             include: [{ observation: :name }, :user],
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-    @links ||= []
-    args[:sorting_links] = sequence_index_sorts
-    show_index_of_objects(query, args)
-  end
-
-  def sequence_index_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
-    ]
-  end
+  # ---------- Strong Psrameters -----------------------------------------------
 
   def sequence_params
     params[:sequence].permit(:archive, :accession, :bases, :locus, :notes)
