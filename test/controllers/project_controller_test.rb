@@ -198,10 +198,6 @@ class ProjectControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       admin_group = UserGroup.find(admin_group.id)
     end
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_admins
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
     n = NameDescriptionAdmin.
         where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
