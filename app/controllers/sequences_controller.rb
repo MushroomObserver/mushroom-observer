@@ -4,37 +4,44 @@
 #
 #  Actions:
 #
-#    index_sequence::    List selected sequences, based on current Query.
-#    show_sequence::     Display sequence details.
-#    create_sequence::   Create new sequence and add to Observation.
-#    destroy_sequence::  Destroy sequence.
-#    edit_sequence::     Update sequence.
+#    create::           Create new sequence and add to Observation
+#    destroy::          Destroy sequence
+#    edit::             Show form to edit a sequence
+#    index::            List selected sequences, based on current Query
+#    list::             ???
+#    next::             show next sequence
+#    observation_index  ???
+#    prev::             show previous sequence
+#    search::           ???
+#    show::             Display sequence details.
 #
 class SequencesController < ApplicationController
   before_action :login_required
   # except: [
-  #   :index_sequence,
-  #   :list_sequences,
-  #   :sequence_search,
-  #   :observation_index,
-  #   :show_sequence,
-  #   :next_sequence,
-  #   :prev_sequence
+  #   :index,
+  #   :list,
+  #   :search,
+  #   :index,
+  #   :show,
+  #   :next,
+  #   :prev
   # ]
 
-  def index_sequence
+  ################# Actions that show data without modifying it
+
+  def index
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def list_sequences
+  def list
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
   end
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search
+  def sequence
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
@@ -58,30 +65,39 @@ class SequencesController < ApplicationController
     show_selected_sequences(query, always_index: true)
   end
 
-  def show_sequence
+  def show
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  def next_sequence
+  def next
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  def prev_sequence
+  def prev
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
-  def create_sequence
+  ################# Actions that modify data
+
+  def new
+    store_location
+    pass_query_params
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless @observation
+  end
+
+  def create
     store_location
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
-    build_sequence if request.method == "POST"
+    build_sequence
   end
 
-  def edit_sequence
+  def edit
     store_location
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
@@ -91,12 +107,25 @@ class SequencesController < ApplicationController
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_with_query(@sequence.observation.show_link_args)
-    elsif request.method == "POST"
+    end
+  end
+
+  def update
+    store_location
+    pass_query_params
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    return unless @sequence
+
+    figure_out_where_to_go_back_to
+    if !check_permission(@sequence)
+      flash_warning(:permission_denied.t)
+      redirect_with_query(@sequence.observation.show_link_args)
+    else
       save_edits
     end
   end
 
-  def destroy_sequence
+  def destroy
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
