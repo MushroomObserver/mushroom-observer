@@ -4,7 +4,7 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
-  def test_index_sequence
+  def test_index
     login
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
@@ -22,13 +22,13 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(results[1].show_link_args.merge(q: q))
   end
 
-  def test_list_sequences
+  def test_list
     login
     get(:list_sequences)
     assert(:success)
   end
 
-  def test_sequence_search
+  def test_search
     login
     get(:sequence_search, params: { pattern: Sequence.last.id })
     assert_redirected_to(Sequence.last.show_link_args)
@@ -48,7 +48,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
-  def test_show_sequence
+  def test_show
     login
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
@@ -60,7 +60,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_sequence)
   end
 
-  def test_create_sequence_get
+  def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs   = observations(:minimal_unknown_obs)
     owner = obs.user
@@ -84,7 +84,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_sequence_post
+  def test_create
     old_count = Sequence.count
     obs = observations(:detailed_unknown_obs)
     owner = obs.user
@@ -175,7 +175,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(obs.show_link_args)
   end
 
-  def test_create_sequence_post_wrong_parameters
+  def test_create_wrong_parameters
     old_count = Sequence.count
     obs = observations(:coprinus_comatus_obs)
     login(obs.user.login)
@@ -223,7 +223,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_create_sequence_redirect
+  def test_create_redirect
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
@@ -243,7 +243,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(obs.show_link_args.merge(q: q))
   end
 
-  def test_edit_sequence_get
+  def test_edit
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
     observer = obs.user
@@ -269,7 +269,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_sequence_post
+  def test_update
     sequence  = sequences(:local_sequence)
     obs       = sequence.observation
     observer  = obs.user
@@ -400,7 +400,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_edit_sequence_redirect
+  def test_edit_redirect
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
@@ -432,7 +432,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(sequence.show_link_args.merge(q: q))
   end
 
-  def test_destroy_sequence
+  def test_destroy
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -459,7 +459,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_admin
+  def test_destroy_admin
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -474,7 +474,7 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
-  def test_destroy_sequence_redirect
+  def test_destroy_redirect
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
