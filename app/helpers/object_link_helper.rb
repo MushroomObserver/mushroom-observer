@@ -185,7 +185,7 @@ module ObjectLinkHelper
     return nil unless check_permission(obs)
 
     link = link_with_query(:show_observation_add_sequence.t,
-                           controller: :sequence, action: :create_sequence,
+                           controller: :sequences, action: :create_sequence,
                            id: obs.id)
     " | ".html_safe + link
   end
