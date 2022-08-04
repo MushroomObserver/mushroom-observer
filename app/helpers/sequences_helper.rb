@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# helpers for add Sequence view
-module SequenceHelper
+# helpers for new Sequence view
+module SequencesHelper
   def sequence_accession_link(sequence)
     link_to(truncate(sequence.accession, length: sequence.locus_width / 2).t,
             sequence.accession_url, target: "_blank", rel: "noopener")
