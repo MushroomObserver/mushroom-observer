@@ -10,7 +10,7 @@
 #    destroy_sequence::  Destroy sequence.
 #    edit_sequence::     Update sequence.
 #
-class SequenceController < ApplicationController
+class SequencesController < ApplicationController
   before_action :login_required
   # except: [
   #   :index_sequence,
