@@ -40,6 +40,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
+=begin
   def test_observation_index
     login
     obs = observations(:locally_sequenced_obs)
@@ -50,6 +51,7 @@ class SequencesControllerTest < FunctionalTestCase
     get(:observation_index, params: { id: obs.id })
     assert(:success)
   end
+=end
 
   def test_show
     login

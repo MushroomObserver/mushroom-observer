@@ -43,6 +43,7 @@ class SequencesController < ApplicationController
     end
   end
 
+=begin
   def observation_index
     store_location
     query = create_query(:Sequence, :for_observation,
@@ -55,6 +56,7 @@ class SequencesController < ApplicationController
     ]
     show_selected_sequences(query, always_index: true)
   end
+=end
 
   def show
     pass_query_params
