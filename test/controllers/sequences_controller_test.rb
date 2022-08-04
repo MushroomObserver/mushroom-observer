@@ -4,6 +4,24 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
+  def test_index_sequence
+    login
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    results = query.results
+    assert_operator(results.count, :>, 3)
+    q = query.id.alphabetize
+
+    get(:index_sequence, params: { q: q, id: results[2].id })
+    assert_response(:success)
+
+    get(:next_sequence, params: { q: q, id: results[1].id })
+    assert_redirected_to(results[2].show_link_args.merge(q: q))
+
+    get(:prev_sequence, params: { q: q, id: results[2].id })
+    assert_redirected_to(results[1].show_link_args.merge(q: q))
+  end
+
   def test_list_sequences
     login
     get(:list_sequences)
@@ -28,24 +46,6 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     get(:observation_index, params: { id: obs.id })
     assert(:success)
-  end
-
-  def test_index_sequence
-    login
-    obs = observations(:genbanked_obs)
-    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
-    results = query.results
-    assert_operator(results.count, :>, 3)
-    q = query.id.alphabetize
-
-    get(:index_sequence, params: { q: q, id: results[2].id })
-    assert_response(:success)
-
-    get(:next_sequence, params: { q: q, id: results[1].id })
-    assert_redirected_to(results[2].show_link_args.merge(q: q))
-
-    get(:prev_sequence, params: { q: q, id: results[2].id })
-    assert_redirected_to(results[1].show_link_args.merge(q: q))
   end
 
   def test_show_sequence
