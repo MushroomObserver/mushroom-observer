@@ -68,15 +68,15 @@ class SequencesController < ApplicationController
   def show
     pass_query_params
     store_location
+
+    case params[:flow]
+    when "next"
+      redirect_to_next_object(:next, Sequence, params[:id]) and return
+    when "prev"
+      redirect_to_next_object(:prev, Sequence, params[:id]) and return
+    end
+
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-  end
-
-  def next
-    redirect_to_next_object(:next, Sequence, params[:id].to_s)
-  end
-
-  def prev
-    redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
   ################# Actions that modify data

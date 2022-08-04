@@ -63,7 +63,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
-    assert_redirected_to(sequence(number2, q: q))
+    assert_redirected_to(sequence_path(number2, q: q))
   end
 
   def test_show_prev
