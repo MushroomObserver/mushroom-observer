@@ -202,24 +202,22 @@ class ProjectControllerTest < FunctionalTestCase
       SELECT COUNT(*) FROM name_description_admins
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     ))
+    n = NameDescriptionAdmin.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \
       "no name descriptions should refer to it to set admin privileges."
     )
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_writers
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
+    n = NameDescriptionWriter.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \
       "no name descriptions should refer to it to set write permissions."
     )
-    n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_description_readers
-      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
-    ))
+    n = NameDescriptionReader.
+        where(user_group: [admin_group.id, user_group.id]).count
     assert_equal(
       0, n,
       "Project admin/user group has been destroyed, " \
