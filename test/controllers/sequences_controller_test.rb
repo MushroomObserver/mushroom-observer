@@ -57,12 +57,12 @@ class SequencesControllerTest < FunctionalTestCase
     login
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
-    get(:show, id: sequence.id)
+    get(:show, params: { id: sequence.id })
     assert_response(:success)
 
     # Prove index displayed if called with id of sequence not in db
     get(:show, params: { id: 666 })
-    assert_redirected_to(action: :index_sequence)
+    assert_redirected_to(action: :index)
   end
 
   def test_show_next
