@@ -176,7 +176,7 @@ class SequencesController < ApplicationController
   end
 
   def show_selected_sequences(query, args = {})
-    args = { action: :list_sequences,
+    args = { action: :list,
              include: [{ observation: :name }, :user],
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)

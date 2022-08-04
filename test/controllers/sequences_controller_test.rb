@@ -14,12 +14,6 @@ class SequencesControllerTest < FunctionalTestCase
 
     get(:index, params: { q: q, id: results[2].id })
     assert_response(:success)
-
-    get(:next, params: { q: q, id: results[1].id })
-    assert_redirected_to(results[2].show_link_args.merge(q: q))
-
-    get(:prev, params: { q: q, id: results[2].id })
-    assert_redirected_to(results[1].show_link_args.merge(q: q))
   end
 
   def test_list
