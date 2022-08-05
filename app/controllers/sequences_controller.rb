@@ -131,7 +131,7 @@ class SequencesController < ApplicationController
       flash_warning(:permission_denied.t)
     end
     if @back == "index"
-      redirect_with_query(action: :index_sequence)
+      redirect_with_query(action: :index)
     else
       redirect_with_query(@back_object.show_link_args)
     end

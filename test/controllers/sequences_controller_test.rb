@@ -520,6 +520,6 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that it can return to index, too, with query intact.
     delete(:destroy, params: { id: seqs[2].id, q: q, back: "index" })
-    assert_redirected_to(action: :index_sequence, q: q)
+    assert_redirected_to(action: :index, q: q)
   end
 end
