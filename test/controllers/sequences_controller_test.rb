@@ -265,7 +265,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='sequence/#{obs.id}?q=#{q}']")
+    assert_select("form[action*='sequences/#{obs.id}?q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
@@ -446,7 +446,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that GET passes "back" and query param through to form.
     get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='sequence/#{sequence.id}?back=foo&q=#{q}']")
+    assert_select("form[action*='sequences/#{sequence.id}?back=foo&q=#{q}']")
 
     # Prove by default POST goes back to observation.
     patch(:update, params: params)
