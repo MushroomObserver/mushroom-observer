@@ -8,12 +8,26 @@
 #    destroy::          Destroy sequence
 #    edit::             Show form to edit a sequence
 #    index::            List selected sequences, based on current Query
-#    list::             ???
-#    next::             show next sequence
-#    observation_index  ???
-#    prev::             show previous sequence
-#    search::           ???
 #    show::             Display sequence details.
+#
+# Table: legacy Sequence actions vs updated Sequence actions
+#
+# legacy Sequence action (method)   updated Sequence action (method)
+# --------------------------------  ---------------------------------
+# create_sequence (get)             new (get)
+# *create_sequence (post)           create (post)
+# destroy_sequence (delete)         destroy (delete)
+# edit_sequence (get)               edit (get)
+# *edit_sequence (post)             update (patch)
+# index_sequence (get)              index (get) - lists query results
+# list_sequences (get)              index (get, flavor: all) - all sequences
+# *next_sequence (get)              show { flow: :next } (get))
+# *prev_sequence (get)              show { flow: :prev } (get)
+# observation_index (get)           ???
+# sequence_search (get)             index (get, pattern: present)
+# show_sequence (get)               show (get)
+# * == legacy action is not redirected
+# Cf. https://tinyurl.com/ynapvpt7
 #
 class SequencesController < ApplicationController
   before_action :login_required
