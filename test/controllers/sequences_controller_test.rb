@@ -265,7 +265,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='sequences/#{obs.id}?q=#{q}']")
+    assert_select("form[action*='?q=#{q}']")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
