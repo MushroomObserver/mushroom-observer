@@ -280,7 +280,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove method requires login
     assert_not_equal(rolf, observer)
     assert_not_equal(rolf, sequence.user)
-    requires_login(:edit_sequence, id: sequence.id)
+    requires_login(:edit, id: sequence.id)
 
     # Prove user cannot edit Sequence he didn't create for Obs he doesn't own
     login("zero")
