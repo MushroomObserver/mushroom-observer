@@ -25,7 +25,7 @@ class NPlusOneTest < IntegrationTestCase
     get("/activity_logs/index")
     get("/project/list_projects")
     get("/publications")
-    get("/sequence/list_sequences")
+    get("/sequences?flavor=all")
     get("/species_list/list_species_lists")
   end
 
