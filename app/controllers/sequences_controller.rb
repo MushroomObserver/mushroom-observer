@@ -34,16 +34,12 @@ class SequencesController < ApplicationController
   before_action :login_required
   # except: [
   #   :index,
-  #   :list,
-  #   :search,
-  #   :index,
   #   :show,
-  #   :next,
-  #   :prev
   # ]
 
   ################# Actions that show data without modifying it
 
+  # display a list of Sequences, depending on params
   def index
     return patterned_index if params[:pattern].present?
 
