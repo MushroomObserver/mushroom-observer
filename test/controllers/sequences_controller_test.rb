@@ -229,46 +229,51 @@ class SequencesControllerTest < FunctionalTestCase
     assert_no_difference("Sequence.count") { post(:create, params: params) }
   end
 
-  def test_create_wrong_parameters
+  def test_create_no_locus
+    # Prove that locus is required.
     obs = observations(:coprinus_comatus_obs)
+    params = { id: obs.id,
+               sequence: { locus: "",
+                           bases: "actgct" } }
     login(obs.user.login)
 
-    # Prove that locus is required.
-    params = {
-      id: obs.id,
-      sequence: { locus: "",
-                  bases: "actgct" }
-    }
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    # response is 200 because it just reloads the form
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
+  end
 
+  def test_create_no_bases_or_equivalent
     # Prove that bases or archive+accession required.
-    params = {
-      id: obs.id,
-      sequence: { locus: "ITS" }
-    }
-    assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success)
-    assert_flash_error
+    obs = observations(:coprinus_comatus_obs)
+    params = { id: obs.id,
+               sequence: { locus: "ITS" } }
+    login(obs.user.login)
 
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
+    assert_response(:success) # response is 200 because it just reloads the form
+    assert_flash_error
+  end
+
+  def test_create_archive_without_accession
     # Prove that accession required if archive present.
-    params = {
-      id: obs.id,
-      sequence: { locus: "ITS", archive: "GenBank" }
-    }
-    assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success)
-    assert_flash_error
+    obs = observations(:coprinus_comatus_obs)
+    params = { id: obs.id,
+               sequence: { locus: "ITS", archive: "GenBank" } }
+    login(obs.user.login)
 
-    # Prove that archive required if accession present.
-    params = {
-      id: obs.id,
-      sequence: { locus: "ITS", accession: "KY133294.1" }
-    }
     assert_no_difference("Sequence.count") { post(:create, params: params) }
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
+    assert_flash_error
+  end
+
+  def test_create_accession_without_archive
+    obs = observations(:coprinus_comatus_obs)
+    params = { id: obs.id,
+               sequence: { locus: "ITS", accession: "KY133294.1" } }
+    login(obs.user.login)
+
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
   end
 
