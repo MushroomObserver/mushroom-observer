@@ -138,12 +138,10 @@ class SequencesControllerTest < FunctionalTestCase
                   bases: bases }
     }
     user = users(:zero_user) # This user has no Observations
-    old_count = Sequence.count
 
     login(user.login)
-    post(:create, params: params)
 
-    assert_equal(old_count + 1, Sequence.count)
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
     assert_users_equal(user, sequence.user)
@@ -168,12 +166,9 @@ class SequencesControllerTest < FunctionalTestCase
       sequence: { locus: locus,
                   bases: bases }
     }
-    old_count = Sequence.count
-
     login(owner.login)
-    post(:create, params: params)
 
-    assert_equal(old_count + 1, Sequence.count)
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
     sequence = Sequence.last
     assert_objs_equal(obs, sequence.observation)
     assert_users_equal(owner, sequence.user)
@@ -199,12 +194,9 @@ class SequencesControllerTest < FunctionalTestCase
                   archive: archive,
                   accession: accession }
     }
-    old_count = Sequence.count
-
     make_admin("zero")
-    post(:create, params: params)
 
-    assert_equal(old_count + 1, Sequence.count)
+    assert_difference("Sequence.count", 1) { post(:create, params: params) }
     sequence = Sequence.last
     assert_equal(locus, sequence.locus)
     assert_empty(sequence.bases)
@@ -215,9 +207,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_no_login
     # Prove user must be logged in to create Sequence
-    old_count = Sequence.count
     obs = observations(:detailed_unknown_obs)
-
     locus = "ITS"
     bases = \
       "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
@@ -236,12 +226,10 @@ class SequencesControllerTest < FunctionalTestCase
                   bases: bases }
     }
 
-    post(:create, params: params)
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
   end
 
   def test_create_wrong_parameters
-    old_count = Sequence.count
     obs = observations(:coprinus_comatus_obs)
     login(obs.user.login)
 
@@ -251,8 +239,7 @@ class SequencesControllerTest < FunctionalTestCase
       sequence: { locus: "",
                   bases: "actgct" }
     }
-    post(:create, params: params)
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
     # response is 200 because it just reloads the form
     assert_response(:success)
     assert_flash_error
@@ -262,8 +249,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS" }
     }
-    post(:create, params: params)
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
     assert_response(:success)
     assert_flash_error
 
@@ -272,8 +258,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", archive: "GenBank" }
     }
-    post(:create, params: params)
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
     assert_response(:success)
     assert_flash_error
 
@@ -282,8 +267,7 @@ class SequencesControllerTest < FunctionalTestCase
       id: obs.id,
       sequence: { locus: "ITS", accession: "KY133294.1" }
     }
-    post(:create, params: params)
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") { post(:create, params: params) }
     assert_response(:success)
     assert_flash_error
   end
@@ -498,26 +482,29 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_destroy
-    old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
     observer = obs.user
 
     # Prove user must be logged in to destroy Sequence.
-    delete(:destroy, params: { id: sequence.id })
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") do
+      delete(:destroy, params: { id: sequence.id })
+    end
 
     # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
     login("zero")
-    delete(:destroy, params: { id: sequence.id })
-    assert_equal(old_count, Sequence.count)
+    assert_no_difference("Sequence.count") do
+      delete(:destroy, params: { id: sequence.id })
+    end
     assert_redirected_to(obs.show_link_args)
     assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
-    delete(:destroy, params: { id: sequence.id })
-    assert_equal(old_count - 1, Sequence.count)
+
+    assert_difference("Sequence.count", -1) do
+      delete(:destroy, params: { id: sequence.id })
+    end
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
@@ -525,14 +512,14 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_destroy_admin
-    old_count = Sequence.count
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
 
     # Prove admin can destroy Sequence
     make_admin("zero")
-    delete(:destroy, params: { id: sequence.id })
-    assert_equal(old_count - 1, Sequence.count)
+    assert_difference("Sequence.count", -1) do
+      delete(:destroy, params: { id: sequence.id })
+    end
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
