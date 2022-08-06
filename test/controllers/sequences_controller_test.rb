@@ -101,11 +101,18 @@ class SequencesControllerTest < FunctionalTestCase
   def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs = observations(:minimal_unknown_obs)
-    # Prove logged-in user can add Sequence to someone else's Observation
-    login("zero") # This user has no Observations
+    query = Query.lookup_and_save(:Sequence, :all)
+    q = query.id.alphabetize
+    params = { id: obs.id, q: q  }
 
-    get(:new, params: { id: obs.id })
-    assert_response(:success)
+    login("zero") # This user has no Observations
+    get(:new, params: params)
+
+    assert_response(:success,
+                    "A user should be able to get form to add Sequence " \
+                    "to someone else's Observation")
+    assert_select("form[action*='?q=#{q}']", true,
+                  "Sequence form submit action missing 'q' param")
   end
 
   def test_new_login_required
@@ -281,20 +288,16 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     query = Query.lookup_and_save(:Sequence, :all)
     q = query.id.alphabetize
-    params = {
-      id: obs.id,
-      sequence: { locus: "ITS", bases: "atgc" },
-      q: q
-    }
+    params = { id: obs.id,
+               sequence: { locus: "ITS", bases: "atgc" },
+               q: q }
 
     login(obs.user.login)
-    get(:new, params: params)
-    assert_select("form[action*='?q=#{q}']", true,
-                  "Sequence form submit action missing 'q' param")
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(obs.show_link_args.merge(q: q))
+    assert_redirected_to(obs.show_link_args.merge(q: q),
+                         "User should go to last query after creating Sequence")
   end
 
   def test_edit
