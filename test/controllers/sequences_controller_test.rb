@@ -46,9 +46,10 @@ class SequencesControllerTest < FunctionalTestCase
     assert(obs.sequences.size.positive?,
            "Use a fixture withn >= 1 sequence")
 
-    get(:observation_index, params: { id: obs.id })
-    assert(:success)
-    assert_select("a[href ^= '#{sequence_path}/#{obs.id}']",
+    get(:index, params: { flavor: :observation, id: obs.id })
+
+    assert_response(:success)
+    assert_select("a[href ^= '#{sequence_path(obs.id)}']",
                   { count: obs.sequences.size },
                   "Page should have #{obs.sequences.size} links to sequences")
   end
