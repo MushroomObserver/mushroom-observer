@@ -23,7 +23,8 @@
 # list_sequences (get)              index (get, flavor: all) - all sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
-# observation_index (get)           ???
+# observation_index (get)           index (get, flavor: observation) - list
+#                                   sequences for one Observation
 # sequence_search (get)             index (get, pattern: present)
 # show_sequence (get)               show (get)
 # * == legacy action is not redirected
@@ -48,29 +49,14 @@ class SequencesController < ApplicationController
 
     case params[:flavor]
     when "all"
-      store_location
-      query = create_query(:Sequence, :all)
-      show_selected_sequences(query)
+      index_all
+    when "observation"
+      index_observation
     else
       query = find_or_create_query(:Sequence, by: params[:by])
       show_selected_sequences(query, id: params[:id].to_s, always_index: true)
     end
   end
-
-=begin
-  def observation_index
-    store_location
-    query = create_query(:Sequence, :for_observation,
-                         observation: params[:id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       Observation.show_link_args(params[:id])],
-      [:show_observation_add_sequence.l,
-       { action: :create_sequence, id: params[:id] }]
-    ]
-    show_selected_sequences(query, always_index: true)
-  end
-=end
 
   def show
     pass_query_params
@@ -161,6 +147,25 @@ class SequencesController < ApplicationController
   end
 
   # ---------- Index -----------------------------------------------------------
+
+  def index_all
+    store_location
+    query = create_query(:Sequence, :all)
+    show_selected_sequences(query)
+  end
+
+  def index_observation
+    store_location
+    query = create_query(:Sequence, :for_observation,
+                         observation: params[:id].to_s)
+    @links = [
+      [:show_object.l(type: :observation),
+       Observation.show_link_args(params[:id])],
+      [:show_observation_add_sequence.l,
+       { action: :create, id: params[:id] }]
+    ]
+    show_selected_sequences(query, always_index: true)
+  end
 
   def patterned_index
     pattern = params[:pattern].to_s
