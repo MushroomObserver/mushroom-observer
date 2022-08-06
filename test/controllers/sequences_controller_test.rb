@@ -305,25 +305,40 @@ class SequencesControllerTest < FunctionalTestCase
     obs      = sequence.observation
     observer = obs.user
 
-    # Prove method requires login
-    assert_not_equal(rolf, observer)
-    assert_not_equal(rolf, sequence.user)
-    requires_login(:edit, id: sequence.id)
-
-    # Prove user cannot edit Sequence he didn't create for Obs he doesn't own
-    login("zero")
-    get(:edit, params: { id: sequence.id })
-    assert_redirected_to(obs.show_link_args)
-
-    # Prove Observation owner can edit Sequence
+    # Prove Observation's creator can edit Sequence
     login(observer.login)
     get(:edit, params: { id: sequence.id })
     assert_response(:success)
+  end
 
-    # Prove admin can edit Sequence
+  def test_edit_by_admin
+    sequence = sequences(:local_sequence)
+
+    # Prove admin can edit Sequence of any Obs
     make_admin("zero")
     get(:edit, params: { id: sequence.id })
     assert_response(:success)
+  end
+
+  def test_edit_login_required
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+    assert_not_equal(rolf, observer)
+    assert_not_equal(rolf, sequence.user)
+
+    # Prove method requires login
+    requires_login(:edit, id: sequence.id)
+  end
+
+  def test_edit_by_other_user
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    login("zero")
+
+    # Prove user cannot edit Sequence he didn't create for Obs he didn't create
+    get(:edit, params: { id: sequence.id })
+    assert_redirected_to(obs.show_link_args)
   end
 
   def test_update
