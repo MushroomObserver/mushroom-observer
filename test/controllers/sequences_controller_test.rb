@@ -40,18 +40,18 @@ class SequencesControllerTest < FunctionalTestCase
     assert(:success)
   end
 
-=begin
   def test_observation_index
     login
-    obs = observations(:locally_sequenced_obs)
-    get(:observation_index, params: { id: obs.id })
-    assert(:success)
-
     obs = observations(:genbanked_obs)
+    assert(obs.sequences.size.positive?,
+           "Use a fixture withn >= 1 sequence")
+
     get(:observation_index, params: { id: obs.id })
     assert(:success)
+    assert_select("a[href ^= '#{sequence_path}/#{obs.id}']",
+                  { count: obs.sequences.size },
+                  "Page should have #{obs.sequences.size} links to sequences")
   end
-=end
 
   def test_show
     login
