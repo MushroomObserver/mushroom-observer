@@ -65,8 +65,11 @@ class SequencesControllerTest < FunctionalTestCase
     sequence = sequences(:local_sequence)
     get(:show, params: { id: sequence.id })
     assert_response(:success)
+  end
 
+  def test_show_nonexistent_sequence
     # Prove index displayed if called with id of sequence not in db
+    login
     get(:show, params: { id: 666 })
     assert_redirected_to(action: :index)
   end
