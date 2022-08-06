@@ -117,9 +117,106 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_create
+    # Normal happy path
+    # Prove logged-in user can add sequence to someone else's Observation
+    obs = observations(:detailed_unknown_obs)
+    locus = "ITS"
+    bases = \
+      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    params = {
+      id: obs.id,
+      sequence: { locus: locus,
+                  bases: bases }
+    }
+    user = users(:zero_user) # This user has no Observations
     old_count = Sequence.count
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_equal(old_count + 1, Sequence.count)
+    sequence = Sequence.last
+    assert_objs_equal(obs, sequence.observation)
+    assert_users_equal(user, sequence.user)
+    assert_equal(locus, sequence.locus)
+    assert_equal(bases, sequence.bases)
+    assert_empty(sequence.archive)
+    assert_empty(sequence.accession)
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_success
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
+  end
+
+  def test_create_non_repo_sequence
+    # Prove user can create non-repository Sequence
     obs = observations(:detailed_unknown_obs)
     owner = obs.user
+    locus = "ITS"
+    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"
+    params = {
+      id: obs.id,
+      sequence: { locus: locus,
+                  bases: bases }
+    }
+    old_count = Sequence.count
+
+    login(owner.login)
+    post(:create, params: params)
+
+    assert_equal(old_count + 1, Sequence.count)
+    sequence = Sequence.last
+    assert_objs_equal(obs, sequence.observation)
+    assert_users_equal(owner, sequence.user)
+    assert_equal(locus, sequence.locus)
+    assert_equal(bases, sequence.bases)
+    assert_empty(sequence.archive)
+    assert_empty(sequence.accession)
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_success
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
+  end
+
+  def test_create_repo_sequence
+    # Prove admin can create repository Sequence
+    obs = observations(:detailed_unknown_obs)
+    locus =     "ITS"
+    archive =   "GenBank"
+    accession = "KY366491.1"
+    params = {
+      id: obs.id,
+      sequence: { locus: locus,
+                  archive: archive,
+                  accession: accession }
+    }
+    old_count = Sequence.count
+
+    make_admin("zero")
+    post(:create, params: params)
+
+    assert_equal(old_count + 1, Sequence.count)
+    sequence = Sequence.last
+    assert_equal(locus, sequence.locus)
+    assert_empty(sequence.bases)
+    assert_equal(archive, sequence.archive)
+    assert_equal(accession, sequence.accession)
+    assert_redirected_to(obs.show_link_args)
+  end
+
+  def test_create_no_login
+    # Prove user must be logged in to create Sequence
+    old_count = Sequence.count
+    obs = observations(:detailed_unknown_obs)
 
     locus = "ITS"
     bases = \
@@ -139,72 +236,8 @@ class SequencesControllerTest < FunctionalTestCase
                   bases: bases }
     }
 
-    # Prove user must be logged in to create Sequence
     post(:create, params: params)
     assert_equal(old_count, Sequence.count)
-
-    # Prove logged-in user can add sequence to someone else's Observation
-    user = users(:zero_user)
-    login(user.login)
-    post(:create, params: params)
-    assert_equal(old_count + 1, Sequence.count)
-    sequence = Sequence.last
-    assert_objs_equal(obs, sequence.observation)
-    assert_users_equal(user, sequence.user)
-    assert_equal(locus, sequence.locus)
-    assert_equal(bases, sequence.bases)
-    assert_empty(sequence.archive)
-    assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
-    assert_flash_success
-    assert(obs.rss_log.notes.include?("log_sequence_added"),
-           "Failed to include Sequence added in RssLog for Observation")
-
-    # Prove user can create non-repository Sequence
-    old_count = Sequence.count
-    locus = "ITS"
-    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"
-    params = {
-      id: obs.id,
-      sequence: { locus: locus,
-                  bases: bases }
-    }
-
-    login(owner.login)
-    post(:create, params: params)
-    assert_equal(old_count + 1, Sequence.count)
-    sequence = Sequence.last
-    assert_objs_equal(obs, sequence.observation)
-    assert_users_equal(owner, sequence.user)
-    assert_equal(locus, sequence.locus)
-    assert_equal(bases, sequence.bases)
-    assert_empty(sequence.archive)
-    assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
-    assert_flash_success
-    assert(obs.rss_log.notes.include?("log_sequence_added"),
-           "Failed to include Sequence added in RssLog for Observation")
-
-    # Prove admin can create repository Sequence
-    locus =     "ITS"
-    archive =   "GenBank"
-    accession = "KY366491.1"
-    params = {
-      id: obs.id,
-      sequence: { locus: locus,
-                  archive: archive,
-                  accession: accession }
-    }
-    old_count = Sequence.count
-    make_admin("zero")
-    post(:create, params: params)
-    assert_equal(old_count + 1, Sequence.count)
-    sequence = Sequence.last
-    assert_equal(locus, sequence.locus)
-    assert_empty(sequence.bases)
-    assert_equal(archive, sequence.archive)
-    assert_equal(accession, sequence.accession)
-    assert_redirected_to(obs.show_link_args)
   end
 
   def test_create_wrong_parameters
