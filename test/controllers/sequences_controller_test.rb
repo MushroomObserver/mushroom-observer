@@ -100,26 +100,20 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
-    obs   = observations(:minimal_unknown_obs)
-    owner = obs.user
+    obs = observations(:minimal_unknown_obs)
+    # Prove logged-in user can add Sequence to someone else's Observation
+    login("zero") # This user has no Observations
+
+    get(:new, params: { id: obs.id })
+    assert_response(:success)
+  end
+
+  def test_new_login_required
+    # choose an obs not owned by Rolf (`requires_login` will login Rolf)
+    obs = observations(:minimal_unknown_obs)
 
     # Prove method requires login
     requires_login(:new, id: obs.id)
-
-    # Prove logged-in user can add Sequence to someone else's Observation
-    login("zero")
-    get(:new, params: { id: obs.id })
-    assert_response(:success)
-
-    # Prove Observation owner can add Sequence
-    login(owner.login)
-    get(:new, params: { id: obs.id })
-    assert_response(:success)
-
-    # Prove admin can add Sequence
-    make_admin("zero")
-    get(:new, params: { id: obs.id })
-    assert_response(:success)
   end
 
   def test_create
