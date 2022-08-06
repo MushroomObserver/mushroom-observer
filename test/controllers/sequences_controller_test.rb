@@ -49,9 +49,11 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { flavor: :observation, id: obs.id })
 
     assert_response(:success)
-    assert_select("a[href ^= '#{sequence_path(obs.id)}']",
-                  { count: obs.sequences.size },
-                  "Page should have #{obs.sequences.size} links to sequences")
+    obs.sequences.each do |sequence|
+      assert_select("a[href ^= '#{sequence_path(sequence.id)}']",
+                    { count: 1 },
+                    "Page missing a link to Sequence")
+    end
   end
 
   def test_show
