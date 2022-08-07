@@ -641,17 +641,33 @@ class SequencesControllerTest < FunctionalTestCase
     seqs  = obs.sequences
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     q     = query.id.alphabetize
-    login(obs.user.login)
 
     # Prove by default it goes back to observation.
+    login(obs.user.login)
     delete(:destroy, params: { id: seqs[0].id })
     assert_redirected_to(obs.show_link_args)
+  end
+
+  def test_destroy_redirect_to_observation_with_query
+    obs   = observations(:genbanked_obs)
+    seqs  = obs.sequences
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
 
     # Prove that it keeps query param intact when returning to observation.
+    login(obs.user.login)
     delete(:destroy, params: { id: seqs[1].id, q: q })
     assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
+  def test_destroy_redirect_to_index_with_query
+    obs   = observations(:genbanked_obs)
+    seqs  = obs.sequences
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
 
     # Prove that it can return to index, too, with query intact.
+    login(obs.user.login)
     delete(:destroy, params: { id: seqs[2].id, q: q, back: "index" })
     assert_redirected_to(action: :index, q: q)
   end
