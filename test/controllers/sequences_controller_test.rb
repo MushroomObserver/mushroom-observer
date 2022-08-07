@@ -4,6 +4,18 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
+  ITS_BASES = \
+    "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+    "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+    "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+    "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+    "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+    "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+    "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+    "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+    "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+    "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+
   def obs_creator(sequence)
     sequence.observation.user
   end
@@ -132,17 +144,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove logged-in user can add sequence to someone else's Observation
     obs = observations(:detailed_unknown_obs)
     locus = "ITS"
-    bases = \
-      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
-      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
-      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
-      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
-      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
-      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
-      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
-      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
-      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
-      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    bases = ITS_BASES
     params = {
       id: obs.id,
       sequence: { locus: locus,
@@ -220,17 +222,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove user must be logged in to create Sequence
     obs = observations(:detailed_unknown_obs)
     locus = "ITS"
-    bases = \
-      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
-      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
-      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
-      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
-      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
-      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
-      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
-      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
-      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
-      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    bases = ITS_BASES
     params = {
       id: obs.id,
       sequence: { locus: locus,
@@ -352,17 +344,7 @@ class SequencesControllerTest < FunctionalTestCase
     sequencer = sequence.user
 
     new_locus = "new locus"
-    new_bases = \
-      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
-      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
-      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
-      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
-      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
-      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
-      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
-      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
-      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
-      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    new_bases = ITS_BASES
     new_archive = "GenBank"
     new_accession = "KT968655"
     new_notes = "New notes."
@@ -398,17 +380,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_update_by_admin
     sequence = sequences(:local_sequence)
     obs = sequence.observation
-    new_bases = \
-      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
-      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
-      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
-      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
-      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
-      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
-      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
-      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
-      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
-      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    new_bases = ITS_BASES
     new_archive   = "GenBank"
     new_accession = "KT968655"
     params = { id: sequence.id,
@@ -446,23 +418,9 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_update_not_logged_in
-    sequence  = sequences(:local_sequence)
-    obs       = sequence.observation
-    observer  = obs.user
-    sequencer = sequence.user
-
+    sequence = sequences(:local_sequence)
     locus = "mtSSU"
-    bases = \
-      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
-      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
-      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
-      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
-      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
-      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
-      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
-      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
-      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
-      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    bases = ITS_BASES
     params = {
       id: sequence.id,
       sequence: { locus: locus,
