@@ -32,10 +32,10 @@
 #
 class SequencesController < ApplicationController
   before_action :login_required
-  # except: [
-  #   :index,
-  #   :show,
-  # ]
+  before_action :store_location, only: [:create, :edit, :new, :show, :update]
+  before_action :pass_query_params, only: [
+    :create, :destroy, :edit, :new, :show, :update
+  ]
 
   ################# Actions that show data without modifying it
 
@@ -55,9 +55,6 @@ class SequencesController < ApplicationController
   end
 
   def show
-    pass_query_params
-    store_location
-
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, Sequence, params[:id]) and return
@@ -71,15 +68,11 @@ class SequencesController < ApplicationController
   ################# Actions that modify data
 
   def new
-    store_location
-    pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
   end
 
   def create
-    store_location
-    pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
@@ -87,8 +80,6 @@ class SequencesController < ApplicationController
   end
 
   def edit
-    store_location
-    pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
@@ -100,8 +91,6 @@ class SequencesController < ApplicationController
   end
 
   def update
-    store_location
-    pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
@@ -115,7 +104,6 @@ class SequencesController < ApplicationController
   end
 
   def destroy
-    pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
 
