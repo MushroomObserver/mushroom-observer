@@ -584,19 +584,6 @@ class SequencesControllerTest < FunctionalTestCase
     obs      = sequence.observation
     observer = obs.user
 
-    # Prove user must be logged in to destroy Sequence.
-    assert_no_difference("Sequence.count") do
-      delete(:destroy, params: { id: sequence.id })
-    end
-
-    # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
-    login("zero")
-    assert_no_difference("Sequence.count") do
-      delete(:destroy, params: { id: sequence.id })
-    end
-    assert_redirected_to(obs.show_link_args)
-    assert_flash_text(:permission_denied.t)
-
     # Prove Observation owner can destroy Sequence
     login(observer.login)
 
@@ -607,6 +594,31 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
            "Failed to include Sequence destroyed in RssLog for Observation")
+  end
+
+  def test_destroy_no_login
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove user must be logged in to destroy Sequence.
+    assert_no_difference("Sequence.count") do
+      delete(:destroy, params: { id: sequence.id })
+    end
+  end
+
+  def test_destroy_by_other_user
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
+    login("zero")
+    assert_no_difference("Sequence.count") do
+      delete(:destroy, params: { id: sequence.id })
+    end
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_text(:permission_denied.t)
   end
 
   def test_destroy_admin
