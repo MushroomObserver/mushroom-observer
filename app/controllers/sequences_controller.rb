@@ -38,7 +38,15 @@ class SequencesController < ApplicationController
 
   ################# Actions that show data without modifying it
 
-  # display a list of Sequences, depending on params
+  # display a list of Sequences, depending on flavor & params
+  # Examples:
+  #  https://mushroomobserver.org/sequences?flavor=observation&id=205345
+  #    => displays a list of sequences for Observation 205345
+  #  https://mushroomobserver.org/sequences?flavor=all
+  #    => displays a list of all sequences in MO
+  #  https://mushroomobserver.org/sequences?pattern=LSU
+  #    => displays a list of all sequences that include "LSU"
+  #
   def index
     return patterned_index if params[:pattern].present?
 
