@@ -84,10 +84,10 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if !check_permission(@sequence)
-      flash_warning(:permission_denied.t)
-      redirect_with_query(@sequence.observation.show_link_args)
-    end
+    return if check_permission(@sequence)
+
+    flash_warning(:permission_denied.t)
+    redirect_with_query(@sequence.observation.show_link_args)
   end
 
   def update
@@ -95,11 +95,11 @@ class SequencesController < ApplicationController
     return unless @sequence
 
     figure_out_where_to_go_back_to
-    if !check_permission(@sequence)
+    if check_permission(@sequence)
+      save_edits
+    else
       flash_warning(:permission_denied.t)
       redirect_with_query(@sequence.observation.show_link_args)
-    else
-      save_edits
     end
   end
 
@@ -205,7 +205,7 @@ class SequencesController < ApplicationController
     end
   end
 
-  # ---------- Strong Psrameters -----------------------------------------------
+  # ---------- Strong Parameters -----------------------------------------------
 
   def sequence_params
     params[:sequence].permit(:archive, :accession, :bases, :locus, :notes)
