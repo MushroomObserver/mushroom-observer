@@ -4,15 +4,14 @@
 #
 #  Actions:
 #
-#    create::           Create new sequence and add to Observation
-#    destroy::          Destroy sequence
-#    edit::             Show form to edit a sequence
-#    index::            List selected sequences, based on current Query
-#    show::             Display sequence details.
+#    create::   Create new sequence and add to Observation
+#    destroy::  Destroy sequence
+#    edit::     Show form to edit a sequence
+#    index::    List selected sequences, based on index flavor and current Query
+#    show::     Display sequence details
 #
-# Table: legacy Sequence actions vs updated Sequence actions
-#
-# legacy Sequence action (method)   updated Sequence action (method)
+# Table: (updated 2022-08-07)
+# legacy Sequence action (method)   updated Sequences action (method)
 # --------------------------------  ---------------------------------
 # create_sequence (get)             new (get)
 # *create_sequence (post)           create (post)
