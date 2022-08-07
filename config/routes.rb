@@ -811,6 +811,23 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/observer/show_rss_log/:id", to: redirect("/activity_logs/%{id}"))
   get("/observer/rss", to: redirect("/activity_logs/rss"))
 
+  # ----- Sequences: legacy action redirects
+  redirect_legacy_actions(
+    old_controller: "sequence", new_controller: "sequences",
+    # actions: [:show, :list, :index]
+    actions: [:show, :index]
+  )
+  # ----- Sequences: nonstandard legacy action redirects
+  # get("/sequence/index", to: redirect("/sequences"))
+  # get("/sequence/index_sequence", to: redirect("/sequences"))
+  get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
+  get("/sequence/observation_index",
+      # to: redirect("/sequences?flavor=observation"))
+      # to: redirect(path: "/sequences?flavor=observation"))
+      to: redirect { |params, request|
+        URI.parse(request.original_url).query ? "/sequences?flavor=observation&#{URI.parse(request.original_url).query}" : "/sequences" })
+  get("/sequence/sequence_search", to: redirect("/sequences"))
+
   # ----- Users: legacy action redirects  ----------------------------------
   get("/observer/user_search", to: redirect(path: "/users"))
   get("/observer/index_user/:id", to: redirect(path: "/users?id=%{id}"))
