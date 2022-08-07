@@ -4,6 +4,10 @@ require("test_helper")
 
 # Controller tests for nucleotide sequences
 class SequencesControllerTest < FunctionalTestCase
+  def obs_creator(sequence)
+    sequence.observation.user
+  end
+
   def test_index
     login
     obs = observations(:genbanked_obs)
@@ -342,6 +346,106 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_update
+    sequence = sequences(:local_sequence)
+    obs = sequence.observation
+    observer  = obs.user
+    sequencer = sequence.user
+
+    new_locus = "new locus"
+    new_bases = \
+      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    new_archive = "GenBank"
+    new_accession = "KT968655"
+    new_notes = "New notes."
+    params = { id: sequence.id,
+               sequence: { locus: new_locus,
+                           bases: new_bases,
+                           archive: new_archive,
+                           accession: new_accession,
+                           notes: new_notes } }
+
+    # Prove Observation owner creator can edit Sequence
+    login(observer.login)
+    patch(:update, params: params)
+
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_success
+
+    assert_objs_equal(obs, sequence.observation)
+    assert_users_equal(sequencer, sequence.user)
+
+    sequence.reload
+    assert_equal(new_locus, sequence.locus)
+    assert_equal(new_bases, sequence.bases)
+    assert_equal(new_archive, sequence.archive)
+    assert_equal(new_accession, sequence.accession)
+    assert_equal(new_notes, sequence.notes)
+
+    obs.rss_log.reload
+    assert(obs.rss_log.notes.include?("log_sequence"),
+           "Failed to include Sequence change in RssLog for Observation")
+  end
+
+  def test_update_by_admin
+    sequence = sequences(:local_sequence)
+    obs = sequence.observation
+    new_bases = \
+      "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg" \
+      "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac" \
+      "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac" \
+      "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt" \
+      "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg" \
+      "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt" \
+      "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga" \
+      "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga" \
+      "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg" \
+      "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    new_archive   = "GenBank"
+    new_accession = "KT968655"
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: new_bases,
+                           archive: new_archive,
+                           accession: new_accession,
+                           notes: sequence.notes } }
+    # Prove admin modify
+    make_admin("zero")
+    patch(:update, params: params)
+
+    sequence.reload
+    assert_equal(new_bases, sequence.reload.bases)
+    assert_equal(new_archive, sequence.archive)
+    assert_equal(new_accession, sequence.accession)
+    obs.rss_log.reload
+    assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
+           "Failed to include Sequence accessioned in RssLog for Observation")
+  end
+
+  def test_update_locus_by_observation_creator
+    sequence = sequences(:local_sequence)
+    new_locus = "new_locus"
+    params = { id: sequence.id,
+               sequence: { locus: new_locus,
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                           accession: sequence.accession,
+                           notes: sequence.notes } }
+    # Prove Observation owner user can edit locus
+    login(obs_creator(sequence).login)
+    patch(:update, params: params)
+    assert_equal(new_locus, sequence.reload.locus)
+  end
+
+  def test_update_not_logged_in
     sequence  = sequences(:local_sequence)
     obs       = sequence.observation
     observer  = obs.user
@@ -368,107 +472,82 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove user must be logged in to edit Sequence.
     patch(:update, params: params)
     assert_not_equal(locus, sequence.reload.locus)
+  end
 
-    # Prove user must be owner to edit Sequence.
+  def test_update_not_observation_creator
+    sequence = sequences(:local_sequence)
+    changed_notes = "Changed notes"
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: sequence.bases,
+                           accession: sequence.accession,
+                           notes: changed_notes } }
+    # Prove user must have created Observation to edit Sequence.
     login("zero")
     patch(:update, params: params)
-    assert_not_equal(locus, sequence.reload.locus)
+
+    assert_not_equal(changed_notes, sequence.reload.notes)
     assert_flash_text(:permission_denied.t)
+  end
 
-    # Prove Observation owner user can edit Sequence
-    login(observer.login)
-    patch(:update, params: params)
-    sequence.reload
-    obs.rss_log.reload
-    assert_objs_equal(obs, sequence.observation)
-    assert_users_equal(sequencer, sequence.user)
-    assert_equal(locus, sequence.locus)
-    assert_equal(bases, sequence.bases)
-    assert_empty(sequence.archive)
-    assert_empty(sequence.accession)
-    assert_redirected_to(obs.show_link_args)
-    assert_flash_success
-    assert(obs.rss_log.notes.include?("log_sequence_updated"),
-           "Failed to include Sequence updated in RssLog for Observation")
-
-    # Prove admin can accession Sequence
-    archive   = "GenBank"
-    accession = "KT968655"
-    params = {
-      id: sequence.id,
-      sequence: { locus: locus,
-                  bases: bases,
-                  archive: archive,
-                  accession: accession }
-    }
-    make_admin("zero")
-    patch(:update, params: params)
-    sequence.reload
-    obs.rss_log.reload
-    assert_equal(archive, sequence.archive)
-    assert_equal(accession, sequence.accession)
-    assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
-           "Failed to include Sequence accessioned in RssLog for Observation")
-
-    # Prove Observation owner user can edit locus
-    locus  = "ITS"
-    params = {
-      id: sequence.id,
-      sequence: { locus: locus,
-                  bases: bases,
-                  archive: archive,
-                  accession: accession }
-    }
-    patch(:update, params: params)
-    assert_equal(locus, sequence.reload.locus)
-
+  def test_update_no_locus
+    sequence = sequences(:local_sequence)
+    params = { id: sequence.id,
+               sequence: { locus: "",
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                           accession: sequence.accession,
+                           notes: sequence.notes } }
     # Prove locus required.
-    params = {
-      id: sequence.id,
-      sequence: { locus: "",
-                  bases: bases,
-                  archive: archive,
-                  accession: accession }
-    }
+    login(obs_creator(sequence).login)
     patch(:update, params: params)
-    # response is 200 because it just reloads the form
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
+  end
 
-    # Prove bases or archive+accession required.
-    params = {
-      id: sequence.id,
-      sequence: { locus: locus,
-                  bases: "",
-                  archive: "",
-                  accession: "" }
-    }
+  def test_update_no_bases_or_equivalent
+    sequence = sequences(:local_sequence)
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: "",
+                           archive: "",
+                           accession: "",
+                           notes: sequence.notes } }
+    # Prove bases or (archive and accession) required
+    login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
+  end
 
-    # Prove accession required if archive present.
-    params = {
-      id: sequence.id,
-      sequence: { locus: locus,
-                  bases: bases,
-                  archive: archive,
-                  accession: "" }
-    }
+  def test_update_archive_without_accession
+    sequence = sequences(:local_sequence)
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: "Genbank",
+                           accession: sequence.accession,
+                           notes: sequence.notes } }
+    # Prove accession is required if archive present.
+    login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
+  end
 
-    # Prove archive required if accession present.
-    params = {
-      id: sequence.id,
-      sequence: { locus: locus,
-                  bases: bases,
-                  archive: "",
-                  accession: accession }
-    }
+  def test_update_accession_without_archive
+    sequence = sequences(:local_sequence)
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: "",
+                           accession: "KT968605",
+                           notes: sequence.notes } }
+    # Prove archive is required if accession present.
+    login(obs_creator(sequence).login)
     patch(:update, params: params)
-    assert_response(:success)
+    assert_response(:success) # response is 200 because it just reloads the form
     assert_flash_error
   end
 
