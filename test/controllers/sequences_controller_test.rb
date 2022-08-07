@@ -337,6 +337,24 @@ class SequencesControllerTest < FunctionalTestCase
     assert_redirected_to(obs.show_link_args)
   end
 
+  def test_edit_redirect
+    obs      = observations(:genbanked_obs)
+    sequence = obs.sequences[2]
+    assert_operator(obs.sequences.count, :>, 3)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
+    params = { id: sequence.id,
+               sequence: { locus: sequence.locus,
+                           bases: sequence.bases,
+                           archive: sequence.archive,
+                          accession: sequence.accession } }
+
+    # Prove that GET passes "back" and query param through to form.
+    login(obs.user.login)
+    get(:edit, params: params.merge(back: "foo", q: q))
+    assert_select("form[action*='sequences/#{sequence.id}?back=foo&q=#{q}']")
+  end
+
   def test_update
     sequence = sequences(:local_sequence)
     obs = sequence.observation
@@ -509,34 +527,54 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_edit_redirect
-    obs      = observations(:genbanked_obs)
-    sequence = obs.sequences[2]
+  def test_update_redirect
+    obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
+    sequence = obs.sequences[2]
     query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
     q     = query.id.alphabetize
-    login(obs.user.login)
-    params = {
-      id: sequence.id,
-      sequence: { locus: sequence.locus,
-                  bases: sequence.bases,
-                  archive: sequence.archive,
-                  accession: sequence.accession }
-    }
-
-    # Prove that GET passes "back" and query param through to form.
-    get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='sequences/#{sequence.id}?back=foo&q=#{q}']")
-
+    params = {id: sequence.id,
+              sequence: { locus: sequence.locus,
+                          bases: sequence.bases,
+                          archive: sequence.archive,
+                          accession: sequence.accession } }
     # Prove by default POST goes back to observation.
+    login(obs.user.login)
     patch(:update, params: params)
     assert_redirected_to(obs.show_link_args)
+  end
 
+  def test_update_redirect_to_observation_keeps_params
+    obs = observations(:genbanked_obs)
+    assert_operator(obs.sequences.count, :>, 3)
+    sequence = obs.sequences[2]
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
+    params = {id: sequence.id,
+              sequence: { locus: sequence.locus,
+                          bases: sequence.bases,
+                          archive: sequence.archive,
+                          accession: sequence.accession } }
     # Prove that POST keeps query param when returning to observation.
+    login(obs.user.login)
     patch(:update, params: params.merge(q: q))
     assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
 
-    # Prove that POST can return to show_sequence, too, with query intact.
+  def test_update_redirect_to_sequence_keeps_params
+    obs = observations(:genbanked_obs)
+    assert_operator(obs.sequences.count, :>, 3)
+    sequence = obs.sequences[2]
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
+    params = {id: sequence.id,
+              sequence: { locus: sequence.locus,
+                          bases: sequence.bases,
+                          archive: sequence.archive,
+                          accession: sequence.accession } }
+
+    # Prove that POST keeps query param when returning to sequence.
+    login(obs.user.login)
     patch(:update, params: params.merge(back: "show", q: q))
     assert_redirected_to(sequence.show_link_args.merge(q: q))
   end
