@@ -127,6 +127,9 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success,
                     "A user should be able to get form to add Sequence " \
                     "to someone else's Observation")
+    assert_select(
+      "form[action^='#{sequences_path}/#{obs.id}']", true,
+      "Sequence form submit action should start with path that includes Obs id")
     assert_select("form[action*='?q=#{q}']", true,
                   "Sequence form submit action missing 'q' param")
   end
