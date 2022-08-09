@@ -9,7 +9,9 @@
 
 <%= render(partial: "observation_title",
            locals: { observation: @observation }) %>
-
-<%= form_for(:sequence, url: add_query_param(action: :create)) do |form| %>
+<%= form_for(
+      :sequence,
+      url: add_query_param(sequence_path(id: @observation.id))
+    ) do |form| %>
   <%= render(partial: "form", locals: { form: form }) %>
 <% end %>
