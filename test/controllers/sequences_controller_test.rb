@@ -369,12 +369,21 @@ class SequencesControllerTest < FunctionalTestCase
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
                            archive: sequence.archive,
-                          accession: sequence.accession } }
+                           accession: sequence.accession } }
 
     # Prove that GET passes "back" and query param through to form.
     login(obs.user.login)
-    get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='sequences/#{sequence.id}?back=foo&q=#{q}']")
+    get(:edit, params: params.merge(back: obs.id, q: q))
+
+    assert_select("form:match('action', ?)", %r{^/sequences/226969185}, true,
+                  "submit action for edit Sequence form should start with " \
+                  "`/sequences/<sequence.id>`")
+    assert_select("form:match('action', ?)", /back=#{obs.id}/, true,
+                  "submit action for edit Sequence form should include " \
+                  "param to go back to Observation (back=#{obs.id})")
+    assert_select("form[action*='q=#{q}']", true,
+                  "submit action for edit Sequence form should include " \
+                  "query param (q=#{q})")
   end
 
   def test_update
