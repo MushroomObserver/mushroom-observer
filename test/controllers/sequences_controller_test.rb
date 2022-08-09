@@ -128,7 +128,7 @@ class SequencesControllerTest < FunctionalTestCase
                     "A user should be able to get form to add Sequence " \
                     "to someone else's Observation")
     assert_select(
-      "form[action^='#{sequences_path}/#{obs.id}']", true,
+      "form[action^='#{sequence_path(obs.id)}']", true,
       "Sequence form submit action should start with path that includes Obs id")
     assert_select("form[action*='?q=#{q}']", true,
                   "Sequence form submit action missing 'q' param")
@@ -149,7 +149,16 @@ class SequencesControllerTest < FunctionalTestCase
       {}, # default (unused)
       {}, # extras (none)
       "`/sequences/create/1`` failed to generate " \
-      "`create`` route with parameter `1`")
+      "`create`` route with parameter `1`"
+    )
+    # Asserts that POSTing to /items will call the create action on ItemsController
+    assert_recognizes(
+      { controller: "sequences", action: "create", id: "1" },
+      "/sequences/create/1",
+      {}, # extras (none)
+      "POSTING to `/sequences/create/1` failed to call " \
+      "`Sequence#create` with and id of `1`"
+    )
   end
 
   def test_create
