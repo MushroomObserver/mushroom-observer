@@ -148,16 +148,15 @@ class SequencesControllerTest < FunctionalTestCase
       { controller: "sequences", action: "create", id: "1" },
       {}, # default (unused)
       {}, # extras (none)
-      "`/sequences/create/1`` failed to generate " \
-      "`create`` route with parameter `1`"
+      "`/sequences/create/1` failed to generate " \
+      "`create` route with parameter `1`"
     )
-    # Asserts that POSTing to /items will call the create action on ItemsController
     assert_recognizes(
       { controller: "sequences", action: "create", id: "1" },
-      "/sequences/create/1",
+      { path: "/sequences/create/1", method: :post },
       {}, # extras (none)
       "POSTING to `/sequences/create/1` failed to call " \
-      "`Sequence#create` with and id of `1`"
+      "`Sequences#create` with an id of `1`"
     )
   end
 
