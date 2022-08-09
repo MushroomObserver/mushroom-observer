@@ -292,4 +292,37 @@ class ExpertTest < IntegrationTestCase
     assert_select("div.comment", text: /Slartibartfast/)
     assert_select("div.comment", text: /Steatopygia/)
   end
+
+  # add, edit, and delete a sequence
+  def test_sequences
+    login!("mary", "testpassword", true)
+    obs = observations(:detailed_unknown_obs)
+    sequence_original_count = Sequence.count
+    get("/#{obs.id}")
+
+    click_mo_link(href: new_sequence_path(id: obs.id))
+    open_form do |form|
+      form.change("locus", "test")
+      form.change("bases", "catcatcatcatcatcatcatcatcat")
+      form.submit("Submit")
+    end
+    assert_equal(sequence_original_count + 1, Sequence.count,
+                 "Sequence should have been created")
+
+    new_sequence = Sequence.last
+    click_mo_link(href: edit_sequence_path(new_sequence.id))
+    open_form do |form|
+      form.change("locus", "Edited locus")
+      form.submit("Submit")
+    end
+    assert_equal("Edited locus", new_sequence.locus,
+                 "Sequence should have been edited")
+
+    # click the show sequence link on the Observation page
+    click_mo_link(href: sequence_path(new_sequence.id))
+    # click the destroy sequence link on the Sequence page
+    click_mo_link(href: sequence_path(new_sequence.id))
+    assert_equal(sequence_original_count, Sequence.count,
+                 "Sequence should have been destroyed")
+  end
 end
