@@ -686,7 +686,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
   # ----- Sequences: nonstandard actions ------------------------------------
-  post("/sequences/create(/:id)", # include id of Observation
+  post("/sequences(/:id)", # include id of Observation
        to: "sequences#create", id: /\d+/)
 
   # ----- Users: standard actions -------------------------------------------

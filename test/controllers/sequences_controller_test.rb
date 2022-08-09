@@ -144,18 +144,19 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_routing
     assert_generates(
-      "/sequences/create/1",
+      "/sequences/1",
       { controller: "sequences", action: "create", id: "1" },
       {}, # default (unused)
       {}, # extras (none)
-      "`/sequences/create/1` failed to generate " \
-      "`create` route with parameter `1`"
+      "`/sequences/1` failed to generate " \
+      "`create` route with route parameter `1`"
     )
+    # id is the Observation id
     assert_recognizes(
       { controller: "sequences", action: "create", id: "1" },
-      { path: "/sequences/create/1", method: :post },
+      { path: "/sequences/1", method: :post },
       {}, # extras (none)
-      "POSTING to `/sequences/create/1` failed to call " \
+      "POSTING to `/sequences/1` failed to call " \
       "`Sequences#create` with an id of `1`"
     )
   end
