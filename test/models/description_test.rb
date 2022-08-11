@@ -82,7 +82,7 @@ class DescriptionTest < UnitTestCase
       User.current = mary
       obj.license_id = 1
       obj.save
-      msg = "#{model}: Mary should not be made author "\
+      msg = "#{model}: Mary should not be made author " \
             "after trivial change to authorless object."
       assert_authors_and_editors(obj, [], ["mary"], msg)
       assert_contributions(0, e, 0, 0, msg)

@@ -6,8 +6,23 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
-#  enum_default_value   Default value (as a Symbol) of an enum attribute
-#                       Ex: User.enum_default_value(:image_size) => :medium
+#
+#  == Scopes
+#
+#  Scopes for collecting objects created (or updated) on, before, after or
+#  between a given "%Y-%m-%d" string(s).
+#
+#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
+#            Name.updated_after("2016-12-01")
+#
+#  created_on::
+#  created_after::
+#  created_before::
+#  created_between::
+#  updated_on::
+#  updated_after::
+#  updated_before::
+#  updated_between::
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
@@ -86,15 +101,38 @@ class AbstractModel < ApplicationRecord
     self.class.name.underscore.to_sym
   end
 
-  # Default value (as a symbol) for an enum attribute
-  def self.enum_default_value(attr)
-    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
-  end
+  ##############################################################################
+  #
+  #  :section: Scopes
+  #
+  ##############################################################################
 
-  # number (or nil) that is the default value for attr
-  def self.default_cardinal(attr)
-    column_defaults[attr.to_s]
-  end
+  scope :created_on, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :created_after, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :created_before, lambda { |ymd_string|
+    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :created_between, lambda { |earliest, latest|
+    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
+  }
+  scope :updated_on, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
+  }
+  scope :updated_after, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
+  }
+  scope :updated_before, lambda { |ymd_string|
+    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
+  }
+  scope :updated_between, lambda { |earliest, latest|
+    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
+      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
+  }
 
   ##############################################################################
   #
@@ -170,7 +208,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?("user_id=")
+    self.user_id ||= User.current_id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
@@ -249,7 +287,7 @@ class AbstractModel < ApplicationRecord
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
-  #   def show_observation
+  #   def show
   #     @observation = Observation.find(params[:id].to_s)
   #     @observation.update_view_stats
   #     ...
@@ -262,13 +300,13 @@ class AbstractModel < ApplicationRecord
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
   def update_view_stats
-    return unless respond_to?("num_views=") || respond_to?("last_view=")
+    return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views
     @old_last_view = last_view
     self.class.record_timestamps = false
-    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-    self.last_view = Time.zone.now        if respond_to?("last_view=")
+    self.num_views = (num_views || 0) + 1 if respond_to?(:num_views=)
+    self.last_view = Time.zone.now        if respond_to?(:last_view=)
     save_without_our_callbacks
     self.class.record_timestamps = true
   end
@@ -330,21 +368,18 @@ class AbstractModel < ApplicationRecord
   # I don't think there will be relevant special cases,
   # i.e., searchable models with singular controller names. JDC 2020-08-02
   #
-  # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
+  # Return the name of the controller (as a symbol)
+  # that handles the "show_<object>" for this object.
   #
-  # The name must be anchored with a slash to avoid namespacing it.
+  #   Article.show_controller => :articles # for normalized controller
   #
-  #   Article.show_controller => "/articles" # for normalized controller
-  #
-  #   Name.show_controller => "/name" # unnormalized controller & special cases
-  #   name.show_controller => "/name"
+  #   Name.show_controller => :name # unnormalized controller & special cases
   #
   def self.show_controller
-    if controller_normalized?(name)
-      "/#{name.pluralize.underscore}" # Rails standard for most controllers
+    if controller_normalized?
+      name.pluralize.underscore.to_sym # Rails standard for most controllers
     else
-      "/#{name.underscore}" # old MO controller names and any special cases
+      name.underscore.to_sym # old MO controller names and any special cases
     end
   end
 
@@ -354,7 +389,7 @@ class AbstractModel < ApplicationRecord
 
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
-  def self.controller_normalized?(name)
+  def self.controller_normalized?
     class_defined?("#{name.pluralize}Controller")
   end
 
@@ -365,13 +400,11 @@ class AbstractModel < ApplicationRecord
     false
   end
 
-  # Return the name of the "index_<object>" action (as a simple
-  # lowercase string) that displays search index for this object.
+  # Return the name of the "index_<object>" action (as a symbol)
+  # that displays search index for this object.
   #
-  #   Article.index_action => "index" # normalized controller
-  #
-  #   Name.index_action => "index_name" #unormalized
-  #   name.index_action => "index_name"
+  #   Article.index_action => :index # normalized controller
+  #   Name.index_action => :index_name # unormalized
   #
   # WARNING.
   # 1. There is no standard Rails action name for displaying a **search** index.
@@ -386,34 +419,34 @@ class AbstractModel < ApplicationRecord
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
   def self.index_action
-    return "index" if controller_normalized?(name) # Rails standard
+    return :index if controller_normalized? # Rails standard
 
-    "index_#{name.underscore}" # Old MO style
+    "index_#{name.underscore}".to_sym # Old MO style
   end
 
   def index_action
     self.class.index_action
   end
 
-  # Return the name of the "show_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "show_<object>" action (as a symbol)
+  # that displays this object.
   #
-  #   Article.show_action => "show" # normalized controller
+  #   Article.show_action => :show # normalized controller
   #
-  #   Name.show_action => "show_name" #unormalized
-  #   name.show_action => "show_name"
+  #   Name.show_action => :show_name # unormalized
+  #   name.show_action => :show_name
   #
   def self.show_action
-    return "show" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "show_#{name.underscore}" # Old MO style
+    "show_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_action
     self.class.show_action
   end
 
-  # Return the URL of the "show_<object>" action
+  # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
   #   Article.index_action => "https://mushroomobserver.org/article/12"
@@ -422,12 +455,11 @@ class AbstractModel < ApplicationRecord
   #   Name.show_url(12) => "https://mushroomobserver.org/name/show_name/12"
   #   name.show_url     => "https://mushroomobserver.org/name/show_name/12"
   #
-  # Note that show_controller has a leading forward slash
   def self.show_url(id)
-    if controller_normalized?(name)
-      "#{MO.http_domain}#{show_controller}/#{id}"
+    if controller_normalized?
+      "#{MO.http_domain}/#{show_controller}/#{id}"
     else
-      "#{MO.http_domain}#{show_controller}/#{show_action}/#{id}"
+      "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
     end
   end
 
@@ -440,9 +472,9 @@ class AbstractModel < ApplicationRecord
   # actions are normalized.
   # See https://www.pivotaltracker.com/story/show/174440291
   def self.show_past_action
-    return "show_past" if controller_normalized?(name) # Rails standard
+    return :show_past if controller_normalized? # Rails standard
 
-    "show_past_#{name.underscore}" # Old MO style
+    "show_past_#{name.underscore}".to_sym # Old MO style
   end
 
   def show_past_action
@@ -452,9 +484,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "next" action
   # See comments above at show_action
   def self.next_action
-    return "next" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "next_#{name.underscore}" # Old MO style
+    "next_#{name.underscore}".to_sym # Old MO style
   end
 
   def next_action
@@ -464,9 +496,9 @@ class AbstractModel < ApplicationRecord
   # Return the name of the "prev" action
   # See comments above at show_action
   def self.prev_action
-    return "prev" if controller_normalized?(name) # Rails standard
+    return :show if controller_normalized? # Rails standard
 
-    "prev_#{name.underscore}" # Old MO style
+    "prev_#{name.underscore}".to_sym # Old MO style
   end
 
   def prev_action
@@ -524,9 +556,9 @@ class AbstractModel < ApplicationRecord
   #   name.edit_action => "edit_name"
   #
   def self.edit_action
-    return "edit" if controller_normalized?(name) # Rails standard
+    return :edit if controller_normalized? # Rails standard
 
-    "edit_#{name.underscore}" # Old MO styl
+    "edit_#{name.underscore}".to_sym # Old MO styl
   end
 
   def edit_action
@@ -573,14 +605,16 @@ class AbstractModel < ApplicationRecord
     show_controller
   end
 
-  # Return the name of the "destroy_<object>" action (as a simple
-  # lowercase string) that displays this object.
+  # Return the name of the "destroy_<object>" action (as a symbol)
+  # that displays this object.
   #
+  #   Article.destroy_action => :destroy
   #   Name.destroy_action => "destroy_name"
-  #   name.destroy_action => "destroy_name"
   #
   def self.destroy_action
-    "destroy_#{name.underscore}"
+    return :destroy if controller_normalized? # Rails standard
+
+    "destroy_#{name.underscore}".to_sym # Old MO styl
   end
 
   def destroy_action
@@ -736,7 +770,7 @@ class AbstractModel < ApplicationRecord
   end
 
   def can_edit?(user = User.current)
-    !respond_to?("user") || (user && (self.user_id == user.id))
+    !respond_to?(:user) || (user && (self.user_id == user.id))
   end
 
   def string_with_id(str)

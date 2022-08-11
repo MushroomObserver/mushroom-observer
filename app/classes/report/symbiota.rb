@@ -2,7 +2,7 @@
 
 module Report
   # Symbiota-style tsv report.
-  class Symbiota < Report::TSV
+  class Symbiota < TSV
     def labels
       %w[
         scientificName

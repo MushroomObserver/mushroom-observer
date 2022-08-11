@@ -9,7 +9,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by(text_name: "Strobilurus diminutivus")
     assert_equal([], @name.descriptions)
     @description_data = {
-      source_type: :public,
+      source_type: "public",
       source_name: nil,
       readable: true,
       writable: true,
@@ -55,7 +55,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by(text_name: "Peltigera")
     assert_equal(4, @name.descriptions.length)
     @description_data = {
-      source_type: :user,
+      source_type: "user",
       source_name: "Mary's Corner",
       readable: true,
       writable: false,
@@ -102,7 +102,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     user.save
     sess = open_session
     sess.login!(user)
-    sess.click(href: /turn_admin_on/)
+    sess.click_mo_link(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
     sess.user = user
     sess
@@ -277,7 +277,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def create_name_description
       get(show_name_uri)
-      click(href: /create_name_description/)
+      click_mo_link(href: /create_name_description/)
       # assert_template("name/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)
@@ -297,7 +297,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       form.assert_enabled("source_type")
       form.assert_enabled("source_name")
       # (have to be enabled because user could switch to :source or :user,
-      # instead must use javascript to disable these when :public)
+      # instead must use javascript to disable these when "public")
       form.assert_enabled("public_write")
       form.assert_enabled("public")
     end
@@ -355,7 +355,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_edit_description_link_behavior
-      click(href: edit_name_description_uri)
+      click_mo_link(href: edit_name_description_uri)
       if edit_description_requires_login?
         assert_match(%r{account/login}, response.body)
       else

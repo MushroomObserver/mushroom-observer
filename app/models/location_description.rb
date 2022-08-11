@@ -15,9 +15,6 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Tracks of descriptions that were merged into this one.
-#    Primarily useful in the past versions: stores id of latest version of the
-#    Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
 #  num_views::        (-) Number of times it has been viewed.
@@ -55,38 +52,42 @@ class LocationDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:source_type,
-          { public: 1,
-            foreign: 2,
-            project: 3,
-            source: 4,
-            user: 5 },
-          source: :source_type,
-          accessor: :whiny)
+  enum source_type:
+       {
+         public: 1,
+         foreign: 2,
+         project: 3,
+         source: 4,
+         user: 5
+       }, _suffix: :source
 
   belongs_to :license
   belongs_to :location
   belongs_to :project
   belongs_to :user
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  has_and_belongs_to_many :admin_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_admins"
-  has_and_belongs_to_many :writer_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_writers"
-  has_and_belongs_to_many :reader_groups,
-                          class_name: "UserGroup",
-                          join_table: "location_descriptions_readers"
-  has_and_belongs_to_many :authors,
-                          class_name: "User",
-                          join_table: "location_descriptions_authors"
-  has_and_belongs_to_many :editors,
-                          class_name: "User",
-                          join_table: "location_descriptions_editors"
+  has_many :location_description_admins, dependent: :destroy
+  has_many :admin_groups, through: :location_description_admins,
+                          source: :user_group
+
+  has_many :location_description_writers, dependent: :destroy
+  has_many :writer_groups, through: :location_description_writers,
+                           source: :user_group
+
+  has_many :location_description_readers, dependent: :destroy
+  has_many :reader_groups, through: :location_description_readers,
+                           source: :user_group
+
+  has_many :location_description_authors, dependent: :destroy
+  has_many :authors, through: :location_description_authors,
+                     source: :user
+
+  has_many :location_description_editors, dependent: :destroy
+  has_many :editors, through: :location_description_editors,
+                     source: :user
 
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
@@ -120,7 +121,7 @@ class LocationDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "/location"
+    :location
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).

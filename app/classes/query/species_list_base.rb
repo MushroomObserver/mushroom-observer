@@ -29,7 +29,7 @@ module Query
     def initialize_flavor
       add_owner_and_time_stamp_conditions("species_lists")
       add_date_condition("species_lists.when", params[:date])
-      initialize_name_parameters(:observations_species_lists, :observations)
+      initialize_name_parameters(:species_list_observations, :observations)
       initialize_association_parameters
       initialize_boolean_parameters
       initialize_search_parameters
@@ -39,9 +39,9 @@ module Query
     def initialize_association_parameters
       add_where_condition("species_lists", params[:locations])
       add_id_condition(
-        "projects_species_lists.project_id",
+        "project_species_lists.project_id",
         lookup_projects_by_name(params[:projects]),
-        :projects_species_lists
+        :project_species_lists
       )
     end
 

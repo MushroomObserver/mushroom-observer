@@ -15,12 +15,9 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Used to keep track of descriptions that were merged
-#    into this one. Primarily useful in the past versions: stores id of latest
-#    version of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
-#  review_status::    (-) :vetted, :unvetted, :inaccurate, :unreviewed.
+#  review_status::    (-) "vetted", "unvetted", "inaccurate", "unreviewed".
 #  last_review::      (-) Last time it was reviewed.
 #  reviewer::         (-) User that reviewed it.
 #  ok_for_export::    (-) Boolean: is this ready for export to EOL?
@@ -70,46 +67,49 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  as_enum(:review_status,
-          { unreviewed: 1,
-            unvetted: 2,
-            vetted: 3,
-            inaccurate: 4 },
-          source: :review_status,
-          accessor: :whiny)
-  as_enum(:source_type,
-          { public: 1,
-            foreign: 2,
-            project: 3,
-            source: 4,
-            user: 5 },
-          source: :source_type,
-          accessor: :whiny)
-
+  enum review_status:
+        {
+          unreviewed: 1,
+          unvetted: 2,
+          vetted: 3,
+          inaccurate: 4
+        }
+  enum source_type:
+        {
+          public: 1,
+          foreign: 2,
+          project: 3,
+          source: 4,
+          user: 5
+        }, _suffix: :source
   belongs_to :license
   belongs_to :name
   belongs_to :project
-  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
+  belongs_to :reviewer, class_name: "User"
   belongs_to :user
 
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  has_and_belongs_to_many :admin_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_admins"
-  has_and_belongs_to_many :writer_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_writers"
-  has_and_belongs_to_many :reader_groups,
-                          class_name: "UserGroup",
-                          join_table: "name_descriptions_readers"
-  has_and_belongs_to_many :authors,
-                          class_name: "User",
-                          join_table: "name_descriptions_authors"
-  has_and_belongs_to_many :editors,
-                          class_name: "User",
-                          join_table: "name_descriptions_editors"
+  has_many :name_description_admins, dependent: :destroy
+  has_many :admin_groups, through: :name_description_admins,
+                          source: :user_group
+
+  has_many :name_description_writers, dependent: :destroy
+  has_many :writer_groups, through: :name_description_writers,
+                           source: :user_group
+
+  has_many :name_description_readers, dependent: :destroy
+  has_many :reader_groups, through: :name_description_readers,
+                           source: :user_group
+
+  has_many :name_description_authors, dependent: :destroy
+  has_many :authors, through: :name_description_authors,
+                     source: :user
+
+  has_many :name_description_editors, dependent: :destroy
+  has_many :editors, through: :name_description_editors,
+                     source: :user
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
@@ -146,7 +146,7 @@ class NameDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    "/name"
+    :name
   end
 
   # Don't add any authors until someone has written something "useful".
@@ -182,11 +182,11 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
-
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses
-    ALL_REVIEW_STATUSES
+    review_statuses.map do |name, _integer|
+      name
+    end
   end
 
   # Update the review status.  Saves the changes if there are no substantive
@@ -201,14 +201,14 @@ class NameDescription < Description
   #
   def update_review_status(value)
     user = User.current
-    if !user.in_group?("reviewers")
+    if user.in_group?("reviewers")
+      reviewer_id = user.id
+    else
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
       value = :unreviewed
       reviewer_id = nil
-    else
-      reviewer_id = user.id
     end
     self.review_status = value
     self.reviewer_id   = reviewer_id
@@ -232,7 +232,7 @@ class NameDescription < Description
     if (name.description_id == id) &&
        (name.classification != classification)
       name.update(classification: classification)
-      name.propagate_classification if name.rank == :Genus
+      name.propagate_classification if name.rank == "Genus"
     end
   end
 

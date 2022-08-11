@@ -3,7 +3,7 @@
 require("test_helper")
 require("rexml/document")
 
-class Api2ControllerTest < FunctionalTestCase
+class API2ControllerTest < FunctionalTestCase
   def assert_api_failed
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
@@ -111,8 +111,9 @@ class Api2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model)
+    response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
-      [:xml, :json].each do |format|
+      response_formats.each do |format|
         get(model.table_name.to_sym, params: { detail: detail, format: format })
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)
@@ -271,7 +272,7 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
-    rolf.update(keep_filenames: :keep_and_show)
+    rolf.update(keep_filenames: "keep_and_show")
     rolf.reload
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     proj = rolf.projects_member.first
@@ -352,7 +353,7 @@ class Api2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
@@ -365,7 +366,7 @@ class Api2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = ApiKey.last
+    api_key = APIKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)
@@ -430,7 +431,7 @@ class Api2ControllerTest < FunctionalTestCase
 
   def test_vote_anonymity
     obs = observations(:coprinus_comatus_obs)
-    rolf.update!(votes_anonymous: :yes)
+    rolf.update!(votes_anonymous: "yes")
     rolfs_key = api_keys(:rolfs_api_key)
     marys_key = api_keys(:marys_api_key)
     rolfs_vote = obs.votes.find_by(user: rolf)

@@ -10,6 +10,7 @@ require:
 # *** Update The Codeclimate Channel When Updating Rubocop
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
 # Use the highest available channel that's compatible with the RuboCop version.
+# Available channels: https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
 # .codeclimate.yml specifies the RuboCop version ('channel') used
 # by Code Climate, which can be different than the version in Gemfile.lock
 #
@@ -25,9 +26,7 @@ require:
 # For more info, see https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
-  # See https://docs.rubocop.org/rubocop/versioning.html#pending-cops
-  NewCops: disable
-
+  NewCops: enable
   ########################### Excluded files ###################################
   # Completely ignore the following
   Exclude:
@@ -36,13 +35,6 @@ AllCops:
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js
     - app/assets/javascripts/lightbox.js
-    # old API is frozen
-    - app/classes/api.rb
-    - "app/classes/api/**/*"
-    - app/controllers/api_controller.rb
-    - app/helpers/api_helper.rb
-    - "app/views/api/**/*"
-    - test/models/api_test.rb
     - "db/**/*"
     - "log/**/*"
     - public/design_test/jquery-1.5.2.min.js
@@ -54,119 +46,135 @@ AllCops:
 
 # ------------------------------------------------------------------------------
 
-#####  Individual Cops
+########### Individual cops for which MO uses a non-default configuration
 
-# Use RuboCop's default configuration, except as specified below
-# NOTE: pending cops have no default, so it must be specified
-
-# Rubocop supports multiple options and MO uses a non-default
-# Default: align "end" with **start of the line** that includes "begin"
-# MO align with "begin". This is how we've almost always done it.
-# And it's consistent with Layout/EndAlignment for other keywords.
-Layout/BeginEndAlignment:
-  EnforcedStyleAlignWith: begin
-
-# Rubocop supports multiple options and MO uses a non-default
-Layout/DotPosition:
-  EnforcedStyle: trailing
-
-# Repeat the default because Codeclimate ignores it as of 2019-07-09
-Layout/HashAlignment:
-  EnforcedColonStyle: key
-
-# Rubocop supports multiple options and MO uses a non-default
-Layout/LineLength:
-  # RuboCop default is 120 as of 0.84
-  Max: 80
-
-Metrics/AbcSize:
-# Can we try relaxing this one?  Even short simple methods sometimes exceed
-# 15 or 16.  Simplifying them further just forces us to make tons of tiny
-# trivial methods with really cumbersome names, without actually making
-# the code any better.
-# Max: 15
-  Max: 20
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/BlockLength:
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/ClassLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
-  Max: 250
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/CyclomaticComplexity:
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/MethodLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 10
-  Max: 30
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/ModuleLength:
-# Relaxed metrics based on CodeClimages default .rubocop.yml
-# Max: 100
-  Max: 250
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-Metrics/PerceivedComplexity:
-  Exclude:
-    # This Cop makes less sense in tests, we regularly ignore it.
-    - "test//**/*"
-
-# Disable because it does not work with Unicode in Ruby 2.4
-# Cop supports --auto-correct.
-Performance/Casecmp:
+Gemspec:
+  # Not relevent (MO is not a gem)
   Enabled: false
 
+Layout/BeginEndAlignment:
+  # Rubocop default: start_of_line
+  # which aligns "end" with **start of the line** that includes "begin"
+  # MO: align with "begin". This is how we've almost always done it.
+  # And it's consistent with Layout/EndAlignment for other keywords.
+  EnforcedStyleAlignWith: begin
+Layout/DotPosition:
+  # Rubocop default: leading
+  EnforcedStyle: trailing
+Layout/HashAlignment:
+  # Repeat the Rubocop default because Codeclimate ignores it as of 2019-07-09
+  EnforcedColonStyle: key
+Layout/LineEndStringConcatenationIndentation: # new in 1.18
+  # Rubocop default: true
+  # We most consistently align the start of the continued line
+  # with the start of the string on the previous line.
+  # This does not correspond to any available EnforcedStyle.
+  Enabled: false
+Layout/LineLength:
+  # RuboCop default: 120
+  # Use 80 instead because some developers have smaller screens
+  Max: 80
+Layout/MultilineMethodParameterLineBreaks: # new in 1.32
+  # Makes Each param in a multi-line method definition start on a separate line.
+  # RuboCop default: true
+  # Cop seems like overkill; MO has many relevant methods with >1 param per line
+  Enabled: false
+
+Lint/AmbiguousOperatorPrecedence: # new in 1.21
+  # RuboCop default: true
+  # We do this only in rare cases; Always doing it would add uneeded clutter
+  Enabled: false
+Lint/NonAtomicFileOperation: # new in 1.31
+  # Disable until I understand the cop's implications - jdc 2022-07-14
+  # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
+  Enabled: false
+
+Metrics/AbcSize:
+  # Rubocop default: 15
+  # Even short simple methods sometimes exceed 15.
+  # Simplifying them further just forces us to make tons of tiny
+  # trivial methods with really cumbersome names, without actually making
+  # the code any better.
+  Max: 20
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/BlockLength:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/ClassLength:
+  # Rubocop default: 100
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+Metrics/CyclomaticComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/MethodLength:
+  # Rubocop default: 10
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  Max: 30
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/ModuleLength:
+  # Rubocop default: 100
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  Max: 250
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/PerceivedComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+
+Performance/Casecmp:
+  # Rubocop default: true
+  # Disable because it does not work with Unicode in Ruby 2.4
+  Enabled: false
 Performance/RegexpMatch:
   # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
   # The latter throws an error when something == nil:
   #   undefined method `match?' for nil:NilClass
   # So manually correct to: regexp.match?(something)
   AutoCorrect: false
-
 Performance/StringInclude:
+  # Rubocop default: true
   # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
   Enabled: false
 
-# Make autocorrect saf(er) by whitelisting our find_by methods
 Rails/DynamicFindBy:
+  # Make autocorrect saf(er) by whitelisting our find_by methods
   AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
   AutoCorrect: true
-
-# MO uses HABTM extensively; RuboCop prefers the newer has_many through
-# Switching would require a migration process, detailed here:
-# http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
-# It's not worth the effort
-Rails/HasAndBelongsToMany:
+Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
+  # Rubocop default: true
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
   Enabled: false
-
-# Can be unsafe depending on eager_load vs pre_load
-# https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
+Rails/RenderInline: # new in 2.7
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
+  Exclude:
+    - "app/controllers/ajax_controller/**/*"
 Rails/WhereExists:
+  # Rubocop default: true
+  # Can be unsafe depending on eager_load vs pre_load
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
   Enabled: false
 
 Style/AccessorGrouping:
+  # Rubocop default: true
   # Disabled. See discussion at
   # https://github.com/MushroomObserver/mushroom-observer/pull/988
   Enabled: false
-  # The follow in case we re-enable the cop
+  # The followin Exclude in case we re-enable the cop
   # Exclude files that individually comment accessors
   # else Rubocop concatenates the accessors and comments on a single line.
   # Disabling Style/AccessorGrouping around the accessors doesn't
@@ -177,48 +185,52 @@ Style/AccessorGrouping:
     - "app/classes/country_counter.rb"
     - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
-
-# Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
+  # Rubocop default: true
+  # Allow non-ascii characters in comments; we need to use accented chars
   Enabled: false
-
-# Repeat the RuboCop default because CodeClimate silently overrides it
-# Is this still true? JDC 2020-08-17
 Style/DateTime:
+  # Repeat the RuboCop default because CodeClimate silently overrides it
+  # Is this still true? JDC 2020-08-17
   Enabled: false
-
-# Rubocop does not enable this cop by defaul
-# MO uses parentheses
-Style/MethodCallWithArgsParentheses:
+Style/EmptyHeredoc: # new in 1.32
+  # Empty Heredoc is usedful as a placeholder in script/refresh_sitemap
+  Exclude:
+    - script/refresh_sitemap
+Style/FormatStringToken:
   Enabled: true
-
-# Repeat the RuboCop defaults because Codeclimate silently overrides them
-# Is that still true? JDC 2020-08-17?
+  # # This doesn't work for redirect in config/routes.rb.
+  IgnoredMethods:
+    - "redirect"
+Style/MethodCallWithArgsParentheses:
+  # Rubocop default: false
+  # MO uses parentheses (except for some macro-style methods)
+  Enabled: true
 Style/PercentLiteralDelimiters:
+  # Repeat the RuboCop defaults because Codeclimate silently overrides them
+  # Is that still true? JDC 2020-08-17?
   PreferredDelimiters:
     default: "()"
-    '%i':    "[]"
-    '%I':    "[]"
-    '%r':    "{}"
-    '%w':    "[]"
-    '%W':    "[]"
-
-# I can't figure out how to get exploded to work with API.
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
 Style/RaiseArgs:
+  # Rubocop defaiult: exploded
+  # I can't figure out how to get exploded to work with API.
   EnforcedStyle: compact
-
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
+  # Rubocop default: single_quotes
   EnforcedStyle: double_quotes
-
-# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiteralsInInterpolation:
+  # Rubocop default: single_quotes
   EnforcedStyle: double_quotes
-
-# MO uses [] not %i() or %I()
 Style/SymbolArray:
+  # Rubocop default: percent. Ex: %i[foo bar baz]
+  # MO uses plain brackets. Ex: [:foo, :bar, :baz]
   EnforcedStyle: brackets
 
-# We skip validations all the time.  I'm tired of disabling this cop.
 Rails/SkipsModelValidations:
+  # We skip validations all the time.  I'm tired of disabling this cop.
   Enabled: false

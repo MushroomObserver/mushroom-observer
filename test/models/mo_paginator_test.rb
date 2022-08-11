@@ -79,8 +79,6 @@ class MOPaginatorTest < UnitTestCase
     assert_raises(RuntimeError) { pages.num_per_page = 0 }
     assert_raises(RuntimeError) { pages.num_per_page = "str" }
 
-    pages.used_letters = nil
-    assert_nil(pages.used_letters)
     pages.used_letters = []
     assert_equal([], pages.used_letters)
     pages.used_letters = [1, 2, 3]

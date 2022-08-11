@@ -7,7 +7,7 @@ class ImageConfigData
 
   def initialize
     root = File.expand_path("..", __dir__)
-    @env = ENV["RAILS_ENV"] || "development"
+    @env = ENV.fetch("RAILS_ENV", "development")
     @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
   end
 end
@@ -18,7 +18,7 @@ MushroomObserver::Application.configure do
   # Ensure that these are defined in case we're executing this script
   # on its own (e.g., to provide access to configs for bash sripts).
   config.root = File.expand_path("..", __dir__)
-  config.env  = ENV["RAILS_ENV"]
+  config.env  = ENV.fetch("RAILS_ENV", nil)
 
   # List of alternate server domains.  We redirect from each of these
   # to the real one.
@@ -83,10 +83,10 @@ MushroomObserver::Application.configure do
   config.email_queue_delay  = 5
 
   # Default email addresses.
-  config.news_email_address = "news@" + config.domain
-  config.noreply_email_address = "no-reply@" + config.domain
-  config.accounts_email_address = "webmaster@" + config.domain
-  config.webmaster_email_address = "webmaster@" + config.domain
+  config.news_email_address = "news@#{config.domain}"
+  config.noreply_email_address = "no-reply@#{config.domain}"
+  config.accounts_email_address = "webmaster@#{config.domain}"
+  config.webmaster_email_address = "webmaster@#{config.domain}"
   config.donation_business = "UQ23P3G6FBYKN"
 
   # File where the list of most commonly used names lives.
@@ -167,9 +167,10 @@ MushroomObserver::Application.configure do
   config.secret_key_base = "a" * 30
 
   # EOL parameters.
-  config.eol_ranks = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
-                      :Class, :Phylum, :Kingdom]
-  config.eol_ranks_for_export = [:Form, :Variety, :Subspecies, :Species, :Genus]
+  config.eol_ranks = %w[
+    Form Variety Subspecies Genus Family Order Class Phylum Kingdom
+  ]
+  config.eol_ranks_for_export = %w[Form Variety Subspecies Species Genus]
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
 
@@ -184,5 +185,5 @@ MushroomObserver::Application.configure do
 
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.
-  config.image_model_beta_testers = []
+  config.image_model_beta_testers = [103_233]
 end

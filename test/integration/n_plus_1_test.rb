@@ -21,8 +21,8 @@ class NPlusOneTest < IntegrationTestCase
     get("/location/list_locations")
     get("/name/list_names")
     get("/image/list_images")
-    get("/observer/list_observations")
-    get("/observer/list_rss_logs")
+    get("/observations/index")
+    get("/activity_logs/index")
     get("/project/list_projects")
     get("/publications")
     get("/sequence/list_sequences")
@@ -31,11 +31,11 @@ class NPlusOneTest < IntegrationTestCase
 
   def test_download_observations
     login
-    get("/observer/download_observations")
+    get("/observations/download")
   end
 
-  def test_show_site_stats
+  def test_site_stats
     login
-    get("/observer/show_site_stats")
+    get("/info/site_stats")
   end
 end

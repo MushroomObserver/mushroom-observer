@@ -19,12 +19,12 @@ json.md5sum(object.upload_md5sum.to_s) if object.upload_md5sum.present?
 json.width(object.width) if object.width.present?
 json.height(object.height) if object.height.present?
 json.original_url(object.original_url)
-if !detail
-  json.owner_id(object.user_id)
-else
+if detail
   json.owner(json_user(object.user))
   json.files((Image.all_sizes + [:original]).map do |size|
     object.send("#{size}_url")
   end)
   json.observation_ids(object.observation_ids)
+else
+  json.owner_id(object.user_id)
 end

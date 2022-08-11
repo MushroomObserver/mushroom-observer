@@ -14,17 +14,16 @@ json.notes_template(object.notes_template_parts) \
   if object.notes_template.present?
 json.mailing_address(object.mailing_address.to_s) \
   if object.mailing_address.present?
-if !detail
-  json.location_id(object.location_id) if object.location_id
-  json.image_id(object.image_id) if object.image_id
-else
+if detail
   json.location(json_location(object.location)) if object.location
   json.image(json_image(object.image)) if object.image
-  if @user == object ||
+  if (@user == object ||
      # (exception: show API key of new user when API creates new user)
-     @show_api_keys_for_new_user
-    if object.api_keys.any?
-      json.api_keys(object.api_keys.map { |x| json_api_key(x) })
-    end
+     @show_api_keys_for_new_user) &&
+     object.api_keys.any?
+    json.api_keys(object.api_keys.map { |x| json_api_key(x) })
   end
+else
+  json.location_id(object.location_id) if object.location_id
+  json.image_id(object.image_id) if object.image_id
 end

@@ -99,7 +99,7 @@ class API2
       end
       return unless @vote
 
-      img.change_vote(@user, @vote, anon: @user.votes_anonymous == :yes)
+      img.change_vote(@user, @vote, anon: @user.votes_anonymous == "yes")
     end
 
     ############################################################################
@@ -123,7 +123,7 @@ class API2
       # sure it doesn't accidentally explicitly set the original_name even if
       # the user has requested not to save it.  I'm not sure the mobile app
       # has access to that preference.
-      return nil if User.current&.keep_filenames == :toss
+      return nil if User.current&.keep_filenames == "toss"
 
       val
     end

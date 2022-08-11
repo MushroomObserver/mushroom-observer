@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-class ApiKey < AbstractModel
+class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
   KEY_LENGTH = 32
 
   def self.show_controller
-    "/account"
+    :account
   end
 
   def self.index_action

@@ -41,10 +41,9 @@ module Query
         project_ids = lookup_projects_by_name(vals)
         return [] if project_ids.empty?
 
-        SpeciesList.connection.select_values(%(
-          SELECT DISTINCT species_list_id FROM projects_species_lists
-          WHERE project_id IN (#{project_ids.join(",")})
-        ))
+        SpeciesList.joins(:project_species_lists).
+          where(project_species_lists: { project_id: project_ids }).distinct.
+          map(&:id)
       end
 
       def lookup_species_lists_by_name(vals)
@@ -72,7 +71,7 @@ module Query
           else
             yield(val).map(&:id)
           end
-        end.flatten.uniq.reject(&:nil?)
+        end.flatten.uniq.compact
       end
     end
   end

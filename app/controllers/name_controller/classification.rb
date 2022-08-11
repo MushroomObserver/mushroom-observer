@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
+module NameController::Classification
   def propagate_classification
     pass_query_params
     name = find_or_goto_index(Name, params[:id])
@@ -80,7 +80,7 @@ class NameController
   end
 
   def make_sure_name_is_genus!(name)
-    return true if name.rank == :Genus
+    return true if name.rank == "Genus"
 
     flash_error("only works on genera!")
     redirect_with_query(name.show_link_args)

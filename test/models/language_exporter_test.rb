@@ -127,8 +127,9 @@ class LanguageExporterTest < UnitTestCase
     use_test_locales do
       @official.write_export_file_lines(export_data)
       result = @official.send_private(message)
-      msg = assert_message("#{export_data}\n should have " +
-                           (pass ? "passed" : "failed"))
+      msg = assert_message(
+        "#{export_data}\n should have #{pass ? "passed" : "failed"}"
+      )
       assert(pass ? result : !result, msg)
       Language.clear_verbose_messages
     end

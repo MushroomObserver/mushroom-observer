@@ -123,9 +123,9 @@ class API2
       end
 
       def range_yyyymmddhhmmss(str)
-        match = str.match(/^#{YYYYMMDDHHMMSS1}$/) ||
-                str.match(/^#{YYYYMMDDHHMMSS2}$/) ||
-                str.match(/^#{YYYYMMDDHHMMSS3}$/)
+        match = str.match(/^#{YYYYMMDDHHMMSS1}$/o) ||
+                str.match(/^#{YYYYMMDDHHMMSS2}$/o) ||
+                str.match(/^#{YYYYMMDDHHMMSS3}$/o)
         return unless match
 
         str  = "#{strip_time(str)} UTC"
@@ -134,9 +134,9 @@ class API2
       end
 
       def range_yyyymmddhhmm(str)
-        match = str.match(/^#{YYYYMMDDHHMM1}$/) ||
-                str.match(/^#{YYYYMMDDHHMM2}$/) ||
-                str.match(/^#{YYYYMMDDHHMM3}$/)
+        match = str.match(/^#{YYYYMMDDHHMM1}$/o) ||
+                str.match(/^#{YYYYMMDDHHMM2}$/o) ||
+                str.match(/^#{YYYYMMDDHHMM3}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -146,9 +146,9 @@ class API2
       end
 
       def range_yyyymmddhh(str)
-        match = str.match(/^#{YYYYMMDDHH1}$/) ||
-                str.match(/^#{YYYYMMDDHH2}$/) ||
-                str.match(/^#{YYYYMMDDHH3}$/)
+        match = str.match(/^#{YYYYMMDDHH1}$/o) ||
+                str.match(/^#{YYYYMMDDHH2}$/o) ||
+                str.match(/^#{YYYYMMDDHH3}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -158,9 +158,9 @@ class API2
       end
 
       def range_yyyymmdd(str)
-        match = str.match(/^#{YYYYMMDD1}$/) ||
-                str.match(/^#{YYYYMMDD2}$/) ||
-                str.match(/^#{YYYYMMDD3}$/)
+        match = str.match(/^#{YYYYMMDD1}$/o) ||
+                str.match(/^#{YYYYMMDD2}$/o) ||
+                str.match(/^#{YYYYMMDD3}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -170,9 +170,9 @@ class API2
       end
 
       def range_yyyymm(str)
-        match = str.match(/^#{YYYYMM1}$/) ||
-                str.match(/^#{YYYYMM2}$/) ||
-                str.match(/^#{YYYYMM3}$/)
+        match = str.match(/^#{YYYYMM1}$/o) ||
+                str.match(/^#{YYYYMM2}$/o) ||
+                str.match(/^#{YYYYMM3}$/o)
         return unless match
 
         str  = "#{strip_time(str)}01"
@@ -184,7 +184,7 @@ class API2
       end
 
       def range_yyyy(str)
-        match = str.match(/^#{YYYY}$/)
+        match = str.match(/^#{YYYY}$/o)
         return unless match
 
         str  = strip_time(str)
@@ -194,9 +194,9 @@ class API2
       end
 
       def scalar_yyyymmddhhmmss(str)
-        match = str.match(/^#{YYYYMMDDHHMMSS1}$/) ||
-                str.match(/^#{YYYYMMDDHHMMSS2}$/) ||
-                str.match(/^#{YYYYMMDDHHMMSS3}$/)
+        match = str.match(/^#{YYYYMMDDHHMMSS1}$/o) ||
+                str.match(/^#{YYYYMMDDHHMMSS2}$/o) ||
+                str.match(/^#{YYYYMMDDHHMMSS3}$/o)
         raise(ArgumentError) unless match
 
         str = "#{strip_time(str)} UTC"

@@ -72,7 +72,7 @@ module Types
       # field :location, Types::Models::LocationType, null: true
 
       # has many
-      # field :api_keys, [Types::Models::ApiKeyType], null: true
+      # field :api_keys, [Types::Models::APIKeyType], null: true
       # field :comments, [Types::Models::CommentType], null: true
       # field :donations, [Types::Models::DonationType], null: true
       # field :external_links, [Types::Models::ExternalLinkType], null: true

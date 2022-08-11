@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Name Tracking Email
-
 class QueuedEmail::NameTracking < QueuedEmail
   def notification
     get_object(:notification, Notification)

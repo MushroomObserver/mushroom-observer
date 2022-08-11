@@ -6,7 +6,6 @@ module PatternSearch
   #   elsif term.var == :specimen
   #     args[:has_specimen] = term.parse_boolean_string
   class Term
-    require_dependency "pattern_search/term/dates"
     include Dates
 
     attr_accessor :var, :vals
@@ -17,7 +16,7 @@ module PatternSearch
     end
 
     CONTAINS_QUOTES =
-      /^("([^"\\]+|\\.)*"|'([^"\\]+|\\.)*'|[^"',]*)(\s*,\s*|$)/.freeze
+      /^("([^"\\]+|\\.)*"|'([^"\\]+|\\.)*'|[^"',]*)(\s*,\s*|$)/
 
     def <<(val)
       while val.to_s =~ CONTAINS_QUOTES
@@ -29,7 +28,7 @@ module PatternSearch
 
     def quote(val)
       if /['" \\]/.match?(val.to_s)
-        '"' + val.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
+        %("#{val.to_s.gsub(/(['"\\])/) { |v| "\\#{v}" }}")
       else
         val.to_s
       end
@@ -227,7 +226,7 @@ module PatternSearch
     end
 
     def alt_rank_check(rank, val)
-      if [:Phylum, :Group].include?(rank)
+      if %w[Phylum Group].include?(rank)
         ranks = :"rank_alt_#{rank.to_s.downcase}".l.split(",")
         ranks.map(&:strip).include?(val)
       else

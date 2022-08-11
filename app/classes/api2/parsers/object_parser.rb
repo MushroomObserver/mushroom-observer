@@ -36,7 +36,7 @@ class API2
           val = model.safe_find(id)
           return val if val
 
-          raise ObjectNotFoundById.new(str, model)
+          raise(ObjectNotFoundById.new(str, model))
         end
         raise(BadLimitedParameterValue.new(str, limit.map(&:type_tag)))
       end

@@ -99,12 +99,8 @@ class CommentController < ApplicationController
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_target
-    model = begin
-              params[:type].to_s.constantize
-            rescue StandardError
-              nil
-            end
-    if !model || !model.acts_like?(:model)
+    model = Comment.safe_model_from_name(params[:type])
+    if !model
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(action: :list_comments)
@@ -210,13 +206,13 @@ class CommentController < ApplicationController
     return unless request.method == "POST"
 
     @comment.attributes = whitelisted_comment_params if params[:comment]
-    if !@comment.save
-      flash_object_errors(@comment)
-    else
+    if @comment.save
       @comment.log_create
       flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
       redirect_with_query(controller: @target.show_controller,
                           action: @target.show_action, id: @target.id)
+    else
+      flash_object_errors(@comment)
     end
   end
 

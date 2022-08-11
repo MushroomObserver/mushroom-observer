@@ -158,7 +158,7 @@ class RssLog < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    :rss_logs
   end
 
   # List of all object types that can have RssLog's.  (This is the order they
@@ -437,7 +437,7 @@ class RssLog < AbstractModel
   end
 
   def decode_time(str)
-    Time.parse(str).in_time_zone
+    Time.parse(str + "+0000").in_time_zone
   rescue StandardError
     Time.zone.now
   end

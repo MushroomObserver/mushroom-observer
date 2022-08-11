@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see app/models/comment.rb
-class Comment
+module Comment::Callbacks
   # Callback called after creation.  Lots of people potentially can receive
   # an email whenever a Comment is posted:
   #
@@ -31,10 +31,10 @@ class Comment
   # the same comment.
   def oil_and_water
     user_ids = users_with_other_comments.map(&:id).sort
-    return unless (user_ids & MO.water_users).any?
-    return unless (user_ids & MO.oil_users).any?
+    return unless (user_ids & ::MO.water_users).any?
+    return unless (user_ids & ::MO.oil_users).any?
 
-    WebmasterEmail.build(
+    ::WebmasterEmail.build(
       MO.noreply_email_address,
       oil_and_water_content(user_ids),
       oil_and_water_subject
@@ -98,20 +98,20 @@ class Comment
 
   USER_LINK_PAT = /
     (?:^|\W) _+user\s+ ([^_\s](?:[^_\n]+[^_\s])?) _+ (?!\w)
-  /xi.freeze
+  /xi
   AT_USER_AT_PAT = /
     (?:^|\W) @ ([^@\s][^@\n]+[^@\s]) @ (?=\W|$)
-  /x.freeze
+  /x
   AT_USER_PAT = /
     (?:^|\W) @ (\w+) (?=[^@]|$)
-  /x.freeze
+  /x
 
   def highlighted_users(str)
     users = []
     users += search_for_highlighted_users(str, USER_LINK_PAT)
     users += search_for_highlighted_users(str, AT_USER_AT_PAT)
     users += search_for_highlighted_users(str, AT_USER_PAT)
-    users.uniq.reject(&:nil?)
+    users.uniq.compact
   end
 
   def search_for_highlighted_users(str, regex)

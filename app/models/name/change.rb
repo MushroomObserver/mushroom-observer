@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Name < AbstractModel
+module Name::Change
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
   #
@@ -32,9 +32,9 @@ class Name < AbstractModel
   #   name.save
   #
   def change_author(new_author)
-    return if rank == :Group
+    return if rank == "Group"
 
-    new_author2 = new_author.blank? ? "" : " " + new_author
+    new_author2 = new_author.blank? ? "" : " #{new_author}"
     self.author = new_author.to_s
     self.search_name  = text_name + new_author2
     self.sort_name    = Name.format_sort_name(text_name, new_author)

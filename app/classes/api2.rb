@@ -38,7 +38,7 @@
 #  :observation corresponds to API2::Observation.  The primary actions each
 #  correspond to one of the main object types:
 #
-#    :api_key               ApiKey's
+#    :api_key               APIKey's
 #    :comment               Comment's (on observations, names, etc.)
 #    :image                 Image's
 #    :image_vote            Vote's on image quality
@@ -106,7 +106,7 @@
 #  results::              List of objects found / updated.
 #  errors::               List of errors.
 #  user::                 Authenticated user making request.
-#  api_key::              ApiKey used to authenticate.
+#  api_key::              APIKey used to authenticate.
 #  version::              Version number of this request.
 #  query::                Rough copy of SQL query used.
 #  number::               Number of matching objects.
@@ -114,30 +114,51 @@
 #  pages::                Number of pages available.
 #
 class API2
-  require_dependency "api2/errors"
-  require_dependency "api2/base"
-  require_dependency "api2/parameters"
-  require_dependency "api2/results"
-  require_dependency "api2/upload"
-  require_dependency "api2/model_api"
-  require_dependency "api2/parsers/base"
-  require_dependency "api2/helpers"
+  API_VERSION = 2.0
 
-  # (subclasses should be auto-loaded if named right? no, but why?)
-  Dir.glob("#{::Rails.root}/app/classes/api2/*_api.rb").each do |file|
-    next if file !~ %r{(api2/\w+_api)\.rb$}
-    next if Regexp.last_match(1) == "api2/model_api"
+  include Helpers
+  include Uploads
+  include Results
+  include Parameters
+  include Base
 
-    require_dependency Regexp.last_match(1)
+  def self.version
+    API_VERSION
   end
-end
 
-# Sometimes the Rails router insists on trying to autoload the constant 'Api2'
-# and expects this file to do so.  It doesn't need to, but that doesn't seem
-# to matter, Rails insists on doing so anyway.  It's requests of the form
-# "/api2/table/id" which cause this to happen.  Yes, they are poorly formed
-# requests, but people seem to try it all the time anyway.  I'm tired of
-# ignoring the error messages that result.  This stops the error message...
-# and in fact appears to cause these poorly-formed requests to work, too.
-class Api2
+  attr_accessor :params, :method, :action, :version, :user, :api_key, :errors
+
+  # Give other modules ability to do additional initialization.
+  class_attribute :initializers
+  self.initializers = []
+
+  ### PARAMETERS ###
+
+  attr_accessor :expected_params, :ignore_params
+
+  initializers << lambda do
+    self.expected_params = {}
+    self.ignore_params   = {}
+    parse(:string, :action)
+  end
+
+  ### RESULTS ###
+
+  class_attribute :model, :table, :high_detail_includes, :low_detail_includes,
+                  :high_detail_page_length, :low_detail_page_length,
+                  :put_page_length, :delete_page_length
+
+  self.high_detail_includes = []
+  self.low_detail_includes  = []
+  self.high_detail_page_length = 10
+  self.low_detail_page_length  = 100
+  self.put_page_length         = 1000
+  self.delete_page_length      = 1000
+
+  attr_accessor :query, :detail, :page_number
+
+  initializers << lambda do
+    self.detail = parse(:enum, :detail, limit: [:none, :low, :high]) || :none
+    self.page_number = parse(:integer, :page, default: 1)
+  end
 end

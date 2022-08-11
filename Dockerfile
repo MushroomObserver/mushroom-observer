@@ -1,4 +1,4 @@
-FROM ruby:2.7.6
+FROM ruby:3.0.4
 
 ENV LANG C.UTF-8
 ENV APP_HOME /moApp

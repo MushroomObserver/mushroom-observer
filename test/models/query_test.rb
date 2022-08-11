@@ -317,7 +317,7 @@ class QueryTest < UnitTestCase
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` " \
-      "JOIN `observations` ON observations.name_id = names.id "\
+      "JOIN `observations` ON observations.name_id = names.id " \
       "JOIN `rss_logs` ON observations.rss_log_id = rss_logs.id",
       clean(query.query(join: { observations: :rss_logs }))
     )
@@ -385,7 +385,7 @@ class QueryTest < UnitTestCase
     # Joins should include these:
     #   names => observations => locations
     #   names => observations => comments
-    #   names => observations => images_observations => images
+    #   names => observations => observation_images => images
     #   names => users (as reviewer)
     sql = query.query(
       join: [
@@ -393,10 +393,10 @@ class QueryTest < UnitTestCase
           observations: [
             :locations,
             :comments,
-            { images_observations: :images }
+            { observation_images: :images }
           ]
         },
-        :'users.reviewer'
+        :"users.reviewer"
       ]
     )
     assert_match(/names.reviewer_id = users.id/, sql)
@@ -404,8 +404,8 @@ class QueryTest < UnitTestCase
     assert_match(/observations.location_id = locations.id/, sql)
     assert_match(/comments.target_id = observations.id/, sql)
     assert_match(/comments.target_type = (['"])Observation\1/, sql)
-    assert_match(/images_observations.observation_id = observations.id/, sql)
-    assert_match(/images_observations.image_id = images.id/, sql)
+    assert_match(/observation_images.observation_id = observations.id/, sql)
+    assert_match(/observation_images.image_id = images.id/, sql)
   end
 
   def test_reverse_order
@@ -463,7 +463,8 @@ class QueryTest < UnitTestCase
                   names(:agaricus).id.to_s,
                   names(:agaricus_campestrus).id.to_s,
                   names(:agaricus_campestras).id.to_s,
-                  names(:agaricus_campestros).id.to_s].sort,
+                  names(:agaricus_campestros).id.to_s,
+                  names(:sect_agaricus).id.to_s].sort,
                  query.select_values(where: 'text_name LIKE "Agaricus%"').
                        map(&:to_s).sort)
 
@@ -479,8 +480,10 @@ class QueryTest < UnitTestCase
     assert_equal({ "id" => Name.first.id }, query.select_one)
 
     assert_equal([Name.first], query.find_by_sql(limit: 1))
-    assert_equal(@agaricus.children.sort_by(&:id),
-                 query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
+    assert_name_list_equal(
+      @agaricus.children(all: true).sort_by(&:id),
+      query.find_by_sql(where: 'text_name LIKE "Agaricus %"')
+    )
   end
 
   def test_tables_used
@@ -492,10 +495,10 @@ class QueryTest < UnitTestCase
 
     query = Query.lookup(:Image, :all, by: :name)
 
-    assert_equal([:images, :images_observations, :names, :observations],
+    assert_equal([:images, :names, :observation_images, :observations],
                  query.tables_used)
     assert_equal(true, query.uses_table?(:images))
-    assert_equal(true, query.uses_table?(:images_observations))
+    assert_equal(true, query.uses_table?(:observation_images))
     assert_equal(true, query.uses_table?(:names))
     assert_equal(true, query.uses_table?(:observations))
     assert_equal(false, query.uses_table?(:comments))
@@ -509,7 +512,7 @@ class QueryTest < UnitTestCase
       Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id, roy.id]) -
         query.result_ids
     )
-    assert_equal(roy.location_format, :scientific)
+    assert_equal(roy.location_format, "scientific")
     assert_equal(
       Set.new,
       Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results
@@ -555,7 +558,7 @@ class QueryTest < UnitTestCase
       @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
     )
     assert_equal(@names.size, @pages.num_total)
-    assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_name_list_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -589,7 +592,7 @@ class QueryTest < UnitTestCase
     assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_equal(@ells[3..5], @query.paginate(@pages))
+    assert_name_list_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator
@@ -1265,7 +1268,7 @@ class QueryTest < UnitTestCase
     # between controllers while browsing the results, but still worth testing
     # this old mechanism, just in case.)
 
-    # This is the default query for list_rss_logs.
+    # This is the default query for index.
     q1 = Query.lookup_and_save(:RssLog)
 
     # Click through to an item (User is expected to fail).
@@ -1806,7 +1809,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_of_name
-    assert_query(Image.joins(:images_observations, :observations).
+    assert_query(Image.joins(:observation_images, :observations).
                        where(observations: { name: names(:fungi) }),
                  :Image, :with_observations, names: [names(:fungi).id])
     assert_query([images(:connected_coprinus_comatus_image).id],
@@ -3198,12 +3201,12 @@ class QueryTest < UnitTestCase
     elgin_co = locations(:elgin_co)
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     assert_query([albion, elgin_co], :Location, :in_set,
                  ids: [albion.id, elgin_co.id], by: :name)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     assert_query([elgin_co, albion], :Location, :in_set,
                  ids: [albion.id, elgin_co.id], by: :name)
 
@@ -3213,12 +3216,12 @@ class QueryTest < UnitTestCase
     obs2.update(location: elgin_co)
 
     User.current = rolf
-    assert_equal(:postal, User.current_location_format)
+    assert_equal("postal", User.current_location_format)
     assert_query([obs1, obs2], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
-    assert_equal(:scientific, User.current_location_format)
+    assert_equal("scientific", User.current_location_format)
     assert_query([obs2, obs1], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
   end

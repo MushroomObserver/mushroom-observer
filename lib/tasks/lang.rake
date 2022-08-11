@@ -36,7 +36,7 @@ def define_tasks(action, verbose, verbose_method, description)
   end
 
   all_locales.each do |locale|
-    desc description.gsub(/XXX/, locale).gsub(/\(S\)/, "")
+    desc(description.gsub(/XXX/, locale).gsub(/\(S\)/, ""))
     task(locale => :setup) do |task|
       lang = Language.find_by(locale: task.name.sub(/.*:/, ""))
       lang.verbose(verbose + " " + lang.send(verbose_method))
@@ -46,8 +46,9 @@ def define_tasks(action, verbose, verbose_method, description)
 end
 
 namespace :lang do
-  desc "Check syntax of official export file, integrate changes into database,"\
-       " refresh YAML and export files."
+  desc "Check syntax of official export file, " \
+       "integrate changes into database, " \
+       "refresh YAML and export files."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file

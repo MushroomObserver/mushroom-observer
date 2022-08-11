@@ -92,7 +92,7 @@ class Vote < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    "/observer"
+    :observations
   end
 
   # This is used to mean "delete my vote".
@@ -222,7 +222,7 @@ class Vote < AbstractModel
   # This is the first step: abstracting it as a method on Vote instance.
   # Now we are free to change the implementation later.
   def anonymous?
-    (user.votes_anonymous == :yes) ||
+    (user.votes_anonymous == "yes") ||
       (user.votes_anonymous == :old &&
        updated_at <= Time.zone.parse(MO.vote_cutoff))
   end

@@ -18,11 +18,7 @@ xml.tag!(
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
-  if !detail
-    if object.synonym_id
-      xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
-    end
-  else
+  if detail
     if object.synonym_id
       xml.synonyms(number: object.synonyms.length - 1) do
         (object.synonyms - [object]).each do |synonym|
@@ -48,5 +44,7 @@ xml.tag!(
         end
       end
     end
+  elsif object.synonym_id
+    xml_minimal_object(xml, :synonym, :synonym, object.synonym_id)
   end
 end

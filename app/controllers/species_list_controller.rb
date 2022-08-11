@@ -216,7 +216,8 @@ class SpeciesListController < ApplicationController
   def print_labels
     species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     query = lookup_species_list_query(species_list)
-    redirect_with_query({ controller: :observer, action: :print_labels }, query)
+    redirect_with_query({ controller: :observations, action: :print_labels },
+                        query)
   end
 
   def lookup_species_list_query(list)
@@ -271,14 +272,13 @@ class SpeciesListController < ApplicationController
   def render_name_list_as_rtf(names)
     charset = "UTF-8"
     doc = RTF::Document.new(RTF::Font::SWISS)
+    reportable_ranks = %w[Genus Species Subspecies Variety Form]
     names.each do |name|
       rank      = name.rank
       text_name = name.real_text_name
       author    = name.author
-      node = name.deprecated ? doc : doc.bold
-      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
-        node = node.italic
-      end
+      node      = name.deprecated ? doc : doc.bold
+      node      = node.italic if reportable_ranks.include?(rank)
       node << text_name
       doc << " #{author}" if author.present?
       doc.line_break
@@ -314,7 +314,7 @@ class SpeciesListController < ApplicationController
         Name.find_by(text_name: name)
       end
     end
-    @names.reject!(&:nil?)
+    @names.compact!
     case params[:commit]
     when :name_lister_submit_spl.l
       if @user
@@ -340,14 +340,14 @@ class SpeciesListController < ApplicationController
 
   def create_species_list
     @species_list = SpeciesList.new
-    if request.method != "POST"
+    if request.method == "POST"
+      process_species_list(:create)
+    else
       init_name_vars_for_create
       init_member_vars_for_create
       init_project_vars_for_create
       init_name_vars_for_clone(params[:clone]) if params[:clone].present?
       @checklist ||= calc_checklist
-    else
-      process_species_list(:create)
     end
   end
 
@@ -484,12 +484,9 @@ class SpeciesListController < ApplicationController
     # This is apparently extremely inefficient.  Danny says it times out for
     # large species_lists, such as "Neotropical Fungi".
     # species_list.observation_ids += ids
-    Observation.connection.insert(%(
-      INSERT INTO observations_species_lists
-        (observation_id, species_list_id)
-      VALUES
-        #{ids.map { |id| "(#{id},#{species_list.id})" }.join(",")}
-    ))
+    SpeciesListObservation.insert_all(
+      ids.map { |id| { observation_id: id, species_list_id: species_list.id } }
+    )
     flash_notice(:species_list_add_remove_add_success.t(num: ids.length))
   end
 
@@ -550,9 +547,7 @@ class SpeciesListController < ApplicationController
   def manage_projects
     return unless (@list = find_or_goto_index(SpeciesList, params[:id].to_s))
 
-    if !check_permission!(@list)
-      redirect_to(action: "show_species_list", id: @list.id)
-    else
+    if check_permission!(@list)
       @projects = projects_to_manage
       @object_states = manage_object_states
       @project_states = manage_project_states
@@ -573,6 +568,8 @@ class SpeciesListController < ApplicationController
           flash_error("Invalid submit button: #{params[:commit].inspect}")
         end
       end
+    else
+      redirect_to(action: "show_species_list", id: @list.id)
     end
   end
 
@@ -810,9 +807,7 @@ class SpeciesListController < ApplicationController
     # (construct_observations) create the observations.  This always succeeds,
     # so we can redirect to show_species_list (or chain to create_location).
     if !failed && @dubious_where_reasons == []
-      if !@species_list.save
-        flash_object_errors(@species_list)
-      else
+      if @species_list.save
         if create_or_update == :create
           @species_list.log(:log_species_list_created)
           id = @species_list.id
@@ -833,6 +828,8 @@ class SpeciesListController < ApplicationController
           redirect_to(action: "show_species_list", id: @species_list)
         end
         redirected = true
+      else
+        flash_object_errors(@species_list)
       end
     end
 
@@ -966,7 +963,7 @@ class SpeciesListController < ApplicationController
   def checklist_from_image_query(query)
     query.select_rows(
       select: "DISTINCT names.display_name, names.id",
-      join: { images_observations: { observations: :names } },
+      join: { observation_images: { observations: :names } },
       limit: 1000
     )
   end

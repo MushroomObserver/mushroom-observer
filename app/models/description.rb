@@ -33,7 +33,7 @@
 #  note_status::          Return some basic stats on notes fields.
 #
 #  ==== Source Info
-#  source_type::          Category of source, e.g. :public, :project, :user.
+#  source_type::          Category of source, e.g. "public", "project", "user".
 #  source_name::          Source identifier (e.g., Project title).
 #  source_object::        Return reference to object representing source.
 #  belongs_to_project?::  Does this Description belong to a given Project?
@@ -235,16 +235,20 @@ class Description < AbstractModel
 
   # Note, this is the order they will be listed in show_name.
   ALL_SOURCE_TYPES = [
-    :public,    # Public ones created by any user.
-    :foreign,   # Foreign "public" description(s) written on another server.
-    :source,    # Derived from another source, e.g. another website or book.
-    :project,   # Draft created for a project.
-    :user       # Created by an individual user.
+    "public",    # Public ones created by any user.
+    "foreign",   # Foreign "public" description(s) written on another server.
+    "source",    # Derived from another source, e.g. another website or book.
+    "project",   # Draft created for a project.
+    "user"       # Created by an individual user.
   ].freeze
 
-  # Return an Array of source type Symbols, e.g. :public, :project, etc.
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
   def self.all_source_types
     ALL_SOURCE_TYPES
+    # NOTE: Why not keep this simple and just load them in order of the enums?
+    # source_types.map do |name, _integer|
+    #   name
+    # end
   end
 
   # Retreive object representing the source (if applicable).  Presently, this
@@ -253,15 +257,15 @@ class Description < AbstractModel
   def source_object
     case source_type
     # (this may eventually be replaced with source_id)
-    when :project then project
-    when :source then nil # (haven't created "Source" model yet)
-    when :user then user
+    when "project" then project
+    when "source" then nil # (haven't created "Source" model yet)
+    when "user" then user
     end
   end
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == :project) &&
+    (source_type == "project") &&
       (project_id == project.id)
   end
 
@@ -273,7 +277,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name}_admins".to_sym
+    "#{table_name.singularize}_admins".to_sym
   end
 
   # Wrapper around class method of same name
@@ -283,7 +287,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name}_writers".to_sym
+    "#{table_name.singularize}_writers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -293,7 +297,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name}_readers".to_sym
+    "#{table_name.singularize}_readers".to_sym
   end
 
   # Wrapper around class method of same name
@@ -396,12 +400,18 @@ class Description < AbstractModel
     @group_users[table] ||= User.where(id: group_user_ids(table)).to_a
   end
 
+  private
+
   # Do minimal query to enumerate the users in a list of groups.  Return as an
   # Array of ids.  Caches result.
   def group_user_ids(table)
     @group_user_ids ||= {}
     @group_user_ids[table] ||=
-      self.class.connection.select_values(select_group_user_ids(table).to_sql)
+      table.to_s.classify.constantize.
+      joins(user_group: :user_group_users).
+      where("#{type_tag}_id" => id).
+      order(user_id: :asc).distinct.
+      pluck(:user_id)
   end
 
   # Do minimal query to enumerate a list of groups.  Return as an Array of ids.
@@ -409,23 +419,10 @@ class Description < AbstractModel
   def group_ids(table)
     @group_ids ||= {}
     @group_ids[table] ||=
-      self.class.connection.select_values(select_group_ids(table).to_sql)
-  end
-
-  private
-
-  def select_group_user_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    ugu = Arel::Table.new(:user_groups_users)
-    table.join(ugu).on(table[:"#{type_tag}_id"].eq(id).
-        and(table[:user_group_id].eq(ugu[:user_group_id]))).distinct.
-      project(ugu[:user_id]).order(ugu[:user_id].asc)
-  end
-
-  def select_group_ids(table)
-    table = Arel::Table.new(table.to_sym)
-    table.where(table[:"#{type_tag}_id"].eq(id)).distinct.
-      project(table[:user_group_id]).order(table[:user_group_id].asc)
+      table.to_s.classify.constantize.
+      where("#{type_tag}_id" => id).
+      order(user_group_id: :asc).distinct.
+      pluck(:user_group_id)
   end
 
   public
@@ -438,7 +435,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name}_authors".to_sym
+    "#{table_name.singularize}_authors".to_sym
   end
 
   # Wrapper around class method of same name
@@ -448,7 +445,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name}_editors".to_sym
+    "#{table_name.singularize}_editors".to_sym
   end
 
   # Wrapper around class method of same name

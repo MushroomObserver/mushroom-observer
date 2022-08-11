@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Synonyms of Names
-class Name < AbstractModel
+module Name::Synonymy
   # Returns "Deprecated" or "Valid" in the local language.
   def status
     deprecated ? :DEPRECATED.l : :ACCEPTED.l

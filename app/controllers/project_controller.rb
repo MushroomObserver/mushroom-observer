@@ -106,7 +106,7 @@ class ProjectController < ApplicationController
   ##############################################################################
 
   # Display project by itself.
-  # Linked from: show_observation, list_projects
+  # Linked from: observations/show, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
   def show_project
@@ -119,7 +119,7 @@ class ProjectController < ApplicationController
     @is_admin = @project.is_admin?(@user)
     @drafts = NameDescription.
               joins(:admin_groups).
-              where("name_descriptions_admins.user_group_id":
+              where("name_description_admins.user_group_id":
                     @project.admin_group_id).
               includes(:name, :user)
   end
@@ -231,8 +231,8 @@ class ProjectController < ApplicationController
   end
 
   # Callback to destroy a project.
-  # Linked from: show_project, show_observation
-  # Redirects to show_observation.
+  # Linked from: show_project, observations/show
+  # Redirects to observations/show.
   # Inputs: params[:id]
   # Outputs: none
   def destroy_project

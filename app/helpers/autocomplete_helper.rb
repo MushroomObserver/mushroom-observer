@@ -38,13 +38,13 @@ module AutocompleteHelper
 
   # Make text_field auto-complete for Location display name.
   def turn_into_location_auto_completer(id, opts = {})
-    format = if @user && @user.location_format == :scientific
+    format = if @user && @user.location_format == "scientific"
                "?format=scientific"
              else
                ""
              end
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/location/@" + format,
+      ajax_url: "/ajax/auto_complete/location/@#{format}",
       unordered: true
     }.merge(opts))
   end
@@ -99,15 +99,15 @@ module AutocompleteHelper
     opts.each_pair do |key, val|
       if key.to_s == "primer"
         list = val ? val.reject(&:blank?).map(&:to_s).uniq.join("\n") : ""
-        js_args << "primer: '" + escape_javascript(list) + "'"
+        js_args << "primer: '#{escape_javascript(list)}'"
       else
         if !key.to_s.start_with?("on") &&
            !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
-          val = "'" + escape_javascript(val.to_s) + "'"
+          val = "'#{escape_javascript(val.to_s)}'"
         end
         js_args << "#{key}: #{val}"
       end
     end
-    "{ " + js_args.join(", ") + " }"
+    "{ #{js_args.join(", ")} }"
   end
 end

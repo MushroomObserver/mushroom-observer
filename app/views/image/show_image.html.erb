@@ -7,7 +7,8 @@
     obs = @image.observations.first
     tabs += [
       link_with_query(:show_object.t(type: :observation),
-                      controller: :observer, action: :show_observation, id: obs.id),
+                      controller: :observations,
+                      action: :show, id: obs.id),
       link_with_query(:show_object.t(type: :name),
                       controller: :name, action: :show_name, id: obs.name.id),
       link_to(:google_images.t, "http://images.google.com/images?q=#{obs.name.search_name}")
@@ -26,7 +27,7 @@
     ]
   end
   if @image.user.email_general_commercial
-    tabs << link_with_query(:image_show_inquiry.t, controller: :observer,
+    tabs << link_with_query(:image_show_inquiry.t, controller: :emails,
                             action: :commercial_inquiry, id: @image.id)
   end
   @tabsets = {
@@ -91,7 +92,7 @@
             <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
           <% end %>
           <% if !@image.original_name.blank? &&
-                (check_permission(@image) || @image.user && @image.user.keep_filenames == :keep_and_show) %>
+                (check_permission(@image) || @image.user && @image.user.keep_filenames == "keep_and_show") %>
             <%= @image.original_name %>
           <% end %>
         </div>
@@ -173,7 +174,7 @@
             <%= link_with_query(user.format_name.t, user.show_link_args) %>
           </div>
         <% end %>
-        <% @image.all_glossary_terms.each do |glossary_term| %>
+        <% @image.glossary_terms.each do |glossary_term| %>
           <div>
             <%= :GLOSSARY_TERM.t %>:
             <%= link_with_query(glossary_term.format_name.t, glossary_term.show_link_args) %>
@@ -189,6 +190,12 @@
     <% if reviewer? %>
       <div class="push-up text-center">
         <%= set_export_status_controls(@image) %>
+      </div>
+    <% end %>
+
+    <% if reviewer? %>
+      <div class="push-up text-center">
+        <%= set_ml_status_controls(@image) %>
       </div>
     <% end %>
 

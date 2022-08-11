@@ -221,37 +221,41 @@ class Image < AbstractModel
   require "fileutils"
   require "net/http"
 
-  has_and_belongs_to_many :observations
-  has_and_belongs_to_many :projects
-  has_and_belongs_to_many :glossary_terms
+  has_many :observation_images, dependent: :destroy
+  has_many :observations, through: :observation_images
+
+  has_many :project_images, dependent: :destroy
+  has_many :projects, through: :project_images
+
+  has_many :glossary_term_images, dependent: :destroy
+  has_many :glossary_terms, through: :glossary_term_images
+
   has_many :thumb_clients, class_name: "Observation",
-                           foreign_key: "thumb_image_id"
+                           foreign_key: "thumb_image_id",
+                           inverse_of: :observation
   has_many :image_votes
   belongs_to :user
   belongs_to :license
-  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
-  has_many :subjects, class_name: "User", foreign_key: "image_id"
-  has_many(:best_glossary_terms,
-           class_name: "GlossaryTerm",
-           foreign_key: "thumb_image_id",
-           inverse_of: :thumb_image)
-
-  has_many :copyright_changes, as: :target, dependent: :destroy
+  belongs_to :reviewer, class_name: "User"
+  has_many :subjects, class_name: "User"
+  has_many :best_glossary_terms, class_name: "GlossaryTerm",
+                                 foreign_key: "thumb_image_id",
+                                 inverse_of: :thumb_image
+  has_many :copyright_changes, as: :target,
+                               dependent: :destroy,
+                               inverse_of: :target
 
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  def all_glossary_terms
-    best_glossary_terms + glossary_terms
-  end
-
-  def get_subjects
-    observations + subjects + best_glossary_terms + glossary_terms
+  # Array of all observations, users and glossary terms using this image.
+  def all_subjects
+    observations + subjects + glossary_terms
   end
 
   # Is image used by an object other than obj
   def other_subjects?(obj)
-    (get_subjects - [obj]).present?
+    (all_subjects - [obj]).present?
   end
 
   # Create plain-text title for image from observations, appending image id to
@@ -262,7 +266,7 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = get_subjects.map(&:text_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:text_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -278,7 +282,7 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = get_subjects.map(&:format_name).uniq.sort.join(" & ")
+    title = all_subjects.map(&:format_name).uniq.sort.join(" & ")
     if title.blank?
       :image.l + " ##{id || "?"}"
     else
@@ -324,7 +328,7 @@ class Image < AbstractModel
   end
 
   def image_url(size)
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: transferred,
@@ -333,7 +337,7 @@ class Image < AbstractModel
   end
 
   def self.image_url(size, id, args = {})
-    Image::Url.new(
+    Image::URL.new(
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
@@ -387,28 +391,13 @@ class Image < AbstractModel
     when "image/gif" then "gif"
     when "image/png" then "png"
     when "image/tiff" then "tiff"
-    when "image/bmp" then "bmp"
-    when "image/x-ms-bmp" then "bmp"
+    when "image/bmp", "image/x-ms-bmp" then "bmp"
     else; "raw"
     end
   end
 
   def extension(size)
     size == :original ? original_extension : "jpg"
-  end
-
-  def has_size?(size)
-    max = width.to_i > height.to_i ? width.to_i : height.to_i
-    case size.to_s
-    when "thumbnail" then true
-    when "small" then max > 160
-    when "medium" then max > 320
-    when "large" then max > 640
-    when "huge" then max > 960
-    when "full_size" then max > 1280
-    when "original" then true
-    else; false
-    end
   end
 
   # Calculate the approximate dimensions of the image of the given size.
@@ -626,7 +615,7 @@ class Image < AbstractModel
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     return unless name.present? && User.current &&
-                  User.current.keep_filenames != :toss
+                  User.current.keep_filenames != "toss"
 
     self.original_name = name
   end
@@ -661,7 +650,7 @@ class Image < AbstractModel
           result = true
         rescue StandardError => e
           errors.add(:image,
-                     "Unexpected error while copying attached file "\
+                     "Unexpected error while copying attached file " \
                      "to temp file. Error class #{e.class}: #{e}")
           result = false
         end
@@ -692,9 +681,7 @@ class Image < AbstractModel
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
-      if !move_original
-        result = false
-      else
+      if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
@@ -704,6 +691,8 @@ class Image < AbstractModel
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
+      else
+        result = false
       end
     end
     result
@@ -983,15 +972,13 @@ class Image < AbstractModel
     data, old_name, user
   )
     data.map do |id, year, lic|
-      Hash[
-        "user_id" => user.id,
+      { "user_id" => user.id,
         "updated_at" => Time.zone.now,
         "target_type" => "Image",
         "target_id" => id,
         "year" => year,
         "name" => old_name,
-        "license_id" => lic
-      ]
+        "license_id" => lic }
     end
   end
 

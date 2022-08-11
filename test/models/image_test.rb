@@ -114,9 +114,9 @@ class ImageTest < UnitTestCase
   def do_truncate_test(img, var, len)
     exes = "x" * (len - 1)
     assert_truncated_right(img, var, exes, exes)
-    assert_truncated_right(img, var, exes + "a", exes + "a")
-    assert_truncated_right(img, var, exes + "å", exes + "å")
-    assert_truncated_right(img, var, exes + "aå", "x" * (len - 3) + "...")
+    assert_truncated_right(img, var, "#{exes}a", "#{exes}a")
+    assert_truncated_right(img, var, "#{exes}å", "#{exes}å")
+    assert_truncated_right(img, var, "#{exes}aå", "#{"x" * (len - 3)}...")
   end
 
   def assert_truncated_right(img, var, set, get)
@@ -149,5 +149,17 @@ class ImageTest < UnitTestCase
         assert_raises(RuntimeError) { img.move_original }
       end
     end
+  end
+
+  def test_glossary_terms
+    img1  = images(:conic_image)
+    img2  = images(:unused_image)
+    term1 = glossary_terms(:conic_glossary_term)
+    term2 = glossary_terms(:unused_thumb_and_used_image_glossary_term)
+    assert_obj_list_equal([term1, term2].sort_by(&:id),
+                          img1.glossary_terms.sort_by(&:id))
+    assert_obj_list_equal([term1], img1.best_glossary_terms)
+    assert_obj_list_equal([term2], img2.glossary_terms)
+    assert_obj_list_equal([term2], img2.best_glossary_terms)
   end
 end

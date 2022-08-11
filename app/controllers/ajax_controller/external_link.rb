@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::ExternalLink
   # Add, edit or remove external link associated with an observation.
   # Returns link id on success.
   def external_link

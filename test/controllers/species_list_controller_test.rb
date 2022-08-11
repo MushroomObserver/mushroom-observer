@@ -39,16 +39,18 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
   end
 
-  # Controller specific asserts
-  MODIFY_PARTIALS = %w[_form_list_feedback _textilize_help _form_species_lists].
-                    freeze
-
   def assert_create_species_list
-    assert_action_partials("create_species_list", MODIFY_PARTIALS)
+    assert_template("create_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_edit_species_list
-    assert_action_partials("edit_species_list", MODIFY_PARTIALS)
+    assert_template("edit_species_list")
+    assert_template("shared/_form_list_feedback")
+    assert_template("shared/_textilize_help")
+    assert_template("species_list/_form_species_lists")
   end
 
   def assert_project_checks(project_states)
@@ -111,12 +113,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     # Show same list with non-owner logged in.
     login("mary")
     get(:show_species_list, params: { id: sl_id })
-    assert_template(:show_species_list, partial: "_show_comments")
+    assert_template(:show_species_list)
+    assert_template("comment/_show_comments")
 
     # Show non-empty list with owner logged in.
     get(:show_species_list,
         params: { id: species_lists(:unknown_species_list).id })
-    assert_template(:show_species_list, partial: "_show_comments")
+    assert_template(:show_species_list)
+    assert_template("comment/_show_comments")
   end
 
   def test_show_species_lists_attached_to_projects
@@ -450,7 +454,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_construct_species_list_new_family
     list_title = "List Title"
-    rank = :Family
+    rank = "Family"
     new_name_str = "Lecideaceae"
     new_list_str = "#{rank} #{new_name_str}"
     assert_nil(Name.find_by(text_name: new_name_str))
@@ -596,7 +600,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
-    assert_equal(:Family, new_name.rank)
+    assert_equal("Family", new_name.rank)
     assert(spl.name_included(new_name))
   end
 
@@ -696,11 +700,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert_equal("Warnerbros bugs-bunny",
-                 @controller.instance_variable_get("@list_members"))
-    assert_equal([], @controller.instance_variable_get("@new_names"))
+                 @controller.instance_variable_get(:@list_members))
+    assert_equal([], @controller.instance_variable_get(:@new_names))
     assert_equal([bugs_names.first],
-                 @controller.instance_variable_get("@multiple_names"))
-    assert_equal([], @controller.instance_variable_get("@deprecated_names"))
+                 @controller.instance_variable_get(:@multiple_names))
+    assert_equal([], @controller.instance_variable_get(:@deprecated_names))
 
     # Now re-post, having selected the other Bugs Bunny name.
     params = {
@@ -1104,7 +1108,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
-    assert_equal(list_data, @controller.instance_variable_get("@list_members"))
+    assert_equal(list_data, @controller.instance_variable_get(:@list_members))
   end
 
   def test_read_species_list_two
@@ -1124,7 +1128,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:upload_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
-    new_data = @controller.instance_variable_get("@list_members")
+    new_data = @controller.instance_variable_get(:@list_members)
     new_data = new_data.split("\r\n").sort.join("\r\n")
     assert_equal(list_data, new_data)
   end
@@ -1145,7 +1149,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
       display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
       deprecated: false,
-      rank: :Species
+      rank: "Species"
     )
 
     list = species_lists(:first_species_list)
@@ -1188,8 +1192,8 @@ class SpeciesListControllerTest < FunctionalTestCase
                                   species_list: spl)
     query_params = @controller.query_params(query)
     get(:print_labels, params: { id: spl.id })
-    assert_redirected_to(query_params.merge(controller: "observer",
-                                            action: "print_labels"))
+    assert_redirected_to(query_params.merge(controller: :observations,
+                                            action: :print_labels))
   end
 
   def test_download
@@ -1200,15 +1204,15 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     get(:download, params: { id: spl.id })
 
-    args = { controller: "observer", action: "print_labels" }
+    args = { controller: :observations, action: :print_labels }
     url = url_for(@controller.add_query_param(args, query))
     assert_select("form[action='#{url}']")
 
-    url = url_for({ controller: "species_list", action: "make_report",
+    url = url_for({ controller: :species_list, action: :make_report,
                     id: spl.id })
     assert_select("form[action='#{url}']")
 
-    args = { controller: "observer", action: "download_observations" }
+    args = { controller: :observations, action: :download }
     url = url_for(@controller.add_query_param(args, query))
     assert_select("form[action='#{url}']")
   end
@@ -1230,7 +1234,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
 
     post(:name_lister, params: params.merge(commit: :name_lister_submit_spl.l))
-    ids = @controller.instance_variable_get("@names").map(&:id)
+    ids = @controller.instance_variable_get(:@names).map(&:id)
     assert_equal([names(:amanita_baccata_borealis).id,
                   names(:coprinus_comatus).id, names(:fungi).id,
                   names(:lactarius_alpigenes).id],
@@ -1842,7 +1846,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_post_add_remove_double_observations
     spl = species_lists(:unknown_species_list)
     old_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
+      SELECT observation_id FROM species_list_observations
       WHERE species_list_id = #{spl.id}
       ORDER BY observation_id ASC
     ))
@@ -1859,7 +1863,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_flash_success
     new_obs_list = SpeciesList.connection.select_values(%(
-      SELECT observation_id FROM observations_species_lists
+      SELECT observation_id FROM species_list_observations
       WHERE species_list_id = #{spl.id}
       ORDER BY observation_id ASC
     ))

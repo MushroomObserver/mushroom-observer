@@ -34,19 +34,25 @@ module Query
       #   @where << "names.id IN (#{set})"
       #
       def clean_id_set(ids)
-        set = ids.map(&:to_i).uniq[0, MO.query_max_array].map(&:to_s).join(",")
+        set = limited_id_set(ids).map(&:to_s).join(",")
         set.presence || "-1"
+      end
+
+      # array of max of 1000 unique ids for use with Arel "in"
+      #    where(<x>.in(limited_id_set(ids)))
+      def limited_id_set(ids)
+        ids.map(&:to_i).uniq[0, MO.query_max_array]
       end
 
       # Clean a pattern for use in LIKE condition.  Takes and returns a String.
       def clean_pattern(pattern)
-        pattern.gsub(/[%'"\\]/) { |x| '\\' + x }.tr("*", "%")
+        pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
       end
 
       # Combine args into one parenthesized condition by ANDing them.
       def and_clause(*args)
         if args.length > 1
-          "(" + args.join(" AND ") + ")"
+          "(#{args.join(" AND ")})"
         else
           args.first
         end
@@ -55,7 +61,7 @@ module Query
       # Combine args into one parenthesized condition by ORing them.
       def or_clause(*args)
         if args.length > 1
-          "(" + args.join(" OR ") + ")"
+          "(#{args.join(" OR ")})"
         else
           args.first
         end

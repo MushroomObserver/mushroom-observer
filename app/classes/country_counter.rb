@@ -34,16 +34,16 @@ class CountryCounter
   end
 
   def wheres
-    Observation.where(location: nil).pluck(:where).reject(&:nil?)
+    Observation.where(location: nil).pluck(:where).compact
   end
 
   def location_names
-    Observation.where.not(location: nil).pluck(:where).reject(&:nil?)
+    Observation.where.not(location: nil).pluck(:where).compact
   end
 
-  def self.load_param_hash(file)
+  private_class_method def self.load_param_hash(file)
     File.open(file, "r:utf-8") do |fh|
-      YAML.load(fh)
+      YAML.safe_load(fh)
     end
   end
 

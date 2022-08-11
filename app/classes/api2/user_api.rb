@@ -73,7 +73,7 @@ class API2
     def after_create(user)
       return unless @create_key
 
-      key = ApiKey.new(notes: @create_key, user: user)
+      key = APIKey.new(notes: @create_key, user: user)
       key.provide_defaults
       key.verified = nil
       key.save

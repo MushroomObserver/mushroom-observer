@@ -199,7 +199,7 @@ class ProjectControllerTest < FunctionalTestCase
       admin_group = UserGroup.find(admin_group.id)
     end
     n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_descriptions_admins
+      SELECT COUNT(*) FROM name_description_admins
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     ))
     assert_equal(
@@ -208,7 +208,7 @@ class ProjectControllerTest < FunctionalTestCase
       "no name descriptions should refer to it to set admin privileges."
     )
     n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_descriptions_writers
+      SELECT COUNT(*) FROM name_description_writers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     ))
     assert_equal(
@@ -217,7 +217,7 @@ class ProjectControllerTest < FunctionalTestCase
       "no name descriptions should refer to it to set write permissions."
     )
     n = Name.connection.select_value(%(
-      SELECT COUNT(*) FROM name_descriptions_readers
+      SELECT COUNT(*) FROM name_description_readers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     ))
     assert_equal(

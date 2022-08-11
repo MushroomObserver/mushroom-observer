@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require("open3")
-
-GPS_TAGS = /latitude|longitude|gps/i.freeze
-
 # see ajax_controller.rb
-class AjaxController
+module AjaxController::EXIF
   require "English"
+  require("open3")
+
+  GPS_TAGS = /latitude|longitude|gps/i
 
   # Get EXIF header of image, return as HTML table.
   def exif

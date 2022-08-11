@@ -32,7 +32,12 @@ module MushroomObserver
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     # Custom directories with classes and modules you want to be autoloadable.
+    config.autoloader = :zeitwerk
     config.autoload_paths += %W[
+      #{config.root}/app/classes
+      #{config.root}/app/extensions
+    ]
+    config.eager_load_paths += %W[
       #{config.root}/app/classes
       #{config.root}/app/extensions
     ]
@@ -66,14 +71,10 @@ module MushroomObserver
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
 
-    # Still validating 5.2 deploy and want to allow rollback
-    # TODO: Remove this once we are satisfied with 5.2 deplay.
-    config.action_dispatch.use_authenticated_cookie_encryption = false
-
     # Rails 6.1+
     config.active_record.legacy_connection_handling = false
   end
 end
 
 MO = MushroomObserver::Application.config
-require(File.expand_path("consts.rb", __dir__))
+require_relative("consts")

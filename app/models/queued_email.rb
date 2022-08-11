@@ -121,7 +121,7 @@ class QueuedEmail < AbstractModel
   has_many :queued_email_strings,  dependent: :destroy
   has_one :queued_email_note, dependent: :destroy
   belongs_to :user
-  belongs_to :to_user, class_name: "User", foreign_key: "to_user_id"
+  belongs_to :to_user, class_name: "User"
 
   # This tells ActiveRecord to instantiate new records into the class referred
   # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration
@@ -284,7 +284,7 @@ class QueuedEmail < AbstractModel
 
   # Returns "flavor from to" for debugging.
   def text_name
-    "#{flavor.sub("QueuedEmail::", "")} "\
+    "#{flavor.sub("QueuedEmail::", "")} " \
     "#{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
   end
 
@@ -508,10 +508,4 @@ class QueuedEmail < AbstractModel
     end
     self.queued_email_note = note
   end
-end
-
-################################################################################
-
-# Tell rdoc not to document Email class.  (But do allow subclasses!)
-class Email # :nodoc:
 end

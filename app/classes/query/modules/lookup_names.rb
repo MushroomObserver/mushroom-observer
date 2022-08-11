@@ -82,7 +82,7 @@ module Query
           else
             result + find_matching_names(val)
           end
-        end.uniq.reject(&:nil?)
+        end.uniq.compact
       end
 
       def find_matching_names(name)
@@ -97,59 +97,62 @@ module Query
         ids = min_names.map { |min_name| min_name[1] || min_name[0] }
         return [] if ids.empty?
 
-        Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE COALESCE(correct_spelling_id, id) IN (#{clean_id_set(ids)})
-        ))
+        Name.
+          where((Name[:correct_spelling_id].coalesce(Name[:id])).
+                in(limited_id_set(ids))).
+          pluck(*minimal_name_columns)
       end
 
       def add_synonyms(min_names)
-        ids = min_names.map { |min_name| min_name[2] }.reject(&:nil?)
+        ids = min_names.filter_map { |min_name| min_name[2] }
         return min_names if ids.empty?
 
         min_names.reject { |min_name| min_name[2] } +
-          Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE synonym_id IN (#{clean_id_set(ids)})
-          ))
+          Name.where(synonym_id: clean_id_set(ids).split(",")).
+          pluck(*minimal_name_columns)
       end
 
       def add_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
-        unless higher_names.empty?
-          regex = escape(": _(#{higher_names.join("|")})_")
-          min_names += Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP #{regex}
-          ))
-        end
-        regex = escape("^(#{lower_names.join("|")}) ")
-        min_names += Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP #{regex}
-        ))
-        min_names.uniq
+        query = Name.where(id: min_names.map(&:first))
+        query = add_lower_names(query, lower_names)
+        query = add_higher_names(query, higher_names) unless higher_names.empty?
+        query.distinct.pluck(*minimal_name_columns)
+      end
+
+      def add_lower_names(query, names)
+        query.or(Name.
+          where(Name[:text_name] =~ /^(#{names.join("|")}) /))
+      end
+
+      def add_higher_names(query, names)
+        query.or(Name.
+          where(Name[:classification] =~ /: _(#{names.join("|")})_/))
       end
 
       def add_immediate_subtaxa(min_names)
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
+
+        query = Name.where(id: min_names.map(&:first))
+        query = add_immediate_lower_names(query, lower_names)
         unless higher_names.empty?
-          regex = escape(": _(#{higher_names.join("|")})_$")
-          min_names += Name.connection.select_rows(%(
-            SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP #{regex}
-            AND text_name NOT LIKE "% %"
-          ))
+          query = add_immediate_higher_names(query, higher_names)
         end
-        regex = escape("^(#{lower_names.join("|")}) " \
-                       "[^[:blank:]]+( [^[:blank:]]+)?$")
-        min_names += Name.connection.select_rows(%(
-          SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP #{regex}
-        ))
-        min_names.uniq
+        query.distinct.pluck(*minimal_name_columns)
+      end
+
+      def add_immediate_lower_names(query, lower_names)
+        query.or(Name.
+          where(Name[:text_name] =~
+            /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/))
+      end
+
+      def add_immediate_higher_names(query, higher_names)
+        query.or(Name.
+          where(Name[:classification] =~ /: _(#{higher_names.join("|")})_$/).
+          where.not(Name[:text_name].matches("% %")))
       end
 
       def genera_and_up(min_names)
@@ -166,7 +169,7 @@ module Query
         end
         # Remove species if genus also present.
         text_names.reject do |text_name|
-          text_name.include?(" ") && genera[text_name.split(" ").first]
+          text_name.include?(" ") && genera[text_name.split.first]
         end.uniq
       end
 
@@ -191,7 +194,7 @@ module Query
       end
 
       def minimal_name_columns
-        "id, correct_spelling_id, synonym_id, text_name"
+        [:id, :correct_spelling_id, :synonym_id, :text_name].freeze
       end
     end
   end

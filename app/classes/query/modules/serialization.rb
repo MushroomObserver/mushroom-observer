@@ -19,16 +19,15 @@ module Query
       end
 
       def serialize_key_value(key, val)
-        key.to_s + "=" + serialize_value(val)
+        "#{key}=#{serialize_value(val)}"
       end
 
       def serialize_value(val)
         case val
-        when Array      then "@" + val.map { |v| serialize_value(v) }.join(",")
-        when String     then "$" + serialize_string(val)
-        when Symbol     then ":" + serialize_string(val.to_s)
-        when Integer    then "#" + val.to_s
-        when Float      then "#" + val.to_s
+        when Array      then "@#{val.map { |v| serialize_value(v) }.join(",")}"
+        when String     then "$#{serialize_string(val)}"
+        when Symbol     then ":#{serialize_string(val.to_s)}"
+        when Integer, Float then "##{val}"
         when TrueClass  then "1"
         when FalseClass then "0"
         when NilClass   then "-"

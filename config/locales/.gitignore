@@ -1,4 +1,5 @@
 *.yml
+ar.txt
 de.txt
 el.txt
 es.txt
@@ -10,4 +11,5 @@ pt.txt
 ru.txt
 tr.txt
 ua.txt
+uk.txt
 zh.txt

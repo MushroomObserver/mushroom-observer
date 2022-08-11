@@ -55,9 +55,9 @@ module Query
       def prev
         new_self = self
         index = result_ids.index(current_id)
-        if !index
-          new_self = nil
-        elsif index.positive?
+        return nil unless index
+
+        if index.positive?
           if new_self == self
             @current_id = result_ids[index - 1]
           else
@@ -85,9 +85,9 @@ module Query
       def next
         new_self = self
         index = result_ids.index(current_id)
-        if !index
-          new_self = nil
-        elsif index < result_ids.length - 1
+        return nil unless index
+
+        if index < result_ids.length - 1
           if new_self == self
             @current_id = result_ids[index + 1]
           else

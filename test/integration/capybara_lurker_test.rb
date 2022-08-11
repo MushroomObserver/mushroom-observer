@@ -110,7 +110,7 @@ class CapybarLurkerTest < IntegrationTestCase
       #  Observation itself, naming, comment.
       # (plus a link to it is also in table of names for mobile)
       assert(
-        assert_selector("#content a[href^='/observer/show_user/#{owner.id}']",
+        assert_selector("#content a[href^='/users/#{owner.id}']",
                         minimum: 4)
       )
 
@@ -127,7 +127,7 @@ class CapybarLurkerTest < IntegrationTestCase
     # Check out species list.
     go_back_after do
       list = SpeciesList.joins(:observations).
-             where("observation_id = ?", obs.id).first
+             where(observations: { id: obs.id }).first
       click_link(list.title)
       assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
                    page.title, "Wrong page")

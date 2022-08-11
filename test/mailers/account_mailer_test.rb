@@ -4,10 +4,11 @@ require("test_helper")
 require("account_mailer")
 
 class AccountMailerTest < UnitTestCase
-  FIXTURES_PATH = File.dirname(__FILE__) + "/../account_mailer"
+  FIXTURES_PATH = "#{File.dirname(__FILE__)}/../account_mailer".freeze
 
   def setup
-    I18n.locale = "en"
+    # Disable cop; there's no block in which to limit the time zone change
+    I18n.locale = :en # rubocop:disable Rails/I18nLocaleAssignment
     ActionMailer::Base.delivery_method = :test
     ActionMailer::Base.perform_deliveries = true
     ActionMailer::Base.deliveries = []

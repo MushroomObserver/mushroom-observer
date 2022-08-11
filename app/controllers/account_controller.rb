@@ -39,7 +39,6 @@
 #
 #  ==== Testing
 #  test_autologin::     <tt>(L V .)</tt>
-#  test_flash::         <tt>(. . .)</tt>
 #
 ################################################################################
 class AccountController < ApplicationController
@@ -50,7 +49,6 @@ class AccountController < ApplicationController
     :reverify,
     :send_verify,
     :signup,
-    :test_flash,
     :verify,
     :welcome
   ]
@@ -113,10 +111,7 @@ class AccountController < ApplicationController
     # first before we can verify them.
     elsif user.password.blank?
       @user = user
-      if request.method != "POST"
-        flash_warning(:account_choose_password_warning.t)
-        render(action: :choose_password)
-      else
+      if request.method == "POST"
         password = begin
                      params[:user][:password]
                    rescue StandardError
@@ -145,6 +140,9 @@ class AccountController < ApplicationController
           flash_object_errors(user)
           render(action: :choose_password)
         end
+      else
+        flash_warning(:account_choose_password_warning.t)
+        render(action: :choose_password)
       end
 
     # If not already verified, and the code checks out, then mark account
@@ -194,7 +192,7 @@ class AccountController < ApplicationController
        (new_user = User.safe_find(session[:real_user_id])) &&
        new_user.admin
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     else
       @user = nil
       User.current = nil
@@ -350,7 +348,7 @@ class AccountController < ApplicationController
       when :string  then update_pref(pref, val.to_s)
       when :integer then update_pref(pref, val.to_i)
       when :boolean then update_pref(pref, val == "1")
-      when :enum    then update_pref(pref, val || User.enum_default_value(pref))
+      when :enum    then update_pref(pref, val)
       when :content_filter then update_content_filter(pref, val)
       end
     end
@@ -391,13 +389,7 @@ class AccountController < ApplicationController
 
   def profile
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method != "POST"
-      @place_name        = @user.location ? @user.location.display_name : ""
-      @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.zone.now.year
-      @upload_license_id = @user.license.id
-
-    else
+    if request.method == "POST"
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
         @user.send("#{arg}=", val) if @user.send(arg) != val
@@ -449,7 +441,7 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_to(controller: "observer", action: "show_user", id: @user.id)
+        redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -460,9 +452,15 @@ class AccountController < ApplicationController
                       where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
-          redirect_to(controller: "observer", action: "show_user", id: @user.id)
+          redirect_to(user_path(@user.id))
         end
       end
+    else
+      @place_name        = @user.location ? @user.location.display_name : ""
+      @copyright_holder  = @user.legal_name
+      @copyright_year    = Time.zone.now.year
+      @upload_license_id = @user.license.id
+
     end
   end
 
@@ -471,7 +469,7 @@ class AccountController < ApplicationController
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
-    redirect_to(controller: "observer", action: "show_user", id: @user.id)
+    redirect_to(user_path(@user.id))
   end
 
   def no_email_comments_owner
@@ -570,15 +568,15 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to(controller: :observer, action: :list_rss_logs)
+        redirect_to("/")
       end
     else
-      redirect_to(controller: :observer, action: :list_rss_logs)
+      redirect_to("/")
     end
   end
 
   def api_keys
-    @key = ApiKey.new
+    @key = APIKey.new
     return unless request.method == "POST"
 
     if params[:commit] == :account_api_keys_create_button.l
@@ -589,10 +587,10 @@ class AccountController < ApplicationController
   end
 
   def create_api_key
-    @key = ApiKey.new(params[:key].permit!)
+    @key = APIKey.new(params[:key].permit!)
     @key.verified = Time.zone.now
     @key.save!
-    @key = ApiKey.new # blank out form for if they want to create another key
+    @key = APIKey.new # blank out form for if they want to create another key
     flash_notice(:account_api_keys_create_success.t)
   rescue StandardError => e
     flash_error(:account_api_keys_create_failed.t(msg: e.to_s))
@@ -614,7 +612,7 @@ class AccountController < ApplicationController
   end
 
   def activate_api_key
-    if (key = find_or_goto_index(ApiKey, params[:id].to_s))
+    if (key = find_or_goto_index(APIKey, params[:id].to_s))
       if check_permission!(key)
         key.verify!
         flash_notice(:account_api_keys_activated.t(notes: key.notes))
@@ -626,7 +624,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key
-    return unless (@key = find_or_goto_index(ApiKey, params[:id].to_s))
+    return unless (@key = find_or_goto_index(APIKey, params[:id].to_s))
     return redirect_to(action: :api_keys) unless check_permission!(@key)
     return if request.method != "POST"
 
@@ -649,12 +647,12 @@ class AccountController < ApplicationController
 
   def turn_admin_on
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
   end
 
   def turn_admin_off
     session[:admin] = nil
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default("/")
   end
 
   def switch_users
@@ -663,10 +661,10 @@ class AccountController < ApplicationController
     flash_error("Couldn't find \"#{@id}\".  Play again?") \
       if new_user.blank? && @id.present?
     if !@user&.admin && session[:real_user_id].blank?
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     elsif new_user.present?
       switch_to_user(new_user)
-      redirect_back_or_default(controller: :observer, action: :index)
+      redirect_back_or_default("/")
     end
   end
 
@@ -716,7 +714,7 @@ class AccountController < ApplicationController
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(do_activity: true)
     else
-      redirect_back_or_default("/observer/how_to_help")
+      redirect_back_or_default("/info/how_to_help")
     end
   end
 
@@ -784,7 +782,7 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default("/")
   end
 
   def can_add_user_to_group?(user, group)
@@ -809,7 +807,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group_user_mode
     flash_error(:permission_denied.t)
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default("/")
   end
 
   public
@@ -822,22 +820,6 @@ class AccountController < ApplicationController
 
   # This is used to test the autologin feature.
   def test_autologin; end
-
-  # This is used to test the flash error mechanism in the unit tests.
-  def test_flash
-    notice   = params[:notice]
-    warning  = params[:warning]
-    error    = params[:error]
-    redirect = params[:redirect]
-    flash_notice(notice)   if notice
-    flash_warning(warning) if warning
-    flash_error(error)     if error
-    if redirect
-      redirect_to(redirect)
-    else
-      render(plain: "", layout: true)
-    end
-  end
 
   ##############################################################################
 
@@ -930,11 +912,11 @@ class AccountController < ApplicationController
     live.com
   ].freeze
 
-  BOGUS_LOGINS = /houghgype|vemslons/.freeze
+  BOGUS_LOGINS = /houghgype|vemslons/
 
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")
-    return unless SPAM_BLOCKERS.any? { |d| domain == d }
+    return unless SPAM_BLOCKERS.any?(domain)
     return if user.login.to_s.match(BOGUS_LOGINS)
 
     notify_root_of_verification_email(user)

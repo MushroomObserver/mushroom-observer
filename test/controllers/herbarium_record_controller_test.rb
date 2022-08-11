@@ -76,7 +76,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert(herbarium_record)
     login
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "_rss_log")
+    assert_template(:show_herbarium_record)
+    assert_template("shared/_matrix_box")
   end
 
   def test_show_herbarium_record_with_notes
@@ -84,7 +85,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert(herbarium_record)
     login
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "_rss_log")
+    assert_template(:show_herbarium_record)
+    assert_template("shared/_matrix_box")
   end
 
   def test_next_and_prev_herbarium_record
@@ -110,7 +112,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     login("rolf")
     get_with_dump(:create_herbarium_record,
                   id: observations(:coprinus_comatus_obs).id)
-    assert_template("create_herbarium_record", partial: "_rss_log")
+    assert_template("create_herbarium_record")
+    assert_template("shared/_matrix_box")
     assert(assigns(:herbarium_record))
   end
 
@@ -143,7 +146,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     post(:create_herbarium_record, params: params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    herbarium = Herbarium.all.order("created_at DESC")[0]
+    herbarium = Herbarium.all.order(created_at: :desc)[0]
     assert(herbarium.curators.member?(mary))
   end
 
@@ -357,12 +360,13 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
     observations = herbarium_record.observations
-    obs_rec_count = observations.map { |o| o.herbarium_records.count }.sum
+    obs_rec_count = observations.sum { |o| o.herbarium_records.count }
     get(:destroy_herbarium_record, params: params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
-    assert_true(obs_rec_count > observations.
-                map { |o| o.herbarium_records.count }.sum)
+    assert_true(
+      obs_rec_count > observations.sum { |o| o.herbarium_records.count }
+    )
     assert_response(:redirect)
   end
 

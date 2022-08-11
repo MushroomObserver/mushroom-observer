@@ -9,7 +9,7 @@ xml.response(
   "xmlns:geo" => "http://www.w3.org/2003/01/geo/wgs84_pos#",
   "xmlns:dwc" => "http://rs.tdwg.org/dwc/dwcore/",
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 "\
+  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 " \
                           "http://services.eol.org/schema/content_0_2.xsd"
 ) do
   @data.names.each do |taxon|
@@ -52,10 +52,11 @@ xml.response(
             xml.license(@data.license_url(desc.license_id))
             xml.dcterms(:rightsHolder, @data.authors(desc.id))
             xml.audience("General public")
-
             # The following mapping assumes that this is being read in English
-            xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
-                        "form_names_#{f}".to_sym.l.delete(" "))
+            xml.subject(
+              "http://rs.tdwg.org/ontology/voc/SPMInfoItems#" \
+              "#{"form_names_#{f}".to_sym.l.delete(" ")}"
+            )
 
             xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
             # xml.reviewStatus(desc.review_status)
@@ -79,7 +80,7 @@ xml.response(
           xml.audience("General public")
           xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
           xml.dc(:description,
-                 "Mushroom Observer Image #{image.id}: "\
+                 "Mushroom Observer Image #{image.id}: " \
                  "#{@data.image_to_names(image.id)}",
                  "xml:lang" => "en")
           xml.mediaURL("#{MO.http_domain}/images/640/#{image.id}.jpg")

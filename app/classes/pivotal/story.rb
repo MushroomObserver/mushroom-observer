@@ -39,10 +39,10 @@ class Pivotal
       @description = parse_description(data["description"])
       @labels =
         data["labels"] == [] ? ["other"] : data["labels"].map { |l| l["name"] }
-      @comments = if !data["comments"]
-                    []
-                  else
+      @comments = if data["comments"]
                     data["comments"].map { |c| Pivotal::Comment.new(c) }
+                  else
+                    []
                   end
     end
 
@@ -66,7 +66,7 @@ class Pivotal
     end
 
     def parse_description(str)
-      str.to_s.split(/\n/).select do |line|
+      str.to_s.split("\n").select do |line|
         if line =~ /USER:\s*(\d+)\s+(\S.*\S)/
           id   = Regexp.last_match[1]
           name = Regexp.last_match[2]

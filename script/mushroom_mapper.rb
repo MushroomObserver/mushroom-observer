@@ -39,8 +39,8 @@ require(File.expand_path("../config/environment.rb", __dir__))
 
 require("json")
 
-JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json"
-RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
+JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json".freeze
+RAW_FILE  = "#{Rails.root}/public/taxonomy.csv".freeze
 
 # synonyms:         map from synonym_id to at least one accepted name_id
 # aliases:          map from name_id to accepted name_id
@@ -103,26 +103,29 @@ end
 # Build mapping from genus to famil(ies).
 genus_to_family = {}
 classifications = {}
-Name.with_correct_spelling.not_deprecated.with_rank(:Genus).
+# The official fungal nomenclature databases include slime molds, which
+# are actually in Amoebozoa or Protozoa
+fungal_nomenclature_kingdoms = %w[Amoebozoa Fungi Protozoa]
+Name.with_correct_spelling.not_deprecated.with_rank("Genus").
   pluck(:id, :text_name, :classification).each do |id, genus, classification|
-  kingdom =
-    classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  klass   =
-    classification.to_s =~ /Class: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  order   =
-    classification.to_s =~ /Order: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  family  =
-    classification.to_s =~ /Family: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  num_obs = observations[genus].to_i
-  list = classifications[genus] ||= []
-  list << [id, kingdom, klass, order, family, genus, num_obs]
-  next unless %w[Amoebozoa Fungi Protozoa].include?(kingdom)
+    kingdom =
+      classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
+    klass   =
+      classification.to_s =~ /Class: _([^_]+)_/ ? Regexp.last_match(1) : nil
+    order   =
+      classification.to_s =~ /Order: _([^_]+)_/ ? Regexp.last_match(1) : nil
+    family  =
+      classification.to_s =~ /Family: _([^_]+)_/ ? Regexp.last_match(1) : nil
+    num_obs = observations[genus].to_i
+    list = classifications[genus] ||= []
+    list << [id, kingdom, klass, order, family, genus, num_obs]
+    next unless fungal_nomenclature_kingdoms.include?(kingdom)
 
-  family2 = family || "Unknown Family in #{order || klass || kingdom}"
-  hash = genus_to_family[genus] ||= {}
-  hash[family2] = hash[family2].to_i + num_obs
-  observations[family2] = observations[family2].to_i + num_obs
-end
+    family2 = family || "Unknown Family in #{order || klass || kingdom}"
+    hash = genus_to_family[genus] ||= {}
+    hash[family2] = hash[family2].to_i + num_obs
+    observations[family2] = observations[family2].to_i + num_obs
+  end
 
 # Build mapping from family to genus, complaining about ambiguous genera.
 family_to_genus = {}
@@ -139,7 +142,7 @@ end
 # Build table of species in each genus.
 genus_to_species = {}
 Name.with_correct_spelling.not_deprecated.
-  with_rank(:Species).order(sort_name: :asc).
+  with_rank("Species").order(sort_name: :asc).
   pluck(:text_name).each do |species|
   genus = species.sub(/ .*/, "")
   list_of_species = genus_to_species[genus] ||= []
@@ -182,9 +185,7 @@ family_to_genus.keys.sort.each do |family|
   end
   data["families"] << family_data
 end
-File.open(JSON_FILE, "w") do |fh|
-  fh.write(JSON.generate(data))
-end
+File.write(JSON_FILE, JSON.generate(data))
 
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|

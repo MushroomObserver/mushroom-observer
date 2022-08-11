@@ -57,11 +57,10 @@
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 class NameController < ApplicationController
-  require_dependency "name_controller/create_and_edit_name"
-  require_dependency "name_controller/classification"
-  require_dependency "name_controller/show_name_description"
-
   include DescriptionControllerHelpers
+  include ShowNameDescription
+  include Classification
+  include CreateAndEditName
 
   # rubocop:disable Rails/LexicallyScopedActionFilter
   # No idea how to fix this offense.  If I add another
@@ -107,6 +106,11 @@ class NameController < ApplicationController
     :show_name_description,
     :show_past_name,
     :show_past_name_description
+  ]
+
+  before_action :disable_link_prefetching, except: [
+    :create_name,
+    :edit_name
   ]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
@@ -162,28 +166,10 @@ class NameController < ApplicationController
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
+  # NOTE: all this extra info and help will be lost if user re-sorts.
   def needed_descriptions
-    # NOTE!! -- all this extra info and help will be lost if user re-sorts.
-    data = Name.connection.select_rows(%(
-      SELECT names.id, name_counts.count
-      FROM names LEFT OUTER JOIN name_descriptions
-        ON names.id = name_descriptions.name_id,
-           (SELECT count(*) AS count, name_id
-            FROM observations group by name_id) AS name_counts
-      WHERE names.id = name_counts.name_id
-        # include "to_i" to avoid Brakeman "SQL injection" false positive.
-        # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
-        AND names.`rank` = #{Name.ranks[:Species].to_i}
-        AND name_counts.count > 1
-        AND name_descriptions.name_id IS NULL
-        AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
-      ORDER BY name_counts.count DESC, names.sort_name ASC
-      LIMIT 100
-    ))
     @help = :needed_descriptions_help
-    query = create_query(:Name, :in_set,
-                         ids: data.map(&:first),
-                         title: :needed_descriptions_title.l)
+    query = Name.descriptions_needed
     show_selected_names(query, num_per_page: 100)
   end
 
@@ -215,7 +201,7 @@ class NameController < ApplicationController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search_form")
+    redirect_to(controller: :search, action: :advanced)
   end
 
   # Used to test pagination.
@@ -421,9 +407,8 @@ class NameController < ApplicationController
 
     # Old correct spellings could have gotten merged with something else
     # and no longer exist.
-    @correct_spelling = Name.connection.select_value(%(
-      SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
-    ))
+    @correct_spelling = Name.where(id: @name.correct_spelling_id).
+                        pluck(:display_name)
   end
 
   # Show past version of NameDescription.  Accessible only from
@@ -435,22 +420,7 @@ class NameController < ApplicationController
     return unless @description
 
     @name = @description.name
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = NameDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.name_description_id
-      subversion = params[:version]
-      if subversion.present? &&
-         (version.version != subversion.to_i)
-        version = NameDescription::Version.find_by(
-          version: params[:version],
-          name_description_id: @old_parent_id
-        )
-      end
-      @description.clone_versioned_model(version, @description)
-    end
+    @description.revert_to(params[:version].to_i)
   end
 
   # Go to next name: redirects to show_name.
@@ -597,9 +567,6 @@ class NameController < ApplicationController
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
            (old_desc = NameDescription.safe_find(params[:old_desc_id]))
-          v = @description.versions.latest
-          v.merge_source_id = old_desc.versions.latest.id
-          v.save
           if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
@@ -739,8 +706,7 @@ class NameController < ApplicationController
     @list_members     = sorter.all_line_strs.join("\r\n")
     @new_names        = sorter.new_name_strs.uniq
     @synonym_name_ids = sorter.all_synonyms.map(&:id)
-    @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.
-                        reject(&:nil?)
+    @synonym_names    = @synonym_name_ids.filter_map { |id| Name.safe_find(id) }
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
@@ -951,17 +917,8 @@ class NameController < ApplicationController
   # Show the data getting sent to EOL
   def eol_preview
     @timer_start = Time.current
-    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
+    eol_data(NameDescription.review_statuses.values_at("unvetted", "vetted"))
     @timer_end = Time.current
-  end
-
-  def eol_description_conditions(review_status_list)
-    # name descriptions that are exportable.
-    rsl = review_status_list.join("', '")
-    "review_status IN ('#{rsl}') AND " \
-                 "gen_desc IS NOT NULL AND " \
-                 "ok_for_export = 1 AND " \
-                 "public = 1"
   end
 
   # Gather data for EOL feed.
@@ -973,19 +930,19 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    descs = NameDescription.where(
-      eol_description_conditions(review_status_list)
-    )
+    descs = NameDescription.
+            where(review_status: review_status_list).
+            where(NameDescription[:gen_desc].not_blank).
+            where(ok_for_export: true).
+            where(public: true)
 
     # Fill in @descs, @users, @authors, @licenses.
     descs.each do |desc|
       name_id = desc.name_id.to_i
       @descs[name_id] ||= []
       @descs[name_id] << desc
-      authors = Name.connection.select_values(%(
-        SELECT user_id FROM name_descriptions_authors
-        WHERE name_description_id = #{desc.id}
-      )).map(&:to_i)
+      authors = NameDescriptionAuthor.where(name_description_id: desc.id).
+                pluck(:user_id)
       authors = [desc.user_id] if authors.empty?
       authors.each do |author|
         @users[author.to_i] ||= User.find(author).legal_name
@@ -999,26 +956,22 @@ class NameController < ApplicationController
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
-    image_data = Name.connection.select_all(%(
-      SELECT name_id, image_id, observation_id, images.user_id,
-             images.license_id, images.created_at
-      FROM observations, images_observations, images
-      WHERE observations.name_id IN (#{name_ids})
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache >= 2
-      AND images.ok_for_export
-      ORDER BY observations.vote_cache
-    ))
-    image_data = image_data.to_a
+    image_data = Observation.joins(:images).
+                 where(name_id: name_ids).
+                 where(Observation[:vote_cache] >= 2.4).
+                 where(Image[:vote_cache] >= 2).
+                 where(Image[:ok_for_export] == true).
+                 order(Observation[:vote_cache]).
+                 select(Observation[:name_id], ObservationImage[:image_id],
+                        ObservationImage[:observation_id], Image[:user_id],
+                        Image[:license_id], Image[:created_at]).to_a
 
     # Fill in @image_data, @users, and @licenses.
     image_data.each do |row|
       name_id    = row["name_id"].to_i
       user_id    = row["user_id"].to_i
       license_id = row["license_id"].to_i
-      image_datum = row.values_at("image_id", "observation_id", "user_id",
+      image_datum = row.values_at("image_id", "id", "user_id",
                                   "license_id", "created_at")
       @image_data[name_id] ||= []
       @image_data[name_id].push(image_datum)
@@ -1035,7 +988,7 @@ class NameController < ApplicationController
   # TODO: List stuff that's almost ready.
   # TODO: Add EOL logo on pages getting exported
   #   show_name and show_descriptions for description info
-  #   show_name, show_observation and show_image for images
+  #   show_name, observations/show and show_image for images
   # EOL preview from Name page
   # Improve the Name page
   # Review unapproved descriptions
@@ -1069,21 +1022,19 @@ class NameController < ApplicationController
     if sorter.only_single_names
       sorter.create_new_synonyms
       flash_notice(:name_bulk_success.t)
-      redirect_to(controller: "observer", action: "list_rss_logs")
+      redirect_to("/")
     else
-      if sorter.new_name_strs != []
-        # This error message is no longer necessary.
-        if Rails.env.test?
-          flash_error(
-            "Unrecognized names given, including: "\
-            "#{sorter.new_name_strs[0].inspect}"
-          )
-        end
-      else
+      if sorter.new_name_strs == []
         # Same with this one... err, no this is not reported anywhere.
         flash_error(
-          "Ambiguous names given, including: "\
+          "Ambiguous names given, including: " \
           "#{sorter.multiple_line_strs[0].inspect}"
+        )
+      elsif Rails.env.test?
+        # This error message is no longer necessary.
+        flash_error(
+          "Unrecognized names given, including: " \
+          "#{sorter.new_name_strs[0].inspect}"
         )
       end
       @list_members = sorter.all_line_strs.join("\r\n")
@@ -1114,10 +1065,10 @@ class NameController < ApplicationController
     flavor = Notification.flavors[:name]
     @notification = Notification.
                     find_by(flavor: flavor, obj_id: name_id, user_id: @user.id)
-    if request.method != "POST"
-      initialize_tracking_form
-    else
+    if request.method == "POST"
       submit_tracking_form(name_id)
+    else
+      initialize_tracking_form
     end
   end
 
@@ -1143,7 +1094,7 @@ class NameController < ApplicationController
       note_template = params[:notification][:note_template]
       note_template = nil if note_template.blank?
       if @notification.nil?
-        @notification = Notification.new(flavor: :name,
+        @notification = Notification.new(flavor: "name",
                                          user: @user,
                                          obj_id: name_id,
                                          note_template: note_template)
