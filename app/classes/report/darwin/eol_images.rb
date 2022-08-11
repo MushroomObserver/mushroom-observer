@@ -42,7 +42,7 @@ module Report
       def tables
         @tables ||= {
           images: Image.arel_table,
-          images_observations: Arel::Table.new(:images_observations),
+          observation_images: Arel::Table.new(:observation_images),
           licenses: License.arel_table,
           names: Name.arel_table,
           observations: Observation.arel_table,
@@ -51,9 +51,9 @@ module Report
       end
 
       def add_joins
-        join_table(:images_observations, :image_id, attribute(:images, :id))
+        join_table(:observation_images, :image_id, attribute(:images, :id))
         join_table(:observations, :id,
-                   attribute(:images_observations, :observation_id))
+                   attribute(:observation_images, :observation_id))
         join_table(:names, :id, attribute(:observations, :name_id))
         join_table(:licenses, :id, attribute(:images, :license_id))
         join_table(:users, :id, attribute(:images, :user_id))

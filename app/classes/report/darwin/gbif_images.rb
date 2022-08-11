@@ -8,7 +8,7 @@ module Report
       PROJECTION_ATTRIBUTES = [[:images, :id],
                                [:images, :when],
                                [:images, :copyright_holder],
-                               [:images_observations, :observation_id],
+                               [:observation_images, :observation_id],
                                [:observations, :updated_at],
                                [:observations, :when, "obs_when"],
                                [:observations, :lat],
@@ -70,7 +70,7 @@ module Report
       def tables
         @tables ||= {
           images: Image.arel_table,
-          images_observations: Arel::Table.new(:images_observations),
+          observation_images: Arel::Table.new(:observation_images),
           licenses: License.arel_table,
           locations: Location.arel_table,
           names: Name.arel_table,
@@ -80,9 +80,9 @@ module Report
       end
 
       def add_joins
-        join_table(:images_observations, :image_id, attribute(:images, :id))
+        join_table(:observation_images, :image_id, attribute(:images, :id))
         join_table(:observations, :id,
-                   attribute(:images_observations, :observation_id))
+                   attribute(:observation_images, :observation_id))
         join_table(:names, :id, attribute(:observations, :name_id))
         join_table(:locations, :id, attribute(:observations, :location_id))
         join_table(:users, :id, attribute(:images, :user_id))

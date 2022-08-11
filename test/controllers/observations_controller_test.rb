@@ -2997,7 +2997,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
 
     post(
-      :download_observations,
+      :download,
       params: {
         q: query.id.alphabetize,
         format: "gbif",
@@ -3009,7 +3009,7 @@ class ObservationsControllerTest < FunctionalTestCase
     assert_response(:success)
 
     post(
-      :download_observations,
+      :download,
       params: {
         q: query.id.alphabetize,
         format: "eol",
